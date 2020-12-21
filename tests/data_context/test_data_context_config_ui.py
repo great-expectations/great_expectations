@@ -201,7 +201,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
             "show_how_to_buttons": True,
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -294,7 +293,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
             "show_how_to_buttons": True,
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
             "store_backend": {
                 "bucket": "custom_data_docs_store_bucket_name",
@@ -465,7 +463,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
             "show_how_to_buttons": True,
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
             "store_backend": {
                 "bucket": "my_default_bucket",
@@ -565,7 +562,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
             "show_how_to_buttons": True,
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
             "store_backend": {
                 "bucket": "custom_data_docs_store_bucket_name",
@@ -666,7 +662,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
             "show_how_to_buttons": True,
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
             "store_backend": {
                 "base_directory": "uncommitted/data_docs/local_site/",
@@ -787,7 +782,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             "show_how_to_buttons": True,
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
             "store_backend": {
                 "base_directory": "uncommitted/data_docs/local_site/",
@@ -904,7 +898,6 @@ def test_override_general_defaults(
                 },
                 "site_index_builder": {
                     "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
                 },
             },
             "local_site": {
@@ -912,7 +905,6 @@ def test_override_general_defaults(
                 "show_how_to_buttons": True,
                 "site_index_builder": {
                     "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
                 },
                 "store_backend": {
                     "base_directory": "uncommitted/data_docs/local_site/",
@@ -992,7 +984,6 @@ def test_override_general_defaults(
             "show_how_to_buttons": True,
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
             "store_backend": {
                 "base_directory": "uncommitted/data_docs/local_site/",
@@ -1003,7 +994,6 @@ def test_override_general_defaults(
             "class_name": "SiteBuilder",
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
             "store_backend": {
                 "bucket": "REPLACE_ME",
@@ -1108,7 +1098,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
             "show_how_to_buttons": True,
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
             "store_backend": {
                 "bucket": "my_default_bucket",
