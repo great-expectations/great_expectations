@@ -22,7 +22,6 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Optional, Union
 
-import black
 from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
@@ -758,14 +757,24 @@ def gen_directory_tree_str(startpath):
 
 
 def lint_code(code):
-    """Lint strings of code passed in."""
-    black_file_mode = black.FileMode()
-    if not isinstance(code, str):
-        raise TypeError
+    """Lint strings of code passed in. Optional dependency "black" must be installed."""
     try:
-        linted_code = black.format_file_contents(code, fast=True, mode=black_file_mode)
-        return linted_code
-    except (black.NothingChanged, RuntimeError):
+        import black
+
+        black_file_mode = black.FileMode()
+        if not isinstance(code, str):
+            raise TypeError
+        try:
+            linted_code = black.format_file_contents(
+                code, fast=True, mode=black_file_mode
+            )
+            return linted_code
+        except (black.NothingChanged, RuntimeError):
+            return code
+    except ImportError:
+        logger.warning(
+            "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
+        )
         return code
 
 
@@ -815,6 +824,7 @@ def filter_properties_dict(
                 for key, value in properties.items()
                 if not (
                     (keep_fields and key in keep_fields)
+                    or (delete_fields and key in delete_fields)
                     or is_numeric(value=value)
                     or value
                 )

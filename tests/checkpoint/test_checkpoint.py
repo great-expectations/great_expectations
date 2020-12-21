@@ -2,19 +2,73 @@ import logging
 
 import pytest
 from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint, LegacyCheckpoint
-from great_expectations.data_context import DataContext
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.data_context.util import instantiate_class_from_config
 
 yaml = YAML()
 
 logger = logging.getLogger(__name__)
+
+
+def test_checkpoint_config(empty_data_context):
+    yaml_config_erroneous: str
+    config_erroneous: CommentedMap
+    checkpoint_config: CheckpointConfig
+
+    yaml_config_erroneous = f"""
+    name: misconfigured_checkpoint
+    unexpected_property: UNKOWN_PROPERTY_VALUE
+    """
+    config_erroneous = yaml.load(yaml_config_erroneous)
+    with pytest.raises(TypeError):
+        # noinspection PyUnusedLocal
+        checkpoint_config = CheckpointConfig(**config_erroneous)
+
+    yaml_config_erroneous = f"""
+    config_version: 1
+    """
+    config_erroneous = yaml.load(yaml_config_erroneous)
+    with pytest.raises(ge_exceptions.InvalidConfigError):
+        # noinspection PyUnusedLocal
+        checkpoint_config = CheckpointConfig.from_commented_map(
+            commented_map=config_erroneous
+        )
+
+    yaml_config: str = f"""
+    name: my_checkpoint
+    validations: []
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+    """
+
+    config: CommentedMap = yaml.load(yaml_config)
+    checkpoint_config: CheckpointConfig = CheckpointConfig(**config)
+    checkpoint: Checkpoint = Checkpoint(
+        data_context=empty_data_context,
+        name="my_checkpoint",
+        checkpoint_config=checkpoint_config,
+    )
+
+    assert checkpoint.self_check()["config"] == {
+        "name": "my_checkpoint",
+        "config_version": None,
+        "class_name": "LegacyCheckpoint",
+        "validation_operator_name": "action_list_operator",
+    }
 
 
 def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(

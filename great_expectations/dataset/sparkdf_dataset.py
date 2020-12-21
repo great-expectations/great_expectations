@@ -1294,6 +1294,21 @@ class SparkDFDataset(MetaSparkDFDataset):
             raise ValueError("match_on must be either 'any' or 'all'")
 
     @DocInherit
+    @MetaSparkDFDataset.column_map_expectation
+    def expect_column_values_to_not_match_regex_list(
+        self,
+        column,
+        regex_list,
+        mostly=None,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # column value is not matched by any regex in regex_list
+        return column.withColumn("__success", ~(column[0].rlike("|".join(regex_list))))
+
+    @DocInherit
     @MetaSparkDFDataset.column_pair_map_expectation
     def expect_column_pair_values_to_be_equal(
         self,

@@ -444,7 +444,7 @@ class ExecutionEngineConfigSchema(Schema):
             data["class_name"] == "SqlAlchemyExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses the "connection_string" key in an execution engine, but only 
+                f"""Your current configuration uses the "connection_string" key in an execution engine, but only
 SqlAlchemyExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
@@ -453,7 +453,7 @@ configuration to continue.
             data["class_name"] == "SparkDFExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses the "spark_config" key in an execution engine, but only 
+                f"""Your current configuration uses the "spark_config" key in an execution engine, but only
 SparkDFExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
@@ -1401,6 +1401,16 @@ class CheckpointConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
+
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        if not (
+            "name" in data or "validation_operator_name" in data or "batches" in data
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current Checkpoint configuration is incomplete.  Please update your configuration to continue.
+                """
+            )
 
 
 class CheckpointConfig(BaseYamlConfig):

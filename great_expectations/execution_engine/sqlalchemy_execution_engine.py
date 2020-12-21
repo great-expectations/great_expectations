@@ -125,7 +125,7 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-class SqlAlchemyBatchData(object):
+class SqlAlchemyBatchData:
     """A class which represents a SQL alchemy batch, with properties including the construction of the batch itself
     and several getters used to access various properties."""
 

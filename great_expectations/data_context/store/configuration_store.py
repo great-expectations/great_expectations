@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -38,9 +39,9 @@ class ConfigurationStore(Store):
     def __init__(
         self,
         store_name: str,
-        store_backend: dict = None,
+        store_backend: Optional[dict] = None,
         overwrite_existing: bool = False,
-        runtime_environment: dict = None,
+        runtime_environment: Optional[dict] = None,
     ):
         if not issubclass(self._configuration_class, BaseYamlConfig):
             raise ge_exceptions.DataContextError(
@@ -78,7 +79,7 @@ class ConfigurationStore(Store):
             include_module_name=True,
             **{
                 "class_name": self.__class__.__name__,
-            }
+            },
         )
         filter_properties_dict(properties=self._config, inplace=True)
 
@@ -111,3 +112,33 @@ class ConfigurationStore(Store):
     @property
     def config(self) -> dict:
         return self._config
+
+    def self_check(self, pretty_print: bool = True) -> dict:
+        # Provide visibility into parameters that ConfigurationStore was instantiated with.
+        report_object: dict = {"config": self.config}
+
+        if pretty_print:
+            print("Checking for existing keys...")
+
+        report_object["keys"] = [key.configuration_key for key in self.list_keys()]
+
+        report_object["len_keys"] = len(report_object["keys"])
+        len_keys: int = report_object["len_keys"]
+
+        if pretty_print:
+            if report_object["len_keys"] == 0:
+                print(f"\t{len_keys} keys found")
+            else:
+                print(f"\t{len_keys} keys found:")
+                for key in report_object["keys"][:10]:
+                    print("\t\t" + str(key))
+            if len_keys > 10:
+                print("\t\t...")
+            print()
+
+        self.serialization_self_check(pretty_print=pretty_print)
+
+        return report_object
+
+    def serialization_self_check(self, pretty_print: bool):
+        raise NotImplementedError

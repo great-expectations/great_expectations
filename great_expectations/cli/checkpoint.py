@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Dict
 
 import click
 from ruamel.yaml import YAML
@@ -11,7 +12,6 @@ from great_expectations.cli.util import cli_message, cli_message_list
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import DataContextError
 from great_expectations.util import lint_code
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -222,6 +222,31 @@ def _verify_checkpoint_does_not_exist(
             usage_event,
             f"A checkpoint named `{checkpoint}` already exists. Please choose a new name.",
         )
+
+
+def _write_checkpoint_to_disk(
+    context: DataContext, checkpoint: Dict, checkpoint_name: str
+) -> str:
+    # TODO this should be the responsibility of the DataContext
+    checkpoint_dir = os.path.join(
+        context.root_directory,
+        context.CHECKPOINTS_DIR,
+    )
+    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    with open(checkpoint_file, "w") as f:
+        yaml.dump(checkpoint, f)
+    return checkpoint_file
+
+
+def _load_checkpoint_yml_template() -> dict:
+    # TODO this should be the responsibility of the DataContext
+    template_file = file_relative_path(
+        __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
+    )
+    with open(template_file) as f:
+        template = yaml.load(f)
+    return template
 
 
 @checkpoint.command(name="list")
