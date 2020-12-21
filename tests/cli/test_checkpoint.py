@@ -483,7 +483,8 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     #     "Please verify these batch kwargs in checkpoint bad_batch`"
     #     in stdout
     # )
-    assert "No such file or directory" in stdout
+    # assert "No such file or directory" in stdout
+    assert ("No such file or directory" in stdout) or ("does not exist" in stdout)
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
