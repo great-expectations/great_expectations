@@ -76,7 +76,11 @@ class ValidationResultsPageRenderer(Renderer):
         ]
 
     # TODO: deprecate dual batch api support in 0.14
-    def render(self, validation_results: ExpectationSuiteValidationResult):
+    def render(
+        self,
+        validation_results: ExpectationSuiteValidationResult,
+        evaluation_parameters=None,
+    ):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
@@ -120,7 +124,6 @@ class ValidationResultsPageRenderer(Renderer):
             columns[column].append(evr)
 
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
-
         overview_content_blocks = [
             self._render_validation_header(validation_results),
             self._render_validation_statistics(validation_results=validation_results),
@@ -196,17 +199,18 @@ class ValidationResultsPageRenderer(Renderer):
         if "Table-Level Expectations" in columns:
             sections += [
                 self._column_section_renderer.render(
-                    validation_results=columns["Table-Level Expectations"]
+                    validation_results=columns["Table-Level Expectations"],
+                    evaluation_parameters=validation_results.evaluation_parameters,
                 )
             ]
 
         sections += [
             self._column_section_renderer.render(
                 validation_results=columns[column],
+                evaluation_parameters=validation_results.evaluation_parameters,
             )
             for column in ordered_columns
         ]
-
         if self.run_info_at_end:
             sections += [
                 RenderedSectionContent(
@@ -283,6 +287,7 @@ class ValidationResultsPageRenderer(Renderer):
             html_success_icon = (
                 '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
             )
+
         return RenderedHeaderContent(
             **{
                 "content_block_type": "header",
@@ -385,7 +390,6 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_nested_table_from_dict(cls, input_dict, header=None, sub_table=False):
         table_rows = []
-
         for kwarg, value in input_dict.items():
             if not isinstance(value, (dict, OrderedDict)):
                 table_row = [

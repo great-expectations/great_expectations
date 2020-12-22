@@ -33,6 +33,8 @@ try:
 except ImportError:
     pass
 
+from great_expectations.expectations.util import render_evaluation_parameter_string
+
 
 class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     """Expect column entries to be strings with length equal to the provided value.
@@ -115,6 +117,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,
