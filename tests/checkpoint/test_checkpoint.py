@@ -10,6 +10,7 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
+from great_expectations.util import filter_properties_dict
 
 yaml = YAML()
 
@@ -20,6 +21,7 @@ def test_checkpoint_config(empty_data_context):
     yaml_config_erroneous: str
     config_erroneous: CommentedMap
     checkpoint_config: CheckpointConfig
+    checkpoint: Checkpoint
 
     yaml_config_erroneous = f"""
     name: misconfigured_checkpoint
@@ -29,6 +31,12 @@ def test_checkpoint_config(empty_data_context):
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         checkpoint_config = CheckpointConfig(**config_erroneous)
+    with pytest.raises(KeyError):
+        # noinspection PyUnusedLocal
+        checkpoint = empty_data_context.test_yaml_config(
+            yaml_config=yaml_config_erroneous,
+            name="my_erroneous_checkpoint",
+        )
 
     yaml_config_erroneous = f"""
     config_version: 1
@@ -39,9 +47,25 @@ def test_checkpoint_config(empty_data_context):
         checkpoint_config = CheckpointConfig.from_commented_map(
             commented_map=config_erroneous
         )
+    with pytest.raises(KeyError):
+        # noinspection PyUnusedLocal
+        checkpoint = empty_data_context.test_yaml_config(
+            yaml_config=yaml_config_erroneous,
+            name="my_erroneous_checkpoint",
+        )
+
+    with pytest.raises(ge_exceptions.InvalidConfigError):
+        # noinspection PyUnusedLocal
+        checkpoint = empty_data_context.test_yaml_config(
+            yaml_config=yaml_config_erroneous,
+            name="my_erroneous_checkpoint",
+            class_name="Checkpoint",
+        )
 
     yaml_config: str = f"""
     name: my_checkpoint
+    config_version: 1
+    class_name: Checkpoint
     validations: []
     action_list:
       - name: store_validation_result
@@ -55,6 +79,27 @@ def test_checkpoint_config(empty_data_context):
           class_name: UpdateDataDocsAction
     """
 
+    expected_checkpoint_config: dict = {
+        "name": "my_checkpoint",
+        "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "module_name": "great_expectations.checkpoint",
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction"},
+            },
+        ],
+    }
+
     config: CommentedMap = yaml.load(yaml_config)
     checkpoint_config: CheckpointConfig = CheckpointConfig(**config)
     checkpoint: Checkpoint = Checkpoint(
@@ -62,19 +107,40 @@ def test_checkpoint_config(empty_data_context):
         name="my_checkpoint",
         checkpoint_config=checkpoint_config,
     )
+    assert (
+        filter_properties_dict(
+            properties=checkpoint.self_check()["config"],
+        )
+        == expected_checkpoint_config
+    )
+    assert (
+        filter_properties_dict(
+            properties=checkpoint.config.to_json_dict(),
+        )
+        == expected_checkpoint_config
+    )
 
-    assert checkpoint.self_check()["config"] == {
-        "name": "my_checkpoint",
-        "config_version": None,
-        "class_name": "LegacyCheckpoint",
-        "validation_operator_name": "action_list_operator",
-    }
+    checkpoint = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        name="my_checkpoint",
+    )
+    assert (
+        filter_properties_dict(
+            properties=checkpoint.self_check()["config"],
+        )
+        == expected_checkpoint_config
+    )
+    assert (
+        filter_properties_dict(
+            properties=checkpoint.config.to_json_dict(),
+        )
+        == expected_checkpoint_config
+    )
 
 
 def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     filesystem_csv_data_context,
 ):
-
     base_directory = filesystem_csv_data_context.list_datasources()[0][
         "batch_kwargs_generators"
     ]["subdir_reader"]["base_directory"]

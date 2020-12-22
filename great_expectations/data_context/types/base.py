@@ -86,7 +86,7 @@ class BaseYamlConfig(SerializableDictDot):
             raise
 
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        commented_map: CommentedMap = deepcopy(self.commented_map)
+        commented_map: CommentedMap = deepcopy(self._commented_map)
         commented_map.update(self._get_schema_instance().dump(self))
         return commented_map
 
@@ -94,24 +94,24 @@ class BaseYamlConfig(SerializableDictDot):
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
-        yaml.dump(self._get_schema_validated_updated_commented_map(), outfile)
+        yaml.dump(self.commented_map, outfile)
 
     def to_yaml_str(self) -> str:
         """
         :returns a YAML string containing the project configuration
         """
-        return object_to_yaml_str(self._get_schema_validated_updated_commented_map())
+        return object_to_yaml_str(self.commented_map)
 
     def to_json_dict(self) -> dict:
         """
         :returns a JSON-serialiable dict containing the project configuration
         """
-        commented_map: CommentedMap = self._get_schema_validated_updated_commented_map()
+        commented_map: CommentedMap = self.commented_map
         return convert_to_json_serializable(data=commented_map)
 
     @property
     def commented_map(self) -> CommentedMap:
-        return self._commented_map
+        return self._get_schema_validated_updated_commented_map()
 
     @classmethod
     def get_config_class(cls):
@@ -1405,9 +1405,37 @@ class CheckpointConfigSchema(Schema):
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current Checkpoint configuration is incomplete.  Please update your configuration to continue.
+                f"""Your current Checkpoint configuration is incomplete.  Please update your checkpoint configuration to
+                continue.
                 """
             )
+
+        if data.get("config_version"):
+            if "name" not in data:
+                raise ge_exceptions.InvalidConfigError(
+                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current checkpoint
+                    configuration to continue.
+                    """
+                )
+            action_list: Optional[list] = data.get("action_list")
+            action_list_present: bool = (
+                action_list is not None
+                and isinstance(action_list, list)
+                and len(action_list) > 0
+            )
+            if not (
+                (
+                    "validations" in data
+                    and isinstance(data["validations"], list)
+                    and len(data["validations"]) > 0
+                )
+                or action_list_present
+            ):
+                raise ge_exceptions.InvalidConfigError(
+                    f"""Your current Checkpoint configuration is inconsistent.  Please update your checkpoint
+                    configuration to continue.
+                    """
+                )
 
 
 class CheckpointConfig(BaseYamlConfig):

@@ -135,7 +135,7 @@ class Checkpoint:
         report_object: dict = {"config": self.config.to_json_dict()}
 
         if pretty_print:
-            print(f"Checkpoint: {self.__class__.__name__}")
+            print(f"\nCheckpoint class name: {self.__class__.__name__}")
 
         return report_object
 
