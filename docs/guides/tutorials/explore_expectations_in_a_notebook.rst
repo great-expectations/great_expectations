@@ -71,7 +71,7 @@ All of these steps take place within your notebook:
     
         my_df = SparkDFDataset(my_spark_dataframe)
     
-    This method will convert your ``Spark DataFrame`` into a class with access to Great Expectations' methods, such as ``ProfilingResultsPageRenderer``.
+    This method will create an object with access to Great Expectations' methods, such as ``ProfilingResultsPageRenderer``.
     
     
 
