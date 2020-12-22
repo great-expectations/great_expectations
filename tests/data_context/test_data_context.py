@@ -15,8 +15,12 @@ from great_expectations.data_context import (
     ExplorerDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    DataContextConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
@@ -1605,6 +1609,62 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
 
     with pytest.raises(CheckpointError) as e:
         context.get_checkpoint("foo")
+
+
+# TODO: add more test cases
+def run_checkpoint_newstyle(titanic_pandas_multibatch_data_context_with_013_datasource):
+    context = titanic_pandas_multibatch_data_context_with_013_datasource
+    # add checkpoint config
+    checkpoint_config = CheckpointConfig(
+        config_version=1,
+        name="my_checkpoint",
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "titanic_multi_batch",
+                    "data_connector_name": "my_data_connector",
+                    "data_asset_name": "Titanic_1911",
+                }
+            }
+        ],
+    )
+    checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=checkpoint_config.name
+    )
+    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
+
+    with pytest.raises(DataContextError, match=r"expectation_suite .* not found"):
+        context.run_checkpoint(checkpoint_name=checkpoint_config.name)
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    print(context.list_datasources())
+    results = context.run_checkpoint(checkpoint_name=checkpoint_config.name)
+
+    assert len(context.validations_store.list_keys()) == 1
 
 
 def test_get_validator_with_instantiated_expectation_suite(
