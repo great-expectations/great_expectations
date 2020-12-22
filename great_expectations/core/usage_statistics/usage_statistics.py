@@ -135,6 +135,7 @@ class UsageStatisticsHandler:
             self._data_context.get_expectation_suite(expectation_suite_name)
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
+        payload_pipeline_dag_runner = "no_pipeline_dag_runner_detected"
         try:
             # Try to determine if a module has been imported from one of the common data workflow frameworks
             DAG_RUNNERS = [
