@@ -326,14 +326,14 @@ def run_validation_operator_usage_statistics(
                 "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
             )
     try:
-        # TODO: Add other dag runners
+        # Try to determine if a module has been imported from one of the common data workflow frameworks
         DAG_RUNNERS = [
             "airflow",
             "prefect",
             "dagster",
             "kedro",
             # "argo",  # TODO: Argo is written in Go, how to include?
-            "flytekit",  # TODO: Check import name
+            # "flytekit",  # TODO: Check import name
             # "ascend",  # TODO: How to import?
             # "nifi",  # TODO: How to import?
             # "metaflow",  # TODO: How to import?
