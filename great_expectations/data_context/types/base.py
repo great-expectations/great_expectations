@@ -1512,16 +1512,12 @@ class CheckpointConfig(BaseYamlConfig):
                 self.expectation_suite_name = other_config.expectation_suite_name
             # update
             if other_config.batch_request is not None:
-                if self.batch_request is not None:
-                    batch_data = self.batch_request.batch_data
-                    batch_request = self.batch_request.get_json_dict()
-                    batch_request["batch_data"] = batch_data
-                else:
+                if self.batch_request is None:
                     batch_request = {}
+                else:
+                    batch_request = self.batch_request
 
-                other_config_batch_data = other_config.batch_request.batch_data
-                other_batch_request = other_config.batch_request.get_json_dict()
-                other_batch_request["batch_data"] = other_config_batch_data
+                other_batch_request = other_config.batch_request
 
                 updated_batch_request = nested_update(
                     batch_request, other_batch_request
@@ -1641,7 +1637,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._run_name_template = value
 
     @property
-    def batch_request(self) -> Union[dict, BatchRequest]:
+    def batch_request(self):
         return self._batch_request
 
     @property
