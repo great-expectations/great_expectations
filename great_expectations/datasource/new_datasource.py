@@ -258,7 +258,9 @@ class BaseDatasource:
         report_object: dict = {"execution_engine": self.execution_engine.config}
 
         if pretty_print:
-            print(f"Execution Engine: {self.execution_engine.__class__.__name__}")
+            print(
+                f"\nExecutionEngine class name: {self.execution_engine.__class__.__name__}"
+            )
 
         if pretty_print:
             print(f"Data Connectors:")

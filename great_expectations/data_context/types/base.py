@@ -10,7 +10,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -86,7 +85,7 @@ class BaseYamlConfig(SerializableDictDot):
             raise
 
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        commented_map: CommentedMap = deepcopy(self.commented_map)
+        commented_map: CommentedMap = deepcopy(self._commented_map)
         commented_map.update(self._get_schema_instance().dump(self))
         return commented_map
 
@@ -94,24 +93,24 @@ class BaseYamlConfig(SerializableDictDot):
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
-        yaml.dump(self._get_schema_validated_updated_commented_map(), outfile)
+        yaml.dump(self.commented_map, outfile)
 
     def to_yaml_str(self) -> str:
         """
         :returns a YAML string containing the project configuration
         """
-        return object_to_yaml_str(self._get_schema_validated_updated_commented_map())
+        return object_to_yaml_str(self.commented_map)
 
     def to_json_dict(self) -> dict:
         """
         :returns a JSON-serialiable dict containing the project configuration
         """
-        commented_map: CommentedMap = self._get_schema_validated_updated_commented_map()
+        commented_map: CommentedMap = self.commented_map
         return convert_to_json_serializable(data=commented_map)
 
     @property
     def commented_map(self) -> CommentedMap:
-        return self._commented_map
+        return self._get_schema_validated_updated_commented_map()
 
     @classmethod
     def get_config_class(cls):
@@ -1405,9 +1404,18 @@ class CheckpointConfigSchema(Schema):
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current Checkpoint configuration is incomplete.  Please update your configuration to continue.
+                f"""Your current Checkpoint configuration is incomplete.  Please update your checkpoint configuration to
+                continue.
                 """
             )
+
+        if data.get("config_version"):
+            if "name" not in data:
+                raise ge_exceptions.InvalidConfigError(
+                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current checkpoint
+                    configuration to continue.
+                    """
+                )
 
 
 class CheckpointConfig(BaseYamlConfig):
@@ -1423,7 +1431,7 @@ class CheckpointConfig(BaseYamlConfig):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[dict, BatchRequest]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1451,11 +1459,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._module_name = module_name or "great_expectations.checkpoint"
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
-            self._batch_request = (
-                batch_request
-                if isinstance(batch_request, (BatchRequest, type(None)))
-                else BatchRequest(**batch_request)
-            )
+            self._batch_request = batch_request
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
@@ -1488,21 +1492,17 @@ class CheckpointConfig(BaseYamlConfig):
                 self.expectation_suite_name = other_config.expectation_suite_name
             # update
             if other_config.batch_request is not None:
-                if self.batch_request is not None:
-                    batch_data = self.batch_request.batch_data
-                    batch_request = self.batch_request.get_json_dict()
-                    batch_request["batch_data"] = batch_data
-                else:
+                if self.batch_request is None:
                     batch_request = {}
+                else:
+                    batch_request = self.batch_request
 
-                other_config_batch_data = other_config.batch_request.batch_data
-                other_batch_request = other_config.batch_request.get_json_dict()
-                other_batch_request["batch_data"] = other_config_batch_data
+                other_batch_request = other_config.batch_request
 
                 updated_batch_request = nested_update(
                     batch_request, other_batch_request
                 )
-                self.batch_request = BatchRequest(**updated_batch_request)
+                self._batch_request = updated_batch_request
             if other_config.action_list is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,
@@ -1530,19 +1530,11 @@ class CheckpointConfig(BaseYamlConfig):
                 )
             # update
             if runtime_kwargs.get("batch_request") is not None:
-                batch_request = (
-                    self.batch_request.get_json_dict()
-                    if isinstance(self.batch_request, BatchRequest)
-                    else self.batch_request
-                )
+                batch_request = self.batch_request
                 batch_request = batch_request or {}
-                runtime_batch_request = (
-                    runtime_kwargs.get("batch_request").get_json_dict()
-                    if isinstance(runtime_kwargs.get("batch_request"), BatchRequest)
-                    else runtime_kwargs.get("batch_request")
-                )
+                runtime_batch_request = runtime_kwargs.get("batch_request")
                 batch_request.update(runtime_batch_request)
-                self.batch_request = batch_request
+                self._batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,
@@ -1627,10 +1619,6 @@ class CheckpointConfig(BaseYamlConfig):
     @property
     def batch_request(self):
         return self._batch_request
-
-    @batch_request.setter
-    def batch_request(self, value: Union[BatchRequest, dict]):
-        self._batch_request = value
 
     @property
     def expectation_suite_name(self):

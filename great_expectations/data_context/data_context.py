@@ -2861,6 +2861,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self,
         yaml_config: str,
         name: Optional[str] = None,
+        class_name: Optional[str] = None,
         pretty_print: bool = True,
         return_mode: str = "instantiated_class",
         shorten_tracebacks: bool = False,
@@ -2934,11 +2935,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         config: CommentedMap = yaml.load(config_str_with_substituted_variables)
 
-        class_name: Optional[str]
         if "class_name" in config:
             class_name = config["class_name"]
-        else:
-            class_name = None
 
         instantiated_class: Union[Any]
         try:
@@ -2982,15 +2980,29 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 print(
                     f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
                 )
+                checkpoint_name: str = name or "my_temp_checkpoint"
                 instantiated_class = cast(
                     Checkpoint,
                     instantiate_class_from_config(
-                        config=config,
+                        config={
+                            "name": checkpoint_name,
+                            "data_context": self,
+                            "checkpoint_config": config,
+                        },
                         runtime_environment={
                             "root_directory": self.root_directory,
                         },
-                        config_defaults={},
+                        config_defaults={
+                            "class_name": class_name,
+                            "module_name": "great_expectations.checkpoint",
+                        },
                     ),
+                )
+                # noinspection PyUnusedLocal
+                checkpoint_config: CheckpointConfig = (
+                    CheckpointConfig.from_commented_map(
+                        commented_map=instantiated_class.config.commented_map
+                    )
                 )
             else:
                 print(
