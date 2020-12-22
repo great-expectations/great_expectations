@@ -124,12 +124,16 @@ def build_continuous_partition_object(
     hist_metric_configuration = MetricConfiguration(
         "column.histogram",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={"bins": tuple(bins),},
+        metric_value_kwargs={
+            "bins": tuple(bins),
+        },
     )
     nonnull_configuration = MetricConfiguration(
         "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={"bins": tuple(bins),},
+        metric_value_kwargs={
+            "bins": tuple(bins),
+        },
     )
     metrics = execution_engine.resolve_metrics(
         (hist_metric_configuration, nonnull_configuration)
@@ -170,10 +174,13 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
     counts_configuration = MetricConfiguration(
         "column.partition",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={"sort": sort,},
+        metric_value_kwargs={
+            "sort": sort,
+        },
     )
     nonnull_configuration = MetricConfiguration(
-        "column_values.nonnull.count", metric_domain_kwargs=domain_kwargs,
+        "column_values.nonnull.count",
+        metric_domain_kwargs=domain_kwargs,
     )
     metrics = execution_engine.resolve_metrics(
         (counts_configuration, nonnull_configuration)
@@ -505,7 +512,8 @@ def get_approximate_percentile_disc_sql(selects: List, sql_engine_dialect: Any) 
 
 
 def check_sql_engine_dialect(
-    actual_sql_engine_dialect: Any, candidate_sql_engine_dialect: Any,
+    actual_sql_engine_dialect: Any,
+    candidate_sql_engine_dialect: Any,
 ) -> bool:
     try:
         # noinspection PyTypeChecker

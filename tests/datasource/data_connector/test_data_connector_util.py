@@ -106,13 +106,15 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
     data_reference = "alex_20200809_1000.csv"
     regex_pattern = r"^(.+)_____________\.csv$"
     group_names = ["name", "timestamp", "price"]
-    returned_batch_def_list = map_data_reference_string_to_batch_definition_list_using_regex(
-        datasource_name="test_datasource",
-        data_connector_name="test_data_connector",
-        data_asset_name=None,
-        data_reference=data_reference,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    returned_batch_def_list = (
+        map_data_reference_string_to_batch_definition_list_using_regex(
+            datasource_name="test_datasource",
+            data_connector_name="test_data_connector",
+            data_asset_name=None,
+            data_reference=data_reference,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
     assert returned_batch_def_list is None
 
@@ -120,13 +122,15 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
     data_reference = "alex_20200809_1000.csv"
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
-    returned_batch_def_list = map_data_reference_string_to_batch_definition_list_using_regex(
-        datasource_name="test_datasource",
-        data_connector_name="test_data_connector",
-        data_asset_name=None,
-        data_reference=data_reference,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    returned_batch_def_list = (
+        map_data_reference_string_to_batch_definition_list_using_regex(
+            datasource_name="test_datasource",
+            data_connector_name="test_data_connector",
+            data_asset_name=None,
+            data_reference=data_reference,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
     assert returned_batch_def_list == [
         BatchDefinition(
@@ -134,19 +138,25 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
             data_connector_name="test_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
             partition_definition=PartitionDefinition(
-                {"name": "alex", "timestamp": "20200809", "price": "1000",}
+                {
+                    "name": "alex",
+                    "timestamp": "20200809",
+                    "price": "1000",
+                }
             ),
         )
     ]
 
     # data_asset_name configured
-    returned_batch_def_list = map_data_reference_string_to_batch_definition_list_using_regex(
-        datasource_name="test_datasource",
-        data_connector_name="test_data_connector",
-        data_asset_name="test_data_asset",
-        data_reference=data_reference,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    returned_batch_def_list = (
+        map_data_reference_string_to_batch_definition_list_using_regex(
+            datasource_name="test_datasource",
+            data_connector_name="test_data_connector",
+            data_asset_name="test_data_asset",
+            data_reference=data_reference,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
     assert returned_batch_def_list == [
         BatchDefinition(
@@ -154,7 +164,11 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
             data_connector_name="test_data_connector",
             data_asset_name="test_data_asset",
             partition_definition=PartitionDefinition(
-                {"name": "alex", "timestamp": "20200809", "price": "1000",}
+                {
+                    "name": "alex",
+                    "timestamp": "20200809",
+                    "price": "1000",
+                }
             ),
         )
     ]
@@ -171,7 +185,11 @@ def test_convert_data_reference_string_to_batch_request_using_regex():
         data_connector_name=None,
         data_asset_name="DEFAULT_ASSET_NAME",
         partition_request=PartitionDefinition(
-            {"name": "alex", "timestamp": "20200809", "price": "1000",}
+            {
+                "name": "alex",
+                "timestamp": "20200809",
+                "price": "1000",
+            }
         ),
     )
 
@@ -185,7 +203,11 @@ def test_convert_data_reference_string_to_batch_request_using_regex():
         data_connector_name=None,
         data_asset_name="DEFAULT_ASSET_NAME",
         partition_request=PartitionDefinition(
-            {"name": "eugene", "timestamp": "20200810", "price": "1500",}
+            {
+                "name": "eugene",
+                "timestamp": "20200810",
+                "price": "1500",
+            }
         ),
     )
 
@@ -273,7 +295,11 @@ def test_convert_batch_request_to_data_reference_string_using_regex():
     group_names = ["name", "timestamp", "price"]
     batch_request = BatchRequest(
         partition_request=PartitionRequest(
-            **{"name": "alex", "timestamp": "20200809", "price": "1000",}
+            **{
+                "name": "alex",
+                "timestamp": "20200809",
+                "price": "1000",
+            }
         )
     )
     assert (
@@ -288,7 +314,11 @@ def test_convert_batch_request_to_data_reference_string_using_regex():
     group_names = ["name", "timestamp"]
     batch_request = BatchRequest(
         partition_request=PartitionRequest(
-            **{"name": "alex", "timestamp": "20200809", "price": "1000",}
+            **{
+                "name": "alex",
+                "timestamp": "20200809",
+                "price": "1000",
+            }
         )
     )
     assert (
@@ -303,7 +333,11 @@ def test_convert_batch_request_to_data_reference_string_using_regex():
     group_names = ["timestamp", "price"]
     batch_request = BatchRequest(
         partition_request=PartitionRequest(
-            **{"name": "alex", "timestamp": "20200809", "price": "1000",}
+            **{
+                "name": "alex",
+                "timestamp": "20200809",
+                "price": "1000",
+            }
         )
     )
     assert (
@@ -397,7 +431,11 @@ def test__invert_regex_to_data_reference_template():
 
 def test_build_sorters_from_config_good_config():
     sorters_config = [
-        {"orderby": "desc", "class_name": "NumericSorter", "name": "price",}
+        {
+            "orderby": "desc",
+            "class_name": "NumericSorter",
+            "name": "price",
+        }
     ]
     sorters = build_sorters_from_config(sorters_config)
     assert sorters.__repr__() == str(
@@ -413,13 +451,23 @@ def test_build_sorters_from_config_good_config():
 
 def test_build_sorters_from_config_bad_config():
     # 1. class_name is bad
-    sorters_config = [{"orderby": "desc", "class_name": "IDontExist", "name": "price",}]
+    sorters_config = [
+        {
+            "orderby": "desc",
+            "class_name": "IDontExist",
+            "name": "price",
+        }
+    ]
     with pytest.raises(ge_exceptions.PluginClassNotFoundError):
         build_sorters_from_config(sorters_config)
 
     # 2. orderby : not a real order
     sorters_config = [
-        {"orderby": "not_a_real_order", "class_name": "NumericSorter", "name": "price",}
+        {
+            "orderby": "not_a_real_order",
+            "class_name": "NumericSorter",
+            "name": "price",
+        }
     ]
     with pytest.raises(ge_exceptions.SorterError):
         build_sorters_from_config(sorters_config)

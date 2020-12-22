@@ -207,36 +207,45 @@ def _get_column_quantiles_mysql(
 ) -> list:
     # MySQL does not support "percentile_disc", so we implement it as a compound query.
     # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
-    percent_rank_query: CTE = sa.select(
-        [
-            column,
-            sa.cast(
-                sa.func.percent_rank().over(order_by=column.asc()),
-                sa.dialects.mysql.DECIMAL(18, 15),
-            ).label("p"),
-        ]
-    ).order_by(sa.column("p").asc()).select_from(selectable).cte("t")
+    percent_rank_query: CTE = (
+        sa.select(
+            [
+                column,
+                sa.cast(
+                    sa.func.percent_rank().over(order_by=column.asc()),
+                    sa.dialects.mysql.DECIMAL(18, 15),
+                ).label("p"),
+            ]
+        )
+        .order_by(sa.column("p").asc())
+        .select_from(selectable)
+        .cte("t")
+    )
 
     selects: List[WithinGroup] = []
     for idx, quantile in enumerate(quantiles):
         # pymysql cannot handle conversion of numpy float64 to float; convert just in case
         if np.issubdtype(type(quantile), np.float_):
             quantile = float(quantile)
-        quantile_column: Label = sa.func.first_value(column).over(
-            order_by=sa.case(
-                [
-                    (
-                        percent_rank_query.c.p
-                        <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
-                        percent_rank_query.c.p,
-                    )
-                ],
-                else_=None,
-            ).desc()
-        ).label(f"q_{idx}")
+        quantile_column: Label = (
+            sa.func.first_value(column)
+            .over(
+                order_by=sa.case(
+                    [
+                        (
+                            percent_rank_query.c.p
+                            <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
+                            percent_rank_query.c.p,
+                        )
+                    ],
+                    else_=None,
+                ).desc()
+            )
+            .label(f"q_{idx}")
+        )
         selects.append(quantile_column)
-    quantiles_query: Select = sa.select(selects).distinct().order_by(
-        percent_rank_query.c.p.desc()
+    quantiles_query: Select = (
+        sa.select(selects).distinct().order_by(percent_rank_query.c.p.desc())
     )
 
     try:

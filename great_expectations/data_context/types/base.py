@@ -44,7 +44,8 @@ def object_to_yaml_str(obj):
 
 class AssetConfig(DictDot):
     def __init__(
-        self, **kwargs,
+        self,
+        **kwargs,
     ):
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -73,7 +74,12 @@ class AssetConfigSchema(Schema):
 
 class SorterConfig(DictDot):
     def __init__(
-        self, name, class_name=None, module_name=None, orderby="asc", **kwargs,
+        self,
+        name,
+        class_name=None,
+        module_name=None,
+        orderby="asc",
+        **kwargs,
     ):
         self._name = name
         self._class_name = class_name
@@ -253,7 +259,10 @@ configuration to continue.
             or "max_keys" in data
         ) and not (
             data["class_name"]
-            in ["InferredAssetS3DataConnector", "ConfiguredAssetS3DataConnector",]
+            in [
+                "InferredAssetS3DataConnector",
+                "ConfiguredAssetS3DataConnector",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by an
@@ -274,7 +283,10 @@ continue.
             or "skip_inapplicable_tables" in data
         ) and not (
             data["class_name"]
-            in ["InferredAssetSqlDataConnector", "ConfiguredAssetSqlDataConnector",]
+            in [
+                "InferredAssetSqlDataConnector",
+                "ConfiguredAssetSqlDataConnector",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data connector, that are required only by an
@@ -352,7 +364,7 @@ class ExecutionEngineConfigSchema(Schema):
             data["class_name"] == "SqlAlchemyExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses the "connection_string" key in an execution engine, but only 
+                f"""Your current configuration uses the "connection_string" key in an execution engine, but only
 SqlAlchemyExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
@@ -361,7 +373,7 @@ configuration to continue.
             data["class_name"] == "SparkDFExecutionEngine"
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current configuration uses the "spark_config" key in an execution engine, but only 
+                f"""Your current configuration uses the "spark_config" key in an execution engine, but only
 SparkDFExecutionEngine requires this attribute (your execution engine is "{data['class_name']}").  Please update your
 configuration to continue.
                 """
@@ -489,7 +501,10 @@ class DatasourceConfigSchema(Schema):
             or "tables" in data
         ) and not (
             data["class_name"]
-            in ["SqlAlchemyDatasource", "SimpleSqlalchemyDatasource",]
+            in [
+                "SqlAlchemyDatasource",
+                "SimpleSqlalchemyDatasource",
+            ]
         ):
             raise ge_exceptions.InvalidConfigError(
                 f"""Your current configuration uses one or more keys in a data source, that are required only by a
@@ -824,15 +839,14 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_DATA_DOCS_SITES = {
         DEFAULT_DATA_DOCS_SITE_NAME: {
             "class_name": "SiteBuilder",
+            "show_how_to_buttons": True,
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/local_site/",
             },
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
-            "show_how_to_buttons": True,
         }
     }
 
@@ -953,7 +967,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                 },
                 "site_index_builder": {
                     "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
                 },
             }
         }
@@ -1085,7 +1098,6 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
                 "site_index_builder": {
                     "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
                 },
             }
         }

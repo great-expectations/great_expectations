@@ -1,8 +1,10 @@
+from copy import deepcopy
 from typing import Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
@@ -20,6 +22,7 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,
@@ -89,7 +92,23 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
-        test = 1
+        other_table_name = configuration.kwargs.get("other_table_name")
+        # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
+        table_row_count_metric_config_other = deepcopy(
+            dependencies["metrics"]["table.row_count"]
+        )
+        table_row_count_metric_config_other.metric_domain_kwargs[
+            "table"
+        ] = other_table_name
+        # rename original "table.row_count" metric to "table.row_count.self"
+        dependencies["metrics"]["table.row_count.self"] = dependencies["metrics"].pop(
+            "table.row_count"
+        )
+        # add a new metric dependency named "table.row_count.other" with modified metric config
+        dependencies["metrics"][
+            "table.row_count.other"
+        ] = table_row_count_metric_config_other
+
         return dependencies
 
     def _validate(
@@ -99,10 +118,15 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        expected_table_row_count = self.get_success_kwargs().get("value")
-        actual_table_row_count = metrics.get("table.row_count")
+        table_row_count_self = metrics["table.row_count.self"]
+        table_row_count_other = metrics["table.row_count.other"]
 
         return {
-            "success": actual_table_row_count == expected_table_row_count,
-            "result": {"observed_value": actual_table_row_count},
+            "success": table_row_count_self == table_row_count_other,
+            "result": {
+                "observed_value": {
+                    "self": table_row_count_self,
+                    "other": table_row_count_other,
+                }
+            },
         }

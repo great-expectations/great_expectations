@@ -64,7 +64,11 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         ]
         if isinstance(
             column_metadata["type"],
-            (sparktypes.LongType, sparktypes.DoubleType, sparktypes.IntegerType,),
+            (
+                sparktypes.LongType,
+                sparktypes.DoubleType,
+                sparktypes.IntegerType,
+            ),
         ):
             # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
             compute_domain_kwargs = execution_engine.add_column_row_condition(

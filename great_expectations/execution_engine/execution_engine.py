@@ -77,7 +77,8 @@ class ExecutionEngine:
             **{"class_name": self.__class__.__name__}
         )
         filter_properties_dict(
-            properties=self._config, inplace=True,
+            properties=self._config,
+            inplace=True,
         )
 
     def configure_validator(self, validator):
@@ -101,8 +102,7 @@ class ExecutionEngine:
 
     @property
     def active_batch_data(self):
-        """The data from the currently-active batch.
-        """
+        """The data from the currently-active batch."""
         if self.active_batch_data_id is None:
             return None
         else:
@@ -117,7 +117,10 @@ class ExecutionEngine:
     def config(self) -> dict:
         return self._config
 
-    def get_batch_data(self, batch_spec: BatchSpec,) -> Any:
+    def get_batch_data(
+        self,
+        batch_spec: BatchSpec,
+    ) -> Any:
         """Interprets batch_data and returns the appropriate data.
 
         This method is primarily useful for utility cases (e.g. testing) where
@@ -249,7 +252,9 @@ class ExecutionEngine:
         raise NotImplementedError
 
     def get_compute_domain(
-        self, domain_kwargs: dict, domain_type: Union[str, "MetricDomainTypes"],
+        self,
+        domain_kwargs: dict,
+        domain_type: Union[str, "MetricDomainTypes"],
     ) -> Tuple[Any, dict, dict]:
         """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
         and specific engine semantics.
