@@ -1,4 +1,5 @@
 import logging
+import os
 
 import pytest
 from ruamel.yaml import YAML
@@ -17,7 +18,7 @@ yaml = YAML()
 logger = logging.getLogger(__name__)
 
 
-def test_checkpoint_config(empty_data_context):
+def test_basic_checkpoint_config_validation(empty_data_context):
     yaml_config_erroneous: str
     config_erroneous: CommentedMap
     checkpoint_config: CheckpointConfig
@@ -135,6 +136,540 @@ def test_checkpoint_config(empty_data_context):
             properties=checkpoint.config.to_json_dict(),
         )
         == expected_checkpoint_config
+    )
+
+
+def test_checkpoint_configuration_no_nesting_using_test_yaml_config(empty_data_context):
+    os.environ["VAR"] = "test"
+    os.environ["MY_PARAM"] = "1"
+    os.environ["OLD_PARAM"] = "2"
+
+    checkpoint: Checkpoint
+
+    yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
+    # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
+    # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+    validations:
+    - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_special_data_connector
+      data_asset_name: users
+      partition_request:
+        partition_index: -1
+      expectation_suite_name: users.delivery
+      action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+    evaluation_parameters:
+      # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
+      # param1: "$MY_PARAM"
+      # param2: 1 + "$OLD_PARAM"
+      param1: 1
+      param2: 2
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
+    """
+
+    expected_checkpoint_config: dict = {
+        "name": "my_fancy_checkpoint",
+        "config_version": 1.0,
+        "template_name": None,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
+        "run_name_template": None,
+        "expectation_suite_name": None,
+        "batch_request": None,
+        "action_list": [],
+        "evaluation_parameters": {"param1": 1, "param2": 2},
+        "runtime_configuration": {
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        "validations": [
+            {
+                "batch_request": None,
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_special_data_connector",
+                "data_asset_name": "users",
+                "partition_request": {"partition_index": -1},
+                "expectation_suite_name": "users.delivery",
+                "action_list": [
+                    {
+                        "name": "store_validation_result",
+                        "action": {"class_name": "StoreValidationResultAction"},
+                    },
+                    {
+                        "name": "store_evaluation_params",
+                        "action": {"class_name": "StoreEvaluationParametersAction"},
+                    },
+                    {
+                        "name": "update_data_docs",
+                        "action": {"class_name": "UpdateDataDocsAction"},
+                    },
+                ],
+            }
+        ],
+        "profilers": [],
+    }
+
+    checkpoint = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        name="my_checkpoint",
+    )
+    assert filter_properties_dict(
+        properties=checkpoint.config.to_json_dict(),
+    ) == filter_properties_dict(
+        properties=expected_checkpoint_config,
+    )
+
+
+def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
+    empty_data_context,
+):
+    os.environ["VAR"] = "test"
+    os.environ["MY_PARAM"] = "1"
+    os.environ["OLD_PARAM"] = "2"
+
+    checkpoint: Checkpoint
+
+    yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
+    # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
+    # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+    validations:
+    - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_special_data_connector
+      data_asset_name: users
+      partition_request:
+        partition_index: -1
+    - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_other_data_connector
+      data_asset_name: users
+      partition_request:
+        partition_index: -2
+    expectation_suite_name: users.delivery
+    action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+    evaluation_parameters:
+      # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
+      # param1: "$MY_PARAM"
+      # param2: 1 + "$OLD_PARAM"
+      param1: 1
+      param2: 2
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
+    """
+
+    expected_checkpoint_config: dict = {
+        "name": "my_fancy_checkpoint",
+        "config_version": 1.0,
+        "template_name": None,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
+        "run_name_template": None,
+        "expectation_suite_name": "users.delivery",
+        "batch_request": None,
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction"},
+            },
+        ],
+        "evaluation_parameters": {"param1": 1, "param2": 2},
+        "runtime_configuration": {
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        "validations": [
+            {
+                "batch_request": None,
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_special_data_connector",
+                "data_asset_name": "users",
+                "partition_request": {"partition_index": -1},
+            },
+            {
+                "batch_request": None,
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_other_data_connector",
+                "data_asset_name": "users",
+                "partition_request": {"partition_index": -2},
+            },
+        ],
+        "profilers": [],
+    }
+
+    checkpoint = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        name="my_checkpoint",
+    )
+    assert filter_properties_dict(
+        properties=checkpoint.config.to_json_dict(),
+    ) == filter_properties_dict(
+        properties=expected_checkpoint_config,
+    )
+
+
+def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
+    empty_data_context,
+):
+    checkpoint: Checkpoint
+
+    yaml_config: str = f"""
+    name: airflow_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    validations:
+    - batch_request:
+      datasource_name: pandas_datasource
+      data_connector_name: runtime_data_connector
+      data_asset_name: users
+    expectation_suite_name: users.delivery
+    action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+    """
+
+    expected_checkpoint_config: dict = {
+        "name": "airflow_checkpoint",
+        "config_version": 1.0,
+        "template_name": None,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
+        "run_name_template": None,
+        "expectation_suite_name": "users.delivery",
+        "batch_request": None,
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction"},
+            },
+        ],
+        "evaluation_parameters": {},
+        "runtime_configuration": {},
+        "validations": [
+            {
+                "batch_request": None,
+                "datasource_name": "pandas_datasource",
+                "data_connector_name": "runtime_data_connector",
+                "data_asset_name": "users",
+            }
+        ],
+        "profilers": [],
+    }
+
+    checkpoint = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        name="my_checkpoint",
+    )
+    assert filter_properties_dict(
+        properties=checkpoint.config.to_json_dict(),
+    ) == filter_properties_dict(
+        properties=expected_checkpoint_config,
+    )
+
+
+def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
+    empty_data_context,
+):
+    os.environ["GE_ENVIRONMENT"] = "my_ge_environment"
+
+    checkpoint: Checkpoint
+
+    yaml_config: str = f"""
+    name: airflow_users_node_3
+    config_version: 1
+    class_name: Checkpoint
+    batch_request:
+        datasource_name: my_datasource
+        data_connector_name: my_special_data_connector
+        data_asset_name: users
+        partition_request:
+            partition_index: -1
+    validations:
+    - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
+    - expectation_suite_name: users.error  # runs the locally-specifiedaction_list (?UNION THE TOP LEVEL?) against the top-level batch_request
+      action_list:
+      - name: quarantine_failed_data
+        action:
+            class_name: CreateQuarantineData
+      - name: advance_passed_data
+        action:
+            class_name: CreatePassedData
+    action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+    evaluation_parameters:
+        environment: $GE_ENVIRONMENT
+        tolerance: 0.01
+    runtime_configuration:
+        result_format:
+          result_format: BASIC
+          partial_unexpected_count: 20
+    """
+
+    expected_checkpoint_config: dict = {
+        "name": "airflow_users_node_3",
+        "config_version": 1.0,
+        "template_name": None,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
+        "run_name_template": None,
+        "expectation_suite_name": None,
+        "batch_request": {
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_special_data_connector",
+            "data_asset_name": "users",
+            "partition_request": {"partition_index": -1},
+        },
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction"},
+            },
+        ],
+        "evaluation_parameters": {
+            "environment": "my_ge_environment",
+            "tolerance": 0.01,
+        },
+        "runtime_configuration": {
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        "validations": [
+            {"expectation_suite_name": "users.warning"},
+            {
+                "expectation_suite_name": "users.error",
+                "action_list": [
+                    {
+                        "name": "quarantine_failed_data",
+                        "action": {"class_name": "CreateQuarantineData"},
+                    },
+                    {
+                        "name": "advance_passed_data",
+                        "action": {"class_name": "CreatePassedData"},
+                    },
+                ],
+            },
+        ],
+        "profilers": [],
+    }
+
+    checkpoint = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        name="my_checkpoint",
+    )
+    assert filter_properties_dict(
+        properties=checkpoint.config.to_json_dict(),
+    ) == filter_properties_dict(
+        properties=expected_checkpoint_config,
+    )
+
+
+def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
+    empty_data_context,
+):
+    os.environ["VAR"] = "test"
+    os.environ["MY_PARAM"] = "1"
+    os.environ["OLD_PARAM"] = "2"
+
+    checkpoint: Checkpoint
+    yaml_config: str
+    expected_checkpoint_config: dict
+
+    yaml_config = f"""
+    name: my_base_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
+    # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
+    # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+    action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+    evaluation_parameters:
+      # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
+      # param1: "$MY_PARAM"
+      # param2: 1 + "$OLD_PARAM"
+      param1: 1
+      param2: 2
+    runtime_configuration:
+        result_format:
+          result_format: BASIC
+          partial_unexpected_count: 20
+    """
+
+    expected_checkpoint_config = {
+        "name": "my_base_checkpoint",
+        "config_version": 1.0,
+        "template_name": None,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
+        "run_name_template": None,
+        "expectation_suite_name": None,
+        "batch_request": None,
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction"},
+            },
+        ],
+        "evaluation_parameters": {"param1": 1, "param2": 2},
+        "runtime_configuration": {
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        "validations": [],
+        "profilers": [],
+    }
+
+    checkpoint = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        name="my_checkpoint",
+    )
+    assert filter_properties_dict(
+        properties=checkpoint.config.to_json_dict(),
+    ) == filter_properties_dict(
+        properties=expected_checkpoint_config,
+    )
+
+    yaml_config = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    template_name: my_base_checkpoint
+    validations:
+    - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_special_data_connector
+      data_asset_name: users
+      partition_request:
+        partition_index: -1
+    - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_other_data_connector
+      data_asset_name: users
+      partition_request:
+        partition_index: -2
+    expectation_suite_name: users.delivery
+    """
+
+    expected_checkpoint_config = {
+        "name": "my_fancy_checkpoint",
+        "config_version": 1.0,
+        "template_name": "my_base_checkpoint",
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
+        "run_name_template": None,
+        "expectation_suite_name": "users.delivery",
+        "batch_request": None,
+        "action_list": [],
+        "evaluation_parameters": {},
+        "runtime_configuration": {},
+        "validations": [
+            {
+                "batch_request": None,
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_special_data_connector",
+                "data_asset_name": "users",
+                "partition_request": {"partition_index": -1},
+            },
+            {
+                "batch_request": None,
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_other_data_connector",
+                "data_asset_name": "users",
+                "partition_request": {"partition_index": -2},
+            },
+        ],
+        "profilers": [],
+    }
+
+    checkpoint = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        name="my_checkpoint",
+    )
+    assert filter_properties_dict(
+        properties=checkpoint.config.to_json_dict(),
+    ) == filter_properties_dict(
+        properties=expected_checkpoint_config,
     )
 
 
@@ -276,8 +811,10 @@ def test_newstyle_checkpoint_config_substitution_simple(
             "aux_param_1": "1 + $MY_PARAM",
         },
         runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 20,
+            "result_format": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 20,
+            }
         },
     )
     checkpoint_template_config_key = ConfigurationIdentifier(
@@ -376,8 +913,10 @@ def test_newstyle_checkpoint_config_substitution_simple(
             "aux_param_1": "1 + $MY_PARAM",
         },
         runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 20,
+            "result_format": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 20,
+            }
         },
     )
 
@@ -462,9 +1001,11 @@ def test_newstyle_checkpoint_config_substitution_simple(
                 "new_runtime_eval_param": "bloopy!",
             },
             runtime_configuration={
-                "result_format": "BASIC",
-                "partial_unexpected_count": 999,
-                "new_runtime_config_key": "bleepy!",
+                "result_format": {
+                    "result_format": "BASIC",
+                    "partial_unexpected_count": 999,
+                    "new_runtime_config_key": "bleepy!",
+                }
             },
         )
     )
@@ -524,9 +1065,11 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "new_runtime_eval_param": "bloopy!",
                 },
                 "runtime_configuration": {
-                    "result_format": "BASIC",
-                    "partial_unexpected_count": 999,
-                    "new_runtime_config_key": "bleepy!",
+                    "result_format": {
+                        "result_format": "BASIC",
+                        "partial_unexpected_count": 999,
+                        "new_runtime_config_key": "bleepy!",
+                    }
                 },
             }
         )

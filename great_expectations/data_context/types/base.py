@@ -1451,7 +1451,7 @@ class CheckpointConfig(BaseYamlConfig):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[dict, BatchRequest]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1479,11 +1479,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._module_name = module_name or "great_expectations.checkpoint"
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
-            self._batch_request = (
-                batch_request
-                if isinstance(batch_request, (BatchRequest, type(None)))
-                else BatchRequest(**batch_request)
-            )
+            self._batch_request = batch_request
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
@@ -1530,7 +1526,7 @@ class CheckpointConfig(BaseYamlConfig):
                 updated_batch_request = nested_update(
                     batch_request, other_batch_request
                 )
-                self.batch_request = BatchRequest(**updated_batch_request)
+                self.batch_request = updated_batch_request
             if other_config.action_list is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,
@@ -1558,17 +1554,9 @@ class CheckpointConfig(BaseYamlConfig):
                 )
             # update
             if runtime_kwargs.get("batch_request") is not None:
-                batch_request = (
-                    self.batch_request.get_json_dict()
-                    if isinstance(self.batch_request, BatchRequest)
-                    else self.batch_request
-                )
+                batch_request = self.batch_request
                 batch_request = batch_request or {}
-                runtime_batch_request = (
-                    runtime_kwargs.get("batch_request").get_json_dict()
-                    if isinstance(runtime_kwargs.get("batch_request"), BatchRequest)
-                    else runtime_kwargs.get("batch_request")
-                )
+                runtime_batch_request = runtime_kwargs.get("batch_request")
                 batch_request.update(runtime_batch_request)
                 self.batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
@@ -1653,11 +1641,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._run_name_template = value
 
     @property
-    def batch_request(self):
+    def batch_request(self) -> Union[dict, BatchRequest]:
         return self._batch_request
 
     @batch_request.setter
-    def batch_request(self, value: Union[BatchRequest, dict]):
+    def batch_request(self, value: Union[dict, BatchRequest]):
         self._batch_request = value
 
     @property
