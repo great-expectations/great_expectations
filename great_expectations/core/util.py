@@ -1,8 +1,11 @@
 import logging
+import sys
 from collections.abc import Mapping
 
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+from decimal import Context
+
 from IPython import get_ipython
 
 from great_expectations.core.run_identifier import RunIdentifier
@@ -138,10 +141,9 @@ def convert_to_json_serializable(data):
         return convert_to_json_serializable(data.to_dict(orient="records"))
 
     elif isinstance(data, decimal.Decimal):
-        if not (-1e-55 < decimal.Decimal.from_float(float(data)) - data < 1e-55):
+        if requires_lossy_conversion(data):
             logger.warning(
-                "Using lossy conversion for decimal %s to float object to support serialization."
-                % str(data)
+                f"Using lossy conversion for decimal {data} to float object to support serialization."
             )
         return float(data)
 
@@ -255,3 +257,7 @@ def ensure_json_serializable(data):
             "%s is of type %s which cannot be serialized to json"
             % (str(data), type(data).__name__)
         )
+
+
+def requires_lossy_conversion(d):
+    return d - Context(prec=sys.float_info.dig).create_decimal(d) != 0

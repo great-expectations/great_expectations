@@ -1,36 +1,48 @@
 import logging
 from decimal import Decimal
 
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    requires_lossy_conversion,
+)
 
 
 def test_lossy_serialization_warning(caplog):
     caplog.set_level(logging.WARNING, logger="great_expectations.core")
 
-    d = (
-        Decimal(7091.17117297555159893818) ** Decimal(2)
-        + Decimal(7118.70008070942458289210) ** Decimal(2)
-        + (Decimal(-1513.67274389594149397453)) ** Decimal(2)
-    ) ** Decimal(1.5)
-    f_1 = (
-        7091.17117297555159893818 ** 2
-        + 7118.70008070942458289210 ** 2
-        + (-1513.67274389594149397453) ** 2
-    ) ** 1.5
-    f_2 = float(d)
-    assert not (-1e-55 < Decimal.from_float(f_1) - d < 1e-55)
-    assert not (-1e-55 < Decimal.from_float(f_2) - d < 1e-55)
+    d = Decimal("12345.678901234567890123456789")
 
     convert_to_json_serializable(d)
     assert len(caplog.messages) == 1
-    assert caplog.messages[0].startswith("Using lossy conversion for decimal")
+    assert caplog.messages[0].startswith(
+        "Using lossy conversion for decimal 12345.678901234567890123456789"
+    )
 
     caplog.clear()
-    d = Decimal(0.1)
-    f_1 = 0.1
-    f_2 = float(d)
-
-    assert -1e-55 < Decimal.from_float(f_1) - d < 1e-55
-    assert -1e-55 < Decimal.from_float(f_2) - d < 1e-55
+    d = Decimal("0.1")
     convert_to_json_serializable(d)
+    print(caplog.messages)
     assert len(caplog.messages) == 0
+
+
+def test_lossy_conversion():
+    d = Decimal("12345.678901234567890123456789")
+    assert requires_lossy_conversion(d)
+
+    d = Decimal("12345.67890123456")
+    assert requires_lossy_conversion(d)
+
+    d = Decimal("12345.6789012345")
+    assert not requires_lossy_conversion(d)
+
+    d = Decimal("0.12345678901234567890123456789")
+    assert requires_lossy_conversion(d)
+
+    d = Decimal("0.1234567890123456")
+    assert requires_lossy_conversion(d)
+
+    d = Decimal("0.123456789012345")
+    assert not requires_lossy_conversion(d)
+
+    d = Decimal("0.1")
+    assert not requires_lossy_conversion(d)
