@@ -135,6 +135,26 @@ class UsageStatisticsHandler:
             self._data_context.get_expectation_suite(expectation_suite_name)
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
+        try:
+            # Try to determine if a module has been imported from one of the common data workflow frameworks
+            DAG_RUNNERS = [
+                "airflow",
+                "prefect",
+                "dagster",
+                "kedro",
+                # "argo",  # TODO: Argo is written in Go, how to include?
+                # "flytekit",  # TODO: Check import name
+                # "ascend",  # TODO: How to import?
+                # "nifi",  # TODO: How to import?
+                # "metaflow",  # TODO: How to import?
+            ]
+            payload_pipeline_dag_runner = ", ".join(
+                [d if d in sys.modules.keys() else None for d in DAG_RUNNERS]
+            )
+        except Exception:
+            logger.debug(
+                "run_validation_operator_usage_statistics: Unable to create pipeline_dag_runner payload field"
+            )
         return {
             "platform.system": platform.system(),
             "platform.release": platform.release(),
@@ -168,6 +188,7 @@ class UsageStatisticsHandler:
                 )
                 for expectation_suite in expectation_suites
             ],
+            "pipeline_dag_runner": payload_pipeline_dag_runner,
         }
 
     def build_envelope(self, message):
