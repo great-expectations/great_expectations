@@ -71,7 +71,7 @@ def test_checkpoint_config(empty_data_context):
     }
 
 
-def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(
+def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     filesystem_csv_data_context,
 ):
 
@@ -109,6 +109,67 @@ def test_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     results = checkpoint.run()
 
     assert len(filesystem_csv_data_context.validations_store.list_keys()) == 1
+
+
+# TODO: add more test cases
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
+    titanic_pandas_multibatch_data_context_with_013_datasource,
+):
+    context = titanic_pandas_multibatch_data_context_with_013_datasource
+    # add checkpoint config
+    checkpoint_config = CheckpointConfig(
+        config_version=1,
+        name="my_checkpoint",
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "titanic_multi_batch",
+                    "data_connector_name": "my_data_connector",
+                    "data_asset_name": "Titanic_1911",
+                }
+            }
+        ],
+    )
+    checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=checkpoint_config.name
+    )
+    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
+    checkpoint = context.get_checkpoint(checkpoint_config.name, return_config=False)
+
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    context.create_expectation_suite("my_expectation_suite")
+    print(context.list_datasources())
+    results = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
 
 
 # TODO: Add test case for recusrive template cases (nested templates) and template_name specified at runtime
