@@ -102,7 +102,6 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     Returns: None
 
     """
-
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
     validation_results_page_renderer = ValidationResultsPageRenderer(
@@ -120,8 +119,6 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     md_str = " ".join(md_str_list)
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
-
-    print(md_str)
 
     assert (
         md_str

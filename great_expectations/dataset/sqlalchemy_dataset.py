@@ -695,23 +695,29 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return element_count - null_count
 
     def get_column_sum(self, column):
-        return self.engine.execute(
-            sa.select([sa.func.sum(sa.column(column))]).select_from(self._table)
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select([sa.func.sum(sa.column(column))]).select_from(self._table)
+            ).scalar()
+        )
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
-        return self.engine.execute(
-            sa.select([sa.func.max(sa.column(column))]).select_from(self._table)
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select([sa.func.max(sa.column(column))]).select_from(self._table)
+            ).scalar()
+        )
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
-        return self.engine.execute(
-            sa.select([sa.func.min(sa.column(column))]).select_from(self._table)
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select([sa.func.min(sa.column(column))]).select_from(self._table)
+            ).scalar()
+        )
 
     def get_column_value_counts(self, column, sort="value", collate=None):
         if sort not in ["value", "count", "none"]:
@@ -748,16 +754,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def get_column_mean(self, column):
         # column * 1.0 needed for correct calculation of avg in MSSQL
-        return self.engine.execute(
-            sa.select([sa.func.avg(sa.column(column) * 1.0)]).select_from(self._table)
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select([sa.func.avg(sa.column(column) * 1.0)]).select_from(
+                    self._table
+                )
+            ).scalar()
+        )
 
     def get_column_unique_count(self, column):
-        return self.engine.execute(
-            sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(
-                self._table
-            )
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select(
+                    [sa.func.count(sa.func.distinct(sa.column(column)))]
+                ).select_from(self._table)
+            ).scalar()
+        )
 
     def get_column_median(self, column):
         # AWS Athena does not support offset
@@ -789,7 +801,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             # An odd number of column values, we can just take the center value
             column_median = column_values[1][0]  # True center value
-        return column_median
+        return convert_to_json_serializable(column_median)
 
     def get_column_quantiles(
         self, column: str, quantiles: Iterable, allow_relative_error: bool = False
@@ -803,10 +815,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif self.sql_engine_dialect.name.lower() == "mysql":
             return self._get_column_quantiles_mysql(column=column, quantiles=quantiles)
         else:
-            return self._get_column_quantiles_generic_sqlalchemy(
-                column=column,
-                quantiles=quantiles,
-                allow_relative_error=allow_relative_error,
+            return convert_to_json_serializable(
+                self._get_column_quantiles_generic_sqlalchemy(
+                    column=column,
+                    quantiles=quantiles,
+                    allow_relative_error=allow_relative_error,
+                )
             )
 
     def _get_column_quantiles_mssql(self, column: str, quantiles: Iterable) -> list:
@@ -1166,7 +1180,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             .select_from(self._table)
         )
 
-        return self.engine.execute(query).scalar()
+        return convert_to_json_serializable(self.engine.execute(query).scalar())
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
