@@ -1526,7 +1526,7 @@ class CheckpointConfig(BaseYamlConfig):
                 updated_batch_request = nested_update(
                     batch_request, other_batch_request
                 )
-                self.batch_request = updated_batch_request
+                self._batch_request = updated_batch_request
             if other_config.action_list is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,
@@ -1558,7 +1558,7 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request = batch_request or {}
                 runtime_batch_request = runtime_kwargs.get("batch_request")
                 batch_request.update(runtime_batch_request)
-                self.batch_request = batch_request
+                self._batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,
@@ -1643,10 +1643,6 @@ class CheckpointConfig(BaseYamlConfig):
     @property
     def batch_request(self) -> Union[dict, BatchRequest]:
         return self._batch_request
-
-    @batch_request.setter
-    def batch_request(self, value: Union[dict, BatchRequest]):
-        self._batch_request = value
 
     @property
     def expectation_suite_name(self):
