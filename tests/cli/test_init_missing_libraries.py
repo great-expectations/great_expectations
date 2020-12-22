@@ -167,7 +167,8 @@ def test_cli_init_db_mssql_without_library_installed_instructs_user(
     reason="requires psycopg2 to NOT be installed",
 )
 def test_cli_init_db_postgres_without_library_installed_instructs_user(
-    caplog, tmp_path_factory,
+    caplog,
+    tmp_path_factory,
 ):
     _library_not_loaded_test(
         tmp_path_factory, "\n\n2\n2\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
@@ -179,7 +180,8 @@ def test_cli_init_db_postgres_without_library_installed_instructs_user(
     reason="requires psycopg2 to NOT be installed",
 )
 def test_cli_init_db_redshift_without_library_installed_instructs_user(
-    caplog, tmp_path_factory,
+    caplog,
+    tmp_path_factory,
 ):
     _library_not_loaded_test(
         tmp_path_factory, "\n\n2\n3\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
@@ -191,7 +193,8 @@ def test_cli_init_db_redshift_without_library_installed_instructs_user(
     reason="requires snowflake-sqlalchemy to NOT be installed",
 )
 def test_cli_init_db_snowflake_without_library_installed_instructs_user(
-    caplog, tmp_path_factory,
+    caplog,
+    tmp_path_factory,
 ):
     _library_not_loaded_test(
         tmp_path_factory,

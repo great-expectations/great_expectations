@@ -265,12 +265,18 @@ tables:
             "view_that_should_be_partitioned_by_random_hash__H",
             "view_with_fk_reference_from_F",
         ],
-        "hourly": ["table_partitioned_by_timestamp_column__B",],
-        "daily": ["table_partitioned_by_date_column__A__daily",],
+        "hourly": [
+            "table_partitioned_by_timestamp_column__B",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A__daily",
+        ],
         "weekly": [
             "some_string__table_partitioned_by_date_column__A__some_other_string",
         ],
-        "by_id_dozens": ["table_partitioned_by_date_column__A",],
+        "by_id_dozens": [
+            "table_partitioned_by_date_column__A",
+        ],
     }
 
     # Here we should test getting another batch
@@ -305,10 +311,18 @@ tables:
     )
     print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
     assert my_sql_datasource.get_available_data_asset_names() == {
-        "whole_table": ["table_partitioned_by_date_column__A",],
-        "daily": ["table_partitioned_by_date_column__A",],
-        "weekly": ["table_partitioned_by_date_column__A",],
-        "by_id_dozens": ["table_partitioned_by_date_column__A",],
+        "whole_table": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "weekly": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "by_id_dozens": [
+            "table_partitioned_by_date_column__A",
+        ],
     }
 
     # Here we should test getting another batch

@@ -33,7 +33,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
     }
 
     _default_content_block_styling = {
-        "body": {"classes": ["table"],},
+        "body": {
+            "classes": ["table"],
+        },
         "classes": ["ml-2", "mr-2", "mt-0", "mb-0", "table-responsive"],
     }
 
@@ -75,6 +77,11 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
             runtime_configuration=None,
             **kwargs,
         ):
+            eval_param_value_dict = kwargs.get("evaluation_parameters", None)
+            # loading into evaluation parameters to be passed onto prescriptive renderer
+            if eval_param_value_dict is not None:
+                runtime_configuration["evaluation_parameters"] = eval_param_value_dict
+
             expectation = result.expectation_config
             expectation_string_cell = expectation_string_fn(
                 configuration=expectation, runtime_configuration=runtime_configuration
@@ -153,7 +160,6 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 expectation_string_cell += unexpected_statement
             if unexpected_table:
                 expectation_string_cell.append(unexpected_table)
-
             if len(expectation_string_cell) > 1:
                 return [status_cell + [expectation_string_cell] + observed_value]
             else:

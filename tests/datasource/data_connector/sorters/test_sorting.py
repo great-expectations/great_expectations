@@ -122,12 +122,16 @@ def test_create_three_batch_definitions_sort_lexicographically():
 
     # sorting by "id" reverse alphabetically (descending)
     my_sorter = LexicographicSorter(name="id", orderby="desc")
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list,)
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(
+        batch_list,
+    )
     assert sorted_batch_list == [c, b, a]
 
     # sorting by "id" reverse alphabetically (ascending)
     my_sorter = LexicographicSorter(name="id", orderby="asc")
-    sorted_batch_list = my_sorter.get_sorted_batch_definitions(batch_list,)
+    sorted_batch_list = my_sorter.get_sorted_batch_definitions(
+        batch_list,
+    )
     assert sorted_batch_list == [a, b, c]
 
 

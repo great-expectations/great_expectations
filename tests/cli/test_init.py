@@ -16,7 +16,9 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
-    mock_webbrowser, caplog, tmp_path_factory,
+    mock_webbrowser,
+    caplog,
+    tmp_path_factory,
 ):
     """
     This test walks through the onboarding experience.
@@ -90,7 +92,9 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
-    mock_webbrowser, caplog, tmp_path_factory,
+    mock_webbrowser,
+    caplog,
+    tmp_path_factory,
 ):
     """
     This test walks through the onboarding experience.

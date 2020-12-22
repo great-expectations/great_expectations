@@ -37,7 +37,8 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
 
         self._data_connectors = {}
         self._init_data_connectors(
-            introspection_configs=introspection, table_configs=tables,
+            introspection_configs=introspection,
+            table_configs=tables,
         )
 
         # NOTE: Abe 20201111 : This is incorrect. Will need to be fixed when we reconcile all the configs.
@@ -46,17 +47,23 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
     # noinspection PyMethodOverriding
     # Note: This method is meant to overwrite Datasource._init_data_connectors (dispite signature mismatch).
     def _init_data_connectors(
-        self, introspection_configs: dict, table_configs: dict,
+        self,
+        introspection_configs: dict,
+        table_configs: dict,
     ):
 
         # First, build DataConnectors for introspected assets
         for name, config in introspection_configs.items():
             data_connector_config = dict(
-                **{"class_name": "InferredAssetSqlDataConnector", "name": name,},
+                **{
+                    "class_name": "InferredAssetSqlDataConnector",
+                    "name": name,
+                },
                 **config
             )
             self._build_data_connector_from_config(
-                name, data_connector_config,
+                name,
+                data_connector_config,
             )
 
         # Second, build DataConnectors for tables. They will map to configured data_assets
@@ -91,5 +98,6 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
                 )
 
                 data_connector.add_data_asset(
-                    data_asset_name, data_asset_config,
+                    data_asset_name,
+                    data_asset_config,
                 )
