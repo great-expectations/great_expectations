@@ -13,7 +13,7 @@ def test_save_expectation_suite_with_datetime_objects(
     data_context_parameterized_expectation_suite,
 ):
     # create datetime evaluation parameters
-    evaluation_params = {
+    evaluation_parameters = {
         "now": datetime.datetime.now(),
         "now_minus_48h": datetime.datetime.now() - datetime.timedelta(days=2),
     }
@@ -45,8 +45,8 @@ def test_save_expectation_suite_with_datetime_objects(
         batch = context.get_batch(
             batch_kwargs=batch_kwargs, expectation_suite_name=empty_suite
         )
-        for param in evaluation_params:
-            batch.set_evaluation_parameter(param, evaluation_params[param])
+        for param in evaluation_parameters:
+            batch.set_evaluation_parameter(param, evaluation_parameters[param])
 
         # Add expectation that will succeed using the datetime in a $PARAMETER
         batch.expect_column_max_to_be_between(
@@ -70,7 +70,7 @@ def test_save_expectation_suite_with_datetime_objects(
             "action_list_operator",
             assets_to_validate=[batch],
             run_id=run_id,
-            evaluation_parameters=evaluation_params,
+            evaluation_parameters=evaluation_parameters,
         )
         assert results.success
 
