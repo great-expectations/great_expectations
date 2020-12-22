@@ -291,24 +291,29 @@ class Checkpoint:
         if pretty_print:
             print(f"\nCheckpoint class name: {self.__class__.__name__}")
 
-        # TODO: <Alex>ALEX</Alex>
+        validations_present: bool = (
+            self.config.validations
+            and isinstance(self.config.validations, list)
+            and len(self.config.validations) > 0
+        )
         action_list: Optional[list] = self.config.action_list
         action_list_present: bool = (
             action_list is not None
             and isinstance(action_list, list)
             and len(action_list) > 0
         )
-        if not (
-            (
-                self.config.validations
-                and isinstance(self.config.validations, list)
-                and len(self.config.validations) > 0
-            )
-            or action_list_present
-        ):
+        if not validations_present:
             logger.warning(
-                f"""Your current Checkpoint configuration is inconsistent.  Please update your checkpoint configuration
-                to continue.
+                f"""Your current Checkpoint configuration has an empty or missing "validations" attribute.  This means
+                you must either update your checkpoint configuration or provide an appropriate validations list
+                programmatically (i.e., when your Checkpoint is run).
+                """
+            )
+        if not action_list_present:
+            logger.warning(
+                f"""Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This means
+                you must provide an appropriate validations list programmatically (i.e., when your Checkpoint is run),
+                with each validation having its own defined "action_list" attribute.
                 """
             )
 

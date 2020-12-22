@@ -61,7 +61,14 @@ def test_basic_checkpoint_config_validation(empty_data_context, caplog):
         name="my_erroneous_checkpoint",
         class_name="Checkpoint",
     )
-    assert "Your current Checkpoint configuration is inconsistent" in caplog.text
+    assert (
+        'Your current Checkpoint configuration has an empty or missing "validations" attribute'
+        in caplog.text
+    )
+    assert (
+        'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
+        in caplog.text
+    )
 
     yaml_config: str = f"""
     name: my_checkpoint
