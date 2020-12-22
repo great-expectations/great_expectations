@@ -31,19 +31,19 @@ def cli_colorize_string(string):
     # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
     flags = re.DOTALL
     mod_string = re.sub(
-        "<blue>(.*?)</blue>", colored("\g<1>", "blue"), string, flags=flags
+        "<blue>(.*?)</blue>", colored(r"\g<1>", "blue"), string, flags=flags
     )
     mod_string = re.sub(
-        "<cyan>(.*?)</cyan>", colored("\g<1>", "cyan"), mod_string, flags=flags
+        "<cyan>(.*?)</cyan>", colored(r"\g<1>", "cyan"), mod_string, flags=flags
     )
     mod_string = re.sub(
-        "<green>(.*?)</green>", colored("\g<1>", "green"), mod_string, flags=flags
+        "<green>(.*?)</green>", colored(r"\g<1>", "green"), mod_string, flags=flags
     )
     mod_string = re.sub(
-        "<yellow>(.*?)</yellow>", colored("\g<1>", "yellow"), mod_string, flags=flags
+        "<yellow>(.*?)</yellow>", colored(r"\g<1>", "yellow"), mod_string, flags=flags
     )
     mod_string = re.sub(
-        "<red>(.*?)</red>", colored("\g<1>", "red"), mod_string, flags=flags
+        "<red>(.*?)</red>", colored(r"\g<1>", "red"), mod_string, flags=flags
     )
 
     return colored(mod_string)

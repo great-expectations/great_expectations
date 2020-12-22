@@ -25,7 +25,7 @@
 #     ])
 #     _key_types = {
 #         "expectations" : ListOf(Expectation),
-#         "meta" : dict, #TODO: Add a type for this field
+#         "meta" : Dict, #TODO: Add a type for this field
 #     }
 #
 # class ValidationResult(AllowedKeysDotDict):
@@ -44,8 +44,8 @@
 #     _key_types = {
 #         "success" : bool,
 #         "expectation_config" : Expectation,
-#         "exception_info" : dict, #TODO: Add a type for this field
-#         "result" : dict, #TODO: Add a type for this field
+#         "exception_info" : Dict, #TODO: Add a type for this field
+#         "result" : Dict, #TODO: Add a type for this field
 #     }
 #
 # class ValidationResultSuite(AllowedKeysDotDict):
@@ -62,6 +62,6 @@
 #     ])
 #     _key_types = {
 #         "results" : ListOf(ValidationResult),
-#         "meta" : dict, #TODO: Add a type for this field
+#         "meta" : Dict, #TODO: Add a type for this field
 #         "success" : bool,
 #     }

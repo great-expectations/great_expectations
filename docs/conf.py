@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # great_expectations documentation build configuration file, created by
 # sphinx-quickstart on Thu Jun  8 23:00:19 2017.
@@ -16,6 +15,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+
 import os
 import re
 import sys
@@ -37,22 +37,23 @@ sys.path.insert(0, os.path.abspath("../"))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "autoapi.extension",
     # 'sphinx_rtd_theme',
-    "sphinx.ext.autodoc",
+    # "sphinx.ext.autodoc",
     "sphinx.ext.todo",
     "sphinx.ext.coverage",
     # 'sphinx.ext.mathjax'
     "sphinx.ext.napoleon",
     "sphinxcontrib.contentui",
     "sphinx_gitstamp",
-    "sphinx.ext.autosectionlabel",
+    # "sphinx.ext.autosectionlabel",
     "sphinxcontrib.discourse",
+    "autoapi.extension",
 ]
 
 autoapi_type = "python"
 autoapi_dirs = ["../great_expectations"]
-
+autoapi_add_toctree_entry = False
+# autoapi_keep_files = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -116,6 +117,8 @@ html_theme = "sphinx_rtd_theme"
 #
 html_theme_options = {
     "logo_only": True,
+    "collapse_navigation": False,
+    "navigation_depth": 4,
 }
 
 html_static_path = [

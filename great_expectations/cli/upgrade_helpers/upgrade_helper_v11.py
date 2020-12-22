@@ -3,7 +3,7 @@ import json
 import os
 import traceback
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 
 from great_expectations import DataContext
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
@@ -336,7 +336,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             self.validation_run_times[run_name] = parse(run_name).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-        except (ParserError, TypeError):
+        except (ValueError, TypeError):
             source_path = os.path.join(
                 store_backend.full_base_directory,
                 store_backend._convert_key_to_filepath(source_key),
@@ -357,7 +357,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             self.validation_run_times[run_name] = parse(run_name).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-        except (ParserError, TypeError):
+        except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
                 source_path = os.path.join(store_backend.prefix, source_path)
@@ -379,7 +379,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             self.validation_run_times[run_name] = parse(run_name).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-        except (ParserError, TypeError):
+        except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
                 source_path = os.path.join(store_backend.prefix, source_path)

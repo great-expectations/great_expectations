@@ -3,7 +3,7 @@ from copy import deepcopy
 from great_expectations.render.exceptions import InvalidRenderedContentError
 
 
-class RenderedContent(object):
+class RenderedContent:
     def to_json_dict(self):
         return {}
 
@@ -173,15 +173,13 @@ class RenderedTabsContent(RenderedComponentContent):
     def __init__(
         self, tabs, header=None, subheader=None, styling=None, content_block_type="tabs"
     ):
-        super(RenderedTabsContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.tabs = tabs
         self.header = header
         self.subheader = subheader
 
     def to_json_dict(self):
-        d = super(RenderedTabsContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["tabs"] = RenderedContent.rendered_content_list_to_json(
             self.tabs, check_dicts=True
         )
@@ -210,9 +208,7 @@ class RenderedBootstrapTableContent(RenderedComponentContent):
         styling=None,
         content_block_type="bootstrap_table",
     ):
-        super(RenderedBootstrapTableContent, self).__init__(
-            content_block_type=content_block_type, styling=styling
-        )
+        super().__init__(content_block_type=content_block_type, styling=styling)
         self.table_data = table_data
         self.table_columns = table_columns
         self.title_row = title_row
@@ -221,7 +217,7 @@ class RenderedBootstrapTableContent(RenderedComponentContent):
         self.subheader = subheader
 
     def to_json_dict(self):
-        d = super(RenderedBootstrapTableContent, self).to_json_dict()
+        d = super().to_json_dict()
         d["table_data"] = RenderedContent.rendered_content_list_to_json(
             self.table_data, check_dicts=True
         )
@@ -429,6 +425,7 @@ class RenderedDocumentContent(RenderedContent):
         cta_footer=None,
         expectation_suite_name=None,
         batch_kwargs=None,
+        batch_spec=None,
     ):
         if not isinstance(sections, list) and all(
             [isinstance(section, RenderedSectionContent) for section in sections]
@@ -446,6 +443,7 @@ class RenderedDocumentContent(RenderedContent):
         self.cta_footer = cta_footer
         self.expectation_suite_name = expectation_suite_name
         self.batch_kwargs = batch_kwargs
+        self.batch_spec = batch_spec
 
     def to_json_dict(self):
         d = super().to_json_dict()
@@ -458,6 +456,7 @@ class RenderedDocumentContent(RenderedContent):
         d["cta_footer"] = self.cta_footer
         d["expectation_suite_name"] = self.expectation_suite_name
         d["batch_kwargs"] = self.batch_kwargs
+        d["batch_spec"] = self.batch_spec
         return d
 
 

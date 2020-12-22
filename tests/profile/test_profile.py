@@ -38,7 +38,9 @@ def test_ColumnsExistProfiler():
 
 
 def test_BasicDatasetProfiler():
-    toy_dataset = PandasDataset({"x": [1, 2, 3]},)
+    toy_dataset = PandasDataset(
+        {"x": [1, 2, 3]},
+    )
     assert (
         len(toy_dataset.get_expectation_suite(suppress_warnings=True).expectations) == 0
     )
@@ -136,23 +138,19 @@ def test_BasicDatasetProfiler_partially_null_column(dataset):
     """
     expectations_config, evr_config = BasicDatasetProfiler.profile(dataset)
 
-    assert set(
-        [
-            "expect_column_to_exist",
-            "expect_column_values_to_be_in_type_list",
-            "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
-            "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_in_set",
-            "expect_column_values_to_be_unique",
-        ]
-    ) == set(
-        [
-            expectation.expectation_type
-            for expectation in expectations_config.expectations
-            if expectation.kwargs.get("column") == "nulls"
-        ]
-    )
+    assert {
+        "expect_column_to_exist",
+        "expect_column_values_to_be_in_type_list",
+        "expect_column_unique_value_count_to_be_between",
+        "expect_column_proportion_of_unique_values_to_be_between",
+        "expect_column_values_to_not_be_null",
+        "expect_column_values_to_be_in_set",
+        "expect_column_values_to_be_unique",
+    } == {
+        expectation.expectation_type
+        for expectation in expectations_config.expectations
+        if expectation.kwargs.get("column") == "nulls"
+    }
 
 
 def test_BasicDatasetProfiler_non_numeric_low_cardinality(non_numeric_low_card_dataset):
@@ -166,24 +164,20 @@ def test_BasicDatasetProfiler_non_numeric_low_cardinality(non_numeric_low_card_d
         non_numeric_low_card_dataset
     )
 
-    assert set(
-        [
-            "expect_column_to_exist",
-            "expect_column_values_to_be_in_type_list",
-            "expect_column_unique_value_count_to_be_between",
-            "expect_column_distinct_values_to_be_in_set",
-            "expect_column_proportion_of_unique_values_to_be_between",
-            "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_in_set",
-            "expect_column_values_to_not_match_regex",
-        ]
-    ) == set(
-        [
-            expectation.expectation_type
-            for expectation in expectations_config.expectations
-            if expectation.kwargs.get("column") == "lowcardnonnum"
-        ]
-    )
+    assert {
+        "expect_column_to_exist",
+        "expect_column_values_to_be_in_type_list",
+        "expect_column_unique_value_count_to_be_between",
+        "expect_column_distinct_values_to_be_in_set",
+        "expect_column_proportion_of_unique_values_to_be_between",
+        "expect_column_values_to_not_be_null",
+        "expect_column_values_to_be_in_set",
+        "expect_column_values_to_not_match_regex",
+    } == {
+        expectation.expectation_type
+        for expectation in expectations_config.expectations
+        if expectation.kwargs.get("column") == "lowcardnonnum"
+    }
 
 
 def test_BasicDatasetProfiler_non_numeric_high_cardinality(
@@ -199,23 +193,19 @@ def test_BasicDatasetProfiler_non_numeric_high_cardinality(
         non_numeric_high_card_dataset
     )
 
-    assert set(
-        [
-            "expect_column_to_exist",
-            "expect_column_values_to_be_in_type_list",
-            "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
-            "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_in_set",
-            "expect_column_values_to_not_match_regex",
-        ]
-    ) == set(
-        [
-            expectation.expectation_type
-            for expectation in expectations_config.expectations
-            if expectation.kwargs.get("column") == "highcardnonnum"
-        ]
-    )
+    assert {
+        "expect_column_to_exist",
+        "expect_column_values_to_be_in_type_list",
+        "expect_column_unique_value_count_to_be_between",
+        "expect_column_proportion_of_unique_values_to_be_between",
+        "expect_column_values_to_not_be_null",
+        "expect_column_values_to_be_in_set",
+        "expect_column_values_to_not_match_regex",
+    } == {
+        expectation.expectation_type
+        for expectation in expectations_config.expectations
+        if expectation.kwargs.get("column") == "highcardnonnum"
+    }
 
 
 def test_BasicDatasetProfiler_numeric_high_cardinality(numeric_high_card_dataset):
@@ -229,24 +219,19 @@ def test_BasicDatasetProfiler_numeric_high_cardinality(numeric_high_card_dataset
         numeric_high_card_dataset
     )
 
-    assert set(
-        [
-            "expect_column_to_exist",
-            "expect_table_row_count_to_be_between",
-            "expect_table_columns_to_match_ordered_list",
-            "expect_column_values_to_be_in_type_list",
-            "expect_column_unique_value_count_to_be_between",
-            "expect_column_proportion_of_unique_values_to_be_between",
-            "expect_column_values_to_not_be_null",
-            "expect_column_values_to_be_in_set",
-            "expect_column_values_to_be_unique",
-        ]
-    ) == set(
-        [
-            expectation.expectation_type
-            for expectation in expectations_config.expectations
-        ]
-    )
+    assert {
+        "expect_column_to_exist",
+        "expect_table_row_count_to_be_between",
+        "expect_table_columns_to_match_ordered_list",
+        "expect_column_values_to_be_in_type_list",
+        "expect_column_unique_value_count_to_be_between",
+        "expect_column_proportion_of_unique_values_to_be_between",
+        "expect_column_values_to_not_be_null",
+        "expect_column_values_to_be_in_set",
+        "expect_column_values_to_be_unique",
+    } == {
+        expectation.expectation_type for expectation in expectations_config.expectations
+    }
 
 
 def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
@@ -283,7 +268,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "batch_markers",
         "batch_parameters",
         "expectation_suite_name",
-        "great_expectations.__version__",
+        "great_expectations_version",
         "run_id",
         "validation_time",
     }
@@ -363,8 +348,8 @@ def test_context_profiler_with_nonexisting_data_asset_name(filesystem_csv_data_c
 
 def test_context_profiler_with_non_existing_generator(filesystem_csv_data_context):
     """
-    If a non-existing generator name is passed to the profiling method
-in the generator_name argument, the profiling method must raise an exception.
+        If a non-existing generator name is passed to the profiling method
+    in the generator_name argument, the profiling method must raise an exception.
     """
     context = filesystem_csv_data_context
 
@@ -391,7 +376,9 @@ def test_context_profiler_without_generator_name_arg_on_datasource_with_multiple
         "rad_datasource",
         "second_generator",
         "SubdirReaderBatchKwargsGenerator",
-        **{"base_directory": str(filesystem_csv_2),}
+        **{
+            "base_directory": str(filesystem_csv_2),
+        }
     )
 
     assert isinstance(context.datasources["rad_datasource"], PandasDatasource)

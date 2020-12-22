@@ -1,4 +1,4 @@
-class CallToActionRenderer(object):
+class CallToActionRenderer:
     _document_defaults = {
         "header": "What would you like to do next?",
         "styling": {

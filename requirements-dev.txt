@@ -9,3 +9,4 @@
 --requirement requirements-dev-sqlalchemy.txt
 --requirement requirements-dev-test.txt
 --requirement requirements-dev-build.txt
+--requirement requirements-dev-publish.txt

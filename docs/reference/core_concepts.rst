@@ -1,93 +1,125 @@
 .. _reference__core_concepts:
 
 
-#############
-Core concepts
-#############
+#####################################
+Core Concepts
+#####################################
 
+Great Expectations is all about helping you understand data better, so you can communicate with your team and others about what you've built and what you expect. Great Expectations delivers three key features: **expectations validate data quality**, **tests are docs, and docs are tests**, and **automatic profiling of data**. This guide helps you understand *how* Great Expectations does that by describing the core concepts used in the tool. The guide aims for precision, which can sometimes make it a bit dense, so we include examples of common use cases to help build intuition.
+
+Below, you'll find a brief introduction to the big ideas you'll need to understand how Great Expectations works, a more detailed definition of each of the core concepts (focused around how they're represented in the codebase), information on some of the defining design decisions in the tool, and links to more detailed documentation on concepts.
+
+
+.. contents:: :depth: 2
+
+************************************************
+Key Ideas
+************************************************
+
+If you only have time to remember a few key ideas about Great Expectations, make them these:
+
+It all starts with ``Expectations``. An Expectation is how we communicate the way data *should* appear. It's also how Profilers communicate what they *learn* about data, and what Data Docs uses to *describe* data or *diagnose* problems. When lots of Expectations are grouped together to define a kind of data asset, like "monthly taxi rides", we call it an ``Expectation Suite``.
+
+``Datasources`` are the first thing you'll need to configure to use Great Expectations. A Datasource brings together a way of interacting with data (like a database or spark cluster) and some specific data (a description of that taxi ride data for last month). With a Datasource, you can get a Batch of data or a Validator that can evaluate expecations on data.
+
+When you're deploying Great Expectations, you'll use a ``Checkpoint`` to run a validation, testing wheher data meets expecations, and potentially performing other actions like building and saving a Data Docs site, sending a notification, or signaling a pipeline runner.
+
+Great Expectations makes it possible to maintain state about data pipelines using ``Stores``. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, or even Data Docs sites. Stores, and other configuration, is managed using a ``Data Context``. The Data Context configuration is usually stored as a yaml file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
+
+
+************************************************
+Concepts in the Codebase
+************************************************
+
+This section describes the foundational concepts used to integrate Great Expectations into your code. It is a glossary of the main concepts and classes you will encounter while using Great Expectations.
 
 .. _reference__core_concepts__expectations:
 
-*************
-Expectations
-*************
+Expectations and Metrics
+=============================
 
-Expectations are assertions for data. They help accelerate data engineering and increase analytic integrity, by making it possible to answer a critical question: *what can I expect of my data?*
+An **Expectation** is a declarative statements that a computer can evaluate, and that is semantically meaningful to humans, like ``expect_column_values_to_be_unique`` or ``expect_column_mean_to_be_between``.  Expectations are implemented as classes that provide a rich interface to the rest of the library to support validation, profiling, and translation. Those implementations provide a ``_validate`` method that determines whether the Expecation is satisfied by some data, and other methods to support the Great Expectations features.
 
-**Expectations** are declarative statements that a computer can evaluate, and that are semantically meaningful to humans, like ``expect_column_values_to_be_unique`` or ``expect_column_mean_to_be_between``.
+A **Metric** is any observable property of data. Expectations are usually evaluated using metrics. A metric could be something simple, like a single statistic (for example the mean of a column), or something more complicated, like the histogram of observed values over some distribution. A ``MetricProvider`` provides the critical translation layer between an individual metric and computing infrastructure that can compute it, like a database or local Pandas DataFrame.
 
-**Expectation Configurations** describe specific Expectations for data. They combine an Expectation and specific parameters to make it possible to evaluate whether the expectation is true for some specific data. For example, they might provide expected values for a column or the name of a column whose values should be unique.
+An **Expectation Configuration** describes a specific Expectations for data. It combines an Expectation and specific parameters to make it possible to evaluate whether the expectation is true for some specific data. For example, they might provide expected values for a column or the name of a column whose values should be unique. See :ref:`domain and success keys <reference__core_concepts__expectations__domain_and_success_keys>` for more information about how an Expectation Configuration works.
 
-**Expectation Implementations** provide the critical translation layer between what we expect and how to verify the expectation in data or express it in :ref:`data_docs`. Expectation Implementations are tailored for specific validation engines where the actual expectation is executed.
+.. _reference__core_concepts__expectations__expectation_suites:
 
-**Expectation Suites** combine multiple Expectation Configurations into an overall description of a dataset. Expectation
-Suites should have names corresponding to the kind of data they define, like “NPI” for National Provider Identifier data or “company.users” for a users table.
+An **Expectation Suite** combines multiple Expectation Configurations into an overall description of a Data Asset. Expectation Suites should have names corresponding to the kind of data they define, like “NPI” for National Provider Identifier data or “company.users” for a users table.
 
 .. toctree::
    :maxdepth: 2
 
    /reference/core_concepts/expectations/expectations.rst
+   /reference/core_concepts/metrics.rst
+   /reference/core_concepts/expectations/expectation_suite_operations.rst
    /reference/core_concepts/expectations/distributional_expectations.rst
    /reference/core_concepts/expectations/standard_arguments.rst
    /reference/core_concepts/expectations/result_format.rst
-   /reference/core_concepts/expectations/glossary_of_expectations.rst
    /reference/core_concepts/expectations/implemented_expectations.rst
+   /reference/core_concepts/conditional_expectations.rst
+
+.. _reference__core_concepts__glossary__datasources:
+
+Datasources
+=================
+
+A **Datasource** is the primary way that you configure data access in Great Expectations. A Datasource can be a simple metadata layer that adds information about a database you provide to Great Expectations at runtime, or it can handle one or more connections to external datasources, including identifying available data assets and batches.
+
+An **Execution Engine** is configured as part of a datasource. The Execution Engine provides the computing resources that will be used to actually perform validation. Great Expectations can take advantage of many different Execution Engines, such as Pandas, Spark, or SqlAlchemy, and can translate the same Expectations to validate data using different engines.
+
+A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external data store to *identify available partitions*, *build batch definitions using parameters such as partition names*, and *translate batch definitions to Execution Engine-specific Batch Specs*. See the :ref:`Data Connectors reference <reference__core_concepts__datasources__data_connector>` for more information including descriptions of Batch Definition and Batch Spec.
+
+A **Batch** is reference to a set of data, with metadata about it. *The Batch is the fundamental building block for accessing data using Great Expectations*, but is not the data itself. Instantiating a Batch does not necessarily "fetch" the data by immediately running a query or pulling data into memory. Instead, think of a Batch as a wrapper that includes the information that you will need to fetch the right data when it’s time to validate.
+
+.. toctree::
+   :maxdepth: 2
+
+   /reference/core_concepts/datasource.rst
+   /reference/core_concepts/partitioning.rst
+
 
 .. _reference__core_concepts__validation:
 
-**********
-Validation
-**********
 
-Great Expectations makes it possible to validate your data against an Expectation Suite. Validation produces a detailed report of how the data meets your expectations -- and where it doesn’t.
+Validation
+===================
+
+A **Validator** uses an Execution Engine and Expectation Suite to validate whether data meets expectations. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis to build or edit an Expectations.
+
+An **Expectation Validation Result** captures the output of checking an expectation against data. It describes whether the data met the expectation, and will usually include Metrics from the data that were used to evaluate the Expectation, such as the percentage of unique values or observed mean.
+
+An **Expectation Suite Validation Result** combines multiple Expectation Validation Results and metadata about the validation into a single report.
+
+A **Checkpoint** faciliates running a validation as well as configurable **Actions** such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket. The Checkpoint makes it easy to add Great Expectations to your project by tracking configuration about what data, Expectation Suite, and Actions should be run when.
 
 .. attention::
 
-   The DataAsset class will be refactored and renamed in an upcoming release of Great Expectations to make it easier to create custom expectations and ensure Expectation Implementations are consistent across different validation engines.
-
-A **DataAsset** is a Great Expectations object that can create and validate Expectations against specific data. DataAssets are connected to data. A DataAsset can evaluate Expectations wherever you access your data, using different **ValidationEngines** such as Pandas, Spark, or SqlAlchemy.
-
-An **Expectation Validation Result** captures the output of checking an expectation against data. It describes whether
-the data met the expectation, and additional metrics from the data such as the percentage of unique values or observed mean.
-
-An **Expectation Suite Validation Result** combines multiple Expectation Validation Results and metadata about the
-validation into a single report.
-
-A **Metric** is a value produced by Great Expectations when evaluating one or more batches of data, such as an
-observed mean or distribution of data.
-
-A **Validation Operator** stitches together resources provided by the Data Context to provide an easy way to deploy Great Expectations in your environment. It executes configurable **Action**s such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket.
-
-A **Checkpoint** is a configuration for a Validation Operator that specifies which Batches of data and Expectation Suites should be validated.
+  The Checkpoint feature is continuing to evolve as we standardize on that name instead of "Validation Operator" but the behavior is very similar.
 
 .. toctree::
    :maxdepth: 2
 
    /reference/core_concepts/validation.rst
    /reference/core_concepts/validation_operators_and_actions.rst
-   /reference/core_concepts/validation_result.rst
-   /reference/core_concepts/metric_reference.rst
-   /reference/core_concepts/metrics.rst
 
 .. _reference__core_concepts__data_contexts:
 
-*************
+
 Data Context
-*************
+===================
 
-A **Data Context** stitches together all the features available with Great Expectations, making it possible to easily 
-manage configurations for resources such as Datasources, Validation Operators, Data Docs Sites, and Stores.
+.. _reference__core_concepts__data_context__data_context:
 
-A **Data Context Configuration** is a yaml file that can be committed to source control to ensure that all the settings 
-related to your validation are appropriately versioned and visible to your team. It can flexibly describe plugins and other customizations for accessing datasources or building data docs sites.
+A **Data Context** manages configuration for your project. The DataContext configuration is usually stored in yaml or code and committed to version control. It provides a simple way to configure resources including Datasources, Checkpoints, Data Docs Sites, and Stores.
+
 
 A **Store** provides a consistent API to manage access to Expectations, Expectation Suite Validation Results and other Great Expectations assets, making it easy to share resources across a team that uses AWS, Azure, GCP, local storage, or something else entirely.
 
-An **Evaluation Parameter** Store makes it possible to build expectation suites that depend on values from other batches
-of data, such as ensuring that the number of rows in a downstream dataset equals the number of unique values from an upstream one. A Data Context can manage a store to facilitate that validation scenario.
+.. _reference__core_concepts__data_context__stores:
 
-A **Metric** Store makes facilitates saving any metric or statistic generated during validation, for example making it easy to create a dashboard showing key output from running Great Expectations.
-
+A **Plugin** customizes Great Expectations by making a new python package or module available at runtime. 
 
 .. toctree::
    :maxdepth: 2
@@ -96,83 +128,74 @@ A **Metric** Store makes facilitates saving any metric or statistic generated du
    /reference/core_concepts/evaluation_parameters.rst
 
 
-.. _reference__core_concepts__datasources:
-
-************
-Datasources
-************
-
-.. attention::
-
-   Datasource configuration will be changing soon to make it easier to:
-
-   - adjust configuration for where data is stored and validated independently.
-   - understand the roles of Batch Kwargs, Batch Kwargs Generators, Batch Parameters, and Batch Markers.
-
-Datasources, Batch Kwargs Generators, Batch Parameters, and Batch Kwargs make it easier to connect Great Expectations to your data. Together, they address questions such as:
-
-- How do I get data into my Great Expectations DataAsset?
-- How do I tell my Datasource how to access my specific data?
-- How do I use Great Expectations to store Batch Kwargs configurations or logically describe data when I need to build equivalent Batch Kwargs for different datasources?
-- How do I know what data is available from my datasource?
-
-A **Datasource** is a connection to a **Validation Engine** (a compute environment such as Pandas, Spark, or a SQL-compatible database) and one or more data storage locations. For a SQL database, the Validation Engine and data storage locations will be the same, but for Spark or Pandas, you may be reading data from a remote location such as an S3 bucket but validating it in a cluster or local machine. The Datasource produces Batches of data that Great Expectations can validate in that environment.
-
-**Batch Kwargs** are specific instructions for a Datasource about what data should be prepared as a Batch for
-validation. The Batch could reference a specific database table, the most recent log file delivered to S3, or a subset of one of those objects, for example just the first 10,000 rows.
-
-A **Batch Kwargs Generator** produces datasource-specific Batch Kwargs. The most basic Batch Kwargs Generator simply stores Batch Kwargs by name to make it easy to retrieve them and obtain batches of data. But Batch Kwargs Generators can be more powerful and offer stronger guarantees about reproducibility and compatibility with other tools, and help identify available Data Assets and Partitions by inspecting a storage environment.
-
-**Batch Parameters** provide instructions for how to retrieve stored Batch Kwargs or build new Batch Kwargs that reflect partitions, deliveries, or slices of logical data assets.
-
-**Batch Markers** provide additional metadata a batch to help ensure reproducitiblity, such as the timestamp at which it was created.
-
-.. _reference__core_concepts__batch_kwargs_generators:
-
-A **Batch Kwargs Generator** translates Batch Parameters to datasource-specific Batch Kwargs. A Batch Kwargs Generator 
-can also identify data assets and partitions by inspecting a storage environment.
-
-.. toctree::
-   :maxdepth: 2
-
-   /reference/core_concepts/datasource.rst
-   /reference/core_concepts/datasource_reference.rst
-   /reference/core_concepts/batch_kwargs_generator.rst
-
-
 .. _reference__core_concepts__data_docs:
 
-**************************
 Data Docs
-**************************
+===================
 
 With Great Expectations, your tests are your docs, and your docs are your tests. Data Docs makes it possible to produce clear visual descriptions of what you expect, what you observe, and how they differ.
 
-An **Expectation Suite Renderer** creates a page that shows what you expect from data. Its language is prescriptive, for example translating a fully-configured ``expect_column_values_to_not_be_null`` expectation into the English phrase, "column ``address`` values must not be null, at least 80% of the time."
+A **Site Builder** orchestrates the construction of individual pages from raw Great Expectations objects, construction of an index, and storage of resources on a Store Backend.
 
-A **Validation Result Renderer** produces an overview of the result of validating a batch of data with an Expectation 
-Suite. It shows the difference between observed and expected values.
+A **Page Builder** converts core Great Expectations objects, such as Expectation Suite Validation Results, into HTML or JSON documents that can be rendered in environments such as a web browser or Slack, using both a Renderer and a
 
-A **Profiling Renderer** details the observed metrics produced from a validation without comparing them to 
-specific expected values. It provides a detailed look into what Great Expectations learned about your data.
+A **Renderer** converts core Great Expectations objects, such as Expectation Suite Validation Results, into an intermediate JSON-based form that includes the relevant *semantic* translation from Expectations but may not include all required formatting for the final document.
+
+.. attention::
+
+    While Data Docs results are extremely robust, we plan to reorganize the internal API for building data docs in the future to provide a more flexible API for extending functionality. Rendering logic is now handled by individual Expectations themselves, making it much easier to customize how your Expectations are documented.
+
+- An **Expectation Suite Renderer** creates a page that shows what you expect from data. Its language is *prescriptive*, for example translating a fully-configured ``expect_column_values_to_not_be_null`` expectation into the English phrase, "column ``address`` values must not be null, at least 80% of the time."
+
+- A **Validation Result Renderer** produces an overview of the result of validating a batch of data with an Expectation Suite. Its language is *diagnostic*; it shows the difference between observed and expected values.
+
+- A **Descriptive Renderer** details the observed metrics produced from a validation *without comparing them to specific expected values*. Its language is descriptive; it can be a critical part of a data discovery process.
 
 .. toctree::
    :maxdepth: 2
 
    /reference/core_concepts/data_docs.rst
-   /reference/core_concepts/profiling.rst
 
-*********
-Profiling
-*********
+.. _reference__core_concepts__profiling:
 
-Profiling helps you understand your data by describing it and even building expectation suites based on previous batches of data. Profiling lets you ask:
+Profilers
+===================
 
-- What is this dataset like?
+A **Profiler** uses an Execution Engine to build a new Expectation Suite. It can use zero, one, or more Batches of data to decide which Expectations to include in the new Suite. It can use other information, like a schema or an idea. A profiler may be used to create basic high-level expectations based on a schema even without data, to create specific Expectations based on team conventions or statistical properties in a dataset, or even to generate Expectation Suites specifically designed to be rendered by a Descriptive Renderer for data discovery.
 
-A **Profiler** reviews data assets and produces new Metrics, Expectation Suites, and Expectation Suite Validation Results that describe the data. A profiler can create a “stub” of high-level expectations based on what it sees in the data. Profilers can also be extended to create more specific expectations based on team conventions or statistical properties. Finally, Profilers can take advantage of metrics produced by Great Expectations when validating data to create useful overviews of data.
+- For example, a **Suite Builder Profiler** reviews characteristics of a sample Batch of data and proposes candidate expectations to help jumpstart new users to Great Expectations.
+
+- The **Descriptive Profiler** produces Expectation Suites whose Expectations are *always (vacuously) true*. A Descriptive Profiler is not intended to produce Expectation Suites that are useful for production Validation. Instead, its goal is to use Expectations to build a collection of Metrics that are useful for understanding data.
 
 .. toctree::
    :maxdepth: 2
 
+   /reference/core_concepts/data_discovery.rst
    /reference/core_concepts/profilers.rst
+
+
+*****************************************
+Design Decisions
+*****************************************
+
+Great Expectations is designed to help you think and communicate clearly about your data. To do that, we need to rely on some specific ideas about *what* we're protecting. You usually do not need to think about these nuances to use Great Expectations, and many users never think about what *exactly* makes a Data Asset or Batch. But we think it can be extremely useful to understand the design decisions that guide Great Expectations.
+
+Great Expectations protects **Data Assets**. A **Data Asset** is a logical collection of records. Great Expectations consumes and creates **metadata about Data Assets**.
+
+- For example, a Data Asset might be *a user table in a database*, *monthly financial data*, *a collection of event log data*, or anything else that your organization uses.
+
+How do you know when a collection of records is *one* Data Asset instead of two Data Assets or when two collections of records are really part of the same Data Asset? In Great Expectations, we think the answer lies in the user. Great Expectations opens insights and enhances communication while protecting against pipeline risks and data risks, but that revolves around a *purpose* in using some data (even if that purpose starts out as "I want to understand what I have here"!).
+
+We recommend that you call a collection of records a Data Asset when you would like to track metadata (and especially, *Expectations*) about it. **A collection of records is a Data Asset when it's worth giving it a name.**
+
+Since the purpose is so important for understanding when a collection of records is a Data Asset, it immediately follows that *Data Assets are not necessarily disjoint*. The same data can be in multiple Data Assets. You may have different Expectations of the same raw data for different purposes or produce documentation tailored to specific analyses and users.
+
+- Similarly, it may useful to describe subsets of a Data Asset as new Data Assets. For example, if we have a Data Asset called the "user table" in our data warehouse, we might also have a different Data Asset called the "Canadian User Table" that includes data only for some users.
+
+Not all records in a Data Asset need to be available at the same time or place. A Data Asset could be built from *streaming data* that is never stored, *incremental deliveries*, *analytic queries*, *incremental updates*, *replacement deliveries*, or from a *one-time* snapshot.
+
+That implies that a Data Asset is a **logical** concept. Not all of the records may be **accessible** at the same time. That highlights a very important and subtle point: no matter where the data comes from originally, Great Expectations validates **batches** of data. A **batch** is a discrete subset of a Data Asset that can be identified by a some collection of parameters, like the date of delivery, value of a field, time of validation, or access control permissions.
+
+- Batches often correspond to deliveries of data or runs of an ETL pipeline, but they do not have to. For example, an analyst studying New York City taxi data might take one logical view into the data where each batch is a month's delivery. But if the analyst selects data from the dataset based on other criteria for her analysis--the time of the ride and number of passengers, for example--then each batch corresponds to the specific query she runs. In that case, the Expectations she creates may have more to do with the analysis she is running than aggregate characteristics of the taxi data.
+
+In some cases **the thing that "makes a batch a batch" is the act of attending to it--for example by validating or profiling the data**. It's all about **your** Expectations.

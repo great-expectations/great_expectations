@@ -15,7 +15,7 @@ from scipy.cluster.vq import kmeans, whiten
 
 def main():
     # load data into vectors of 1s and 0s for each tag
-    with open("elements-by-episode.csv", "r") as csvfile:
+    with open("elements-by-episode.csv") as csvfile:
         reader = csv.reader(csvfile)
         reader.next()  # skip header
         data = []

@@ -1,26 +1,27 @@
 import datetime
 import logging
 import uuid
+import warnings
+from collections import Callable
 from functools import partial
-from io import StringIO
+from io import BytesIO
 
 import pandas as pd
 
-from great_expectations.core.batch import Batch
-from great_expectations.datasource.types import BatchMarkers
+from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.datasource.util import S3Url, hash_pandas_dataframe
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.types import ClassConfig
 
 from ..types.configurations import classConfigSchema
-from .datasource import Datasource
-from .util import S3Url, hash_pandas_dataframe
+from .datasource import LegacyDatasource
 
 logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
 
 
-class PandasDatasource(Datasource):
+class PandasDatasource(LegacyDatasource):
     """The PandasDatasource produces PandasDataset objects and supports generators capable of
     interacting with the local filesystem (the default subdir_reader generator), and from
     existing in-memory dataframes.
@@ -31,6 +32,7 @@ class PandasDatasource(Datasource):
         "reader_options",
         "limit",
         "dataset_options",
+        "boto3_options",
     }
 
     @classmethod
@@ -82,6 +84,7 @@ class PandasDatasource(Datasource):
                     "boto3_options must be a dictionary of key-value pairs to pass to boto3 upon "
                     "initialization."
                 )
+            configuration["boto3_options"] = boto3_options
 
         if reader_options is not None:
             if isinstance(reader_options, dict):
@@ -140,8 +143,13 @@ class PandasDatasource(Datasource):
         self._reader_options = configuration_with_defaults.get("reader_options", None)
         self._limit = configuration_with_defaults.get("limit", None)
 
+    # TODO: move to data connector
     def process_batch_parameters(
-        self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
+        self,
+        reader_method=None,
+        reader_options=None,
+        limit=None,
+        dataset_options=None,
     ):
         # Note that we do not pass limit up, since even that will be handled by PandasDatasource
         batch_kwargs = super().process_batch_parameters(dataset_options=dataset_options)
@@ -177,6 +185,7 @@ class PandasDatasource(Datasource):
 
         return batch_kwargs
 
+    # TODO: move to execution engine or make a wrapper
     def get_batch(self, batch_kwargs, batch_parameters=None):
         # We will use and manipulate reader_options along the way
         reader_options = batch_kwargs.get("reader_options", {})
@@ -197,6 +206,10 @@ class PandasDatasource(Datasource):
             df = reader_fn(path, **reader_options)
 
         elif "s3" in batch_kwargs:
+            warnings.warn(
+                "Direct GE Support for the s3 BatchKwarg will be removed in a future release. Please use a path including the s3a:// protocol instead.",
+                DeprecationWarning,
+            )
             try:
                 import boto3
 
@@ -209,18 +222,20 @@ class PandasDatasource(Datasource):
             reader_method = batch_kwargs.get("reader_method")
             url = S3Url(raw_url)
             logger.debug(
-                "Fetching s3 object. Bucket: %s Key: %s" % (url.bucket, url.key)
+                "Fetching s3 object. Bucket: {} Key: {}".format(url.bucket, url.key)
             )
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)
-            df = reader_fn(
-                StringIO(
-                    s3_object["Body"]
-                    .read()
-                    .decode(s3_object.get("ContentEncoding", "utf-8"))
-                ),
-                **reader_options
+            default_reader_options = self._infer_default_options(
+                reader_fn, reader_options
             )
+            if not reader_options.get("encoding") and default_reader_options.get(
+                "encoding"
+            ):
+                reader_options["encoding"] = s3_object.get(
+                    "ContentEncoding", default_reader_options.get("encoding")
+                )
+            df = reader_fn(BytesIO(s3_object["Body"].read()), **reader_options)
 
         elif "dataset" in batch_kwargs and isinstance(
             batch_kwargs["dataset"], (pd.DataFrame, pd.Series)
@@ -272,6 +287,24 @@ class PandasDatasource(Datasource):
         raise BatchKwargsError(
             "Unable to determine reader method from path: %s" % path, {"path": path}
         )
+
+    def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:
+        """
+        Allows reader options to be customized based on file context before loading to a DataFrame
+
+        Args:
+            reader_method (str): pandas reader method
+            reader_options: Current options and defaults set to pass to the reader method
+
+        Returns:
+            dict: A copy of the reader options post-inference
+        """
+        if reader_fn.__name__ == "read_parquet":
+            return {}
+        if reader_fn.__name__ == "read_excel":
+            return {}
+        else:
+            return {"encoding": "utf-8"}
 
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the

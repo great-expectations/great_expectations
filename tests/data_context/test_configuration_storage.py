@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def read_config_file_from_disk(config_filepath):
-    with open(config_filepath, "r") as infile:
+    with open(config_filepath) as infile:
         config_file = infile.read()
         return config_file
 

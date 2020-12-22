@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 from click.testing import CliRunner
@@ -10,7 +9,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 def test_docs_help_output(caplog):

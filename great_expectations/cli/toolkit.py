@@ -16,7 +16,7 @@ from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.cli.util import cli_colorize_string, cli_message
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
@@ -25,7 +25,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
@@ -167,9 +167,9 @@ def _profile_to_create_a_suite(
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data.
 
-Great Expectations will store these expectations in a new Expectation Suite '{0:s}' here:
+Great Expectations will store these expectations in a new Expectation Suite '{:s}' here:
 
-  {1:s}
+  {:s}
 """.format(
             expectation_suite_name,
             context.stores[
@@ -211,7 +211,7 @@ def _raise_profiling_errors(profiling_results):
         == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
     ):
         raise ge_exceptions.DataContextError(
-            """Some of the data assets you specified were not found: {0:s}
+            """Some of the data assets you specified were not found: {:s}
             """.format(
                 ",".join(profiling_results["error"]["not_found_data_assets"])
             )
@@ -265,9 +265,9 @@ def create_empty_suite(
 ) -> None:
     cli_message(
         """
-Great Expectations will create a new Expectation Suite '{0:s}' and store it here:
+Great Expectations will create a new Expectation Suite '{:s}' and store it here:
 
-  {1:s}
+  {:s}
 """.format(
             expectation_suite_name,
             context.stores[
@@ -358,7 +358,9 @@ def load_checkpoint(
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
-def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
+def select_datasource(
+    context: DataContext, datasource_name: str = None
+) -> LegacyDatasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source = None

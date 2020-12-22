@@ -2,9 +2,8 @@ import logging
 import warnings
 from collections import OrderedDict
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 
-from great_expectations.core import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
@@ -16,7 +15,9 @@ from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+from great_expectations.validator.validator import Validator
 
+from ..core.run_identifier import RunIdentifier
 from .util import send_slack_notification
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 logger = logging.getLogger(__name__)
 
 
-class ValidationOperator(object):
+class ValidationOperator:
     """
     The base class of all validation operators.
 
@@ -84,106 +85,107 @@ class ValidationOperator(object):
 class ActionListValidationOperator(ValidationOperator):
     """
 
-ActionListValidationOperator validates each batch in its ``run`` method's ``assets_to_validate`` argument against the Expectation Suite included within that batch.
+    ActionListValidationOperator validates each batch in its ``run`` method's ``assets_to_validate`` argument against the Expectation Suite included within that batch.
 
-Then it invokes a list of configured actions on every validation result.
+    Then it invokes a list of configured actions on every validation result.
 
-Each action in the list must be an instance of :py:class:`ValidationAction<great_expectations.validation_operators.actions.ValidationAction>`
-class (or its descendants). See the actions included in Great Expectations and how to configure them :py:mod:`here<great_expectations.validation_operators.actions>`. You can also implement your own actions by extending the base class.
+    Each action in the list must be an instance of :py:class:`ValidationAction<great_expectations.validation_operators.actions.ValidationAction>`
+    class (or its descendants). See the actions included in Great Expectations and how to configure them :py:mod:`here<great_expectations.validation_operators.actions>`. You can also implement your own actions by extending the base class.
 
-The init command includes this operator in the default configuration file.
-
-
-**Configuration**
-
-An instance of ActionListValidationOperator is included in the default configuration file ``great_expectations.yml`` that ``great_expectations init`` command creates.
-
-.. code-block:: yaml
-
-  perform_action_list_operator:  # this is the name you will use when you invoke the operator
-    class_name: ActionListValidationOperator
-
-    # the operator will call the following actions on each validation result
-    # you can remove or add actions to this list. See the details in the actions
-    # reference
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          target_store_name: validations_store
-      - name: send_slack_notification_on_validation_result
-        action:
-          class_name: SlackNotificationAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          slack_webhook: ${validation_notification_slack_webhook}
-          notify_on: all # possible values: "all", "failure", "success"
-          renderer:
-            module_name: great_expectations.render.renderer.slack_renderer
-            class_name: SlackRenderer
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
+    The init command includes this operator in the default configuration file.
 
 
-**Invocation**
+    **Configuration**
 
-This is an example of invoking an instance of a Validation Operator from Python:
+    An instance of ActionListValidationOperator is included in the default configuration file ``great_expectations.yml`` that ``great_expectations init`` command creates.
 
-.. code-block:: python
+    .. code-block:: yaml
 
-    results = context.run_validation_operator(
-        assets_to_validate=[batch0, batch1, ...],
-        run_id=RunIdentifier(**{
-          "run_name": "some_string_that_uniquely_identifies_this_run",
-          "run_time": "2020-04-29T10:46:03.197008"  # optional run timestamp, defaults to current UTC datetime
-        }),  # you may also pass in a dictionary with run_name and run_time keys
-        validation_operator_name="operator_instance_name",
-    )
+      perform_action_list_operator:  # this is the name you will use when you invoke the operator
+        class_name: ActionListValidationOperator
 
-* ``assets_to_validate`` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.BaseDataContext.get_batch`
-* ``run_id`` - pipeline run id of type RunIdentifier, consisting of a ``run_time`` (always assumed to be UTC time) and ``run_name`` string that is meaningful to you and will help you refer to the result of this operation later
-* ``validation_operator_name`` you can instances of a class that implements a Validation Operator
+        # the operator will call the following actions on each validation result
+        # you can remove or add actions to this list. See the details in the actions
+        # reference
+        action_list:
+          - name: store_validation_result
+            action:
+              class_name: StoreValidationResultAction
+              target_store_name: validations_store
+          - name: send_slack_notification_on_validation_result
+            action:
+              class_name: SlackNotificationAction
+              # put the actual webhook URL in the uncommitted/config_variables.yml file
+              slack_webhook: ${validation_notification_slack_webhook}
+              notify_on: all # possible values: "all", "failure", "success"
+              notify_with: optional list of DataDocs sites (ie local_site or gcs_site") to include in Slack notification. Will default to including all configured DataDocs sites.
+              renderer:
+                module_name: great_expectations.render.renderer.slack_renderer
+                class_name: SlackRenderer
+          - name: update_data_docs
+            action:
+              class_name: UpdateDataDocsAction
 
-The ``run`` method returns a ValidationOperatorResult object:
 
-::
+    **Invocation**
 
-    {
-        "run_id": {"run_time": "20200527T041833.074212Z", "run_name": "my_run_name"},
-        "success": True,
-        "evaluation_parameters": None,
-        "validation_operator_config": {
-            "class_name": "ActionListValidationOperator",
-            "module_name": "great_expectations.validation_operators",
-            "name": "action_list_operator",
-            "kwargs": {
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {"class_name": "StoreValidationResultAction"},
-                    },
-                    {
-                        "name": "store_evaluation_params",
-                        "action": {"class_name": "StoreEvaluationParametersAction"},
-                    },
-                    {
-                        "name": "update_data_docs",
-                        "action": {"class_name": "UpdateDataDocsAction"},
-                    },
-                ]
-            },
-        },
-        "run_results": {
-            ValidationResultIdentifier: {
-                "validation_result": ExpectationSuiteValidationResult object,
-                "actions_results": {
-                    "store_validation_result": {},
-                    "store_evaluation_params": {},
-                    "update_data_docs": {},
+    This is an example of invoking an instance of a Validation Operator from Python:
+
+    .. code-block:: python
+
+        results = context.run_validation_operator(
+            assets_to_validate=[batch0, batch1, ...],
+            run_id=RunIdentifier(**{
+              "run_name": "some_string_that_uniquely_identifies_this_run",
+              "run_time": "2020-04-29T10:46:03.197008"  # optional run timestamp, defaults to current UTC datetime
+            }),  # you may also pass in a dictionary with run_name and run_time keys
+            validation_operator_name="operator_instance_name",
+        )
+
+    * ``assets_to_validate`` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.BaseDataContext.get_batch`
+    * ``run_id`` - pipeline run id of type RunIdentifier, consisting of a ``run_time`` (always assumed to be UTC time) and ``run_name`` string that is meaningful to you and will help you refer to the result of this operation later
+    * ``validation_operator_name`` you can instances of a class that implements a Validation Operator
+
+    The ``run`` method returns a ValidationOperatorResult object:
+
+    ::
+
+        {
+            "run_id": {"run_time": "20200527T041833.074212Z", "run_name": "my_run_name"},
+            "success": True,
+            "evaluation_parameters": None,
+            "validation_operator_config": {
+                "class_name": "ActionListValidationOperator",
+                "module_name": "great_expectations.validation_operators",
+                "name": "action_list_operator",
+                "kwargs": {
+                    "action_list": [
+                        {
+                            "name": "store_validation_result",
+                            "action": {"class_name": "StoreValidationResultAction"},
+                        },
+                        {
+                            "name": "store_evaluation_params",
+                            "action": {"class_name": "StoreEvaluationParametersAction"},
+                        },
+                        {
+                            "name": "update_data_docs",
+                            "action": {"class_name": "UpdateDataDocsAction"},
+                        },
+                    ]
                 },
-            }
-        },
-    }
+            },
+            "run_results": {
+                ValidationResultIdentifier: {
+                    "validation_result": ExpectationSuiteValidationResult object,
+                    "actions_results": {
+                        "store_validation_result": {},
+                        "store_evaluation_params": {},
+                        "update_data_docs": {},
+                    },
+                }
+            },
+        }
     """
 
     def __init__(
@@ -259,7 +261,7 @@ The ``run`` method returns a ValidationOperatorResult object:
             A batch of data
 
         """
-        if not isinstance(item, DataAsset):
+        if not isinstance(item, (DataAsset, Validator)):
             if not (
                 isinstance(item, tuple)
                 and len(item) == 2
@@ -284,6 +286,7 @@ The ``run`` method returns a ValidationOperatorResult object:
         run_time=None,
         result_format=None,
     ):
+
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
@@ -297,7 +300,7 @@ The ``run`` method returns a ValidationOperatorResult object:
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -310,11 +313,17 @@ The ``run`` method returns a ValidationOperatorResult object:
         for item in assets_to_validate:
             run_result_obj = {}
             batch = self._build_batch_from_item(item)
+
+            if isinstance(batch, Validator):
+                batch_identifier = batch.active_batch_id
+            else:
+                batch_identifier = batch.batch_id
+
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
             validation_result_id = ValidationResultIdentifier(
-                batch_identifier=batch.batch_id,
+                batch_identifier=batch_identifier,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )
@@ -331,6 +340,7 @@ The ``run`` method returns a ValidationOperatorResult object:
                 batch_validation_result,
                 run_id,
             )
+
             run_result_obj["actions_results"] = batch_actions_results
             run_results[validation_result_id] = run_result_obj
 
@@ -368,21 +378,32 @@ The ``run`` method returns a ValidationOperatorResult object:
                 "Processing validation action with name {}".format(action["name"])
             )
 
+            if isinstance(batch, Validator):
+                batch_identifier = batch.active_batch_id
+            else:
+                batch_identifier = batch.batch_id
+
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
-                batch_identifier=batch.batch_id,
+                batch_identifier=batch_identifier,
             )
             try:
                 action_result = self.actions[action["name"]].run(
                     validation_result_suite_identifier=validation_result_id,
                     validation_result_suite=batch_validation_result,
                     data_asset=batch,
+                    payload=batch_actions_results,
                 )
 
+                # add action_result
                 batch_actions_results[action["name"]] = (
                     {} if action_result is None else action_result
                 )
+                batch_actions_results[action["name"]]["class"] = action["action"][
+                    "class_name"
+                ]
+
             except Exception as e:
                 logger.exception(
                     "Error running action with name {}".format(action["name"])
@@ -396,136 +417,137 @@ class WarningAndFailureExpectationSuitesValidationOperator(
     ActionListValidationOperator
 ):
     """
-WarningAndFailureExpectationSuitesValidationOperator is a validation operator
-that accepts a list batches of data assets (or the information necessary to fetch these batches).
-The operator retrieves 2 expectation suites for each data asset/batch - one containing
-the critical expectations ("failure") and the other containing non-critical expectations
-("warning"). By default, the operator assumes that the first is called "failure" and the
-second is called "warning", but "base_expectation_suite_name" attribute can be specified
-in the operator's configuration to make sure it searched for "{base_expectation_suite_name}.failure"
-and {base_expectation_suite_name}.warning" expectation suites for each data asset.
+    WarningAndFailureExpectationSuitesValidationOperator is a validation operator
+    that accepts a list batches of data assets (or the information necessary to fetch these batches).
+    The operator retrieves 2 expectation suites for each data asset/batch - one containing
+    the critical expectations ("failure") and the other containing non-critical expectations
+    ("warning"). By default, the operator assumes that the first is called "failure" and the
+    second is called "warning", but "base_expectation_suite_name" attribute can be specified
+    in the operator's configuration to make sure it searched for "{base_expectation_suite_name}.failure"
+    and {base_expectation_suite_name}.warning" expectation suites for each data asset.
 
-The operator validates each batch against its "failure" and "warning" expectation suites and
-invokes a list of actions on every validation result.
+    The operator validates each batch against its "failure" and "warning" expectation suites and
+    invokes a list of actions on every validation result.
 
-The list of these actions is specified in the operator's configuration
+    The list of these actions is specified in the operator's configuration
 
-Each action in the list must be an instance of ValidationAction
-class (or its descendants).
+    Each action in the list must be an instance of ValidationAction
+    class (or its descendants).
 
-The operator sends a Slack notification (if "slack_webhook" is present in its
-config). The "notify_on" config property controls whether the notification
-should be sent only in the case of failure ("failure"), only in the case
-of success ("success"), or always ("all").
-
-
-**Configuration**
-
-Below is an example of this operator's configuration:
-
-.. code-block:: yaml
-
-    run_warning_and_failure_expectation_suites:
-        class_name: WarningAndFailureExpectationSuitesValidationOperator
-
-        # the following two properties are optional - by default the operator looks for
-        # expectation suites named "failure" and "warning".
-        # You can use these two properties to override these names.
-        # e.g., with expectation_suite_name_prefix=boo_ and
-        # expectation_suite_name_suffixes = ["red", "green"], the operator
-        # will look for expectation suites named "boo_red" and "boo_green"
-        expectation_suite_name_prefix="",
-        expectation_suite_name_suffixes=["failure", "warning"],
-
-        # optional - if true, the operator will stop and exit after first failed validation. false by default.
-        stop_on_first_error=False,
-
-        # put the actual webhook URL in the uncommitted/config_variables.yml file
-        slack_webhook: ${validation_notification_slack_webhook}
-        # optional - if "all" - notify always, "success" - notify only on success, "failure" - notify only on failure
-        notify_on="all"
-
-        # the operator will call the following actions on each validation result
-        # you can remove or add actions to this list. See the details in the actions
-        # reference
-        action_list:
-          - name: store_validation_result
-            action:
-              class_name: StoreValidationResultAction
-              target_store_name: validations_store
-          - name: store_evaluation_params
-            action:
-              class_name: StoreEvaluationParametersAction
-              target_store_name: evaluation_parameter_store
+    The operator sends a Slack notification (if "slack_webhook" is present in its
+    config). The "notify_on" config property controls whether the notification
+    should be sent only in the case of failure ("failure"), only in the case
+    of success ("success"), or always ("all").
 
 
-**Invocation**
+    **Configuration**
 
-This is an example of invoking an instance of a Validation Operator from Python:
+    Below is an example of this operator's configuration:
 
-.. code-block:: python
+    .. code-block:: yaml
 
-    results = context.run_validation_operator(
-        assets_to_validate=[batch0, batch1, ...],
-        run_id=RunIdentifier(**{
-          "run_name": "some_string_that_uniquely_identifies_this_run",
-          "run_time": "2020-04-29T10:46:03.197008"  # optional run timestamp, defaults to current UTC datetime
-        }),  # you may also pass in a dictionary with run_name and run_time keys
-        validation_operator_name="operator_instance_name",
-    )
+        run_warning_and_failure_expectation_suites:
+            class_name: WarningAndFailureExpectationSuitesValidationOperator
 
-* `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.BaseDataContext.get_batch`
-* run_id - pipeline run id of type RunIdentifier, consisting of a run_time (always assumed to be UTC time) and run_name string that is meaningful to you and will help you refer to the result of this operation later
-* validation_operator_name you can instances of a class that implements a Validation Operator
+            # the following two properties are optional - by default the operator looks for
+            # expectation suites named "failure" and "warning".
+            # You can use these two properties to override these names.
+            # e.g., with expectation_suite_name_prefix=boo_ and
+            # expectation_suite_name_suffixes = ["red", "green"], the operator
+            # will look for expectation suites named "boo_red" and "boo_green"
+            expectation_suite_name_prefix="",
+            expectation_suite_name_suffixes=["failure", "warning"],
 
-The `run` method returns a ValidationOperatorResult object.
+            # optional - if true, the operator will stop and exit after first failed validation. false by default.
+            stop_on_first_error=False,
 
-The value of "success" is True if no critical expectation suites ("failure") failed to validate (non-critical warning") expectation suites are allowed to fail without affecting the success status of the run.
+            # put the actual webhook URL in the uncommitted/config_variables.yml file
+            slack_webhook: ${validation_notification_slack_webhook}
+            # optional - if "all" - notify always, "success" - notify only on success, "failure" - notify only on failure
+            notify_on="all"
 
-.. code-block:: json
+            # the operator will call the following actions on each validation result
+            # you can remove or add actions to this list. See the details in the actions
+            # reference
+            action_list:
+              - name: store_validation_result
+                action:
+                  class_name: StoreValidationResultAction
+                  target_store_name: validations_store
+              - name: store_evaluation_params
+                action:
+                  class_name: StoreEvaluationParametersAction
+                  target_store_name: evaluation_parameter_store
 
-    {
-        "run_id": {"run_time": "20200527T041833.074212Z", "run_name": "my_run_name"},
-        "success": True,
-        "evaluation_parameters": None,
-        "validation_operator_config": {
-            "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
-            "module_name": "great_expectations.validation_operators",
-            "name": "warning_and_failure_operator",
-            "kwargs": {
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {"class_name": "StoreValidationResultAction"},
-                    },
-                    {
-                        "name": "store_evaluation_params",
-                        "action": {"class_name": "StoreEvaluationParametersAction"},
-                    },
-                    {
-                        "name": "update_data_docs",
-                        "action": {"class_name": "UpdateDataDocsAction"},
-                    },
-                ],
-                "base_expectation_suite_name": ...,
-                "expectation_suite_name_suffixes": ...,
-                "stop_on_first_error": ...,
-                "slack_webhook": ...,
-                "notify_on": ...,
-            },
-        },
-        "run_results": {
-            ValidationResultIdentifier: {
-                "validation_result": ExpectationSuiteValidationResult object,
-                "expectation_suite_severity_level": "warning",
-                "actions_results": {
-                    "store_validation_result": {},
-                    "store_evaluation_params": {},
-                    "update_data_docs": {},
+
+    **Invocation**
+
+    This is an example of invoking an instance of a Validation Operator from Python:
+
+    .. code-block:: python
+
+        results = context.run_validation_operator(
+            assets_to_validate=[batch0, batch1, ...],
+            run_id=RunIdentifier(**{
+              "run_name": "some_string_that_uniquely_identifies_this_run",
+              "run_time": "2020-04-29T10:46:03.197008"  # optional run timestamp, defaults to current UTC datetime
+            }),  # you may also pass in a dictionary with run_name and run_time keys
+            validation_operator_name="operator_instance_name",
+        )
+
+    * `assets_to_validate` - an iterable that specifies the data assets that the operator will validate. The members of the list can be either batches or triples that will allow the operator to fetch the batch: (data_asset_name, expectation_suite_name, batch_kwargs) using this method: :py:meth:`~great_expectations.data_context.BaseDataContext.get_batch`
+    * run_id - pipeline run id of type RunIdentifier, consisting of a run_time (always assumed to be UTC time) and run_name string that is meaningful to you and will help you refer to the result of this operation later
+    * validation_operator_name you can instances of a class that implements a Validation Operator
+
+    The `run` method returns a ValidationOperatorResult object.
+
+    The value of "success" is True if no critical expectation suites ("failure") failed to validate (non-critical warning") expectation suites are allowed to fail without affecting the success status of the run.
+
+    .. code-block:: json
+
+        {
+            "run_id": {"run_time": "20200527T041833.074212Z", "run_name": "my_run_name"},
+            "success": True,
+            "evaluation_parameters": None,
+            "validation_operator_config": {
+                "class_name": "WarningAndFailureExpectationSuitesValidationOperator",
+                "module_name": "great_expectations.validation_operators",
+                "name": "warning_and_failure_operator",
+                "kwargs": {
+                    "action_list": [
+                        {
+                            "name": "store_validation_result",
+                            "action": {"class_name": "StoreValidationResultAction"},
+                        },
+                        {
+                            "name": "store_evaluation_params",
+                            "action": {"class_name": "StoreEvaluationParametersAction"},
+                        },
+                        {
+                            "name": "update_data_docs",
+                            "action": {"class_name": "UpdateDataDocsAction"},
+                        },
+                    ],
+                    "base_expectation_suite_name": ...,
+                    "expectation_suite_name_suffixes": ...,
+                    "stop_on_first_error": ...,
+                    "slack_webhook": ...,
+                    "notify_on": ...,
+                    "notify_with":...,
                 },
+            },
+            "run_results": {
+                ValidationResultIdentifier: {
+                    "validation_result": ExpectationSuiteValidationResult object,
+                    "expectation_suite_severity_level": "warning",
+                    "actions_results": {
+                        "store_validation_result": {},
+                        "store_evaluation_params": {},
+                        "update_data_docs": {},
+                    },
+                }
             }
         }
-    }
 
     """
 
@@ -539,6 +561,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
         stop_on_first_error=False,
         slack_webhook=None,
         notify_on="all",
+        notify_with=None,
         result_format={"result_format": "SUMMARY"},
     ):
         super().__init__(data_context, action_list, name)
@@ -556,6 +579,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
 
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
+        self.notify_with = notify_with
         result_format = parse_result_format(result_format)
         assert result_format["result_format"] in [
             "BOOLEAN_ONLY",
@@ -579,6 +603,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
                     "stop_on_first_error": self.stop_on_first_error,
                     "slack_webhook": self.slack_webhook,
                     "notify_on": self.notify_on,
+                    "notify_with": self.notify_with,
                     "result_format": self.result_format,
                 },
             }
@@ -700,7 +725,7 @@ The value of "success" is True if no critical expectation suites ("failure") fai
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

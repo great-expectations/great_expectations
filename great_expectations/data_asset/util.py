@@ -8,9 +8,9 @@ from functools import wraps
 import numpy as np
 import pandas as pd
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
@@ -60,7 +60,7 @@ Usage::
 """
 
 
-class DocInherit(object):
+class DocInherit:
     def __init__(self, mthd):
         self.mthd = mthd
         self.name = mthd.__name__

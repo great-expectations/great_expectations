@@ -1,6 +1,6 @@
 {
   "meta": {
-    "great_expectations.__version__": "0.9.11+20.gb9574e55.dirty",
+    "great_expectations_version": "0.9.11+20.gb9574e55.dirty",
     "expectation_suite_name": "default",
     "run_id": "20200411T010314.344479Z",
     "batch_kwargs": {

@@ -51,13 +51,13 @@ All Expectations accept a boolean `include_config` parameter. If true, then the 
 `catch_exceptions`
 ------------------------------------------------------------------------------
 
-All Expectations accept a boolean `catch_exceptions` parameter. If true, execution will not fail if the Expectation encounters an error. Instead, it will return False and (in `BASIC` and `SUMMARY` modes) an informative error message
+All Expectations accept a boolean `catch_exceptions` parameter. If this parameter is set to True, then Great Expectations will intercept any exceptions so that execution will not fail if the Expectation encounters an error. Instead, if Great Excpectations catches an exception while evaluating an Expectation, the Expectation result will (in `BASIC` and `SUMMARY` modes) return the following informative error message:
 
 .. code-block:: bash
 
     {
         "result": False,
-        "raised_exception": True,
+        "catch_exceptions": True,
         "exception_traceback": "..."
     }
 

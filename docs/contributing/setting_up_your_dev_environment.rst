@@ -51,13 +51,15 @@ Install python dependencies
 **5. Create a new virtual environment**
 
     * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar.
-    * Ex: ``virtualenv great_expectations_dev; source great_expectations_dev/bin/activate``
+    * Ex virtualenv: ``python3 -m venv <path_to_environments_folder>/great_expectations_dev`` and then ``<source path_to_environments_folder>/great_expectations_dev/bin/activate``
+    * Ex conda: ``conda create --name great_expectations_dev`` and then ``conda activate great_expectations_dev``
     * This is not required, but highly recommended.
 
 **6. Install dependencies from requirements-dev.txt**
 
     * ``pip install -r requirements-dev.txt``
     *  This will ensure that sure you have the right libraries installed in your python environment.
+    
       * Note that you can also substitute ``requirements-dev-test.txt`` to only install requirements required for testing all backends, and ``requirements-dev-spark.txt`` or ``requirements-dev-sqlalchemy.txt`` if you would like to add support for spark or sqlalchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.
       * `Installing Microsoft ODBC driver for MacOS <https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos>`__
       * `Installing Microsoft ODBC driver for Linux <https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server>`__
@@ -135,6 +137,7 @@ Depending on which features of Great Expectations you want to work on, you may w
     * ``pip install -r docs/requirements.txt``
     * To build documentation, the command is ``cd docs; make html``
     * Documentation will be generated in ``docs/build/html/`` with the ``index.html`` as the index page.
+    * Note: we use ``autoapi`` to generate API reference docs, but it's not compatible with pandas 1.1.0. You'll need to have pandas 1.0.5 (or a previous version) installed in order to successfully build docs.
 
 Run tests to confirm that everything is working
 -----------------------------------------------

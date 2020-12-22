@@ -1,8 +1,8 @@
 import os
 import shutil
 import subprocess
+from unittest import mock
 
-import mock
 import pytest
 from click.testing import CliRunner
 from ruamel.yaml import YAML
@@ -62,7 +62,9 @@ def test_checkpoint_list_with_no_checkpoints(
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint list -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint list -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -92,7 +94,9 @@ def test_checkpoint_list_with_single_checkpoint(
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint list -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint list -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -125,7 +129,9 @@ def test_checkpoint_new_raises_error_on_no_suite_found(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint new foo not_a_suite -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint new foo not_a_suite -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -220,7 +226,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
     context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
-    with open(expected_checkpoint, "r") as f:
+    with open(expected_checkpoint) as f:
         obs_file = f.read()
 
     # This is snapshot-ish to prove that comments remain in place
@@ -235,7 +241,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
 # You can edit this file to add batches of data and expectation suites.
 #
 # For more details please see
-# https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
+# https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
 validation_operator_name: action_list_operator
 # Batches are a list of batch_kwargs paired with a list of one or more suite
 # names. A checkpoint can have one or more batches. This makes deploying
@@ -364,7 +370,9 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run fake_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run fake_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -396,7 +404,9 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -448,7 +458,9 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run bad_batch -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run bad_batch -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -505,7 +517,9 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run bad_batch -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run bad_batch -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -571,7 +585,9 @@ def test_checkpoint_run_on_non_existent_validation_operator(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run bad_operator -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run bad_operator -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
@@ -580,11 +596,12 @@ def test_checkpoint_run_on_non_existent_validation_operator(
         f"No validation operator `foo` was found in your project. Please verify this in your great_expectations.yml"
         in stdout
     )
+    usage_emits = mock_emit.call_args_list
 
     assert mock_emit.call_count == 3
-    assert mock_emit.call_args_list[0].args[0]["success"] == True
-    assert mock_emit.call_args_list[1].args[0]["success"] == False
-    assert mock_emit.call_args_list[2].args[0]["success"] == False
+    assert usage_emits[0][0][0]["success"] is True
+    assert usage_emits[1][0][0]["success"] is False
+    assert usage_emits[2][0][0]["success"] is False
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -601,13 +618,39 @@ def test_checkpoint_run_happy_path_with_successful_validation(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "Validation Succeeded!" in stdout
+    assert "Validation succeeded!" in stdout
 
-    assert mock_emit.call_count == 4
+    # Check to make sure data docs are built
+    assert os.path.isfile(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
+    )
+    assert os.path.isfile(
+        os.path.join(
+            root_dir,
+            "uncommitted",
+            "data_docs",
+            "local_site",
+            "expectations",
+            "Titanic",
+            "warning.html",
+        )
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "expectations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
+    )
+    assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -615,10 +658,13 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3] == mock.call(
+    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[3][0][0]["success"] is True
+
+    assert usage_emits[4] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
@@ -642,14 +688,41 @@ def test_checkpoint_run_happy_path_with_failed_validation(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint run my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint run my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     print(stdout)
     assert result.exit_code == 1
-    assert "Validation Failed!" in stdout
+    assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 4
+    # Check to make sure data docs are built
+    assert os.path.isfile(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
+    )
+    assert os.path.isfile(
+        os.path.join(
+            root_dir,
+            "uncommitted",
+            "data_docs",
+            "local_site",
+            "expectations",
+            "Titanic",
+            "warning.html",
+        )
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "expectations")
+    )
+    assert os.path.isdir(
+        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
+    )
+
+    assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
         {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -657,10 +730,13 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert usage_emits[1][0][0]["event"] == "data_asset.validate"
     assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3] == mock.call(
+    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
+    assert usage_emits[3][0][0]["success"] is True
+
+    assert usage_emits[4] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
@@ -721,7 +797,9 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint script my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert (
@@ -741,7 +819,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     ]
 
     # assert the script has original contents
-    with open(script_path, "r") as f:
+    with open(script_path) as f:
         assert f.read() == "script here"
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -759,7 +837,9 @@ def test_checkpoint_script_happy_path_generates_script(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint script my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -811,7 +891,9 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint script my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -836,7 +918,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 0
-    assert output == "Validation Succeeded!"
+    assert output == "Validation succeeded!"
 
 
 def test_checkpoint_script_happy_path_executable_failed_validation(
@@ -862,7 +944,9 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"checkpoint script my_checkpoint -d {root_dir}", catch_exceptions=False,
+        cli,
+        f"checkpoint script my_checkpoint -d {root_dir}",
+        catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
@@ -887,7 +971,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
-    assert output == "Validation Failed!"
+    assert output == "Validation failed!"
 
 
 def _write_checkpoint_dict_to_file(bad, checkpoint_file_path):

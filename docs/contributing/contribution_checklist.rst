@@ -22,7 +22,7 @@ Once your code is ready, please go through the following checklist before submit
 
 **2. Have you followed the Style Guide for code and comments?**
 
-    * The :ref:`contributing_style_guide` is here.
+    * The :ref:`contributing__style_guide` is here.
     * Thanks for helping us keep the codebase and documentation clean and consistent, so that it's easier to maintain it as a community!
 
 **3. Is your branch up to date with upstream/develop?**
@@ -45,7 +45,8 @@ Once your code is ready, please go through the following checklist before submit
 
 **5. Have you added a bullet with your changes under the "develop" heading in the Changelog?**
 
-    * Please add a bullet point to ``docs/changelog/changelog.rst``, in the ``develop`` section.
+    * Please add a bullet point to ``docs/changelog.rst``, in the ``develop`` section.
+        * Please group in the following order: [BREAKING], [FEATURE], [ENHANCEMENT], [BUGFIX], [DOCS], [MAINTENANCE]
     * You can see the past Changelog here: :ref:`changelog`
 
 If you’ve checked off all these items, you’re now ready to submit a pull request!

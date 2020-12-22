@@ -10,11 +10,13 @@ from freezegun import freeze_time
 import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationSuite,
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
+)
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
 )
 from great_expectations.data_asset.data_asset import (
     ValidationStatistics,
@@ -27,7 +29,7 @@ from great_expectations.exceptions import InvalidCacheValueError
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 def isprime(n):
@@ -768,7 +770,7 @@ def test_validate():
     ) as f:
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
-    del results.meta["great_expectations.__version__"]
+    del results.meta["great_expectations_version"]
 
     assert results.to_json_dict() == expected_results.to_json_dict()
 
@@ -779,7 +781,7 @@ def test_validate():
     # Finally, confirm that only_return_failures works
     # and does not affect the "statistics" field.
     validation_results = my_df.validate(only_return_failures=True)
-    del validation_results.meta["great_expectations.__version__"]
+    del validation_results.meta["great_expectations_version"]
 
     expected_results = ExpectationSuiteValidationResult(
         meta={
@@ -875,7 +877,7 @@ def test_validate_with_invalid_result(validate_result_dict):
     ) as f:
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
-    del results.meta["great_expectations.__version__"]
+    del results.meta["great_expectations_version"]
 
     for result in results.results:
         result.exception_info.pop("exception_traceback")
@@ -888,7 +890,7 @@ def test_validate_catch_non_existent_expectation():
 
     validation_config_non_existent_expectation = ExpectationSuite(
         expectation_suite_name="default",
-        meta={"great_expectations.__version__": ge.__version__},
+        meta={"great_expectations_version": ge.__version__},
         expectations=[
             ExpectationConfiguration(
                 expectation_type="non_existent_expectation", kwargs={"column": "x"}
@@ -909,7 +911,7 @@ def test_validate_catch_invalid_parameter():
 
     validation_config_invalid_parameter = ExpectationSuite(
         expectation_suite_name="default",
-        meta={"great_expectations.__version__": ge.__version__},
+        meta={"great_expectations_version": ge.__version__},
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_between",
@@ -985,11 +987,15 @@ def test_stats_mixed_expectations():
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_csv(script_path + "/test_sets/Titanic.csv",)
+        df = ge.read_csv(
+            script_path + "/test_sets/Titanic.csv",
+        )
 
     def test_read_json(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_json(script_path + "/test_sets/test_json_data_file.json",)
+        df = ge.read_json(
+            script_path + "/test_sets/test_json_data_file.json",
+        )
         assert df["x"][0] == "i"
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
@@ -1004,7 +1010,9 @@ class TestIO(unittest.TestCase):
 
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_excel(script_path + "/test_sets/Titanic_multi_sheet.xlsx",)
+        df = ge.read_excel(
+            script_path + "/test_sets/Titanic_multi_sheet.xlsx",
+        )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
@@ -1075,7 +1083,9 @@ class TestIO(unittest.TestCase):
 
     def test_read_pickle(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_pickle(script_path + "/test_sets/Titanic.pkl",)
+        df = ge.read_pickle(
+            script_path + "/test_sets/Titanic.pkl",
+        )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 

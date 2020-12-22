@@ -34,8 +34,10 @@ def docs():
     default=True,
 )
 @click.option(
-    "--assume-yes/--yes",
+    "--assume-yes",
+    "--yes",
     "-y",
+    is_flag=True,
     help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
     default=False,
 )
@@ -104,7 +106,7 @@ def clean_data_docs(directory, site_name=None, all=None):
         sys.exit(1)
     context.clean_data_docs(site_name=site_name)
     failed = False
-    if failed == False and context is not None:
+    if not failed and context is not None:
         send_usage_message(data_context=context, event="cli.docs.clean", success=True)
         cli_message("<green>{}</green>".format("Cleaned data docs"))
 

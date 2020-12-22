@@ -9,8 +9,18 @@
       "a" : [1, 1, 1, 1, 1, 2, 2, 2, 2, null],
       "b" : [1, 2, 1, 2, 1, 2, 1, 2, 1, null]
     },
+    "schemas": {
+      "spark": {
+        "w": "IntegerType",
+        "x": "IntegerType",
+        "y": "StringType",
+        "z": "IntegerType",
+        "a": "IntegerType",
+        "b": "IntegerType"
+      }
+    },
     "tests" : [{
-      "title": "Basic positive test without nulls",
+      "title": "basic_positive_test_without_nulls",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -23,7 +33,7 @@
         "success": true
       }
     },{
-      "title": "Positive test with nulls and ignore_row_if='either_value_is_missing'",
+      "title": "positive_test_with_nulls_and_ignore_row_if_either_value_is_missing",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -37,7 +47,7 @@
         "success": true
       }
     },{
-      "title": "Negative test with nulls",
+      "title": "negative_test_with_nulls",
       "exact_match_out" : false,
       "in": {
         "column_A": "x",
@@ -50,7 +60,7 @@
         "success": false
       }
     },{
-      "title": "Another positive test with nulls",
+      "title": "another_positive_test_with_nulls",
       "exact_match_out" : false,
       "in": {
         "column_A": "a",

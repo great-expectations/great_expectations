@@ -4,7 +4,7 @@
 Distributional Expectations
 ===========================
 
-Distributional expectations help identify when new datasets or samples may be different than expected, and can help ensure that assumptions developed during exploratory analysis still hold as new data becomes available. You should use distributional expectations in the same way as other expectations: to help accelerate identification of risks as diverse as changes in a system being modeled or disruptions to a complex upstream data feed.
+Distributional expectations help identify when new datasets or samples may be different than expected, and can help ensure that assumptions developed during exploratory analysis still hold as new data becomes available. You should use distributional expectations in the same way as other expectations: to help accelerate identification of risks and changes to a modeled system or disruptions to a complex upstream data feed.
 
 Great Expectations provides a direct, expressive framework for describing distributional expectations. Most distributional expectations apply nonparametric tests, although it is possible to build expectations from parameterized distributions.
 
@@ -13,7 +13,7 @@ Great Expectations provides a direct, expressive framework for describing distri
 Partition Objects
 --------------------------------------------------------------------------------
 
-The core constructs of a great expectations distributional expectation are the partition (histogram bins) and associated weights.
+Distributional expectations rely on expected distributions or "partition objects", which are built from intervals for continuous data or categorical classes and their associated weights.
 
 For continuous data:
 
@@ -22,7 +22,7 @@ For continuous data:
 * However, following the behavior of numpy.histogram, a data element x is in the largest bin k if x == upper_bound_k.
 * A partition object can also include ``tail_weights`` which extend from -Infinity to the lowest bound, and from the highest bound to +Infinity.
 
-* Partition weights define the probability of the associated interval. Note that this applies a "piecewise uniform" distribution to the data for the purpose of statistical tests. The weights must define a valid probability distribution, i.e. they must be non-negative numbers that sum to 1.
+* Partition weights define the probability of the associated bin or interval. Note that this applies a "piecewise uniform" distribution to the data for the purpose of statistical tests. The weights must define a valid probability distribution, i.e. they must be non-negative numbers that sum to 1.
 
 Example continuous partition object:
 
@@ -86,14 +86,14 @@ Tests interpret partition objects literally, so care should be taken when a part
 Available Distributional Expectations
 --------------------------------------
 
-Kullback-Leibler (KL) divergence is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a p-value, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
+`Kullback-Leibler (KL) divergence <https://www.youtube.com/watch?v=ErfnhcEV1O8)/>`_ (also known as relative entropy) is available as an expectation for both categorical and continuous data (continuous data will be discretized according to the provided partition prior to computing divergence). Unlike KS and Chi-Squared tests which can use a p-value, you must provide a threshold for the relative entropy to use KL divergence. Further, KL divergence is not symmetric.
 
 * :func:`expect_column_kl_divergence_to_be_less_than <great_expectations.dataset.dataset.Dataset.expect_column_kl_divergence_to_be_less_than>`
 
-For continuous data, the expect_column_bootstrapped_ks_test_p_value_to_be_greater_than expectation uses the Kolmogorov-Smirnov (KS) test, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test would be overly sensitive to differences when used with a sample of data of much larger than the size of the partition. The expectation consequently uses a bootstrapping method to sample the provided data with tunable specificity.
+For continuous data, the expect_column_bootstrapped_ks_test_p_value_to_be_greater_than expectation uses the `Kolmogorov-Smirnov (KS) test <https://www.youtube.com/watch?v=ZO2RmSkXK3c)/>`_, which compares the actual and expected cumulative densities of the data. Because of the partition_object's piecewise uniform approximation of the expected distribution, the test would be overly sensitive to differences when used with a sample of data of much larger than the size of the partition interval. The expectation consequently uses a bootstrapping method to sample the provided data with tunable specificity.
 
 * :func:`expect_column_bootstrapped_ks_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_bootstrapped_ks_test_p_value_to_be_greater_than>`
 
-For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_than expectation uses the Chi-Squared test. The Chi-Squared test works with expected and observed counts, but that is handled internally in this function -- both the input and output to this function are valid partition objects (ie with weights that are probabilities and sum to 1).
+For categorical data, the expect_column_chisquare_test_p_value_to_be_greater_than expectation uses the `Chi-Squared test <https://www.youtube.com/watch?v=7_cs1YlZoug&t=435s>`_. The Chi-Squared test works with expected and observed counts, but that is handled internally in this function -- both the input and output to this function are valid partition objects (ie with weights that are probabilities and sum to 1).
 
 * :func:`expect_column_chisquare_test_p_value_to_be_greater_than <great_expectations.dataset.dataset.Dataset.expect_column_chisquare_test_p_value_to_be_greater_than>`

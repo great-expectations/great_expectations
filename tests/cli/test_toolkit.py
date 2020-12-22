@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
+from unittest import mock
 
-import mock
 import pytest
 
 from great_expectations.cli import toolkit

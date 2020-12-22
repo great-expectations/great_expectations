@@ -1,3 +1,5 @@
+.. _contributing__levels_of_maturity:
+
 ##################
 Levels of maturity
 ##################

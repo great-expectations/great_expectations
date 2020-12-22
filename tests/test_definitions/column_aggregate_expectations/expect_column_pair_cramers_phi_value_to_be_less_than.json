@@ -1,0 +1,222 @@
+{
+  "expectation_type": "expect_column_pair_cramers_phi_value_to_be_less_than",
+  "datasets": [
+    {
+      "data": {
+        "integer_1": [
+          1,
+          2,
+          3,
+          4,
+          1,
+          2,
+          3,
+          4,
+          1,
+          2,
+          3,
+          4
+        ],
+        "integer_2": [
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          2,
+          2,
+          3,
+          3,
+          3,
+          3
+        ],
+        "string_1": [
+          "a",
+          "a",
+          "b",
+          "b",
+          "c",
+          "c",
+          "d",
+          "d",
+          "e",
+          "e",
+          "f",
+          "f"
+        ],
+        "string_2": [
+          "a",
+          "a",
+          "b",
+          "c",
+          "d",
+          "e",
+          "f",
+          "g",
+          "h",
+          "i",
+          "j",
+          "k"
+        ],
+        "string_3": [
+          "a",
+          "a",
+          "a",
+          "a",
+          "c",
+          "c",
+          "c",
+          "c",
+          "d",
+          "d",
+          "d",
+          "d"
+        ],
+        "float": [
+          1.0,
+          1.1,
+          1.2,
+          1.3,
+          2.0,
+          2.1,
+          2.2,
+          2.3,
+          3.0,
+          3.1,
+          3.2,
+          3.3
+        ],
+        "float_with_missings_1": [null, null, null, null, 2.0, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0],
+        "float_with_missings_2": [null, null, null, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0, 4.0, 4.0, 4.0],
+        "string_with_missings": [null, null, null, "a", "b", "c", "a", "b", "c", "a", "b", "c"]
+      },
+      "tests": [
+        {
+          "title": "basic_failure_test",
+          "in": {
+            "column_A": "integer_1",
+            "column_B": "integer_1"
+          },
+          "out": {
+            "success": false,
+            "observed_value": 1
+          },
+          "tolerance": 0.000000000001,
+          "exact_match_out": false,
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "basic_pass_test",
+          "in": {
+            "column_A": "integer_1",
+            "column_B": "integer_2"
+          },
+          "out": {
+            "success": true,
+            "observed_value": 0
+          },
+          "exact_match_out": false,
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "basic_pass_int_string_test",
+          "in": {
+            "column_A": "integer_1",
+            "column_B": "string_3"
+          },
+          "out": {
+            "success": true,
+            "observed_value": 0
+          },
+          "exact_match_out": false,
+           "only_for": ["pandas"]
+        },
+        {
+          "title": "test_string_n_bins",
+          "in": {
+            "column_A": "string_1",
+            "column_B": "string_2",
+            "n_bins_B": 2
+          },
+          "out": {
+            "success": false,
+            "observed_value": 0.8498365855987975
+          },
+          "exact_match_out": false,
+          "tolerance": 0.000000000001,
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "test_string_preconfigured_bins",
+          "in": {
+            "column_A": "string_1",
+            "column_B": "string_2",
+            "bins_B": [
+              [
+                "b",
+                "c"
+              ],
+              [
+                "d",
+                "e"
+              ],
+              [
+                "f",
+                "g"
+              ]
+            ]
+          },
+          "out": {
+            "success": false,
+            "observed_value": 1.0
+          },
+          "exact_match_out": false,
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "test_float_bins_preconfigured_bins",
+          "in": {
+            "column_A": "integer_1",
+            "column_B": "float",
+            "n_bins_B": 3
+          },
+          "out": {
+            "success": true,
+            "observed_value": 0
+          },
+          "exact_match_out": false,
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "test_float_with_missing",
+          "in": {
+            "column_A": "integer_1",
+            "column_B": "float_with_missings_1",
+            "n_bins_B": 2
+          },
+          "out": {
+            "success": true,
+            "observed_value": 0
+          },
+          "exact_match_out": false,
+          "only_for": ["pandas"]
+        },
+        {
+          "title": "test_float_and_string_with_missings",
+          "in": {
+            "column_A": "float_with_missings_2",
+            "column_B": "string_with_missings",
+            "n_bins_A": 3
+          },
+          "out": {
+            "success": false,
+            "observed_value": 0.5773502691896257
+          },
+          "exact_match_out": false,
+          "only_for": ["pandas"]
+        }
+      ]
+    }
+  ]
+}

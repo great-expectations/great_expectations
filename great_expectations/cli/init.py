@@ -185,7 +185,7 @@ def init(target_directory, view, usage_stats):
     except (
         DataContextError,
         ge_exceptions.ProfilerError,
-        IOError,
+        OSError,
         SQLAlchemyError,
     ) as e:
         cli_message("<red>{}</red>".format(e))

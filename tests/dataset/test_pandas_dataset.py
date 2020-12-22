@@ -5,9 +5,9 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.profile import ColumnsExistProfiler
-from tests.test_utils import expectationValidationResultSchema
+from tests.test_utils import expectationSuiteSchema, expectationValidationResultSchema
 
 
 def test_expect_column_values_to_be_dateutil_parseable():
@@ -168,7 +168,11 @@ def test_expect_column_values_to_be_json_parseable():
 
 
 def test_expectation_decorator_summary_mode():
-    df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 7, None, None],})
+    df = ge.dataset.PandasDataset(
+        {
+            "x": [1, 2, 3, 4, 5, 6, 7, 7, None, None],
+        }
+    )
     df.set_default_expectation_argument("result_format", "COMPLETE")
     df.set_default_expectation_argument("include_config", False)
 
@@ -217,6 +221,127 @@ def test_expectation_decorator_summary_mode():
         df.expect_column_mean_to_be_between("x", 3, 7, result_format="SUMMARY")
         == exp_output
     )
+
+
+def test_positional_arguments():
+
+    df = ge.dataset.PandasDataset(
+        {"x": [1, 3, 5, 7, 9], "y": [2, 4, 6, 8, 10], "z": [None, "a", "b", "c", "abc"]}
+    )
+    df.set_default_expectation_argument("result_format", "COMPLETE")
+    df.set_default_expectation_argument("include_config", False)
+
+    exp_output = expectationValidationResultSchema.load(
+        {
+            "success": True,
+            "result": {
+                "observed_value": 5,
+                "element_count": 5,
+                "missing_count": 0,
+                "missing_percent": 0.0,
+            },
+        }
+    )
+
+    assert df.expect_column_mean_to_be_between("x", 4, 6) == exp_output
+
+    out = df.expect_column_values_to_be_between("y", 1, 6)
+    t = {
+        "out": {
+            "success": False,
+            "unexpected_list": [8, 10],
+            "unexpected_index_list": [3, 4],
+        }
+    }
+    if "out" in t:
+        assert t["out"]["success"] == out.success
+        if "unexpected_index_list" in t["out"]:
+            assert (
+                t["out"]["unexpected_index_list"] == out.result["unexpected_index_list"]
+            )
+        if "unexpected_list" in t["out"]:
+            assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
+
+    out = df.expect_column_values_to_be_between("y", 1, 8, strict_max=True)
+    t = {
+        "out": {
+            "success": False,
+            "unexpected_list": [8, 10],
+            "unexpected_index_list": [3, 4],
+        }
+    }
+    if "out" in t:
+        assert t["out"]["success"] == out.success
+        if "unexpected_index_list" in t["out"]:
+            assert (
+                t["out"]["unexpected_index_list"] == out.result["unexpected_index_list"]
+            )
+        if "unexpected_list" in t["out"]:
+            assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
+
+    out = df.expect_column_values_to_be_between("y", 2, 100, strict_min=True)
+    t = {
+        "out": {"success": False, "unexpected_list": [2], "unexpected_index_list": [0]}
+    }
+    if "out" in t:
+        assert t["out"]["success"] == out.success
+        if "unexpected_index_list" in t["out"]:
+            assert (
+                t["out"]["unexpected_index_list"] == out.result["unexpected_index_list"]
+            )
+        if "unexpected_list" in t["out"]:
+            assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
+
+    out = df.expect_column_values_to_be_between("y", 1, 6, mostly=0.5)
+    t = {
+        "out": {
+            "success": True,
+            "unexpected_list": [8, 10],
+            "unexpected_index_list": [3, 4],
+        }
+    }
+    if "out" in t:
+        assert t["out"]["success"] == out.success
+        if "unexpected_index_list" in t["out"]:
+            assert (
+                t["out"]["unexpected_index_list"] == out.result["unexpected_index_list"]
+            )
+        if "unexpected_list" in t["out"]:
+            assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
+
+    out = df.expect_column_values_to_be_in_set("z", ["a", "b", "c"])
+    t = {
+        "out": {
+            "success": False,
+            "unexpected_list": ["abc"],
+            "unexpected_index_list": [4],
+        }
+    }
+    if "out" in t:
+        assert t["out"]["success"] == out.success
+        if "unexpected_index_list" in t["out"]:
+            assert (
+                t["out"]["unexpected_index_list"] == out.result["unexpected_index_list"]
+            )
+        if "unexpected_list" in t["out"]:
+            assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
+
+    out = df.expect_column_values_to_be_in_set("z", ["a", "b", "c"], mostly=0.5)
+    t = {
+        "out": {
+            "success": True,
+            "unexpected_list": ["abc"],
+            "unexpected_index_list": [4],
+        }
+    }
+    if "out" in t:
+        assert t["out"]["success"] == out.success
+        if "unexpected_index_list" in t["out"]:
+            assert (
+                t["out"]["unexpected_index_list"] == out.result["unexpected_index_list"]
+            )
+        if "unexpected_list" in t["out"]:
+            assert t["out"]["unexpected_list"] == out.result["unexpected_list"]
 
 
 def test_result_format_argument_in_decorators():
@@ -329,7 +454,7 @@ def test_ge_pandas_concatenating_no_autoinspect():
     #      to the concatenated dataframes and still make sense (since no autoinspection happens).
 
     assert isinstance(df, ge.dataset.PandasDataset)
-    assert df.find_expectations() == exp_c
+    assert df.get_expectation_suite().expectations == exp_c
 
 
 def test_ge_pandas_joining():
@@ -367,7 +492,7 @@ def test_ge_pandas_joining():
     #   2. Have no expectations (no autoinspection)
 
     assert isinstance(df, ge.dataset.PandasDataset)
-    assert df.find_expectations() == exp_j
+    assert df.get_expectation_suite().expectations == exp_j
 
 
 def test_ge_pandas_merging():
@@ -399,7 +524,7 @@ def test_ge_pandas_merging():
     #   2. Have no expectations (no autoinspection is now default)
 
     assert isinstance(df, ge.dataset.PandasDataset)
-    assert df.find_expectations() == exp_m
+    assert df.get_expectation_suite().expectations == exp_m
 
 
 def test_ge_pandas_sampling():
@@ -419,7 +544,7 @@ def test_ge_pandas_sampling():
     df.expect_column_values_to_be_in_set("C", ["a", "b", "c", "d"])
     df.expect_column_values_to_be_in_set("D", ["e", "f", "g", "h"])
 
-    exp1 = df.find_expectations()
+    exp1 = df.get_expectation_suite().expectations
 
     # The sampled data frame should:
     #
@@ -428,11 +553,11 @@ def test_ge_pandas_sampling():
 
     samp1 = df.sample(n=2)
     assert isinstance(samp1, ge.dataset.PandasDataset)
-    assert samp1.find_expectations() == exp1
+    assert samp1.get_expectation_suite().expectations == exp1
 
     samp1 = df.sample(frac=0.25, replace=True)
     assert isinstance(samp1, ge.dataset.PandasDataset)
-    assert samp1.find_expectations() == exp1
+    assert samp1.get_expectation_suite().expectations == exp1
 
     # Change expectation on column "D", sample, and check expectations.
     # The failing expectation on column "D" is NOT automatically dropped
@@ -478,7 +603,10 @@ def test_ge_pandas_sampling():
             ],
         }
     )
-    assert samp1.find_expectations() == exp1.expectations
+    assert (
+        samp1.get_expectation_suite(discard_failed_expectations=False).expectations
+        == exp1.expectations
+    )
 
 
 def test_ge_pandas_subsetting():
@@ -502,39 +630,39 @@ def test_ge_pandas_subsetting():
     #   1. Be a ge.dataset.PandaDataSet
     #   2. Inherit ALL the expectations of the parent data frame
 
-    exp1 = df.find_expectations()
+    exp1 = df.get_expectation_suite().expectations
 
     sub1 = df[["A", "D"]]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[["A"]]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[:3]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[1:2]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[:-1]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[-1:]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.iloc[:3, 1:4]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.loc[0:, "A":"B"]
     assert isinstance(sub1, ge.dataset.PandasDataset)
-    assert sub1.find_expectations() == exp1
+    assert sub1.get_expectation_suite().expectations == exp1
 
 
 def test_ge_pandas_automatic_failure_removal():
@@ -588,12 +716,18 @@ def test_ge_pandas_automatic_failure_removal():
         ),
     ]
     samp1 = df.sample(n=2)
-    assert samp1.find_expectations() == exp1
+    assert (
+        samp1.get_expectation_suite(discard_failed_expectations=False).expectations
+        == exp1
+    )
 
     # Now check subsetting to verify that failing expectations are NOT
     # automatically dropped when subsetting.
     sub1 = df[["A", "D"]]
-    assert samp1.find_expectations() == exp1
+    assert (
+        samp1.get_expectation_suite(discard_failed_expectations=False).expectations
+        == exp1
+    )
 
     # Set property/attribute so that failing expectations are
     # automatically removed when sampling or subsetting.
@@ -631,7 +765,10 @@ def test_ge_pandas_automatic_failure_removal():
     ]
 
     samp2 = df.sample(n=2)
-    assert samp2.find_expectations() == exp_samp
+    assert (
+        samp2.get_expectation_suite(discard_failed_expectations=False).expectations
+        == exp_samp
+    )
 
     # Now check subsetting. In additional to the failure on column "C",
     # the expectations on column "B" now fail since column "B" doesn't
@@ -653,7 +790,10 @@ def test_ge_pandas_automatic_failure_removal():
             kwargs={"column": "D", "value_set": ["e", "f", "g", "h"]},
         ),
     ]
-    assert samp2.find_expectations() == exp_samp
+    assert (
+        samp2.get_expectation_suite(discard_failed_expectations=False).expectations
+        == exp_samp
+    )
 
 
 def test_subclass_pandas_subset_retains_subclass():
@@ -730,7 +870,9 @@ def test_ge_value_count_of_object_dtype_column_with_mixed_types():
     that the issue is fixed.
     """
     df = ge.dataset.PandasDataset(
-        {"A": [1.5, 0.009, 0.5, "I am a string in an otherwise float column"],}
+        {
+            "A": [1.5, 0.009, 0.5, "I am a string in an otherwise float column"],
+        }
     )
 
     value_counts = df.get_column_value_counts("A")
@@ -742,7 +884,11 @@ def test_expect_values_to_be_of_type_list():
     Having lists in a Pandas column used to raise a ValueError when parsing to
     see if any rows had missing values. This test verifies that the issue is fixed.
     """
-    df = ge.dataset.PandasDataset({"A": [[1, 2], None, [4, 5], 6],})
+    df = ge.dataset.PandasDataset(
+        {
+            "A": [[1, 2], None, [4, 5], 6],
+        }
+    )
 
     validation = df.expect_column_values_to_be_of_type("A", "list")
     assert not validation.success
@@ -762,6 +908,10 @@ def test_expect_values_quantiles_to_be_between():
         df = ge.dataset.PandasDataset({"A": data})
 
         validation = df.expect_column_quantile_values_to_be_between(
-            "A", {"quantiles": quantiles, "value_ranges": value_ranges,}
+            "A",
+            {
+                "quantiles": quantiles,
+                "value_ranges": value_ranges,
+            },
         )
         assert validation.success is success

@@ -1,0 +1,136 @@
+{
+  "expectation_type" : "expect_select_column_values_to_be_unique_within_record",
+  "datasets" : [{
+    "data" : {
+      "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
+      "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "y" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
+      "z" : [1, 2, 3, 4, 5, null, null, null, null, null],
+      "a" : [1, 1, 1, 1, 1, 2, 2, 2, 2, null],
+      "b" : [1, 2, 1, 2, 1, 2, 1, 2, 1, null]
+    },
+    "schemas": {
+      "spark": {
+        "w": "IntegerType",
+        "x": "IntegerType",
+        "y": "IntegerType",
+        "z": "IntegerType",
+        "a": "IntegerType",
+        "b": "IntegerType"
+      }
+    },
+    "tests" : [{
+      "title": "basic_test_ignore_if_all_are_missing_the_default_behavior",
+      "exact_match_out" : false,
+      "in": {
+        "column_list": ["w", "x"]
+      },
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      }
+    },{
+      "title": "basic_test_ignore_if_any_are_missing",
+      "exact_match_out" : false,
+      "in": {
+        "column_list": ["w", "x"],
+        "ignore_row_if": "any_value_is_missing"
+      },
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      }
+    },{
+      "title": "unexpected_values",
+      "exact_match_out" : false,
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "unexpected_list": [{"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 2.0, "b": 2.0}, {"a": 2.0, "b": 2.0}],
+        "unexpected_index_list": [0,2,4,5,7],
+        "success": false
+      }
+    },{
+      "title": "unexpected_values_exact_match_out",
+      "exact_match_out" : true,
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "success": false,
+        "result": {
+          "element_count": 10,
+          "missing_count": 1,
+          "missing_percent": 10.0,
+          "unexpected_count": 5,
+          "unexpected_percent": 50.0,
+          "unexpected_percent_nonmissing": 55.55555555555556,
+          "partial_unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "partial_unexpected_index_list": [
+            0,
+            2,
+            4,
+            5,
+            7
+          ],
+          "partial_unexpected_counts": [
+            "partial_exception_counts requires a hashable type"
+          ],
+          "unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "unexpected_index_list": [
+            0,
+            2,
+            4,
+            5,
+            7
+          ]
+        }
+      }
+    }]
+  }]
+}

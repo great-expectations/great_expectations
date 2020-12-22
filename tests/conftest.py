@@ -2,7 +2,9 @@ import datetime
 import json
 import locale
 import os
+import random
 import shutil
+import threading
 from types import ModuleType
 from typing import Union
 
@@ -10,30 +12,59 @@ import numpy as np
 import pandas as pd
 import pytest
 from freezegun import freeze_time
+from ruamel.yaml import YAML
 
 import great_expectations as ge
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
+from great_expectations import DataContext
+from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
-    expectationSuiteSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import file_relative_path
+from great_expectations.data_context.util import (
+    file_relative_path,
+    instantiate_class_from_config,
+)
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
+from great_expectations.datasource.new_datasource import Datasource
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.util import import_library_module
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
+yaml = YAML()
 ###
 #
 # NOTE: THESE TESTS ARE WRITTEN WITH THE en_US.UTF-8 LOCALE AS DEFAULT FOR STRING FORMATTING
 #
 ###
+
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+
+
+class LockingConnectionCheck:
+    def __init__(self, sa, connection_string):
+        self.lock = threading.Lock()
+        self.sa = sa
+        self.connection_string = connection_string
+        self._is_valid = None
+
+    def is_valid(self):
+        with self.lock:
+            if self._is_valid is None:
+                try:
+                    engine = self.sa.create_engine(self.connection_string)
+                    conn = engine.connect()
+                    conn.close()
+                    self._is_valid = True
+                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
+                    print(f"{str(e)}")
+                    self._is_valid = False
+            return self._is_valid
 
 
 def pytest_configure(config):
@@ -69,10 +100,14 @@ def pytest_addoption(parser):
         help="If set, suppress all tests against postgresql",
     )
     parser.addoption(
-        "--mysql", action="store_true", help="If set, execute tests against mysql",
+        "--mysql",
+        action="store_true",
+        help="If set, execute tests against mysql",
     )
     parser.addoption(
-        "--mssql", action="store_true", help="If set, execute tests against mssql",
+        "--mssql",
+        action="store_true",
+        help="If set, execute tests against mssql",
     )
     parser.addoption(
         "--aws-integration",
@@ -86,6 +121,7 @@ def build_test_backends_list(metafunc):
     no_spark = metafunc.config.getoption("--no-spark")
     if not no_spark:
         try:
+            import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
@@ -106,16 +142,80 @@ def build_test_backends_list(metafunc):
             # Be sure to ensure that tests (and users!) understand that subtlety,
             # which can be important for distributional expectations, for example.
             ###
+            connection_string = "postgresql://postgres@localhost/test_ci"
+            checker = LockingConnectionCheck(sa, connection_string)
+            if checker.is_valid() is True:
+                test_backends += ["postgresql"]
+            else:
+                raise ValueError(
+                    f"backend-specific tests are requested, but unable to connect to the database at "
+                    f"{connection_string}"
+                )
+        mysql = metafunc.config.getoption("--mysql")
+        if sa and mysql:
             try:
-                engine = sa.create_engine("postgresql://postgres@localhost/test_ci")
+                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
-                    "postgresql tests are requested, but unable to connect to the postgresql database at "
-                    "'postgresql://postgres@localhost/test_ci'"
+                    "mysql tests are requested, but unable to connect to the mysql database at "
+                    "'mysql+pymysql://root@localhost/test_ci'"
                 )
-            test_backends += ["postgresql"]
+            test_backends += ["mysql"]
+        mssql = metafunc.config.getoption("--mssql")
+        if sa and mssql:
+            try:
+                engine = sa.create_engine(
+                    "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+                    # echo=True,
+                )
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "mssql tests are requested, but unable to connect to the mssql database at "
+                    "'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                )
+            test_backends += ["mssql"]
+    return test_backends
+
+
+def build_test_backends_list_cfe(metafunc):
+    test_backends = ["pandas"]
+    no_spark = metafunc.config.getoption("--no-spark")
+    if not no_spark:
+        try:
+            import pyspark
+            from pyspark.sql import SparkSession
+        except ImportError:
+            raise ValueError("spark tests are requested, but pyspark is not installed")
+        test_backends += ["spark"]
+    no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
+    if not no_sqlalchemy:
+        test_backends += ["sqlite"]
+
+        sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
+
+        no_postgresql = metafunc.config.getoption("--no-postgresql")
+        if not (sa is None or no_postgresql):
+            ###
+            # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
+            # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
+            # round trip compared to NUMERIC, which stays as a python DECIMAL
+
+            # Be sure to ensure that tests (and users!) understand that subtlety,
+            # which can be important for distributional expectations, for example.
+            ###
+            connection_string = "postgresql://postgres@localhost/test_ci"
+            checker = LockingConnectionCheck(sa, connection_string)
+            if checker.is_valid() is True:
+                test_backends += ["postgresql"]
+            else:
+                raise ValueError(
+                    f"backend-specific tests are requested, but unable to connect to the database at "
+                    f"{connection_string}"
+                )
         mysql = metafunc.config.getoption("--mysql")
         if sa and mysql:
             try:
@@ -182,18 +282,25 @@ def sa(test_backends):
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
-        import sqlalchemy as sa
+        try:
+            import sqlalchemy as sa
 
-        return sa
+            return sa
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
 
 @pytest.fixture
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
-    from pyspark.sql import SparkSession
+    try:
+        import pyspark
+        from pyspark.sql import SparkSession
 
-    return SparkSession.builder.getOrCreate()
+        return SparkSession.builder.getOrCreate()
+    except ImportError:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
@@ -1253,15 +1360,25 @@ def numeric_high_card_dict():
 @pytest.fixture
 def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
     schemas = {
-        "pandas": {"norm_0_1": "float64",},
+        "pandas": {
+            "norm_0_1": "float64",
+        },
         "postgresql": {
             # "norm_0_1": "DOUBLE_PRECISION",
             "norm_0_1": "NUMERIC",
         },
-        "sqlite": {"norm_0_1": "FLOAT",},
-        "mysql": {"norm_0_1": "DOUBLE",},
-        "mssql": {"norm_0_1": "FLOAT",},
-        "spark": {"norm_0_1": "FloatType",},
+        "sqlite": {
+            "norm_0_1": "FLOAT",
+        },
+        "mysql": {
+            "norm_0_1": "DOUBLE",
+        },
+        "mssql": {
+            "norm_0_1": "FLOAT",
+        },
+        "spark": {
+            "norm_0_1": "FloatType",
+        },
     }
     return get_dataset(test_backend, numeric_high_card_dict, schemas=schemas)
 
@@ -1284,12 +1401,24 @@ def datetime_dataset(test_backend):
     }
 
     schemas = {
-        "pandas": {"datetime": "datetime64",},
-        "postgresql": {"datetime": "TIMESTAMP",},
-        "sqlite": {"datetime": "TIMESTAMP",},
-        "mysql": {"datetime": "TIMESTAMP",},
-        "mssql": {"datetime": "DATETIME",},
-        "spark": {"datetime": "TimestampType",},
+        "pandas": {
+            "datetime": "datetime64",
+        },
+        "postgresql": {
+            "datetime": "TIMESTAMP",
+        },
+        "sqlite": {
+            "datetime": "TIMESTAMP",
+        },
+        "mysql": {
+            "datetime": "TIMESTAMP",
+        },
+        "mssql": {
+            "datetime": "DATETIME",
+        },
+        "spark": {
+            "datetime": "TimestampType",
+        },
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
@@ -1409,12 +1538,24 @@ def non_numeric_low_card_dataset(test_backend):
         ]
     }
     schemas = {
-        "pandas": {"lowcardnonnum": "str",},
-        "postgresql": {"lowcardnonnum": "TEXT",},
-        "sqlite": {"lowcardnonnum": "VARCHAR",},
-        "mysql": {"lowcardnonnum": "TEXT",},
-        "mssql": {"lowcardnonnum": "VARCHAR",},
-        "spark": {"lowcardnonnum": "StringType",},
+        "pandas": {
+            "lowcardnonnum": "str",
+        },
+        "postgresql": {
+            "lowcardnonnum": "TEXT",
+        },
+        "sqlite": {
+            "lowcardnonnum": "VARCHAR",
+        },
+        "mysql": {
+            "lowcardnonnum": "TEXT",
+        },
+        "mssql": {
+            "lowcardnonnum": "VARCHAR",
+        },
+        "spark": {
+            "lowcardnonnum": "StringType",
+        },
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
@@ -1837,14 +1978,157 @@ def non_numeric_high_card_dataset(test_backend):
         ],
     }
     schemas = {
-        "pandas": {"highcardnonnum": "str", "medcardnonnum": "str",},
-        "postgresql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
-        "sqlite": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
-        "mysql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
-        "mssql": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
-        "spark": {"highcardnonnum": "StringType", "medcardnonnum": "StringType",},
+        "pandas": {
+            "highcardnonnum": "str",
+            "medcardnonnum": "str",
+        },
+        "postgresql": {
+            "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
+        },
+        "sqlite": {
+            "highcardnonnum": "VARCHAR",
+            "medcardnonnum": "VARCHAR",
+        },
+        "mysql": {
+            "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
+        },
+        "mssql": {
+            "highcardnonnum": "VARCHAR",
+            "medcardnonnum": "VARCHAR",
+        },
+        "spark": {
+            "highcardnonnum": "StringType",
+            "medcardnonnum": "StringType",
+        },
     }
     return get_dataset(test_backend, data, schemas=schemas)
+
+
+@pytest.fixture
+def periodic_table_of_elements():
+    data = [
+        "Hydrogen",
+        "Helium",
+        "Lithium",
+        "Beryllium",
+        "Boron",
+        "Carbon",
+        "Nitrogen",
+        "Oxygen",
+        "Fluorine",
+        "Neon",
+        "Sodium",
+        "Magnesium",
+        "Aluminum",
+        "Silicon",
+        "Phosphorus",
+        "Sulfur",
+        "Chlorine",
+        "Argon",
+        "Potassium",
+        "Calcium",
+        "Scandium",
+        "Titanium",
+        "Vanadium",
+        "Chromium",
+        "Manganese",
+        "Iron",
+        "Cobalt",
+        "Nickel",
+        "Copper",
+        "Zinc",
+        "Gallium",
+        "Germanium",
+        "Arsenic",
+        "Selenium",
+        "Bromine",
+        "Krypton",
+        "Rubidium",
+        "Strontium",
+        "Yttrium",
+        "Zirconium",
+        "Niobium",
+        "Molybdenum",
+        "Technetium",
+        "Ruthenium",
+        "Rhodium",
+        "Palladium",
+        "Silver",
+        "Cadmium",
+        "Indium",
+        "Tin",
+        "Antimony",
+        "Tellurium",
+        "Iodine",
+        "Xenon",
+        "Cesium",
+        "Barium",
+        "Lanthanum",
+        "Cerium",
+        "Praseodymium",
+        "Neodymium",
+        "Promethium",
+        "Samarium",
+        "Europium",
+        "Gadolinium",
+        "Terbium",
+        "Dysprosium",
+        "Holmium",
+        "Erbium",
+        "Thulium",
+        "Ytterbium",
+        "Lutetium",
+        "Hafnium",
+        "Tantalum",
+        "Tungsten",
+        "Rhenium",
+        "Osmium",
+        "Iridium",
+        "Platinum",
+        "Gold",
+        "Mercury",
+        "Thallium",
+        "Lead",
+        "Bismuth",
+        "Polonium",
+        "Astatine",
+        "Radon",
+        "Francium",
+        "Radium",
+        "Actinium",
+        "Thorium",
+        "Protactinium",
+        "Uranium",
+        "Neptunium",
+        "Plutonium",
+        "Americium",
+        "Curium",
+        "Berkelium",
+        "Californium",
+        "Einsteinium",
+        "Fermium",
+        "Mendelevium",
+        "Nobelium",
+        "Lawrencium",
+        "Rutherfordium",
+        "Dubnium",
+        "Seaborgium",
+        "Bohrium",
+        "Hassium",
+        "Meitnerium",
+        "Darmstadtium",
+        "Roentgenium",
+        "Copernicium",
+        "Nihomium",
+        "Flerovium",
+        "Moscovium",
+        "Livermorium",
+        "Tennessine",
+        "Oganesson",
+    ]
+    return data
 
 
 def dataset_sample_data(test_backend):
@@ -1927,7 +2211,12 @@ def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
         import sqlalchemy as sa
 
-        return sa.create_engine("sqlite://")
+        try:
+            import sqlalchemy as sa
+
+            return sa.create_engine("sqlite://")
+        except ImportError:
+            raise ValueError("sqlite tests require sqlalchemy to be installed")
     else:
         pytest.skip("Skipping test designed for sqlite on non-sqlite backend.")
 
@@ -1935,11 +2224,16 @@ def sqlitedb_engine(test_backend):
 @pytest.fixture
 def postgresql_engine(test_backend):
     if test_backend == "postgresql":
-        import sqlalchemy as sa
+        try:
+            import sqlalchemy as sa
 
-        engine = sa.create_engine("postgresql://postgres@localhost/test_ci").connect()
-        yield engine
-        engine.close()
+            engine = sa.create_engine(
+                "postgresql://postgres@localhost/test_ci"
+            ).connect()
+            yield engine
+            engine.close()
+        except ImportError:
+            raise ValueError("SQL Database tests require sqlalchemy to be installed.")
     else:
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
@@ -1952,6 +2246,72 @@ def empty_data_context(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
     return context
+
+
+@pytest.fixture
+def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
+    """
+    Based on titanic_data_context, but with 2 identical batches of
+    data asset "titanic", with a PandasExecutionEngine
+    :param tmp_path_factory:
+    :return:
+    """
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path = os.path.join(context_path, "../data/titanic")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/great_expectations_v013_no_datasource.yml"
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "../data/titanic/Titanic_1911.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")),
+    )
+    context = ge.data_context.DataContext(context_path)
+
+    datasource_config = f"""
+            class_name: Datasource
+
+            execution_engine:
+                class_name: PandasExecutionEngine
+
+            data_connectors:
+                my_data_connector:
+                    class_name: InferredAssetFilesystemDataConnector
+                    base_directory: {data_path}
+                    default_regex:
+                        pattern: (.*)\\.csv
+                        group_names:
+                            - data_asset_name
+            """
+    context.test_yaml_config(name="titanic_multi_batch", yaml_config=datasource_config)
+    return context
+
+
+@pytest.fixture
+def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
+    monkeypatch.setenv("FOO", "BAR")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
+    root_dir = empty_data_context.root_directory
+    ge_config_path = file_relative_path(
+        __file__,
+        "./test_fixtures/great_expectations_basic_with_variables.yml",
+    )
+    shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
+    config_variables_path = file_relative_path(
+        __file__,
+        "./test_fixtures/config_variables.yml",
+    )
+    shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
+    return DataContext(context_root_dir=root_dir)
 
 
 @pytest.fixture
@@ -2015,6 +2375,27 @@ def titanic_data_context(tmp_path_factory):
 
 
 @pytest.fixture
+def titanic_data_context_no_data_docs(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "../data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_titanic_no_data_docs.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
 def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Reenable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
@@ -2039,12 +2420,16 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_sqlite_db(sa):
-    from sqlalchemy import create_engine
+    try:
+        import sqlalchemy as sa
+        from sqlalchemy import create_engine
 
-    titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
-    engine = create_engine("sqlite:///{}".format(titanic_db_path))
-    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
-    return engine
+        titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+        engine = create_engine("sqlite:///{}".format(titanic_db_path))
+        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        return engine
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
 
 
 @pytest.fixture
@@ -2069,6 +2454,7 @@ def titanic_expectation_suite():
 def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
@@ -2208,7 +2594,8 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic.yml"),
@@ -2250,7 +2637,8 @@ def data_context_with_bad_notebooks(tmp_path_factory):
     custom_notebook_assets_dir = "notebook_assets"
 
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"),
@@ -2283,7 +2671,8 @@ def data_context_custom_notebooks(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
@@ -2313,14 +2702,18 @@ def data_context_simple_expectation_suite(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "rendering_fixtures/expectations_suite_1.json",),
+        os.path.join(
+            fixture_dir,
+            "rendering_fixtures/expectations_suite_1.json",
+        ),
         os.path.join(asset_config_path, "default.json"),
     )
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
@@ -2407,7 +2800,12 @@ def filesystem_csv_4(tmp_path_factory):
     base_dir = str(base_dir)
 
     # Put a file in the directory
-    toy_dataset = PandasDataset({"x": [1, 2, 3], "y": [1, 2, 3],})
+    toy_dataset = PandasDataset(
+        {
+            "x": [1, 2, 3],
+            "y": [1, 2, 3],
+        }
+    )
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
 
     return base_dir
@@ -2419,7 +2817,6 @@ def titanic_profiled_evrs_1():
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_evrs.json"
         ),
-        "r",
     ) as infile:
         return expectationSuiteValidationResultSchema.loads(infile.read())
 
@@ -2434,7 +2831,6 @@ def titanic_profiled_name_column_evrs():
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_evrs.json"
         ),
-        "r",
     ) as infile:
         titanic_profiled_evrs_1 = expectationSuiteValidationResultSchema.load(
             json.load(infile)
@@ -2452,7 +2848,6 @@ def titanic_profiled_expectations_1():
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
-        "r",
     ) as infile:
         return expectationSuiteSchema.load(json.load(infile))
 
@@ -2465,7 +2860,6 @@ def titanic_profiled_name_column_expectations():
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
-        "r",
     ) as infile:
         titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile))
 
@@ -2481,7 +2875,6 @@ def titanic_profiled_name_column_expectations():
 def titanic_validation_results():
     with open(
         file_relative_path(__file__, "./test_sets/expected_cli_results_default.json"),
-        "r",
     ) as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile))
 
@@ -2515,14 +2908,14 @@ def evr_failed():
             "exception_message": None,
             "exception_traceback": None,
         },
-        expectation_config={
-            "expectation_type": "expect_column_values_to_not_match_regex",
-            "kwargs": {
+        expectation_config=ExpectationConfiguration(
+            expectation_type="expect_column_values_to_not_match_regex",
+            kwargs={
                 "column": "Name",
                 "regex": "^\\s+|\\s+$",
                 "result_format": "SUMMARY",
             },
-        },
+        ),
     )
 
 
@@ -2569,18 +2962,21 @@ def evr_success():
 def sqlite_view_engine(test_backends):
     # Create a small in-memory engine with two views, one of which is temporary
     if "sqlite" in test_backends:
-        import sqlalchemy as sa
+        try:
+            import sqlalchemy as sa
 
-        sqlite_engine = sa.create_engine("sqlite://")
-        df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-        df.to_sql("test_table", con=sqlite_engine)
-        sqlite_engine.execute(
-            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-        )
-        sqlite_engine.execute(
-            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-        )
-        return sqlite_engine
+            sqlite_engine = sa.create_engine("sqlite://")
+            df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
+            df.to_sql("test_table", con=sqlite_engine)
+            sqlite_engine.execute(
+                "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+            )
+            sqlite_engine.execute(
+                "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+            )
+            return sqlite_engine
+        except ImportError:
+            sa = None
     else:
         pytest.skip("SqlAlchemy tests disabled; not testing views")
 
@@ -2593,3 +2989,248 @@ def expectation_suite_identifier():
 @pytest.fixture
 def basic_sqlalchemy_datasource(sqlitedb_engine):
     return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)
+
+
+@pytest.fixture
+def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
+    if sa is None:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+
+    db_file = file_relative_path(
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    engine = sa.create_engine(f"sqlite:////{db_file}")
+    conn = engine.connect()
+
+    # Build a SqlAlchemyDataset using that database
+    return SqlAlchemyExecutionEngine(
+        name="test_sql_execution_engine",
+        engine=conn,
+    )
+
+
+@pytest.fixture
+def test_folder_connection_path_csv(tmp_path_factory):
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path_csv"))
+    df1.to_csv(path_or_buf=os.path.join(path, "test.csv"), index=False)
+    return str(path)
+
+
+@pytest.fixture
+def test_folder_connection_path_tsv(tmp_path_factory):
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path_tsv"))
+    df1.to_csv(path_or_buf=os.path.join(path, "test.tsv"), sep="\t", index=False)
+    return str(path)
+
+
+@pytest.fixture
+def test_folder_connection_path_parquet(tmp_path_factory):
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    path = str(tmp_path_factory.mktemp("test_folder_connection_path_parquet"))
+    df1.to_parquet(path=os.path.join(path, "test.parquet"))
+    return str(path)
+
+
+@pytest.fixture
+def test_db_connection_string(tmp_path_factory, test_backends):
+    if "sqlite" not in test_backends:
+        pytest.skip("skipping fixture because sqlite not selected")
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    df2 = pd.DataFrame({"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]})
+
+    try:
+        import sqlalchemy as sa
+
+        basepath = str(tmp_path_factory.mktemp("db_context"))
+        path = os.path.join(basepath, "test.db")
+        engine = sa.create_engine("sqlite:///" + str(path))
+        df1.to_sql("table_1", con=engine, index=True)
+        df2.to_sql("table_2", con=engine, index=True, schema="main")
+
+        # Return a connection string to this newly-created db
+        return "sqlite:///" + str(path)
+    except ImportError:
+        raise ValueError("SQL Database tests require sqlalchemy to be installed.")
+
+
+@pytest.fixture
+def test_df(tmp_path_factory):
+    def generate_ascending_list_of_datetimes(
+        k, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
+    ):
+        start_time = datetime.datetime(
+            start_date.year, start_date.month, start_date.day
+        )
+        days_between_dates = (end_date - start_date).total_seconds()
+
+        datetime_list = [
+            start_time
+            + datetime.timedelta(seconds=random.randrange(days_between_dates))
+            for i in range(k)
+        ]
+        datetime_list.sort()
+        return datetime_list
+
+    k = 120
+    random.seed(1)
+
+    timestamp_list = generate_ascending_list_of_datetimes(
+        k, end_date=datetime.date(2020, 1, 31)
+    )
+    date_list = [datetime.date(ts.year, ts.month, ts.day) for ts in timestamp_list]
+
+    batch_ids = [random.randint(0, 10) for i in range(k)]
+    batch_ids.sort()
+
+    session_ids = [random.randint(2, 60) for i in range(k)]
+    session_ids.sort()
+    session_ids = [i - random.randint(0, 2) for i in session_ids]
+
+    events_df = pd.DataFrame(
+        {
+            "id": range(k),
+            "batch_id": batch_ids,
+            "date": date_list,
+            "y": [d.year for d in date_list],
+            "m": [d.month for d in date_list],
+            "d": [d.day for d in date_list],
+            "timestamp": timestamp_list,
+            "session_ids": session_ids,
+            "event_type": [
+                random.choice(["start", "stop", "continue"]) for i in range(k)
+            ],
+            "favorite_color": [
+                "#"
+                + "".join([random.choice(list("0123456789ABCDEF")) for j in range(6)])
+                for i in range(k)
+            ],
+        }
+    )
+    return events_df
+
+
+@pytest.fixture
+def test_connectable_postgresql_db(sa, test_backends, test_df):
+    """Populates a postgres DB with a `test_df` table in the `connection_test` schema to test DataConnectors against"""
+
+    if "postgresql" not in test_backends:
+        pytest.skip("skipping fixture because postgresql not selected")
+
+    import sqlalchemy as sa
+
+    url = sa.engine.url.URL(
+        drivername="postgresql",
+        username="postgres",
+        password="",
+        host="localhost",
+        port="5432",
+        database="test_ci",
+    )
+    engine = sa.create_engine(url)
+
+    schema_check_results = engine.execute(
+        "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
+    ).fetchall()
+    if len(schema_check_results) == 0:
+        engine.execute("CREATE SCHEMA connection_test;")
+
+    table_check_results = engine.execute(
+        """
+SELECT EXISTS (
+   SELECT FROM information_schema.tables
+   WHERE  table_schema = 'connection_test'
+   AND    table_name   = 'test_df'
+);
+"""
+    ).fetchall()
+    if table_check_results != [(True,)]:
+        test_df.to_sql("test_df", con=engine, index=True, schema="connection_test")
+
+    # Return a connection string to this newly-created db
+    return engine
+
+
+@pytest.fixture
+def data_context_with_sql_datasource_for_testing_get_batch(sa, empty_data_context):
+    context = empty_data_context
+
+    db_file = file_relative_path(
+        __file__,
+        "test_sets/test_cases_for_sql_data_connector.db",
+    )
+
+    config = yaml.load(
+        f"""
+class_name: SimpleSqlalchemyDatasource
+connection_string: sqlite:///{db_file}
+"""
+        + """
+introspection:
+    whole_table: {}
+
+    daily:
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%m-%d"
+
+    weekly:
+        splitter_method: _split_on_converted_datetime
+        splitter_kwargs:
+            column_name: date
+            date_format_string: "%Y-%W"
+
+    by_id_dozens:
+        splitter_method: _split_on_divided_integer
+        splitter_kwargs:
+            column_name: id
+            divisor: 12
+""",
+    )
+
+    try:
+        context.add_datasource("my_sqlite_db", **config)
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
+    return context
+
+
+@pytest.fixture
+def basic_datasource(tmp_path_factory):
+    base_directory: str = str(
+        tmp_path_factory.mktemp("basic_datasource_runtime_data_connector")
+    )
+
+    basic_datasource: Datasource = instantiate_class_from_config(
+        config=yaml.load(
+            f"""
+class_name: Datasource
+
+data_connectors:
+    test_runtime_data_connector:
+        module_name: great_expectations.datasource.data_connector
+        class_name: RuntimeDataConnector
+        runtime_keys:
+        - pipeline_stage_name
+        - run_id
+        - custom_key_0
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+    """,
+        ),
+        runtime_environment={
+            "name": "my_datasource",
+        },
+        config_defaults={
+            "module_name": "great_expectations.datasource",
+        },
+    )
+
+    return basic_datasource

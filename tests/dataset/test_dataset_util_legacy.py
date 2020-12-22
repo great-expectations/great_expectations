@@ -74,7 +74,7 @@ def test_build_categorical_partition(non_numeric_high_card_dataset):
 
 class TestUtilMethods(unittest.TestCase):
     def __init__(self, *args, **kwargs):
-        super(TestUtilMethods, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.D = ge.read_csv(
             file_relative_path(
                 __file__, "../test_sets/distributional_expectations_data_base.csv"
@@ -82,7 +82,7 @@ class TestUtilMethods(unittest.TestCase):
         )
 
         with open(
-            file_relative_path(__file__, "../test_sets/test_partitions.json"), "r"
+            file_relative_path(__file__, "../test_sets/test_partitions.json")
         ) as file:
             self.test_partitions = json.loads(file.read())
 

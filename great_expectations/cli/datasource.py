@@ -21,7 +21,7 @@ from great_expectations.cli.util import (
     cli_message_dict,
     verify_library_dependent_modules,
 )
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
 from great_expectations.datasource import (
@@ -39,7 +39,7 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
 
@@ -112,15 +112,17 @@ def delete_datasource(directory, datasource):
     except ValueError:
         cli_message(
             "<red>{}</red>".format(
-                "Datasource {} could not be found".format(datasource)
+                "Datasource {} could not be found.".format(datasource)
             )
         )
         sys.exit(1)
-    else:
+    try:
+        context.get_datasource(datasource)
+    except ValueError:
         cli_message("<green>{}</green>".format("Datasource deleted successfully."))
-
-    if context.get_datasource(datasource) is None:
-        cli_message("<red>{}</red>".format("Datasource not deleted"))
+        sys.exit(1)
+    else:
+        cli_message("<red>{}</red>".format("Datasource not deleted."))
         sys.exit(1)
 
 
@@ -182,6 +184,14 @@ def _build_datasource_intro_string(datasource_count):
     "If True, this will override --max_data_assets.",
 )
 @click.option(
+    "--assume-yes",
+    "--yes",
+    "-y",
+    is_flag=True,
+    default=False,
+    help="By default request confirmation unless you specify -y/--yes/--assume-yes flag to skip dialog",
+)
+@click.option(
     "--directory",
     "-d",
     default=None,
@@ -206,6 +216,7 @@ def datasource_profile(
     directory,
     view,
     additional_batch_kwargs,
+    assume_yes,
 ):
     """
     Profile a datasource (Experimental)
@@ -251,6 +262,7 @@ def datasource_profile(
                     profile_all_data_assets=profile_all_data_assets,
                     open_docs=view,
                     additional_batch_kwargs=additional_batch_kwargs,
+                    skip_prompt_flag=assume_yes,
                 )
                 send_usage_message(
                     data_context=context, event="cli.datasource.profile", success=True
@@ -264,6 +276,7 @@ def datasource_profile(
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
                 additional_batch_kwargs=additional_batch_kwargs,
+                skip_prompt_flag=assume_yes,
             )
             send_usage_message(
                 data_context=context, event="cli.datasource.profile", success=True
@@ -382,14 +395,14 @@ def _add_pandas_datasource(
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
-                "Invalid Datasource configuration: {0:s}".format(errors)
+                "Invalid Datasource configuration: {:s}".format(errors)
             )
 
     cli_message(
         """
-Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
+Great Expectations will now add a new Datasource '{:s}' to your deployment, by adding this entry to your great_expectations.yml:
 
-{1:s}
+{:s}
 """.format(
             datasource_name,
             textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "),
@@ -511,7 +524,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
             errors = DatasourceConfigSchema().validate(configuration)
             if len(errors) != 0:
                 raise ge_exceptions.GreatExpectationsError(
-                    "Invalid Datasource configuration: {0:s}".format(errors)
+                    "Invalid Datasource configuration: {:s}".format(errors)
                 )
 
             cli_message(
@@ -550,9 +563,9 @@ The credentials will be saved in uncommitted/config_variables.yml under the key 
                 # TODO this message about continuing may not be accurate
                 cli_message(
                     """
-We saved datasource {0:s} in {1:s} and the credentials you entered in {2:s}.
+We saved datasource {:s} in {:s} and the credentials you entered in {:s}.
 Since we could not connect to the database, you can complete troubleshooting in the configuration files documented here:
-<blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={3:s}#{4:s}</blue> .
+<blue>https://docs.greatexpectations.io/en/latest/tutorials/add-sqlalchemy-datasource.html?utm_source=cli&utm_medium=init&utm_campaign={:s}#{:s}</blue> .
 
 After you connect to the datasource, run great_expectations init to continue.
 
@@ -571,8 +584,8 @@ After you connect to the datasource, run great_expectations init to continue.
 
 def _should_hide_input():
     """
-        This is a workaround to help identify Windows and adjust the prompts accordingly
-        since hidden prompts may freeze in certain Windows terminals
+    This is a workaround to help identify Windows and adjust the prompts accordingly
+    since hidden prompts may freeze in certain Windows terminals
     """
     if "windows" in platform.platform().lower():
         return False
@@ -711,7 +724,8 @@ def _collect_snowflake_credentials_key_pair():
     credentials = {}
 
     credentials["private_key_path"] = click.prompt(
-        "Path to the private key used for authentication", show_default=False,
+        "Path to the private key used for authentication",
+        show_default=False,
     )
 
     credentials["private_key_passphrase"] = click.prompt(
@@ -875,14 +889,14 @@ def _add_spark_datasource(
         errors = DatasourceConfigSchema().validate(configuration)
         if len(errors) != 0:
             raise ge_exceptions.GreatExpectationsError(
-                "Invalid Datasource configuration: {0:s}".format(errors)
+                "Invalid Datasource configuration: {:s}".format(errors)
             )
 
     cli_message(
         """
-Great Expectations will now add a new Datasource '{0:s}' to your deployment, by adding this entry to your great_expectations.yml:
+Great Expectations will now add a new Datasource '{:s}' to your deployment, by adding this entry to your great_expectations.yml:
 
-{1:s}
+{:s}
 """.format(
             datasource_name,
             textwrap.indent(toolkit.yaml.dump({datasource_name: configuration}), "  "),
@@ -1019,7 +1033,7 @@ def get_batch_kwargs(
 
     else:
         raise ge_exceptions.DataContextError(
-            "Datasource {0:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {1:s}".format(
+            "Datasource {:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {:s}".format(
                 datasource_name, str(type(context.get_datasource(datasource_name)))
             )
         )
@@ -1042,7 +1056,7 @@ Would you like to:
     2. enter the path of a data file
 """
     msg_prompt_file_path = """
-Enter the path (relative or absolute) of a data file
+Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
 """
 
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use?\n"
@@ -1130,13 +1144,16 @@ We could not determine the format of the file. What is it?
 
     path = None
     while True:
+        # do not use Click to check if the file exists - the get_batch
+        # logic will check this
         path = click.prompt(
             msg_prompt_file_path,
-            type=click.Path(exists=True, dir_okay=dir_okay),
+            type=click.Path(dir_okay=dir_okay),
             default=path,
         )
 
-        path = os.path.abspath(path)
+        if not path.startswith("gs:") and not path.startswith("s3"):
+            path = os.path.abspath(path)
 
         batch_kwargs = {"path": path, "datasource": datasource_name}
 
@@ -1268,19 +1285,8 @@ Enter an SQL query
     # where appropriate.
     temp_table_kwargs = dict()
     datasource = context.get_datasource(datasource_name)
-    if datasource.engine.dialect.name.lower() == "snowflake":
-        # snowflake requires special handling
-        table_name = click.prompt(
-            "In Snowflake, GE may need to create a transient table "
-            "to use for validation."
-            + os.linesep
-            + "Please enter a name to use for that table: ",
-            default="ge_tmp_" + str(uuid.uuid4())[:8],
-        )
-        temp_table_kwargs = {
-            "snowflake_transient_table": table_name,
-        }
-    elif datasource.engine.dialect.name.lower() == "bigquery":
+
+    if datasource.engine.dialect.name.lower() == "bigquery":
         # bigquery also requires special handling
         table_name = click.prompt(
             "GE will create a table to use for "
@@ -1321,7 +1327,7 @@ Enter an SQL query
             else:
                 batch_kwargs = {"query": query, "datasource": datasource_name}
                 batch_kwargs.update(temp_table_kwargs)
-                Validator(
+                BridgeValidator(
                     batch=datasource.get_batch(batch_kwargs),
                     expectation_suite=ExpectationSuite("throwaway"),
                 ).get_dataset()
@@ -1399,6 +1405,14 @@ def _verify_pyspark_dependent_modules() -> bool:
     )
 
 
+def skip_prompt_message(skip_flag, prompt_message_text) -> bool:
+
+    if not skip_flag:
+        return click.confirm(prompt_message_text, default=True)
+
+    return skip_flag
+
+
 def profile_datasource(
     context,
     datasource_name,
@@ -1408,6 +1422,7 @@ def profile_datasource(
     max_data_assets=20,
     additional_batch_kwargs=None,
     open_docs=False,
+    skip_prompt_flag=False,
 ):
     """"Profile a named datasource using the specified context"""
     # Note we are explicitly not using a logger in all CLI output to have
@@ -1474,8 +1489,8 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if (
             data_assets
             or profile_all_data_assets
-            or click.confirm(
-                msg_confirm_ok_to_proceed.format(datasource_name), default=True
+            or skip_prompt_message(
+                skip_prompt_flag, msg_confirm_ok_to_proceed.format(datasource_name)
             )
         ):
             profiling_results = context.profile_datasource(
@@ -1574,7 +1589,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 break
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
-    build_docs(context, view=open_docs)
+    build_docs(context, view=open_docs, assume_yes=skip_prompt_flag)
     if open_docs:  # This is mostly to keep tests from spawning windows
         context.open_data_docs()
 

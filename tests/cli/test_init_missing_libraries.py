@@ -63,7 +63,7 @@ but the package `{library_name}` containing this library is not installed.
     config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path, "r"))
+    config = yaml.load(open(config_path))
     assert config["datasources"] == dict()
 
     obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
@@ -75,6 +75,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -92,6 +93,7 @@ great_expectations/
         config_variables.yml
         data_docs/
         validations/
+            .ge_store_backend_id
 """
     )
 
@@ -165,7 +167,8 @@ def test_cli_init_db_mssql_without_library_installed_instructs_user(
     reason="requires psycopg2 to NOT be installed",
 )
 def test_cli_init_db_postgres_without_library_installed_instructs_user(
-    caplog, tmp_path_factory,
+    caplog,
+    tmp_path_factory,
 ):
     _library_not_loaded_test(
         tmp_path_factory, "\n\n2\n2\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
@@ -177,7 +180,8 @@ def test_cli_init_db_postgres_without_library_installed_instructs_user(
     reason="requires psycopg2 to NOT be installed",
 )
 def test_cli_init_db_redshift_without_library_installed_instructs_user(
-    caplog, tmp_path_factory,
+    caplog,
+    tmp_path_factory,
 ):
     _library_not_loaded_test(
         tmp_path_factory, "\n\n2\n3\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
@@ -189,7 +193,8 @@ def test_cli_init_db_redshift_without_library_installed_instructs_user(
     reason="requires snowflake-sqlalchemy to NOT be installed",
 )
 def test_cli_init_db_snowflake_without_library_installed_instructs_user(
-    caplog, tmp_path_factory,
+    caplog,
+    tmp_path_factory,
 ):
     _library_not_loaded_test(
         tmp_path_factory,
@@ -245,7 +250,7 @@ but the package `pyspark` containing this library is not installed.
     config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path, "r"))
+    config = yaml.load(open(config_path))
     assert config["datasources"] == dict()
 
     obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
@@ -257,6 +262,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
     notebooks/
         pandas/
             validation_playground.ipynb
@@ -274,6 +280,7 @@ great_expectations/
         config_variables.yml
         data_docs/
         validations/
+            .ge_store_backend_id
 """
     )
 

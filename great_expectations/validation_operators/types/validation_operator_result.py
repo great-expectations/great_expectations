@@ -2,18 +2,16 @@ import json
 from copy import deepcopy
 from typing import Dict, List, Union
 
-from marshmallow import Schema, fields, post_load, pre_dump
-
-from great_expectations.core import (
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
-    RunIdentifier,
-    RunIdentifierSchema,
-    convert_to_json_serializable,
 )
 from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
 from great_expectations.types import DictDot
 
 
@@ -99,36 +97,30 @@ class ValidationOperatorResult(DictDot):
     def list_batch_identifiers(self) -> List[str]:
         if self._batch_identifiers is None:
             self._batch_identifiers = list(
-                set(
-                    [
-                        validation_result_identifier.batch_identifier
-                        for validation_result_identifier in self.list_validation_result_identifiers()
-                    ]
-                )
+                {
+                    validation_result_identifier.batch_identifier
+                    for validation_result_identifier in self.list_validation_result_identifiers()
+                }
             )
         return self._batch_identifiers
 
     def list_data_asset_names(self) -> List[str]:
         if self._data_asset_names is None:
             self._data_asset_names = list(
-                set(
-                    [
-                        data_asset["batch_kwargs"].get("data_asset_name") or "__none__"
-                        for data_asset in self.list_data_assets_validated()
-                    ]
-                )
+                {
+                    data_asset["batch_kwargs"].get("data_asset_name") or "__none__"
+                    for data_asset in self.list_data_assets_validated()
+                }
             )
         return self._data_asset_names
 
     def list_expectation_suite_names(self) -> List[str]:
         if self._expectation_suite_names is None:
             self._expectation_suite_names = list(
-                set(
-                    [
-                        validation_result_identifier.expectation_suite_identifier.expectation_suite_name
-                        for validation_result_identifier in self.run_results.keys()
-                    ]
-                )
+                {
+                    validation_result_identifier.expectation_suite_identifier.expectation_suite_name
+                    for validation_result_identifier in self.run_results.keys()
+                }
             )
         return self._expectation_suite_names
 

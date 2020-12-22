@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 import json
 import os
 import shutil
 
 from click.testing import CliRunner
 from freezegun import freeze_time
+from moto import mock_s3
 
 import great_expectations
 from great_expectations import DataContext
@@ -16,7 +16,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
@@ -151,6 +151,7 @@ great_expectations/
     checkpoints/
         .gitkeep
     expectations/
+        .ge_store_backend_id
         .gitkeep
     notebooks/
         .gitkeep
@@ -176,6 +177,7 @@ great_expectations/
             project_upgrades/
                 UpgradeHelperV11_20190926T134241.000000Z.json
         validations/
+            .ge_store_backend_id
             diabetic_data/
                 warning/
                     20200430T191246.763896Z/
@@ -256,6 +258,7 @@ great_expectations/
     checkpoints/
         .gitkeep
     expectations/
+        .ge_store_backend_id
         .gitkeep
     notebooks/
         .gitkeep
@@ -281,6 +284,7 @@ great_expectations/
             project_upgrades/
                 UpgradeHelperV11_20190926T134241.000000Z.json
         validations/
+            .ge_store_backend_id
             diabetic_data/
                 warning/
                     20200430T191246.763896Z/
@@ -317,6 +321,7 @@ great_expectations/
 
 
 @freeze_time("09/26/2019 13:42:41")
+@mock_s3
 def test_project_upgrade_with_exception(v10_project_directory, caplog):
     # test project upgrade that requires manual steps
 
@@ -358,6 +363,7 @@ great_expectations/
     checkpoints/
         .gitkeep
     expectations/
+        .ge_store_backend_id
         .gitkeep
     notebooks/
         .gitkeep
@@ -383,6 +389,7 @@ great_expectations/
             project_upgrades/
                 UpgradeHelperV11_20190926T134241.000000Z.json
         validations/
+            .ge_store_backend_id
             diabetic_data/
                 warning/
                     20200430T191246.763896Z/

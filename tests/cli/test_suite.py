@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 import json
 import os
+from unittest import mock
 
-import mock
 from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -21,7 +20,7 @@ def test_suite_help_output(caplog):
   demo      Create a new demo Expectation Suite.
   edit      Generate a Jupyter notebook for editing an existing Expectation...
   list      Lists available Expectation Suites.
-  new       Create a new Expectation Suite.
+  new       Create a new empty Expectation Suite.
   scaffold  Scaffold a new Expectation Suite."""
         in result.stdout
     )
@@ -47,7 +46,9 @@ def test_suite_demo_on_context_with_no_datasources(
     root_dir = project_root_dir
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["suite", "demo", "-d", root_dir], catch_exceptions=False,
+        cli,
+        ["suite", "demo", "-d", root_dir],
+        catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -215,10 +216,9 @@ def test_suite_new_creates_empty_suite(
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
-    # TODO this test must be updated to remove the --empty flag in the next major release
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--empty", "--suite", "foo"],
+        ["suite", "new", "-d", root_dir, "--suite", "foo"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -300,10 +300,9 @@ def test_suite_new_empty_with_no_jupyter(
     root_dir = data_context_parameterized_expectation_suite.root_directory
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
-    # TODO this test must be updated to remove the --empty flag in the next major release
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--empty", "--suite", "foo", "--no-jupyter"],
+        ["suite", "new", "-d", root_dir, "--suite", "foo", "--no-jupyter"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -770,7 +769,13 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo_suite", "-d", root_dir,],
+        [
+            "suite",
+            "edit",
+            "foo_suite",
+            "-d",
+            root_dir,
+        ],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -958,7 +963,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error(
-    mock_webbrowser, mock_subprocess, caplog, titanic_data_context,
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    titanic_data_context,
 ):
     """
     Given:
@@ -1006,7 +1014,10 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs(
-    mock_webbrowser, mock_subprocess, caplog, titanic_data_context,
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    titanic_data_context,
 ):
     """
     Given:
@@ -1089,9 +1100,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir],
-        input="{0:s}\nmy_new_suite\n\n".format(
-            os.path.join(filesystem_csv_2, "f1.csv")
-        ),
+        input="{:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -1115,7 +1124,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     result = runner.invoke(
         cli,
         ["suite", "edit", "my_new_suite", "-d", root_dir],
-        input="{0:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
+        input="{:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
 
@@ -1144,7 +1153,9 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-        cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
+        cli,
+        "suite list -d {}".format(project_dir),
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert "No Expectation Suites found" in result.output
@@ -1159,7 +1170,9 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-        cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
+        cli,
+        "suite list -d {}".format(project_dir),
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert "1 Expectation Suite found" in result.output
@@ -1177,7 +1190,9 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-        cli, "suite list -d {}".format(project_dir), catch_exceptions=False,
+        cli,
+        "suite list -d {}".format(project_dir),
+        catch_exceptions=False,
     )
     output = result.output
     assert result.exit_code == 0
@@ -1199,7 +1214,9 @@ def test_suite_delete_with_zero_suites(
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
-        cli, f"suite delete not_a_suite -d {project_dir}", catch_exceptions=False,
+        cli,
+        f"suite delete not_a_suite -d {project_dir}",
+        catch_exceptions=False,
     )
     assert result.exit_code == 1
     assert "No expectation suites found in the project" in result.output
@@ -1229,7 +1246,9 @@ def test_suite_delete_with_non_existent_suite(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, f"suite delete not_a_suite -d {project_dir}", catch_exceptions=False,
+        cli,
+        f"suite delete not_a_suite -d {project_dir}",
+        catch_exceptions=False,
     )
     assert result.exit_code == 1
     assert "No expectation suite named not_a_suite found" in result.output
@@ -1262,7 +1281,9 @@ def test_suite_delete_with_one_suite(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, "suite delete a.warning -d {}".format(project_dir), catch_exceptions=False,
+        cli,
+        "suite delete a.warning -d {}".format(project_dir),
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert "Deleted the expectation suite named: a.warning" in result.output
@@ -1301,7 +1322,9 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["suite", "scaffold", "foop", "-d", root_dir], catch_exceptions=False,
+        cli,
+        ["suite", "scaffold", "foop", "-d", root_dir],
+        catch_exceptions=False,
     )
     stdout = result.output
     assert result.exit_code == 1
@@ -1347,7 +1370,9 @@ def test_suite_scaffold_on_existing_suite_raises_error(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["suite", "scaffold", "foop", "-d", root_dir], catch_exceptions=False,
+        cli,
+        ["suite", "scaffold", "foop", "-d", root_dir],
+        catch_exceptions=False,
     )
     stdout = result.output
     assert result.exit_code == 1

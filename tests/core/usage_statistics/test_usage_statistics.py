@@ -2,11 +2,20 @@ import configparser
 import os
 import shutil
 from copy import deepcopy
+from unittest import mock
 
-import mock
+import jsonschema
 import pytest
 
+from great_expectations.core.usage_statistics.schemas import (
+    anonymized_datasource_schema,
+    cli_new_ds_choice_payload,
+    init_payload_schema,
+    save_or_edit_expectation_suite_payload_schema,
+    usage_statistics_record_schema,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
+    add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
 )
 from great_expectations.data_context import BaseDataContext, DataContext
@@ -30,8 +39,12 @@ def in_memory_data_context_config_usage_stats_enabled():
             "config_variables_file_path": None,
             "datasources": {},
             "stores": {
-                "expectations_store": {"class_name": "ExpectationsStore",},
-                "validations_store": {"class_name": "ValidationsStore",},
+                "expectations_store": {
+                    "class_name": "ExpectationsStore",
+                },
+                "validations_store": {
+                    "class_name": "ValidationsStore",
+                },
                 "evaluation_parameter_store": {
                     "class_name": "EvaluationParameterStore",
                 },

@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -20,7 +21,6 @@ from great_expectations.dataset.util import (
 )
 from great_expectations.util import import_library_module
 
-from ..core import convert_to_json_serializable
 from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 
@@ -30,13 +30,13 @@ try:
     import sqlalchemy as sa
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
-    from sqlalchemy.sql.expression import BinaryExpression, literal
-    from sqlalchemy.sql.selectable import Select, CTE
-    from sqlalchemy.sql.operators import custom_op
-    from sqlalchemy.sql.elements import Label, WithinGroup, TextClause
-    from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
+    from sqlalchemy.sql.expression import BinaryExpression, literal
+    from sqlalchemy.sql.operators import custom_op
+    from sqlalchemy.sql.selectable import CTE, Select
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
@@ -113,8 +113,13 @@ try:
 except ImportError:
     pass
 
+try:
+    import pyathena.sqlalchemy_athena
+except ImportError:
+    pyathena = None
 
-class SqlAlchemyBatchReference(object):
+
+class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None):
         self._engine = engine
         if table_name is None and query is None:
@@ -162,6 +167,8 @@ class MetaSqlAlchemyDataset(Dataset):
         def inner_wrapper(
             self, column, mostly=None, result_format=None, *args, **kwargs
         ):
+            if self.batch_kwargs.get("use_quoted_name"):
+                column = quoted_name(column, quote=True)
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
@@ -262,9 +269,9 @@ class MetaSqlAlchemyDataset(Dataset):
                 .limit(unexpected_count_limit)
             )
 
-            nonnull_count: int = count_results["element_count"] - count_results[
-                "null_count"
-            ]
+            nonnull_count: int = (
+                count_results["element_count"] - count_results["null_count"]
+            )
 
             if "output_strftime_format" in kwargs:
                 output_strftime_format = kwargs["output_strftime_format"]
@@ -355,18 +362,28 @@ class MetaSqlAlchemyDataset(Dataset):
             )
             self.engine.execute(inner_case_query)
 
-        element_count_query: Select = sa.select(
-            [
-                sa.func.count().label("element_count"),
-                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
-                    "null_count"
-                ),
-            ]
-        ).select_from(self._table).alias("ElementAndNullCountsSubquery")
+        element_count_query: Select = (
+            sa.select(
+                [
+                    sa.func.count().label("element_count"),
+                    sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                        "null_count"
+                    ),
+                ]
+            )
+            .select_from(self._table)
+            .alias("ElementAndNullCountsSubquery")
+        )
 
-        unexpected_count_query: Select = sa.select(
-            [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
-        ).select_from(temp_table_obj).alias("UnexpectedCountSubquery")
+        unexpected_count_query: Select = (
+            sa.select(
+                [
+                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
+                ]
+            )
+            .select_from(temp_table_obj)
+            .alias("UnexpectedCountSubquery")
+        )
 
         count_query: Select = sa.select(
             [
@@ -410,25 +427,24 @@ class MetaSqlAlchemyDataset(Dataset):
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     """
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: validation_engine_sqlalchemy
-    title: Validation Engine - SQLAlchemy
-    icon:
-    short_description: Use SQLAlchemy to validate data in a database
-    description: Use SQLAlchemy to validate data in a database
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_database_table_or_a_query_result_as_a_batch.html
-    maturity: Production
-    maturity_details:
-        api_stability: High
-        implementation_completeness: Moderate (temp table handling/permissions not universal)
-        unit_test_coverage: High
-        integration_infrastructure_test_coverage: N/A
-        documentation_completeness:  Minimal (none)
-        bug_risk: Low
+        id: validation_engine_sqlalchemy
+        title: Validation Engine - SQLAlchemy
+        icon:
+        short_description: Use SQLAlchemy to validate data in a database
+        description: Use SQLAlchemy to validate data in a database
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_database_table_or_a_query_result_as_a_batch.html
+        maturity: Production
+        maturity_details:
+            api_stability: High
+            implementation_completeness: Moderate (temp table handling/permissions not universal)
+            unit_test_coverage: High
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness:  Minimal (none)
+            bug_risk: Low
 
---ge-feature-maturity-info--
-"""
+    --ge-feature-maturity-info--"""
 
     @classmethod
     def from_dataset(cls, dataset=None):
@@ -456,9 +472,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
                 table_name = f"#{table_name}"
-            generated_table_name = table_name
+            self.generated_table_name = table_name
         else:
-            generated_table_name = None
+            self.generated_table_name = None
 
         if table_name is None:
             raise ValueError("No table_name provided.")
@@ -495,13 +511,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
 
-            if engine and engine.dialect.name.lower() in ["sqlite", "mssql"]:
-                # sqlite/mssql temp tables only persist within a connection so override the engine
-                self.engine = engine.connect()
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
+
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
@@ -510,8 +524,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
             )
+        elif self.engine.dialect.name.lower() == "awsathena":
+            self.dialect = import_library_module(
+                module_name="pyathena.sqlalchemy_athena"
+            )
         else:
             self.dialect = None
+
+        if engine and engine.dialect.name.lower() in ["sqlite", "mssql", "snowflake"]:
+            # sqlite/mssql/snowflake temp tables only persist within a connection so override the engine
+            self.engine = engine.connect()
 
         if schema is not None and custom_sql is not None:
             # temporary table will be written to temp schema, so don't allow
@@ -524,7 +546,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql is not None and self.engine.dialect.name.lower() == "bigquery":
             if (
-                generated_table_name is not None
+                self.generated_table_name is not None
                 and self.engine.dialect.dataset_id is None
             ):
                 raise ValueError(
@@ -532,26 +554,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     "default dataset in engine url"
                 )
 
-        if (
-            custom_sql is not None
-            and self.engine.dialect.name.lower() == "snowflake"
-            and generated_table_name is not None
-        ):
-            raise ValueError(
-                "No snowflake_transient_table specified. Snowflake with a query batch_kwarg will create "
-                "a transient table, so you must provide a user-selected name."
-            )
-
         if custom_sql:
             self.create_temporary_table(table_name, custom_sql, schema_name=schema)
 
-            if (
-                generated_table_name is not None
-                and self.engine.dialect.name.lower() == "bigquery"
-            ):
-                logger.warning(
-                    "Created permanent table {table_name}".format(table_name=table_name)
-                )
+            if self.generated_table_name is not None:
+                if self.engine.dialect.name.lower() == "bigquery":
+                    logger.warning(
+                        "Created permanent table {table_name}".format(
+                            table_name=table_name
+                        )
+                    )
+                if self.engine.dialect.name.lower() == "awsathena":
+                    logger.warning(
+                        "Created permanent table default.{table_name}".format(
+                            table_name=table_name
+                        )
+                    )
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
@@ -573,12 +591,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return self.engine.dialect
 
     def attempt_allowing_relative_error(self):
-        detected_redshift: bool = (
-            sqlalchemy_redshift is not None
-            and check_sql_engine_dialect(
-                actual_sql_engine_dialect=self.sql_engine_dialect,
-                candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
-            )
+        detected_redshift: bool = sqlalchemy_redshift is not None and check_sql_engine_dialect(
+            actual_sql_engine_dialect=self.sql_engine_dialect,
+            candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
         )
         # noinspection PyTypeChecker
         detected_psycopg2: bool = (
@@ -613,7 +628,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 head_sql_str += "`" + self._table.name + "`"
             else:
                 head_sql_str += self._table.name
-            head_sql_str += " limit {0:d}".format(n)
+            head_sql_str += " limit {:d}".format(n)
 
             # Limit is unknown in mssql! Use top instead!
             if self.engine.dialect.name.lower() == "mssql":
@@ -732,8 +747,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return series
 
     def get_column_mean(self, column):
+        # column * 1.0 needed for correct calculation of avg in MSSQL
         return self.engine.execute(
-            sa.select([sa.func.avg(sa.column(column))]).select_from(self._table)
+            sa.select([sa.func.avg(sa.column(column) * 1.0)]).select_from(self._table)
         ).scalar()
 
     def get_column_unique_count(self, column):
@@ -744,6 +760,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ).scalar()
 
     def get_column_median(self, column):
+        # AWS Athena does not support offset
+        if self.sql_engine_dialect.name.lower() == "awsathena":
+            raise NotImplementedError("AWS Athena does not support OFFSET.")
         nonnull_count = self.get_column_nonnull_count(column)
         element_values = self.engine.execute(
             sa.select([sa.column(column)])
@@ -835,36 +854,45 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def _get_column_quantiles_mysql(self, column: str, quantiles: Iterable) -> list:
         # MySQL does not support "percentile_disc", so we implement it as a compound query.
         # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
-        percent_rank_query: CTE = sa.select(
-            [
-                sa.column(column),
-                sa.cast(
-                    sa.func.percent_rank().over(order_by=sa.column(column).asc()),
-                    sa.dialects.mysql.DECIMAL(18, 15),
-                ).label("p"),
-            ]
-        ).order_by(sa.column("p").asc()).select_from(self._table).cte("t")
+        percent_rank_query: CTE = (
+            sa.select(
+                [
+                    sa.column(column),
+                    sa.cast(
+                        sa.func.percent_rank().over(order_by=sa.column(column).asc()),
+                        sa.dialects.mysql.DECIMAL(18, 15),
+                    ).label("p"),
+                ]
+            )
+            .order_by(sa.column("p").asc())
+            .select_from(self._table)
+            .cte("t")
+        )
 
         selects: List[WithinGroup] = []
         for idx, quantile in enumerate(quantiles):
             # pymysql cannot handle conversion of numpy float64 to float; convert just in case
             if np.issubdtype(type(quantile), np.float_):
                 quantile = float(quantile)
-            quantile_column: Label = sa.func.first_value(sa.column(column)).over(
-                order_by=sa.case(
-                    [
-                        (
-                            percent_rank_query.c.p
-                            <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
-                            percent_rank_query.c.p,
-                        )
-                    ],
-                    else_=None,
-                ).desc()
-            ).label(f"q_{idx}")
+            quantile_column: Label = (
+                sa.func.first_value(sa.column(column))
+                .over(
+                    order_by=sa.case(
+                        [
+                            (
+                                percent_rank_query.c.p
+                                <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
+                                percent_rank_query.c.p,
+                            )
+                        ],
+                        else_=None,
+                    ).desc()
+                )
+                .label(f"q_{idx}")
+            )
             selects.append(quantile_column)
-        quantiles_query: Select = sa.select(selects).distinct().order_by(
-            percent_rank_query.c.p.desc()
+        quantiles_query: Select = (
+            sa.select(selects).distinct().order_by(percent_rank_query.c.p.desc())
         )
 
         try:
@@ -1034,7 +1062,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         query = (
             sa.select(case_conditions)
-            .where(sa.column(column) != None,)
+            .where(
+                sa.column(column) != None,
+            )
             .select_from(self._table)
         )
 
@@ -1131,7 +1161,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             condition = max_condition
 
         query = (
-            sa.select([sa.func.count((sa.column(column)))])
+            sa.select([sa.func.count(sa.column(column))])
             .where(sa.and_(sa.column(column) != None, condition))
             .select_from(self._table)
         )
@@ -1173,15 +1203,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ###
 
         if self.sql_engine_dialect.name.lower() == "bigquery":
-            stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
+            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
-            logger.info("Creating transient table %s" % table_name)
+            table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
+
+            logger.info("Creating temporary table %s" % table_name)
             if schema_name is not None:
                 table_name = schema_name + "." + table_name
-            stmt = "CREATE OR REPLACE TRANSIENT TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
+            stmt = "CREATE OR REPLACE {table_type} TABLE {table_name} AS {custom_sql}".format(
+                table_type=table_type, table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the generic case.
@@ -1200,10 +1232,15 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = (
                 custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
             ).format(table_name=table_name)
+        elif self.sql_engine_dialect.name.lower() == "awsathena":
+            stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
                 table_name=table_name, custom_sql=custom_sql
             )
+
         self.engine.execute(stmt)
 
     def column_reflection_fallback(self):
@@ -1298,8 +1335,71 @@ WHERE
         return {
             "success": row_count == other_table_row_count,
             "result": {
-                "observed_value": {"self": row_count, "other": other_table_row_count,}
+                "observed_value": {
+                    "self": row_count,
+                    "other": other_table_row_count,
+                }
             },
+        }
+
+    ###
+    ###
+    ###
+    #
+    # Compound Column Expectation Implementations
+    #
+    ###
+    ###
+    ###
+
+    @DocInherit
+    @MetaSqlAlchemyDataset.expectation(["column_list", "ignore_row_if"])
+    def expect_compound_columns_to_be_unique(
+        self,
+        column_list,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        row_condition=None,
+        condition_parser=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        columns = [
+            sa.column(col["name"]) for col in self.columns if col["name"] in column_list
+        ]
+        query = (
+            sa.select([sa.func.count()])
+            .group_by(*columns)
+            .having(sa.func.count() > 1)
+            .select_from(self._table)
+        )
+
+        if ignore_row_if == "all_values_are_missing":
+            query = query.where(sa.and_(*[col != None for col in columns]))
+        elif ignore_row_if == "any_value_is_missing":
+            query = query.where(sa.or_(*[col != None for col in columns]))
+        elif ignore_row_if == "never":
+            pass
+        else:
+            raise ValueError(
+                "ignore_row_if was set to an unexpected value: %s" % ignore_row_if
+            )
+
+        unexpected_count = self.engine.execute(query).fetchone()
+
+        if unexpected_count is None:
+            # This can happen when the condition filters out all rows
+            unexpected_count = 0
+        else:
+            unexpected_count = unexpected_count[0]
+
+        total_count_query = sa.select([sa.func.count()]).select_from(self._table)
+        total_count = self.engine.execute(total_count_query).fetchone()[0]
+
+        return {
+            "success": unexpected_count == 0,
+            "result": {"unexpected_percent": 100.0 * unexpected_count / total_count},
         }
 
     ###
@@ -1323,7 +1423,6 @@ WHERE
         catch_exceptions=None,
         meta=None,
     ):
-
         return sa.column(column) == None
 
     @DocInherit
@@ -1418,7 +1517,7 @@ WHERE
             raise ValueError("Type not recognized by current driver: %s" % type_)
 
     @DocInherit
-    @DataAsset.expectation(["column", "type_", "mostly"])
+    @DataAsset.expectation(["column", "type_list", "mostly"])
     def expect_column_values_to_be_in_type_list(
         self,
         column,
@@ -1869,12 +1968,19 @@ WHERE
             (
                 sa.dialects.sqlite.dialect,
                 sa.dialects.postgresql.dialect,
-                sqlalchemy_redshift.dialect.RedshiftDialect,
                 sa.dialects.mysql.dialect,
                 sa.dialects.mssql.dialect,
             ),
         ):
             dialect_supported = True
+
+        try:
+            if isinstance(
+                self.sql_engine_dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+            ):
+                dialect_supported = True
+        except (AttributeError, TypeError):
+            pass
 
         if dialect_supported:
             try:

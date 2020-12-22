@@ -1,6 +1,7 @@
 import inspect
 import json
 import logging
+import warnings
 from datetime import datetime
 from functools import wraps
 from typing import List
@@ -11,7 +12,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -55,15 +56,28 @@ class MetaPandasDataset(Dataset):
         @cls.expectation(argspec)
         @wraps(func)
         def inner_wrapper(
-            self, column, mostly=None, result_format=None, *args, **kwargs
+            self,
+            column,
+            mostly=None,
+            result_format=None,
+            row_condition=None,
+            condition_parser=None,
+            *args,
+            **kwargs,
         ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
 
             result_format = parse_result_format(result_format)
+            if row_condition and self._supports_row_condition:
+                data = self._apply_row_condition(
+                    row_condition=row_condition, condition_parser=condition_parser
+                )
+            else:
+                data = self
 
-            series = self[column]
+            series = data[column]
             if func.__name__ in [
                 "expect_column_values_to_not_be_null",
                 "expect_column_values_to_be_null",
@@ -161,12 +175,17 @@ class MetaPandasDataset(Dataset):
             mostly=None,
             ignore_row_if="both_values_are_missing",
             result_format=None,
+            row_condition=None,
+            condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
+
+            if row_condition:
+                self = self.query(row_condition).reset_index(drop=True)
 
             series_A = self[column_A]
             series_B = self[column_B]
@@ -260,12 +279,17 @@ class MetaPandasDataset(Dataset):
             mostly=None,
             ignore_row_if="all_values_are_missing",
             result_format=None,
+            row_condition=None,
+            condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
+
+            if row_condition:
+                self = self.query(row_condition).reset_index(drop=True)
 
             test_df = self[column_list]
 
@@ -364,9 +388,16 @@ Notes:
         "discard_subset_failing_expectations",
     ]
     _internal_names_set = set(_internal_names)
+    _supports_row_condition = True
 
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.discard_subset_failing_expectations = kwargs.get(
+            "discard_subset_failing_expectations", False
+        )
 
     @property
     def _constructor(self):
@@ -387,11 +418,16 @@ Notes:
         super().__finalize__(other, method, **kwargs)
         return self
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.discard_subset_failing_expectations = kwargs.get(
-            "discard_subset_failing_expectations", False
-        )
+    def _apply_row_condition(self, row_condition, condition_parser):
+        if condition_parser not in ["python", "pandas"]:
+            raise ValueError(
+                "condition_parser is required when setting a row_condition,"
+                " and must be 'python' or 'pandas'"
+            )
+        else:
+            return self.query(row_condition, parser=condition_parser).reset_index(
+                drop=True
+            )
 
     def get_row_count(self):
         return self.shape[0]
@@ -492,6 +528,83 @@ Notes:
                 result = result[result <= max_val]
         return len(result)
 
+    def get_crosstab(
+        self,
+        column_A,
+        column_B,
+        bins_A=None,
+        bins_B=None,
+        n_bins_A=None,
+        n_bins_B=None,
+    ):
+        """Get crosstab of column_A and column_B, binning values if necessary"""
+        series_A = self.get_binned_values(self[column_A], bins_A, n_bins_A)
+        series_B = self.get_binned_values(self[column_B], bins_B, n_bins_B)
+        return pd.crosstab(series_A, columns=series_B)
+
+    def get_binned_values(self, series, bins, n_bins):
+        """
+        Get binned values of series.
+
+        Args:
+            Series (pd.Series): Input series
+            bins (list):
+                Bins for the series. List of numeric if series is numeric or list of list
+                of series values else.
+            n_bins (int): Number of bins. Ignored if bins is not None.
+        """
+        if n_bins is None:
+            n_bins = 10
+
+        if series.dtype in ["int", "float"]:
+            if bins is not None:
+                bins = sorted(np.unique(bins))
+                if np.min(series) < bins[0]:
+                    bins = [np.min(series)] + bins
+                if np.max(series) > bins[-1]:
+                    bins = bins + [np.max(series)]
+
+            if bins is None:
+                bins = np.histogram_bin_edges(series[series.notnull()], bins=n_bins)
+
+            # Make sure max of series is included in rightmost bin
+            bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
+
+            # Create labels for returned series
+            # Used in e.g. crosstab that is printed as observed value in data docs.
+            precision = int(np.log10(min(bins[1:] - bins[:-1]))) + 2
+            labels = [
+                f"[{round(lower, precision)}, {round(upper, precision)})"
+                for lower, upper in zip(bins[:-1], bins[1:])
+            ]
+            if any(np.isnan(series)):
+                # Missings get digitized into bin = n_bins+1
+                labels += ["(missing)"]
+
+            return pd.Categorical.from_codes(
+                codes=np.digitize(series, bins=bins) - 1,
+                categories=labels,
+                ordered=True,
+            )
+
+        else:
+            if bins is None:
+                value_counts = series.value_counts(sort=True)
+                if len(value_counts) < n_bins + 1:
+                    return series.fillna("(missing)")
+                else:
+                    other_values = sorted(value_counts.index[n_bins:])
+                    replace = {value: "(other)" for value in other_values}
+            else:
+                replace = dict()
+                for x in bins:
+                    replace.update({value: ", ".join(x) for value in x})
+            return (
+                series.replace(to_replace=replace)
+                .fillna("(missing)")
+                .astype("category")
+            )
+
     ### Expectation methods ###
 
     @DocInherit
@@ -501,6 +614,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -515,6 +630,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -530,6 +647,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -546,7 +665,8 @@ Notes:
         # Since we've now received the default arguments *before* the expectation decorator, we need to
         # ensure we only pass what we actually received. Hence, we'll use kwargs
         # mostly=None,
-        # result_format=None, include_config=None, catch_exceptions=None, meta=None
+        # result_format=None,
+        # row_condition=None, condition_parser=None, include_config=None, catch_exceptions=None, meta=None
     ):
         """
         The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
@@ -586,16 +706,21 @@ Notes:
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_of_type", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_of_type",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
-
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_of_type__aggregate", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_of_type__aggregate",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]
@@ -617,15 +742,21 @@ Notes:
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_of_type", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_of_type",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_of_type__map", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_of_type__map",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]
@@ -646,6 +777,8 @@ Notes:
         type_,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -717,6 +850,8 @@ Notes:
         type_,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -758,7 +893,8 @@ Notes:
         # Since we've now received the default arguments *before* the expectation decorator, we need to
         # ensure we only pass what we actually received. Hence, we'll use kwargs
         # mostly=None,
-        # result_format=None, include_config=None, catch_exceptions=None, meta=None
+        # result_format = None,
+        # row_condition=None, condition_parser=None, include_config=None, catch_exceptions=None, meta=None
     ):
         """
         The pandas implementation of this expectation takes kwargs mostly, result_format, include_config,
@@ -794,14 +930,20 @@ Notes:
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_in_type_list", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_in_type_list",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_in_type_list__aggregate", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_in_type_list__aggregate",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]
@@ -825,15 +967,21 @@ Notes:
 
             # First, if there is an existing expectation of this type, delete it. Then change the one we created to be
             # of the proper expectation_type
-            existing_expectations = self.find_expectation_indexes(
-                "expect_column_values_to_be_in_type_list", column
+            existing_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="expect_column_values_to_be_in_type_list",
+                    kwargs={"column": column},
+                )
             )
             if len(existing_expectations) == 1:
                 self._expectation_suite.expectations.pop(existing_expectations[0])
 
             # Now, rename the expectation we just added
-            new_expectations = self.find_expectation_indexes(
-                "_expect_column_values_to_be_in_type_list__map", column
+            new_expectations = self._expectation_suite.find_expectation_indexes(
+                ExpectationConfiguration(
+                    expectation_type="_expect_column_values_to_be_in_type_list__map",
+                    kwargs={"column": column},
+                )
             )
             assert len(new_expectations) == 1
             old_config = self._expectation_suite.expectations[new_expectations[0]]
@@ -854,6 +1002,8 @@ Notes:
         type_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -903,6 +1053,8 @@ Notes:
         type_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -945,6 +1097,8 @@ Notes:
         mostly=None,
         parse_strings_as_datetimes=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -952,6 +1106,7 @@ Notes:
         if value_set is None:
             # Vacuously true
             return np.ones(len(column), dtype=np.bool_)
+
         if parse_strings_as_datetimes:
             parsed_value_set = self._parse_value_set(value_set)
         else:
@@ -968,6 +1123,8 @@ Notes:
         mostly=None,
         parse_strings_as_datetimes=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -992,6 +1149,8 @@ Notes:
         output_strftime_format=None,
         allow_cross_type_comparisons=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1118,7 +1277,10 @@ Notes:
         column,
         strictly=None,
         parse_strings_as_datetimes=None,
+        output_strftime_format=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1154,7 +1316,10 @@ Notes:
         column,
         strictly=None,
         parse_strings_as_datetimes=None,
+        output_strftime_format=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1191,6 +1356,8 @@ Notes:
         min_value=None,
         max_value=None,
         mostly=None,
+        row_condition=None,
+        condition_parser=None,
         result_format=None,
         include_config=True,
         catch_exceptions=None,
@@ -1233,6 +1400,8 @@ Notes:
         value,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1247,6 +1416,8 @@ Notes:
         regex,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1261,6 +1432,8 @@ Notes:
         regex,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1276,6 +1449,8 @@ Notes:
         match_on="any",
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1301,6 +1476,8 @@ Notes:
         regex_list,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1320,6 +1497,8 @@ Notes:
         strftime_format,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1331,7 +1510,7 @@ Notes:
                 datetime.strftime(datetime.now(), strftime_format), strftime_format
             )
         except ValueError as e:
-            raise ValueError("Unable to use provided strftime_format. " + e.message)
+            raise ValueError("Unable to use provided strftime_format. " + str(e))
 
         def is_parseable_by_format(val):
             try:
@@ -1353,6 +1532,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1379,6 +1560,8 @@ Notes:
         column,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1400,6 +1583,8 @@ Notes:
         json_schema,
         mostly=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1429,6 +1614,8 @@ Notes:
         p_value=0.05,
         params=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1476,6 +1663,8 @@ Notes:
         bootstrap_samples=None,
         bootstrap_sample_size=None,
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1585,6 +1774,8 @@ Notes:
         column_B,
         ignore_row_if="both_values_are_missing",
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1602,6 +1793,8 @@ Notes:
         allow_cross_type_comparisons=None,
         ignore_row_if="both_values_are_missing",
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1632,6 +1825,8 @@ Notes:
         value_pairs_set,
         ignore_row_if="both_values_are_missing",
         result_format=None,
+        row_condition=None,
+        condition_parser=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1659,11 +1854,41 @@ Notes:
 
         return pd.Series(results, temp_df.index)
 
-    @DocInherit
-    @MetaPandasDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
         self,
         column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        deprecation_warning = (
+            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+            "expect_select_column_values_to_be_unique_within_record instead."
+        )
+        warnings.warn(
+            deprecation_warning,
+            DeprecationWarning,
+        )
+
+        return self.expect_select_column_values_to_be_unique_within_record(
+            column_list=column_list,
+            mostly=mostly,
+            ignore_row_if=ignore_row_if,
+            result_format=result_format,
+            include_config=include_config,
+            catch_exceptions=catch_exceptions,
+            meta=meta,
+        )
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_select_column_values_to_be_unique_within_record(
+        self,
+        column_list,
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
         include_config=True,
@@ -1673,3 +1898,42 @@ Notes:
         threshold = len(column_list.columns)
         # Do not dropna here, since we have separately dealt with na in decorator
         return column_list.nunique(dropna=False, axis=1) >= threshold
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_multicolumn_sum_to_equal(
+        self,
+        column_list,
+        sum_total,
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        """ Multi-Column Map Expectation
+
+        Expects that sum of all rows for a set of columns is equal to a specific value
+
+        Args:
+            column_list (List[str]): \
+                Set of columns to be checked
+            sum_total (int): \
+                expected sum of columns
+        """
+        return column_list.sum(axis=1) == sum_total
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_compound_columns_to_be_unique(
+        self,
+        column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # Do not dropna here, since we have separately dealt with na in decorator
+        # Invert boolean so that duplicates are False and non-duplicates are True
+        return ~column_list.duplicated(keep=False)

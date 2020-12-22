@@ -7,7 +7,7 @@ from freezegun import freeze_time
 from numpy import Infinity
 
 import great_expectations as ge
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
 from great_expectations.exceptions import ProfilerError
@@ -64,13 +64,11 @@ def test__create_expectations_for_low_card_column(non_numeric_low_card_dataset):
     expectation_suite = non_numeric_low_card_dataset.get_expectation_suite(
         suppress_warnings=True
     )
-    assert set(
-        [
-            expectation.expectation_type
-            for expectation in expectation_suite.expectations
-            if expectation.kwargs.get("column") == column
-        ]
-    ) == {
+    assert {
+        expectation.expectation_type
+        for expectation in expectation_suite.expectations
+        if expectation.kwargs.get("column") == column
+    } == {
         "expect_column_to_exist",
         "expect_column_distinct_values_to_be_in_set",
         "expect_column_kl_divergence_to_be_less_than",
@@ -131,13 +129,11 @@ def test__create_expectations_for_numeric_column(
         "mysql",
         "mssql",
     ]:
-        assert set(
-            [
-                expectation.expectation_type
-                for expectation in expectation_suite.expectations
-                if expectation.kwargs.get("column") == column
-            ]
-        ) == {
+        assert {
+            expectation.expectation_type
+            for expectation in expectation_suite.expectations
+            if expectation.kwargs.get("column") == column
+        } == {
             "expect_column_to_exist",
             "expect_column_min_to_be_between",
             "expect_column_max_to_be_between",
@@ -147,13 +143,11 @@ def test__create_expectations_for_numeric_column(
             "expect_column_values_to_not_be_null",
         }
     else:
-        assert set(
-            [
-                expectation.expectation_type
-                for expectation in expectation_suite.expectations
-                if expectation.kwargs.get("column") == column
-            ]
-        ) == {
+        assert {
+            expectation.expectation_type
+            for expectation in expectation_suite.expectations
+            if expectation.kwargs.get("column") == column
+        } == {
             "expect_column_to_exist",
             "expect_column_min_to_be_between",
             "expect_column_max_to_be_between",
@@ -209,13 +203,11 @@ def test__create_expectations_for_string_column(non_numeric_high_card_dataset):
     expectation_suite = non_numeric_high_card_dataset.get_expectation_suite(
         suppress_warnings=True
     )
-    assert set(
-        [
-            expectation.expectation_type
-            for expectation in expectation_suite.expectations
-            if expectation.kwargs.get("column") == column
-        ]
-    ) == {
+    assert {
+        expectation.expectation_type
+        for expectation in expectation_suite.expectations
+        if expectation.kwargs.get("column") == column
+    } == {
         "expect_column_to_exist",
         "expect_column_values_to_not_be_null",
         "expect_column_value_lengths_to_be_between",
@@ -260,13 +252,11 @@ def test__create_expectations_for_datetime_column(datetime_dataset):
         datetime_dataset, column
     )
     expectation_suite = datetime_dataset.get_expectation_suite(suppress_warnings=True)
-    assert set(
-        [
-            expectation.expectation_type
-            for expectation in expectation_suite.expectations
-            if expectation.kwargs.get("column") == column
-        ]
-    ) == {
+    assert {
+        expectation.expectation_type
+        for expectation in expectation_suite.expectations
+        if expectation.kwargs.get("column") == column
+    } == {
         "expect_column_to_exist",
         "expect_column_values_to_be_between",
         "expect_column_values_to_not_be_null",
@@ -353,7 +343,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
         "batch_markers",
         "batch_parameters",
         "expectation_suite_name",
-        "great_expectations.__version__",
+        "great_expectations_version",
         "run_id",
         "validation_time",
     }
@@ -478,7 +468,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     # with open(file_relative_path(__file__, '../render/fixtures/BasicSuiteBuilderProfiler_evrs.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
-    with open(expected_filepath, "r",) as file:
+    with open(
+        expected_filepath,
+    ) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
             json.load(file, object_pairs_hook=OrderedDict)
         )
@@ -495,8 +487,8 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
             result.result.pop("partial_unexpected_counts")
 
     # Version, run_id, batch id will be different
-    del expected_evrs.meta["great_expectations.__version__"]
-    del evrs.meta["great_expectations.__version__"]
+    del expected_evrs.meta["great_expectations_version"]
+    del evrs.meta["great_expectations_version"]
 
     del expected_evrs.meta["run_id"]
     del evrs.meta["run_id"]
@@ -724,7 +716,9 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
 
 
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
-def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(pandas_dataset,):
+def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
+    pandas_dataset,
+):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset, profiler_configuration={"included_columns": ["naturals"]}
     )
@@ -932,7 +926,8 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_columns", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_falsey_on_pandas(
-    included_columns, pandas_dataset,
+    included_columns,
+    pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
@@ -967,15 +962,22 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_false
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_expectations", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations_are_falsey_on_pandas(
-    included_expectations, pandas_dataset,
+    included_expectations,
+    pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
-        profiler_configuration={"included_expectations": included_expectations,},
+        profiler_configuration={
+            "included_expectations": included_expectations,
+        },
     )
     assert isinstance(observed_suite, ExpectationSuite)
 
-    expected = ExpectationSuite("default", data_asset_type="Dataset", expectations=[],)
+    expected = ExpectationSuite(
+        "default",
+        data_asset_type="Dataset",
+        expectations=[],
+    )
 
     # remove metadata to simplify assertions
     observed_suite.meta = None
@@ -986,11 +988,14 @@ def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_expectations", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectations_are_falsey_on_pandas(
-    excluded_expectations, pandas_dataset,
+    excluded_expectations,
+    pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
-        profiler_configuration={"excluded_expectations": excluded_expectations,},
+        profiler_configuration={
+            "excluded_expectations": excluded_expectations,
+        },
     )
     assert isinstance(observed_suite, ExpectationSuite)
 
@@ -1204,7 +1209,8 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_columns", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_falsey_on_pandas(
-    excluded_columns, pandas_dataset,
+    excluded_columns,
+    pandas_dataset,
 ):
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
@@ -1322,14 +1328,16 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     # with open(file_relative_path(__file__, '../render/fixtures/SuiteBuilderProfiler_evrs.json'), 'w+') as file:
     #     json.dump(expectationSuiteValidationResultSchema.dump(evrs), file, indent=2)
 
-    with open(expected_filepath, "r",) as file:
+    with open(
+        expected_filepath,
+    ) as file:
         expected_evrs = expectationSuiteValidationResultSchema.load(
             json.load(file, object_pairs_hook=OrderedDict)
         )
 
         # Version and RUN-ID will be different
-    del expected_evrs.meta["great_expectations.__version__"]
-    del evrs.meta["great_expectations.__version__"]
+    del expected_evrs.meta["great_expectations_version"]
+    del evrs.meta["great_expectations_version"]
     del expected_evrs.meta["run_id"]
     del expected_evrs.meta["batch_kwargs"]["ge_batch_id"]
     del evrs.meta["run_id"]

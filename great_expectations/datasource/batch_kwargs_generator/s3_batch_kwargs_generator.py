@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
-    """
+    r"""
     S3 BatchKwargGenerator provides support for generating batches of data from an S3 bucket. For the S3 batch kwargs generator, assets must
     be individually defined using a prefix and glob, although several additional configuration parameters are available
     for assets (see below).
@@ -301,14 +301,12 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 keys,
             )
         ]
-        for key in keys:
-            yield key
+        yield from keys
 
         if asset_options["IsTruncated"]:
             iterator_dict["continuation_token"] = asset_options["NextContinuationToken"]
             # Recursively fetch more
-            for key in self._get_asset_options(asset_config, iterator_dict):
-                yield key
+            yield from self._get_asset_options(asset_config, iterator_dict)
         elif "continuation_token" in iterator_dict:
             # Make sure we clear the token once we've gotten fully through
             del iterator_dict["continuation_token"]
@@ -349,7 +347,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         asset_config = self._assets[data_asset_name]
         available_ids = [
             self._partitioner(key=key, asset_config=asset_config)
-            for key in self._get_asset_options(data_asset_name, iterator_dict)
+            for key in self._get_asset_options(asset_config, iterator_dict)
         ]
         return available_ids
 

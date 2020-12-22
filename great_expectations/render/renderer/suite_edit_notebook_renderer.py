@@ -4,9 +4,10 @@ from typing import Dict, Optional, Union
 import jinja2
 import nbformat
 
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
+    NotebookConfig,
     NotebookTemplateConfig,
     notebookConfigSchema,
 )
@@ -165,6 +166,7 @@ class SuiteEditNotebookRenderer(Renderer):
             "header.py.j2",
             suite_name=suite_name,
             batch_kwargs=batch_kwargs,
+            env=os.environ,
         )
         self.add_code_cell(code, lint=True)
 
@@ -234,7 +236,8 @@ class SuiteEditNotebookRenderer(Renderer):
                     meta_args=self._build_meta_arguments(exp.meta),
                 )
                 self.add_code_cell(
-                    code, lint=True,
+                    code,
+                    lint=True,
                 )
 
     def _add_table_level_expectations(self, expectations_by_column):
@@ -338,6 +341,8 @@ class SuiteEditNotebookRenderer(Renderer):
             batch_kwargs = dict(batch_kwargs)
         if batch_kwargs and "path" in batch_kwargs.keys():
             base_dir = batch_kwargs["path"]
+            if base_dir[0:5] in ["s3://", "gs://"]:
+                return batch_kwargs
             if not os.path.isabs(base_dir):
                 batch_kwargs["path"] = os.path.join("..", "..", base_dir)
 

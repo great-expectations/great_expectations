@@ -85,7 +85,7 @@ class BasicDatasetProfilerBase(DatasetProfiler):
             ).result["observed_value"]
         except KeyError:  # if observed_value value is not set
             logger.error(
-                "Failed to get cardinality of column {0:s} - continuing...".format(
+                "Failed to get cardinality of column {:s} - continuing...".format(
                     column
                 )
             )
@@ -175,6 +175,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_MANY,
                     ProfilerCardinality.UNIQUE,
                 ]:
+                    # TODO: change to class-first expectation structure?
                     df.expect_column_min_to_be_between(
                         column, min_value=None, max_value=None
                     )
@@ -230,6 +231,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
                     ProfilerCardinality.VERY_MANY,
                     ProfilerCardinality.UNIQUE,
                 ]:
+                    # TODO: migrate to class first structure
                     df.expect_column_min_to_be_between(
                         column, min_value=None, max_value=None
                     )

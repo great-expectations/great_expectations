@@ -8,25 +8,26 @@ import logging
 import os
 import shutil
 import sys
+import traceback
 import uuid
 import warnings
 import webbrowser
-from typing import Dict, List, Optional, Union
+from collections import OrderedDict
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
-from dateutil.parser import ParserError, parse
-from marshmallow import ValidationError
+from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core import (
-    ExpectationSuite,
-    RunIdentifier,
-    get_metric_kwargs_id,
-)
+from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
-from great_expectations.core.usage_statistics.usage_statistics import (
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.usage_statistics.usage_statistics import (  # TODO: deprecate
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
@@ -35,6 +36,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.store import TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -62,11 +64,13 @@ from great_expectations.data_context.util import (
     substitute_config_variable,
 )
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
+from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -81,109 +85,109 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-class BaseDataContext(object):
+class BaseDataContext:
     """
-    This class implements most of the functionality of DataContext, with a few exceptions.
+        This class implements most of the functionality of DataContext, with a few exceptions.
 
-    1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
-    2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
-        into DataContext class.
+        1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
+        2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
+            into DataContext class.
 
-    Together, these changes make BaseDataContext class more testable.
+        Together, these changes make BaseDataContext class more testable.
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: os_linux
-    title: OS - Linux
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Production
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Complete
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: os_linux
+        title: OS - Linux
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Production
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: Complete
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: os_macos
-    title: OS - MacOS
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Production
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: Complete (local only)
-        integration_infrastructure_test_coverage: Complete (local only)
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: os_macos
+        title: OS - MacOS
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Production
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: Complete (local only)
+            integration_infrastructure_test_coverage: Complete (local only)
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: os_windows
-    title: OS - Windows
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Beta
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: Minimal
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Complete
-        bug_risk: Moderate
-------------------------------------------------------------
-    id: workflow_create_edit_expectations_cli_scaffold
-    title: Create and Edit Expectations - suite scaffold
-    icon:
-    short_description: Creating a new Expectation Suite using suite scaffold
-    description: Creating Expectation Suites through an interactive development loop using suite scaffold
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_suite_scaffold.html
-    maturity: Experimental (expect exciting changes to Profiler capability)
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: N/A
-        integration_infrastructure_test_coverage: Partial
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: os_windows
+        title: OS - Windows
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Beta
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: Minimal
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Complete
+            bug_risk: Moderate
+    ------------------------------------------------------------
+        id: workflow_create_edit_expectations_cli_scaffold
+        title: Create and Edit Expectations - suite scaffold
+        icon:
+        short_description: Creating a new Expectation Suite using suite scaffold
+        description: Creating Expectation Suites through an interactive development loop using suite scaffold
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_suite_scaffold.html
+        maturity: Experimental (expect exciting changes to Profiler capability)
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Partial
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: workflow_create_edit_expectations_cli_edit
-    title: Create and Edit Expectations - CLI
-    icon:
-    short_description: Creating a new Expectation Suite using the CLI
-    description: Creating a Expectation Suite great_expectations suite new command
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
-    maturity: Experimental (expect exciting changes to Profiler and Suite Renderer capability)
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: N/A
-        integration_infrastructure_test_coverage: Partial
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: workflow_create_edit_expectations_cli_edit
+        title: Create and Edit Expectations - CLI
+        icon:
+        short_description: Creating a new Expectation Suite using the CLI
+        description: Creating a Expectation Suite great_expectations suite new command
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
+        maturity: Experimental (expect exciting changes to Profiler and Suite Renderer capability)
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Partial
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: workflow_create_edit_expectations_json_schema
-    title: Create and Edit Expectations - Json schema
-    icon:
-    short_description: Creating a new Expectation Suite from a json schema file
-    description: Creating a new Expectation Suite using JsonSchemaProfiler function and json schema file
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
-    maturity: Experimental (expect exciting changes to Profiler capability)
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: N/A
-        integration_infrastructure_test_coverage: Partial
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: workflow_create_edit_expectations_json_schema
+        title: Create and Edit Expectations - Json schema
+        icon:
+        short_description: Creating a new Expectation Suite from a json schema file
+        description: Creating a new Expectation Suite using JsonSchemaProfiler function and json schema file
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
+        maturity: Experimental (expect exciting changes to Profiler capability)
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Partial
+            documentation_completeness: Complete
+            bug_risk: Low
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -209,6 +213,7 @@ class BaseDataContext(object):
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
+    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @classmethod
     def validate_config(cls, project_config):
@@ -220,7 +225,9 @@ class BaseDataContext(object):
             raise
         return True
 
-    @usage_statistics_enabled_method(event_name="data_context.__init__",)
+    @usage_statistics_enabled_method(
+        event_name="data_context.__init__",
+    )
     def __init__(self, project_config, context_root_dir=None, runtime_environment=None):
         """DataContext constructor
 
@@ -239,51 +246,90 @@ class BaseDataContext(object):
             )
         self._project_config = project_config
         self._apply_global_config_overrides()
+
         if context_root_dir is not None:
-            self._context_root_directory = os.path.abspath(context_root_dir)
-        else:
-            self._context_root_directory = context_root_dir
+            context_root_dir = os.path.abspath(context_root_dir)
+        self._context_root_directory = context_root_dir
+
         self.runtime_environment = runtime_environment or {}
 
         # Init plugin support
-        if self.plugins_directory is not None:
+        if self.plugins_directory is not None and os.path.exists(
+            self.plugins_directory
+        ):
             sys.path.append(self.plugins_directory)
 
         # We want to have directories set up before initializing usage statistics so that we can obtain a context instance id
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
-        self._initialize_usage_statistics(project_config.anonymous_usage_statistics)
-
-        # Store cached datasources but don't init them
-        self._cached_datasources = {}
 
         # Init stores
         self._stores = dict()
         self._init_stores(self._project_config_with_variables_substituted.stores)
 
+        # Init data_context_id
+        self._data_context_id = self._construct_data_context_id()
+
+        # Override the project_config data_context_id if an expectations_store was already set up
+        self._project_config.anonymous_usage_statistics.data_context_id = (
+            self._data_context_id
+        )
+        self._initialize_usage_statistics(
+            self._project_config.anonymous_usage_statistics
+        )
+
+        # Store cached datasources but don't init them
+        self._cached_datasources = {}
+
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
-        # the way that datasources, validation operators, site builders and other plugins are built.
+        # the way that execution environments (AKA datasources), validation operators, site builders and other
+        # plugins are built.
         self.validation_operators = {}
         for (
             validation_operator_name,
             validation_operator_config,
         ) in self._project_config.validation_operators.items():
             self.add_validation_operator(
-                validation_operator_name, validation_operator_config,
+                validation_operator_name,
+                validation_operator_config,
             )
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
 
-    def _build_store(self, store_name, store_config):
+    def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
         try:
+            # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+            # the expectations_store doesnt yet exist by:
+            # adding the data_context_id from the project_config
+            # to the store_config under the key manually_initialize_store_backend_id
+            if (store_name == self.expectations_store_name) and store_config.get(
+                "store_backend"
+            ):
+                store_config["store_backend"].update(
+                    {
+                        "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                    }
+                )
+
+            # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+            if (
+                store_name not in [store["name"] for store in self.list_active_stores()]
+                and store_config.get("store_backend") is not None
+            ):
+                store_config["store_backend"].update(
+                    {"suppress_store_backend_id": True}
+                )
+
             new_store = instantiate_class_from_config(
                 config=store_config,
-                runtime_environment={"root_directory": self.root_directory,},
-                config_defaults={"module_name": module_name},
+                runtime_environment={
+                    "root_directory": self.root_directory,
+                },
+                config_defaults={"module_name": module_name, "store_name": store_name},
             )
         except ge_exceptions.DataContextError as e:
             new_store = None
@@ -306,19 +352,11 @@ class BaseDataContext(object):
             1. follow a clear key-value pattern, and
             2. are usually edited programmatically, using the Context
 
-        In general, Stores should take over most of the reading and writing to disk that DataContext had previously done.
-        As of 9/21/2019, the following Stores had not yet been implemented
-            * great_expectations.yml
-            * expectations
-            * data documentation
-            * config_variables
-            * anything accessed via write_resource
-
         Note that stores do NOT manage plugins.
         """
 
         for store_name, store_config in store_configs.items():
-            self._build_store(store_name, store_config)
+            self._build_store_from_config(store_name, store_config)
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
@@ -423,6 +461,28 @@ class BaseDataContext(object):
                 pass
         return False
 
+    def _construct_data_context_id(self) -> str:
+        """
+        Choose the id of the currently-configured expectations store, if available and a persistent store.
+        If not, it should choose the id stored in DataContextConfig.
+        Returns:
+            UUID to use as the data_context_id
+        """
+
+        # Choose the id of the currently-configured expectations store, if it is a persistent store
+        expectations_store = self._stores[
+            self._project_config_with_variables_substituted.expectations_store_name
+        ]
+        if isinstance(expectations_store.store_backend, TupleStoreBackend):
+            # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
+            return expectations_store.store_backend_id_warnings_suppressed
+
+        # Otherwise choose the id stored in the project_config
+        else:
+            return (
+                self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            )
+
     def _initialize_usage_statistics(
         self, usage_statistics_config: AnonymizedUsageStatisticsConfig
     ):
@@ -434,7 +494,7 @@ class BaseDataContext(object):
 
         self._usage_statistics_handler = UsageStatisticsHandler(
             data_context=self,
-            data_context_id=usage_statistics_config.data_context_id,
+            data_context_id=self._data_context_id,
             usage_statistics_url=usage_statistics_config.usage_statistics_url,
         )
 
@@ -450,7 +510,7 @@ class BaseDataContext(object):
         """
 
         self._project_config["stores"][store_name] = store_config
-        return self._build_store(store_name, store_config)
+        return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
         self, validation_operator_name, validation_operator_config
@@ -510,6 +570,7 @@ class BaseDataContext(object):
         resource_identifier=None,
         site_name: Optional[str] = None,
         only_if_exists=True,
+        site_names: Optional[List[str]] = None,
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
@@ -524,12 +585,24 @@ class BaseDataContext(object):
                 the URLs of the index page.
             site_name: Optionally specify which site to open. If not specified,
                 return all urls in the project.
+            site_names: Optionally specify which sites are active. Sites not in
+                this list are not processed, even if specified in site_name.
 
         Returns:
             list: a list of URLs. Each item is the URL for the resource for a
                 data docs site
         """
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        unfiltered_sites = (
+            self._project_config_with_variables_substituted.data_docs_sites
+        )
+
+        # Filter out sites that are not in site_names
+        sites = (
+            {k: v for k, v in unfiltered_sites.items() if k in site_names}
+            if site_names
+            else unfiltered_sites
+        )
+
         if not sites:
             logger.debug("Found no data_docs_sites.")
             return []
@@ -575,7 +648,9 @@ class BaseDataContext(object):
             )
         return site_builder
 
-    @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
+    @usage_statistics_enabled_method(
+        event_name="data_context.open_data_docs",
+    )
     def open_data_docs(
         self,
         resource_identifier: Optional[str] = None,
@@ -638,10 +713,10 @@ class BaseDataContext(object):
         return self._stores
 
     @property
-    def datasources(self):
+    def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         """A single holder for all Datasources in this context"""
         return {
-            datasource: self.get_datasource(datasource)
+            datasource: self.get_datasource(datasource_name=datasource)
             for datasource in self._project_config_with_variables_substituted.datasources
         }
 
@@ -664,6 +739,11 @@ class BaseDataContext(object):
             instance_id = str(uuid.uuid4())
             self._in_memory_instance_id = instance_id
         return instance_id
+
+    @property
+    def config_variables(self):
+        # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
+        return dict(self._load_config_variables_file())
 
     #####
     #
@@ -689,7 +769,7 @@ class BaseDataContext(object):
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
                     return yaml.load(config_variables_file) or {}
-            except IOError as e:
+            except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
                 logger.debug("Generating empty config variables file.")
@@ -702,15 +782,52 @@ class BaseDataContext(object):
         if not config:
             config = self._project_config
 
+        substituted_config_variables = substitute_all_config_variables(
+            dict(self._load_config_variables_file()),
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
         substitutions = {
-            **dict(self._load_config_variables_file()),
+            **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
         }
 
         return DataContextConfig(
-            **substitute_all_config_variables(config, substitutions)
+            **substitute_all_config_variables(
+                config, substitutions, self.DOLLAR_SIGN_ESCAPE_STRING
+            )
         )
+
+    def escape_all_config_variables(
+        self,
+        value: Union[str, dict, list],
+        dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+    ) -> Union[str, dict, list]:
+        """
+        Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
+
+        Args:
+            value: config variable value
+            dollar_sign_escape_string: replaces instances of `$`
+
+        Returns:
+            input value with all `$` characters replaced with the escape string
+        """
+
+        if isinstance(value, dict) or isinstance(value, OrderedDict):
+            return {
+                k: self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for k, v in value.items()
+            }
+
+        elif isinstance(value, list):
+            return [
+                self.escape_all_config_variables(v, dollar_sign_escape_string)
+                for v in value
+            ]
+        return value.replace("$", dollar_sign_escape_string)
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
@@ -723,6 +840,7 @@ class BaseDataContext(object):
             None
         """
         config_variables = self._load_config_variables_file()
+        value = self.escape_all_config_variables(value, self.DOLLAR_SIGN_ESCAPE_STRING)
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
@@ -747,7 +865,7 @@ class BaseDataContext(object):
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def delete_datasource(self, datasource_name=None):
+    def delete_datasource(self, datasource_name: str):
         """Delete a data source
         Args:
             datasource_name: The name of the datasource to delete.
@@ -758,11 +876,12 @@ class BaseDataContext(object):
         if datasource_name is None:
             raise ValueError("Datasource names must be a datasource name")
         else:
-            datasource = self.get_datasource(datasource_name)
+            datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
                 # remove key until we have a delete method on project_config
-                # self._project_config_with_variables_substituted.datasources[datasource_name].remove()
-                # del self._project_config["datasources"][datasource_name]
+                # self._project_config_with_variables_substituted.datasources[
+                # datasource_name].remove()
+                del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError("Datasource {} not found".format(datasource_name))
@@ -882,7 +1001,7 @@ class BaseDataContext(object):
         )
         return batch_kwargs
 
-    def get_batch(
+    def _get_batch_v2(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
         expectation_suite_name: Union[str, ExpectationSuite],
@@ -891,7 +1010,6 @@ class BaseDataContext(object):
     ) -> DataAsset:
         """Build a batch of data using batch_kwargs, and return a DataAsset with expectation_suite_name attached. If
         batch_parameters are included, they will be available as attributes of the batch.
-
         Args:
             batch_kwargs: the batch_kwargs to use; must include a datasource key
             expectation_suite_name: The ExpectationSuite or the name of the expectation_suite to get
@@ -899,7 +1017,6 @@ class BaseDataContext(object):
                 generally be inferred from the datasource.
             batch_parameters: optional parameters to store as the reference description of the batch. They should
                 reflect parameters that would provide the passed BatchKwargs.
-
         Returns:
             DataAsset
         """
@@ -934,12 +1051,93 @@ class BaseDataContext(object):
         )
         if data_asset_type is None:
             data_asset_type = datasource.config.get("data_asset_type")
-        validator = Validator(
+        validator = BridgeValidator(
             batch=batch,
             expectation_suite=expectation_suite,
             expectation_engine=data_asset_type,
         )
         return validator.get_dataset()
+
+    def _get_batch_v3(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        **kwargs,
+    ) -> Union[Batch, DataAsset]:
+        """Get exactly one batch, based on a variety of flexible input types.
+
+        Args:
+            datasource_name
+            data_connector_name
+            data_asset_name
+
+            batch_request
+            batch_data
+            partition_request
+            partition_identifiers
+
+            limit
+            index
+            custom_filter_function
+
+            batch_spec_passthrough
+
+            sampling_method
+            sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        This method does not require typed or nested inputs.
+        Instead, it is intended to help the user pick the right parameters.
+
+        This method attempts to return exactly one batch.
+        If 0 or more than 1 batches would be returned, it raises an error.
+        """
+
+        batch_list: List[Batch] = self.get_batch_list(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            partition_request=partition_request,
+            partition_identifiers=partition_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            **kwargs,
+        )
+        # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
+        if len(batch_list) != 1:
+            raise ValueError(
+                f"Got {len(batch_list)} batches instead of a single batch."
+            )
+        return batch_list[0]
 
     @usage_statistics_enabled_method(
         event_name="data_context.run_validation_operator",
@@ -977,7 +1175,7 @@ class BaseDataContext(object):
             )
 
         for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, DataAsset)):
+            if not isinstance(batch, (tuple, DataAsset, Validator)):
                 raise ge_exceptions.DataContextError(
                     "Batches are required to be of type DataAsset"
                 )
@@ -1013,16 +1211,357 @@ class BaseDataContext(object):
                 **kwargs,
             )
 
+    def _get_data_context_version(self, arg1: Any, **kwargs) -> Optional[str]:
+        """
+        arg1: the first positional argument (can take on various types)
+
+        **kwargs: variable arguments
+
+        Returns None if no datasources have been configured (or if there is an exception while getting the datasource).
+        Returns "v3" if the datasource is a subclass of the BaseDatasource class.
+        Returns "v2" if the datasource is an instance of the LegacyDatasource class.
+        """
+
+        if not self.datasources:
+            return None
+
+        if {
+            "datasource_name",
+            "data_connector_name",
+            "data_asset_name",
+            "batch_request",
+            "batch_data",
+        }.intersection(set(kwargs.keys())):
+            return "v3"
+
+        api_version: Optional[str] = None
+        datasource_name: Any
+        if "datasource_name" in kwargs:
+            datasource_name = kwargs.pop("datasource_name", None)
+        else:
+            datasource_name = arg1
+        try:
+            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(
+                datasource_name=datasource_name
+            )
+            if issubclass(type(datasource), BaseDatasource):
+                api_version = "v3"
+        except (ValueError, TypeError):
+            if "batch_kwargs" in kwargs:
+                batch_kwargs = kwargs.get("batch_kwargs", None)
+            else:
+                batch_kwargs = arg1
+            if isinstance(batch_kwargs, dict):
+                datasource_name = batch_kwargs.get("datasource")
+                if datasource_name is not None:
+                    try:
+                        datasource: Union[
+                            LegacyDatasource, BaseDatasource
+                        ] = self.get_datasource(datasource_name=datasource_name)
+                        if isinstance(datasource, LegacyDatasource):
+                            api_version = "v2"
+                    except (ValueError, TypeError):
+                        pass
+        return api_version
+
+    def get_batch(
+        self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
+    ) -> Union[Batch, DataAsset]:
+        """Get exactly one batch, based on a variety of flexible input types.
+        The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
+        Legacy (V2) Datasource schemas.  The version-specific implementations are contained in "_get_batch_v2()" and
+        "_get_batch_v3()", respectively, both of which are in the present module.
+
+        For the V3 API parameters, please refer to the signature and parameter description of method "_get_batch_v3()".
+        For the Legacy usage, please refer to the signature and parameter description of the method "_get_batch_v2()".
+
+        Args:
+            arg1: the first positional argument (can take on various types)
+            arg2: the second positional argument (can take on various types)
+            arg3: the third positional argument (can take on various types)
+
+            **kwargs: variable arguments
+
+        Returns:
+            Batch (V3) or DataAsset (V2) -- the requested batch
+
+        Processing Steps:
+        1. Determine the version (possible values are "v3" or "v2").
+        2. Convert the positional arguments to the appropriate named arguments, based on the version.
+        3. Package the remaining arguments as variable keyword arguments (applies only to V3).
+        4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
+        """
+
+        api_version: Optional[str] = self._get_data_context_version(arg1=arg1, **kwargs)
+        if api_version == "v3":
+            if "datasource_name" in kwargs:
+                datasource_name = kwargs.pop("datasource_name", None)
+            else:
+                datasource_name = arg1
+            if "data_connector_name" in kwargs:
+                data_connector_name = kwargs.pop("data_connector_name", None)
+            else:
+                data_connector_name = arg2
+            if "data_asset_name" in kwargs:
+                data_asset_name = kwargs.pop("data_asset_name", None)
+            else:
+                data_asset_name = arg3
+            return self._get_batch_v3(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                **kwargs,
+            )
+        if "batch_kwargs" in kwargs:
+            batch_kwargs = kwargs.get("batch_kwargs", None)
+        else:
+            batch_kwargs = arg1
+        if "expectation_suite_name" in kwargs:
+            expectation_suite_name = kwargs.get("expectation_suite_name", None)
+        else:
+            expectation_suite_name = arg2
+        if "data_asset_type" in kwargs:
+            data_asset_type = kwargs.get("data_asset_type", None)
+        else:
+            data_asset_type = arg3
+        batch_parameters = kwargs.get("batch_parameters")
+        return self._get_batch_v2(
+            batch_kwargs=batch_kwargs,
+            expectation_suite_name=expectation_suite_name,
+            data_asset_type=data_asset_type,
+            batch_parameters=batch_parameters,
+        )
+
+    def get_batch_list(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        **kwargs,
+    ) -> List[Batch]:
+        """Get the list of zero or more batches, based on a variety of flexible input types.
+        This method applies only to the new (V3) Datasource schema.
+
+        Args:
+            batch_request
+
+            datasource_name
+            data_connector_name
+            data_asset_name
+
+            batch_request
+            batch_data
+            partition_request
+            partition_identifiers
+
+            limit
+            index
+            custom_filter_function
+
+            sampling_method
+            sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            batch_spec_passthrough
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        `get_batch` is the main user-facing API for getting batches.
+        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
+        Instead, this method is intended to help the user pick the right parameters
+
+        This method attempts to return any number of batches, including an empty list.
+        """
+
+        datasource_name: str
+        if batch_request:
+            if not isinstance(batch_request, BatchRequest):
+                raise TypeError(
+                    f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
+                )
+            datasource_name = batch_request.datasource_name
+        else:
+            datasource_name = datasource_name
+
+        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+
+        if batch_request:
+            # TODO: Raise a warning if any parameters besides batch_requests are specified
+            return datasource.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
+        else:
+            if partition_request is None:
+                if partition_identifiers is None:
+                    partition_identifiers = kwargs
+                else:
+                    # Raise a warning if kwargs exist
+                    pass
+
+                # Currently, the implementation of splitting and sampling is inconsistent between the
+                # Datasource and SimpleSqlalchemyDatasource classes.  The former communicates these
+                # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
+                # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
+                # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
+                # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
+                # of partitions is implemented using the PartitionQuery class, it will not recognize the keys
+                # representing the splitting and sampling directives and raise an exception.  Additional work is needed
+                # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
+                partition_request_params: dict = {
+                    "partition_identifiers": partition_identifiers,
+                    "limit": limit,
+                    "index": index,
+                    "custom_filter_function": custom_filter_function,
+                }
+                if sampling_method is not None:
+                    sampling_params: dict = {
+                        "sampling_method": sampling_method,
+                    }
+                    if sampling_kwargs is not None:
+                        sampling_params["sampling_kwargs"] = sampling_kwargs
+                    partition_request_params.update(sampling_params)
+                if splitter_method is not None:
+                    splitter_params: dict = {
+                        "splitter_method": splitter_method,
+                    }
+                    if splitter_kwargs is not None:
+                        splitter_params["splitter_kwargs"] = splitter_kwargs
+                    partition_request_params.update(splitter_params)
+                partition_request = PartitionRequest(partition_request_params)
+            else:
+                # Raise a warning if partition_identifiers or kwargs exist
+                partition_request = PartitionRequest(partition_request)
+
+            batch_request: BatchRequest = BatchRequest(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                batch_data=batch_data,
+                partition_request=partition_request,
+                batch_spec_passthrough=batch_spec_passthrough,
+            )
+            return datasource.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
+
+    def get_validator(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        expectation_suite_name: str = None,
+        expectation_suite: ExpectationSuite = None,
+        create_expectation_suite_with_name: str = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        **kwargs,
+    ) -> Validator:
+        """
+        This method applies only to the new (V3) Datasource schema.
+        """
+
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    expectation_suite is not None,
+                    expectation_suite_name is not None,
+                    create_expectation_suite_with_name is not None,
+                ]
+            )
+            != 1
+        ):
+            raise ValueError(
+                "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
+            )
+
+        if expectation_suite_name is not None:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
+
+        if create_expectation_suite_with_name is not None:
+            expectation_suite = self.create_expectation_suite(
+                expectation_suite_name=create_expectation_suite_with_name
+            )
+
+        batch: Batch = cast(
+            Batch,
+            self.get_batch(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                batch_request=batch_request,
+                batch_data=batch_data,
+                partition_request=partition_request,
+                partition_identifiers=partition_identifiers,
+                limit=limit,
+                index=index,
+                custom_filter_function=custom_filter_function,
+                batch_spec_passthrough=batch_spec_passthrough,
+                sampling_method=sampling_method,
+                sampling_kwargs=sampling_kwargs,
+                splitter_method=splitter_method,
+                splitter_kwargs=splitter_kwargs,
+                **kwargs,
+            ),
+        )
+
+        batch_definition = batch.batch_definition
+        execution_engine = self.datasources[
+            batch_definition.datasource_name
+        ].execution_engine
+
+        validator = Validator(
+            execution_engine=execution_engine,
+            interactive_evaluation=True,
+            expectation_suite=expectation_suite,
+            data_context=self,
+            batches=[batch],
+        )
+
+        return validator
+
     def list_validation_operator_names(self):
         if not self.validation_operators:
             return []
         return list(self.validation_operators.keys())
 
+    # TODO: deprecate
     @usage_statistics_enabled_method(
         event_name="data_context.add_datasource",
         args_payload_fn=add_datasource_usage_statistics,
     )
-    def add_datasource(self, name, initialize=True, **kwargs):
+    def add_datasource(
+        self, name, initialize=True, **kwargs
+    ) -> Optional[Dict[str, Union[LegacyDatasource, BaseDatasource]]]:
         """Add a new datasource to the data context, with configuration provided as kwargs.
         Args:
             name: the name for the new datasource to add
@@ -1034,6 +1573,7 @@ class BaseDataContext(object):
             datasource (Datasource)
         """
         logger.debug("Starting BaseDataContext.add_datasource for %s" % name)
+
         module_name = kwargs.get("module_name", "great_expectations.datasource")
         verify_dynamic_loading_support(module_name=module_name)
         class_name = kwargs.get("class_name")
@@ -1041,27 +1581,68 @@ class BaseDataContext(object):
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
+        config: dict
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
         else:
             config = kwargs
 
-        config = datasourceConfigSchema.load(config)
-        self._project_config["datasources"][name] = config
+        return self._instantiate_datasource_from_config_and_update_project_config(
+            name=name,
+            config=config,
+            initialize=initialize,
+        )
 
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self, name: str, config: dict, initialize: bool = True
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        datasource_config: DatasourceConfig = datasourceConfigSchema.load(
+            CommentedMap(**config)
+        )
+        self._project_config["datasources"][name] = datasource_config
+        datasource_config = self._project_config_with_variables_substituted.datasources[
+            name
+        ]
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
+        if initialize:
+            try:
+                datasource = self._instantiate_datasource_from_config(
+                    name=name, config=config
+                )
+                self._cached_datasources[name] = datasource
+            except ge_exceptions.DatasourceInitializationError as e:
+                # Do not keep configuration that could not be instantiated.
+                del self._project_config["datasources"][name]
+                raise e
+        else:
+            datasource = None
+        return datasource
+
+    def _instantiate_datasource_from_config(
+        self, name: str, config: dict
+    ) -> Union[LegacyDatasource, BaseDatasource]:
+        """Instantiate a new datasource to the data context, with configuration provided as kwargs.
+        Args:
+            kwargs (keyword arguments): the configuration for the new datasource
+
+        Returns:
+            datasource (Datasource)
+        """
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
-        if initialize:
-            datasource = self._build_datasource_from_config(
-                name, self._project_config_with_variables_substituted.datasources[name]
+        try:
+            datasource: Union[
+                LegacyDatasource, BaseDatasource
+            ] = self._build_datasource_from_config(name=name, config=config)
+        except Exception as e:
+            raise ge_exceptions.DatasourceInitializationError(
+                datasource_name=name, message=str(e)
             )
-            self._cached_datasources[name] = datasource
-        else:
-            datasource = None
-
         return datasource
 
+    # TODO: deprecate
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
@@ -1084,14 +1665,39 @@ class BaseDataContext(object):
         )
         return generator
 
-    def get_config(self):
-        return self._project_config
+    def get_config(
+        self, mode="typed"
+    ) -> Union[DataContextConfig, CommentedMap, dict, str]:
+        config: DataContextConfig = self._project_config
 
-    def _build_datasource_from_config(self, name, config):
+        if mode == "typed":
+            return config
+
+        elif mode == "commented_map":
+            return config.commented_map
+
+        elif mode == "dict":
+            return config.to_json_dict()
+
+        elif mode == "yaml":
+            return config.to_yaml_str()
+
+        else:
+            raise ValueError(f"Unknown config mode {mode}")
+
+    def _build_datasource_from_config(
+        self, name: str, config: Union[dict, DatasourceConfig]
+    ):
         # We convert from the type back to a dictionary for purposes of instantiation
         if isinstance(config, DatasourceConfig):
             config = datasourceConfigSchema.dump(config)
         config.update({"name": name})
+        # While the new Datasource classes accept "data_context_root_directory", the Legacy Datasource classes do not.
+        if config["class_name"] in [
+            "BaseDatasource",
+            "Datasource",
+        ]:
+            config.update({"data_context_root_directory": self.root_directory})
         module_name = "great_expectations.datasource"
         datasource = instantiate_class_from_config(
             config=config,
@@ -1106,7 +1712,9 @@ class BaseDataContext(object):
             )
         return datasource
 
-    def get_datasource(self, datasource_name: str = "default") -> Datasource:
+    def get_datasource(
+        self, datasource_name: str = "default"
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         """Get the named datasource
 
         Args:
@@ -1121,7 +1729,7 @@ class BaseDataContext(object):
             datasource_name
             in self._project_config_with_variables_substituted.datasources
         ):
-            datasource_config = copy.deepcopy(
+            datasource_config: DatasourceConfig = copy.deepcopy(
                 self._project_config_with_variables_substituted.datasources[
                     datasource_name
                 ]
@@ -1130,9 +1738,13 @@ class BaseDataContext(object):
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-        datasource_config = datasourceConfigSchema.load(datasource_config)
-        datasource = self._build_datasource_from_config(
-            datasource_name, datasource_config
+
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+
+        datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = self._instantiate_datasource_from_config(
+            name=datasource_name, config=config
         )
         self._cached_datasources[datasource_name] = datasource
         return datasource
@@ -1173,6 +1785,22 @@ class BaseDataContext(object):
             value["name"] = name
             stores.append(value)
         return stores
+
+    def list_active_stores(self):
+        """
+        List active Stores on this context. Active stores are identified by setting the following parameters:
+            expectations_store_name,
+            validations_store_name,
+            evaluation_parameter_store_name
+        """
+        active_store_names = [
+            self.expectations_store_name,
+            self.validations_store_name,
+            self.evaluation_parameter_store_name,
+        ]
+        return [
+            store for store in self.list_stores() if store["name"] in active_store_names
+        ]
 
     def list_validation_operators(self):
         """List currently-configured Validation Operators on this context"""
@@ -1241,7 +1869,6 @@ class BaseDataContext(object):
         else:
             self._stores[self.expectations_store_name].remove_key(key)
             return True
-        return False
 
     def get_expectation_suite(self, expectation_suite_name):
         """Get a named expectation suite for the provided data_asset_name.
@@ -1540,9 +2167,11 @@ class BaseDataContext(object):
             logger.debug("Found data_docs_sites. Building sites...")
 
             for site_name, site_config in sites.items():
-                logger.debug("Building Data Docs Site %s" % site_name,)
+                logger.debug(
+                    "Building Data Docs Site %s" % site_name,
+                )
 
-                if (site_names and site_name in site_names) or not site_names:
+                if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
                     module_name = "great_expectations.render.renderer.site_builder"
                     site_builder = instantiate_class_from_config(
@@ -1657,7 +2286,7 @@ class BaseDataContext(object):
 
         if not dry_run:
             logger.info(
-                "Profiling '%s' with '%s'" % (datasource_name, profiler.__name__)
+                "Profiling '{}' with '{}'".format(datasource_name, profiler.__name__)
             )
 
         profiling_results = {}
@@ -1813,7 +2442,7 @@ class BaseDataContext(object):
 
                 except ge_exceptions.ProfilerError as err:
                     logger.warning(err.message)
-                except IOError as err:
+                except OSError as err:
                     logger.warning(
                         "IOError while profiling %s. (Perhaps a loading error?) Skipping."
                         % name[1]
@@ -1900,7 +2529,7 @@ class BaseDataContext(object):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 pass
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -1909,7 +2538,9 @@ class BaseDataContext(object):
             run_name = run_name or "profiling"
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
-        logger.info("Profiling '%s' with '%s'" % (datasource_name, profiler.__name__))
+        logger.info(
+            "Profiling '{}' with '{}'".format(datasource_name, profiler.__name__)
+        )
 
         if not additional_batch_kwargs:
             additional_batch_kwargs = {}
@@ -1973,7 +2604,8 @@ class BaseDataContext(object):
 
         # TODO: Add batch_parameters
         batch = self.get_batch(
-            expectation_suite_name=expectation_suite_name, batch_kwargs=batch_kwargs,
+            expectation_suite_name=expectation_suite_name,
+            batch_kwargs=batch_kwargs,
         )
 
         if not profiler.validate(batch):
@@ -2005,13 +2637,11 @@ class BaseDataContext(object):
             row_count = batch.get_row_count()
             total_rows += row_count
             new_column_count = len(
-                set(
-                    [
-                        exp.kwargs["column"]
-                        for exp in expectation_suite.expectations
-                        if "column" in exp.kwargs
-                    ]
-                )
+                {
+                    exp.kwargs["column"]
+                    for exp in expectation_suite.expectations
+                    if "column" in exp.kwargs
+                }
             )
             total_columns += new_column_count
 
@@ -2030,11 +2660,259 @@ class BaseDataContext(object):
             """
 Profiled the data asset, with %d total rows and %d columns in %.2f seconds.
 Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs."""
-            % (total_rows, total_columns, total_duration, total_expectations,)
+            % (
+                total_rows,
+                total_columns,
+                total_duration,
+                total_expectations,
+            )
         )
 
         profiling_results["success"] = True
         return profiling_results
+
+    @staticmethod
+    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
+        if checkpoint is None:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
+            )
+        if "validation_operator_name" not in checkpoint:
+            checkpoint["validation_operator_name"] = "action_list_operator"
+
+        if "batches" not in checkpoint:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
+            )
+        batches = checkpoint["batches"]
+        if not isinstance(batches, list):
+            raise ge_exceptions.CheckpointError(
+                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+            )
+
+        for batch in batches:
+            for required in ["expectation_suite_names", "batch_kwargs"]:
+                if required not in batch:
+                    raise ge_exceptions.CheckpointError(
+                        f"Items in `batches` must have a key `{required}`"
+                    )
+
+        return checkpoint
+
+    def list_checkpoints(self) -> List[str]:
+        """List checkpoints. (Experimental)"""
+        # TODO mark experimental
+        files = self._list_ymls_in_checkpoints_directory()
+        return [
+            os.path.basename(f)[:-4]
+            for f in files
+            if os.path.basename(f).endswith(".yml")
+        ]
+
+    def get_checkpoint(self, checkpoint_name: str) -> dict:
+        """Load a checkpoint. (Experimental)"""
+        # TODO mark experimental
+        yaml = YAML(typ="safe")
+        # TODO make a serializable class with a schema
+        checkpoint_path = os.path.join(
+            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
+        )
+        try:
+            with open(checkpoint_path) as f:
+                checkpoint = yaml.load(f.read())
+                return self._validate_checkpoint(checkpoint, checkpoint_name)
+        except FileNotFoundError:
+            raise ge_exceptions.CheckpointNotFoundError(
+                f"Could not find checkpoint `{checkpoint_name}`."
+            )
+
+    def run_checkpoint(
+        self,
+        checkpoint_name: str,
+        run_id=None,
+        evaluation_parameters=None,
+        run_name=None,
+        run_time=None,
+        result_format=None,
+        **kwargs,
+    ):
+        """
+        Validate against a pre-defined checkpoint. (Experimental)
+        Args:
+            checkpoint_name: The name of a checkpoint defined via the CLI or by manually creating a yml file
+            run_name: The run_name for the validation; if None, a default value will be used
+            **kwargs: Additional kwargs to pass to the validation operator
+
+        Returns:
+            ValidationOperatorResult
+        """
+        # TODO mark experimental
+
+        if result_format is None:
+            result_format = {"result_format": "SUMMARY"}
+
+        checkpoint = self.get_checkpoint(checkpoint_name)
+
+        batches_to_validate = []
+        for batch in checkpoint["batches"]:
+            batch_kwargs = batch["batch_kwargs"]
+            for suite_name in batch["expectation_suite_names"]:
+                suite = self.get_expectation_suite(suite_name)
+                batch = self.get_batch(batch_kwargs, suite)
+                batches_to_validate.append(batch)
+
+        results = self.run_validation_operator(
+            checkpoint["validation_operator_name"],
+            assets_to_validate=batches_to_validate,
+            run_id=run_id,
+            evaluation_parameters=evaluation_parameters,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            **kwargs,
+        )
+        return results
+
+    def _list_ymls_in_checkpoints_directory(self):
+        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
+        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
+        return files
+
+    def test_yaml_config(
+        self,
+        yaml_config: str,
+        name=None,
+        pretty_print=True,
+        return_mode="instantiated_class",
+        shorten_tracebacks=False,
+    ):
+        """Convenience method for testing yaml configs
+
+        test_yaml_config is a convenience method for configuring the moving
+        parts of a Great Expectations deployment. It allows you to quickly
+        test out configs for system components, especially Datasources,
+        Checkpoints, and Stores.
+
+        For many deployments of Great Expectations, these components (plus
+        Expectations) are the only ones you'll need.
+
+        test_yaml_config is mainly intended for use within notebooks and tests.
+
+        Parameters
+        ----------
+        yaml_config : str
+            A string containing the yaml config to be tested
+
+        name: str
+            (Optional) A string containing the name of the component to instantiate
+
+        pretty_print : bool
+            Determines whether to print human-readable output
+
+        return_mode : str
+            Determines what type of object test_yaml_config will return
+            Valid modes are "instantiated_class" and "report_object"
+
+        shorten_tracebacks : bool
+            If true, catch any errors during instantiation and print only the
+            last element of the traceback stack. This can be helpful for
+            rapid iteration on configs in a notebook, because it can remove
+            the need to scroll up and down a lot.
+
+        Returns
+        -------
+        The instantiated component (e.g. a Datasource)
+        OR
+        a json object containing metadata from the component's self_check method
+
+        The returned object is determined by return_mode.
+        """
+        if pretty_print:
+            print("Attempting to instantiate class from config...")
+
+        if return_mode not in ["instantiated_class", "report_object"]:
+            raise ValueError(f"Unknown return_mode: {return_mode}.")
+
+        substituted_config_variables = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+        )
+
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        config_str_with_substituted_variables = substitute_all_config_variables(
+            yaml_config,
+            substitutions,
+        )
+
+        config = yaml.load(config_str_with_substituted_variables)
+
+        if "class_name" in config:
+            class_name = config["class_name"]
+        else:
+            class_name = None
+
+        try:
+            if class_name in [
+                "ExpectationsStore",
+                "ValidationsStore",
+                "HtmlSiteStore",
+                "EvaluationParameterStore",
+                "MetricStore",
+                "SqlAlchemyQueryStore",
+            ]:
+                print(f"\tInstantiating as a Store, since class_name is {class_name}")
+                instantiated_class = self._build_store_from_config(
+                    "my_temp_store", config
+                )
+
+            elif class_name in [
+                "Datasource",
+                "SimpleSqlalchemyDatasource",
+            ]:
+                print(
+                    f"\tInstantiating as a Datasource, since class_name is {class_name}"
+                )
+                datasource_name = name or "my_temp_datasource"
+                instantiated_class = (
+                    self._instantiate_datasource_from_config_and_update_project_config(
+                        name=datasource_name,
+                        config=config,
+                        initialize=True,
+                    )
+                )
+
+            else:
+                print(
+                    "\tNo matching class found. Attempting to instantiate class from the raw config..."
+                )
+                instantiated_class = instantiate_class_from_config(
+                    config, runtime_environment={}, config_defaults={}
+                )
+
+            if pretty_print:
+                print(
+                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
+                )
+                print()
+
+            report_object = instantiated_class.self_check(pretty_print)
+
+            if return_mode == "instantiated_class":
+                return instantiated_class
+
+            elif return_mode == "report_object":
+                return report_object
+
+        except Exception as e:
+            if shorten_tracebacks:
+                traceback.print_exc(limit=1)
+            else:
+                raise e
 
 
 class DataContext(BaseDataContext):
@@ -2280,7 +3158,7 @@ class DataContext(BaseDataContext):
             raise ge_exceptions.InvalidConfigurationYamlError(
                 "Error: duplicate key found in project YAML file."
             )
-        except IOError:
+        except OSError:
             raise ge_exceptions.ConfigNotFoundError()
 
         try:
@@ -2288,38 +3166,6 @@ class DataContext(BaseDataContext):
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
-
-    def list_checkpoints(self) -> List[str]:
-        """List checkpoints. (Experimental)"""
-        # TODO mark experimental
-        files = self._list_ymls_in_checkpoints_directory()
-        return [
-            os.path.basename(f)[:-4]
-            for f in files
-            if os.path.basename(f).endswith(".yml")
-        ]
-
-    def get_checkpoint(self, checkpoint_name: str) -> dict:
-        """Load a checkpoint. (Experimental)"""
-        # TODO mark experimental
-        yaml = YAML(typ="safe")
-        # TODO make a serializable class with a schema
-        checkpoint_path = os.path.join(
-            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
-        )
-        try:
-            with open(checkpoint_path, "r") as f:
-                checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint, checkpoint_name)
-        except FileNotFoundError:
-            raise ge_exceptions.CheckpointNotFoundError(
-                f"Could not find checkpoint `{checkpoint_name}`."
-            )
-
-    def _list_ymls_in_checkpoints_directory(self):
-        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
-        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
-        return files
 
     def _save_project_config(self):
         """Save the current project to disk."""
@@ -2336,13 +3182,23 @@ class DataContext(BaseDataContext):
         self._save_project_config()
         return new_store
 
-    def add_datasource(self, name, **kwargs):
+    def add_datasource(
+        self, name, **kwargs
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         logger.debug("Starting DataContext.add_datasource for datasource %s" % name)
 
-        new_datasource = super().add_datasource(name, **kwargs)
+        new_datasource: Optional[
+            Union[LegacyDatasource, BaseDatasource]
+        ] = super().add_datasource(name=name, **kwargs)
         self._save_project_config()
 
         return new_datasource
+
+    def delete_datasource(self, name: str):
+        logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
+
+        super().delete_datasource(datasource_name=name)
+        self._save_project_config()
 
     @classmethod
     def find_context_root_dir(cls):
@@ -2496,34 +3352,6 @@ class DataContext(BaseDataContext):
             ge_exceptions.InvalidDataContextConfigError,
         ) as e:
             logger.debug(e)
-
-    @staticmethod
-    def _validate_checkpoint(checkpoint: dict, checkpoint_name: str) -> dict:
-        if checkpoint is None:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
-            )
-        if "validation_operator_name" not in checkpoint:
-            checkpoint["validation_operator_name"] = "action_list_operator"
-
-        if "batches" not in checkpoint:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
-            )
-        batches = checkpoint["batches"]
-        if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(
-                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
-            )
-
-        for batch in batches:
-            for required in ["expectation_suite_names", "batch_kwargs"]:
-                if required not in batch:
-                    raise ge_exceptions.CheckpointError(
-                        f"Items in `batches` must have a key `{required}`"
-                    )
-
-        return checkpoint
 
 
 class ExplorerDataContext(DataContext):

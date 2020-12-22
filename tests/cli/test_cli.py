@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 from click.testing import CliRunner
@@ -57,7 +56,9 @@ Commands:
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_command_invalid_command(caplog,):
+def test_cli_command_invalid_command(
+    caplog,
+):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["blarg"])
     assert result.exit_code == 2
@@ -65,7 +66,9 @@ def test_cli_command_invalid_command(caplog,):
     assert ("'blarg'" in result.stderr) or ('"blarg"' in result.stderr)
 
 
-def test_cli_version(caplog,):
+def test_cli_version(
+    caplog,
+):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["--version"], catch_exceptions=False)
     assert ge_version in str(result.output)
