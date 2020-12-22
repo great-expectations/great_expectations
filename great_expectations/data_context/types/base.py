@@ -10,7 +10,6 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -1414,25 +1413,6 @@ class CheckpointConfigSchema(Schema):
             if "name" not in data:
                 raise ge_exceptions.InvalidConfigError(
                     f"""Your Checkpoint configuration requires the "name" field.  Please update your current checkpoint
-                    configuration to continue.
-                    """
-                )
-            action_list: Optional[list] = data.get("action_list")
-            action_list_present: bool = (
-                action_list is not None
-                and isinstance(action_list, list)
-                and len(action_list) > 0
-            )
-            if not (
-                (
-                    "validations" in data
-                    and isinstance(data["validations"], list)
-                    and len(data["validations"]) > 0
-                )
-                or action_list_present
-            ):
-                raise ge_exceptions.InvalidConfigError(
-                    f"""Your current Checkpoint configuration is inconsistent.  Please update your checkpoint
                     configuration to continue.
                     """
                 )

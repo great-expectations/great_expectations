@@ -1,4 +1,5 @@
 import json
+import logging
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, List, Optional, Union
@@ -12,6 +13,8 @@ from great_expectations.validation_operators.types.validation_operator_result im
     ValidationOperatorResult,
 )
 from great_expectations.validator.validator import Validator
+
+logger = logging.getLogger(__name__)
 
 
 class Checkpoint:
@@ -287,6 +290,27 @@ class Checkpoint:
 
         if pretty_print:
             print(f"\nCheckpoint class name: {self.__class__.__name__}")
+
+        # TODO: <Alex>ALEX</Alex>
+        action_list: Optional[list] = self.config.action_list
+        action_list_present: bool = (
+            action_list is not None
+            and isinstance(action_list, list)
+            and len(action_list) > 0
+        )
+        if not (
+            (
+                self.config.validations
+                and isinstance(self.config.validations, list)
+                and len(self.config.validations) > 0
+            )
+            or action_list_present
+        ):
+            logger.warning(
+                f"""Your current Checkpoint configuration is inconsistent.  Please update your checkpoint configuration
+                to continue.
+                """
+            )
 
         return report_object
 

@@ -18,7 +18,7 @@ yaml = YAML()
 logger = logging.getLogger(__name__)
 
 
-def test_basic_checkpoint_config_validation(empty_data_context):
+def test_basic_checkpoint_config_validation(empty_data_context, caplog):
     yaml_config_erroneous: str
     config_erroneous: CommentedMap
     checkpoint_config: CheckpointConfig
@@ -55,13 +55,13 @@ def test_basic_checkpoint_config_validation(empty_data_context):
             name="my_erroneous_checkpoint",
         )
 
-    with pytest.raises(ge_exceptions.InvalidConfigError):
-        # noinspection PyUnusedLocal
-        checkpoint = empty_data_context.test_yaml_config(
-            yaml_config=yaml_config_erroneous,
-            name="my_erroneous_checkpoint",
-            class_name="Checkpoint",
-        )
+    # noinspection PyUnusedLocal
+    checkpoint = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config_erroneous,
+        name="my_erroneous_checkpoint",
+        class_name="Checkpoint",
+    )
+    assert "Your current Checkpoint configuration is inconsistent" in caplog.text
 
     yaml_config: str = f"""
     name: my_checkpoint
