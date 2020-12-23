@@ -22,7 +22,7 @@ class Checkpoint:
         self,
         name: str,
         data_context,
-        checkpoint_config: CheckpointConfig,
+        checkpoint_config: Union[CheckpointConfig, dict],
     ):
         self._data_context = data_context
         self._name = name
@@ -34,7 +34,7 @@ class Checkpoint:
                 f"instead got {type(checkpoint_config)}"
             )
         elif isinstance(checkpoint_config, dict):
-            checkpoint_config: CheckpointConfig = CheckpointConfig(**checkpoint_config)
+            checkpoint_config = CheckpointConfig(**checkpoint_config)
         self._config = checkpoint_config
 
         self._substituted_config = None
@@ -301,6 +301,18 @@ class Checkpoint:
             action_list is not None
             and isinstance(action_list, list)
             and len(action_list) > 0
+        ) or (
+            validations_present
+            and all(
+                [
+                    (
+                        validation.get("action_list")
+                        and isinstance(validation["action_list"], list)
+                        and len(validation["action_list"]) > 0
+                    )
+                    for validation in self.config.validations
+                ]
+            )
         )
         if not validations_present:
             logger.warning(
