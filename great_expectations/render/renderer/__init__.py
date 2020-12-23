@@ -12,3 +12,4 @@ from .page_renderer import (
 )
 from .site_index_page_renderer import SiteIndexPageRenderer
 from .slack_renderer import SlackRenderer
+from .opsgenie_renderer import OpsgenieRenderer
