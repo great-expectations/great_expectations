@@ -23,7 +23,9 @@ class CustomPageRenderer(Renderer):
                 "header": RenderedStringTemplateContent(
                     **{
                         "content_block_type": "string_template",
-                        "string_template": {"template": header,},
+                        "string_template": {
+                            "template": header,
+                        },
                     }
                 ),
                 "subheader": subheader,
@@ -121,7 +123,10 @@ class CustomPageRenderer(Renderer):
                     "tag": "code",
                     "tooltip": {"content": "This is the tooltip content."},
                 },
-                "styling": {"classes": ["col-12"], "styles": {"margin-top": "20px"},},
+                "styling": {
+                    "classes": ["col-12"],
+                    "styles": {"margin-top": "20px"},
+                },
             }
         )
 
@@ -154,7 +159,10 @@ class CustomPageRenderer(Renderer):
                         }
                     },
                 },
-                "styling": {"classes": ["col-12"], "styles": {"margin-top": "20px"},},
+                "styling": {
+                    "classes": ["col-12"],
+                    "styles": {"margin-top": "20px"},
+                },
             }
         )
 
@@ -172,7 +180,9 @@ class CustomPageRenderer(Renderer):
                             "template": "$value",
                             "params": {"value": value},
                             "styling": {
-                                "default": {"classes": ["badge", "badge-info"],},
+                                "default": {
+                                    "classes": ["badge", "badge-info"],
+                                },
                             },
                         },
                     }

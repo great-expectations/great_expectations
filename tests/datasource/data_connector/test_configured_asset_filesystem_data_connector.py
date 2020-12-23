@@ -1,4 +1,5 @@
 import json
+import os
 from typing import List
 
 import pytest
@@ -1174,3 +1175,114 @@ assets:
         )
         == 5
     )
+
+
+def test_basic_instantiation_with_nested_directories(tmp_path_factory):
+    base_directory = str(
+        tmp_path_factory.mktemp("test_basic_instantiation_with_nested_directories")
+    )
+    os.makedirs(os.path.join(base_directory, "foo"))
+    create_files_in_directory(
+        directory=os.path.join(base_directory, "foo"),
+        file_name_list=[
+            "alpha-1.csv",
+            "alpha-2.csv",
+            "alpha-3.csv",
+        ],
+    )
+
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        base_directory=os.path.join(base_directory, "foo"),
+        assets={"alpha": {}},
+    )
+
+    assert my_data_connector.self_check() == {
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
+        ],
+        "data_assets": {
+            "alpha": {
+                "example_data_references": [
+                    "alpha-1.csv",
+                    "alpha-2.csv",
+                    "alpha-3.csv",
+                ],
+                "batch_definition_count": 3,
+            },
+        },
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
+        "example_data_reference": {},
+    }
+
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        base_directory=base_directory,
+        assets={"alpha": {"base_directory": "foo"}},
+    )
+
+    assert my_data_connector.self_check() == {
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
+        ],
+        "data_assets": {
+            "alpha": {
+                "example_data_references": [
+                    "alpha-1.csv",
+                    "alpha-2.csv",
+                    "alpha-3.csv",
+                ],
+                "batch_definition_count": 3,
+            },
+        },
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
+        "example_data_reference": {},
+    }
+
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "foo/alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        base_directory=base_directory,
+        assets={"alpha": {}},
+    )
+
+    assert my_data_connector.self_check() == {
+        "class_name": "ConfiguredAssetFilesystemDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": [
+            "alpha",
+        ],
+        "data_assets": {
+            "alpha": {
+                "example_data_references": [
+                    "foo/alpha-1.csv",
+                    "foo/alpha-2.csv",
+                    "foo/alpha-3.csv",
+                ],
+                "batch_definition_count": 3,
+            },
+        },
+        "example_unmatched_data_references": ["foo"],
+        "unmatched_data_reference_count": 1,
+        "example_data_reference": {},
+    }
