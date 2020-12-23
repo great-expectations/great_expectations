@@ -54,7 +54,19 @@ def test_basic_checkpoint_config_validation(empty_data_context, caplog):
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
         )
+    with pytest.raises(ge_exceptions.InvalidConfigError):
+        # noinspection PyUnusedLocal
+        checkpoint = empty_data_context.test_yaml_config(
+            yaml_config=yaml_config_erroneous,
+            name="my_erroneous_checkpoint",
+            class_name="Checkpoint",
+        )
 
+    yaml_config_erroneous = f"""
+    config_version: 1
+    name: my_erroneous_checkpoint
+    class_name: Checkpoint
+    """
     # noinspection PyUnusedLocal
     checkpoint = empty_data_context.test_yaml_config(
         yaml_config=yaml_config_erroneous,
@@ -69,6 +81,8 @@ def test_basic_checkpoint_config_validation(empty_data_context, caplog):
         'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
         in caplog.text
     )
+
+    assert len(empty_data_context.list_checkpoints()) == 1
 
     yaml_config: str = f"""
     name: my_checkpoint
@@ -144,6 +158,8 @@ def test_basic_checkpoint_config_validation(empty_data_context, caplog):
         )
         == expected_checkpoint_config
     )
+
+    assert len(empty_data_context.list_checkpoints()) == 2
 
 
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(empty_data_context):
@@ -240,6 +256,8 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(empty_data_c
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
     )
+
+    assert len(empty_data_context.list_checkpoints()) == 1
 
 
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
@@ -350,6 +368,8 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         properties=expected_checkpoint_config,
     )
 
+    assert len(empty_data_context.list_checkpoints()) == 1
+
 
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
     empty_data_context,
@@ -423,6 +443,8 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
     )
+
+    assert len(empty_data_context.list_checkpoints()) == 1
 
 
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
@@ -535,6 +557,8 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         properties=expected_checkpoint_config,
     )
 
+    assert len(empty_data_context.list_checkpoints()) == 1
+
 
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     empty_data_context,
@@ -609,7 +633,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
     checkpoint = empty_data_context.test_yaml_config(
         yaml_config=yaml_config,
-        name="my_checkpoint",
+        name="my_base_checkpoint",
     )
     assert filter_properties_dict(
         properties=checkpoint.config.to_json_dict(),
@@ -678,6 +702,8 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
     )
+
+    assert len(empty_data_context.list_checkpoints()) == 2
 
 
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
@@ -775,6 +801,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     context.create_expectation_suite("my_expectation_suite")
     print(context.list_datasources())
+    # noinspection PyUnusedLocal
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1

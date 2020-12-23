@@ -2980,6 +2980,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 print(
                     f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
                 )
+
+                checkpoint_config: CheckpointConfig = (
+                    CheckpointConfig.from_commented_map(commented_map=config)
+                )
+
                 checkpoint_name: str = name or "my_temp_checkpoint"
                 instantiated_class = cast(
                     Checkpoint,
@@ -2987,7 +2992,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                         config={
                             "name": checkpoint_name,
                             "data_context": self,
-                            "checkpoint_config": config,
+                            "checkpoint_config": checkpoint_config,
                         },
                         runtime_environment={
                             "root_directory": self.root_directory,
@@ -2998,11 +3003,15 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                         },
                     ),
                 )
+
+                checkpoint_config = CheckpointConfig.from_commented_map(
+                    commented_map=instantiated_class.config.commented_map
+                )
+
                 # noinspection PyUnusedLocal
-                checkpoint_config: CheckpointConfig = (
-                    CheckpointConfig.from_commented_map(
-                        commented_map=instantiated_class.config.commented_map
-                    )
+                checkpoint: Checkpoint = self.create_checkpoint(
+                    checkpoint_name=checkpoint_name,
+                    checkpoint_config=checkpoint_config,
                 )
             else:
                 print(
