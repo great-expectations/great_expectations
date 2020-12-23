@@ -620,7 +620,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
             configuration = self.configuration
         try:
             assert configuration.expectation_type == self.expectation_type, (
-                "expectation configuration type does not match " "expectation type"
+                f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
             )
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -693,7 +693,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
             kwargs=convert_to_json_serializable(deepcopy(all_args)),
             meta=meta,
         )
-
+    
 
 class TableExpectation(Expectation, ABC):
     domain_keys = (
