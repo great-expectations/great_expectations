@@ -5,7 +5,8 @@ from collections import OrderedDict
 import mistune
 import pytest
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import (
     ExpectationSuitePageRenderer,
@@ -507,7 +508,8 @@ def ValidationResultsPageRenderer_render_with_run_info_at_start():
 
 
 def test_snapshot_ValidationResultsPageRenderer_render_with_run_info_at_end(
-    titanic_profiled_evrs_1, ValidationResultsPageRenderer_render_with_run_info_at_end,
+    titanic_profiled_evrs_1,
+    ValidationResultsPageRenderer_render_with_run_info_at_end,
 ):
     validation_results_page_renderer = ValidationResultsPageRenderer(
         run_info_at_end=True

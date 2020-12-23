@@ -4,7 +4,7 @@ from typing import Iterable
 import numpy as np
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import ProfilerCardinality, ProfilerDataType
@@ -99,6 +99,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             column_type = cls._get_column_type(dataset, column_name)
             column_cache_entry["type"] = column_type
             # remove the expectation
+            # Does this change with different config format?
             dataset.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_values_to_be_in_type_list",
@@ -176,7 +177,10 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         ):
             if cls._get_column_cardinality_with_caching(
                 dataset, column, column_cache
-            ) in [ProfilerCardinality.TWO, ProfilerCardinality.VERY_FEW,]:
+            ) in [
+                ProfilerCardinality.TWO,
+                ProfilerCardinality.VERY_FEW,
+            ]:
                 partition_object = build_categorical_partition_object(dataset, column)
                 dataset.expect_column_kl_divergence_to_be_less_than(
                     column,
@@ -399,11 +403,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
 
-            if cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ] and type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]:
+            if (
+                cardinality
+                in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]
+                and type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]
+            ):
                 return column
 
         return None
@@ -419,11 +427,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
 
-            if cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ] and type in [ProfilerDataType.STRING, ProfilerDataType.UNKNOWN]:
+            if (
+                cardinality
+                in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]
+                and type in [ProfilerDataType.STRING, ProfilerDataType.UNKNOWN]
+            ):
                 return column
 
         return None
@@ -441,11 +453,15 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
             type = cls._get_column_type_with_caching(dataset, column, column_cache)
 
-            if cardinality in [
-                ProfilerCardinality.MANY,
-                ProfilerCardinality.VERY_MANY,
-                ProfilerCardinality.UNIQUE,
-            ] and type in [ProfilerDataType.DATETIME]:
+            if (
+                cardinality
+                in [
+                    ProfilerCardinality.MANY,
+                    ProfilerCardinality.VERY_MANY,
+                    ProfilerCardinality.UNIQUE,
+                ]
+                and type in [ProfilerDataType.DATETIME]
+            ):
                 return column
 
         return None
@@ -649,7 +665,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             )
         if included_expectations:
             for expectation in dataset.get_expectation_suite(
-                discard_failed_expectations=False, suppress_logging=True,
+                discard_failed_expectations=False,
+                suppress_logging=True,
             ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
@@ -726,6 +743,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
         return expectation_suite
 
+    # TODO: MIGRATE TO CLASS-FIRST STRUCTURE
+    # Question: do Domain and Success kwargs need to be passed here as well?
     @classmethod
     def _build_table_row_count_expectation(
         cls,

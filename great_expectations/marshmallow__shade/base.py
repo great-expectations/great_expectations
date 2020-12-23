@@ -10,8 +10,7 @@ These are necessary to avoid circular imports between core.py and fields.py.
 
 
 class FieldABC:
-    """Abstract base class from which all Field classes inherit.
-    """
+    """Abstract base class from which all Field classes inherit."""
 
     parent = None
     name = None

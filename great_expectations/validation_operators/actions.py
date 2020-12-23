@@ -18,7 +18,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
 from ..exceptions import ClassInstantiationError, DataContextError
-from .util import send_slack_notification, send_opsgenie_alert
+from .util import send_opsgenie_alert, send_slack_notification
 
 logger = logging.getLogger(__name__)
 
@@ -77,30 +77,35 @@ class NoOpAction(ValidationAction):
 
 class SlackNotificationAction(ValidationAction):
     """
-SlackNotificationAction sends a Slack notification to a given webhook.
+    SlackNotificationAction sends a Slack notification to a given webhook.
 
-**Configuration**
+    **Configuration**
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-    - name: send_slack_notification_on_validation_result
-    action:
-      class_name: StoreValidationResultAction
-      # put the actual webhook URL in the uncommitted/config_variables.yml file
-      slack_webhook: ${validation_notification_slack_webhook}
-      notify_on: all # possible values: "all", "failure", "success"
-      notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
-      renderer:
-        # the class that implements the message to be sent
-        # this is the default implementation, but you can
-        # implement a custom one
-        module_name: great_expectations.render.renderer.slack_renderer
-        class_name: SlackRenderer
+        - name: send_slack_notification_on_validation_result
+        action:
+          class_name: StoreValidationResultAction
+          # put the actual webhook URL in the uncommitted/config_variables.yml file
+          slack_webhook: ${validation_notification_slack_webhook}
+          notify_on: all # possible values: "all", "failure", "success"
+          notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
+          renderer:
+            # the class that implements the message to be sent
+            # this is the default implementation, but you can
+            # implement a custom one
+            module_name: great_expectations.render.renderer.slack_renderer
+            class_name: SlackRenderer
 
     """
 
     def __init__(
-        self, data_context, renderer, slack_webhook, notify_on="all", notify_with=None,
+        self,
+        data_context,
+        renderer,
+        slack_webhook,
+        notify_on="all",
+        notify_with=None,
     ):
         """Construct a SlackNotificationAction
 
@@ -117,7 +122,9 @@ SlackNotificationAction sends a Slack notification to a given webhook.
         """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
-            config=renderer, runtime_environment={}, config_defaults={},
+            config=renderer,
+            runtime_environment={},
+            config_defaults={},
         )
         module_name = renderer["module_name"]
         if not self.renderer:
@@ -184,23 +191,27 @@ SlackNotificationAction sends a Slack notification to a given webhook.
 
 class PagerdutyAlertAction(ValidationAction):
     """
-PagerdutyAlertAction sends a pagerduty event
+    PagerdutyAlertAction sends a pagerduty event
 
-**Configuration**
+    **Configuration**
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-    - name: send_pagerduty_alert_on_validation_result
-    action:
-      class_name: PagerdutyAlertAction
-      api_key: ${pagerduty_api_key} # Events API v2 key
-      routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.
-      notify_on: failure # possible values: "all", "failure", "success"
+        - name: send_pagerduty_alert_on_validation_result
+        action:
+          class_name: PagerdutyAlertAction
+          api_key: ${pagerduty_api_key} # Events API v2 key
+          routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.
+          notify_on: failure # possible values: "all", "failure", "success"
 
     """
 
     def __init__(
-        self, data_context, api_key, routing_key, notify_on="failure",
+        self,
+        data_context,
+        api_key,
+        routing_key,
+        notify_on="failure",
     ):
         """Construct a PagerdutyAlertAction
 
@@ -380,23 +391,25 @@ class OpsgenieAlertAction(ValidationAction):
 
 class StoreValidationResultAction(ValidationAction):
     """
-    StoreValidationResultAction stores a validation result in the ValidationsStore.
+        StoreValidationResultAction stores a validation result in the ValidationsStore.
 
-**Configuration**
+    **Configuration**
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-    - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-      # name of the store where the actions will store validation results
-      # the name must refer to a store that is configured in the great_expectations.yml file
-      target_store_name: validations_store
+        - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+          # name of the store where the actions will store validation results
+          # the name must refer to a store that is configured in the great_expectations.yml file
+          target_store_name: validations_store
 
     """
 
     def __init__(
-        self, data_context, target_store_name=None,
+        self,
+        data_context,
+        target_store_name=None,
     ):
         """
 
@@ -439,22 +452,22 @@ class StoreValidationResultAction(ValidationAction):
 
 class StoreEvaluationParametersAction(ValidationAction):
     """
-StoreEvaluationParametersAction extracts evaluation parameters from a validation result and stores them in the store
-configured for this action.
+    StoreEvaluationParametersAction extracts evaluation parameters from a validation result and stores them in the store
+    configured for this action.
 
-Evaluation parameters allow expectations to refer to statistics/metrics computed
-in the process of validating other prior expectations.
+    Evaluation parameters allow expectations to refer to statistics/metrics computed
+    in the process of validating other prior expectations.
 
-**Configuration**
+    **Configuration**
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-    - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-      # name of the store where the action will store the parameters
-      # the name must refer to a store that is configured in the great_expectations.yml file
-      target_store_name: evaluation_parameter_store
+        - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+          # name of the store where the action will store the parameters
+          # the name must refer to a store that is configured in the great_expectations.yml file
+          target_store_name: evaluation_parameter_store
 
     """
 
@@ -499,19 +512,19 @@ in the process of validating other prior expectations.
 
 class StoreMetricsAction(ValidationAction):
     """
-StoreMetricsAction extracts metrics from a Validation Result and stores them
-in a metrics store.
+    StoreMetricsAction extracts metrics from a Validation Result and stores them
+    in a metrics store.
 
-**Configuration**
+    **Configuration**
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-    - name: store_evaluation_params
-    action:
-      class_name: StoreMetricsAction
-      # name of the store where the action will store the metrics
-      # the name must refer to a store that is configured in the great_expectations.yml file
-      target_store_name: my_metrics_store
+        - name: store_evaluation_params
+        action:
+          class_name: StoreMetricsAction
+          # name of the store where the action will store the metrics
+          # the name must refer to a store that is configured in the great_expectations.yml file
+          target_store_name: my_metrics_store
 
     """
 
@@ -576,26 +589,26 @@ in a metrics store.
 
 class UpdateDataDocsAction(ValidationAction):
     """
-UpdateDataDocsAction is a validation action that
-notifies the site builders of all the data docs sites of the Data Context
-that a validation result should be added to the data docs.
+    UpdateDataDocsAction is a validation action that
+    notifies the site builders of all the data docs sites of the Data Context
+    that a validation result should be added to the data docs.
 
-**Configuration**
+    **Configuration**
 
-.. code-block:: yaml
+    .. code-block:: yaml
 
-    - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
+        - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
 
-You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
-list of sites to update:
+    You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
+    list of sites to update:
 
-    - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-      site_names:
-        - production_site
+        - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+          site_names:
+            - production_site
 
     """
 
@@ -642,7 +655,10 @@ list of sites to update:
         # build_data_docs will return the index page for the validation results, but we want to return the url for the valiation result using the code below
         data_docs_index_pages = self.data_context.build_data_docs(
             site_names=self._site_names,
-            resource_identifiers=[validation_result_suite_identifier],
+            resource_identifiers=[
+                validation_result_suite_identifier,
+                validation_result_suite_identifier.expectation_suite_identifier,
+            ],
         )
 
         # get the URL for the validation result

@@ -15,16 +15,18 @@ from typing import List
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import (
-    ExpectationConfiguration,
+from great_expectations.core.evaluation_parameters import build_evaluation_parameters
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import (
     ExpectationSuite,
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-    RunIdentifier,
     expectationSuiteSchema,
 )
-from great_expectations.core.evaluation_parameters import build_evaluation_parameters
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+)
 from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import (
     parse_result_format,
     recursively_convert_to_json_serializable,
@@ -847,8 +849,8 @@ class DataAsset:
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_evaluation_parameters = data_context.evaluation_parameter_store.get_bind_params(
-                    run_id
+                runtime_evaluation_parameters = (
+                    data_context.evaluation_parameter_store.get_bind_params(run_id)
                 )
             else:
                 runtime_evaluation_parameters = {}
@@ -877,7 +879,10 @@ class DataAsset:
                     warnings.warn(
                         "WARNING: This configuration object was built using version %s of great_expectations, but "
                         "is currently being validated by version %s."
-                        % (suite_ge_version, ge_version,)
+                        % (
+                            suite_ge_version,
+                            ge_version,
+                        )
                     )
             else:
                 warnings.warn(
@@ -1155,7 +1160,7 @@ class DataAsset:
                         Counter(unexpected_list).most_common(
                             result_format["partial_unexpected_count"]
                         ),
-                        key=lambda x: (-x[1], x[0]),
+                        key=lambda x: (-x[1], str(x[0])),
                     )
                 ]
             except TypeError:

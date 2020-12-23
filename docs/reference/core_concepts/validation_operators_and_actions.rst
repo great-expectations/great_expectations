@@ -1,5 +1,9 @@
 .. _validation_operators_and_actions:
 
+.. warning::
+
+  As part of the new modular expectations API in Great Expectations, Validation Operators are being folded into the Checkpoints functionality. We will continue to update this documentation as that change is made broadly available.
+
 
 #############################################
 Validation Operators And Actions Introduction

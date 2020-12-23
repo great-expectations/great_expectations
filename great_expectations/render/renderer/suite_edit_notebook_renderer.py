@@ -4,11 +4,11 @@ from typing import Dict, Optional, Union
 import jinja2
 import nbformat
 
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
-    NotebookTemplateConfig,
     NotebookConfig,
+    NotebookTemplateConfig,
     notebookConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -236,7 +236,8 @@ class SuiteEditNotebookRenderer(Renderer):
                     meta_args=self._build_meta_arguments(exp.meta),
                 )
                 self.add_code_cell(
-                    code, lint=True,
+                    code,
+                    lint=True,
                 )
 
     def _add_table_level_expectations(self, expectations_by_column):

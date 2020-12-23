@@ -1164,8 +1164,8 @@ class ExpectationExplorer:
             parse_strings_as_datetimes_widget_dict = expectation_state["kwargs"].get(
                 "parse_strings_as_datetimes", {}
             )
-            parse_strings_as_datetimes_widget = parse_strings_as_datetimes_widget_dict.get(
-                "kwarg_widget"
+            parse_strings_as_datetimes_widget = (
+                parse_strings_as_datetimes_widget_dict.get("kwarg_widget")
             )
 
             if new_type_selection == "string":
@@ -1345,8 +1345,10 @@ class ExpectationExplorer:
         if min_value_widget:
             min_value_widget_dict["kwarg_widget"] = min_value_widget
         else:
-            min_value_widget_dict = self.generate_expectation_kwarg_fallback_widget_dict(
-                expectation_kwarg_name="min_value", **{"min_value": min_value}
+            min_value_widget_dict = (
+                self.generate_expectation_kwarg_fallback_widget_dict(
+                    expectation_kwarg_name="min_value", **{"min_value": min_value}
+                )
             )
 
         expectation_state["kwargs"]["min_value"] = min_value_widget_dict
@@ -1893,8 +1895,10 @@ class ExpectationExplorer:
             expectation_suite = data_asset.get_expectation_suite(
                 discard_failed_expectations=False
             )
-            expectation_suite_editor.children = self.generate_expectation_suite_editor_widgets(
-                data_asset, expectation_suite
+            expectation_suite_editor.children = (
+                self.generate_expectation_suite_editor_widgets(
+                    data_asset, expectation_suite
+                )
             )
 
         return expectation_editor_widget
@@ -1966,7 +1970,10 @@ class ExpectationExplorer:
             expectation_count=expectation_count,
         )
         summary_widget = widgets.HTML(
-            value=summary_widget_content, layout=widgets.Layout(margin="10px",)
+            value=summary_widget_content,
+            layout=widgets.Layout(
+                margin="10px",
+            ),
         )
 
         for column_name in column_names:
@@ -2001,13 +2008,17 @@ class ExpectationExplorer:
                 include_config=True, **expectation_kwargs
             )
 
-        expectation_suite_editor_widgets = self.generate_expectation_suite_editor_widgets(
-            data_asset, expectation_suite
+        expectation_suite_editor_widgets = (
+            self.generate_expectation_suite_editor_widgets(
+                data_asset, expectation_suite
+            )
         )
         ###################
         expectation_suite_editor = widgets.VBox(
             children=expectation_suite_editor_widgets,
-            layout=widgets.Layout(border="2px solid black",),
+            layout=widgets.Layout(
+                border="2px solid black",
+            ),
         )
 
         self.state["data_assets"][data_asset_name][

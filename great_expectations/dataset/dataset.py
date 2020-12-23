@@ -291,11 +291,11 @@ class Dataset(MetaDataset):
         raise NotImplementedError
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_unique_count(self, column):
@@ -303,11 +303,11 @@ class Dataset(MetaDataset):
         raise NotImplementedError
 
     def get_column_modes(self, column):
-        """Returns: List[any], list of modes (ties OK)"""
+        """Returns: List[Any], list of modes (ties OK)"""
         raise NotImplementedError
 
     def get_column_median(self, column):
-        """Returns: any"""
+        """Returns: Any"""
         raise NotImplementedError
 
     def get_column_quantiles(
@@ -320,7 +320,7 @@ class Dataset(MetaDataset):
             *must* be a tuple to ensure caching is possible
 
         Returns:
-            List[any]: the nearest values in the dataset to those quantiles
+            List[Any]: the nearest values in the dataset to those quantiles
         """
         raise NotImplementedError
 
@@ -882,6 +882,9 @@ class Dataset(MetaDataset):
                     raise ValueError("max_value must be integer")
         except ValueError:
             raise ValueError("min_value and max_value must be integers")
+
+        if min_value is not None and max_value is not None and min_value > max_value:
+            raise ValueError("min_value cannot be greater than max_value")
 
         # check that min_value or max_value is set
         # if min_value is None and max_value is None:
@@ -4601,13 +4604,14 @@ class Dataset(MetaDataset):
         Expect the values for each record to be unique across the columns listed.
         Note that records can be duplicated.
 
-        E.g.
-        A B C
-        1 1 2 Fail
-        1 2 3 Pass
-        8 2 7 Pass
-        1 2 3 Pass
-        4 4 4 Fail
+        For example::
+
+            A B C
+            1 1 2 Fail
+            1 2 3 Pass
+            8 2 7 Pass
+            1 2 3 Pass
+            4 4 4 Fail
 
         Args:
             column_list (tuple or list): The column names to evaluate
@@ -4653,13 +4657,14 @@ class Dataset(MetaDataset):
         Expect the values for each record to be unique across the columns listed.
         Note that records can be duplicated.
 
-        E.g.
-        A B C
-        1 1 2 Fail
-        1 2 3 Pass
-        8 2 7 Pass
-        1 2 3 Pass
-        4 4 4 Fail
+        For example::
+
+            A B C            
+            1 1 2 Fail
+            1 2 3 Pass
+            8 2 7 Pass
+            1 2 3 Pass
+            4 4 4 Fail
 
         Args:
             column_list (tuple or list): The column names to evaluate
@@ -4705,13 +4710,14 @@ class Dataset(MetaDataset):
         Expect that the columns are unique together, e.g. a multi-column primary key
         Note that all instances of any duplicates are considered failed
 
-        E.g.
-        A B C
-        1 1 2 Fail
-        1 2 3 Pass
-        1 1 2 Fail
-        2 2 2 Pass
-        3 2 3 Pass
+        For example::
+        
+            A B C
+            1 1 2 Fail
+            1 2 3 Pass
+            1 1 2 Fail
+            2 2 2 Pass
+            3 2 3 Pass
 
         Args:
             column_list (tuple or list): The column names to evaluate

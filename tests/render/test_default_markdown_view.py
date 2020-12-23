@@ -6,7 +6,9 @@ import pytest
 
 import great_expectations as ge
 import great_expectations.render as render
-from great_expectations.core import ExpectationSuiteValidationResultSchema
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResultSchema,
+)
 from great_expectations.render.renderer import ValidationResultsPageRenderer
 from great_expectations.render.types import (
     RenderedDocumentContent,
@@ -44,7 +46,10 @@ def test_render_section_page():
             "section_name": None,
             "content_blocks": [
                 RenderedHeaderContent(
-                    **{"content_block_type": "header", "header": "Overview",}
+                    **{
+                        "content_block_type": "header",
+                        "header": "Overview",
+                    }
                 ),
                 RenderedTableContent(
                     **{
@@ -97,15 +102,16 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     Returns: None
 
     """
-
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
     validation_results_page_renderer = ValidationResultsPageRenderer(
         run_info_at_end=True
     )
 
-    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
-        validation_operator_result=validation_operator_result
+    rendered_document_content_list = (
+        validation_results_page_renderer.render_validation_operator_result(
+            validation_operator_result=validation_operator_result
+        )
     )
 
     md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)
@@ -113,8 +119,6 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     md_str = " ".join(md_str_list)
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
-
-    print(md_str)
 
     assert (
         md_str
@@ -478,8 +482,10 @@ def test_render_section_page_with_fixture_data_multiple_validations(
         run_info_at_end=True
     )
 
-    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
-        validation_operator_result=validation_operator_result
+    rendered_document_content_list = (
+        validation_results_page_renderer.render_validation_operator_result(
+            validation_operator_result=validation_operator_result
+        )
     )
 
     md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)

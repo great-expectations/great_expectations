@@ -39,8 +39,12 @@ def in_memory_data_context_config_usage_stats_enabled():
             "config_variables_file_path": None,
             "datasources": {},
             "stores": {
-                "expectations_store": {"class_name": "ExpectationsStore",},
-                "validations_store": {"class_name": "ValidationsStore",},
+                "expectations_store": {
+                    "class_name": "ExpectationsStore",
+                },
+                "validations_store": {
+                    "class_name": "ValidationsStore",
+                },
                 "evaluation_parameter_store": {
                     "class_name": "EvaluationParameterStore",
                 },

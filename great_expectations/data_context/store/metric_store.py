@@ -1,7 +1,7 @@
 import json
 
-from great_expectations.core import ensure_json_serializable
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.util import ensure_json_serializable
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
@@ -16,7 +16,7 @@ class MetricStore(Store):
 
     _key_class = ValidationMetricIdentifier
 
-    def __init__(self, store_backend=None):
+    def __init__(self, store_backend=None, store_name=None):
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -48,7 +48,7 @@ class MetricStore(Store):
                         ],
                     )
 
-        super().__init__(store_backend=store_backend)
+        super().__init__(store_backend=store_backend, store_name=store_name)
 
     # noinspection PyMethodMayBeStatic
     def _validate_value(self, value):
@@ -64,7 +64,7 @@ class MetricStore(Store):
 
 
 class EvaluationParameterStore(MetricStore):
-    def __init__(self, store_backend=None):
+    def __init__(self, store_backend=None, store_name=None):
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -83,7 +83,7 @@ class EvaluationParameterStore(MetricStore):
                 store_backend["table_name"] = store_backend.get(
                     "table_name", "ge_evaluation_parameters"
                 )
-        super().__init__(store_backend=store_backend)
+        super().__init__(store_backend=store_backend, store_name=store_name)
 
     def get_bind_params(self, run_id):
         params = {}
