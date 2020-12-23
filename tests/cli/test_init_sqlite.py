@@ -583,10 +583,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
-    mock_webbrowser,
-    caplog,
-    initialized_sqlite_project,
-    sa
+    mock_webbrowser, caplog, initialized_sqlite_project, sa
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)

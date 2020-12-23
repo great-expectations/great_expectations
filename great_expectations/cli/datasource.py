@@ -1311,9 +1311,9 @@ def _get_batch_kwargs_for_sqlalchemy_datasource(
             batch_kwargs = {"query": sql_query, "datasource": datasource_name}
             batch_kwargs.update(temp_table_kwargs)
             BridgeValidator(
-                    batch=datasource.get_batch(batch_kwargs),
-                    expectation_suite=ExpectationSuite("throwaway"),
-                ).get_dataset()
+                batch=datasource.get_batch(batch_kwargs),
+                expectation_suite=ExpectationSuite("throwaway"),
+            ).get_dataset()
 
     except ge_exceptions.GreatExpectationsError as error:
         cli_message("""<red>ERROR: {}</red>""".format(str(error)))
