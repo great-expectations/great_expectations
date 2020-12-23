@@ -693,7 +693,38 @@ class Expectation(ABC, metaclass=MetaExpectation):
             kwargs=convert_to_json_serializable(deepcopy(all_args)),
             meta=meta,
         )
-    
+
+    def self_check(self, pretty_print=True):
+        return {
+            # Top-level info
+            "description" : "Long text, probably from the docstring,",
+            "contributors" : [
+                "@abegong",
+                "@shinnyshinshin",
+            ],
+            "last_updated" : "date or timestamp",
+
+            "supported_execution_engines": {
+                "PandasExecutionEngine" : True,
+                "SqlAlchemyExecutionEngine": True,
+                "Spark" : True
+            },
+            "supported_renderers": {
+                "descriptive" : "How many values in column {column} aren't prime?",
+                "prescriptive" : "How many values in column {column} aren't prime?",
+                "diagnostic" : "How many values in column {column} aren't prime?",
+                "diagnostic_tabular" : "How many values in column {column} aren't prime?",
+            },
+
+            "metrics" : {
+                "column_values.is_prime.under_threshold" : "Are at least {mostly}% of values in column {column} prime numbers?",
+                "column_values.is_prime.unexpected_count" : "How many values in column {column} aren't prime?",
+                "column_values.is_prime.unexpected_values" : "Which values in column {column} aren't prime numbers?",
+                "column_values.is_prime.unexpected_index_list" : "Which row indexes in column {column} don't contain prime numbers?",
+                "column_values.is_prime.unexpected_rows" : "In which which rows does column {column} not contain a prime numbers?",
+            },
+            "test_cases" : {}
+        }
 
 class TableExpectation(Expectation, ABC):
     domain_keys = (
