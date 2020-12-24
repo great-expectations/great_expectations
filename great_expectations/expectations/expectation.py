@@ -4,7 +4,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union, Tuple
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import (
@@ -25,6 +25,11 @@ from great_expectations.expectations.registry import (
     register_renderer,
 )
 from great_expectations.expectations.util import legacy_method_parameters
+from great_expectations.core.batch import Batch
+from great_expectations.validator.validator import Validator
+from great_expectations.expectations.registry import (
+    _registered_renderers,
+)
 
 from ..core.util import convert_to_json_serializable, nested_update
 from ..data_asset.util import recursively_convert_to_json_serializable
@@ -695,36 +700,119 @@ class Expectation(ABC, metaclass=MetaExpectation):
         )
 
     def self_check(self, pretty_print=True):
-        return {
-            # Top-level info
-            "description" : "Long text, probably from the docstring,",
-            "contributors" : [
-                "@abegong",
-                "@shinnyshinshin",
-            ],
-            "last_updated" : "date or timestamp",
 
-            "supported_execution_engines": {
+        camel_name = self.__class__.__name__
+        snake_name = camel_to_snake(self.__class__.__name__)
+        docstring, short_description = self._get_docstring_and_short_description()
+        supported_renderers = self._get_supported_renderers(snake_name)
+
+        # Generate artifacts from an example case
+        examples = self._get_examples()
+        example_data, example_test = self._choose_example(examples)
+        batch = Batch(data=example_data)
+        
+        expectation_config = ExpectationConfiguration(**{
+            "expectation_type": snake_name,
+            "kwargs": example_test
+        })
+        
+        validation_results = Validator(
+            execution_engine=PandasExecutionEngine(),
+            batches=[batch]
+        ).graph_validate(
+            configurations=[expectation_config]
+        )
+        validation_result = validation_results[0]
+
+        question_str, answer_str = self._get_question_answer_strings(
+            expectation_config=expectation_config,
+            validation_result=validation_result
+        )
+
+        upstream_metrics = self._get_upstream_metrics(expectation_config)
+
+        return {
+            "camel_name": camel_name,
+            "snake_name": snake_name,
+            "short_description" : short_description,
+            "docstring" : docstring,
+            "question" : question_str,
+            "answer" : answer_str,
+
+            # From metadata...
+            # "contributors" : [
+            #     "@abegong",
+            #     "@shinnyshinshin",
+            # ],
+            # "last_updated" : "date or timestamp",
+
+            "execution_engines": {
                 "PandasExecutionEngine" : True,
                 "SqlAlchemyExecutionEngine": True,
                 "Spark" : True
             },
-            "supported_renderers": {
-                "descriptive" : "How many values in column {column} aren't prime?",
-                "prescriptive" : "How many values in column {column} aren't prime?",
-                "diagnostic" : "How many values in column {column} aren't prime?",
-                "diagnostic_tabular" : "How many values in column {column} aren't prime?",
-            },
-
-            "metrics" : {
-                "column_values.is_prime.under_threshold" : "Are at least {mostly}% of values in column {column} prime numbers?",
-                "column_values.is_prime.unexpected_count" : "How many values in column {column} aren't prime?",
-                "column_values.is_prime.unexpected_values" : "Which values in column {column} aren't prime numbers?",
-                "column_values.is_prime.unexpected_index_list" : "Which row indexes in column {column} don't contain prime numbers?",
-                "column_values.is_prime.unexpected_rows" : "In which which rows does column {column} not contain a prime numbers?",
-            },
-            "test_cases" : {}
+            "renderers": supported_renderers,
+            "metrics" : upstream_metrics,
+            "examples" : examples,
         }
+
+    def _get_examples(self) -> List[Dict]:
+        try:
+            examples = self.examples
+        except:
+            examples = []
+
+        return examples
+
+    def _get_docstring_and_short_description(self) -> Tuple[str, str]:
+        if self.__doc__ is not None:
+            docstring = self.__doc__
+            short_description = self.__doc__.split('\n')[0]
+        else:
+            docstring = ""
+            short_description = ""
+
+        return docstring, short_description
+
+    def _choose_example(self, examples):
+        example = examples[0]
+
+        example_data = example["data"]
+        example_test = example["tests"][0]["in"]
+
+        return example_data, example_test
+
+    def _get_supported_renderers(self, snake_name):
+        return list(_registered_renderers[snake_name].keys())
+
+    def _get_question_answer_strings(self,
+        expectation_config: ExpectationConfiguration,
+        validation_result
+    ) -> Tuple[str, str]:
+        expectation_name = camel_to_snake(self.__class__.__name__)
+
+        _, question_renderer = _registered_renderers[expectation_name]["question"]
+        _, answer_renderer = _registered_renderers[expectation_name]["answer"]
+
+        question_str = question_renderer(
+            configuration=expectation_config,
+            result=validation_result,
+        )
+
+        answer_str = answer_renderer(
+            configuration=expectation_config,
+            result=validation_result,
+        )
+
+        return question_str, answer_str
+
+    def _get_upstream_metrics(self, expectation_config):
+        validation_dependencies = self.get_validation_dependencies(
+            configuration=expectation_config
+        )
+
+        return list(validation_dependencies["metrics"].keys())
+
 
 class TableExpectation(Expectation, ABC):
     domain_keys = (
