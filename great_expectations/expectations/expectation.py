@@ -706,55 +706,61 @@ class Expectation(ABC, metaclass=MetaExpectation):
         docstring, short_description = self._get_docstring_and_short_description()
         supported_renderers = self._get_supported_renderers(snake_name)
 
+        report_obj = {
+            "description": {
+                "camel_name": camel_name,
+                "snake_name": snake_name,
+                "short_description" : short_description,
+                "docstring" : docstring,
+            },
+            "renderers": supported_renderers,
+            "examples": [],
+            "metrics": [],
+            "execution_engines": [],
+        }
+
         # Generate artifacts from an example case
         examples = self._get_examples()
-        example_data, example_test = self._choose_example(examples)
-        batch = Batch(data=example_data)
-        
-        expectation_config = ExpectationConfiguration(**{
-            "expectation_type": snake_name,
-            "kwargs": example_test
-        })
-        
-        validation_results = Validator(
-            execution_engine=PandasExecutionEngine(),
-            batches=[batch]
-        ).graph_validate(
-            configurations=[expectation_config]
-        )
-        validation_result = validation_results[0]
+        report_obj.update({"examples": examples})
 
-        question_str, answer_str = self._get_question_answer_strings(
-            expectation_config=expectation_config,
-            validation_result=validation_result
-        )
+        if examples != []:
+            example_data, example_test = self._choose_example(examples)
+            batch = Batch(data=example_data)
+            
+            expectation_config = ExpectationConfiguration(**{
+                "expectation_type": snake_name,
+                "kwargs": example_test
+            })
+            
+            validation_results = Validator(
+                execution_engine=PandasExecutionEngine(),
+                batches=[batch]
+            ).graph_validate(
+                configurations=[expectation_config]
+            )
+            validation_result = validation_results[0]
 
-        upstream_metrics = self._get_upstream_metrics(expectation_config)
+            question_str, answer_str = self._get_question_answer_strings(
+                expectation_config=expectation_config,
+                validation_result=validation_result
+            )
+            report_obj["description"].update({
+                "question": question_str,
+                "answer": answer_str,
+            })
 
-        return {
-            "camel_name": camel_name,
-            "snake_name": snake_name,
-            "short_description" : short_description,
-            "docstring" : docstring,
-            "question" : question_str,
-            "answer" : answer_str,
+            upstream_metrics = self._get_upstream_metrics(expectation_config)
+            report_obj.update({"metrics": upstream_metrics})
 
-            # From metadata...
-            # "contributors" : [
-            #     "@abegong",
-            #     "@shinnyshinshin",
-            # ],
-            # "last_updated" : "date or timestamp",
-
+        report_obj.update({
             "execution_engines": {
                 "PandasExecutionEngine" : True,
                 "SqlAlchemyExecutionEngine": True,
                 "Spark" : True
             },
-            "renderers": supported_renderers,
-            "metrics" : upstream_metrics,
-            "examples" : examples,
-        }
+        })
+
+        return report_obj
 
     def _get_examples(self) -> List[Dict]:
         try:
