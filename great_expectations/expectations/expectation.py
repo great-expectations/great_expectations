@@ -797,20 +797,26 @@ class Expectation(ABC, metaclass=MetaExpectation):
     ) -> Tuple[str, str]:
         expectation_name = camel_to_snake(self.__class__.__name__)
 
-        _, question_renderer = _registered_renderers[expectation_name]["question"]
-        _, answer_renderer = _registered_renderers[expectation_name]["answer"]
+        try:
+            _, question_renderer = _registered_renderers[expectation_name]["question"]
+            _, answer_renderer = _registered_renderers[expectation_name]["answer"]
 
-        question_str = question_renderer(
-            configuration=expectation_config,
-            result=validation_result,
-        )
+            question_str = question_renderer(
+                configuration=expectation_config,
+                result=validation_result,
+            )
 
-        answer_str = answer_renderer(
-            configuration=expectation_config,
-            result=validation_result,
-        )
+            answer_str = answer_renderer(
+                configuration=expectation_config,
+                result=validation_result,
+            )
 
-        return question_str, answer_str
+            return question_str, answer_str
+
+        except:
+            pass
+
+            return None, None
 
     def _get_upstream_metrics(self, expectation_config):
         validation_dependencies = self.get_validation_dependencies(
