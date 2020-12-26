@@ -48,6 +48,29 @@ def test_expectation_self_check():
     report_object = my_expectation.self_check()
     print(json.dumps(report_object, indent=2))
 
+    assert report_object == {
+        "description": {
+            "camel_name": "ExpectColumnValuesToEqualThree",
+            "snake_name": "expect_column_values_to_equal_three",
+            "short_description": "",
+            "docstring": ""
+        },
+        "renderers": [
+            "renderer.diagnostic.observed_value",
+            "renderer.diagnostic.status_icon",
+            "renderer.diagnostic.unexpected_statement",
+            "renderer.diagnostic.unexpected_table",
+            "renderer.prescriptive"
+        ],
+        "examples": [],
+        "metrics": [],
+        "execution_engines": {
+            "PandasExecutionEngine": True,
+            "SqlAlchemyExecutionEngine": True,
+            "Spark": True
+        }
+    }
+
 def test_all_expectation_self_checks():
     library_json = {}
 
