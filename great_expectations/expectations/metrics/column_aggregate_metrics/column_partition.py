@@ -107,7 +107,8 @@ class ColumnPartition(ColumnMetricProvider):
         elif bins == "auto":
             return {
                 "column_values.nonnull.count": MetricConfiguration(
-                    "column_values.nonnull.count", metric.metric_domain_kwargs,
+                    "column_values.nonnull.count",
+                    metric.metric_domain_kwargs,
                 ),
                 "column.quantile_values": MetricConfiguration(
                     "column.quantile_values",

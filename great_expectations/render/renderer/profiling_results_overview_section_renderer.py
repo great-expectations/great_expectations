@@ -65,7 +65,10 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
 
         table_rows = []
         table_rows.append(
-            ["Number of variables", len(cls._get_column_list_from_evrs(evrs)),]
+            [
+                "Number of variables",
+                len(cls._get_column_list_from_evrs(evrs)),
+            ]
         )
 
         table_rows.append(
@@ -89,7 +92,10 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         )
 
         table_rows += [
-            ["Missing cells", cls._get_percentage_missing_cells_str(evrs),],
+            [
+                "Missing cells",
+                cls._get_percentage_missing_cells_str(evrs),
+            ],
             # ["Duplicate rows", "0 (0.0%)", ], #TODO: bring back when we have an expectation for this
         ]
 
@@ -198,7 +204,9 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
                 "bullet_list": bullet_list_items,
                 "styling": {
                     "classes": ["col-12", "mt-1"],
-                    "body": {"classes": ["list-group"],},
+                    "body": {
+                        "classes": ["list-group"],
+                    },
                 },
             }
         )

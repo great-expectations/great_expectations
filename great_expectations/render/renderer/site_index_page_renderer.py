@@ -424,7 +424,9 @@ class SiteIndexPageRenderer(Renderer):
             tabs_content_block = RenderedTabsContent(
                 **{
                     "tabs": tabs,
-                    "styling": {"classes": ["col-12", "ge-index-page-tabs-container"],},
+                    "styling": {
+                        "classes": ["col-12", "ge-index-page-tabs-container"],
+                    },
                 }
             )
 
@@ -461,4 +463,4 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
             )
-            logger.error(exception_message, e, exc_info=True)
+            logger.error(exception_message)

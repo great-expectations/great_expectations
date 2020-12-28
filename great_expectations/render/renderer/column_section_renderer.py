@@ -122,13 +122,16 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
                 exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
-                logger.error(exception_message, e, exc_info=True)
+                logger.error(exception_message)
 
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))
 
         return RenderedSectionContent(
-            **{"section_name": column, "content_blocks": populated_content_blocks,}
+            **{
+                "section_name": column,
+                "content_blocks": populated_content_blocks,
+            }
         )
 
     @classmethod
@@ -245,9 +248,13 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                 "aria-expanded": "true",
                                 "aria-controls": "collapseExample",
                             },
-                            "styles": {"cursor": "pointer",},
+                            "styles": {
+                                "cursor": "pointer",
+                            },
                         },
-                        "body": {"classes": ["list-group", "collapse"],},
+                        "body": {
+                            "classes": ["list-group", "collapse"],
+                        },
                     },
                 }
             )
@@ -329,7 +336,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     "table": table_rows,
                     "styling": {
                         "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                        "body": {"classes": ["table", "table-sm", "table-unbordered"],},
+                        "body": {
+                            "classes": ["table", "table-sm", "table-unbordered"],
+                        },
                     },
                 }
             )
@@ -468,21 +477,23 @@ class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):
 
         return validation_results, new_block
 
-    def _render_table(self, validation_results):
+    def _render_table(self, validation_results, evaluation_parameters=None):
         new_block = self._table_renderer.render(
-            validation_results, include_column_name=False
+            validation_results,
+            include_column_name=False,
+            evaluation_parameters=evaluation_parameters,
         )
-
         return [], new_block
 
-    def render(self, validation_results):
+    def render(self, validation_results, evaluation_parameters=None):
         column = self._get_column_name(validation_results)
         content_blocks = []
         remaining_evrs, content_block = self._render_header(validation_results)
         content_blocks.append(content_block)
-        remaining_evrs, content_block = self._render_table(remaining_evrs)
+        remaining_evrs, content_block = self._render_table(
+            remaining_evrs, evaluation_parameters
+        )
         content_blocks.append(content_block)
-
         return RenderedSectionContent(
             **{"section_name": column, "content_blocks": content_blocks}
         )
@@ -532,7 +543,8 @@ class ExpectationSuiteColumnSectionRenderer(ColumnSectionRenderer):
     def _render_bullet_list(self, expectations):
 
         new_block = self._bullet_list_renderer.render(
-            expectations, include_column_name=False,
+            expectations,
+            include_column_name=False,
         )
 
         return [], new_block

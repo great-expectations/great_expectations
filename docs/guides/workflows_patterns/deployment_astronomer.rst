@@ -5,6 +5,8 @@ Deploying Great Expectations with Astronomer
 
 This guide will help you deploy Great Expectations within an Airflow pipeline that runs in `Astronomer <https://www.astronomer.io/>`_.  You can use Great Expectations to automate validation of data integrity and navigate your DAG based on the output of validations.
 
+Note that you can also define your Data Context in code by following this documentation: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
+
 .. admonition:: Prerequisites: This workflow pattern assumes you have already:
 
     - Followed the instructions for :ref:`creating a Great Expectations validation task in an Airflow DAG<deployment_airflow>`

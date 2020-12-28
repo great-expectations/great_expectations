@@ -8,6 +8,42 @@ Develop
 -----------------
 
 
+0.13.4
+-----------------
+* [FEATURE] Implement expect_column_values_to_not_match_regex_list in Spark (Thanks @mikaylaedwards!)
+* [ENHANCEMENT] Improve support for quantile calculations in Snowflake
+* [ENHANCEMENT] DataDocs show values of Evaluation Parameters #2165. Issue #2010
+* [ENHANCEMENT] Work on requirements.txt #2052 (Thanks @shapiroj18!)
+* [ENHANCEMENT] expect_table_row_count_to_equal_other_table #2133
+* [ENHANCEMENT] Improved support for quantile calculations in Snowflake #2176
+* [ENHANCEMENT] DataDocs show values of Evaluation Parameters #2165
+* [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169. Issue #2164
+* [BUGFIX] Fixed black conflict, upgraded black, made import optional #2183
+* [BUGFIX] Made improvements for the treatment of decimals for database backends for lossy conversion #2207
+* [BUGFIX] Pass manually_initialize_store_backend_id to database store backends to mirror functionality of other backends. Issue #2181
+* [BUGFIX] Make glob_directive more permissive in ConfiguredAssetFilesystemDataConnector #2197. Issue #2193
+* [DOCS] Added link to Youtube video on in-code contexts #2177
+* [DOCS] Docstrings for DataConnector and associated classes #2172
+* [DOCS] Custom expectations improvement #2179
+* [DOCS] Add a conda example to creating virtualenvs #2189
+* [DOCS] Fix Airflow logo URL #2198 (Thanks @floscha!)
+* [DOCS] Update explore_expectations_in_a_notebook.rst #2174
+* [DOCS] Change to DOCS that describe Evaluation Parameters #2209
+* [MAINTENANCE] Removed mentions of show_cta_footer and added deprecation notes in usage stats #2190. Issue #2120
+
+0.13.3
+-----------------
+* [ENHANCEMENT] Updated the BigQuery Integration to create a view instead of a table (thanks @alessandrolacorte!) #2082.
+* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
+* [ENHANCEMENT] Add support for connection_string and url in configuring DatabaseStoreBackend, bringing parity to other SQL-based objects. In the rare case of user code that instantiates a DatabaseStoreBackend without using the Great Expectations config architecture, users should ensure they are providing kwargs to init, because the init signature order has changed.
+* [ENHANCEMENT] Improved exception handling in the Slack notifications rendering logic
+* [ENHANCEMENT] Uniform configuration support for both 0.13 and 0.12 versions of the Datasource class
+* [ENHANCEMENT] A single `DataContext.get_batch()` method supports both 0.13 and 0.12 style call arguments
+* [ENHANCEMENT] Initializing DataContext in-code is now available in both 0.13 and 0.12 versions
+* [BUGFIX] Fixed a bug in the error printing logic in several exception handling blocks in the Data Docs rendering. This will make it easier for users to submit error messages in case of an error in rendering.
+* [DOCS] Miscellaneous doc improvements
+* [DOCS] Update cloud composer workflow to use GCSStoreBackendDefaults
+
 0.13.2
 -----------------
 * [ENHANCEMENT] Support avro format in Spark datasource (thanks @ryanaustincarlson!) #2122

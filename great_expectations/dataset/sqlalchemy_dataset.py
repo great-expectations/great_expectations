@@ -269,9 +269,9 @@ class MetaSqlAlchemyDataset(Dataset):
                 .limit(unexpected_count_limit)
             )
 
-            nonnull_count: int = count_results["element_count"] - count_results[
-                "null_count"
-            ]
+            nonnull_count: int = (
+                count_results["element_count"] - count_results["null_count"]
+            )
 
             if "output_strftime_format" in kwargs:
                 output_strftime_format = kwargs["output_strftime_format"]
@@ -362,18 +362,28 @@ class MetaSqlAlchemyDataset(Dataset):
             )
             self.engine.execute(inner_case_query)
 
-        element_count_query: Select = sa.select(
-            [
-                sa.func.count().label("element_count"),
-                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
-                    "null_count"
-                ),
-            ]
-        ).select_from(self._table).alias("ElementAndNullCountsSubquery")
+        element_count_query: Select = (
+            sa.select(
+                [
+                    sa.func.count().label("element_count"),
+                    sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                        "null_count"
+                    ),
+                ]
+            )
+            .select_from(self._table)
+            .alias("ElementAndNullCountsSubquery")
+        )
 
-        unexpected_count_query: Select = sa.select(
-            [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
-        ).select_from(temp_table_obj).alias("UnexpectedCountSubquery")
+        unexpected_count_query: Select = (
+            sa.select(
+                [
+                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
+                ]
+            )
+            .select_from(temp_table_obj)
+            .alias("UnexpectedCountSubquery")
+        )
 
         count_query: Select = sa.select(
             [
@@ -417,25 +427,24 @@ class MetaSqlAlchemyDataset(Dataset):
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     """
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: validation_engine_sqlalchemy
-    title: Validation Engine - SQLAlchemy
-    icon:
-    short_description: Use SQLAlchemy to validate data in a database
-    description: Use SQLAlchemy to validate data in a database
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_database_table_or_a_query_result_as_a_batch.html
-    maturity: Production
-    maturity_details:
-        api_stability: High
-        implementation_completeness: Moderate (temp table handling/permissions not universal)
-        unit_test_coverage: High
-        integration_infrastructure_test_coverage: N/A
-        documentation_completeness:  Minimal (none)
-        bug_risk: Low
+        id: validation_engine_sqlalchemy
+        title: Validation Engine - SQLAlchemy
+        icon:
+        short_description: Use SQLAlchemy to validate data in a database
+        description: Use SQLAlchemy to validate data in a database
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_database_table_or_a_query_result_as_a_batch.html
+        maturity: Production
+        maturity_details:
+            api_stability: High
+            implementation_completeness: Moderate (temp table handling/permissions not universal)
+            unit_test_coverage: High
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness:  Minimal (none)
+            bug_risk: Low
 
---ge-feature-maturity-info--
-"""
+    --ge-feature-maturity-info--"""
 
     @classmethod
     def from_dataset(cls, dataset=None):
@@ -582,12 +591,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return self.engine.dialect
 
     def attempt_allowing_relative_error(self):
-        detected_redshift: bool = (
-            sqlalchemy_redshift is not None
-            and check_sql_engine_dialect(
-                actual_sql_engine_dialect=self.sql_engine_dialect,
-                candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
-            )
+        detected_redshift: bool = sqlalchemy_redshift is not None and check_sql_engine_dialect(
+            actual_sql_engine_dialect=self.sql_engine_dialect,
+            candidate_sql_engine_dialect=sqlalchemy_redshift.dialect.RedshiftDialect,
         )
         # noinspection PyTypeChecker
         detected_psycopg2: bool = (
@@ -689,23 +695,29 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return element_count - null_count
 
     def get_column_sum(self, column):
-        return self.engine.execute(
-            sa.select([sa.func.sum(sa.column(column))]).select_from(self._table)
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select([sa.func.sum(sa.column(column))]).select_from(self._table)
+            ).scalar()
+        )
 
     def get_column_max(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
-        return self.engine.execute(
-            sa.select([sa.func.max(sa.column(column))]).select_from(self._table)
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select([sa.func.max(sa.column(column))]).select_from(self._table)
+            ).scalar()
+        )
 
     def get_column_min(self, column, parse_strings_as_datetimes=False):
         if parse_strings_as_datetimes:
             raise NotImplementedError
-        return self.engine.execute(
-            sa.select([sa.func.min(sa.column(column))]).select_from(self._table)
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select([sa.func.min(sa.column(column))]).select_from(self._table)
+            ).scalar()
+        )
 
     def get_column_value_counts(self, column, sort="value", collate=None):
         if sort not in ["value", "count", "none"]:
@@ -742,16 +754,22 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
     def get_column_mean(self, column):
         # column * 1.0 needed for correct calculation of avg in MSSQL
-        return self.engine.execute(
-            sa.select([sa.func.avg(sa.column(column) * 1.0)]).select_from(self._table)
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select([sa.func.avg(sa.column(column) * 1.0)]).select_from(
+                    self._table
+                )
+            ).scalar()
+        )
 
     def get_column_unique_count(self, column):
-        return self.engine.execute(
-            sa.select([sa.func.count(sa.func.distinct(sa.column(column)))]).select_from(
-                self._table
-            )
-        ).scalar()
+        return convert_to_json_serializable(
+            self.engine.execute(
+                sa.select(
+                    [sa.func.count(sa.func.distinct(sa.column(column)))]
+                ).select_from(self._table)
+            ).scalar()
+        )
 
     def get_column_median(self, column):
         # AWS Athena does not support offset
@@ -783,7 +801,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             # An odd number of column values, we can just take the center value
             column_median = column_values[1][0]  # True center value
-        return column_median
+        return convert_to_json_serializable(column_median)
 
     def get_column_quantiles(
         self, column: str, quantiles: Iterable, allow_relative_error: bool = False
@@ -796,11 +814,27 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
         elif self.sql_engine_dialect.name.lower() == "mysql":
             return self._get_column_quantiles_mysql(column=column, quantiles=quantiles)
-        else:
+        elif self.sql_engine_dialect.name.lower() == "snowflake":
+            # NOTE: 20201216 - JPC - snowflake has a representation/precision limitation
+            # in its percentile_disc implementation that causes an error when we do
+            # not round. It is unclear to me *how* the call to round affects the behavior --
+            # the binary representation should be identical before and after, and I do
+            # not observe a type difference. However, the issue is replicable in the
+            # snowflake console and directly observable in side-by-side comparisons with
+            # and without the call to round()
+            quantiles = [round(x, 10) for x in quantiles]
             return self._get_column_quantiles_generic_sqlalchemy(
                 column=column,
                 quantiles=quantiles,
                 allow_relative_error=allow_relative_error,
+            )
+        else:
+            return convert_to_json_serializable(
+                self._get_column_quantiles_generic_sqlalchemy(
+                    column=column,
+                    quantiles=quantiles,
+                    allow_relative_error=allow_relative_error,
+                )
             )
 
     def _get_column_quantiles_mssql(self, column: str, quantiles: Iterable) -> list:
@@ -848,36 +882,45 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def _get_column_quantiles_mysql(self, column: str, quantiles: Iterable) -> list:
         # MySQL does not support "percentile_disc", so we implement it as a compound query.
         # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
-        percent_rank_query: CTE = sa.select(
-            [
-                sa.column(column),
-                sa.cast(
-                    sa.func.percent_rank().over(order_by=sa.column(column).asc()),
-                    sa.dialects.mysql.DECIMAL(18, 15),
-                ).label("p"),
-            ]
-        ).order_by(sa.column("p").asc()).select_from(self._table).cte("t")
+        percent_rank_query: CTE = (
+            sa.select(
+                [
+                    sa.column(column),
+                    sa.cast(
+                        sa.func.percent_rank().over(order_by=sa.column(column).asc()),
+                        sa.dialects.mysql.DECIMAL(18, 15),
+                    ).label("p"),
+                ]
+            )
+            .order_by(sa.column("p").asc())
+            .select_from(self._table)
+            .cte("t")
+        )
 
         selects: List[WithinGroup] = []
         for idx, quantile in enumerate(quantiles):
             # pymysql cannot handle conversion of numpy float64 to float; convert just in case
             if np.issubdtype(type(quantile), np.float_):
                 quantile = float(quantile)
-            quantile_column: Label = sa.func.first_value(sa.column(column)).over(
-                order_by=sa.case(
-                    [
-                        (
-                            percent_rank_query.c.p
-                            <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
-                            percent_rank_query.c.p,
-                        )
-                    ],
-                    else_=None,
-                ).desc()
-            ).label(f"q_{idx}")
+            quantile_column: Label = (
+                sa.func.first_value(sa.column(column))
+                .over(
+                    order_by=sa.case(
+                        [
+                            (
+                                percent_rank_query.c.p
+                                <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
+                                percent_rank_query.c.p,
+                            )
+                        ],
+                        else_=None,
+                    ).desc()
+                )
+                .label(f"q_{idx}")
+            )
             selects.append(quantile_column)
-        quantiles_query: Select = sa.select(selects).distinct().order_by(
-            percent_rank_query.c.p.desc()
+        quantiles_query: Select = (
+            sa.select(selects).distinct().order_by(percent_rank_query.c.p.desc())
         )
 
         try:
@@ -1047,7 +1090,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         query = (
             sa.select(case_conditions)
-            .where(sa.column(column) != None,)
+            .where(
+                sa.column(column) != None,
+            )
             .select_from(self._table)
         )
 
@@ -1149,7 +1194,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             .select_from(self._table)
         )
 
-        return self.engine.execute(query).scalar()
+        return convert_to_json_serializable(self.engine.execute(query).scalar())
 
     def create_temporary_table(self, table_name, custom_sql, schema_name=None):
         """
@@ -1186,7 +1231,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ###
 
         if self.sql_engine_dialect.name.lower() == "bigquery":
-            stmt = "CREATE OR REPLACE TABLE `{table_name}` AS {custom_sql}".format(
+            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
@@ -1318,7 +1363,10 @@ WHERE
         return {
             "success": row_count == other_table_row_count,
             "result": {
-                "observed_value": {"self": row_count, "other": other_table_row_count,}
+                "observed_value": {
+                    "self": row_count,
+                    "other": other_table_row_count,
+                }
             },
         }
 

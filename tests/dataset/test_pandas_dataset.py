@@ -168,7 +168,11 @@ def test_expect_column_values_to_be_json_parseable():
 
 
 def test_expectation_decorator_summary_mode():
-    df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 7, None, None],})
+    df = ge.dataset.PandasDataset(
+        {
+            "x": [1, 2, 3, 4, 5, 6, 7, 7, None, None],
+        }
+    )
     df.set_default_expectation_argument("result_format", "COMPLETE")
     df.set_default_expectation_argument("include_config", False)
 
@@ -866,7 +870,9 @@ def test_ge_value_count_of_object_dtype_column_with_mixed_types():
     that the issue is fixed.
     """
     df = ge.dataset.PandasDataset(
-        {"A": [1.5, 0.009, 0.5, "I am a string in an otherwise float column"],}
+        {
+            "A": [1.5, 0.009, 0.5, "I am a string in an otherwise float column"],
+        }
     )
 
     value_counts = df.get_column_value_counts("A")
@@ -878,7 +884,11 @@ def test_expect_values_to_be_of_type_list():
     Having lists in a Pandas column used to raise a ValueError when parsing to
     see if any rows had missing values. This test verifies that the issue is fixed.
     """
-    df = ge.dataset.PandasDataset({"A": [[1, 2], None, [4, 5], 6],})
+    df = ge.dataset.PandasDataset(
+        {
+            "A": [[1, 2], None, [4, 5], 6],
+        }
+    )
 
     validation = df.expect_column_values_to_be_of_type("A", "list")
     assert not validation.success
@@ -898,6 +908,10 @@ def test_expect_values_quantiles_to_be_between():
         df = ge.dataset.PandasDataset({"A": data})
 
         validation = df.expect_column_quantile_values_to_be_between(
-            "A", {"quantiles": quantiles, "value_ranges": value_ranges,}
+            "A",
+            {
+                "quantiles": quantiles,
+                "value_ranges": value_ranges,
+            },
         )
         assert validation.success is success

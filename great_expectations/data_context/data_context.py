@@ -13,7 +13,7 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
@@ -21,7 +21,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -66,7 +66,6 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -88,107 +87,107 @@ yaml.default_flow_style = False
 
 class BaseDataContext:
     """
-    This class implements most of the functionality of DataContext, with a few exceptions.
+        This class implements most of the functionality of DataContext, with a few exceptions.
 
-    1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
-    2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
-        into DataContext class.
+        1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
+        2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
+            into DataContext class.
 
-    Together, these changes make BaseDataContext class more testable.
+        Together, these changes make BaseDataContext class more testable.
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: os_linux
-    title: OS - Linux
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Production
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Complete
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: os_linux
+        title: OS - Linux
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Production
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: Complete
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: os_macos
-    title: OS - MacOS
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Production
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: Complete (local only)
-        integration_infrastructure_test_coverage: Complete (local only)
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: os_macos
+        title: OS - MacOS
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Production
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: Complete (local only)
+            integration_infrastructure_test_coverage: Complete (local only)
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: os_windows
-    title: OS - Windows
-    icon:
-    short_description:
-    description:
-    how_to_guide_url:
-    maturity: Beta
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: Minimal
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Complete
-        bug_risk: Moderate
-------------------------------------------------------------
-    id: workflow_create_edit_expectations_cli_scaffold
-    title: Create and Edit Expectations - suite scaffold
-    icon:
-    short_description: Creating a new Expectation Suite using suite scaffold
-    description: Creating Expectation Suites through an interactive development loop using suite scaffold
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_suite_scaffold.html
-    maturity: Experimental (expect exciting changes to Profiler capability)
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: N/A
-        integration_infrastructure_test_coverage: Partial
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: os_windows
+        title: OS - Windows
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Beta
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: Minimal
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Complete
+            bug_risk: Moderate
+    ------------------------------------------------------------
+        id: workflow_create_edit_expectations_cli_scaffold
+        title: Create and Edit Expectations - suite scaffold
+        icon:
+        short_description: Creating a new Expectation Suite using suite scaffold
+        description: Creating Expectation Suites through an interactive development loop using suite scaffold
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_suite_scaffold.html
+        maturity: Experimental (expect exciting changes to Profiler capability)
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Partial
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: workflow_create_edit_expectations_cli_edit
-    title: Create and Edit Expectations - CLI
-    icon:
-    short_description: Creating a new Expectation Suite using the CLI
-    description: Creating a Expectation Suite great_expectations suite new command
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
-    maturity: Experimental (expect exciting changes to Profiler and Suite Renderer capability)
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: N/A
-        integration_infrastructure_test_coverage: Partial
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: workflow_create_edit_expectations_cli_edit
+        title: Create and Edit Expectations - CLI
+        icon:
+        short_description: Creating a new Expectation Suite using the CLI
+        description: Creating a Expectation Suite great_expectations suite new command
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_the_cli.html
+        maturity: Experimental (expect exciting changes to Profiler and Suite Renderer capability)
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Partial
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: workflow_create_edit_expectations_json_schema
-    title: Create and Edit Expectations - Json schema
-    icon:
-    short_description: Creating a new Expectation Suite from a json schema file
-    description: Creating a new Expectation Suite using JsonSchemaProfiler function and json schema file
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
-    maturity: Experimental (expect exciting changes to Profiler capability)
-    maturity_details:
-        api_stability: N/A
-        implementation_completeness: N/A
-        unit_test_coverage: N/A
-        integration_infrastructure_test_coverage: Partial
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: workflow_create_edit_expectations_json_schema
+        title: Create and Edit Expectations - Json schema
+        icon:
+        short_description: Creating a new Expectation Suite from a json schema file
+        description: Creating a new Expectation Suite using JsonSchemaProfiler function and json schema file
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_suite_from_a_json_schema_file.html
+        maturity: Experimental (expect exciting changes to Profiler capability)
+        maturity_details:
+            api_stability: N/A
+            implementation_completeness: N/A
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Partial
+            documentation_completeness: Complete
+            bug_risk: Low
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS = 2
@@ -226,7 +225,9 @@ class BaseDataContext:
             raise
         return True
 
-    @usage_statistics_enabled_method(event_name="data_context.__init__",)
+    @usage_statistics_enabled_method(
+        event_name="data_context.__init__",
+    )
     def __init__(self, project_config, context_root_dir=None, runtime_environment=None):
         """DataContext constructor
 
@@ -245,10 +246,11 @@ class BaseDataContext:
             )
         self._project_config = project_config
         self._apply_global_config_overrides()
+
         if context_root_dir is not None:
-            self._context_root_directory = os.path.abspath(context_root_dir)
-        else:
-            self._context_root_directory = context_root_dir
+            context_root_dir = os.path.abspath(context_root_dir)
+        self._context_root_directory = context_root_dir
+
         self.runtime_environment = runtime_environment or {}
 
         # Init plugin support
@@ -290,7 +292,8 @@ class BaseDataContext:
             validation_operator_config,
         ) in self._project_config.validation_operators.items():
             self.add_validation_operator(
-                validation_operator_name, validation_operator_config,
+                validation_operator_name,
+                validation_operator_config,
             )
 
         self._evaluation_parameter_dependencies_compiled = False
@@ -323,7 +326,9 @@ class BaseDataContext:
 
             new_store = instantiate_class_from_config(
                 config=store_config,
-                runtime_environment={"root_directory": self.root_directory,},
+                runtime_environment={
+                    "root_directory": self.root_directory,
+                },
                 config_defaults={"module_name": module_name, "store_name": store_name},
             )
         except ge_exceptions.DataContextError as e:
@@ -643,7 +648,9 @@ class BaseDataContext:
             )
         return site_builder
 
-    @usage_statistics_enabled_method(event_name="data_context.open_data_docs",)
+    @usage_statistics_enabled_method(
+        event_name="data_context.open_data_docs",
+    )
     def open_data_docs(
         self,
         resource_identifier: Optional[str] = None,
@@ -994,7 +1001,7 @@ class BaseDataContext:
         )
         return batch_kwargs
 
-    def get_batch(
+    def _get_batch_v2(
         self,
         batch_kwargs: Union[dict, BatchKwargs],
         expectation_suite_name: Union[str, ExpectationSuite],
@@ -1050,6 +1057,87 @@ class BaseDataContext:
             expectation_engine=data_asset_type,
         )
         return validator.get_dataset()
+
+    def _get_batch_v3(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        **kwargs,
+    ) -> Union[Batch, DataAsset]:
+        """Get exactly one batch, based on a variety of flexible input types.
+
+        Args:
+            datasource_name
+            data_connector_name
+            data_asset_name
+
+            batch_request
+            batch_data
+            partition_request
+            partition_identifiers
+
+            limit
+            index
+            custom_filter_function
+
+            batch_spec_passthrough
+
+            sampling_method
+            sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        This method does not require typed or nested inputs.
+        Instead, it is intended to help the user pick the right parameters.
+
+        This method attempts to return exactly one batch.
+        If 0 or more than 1 batches would be returned, it raises an error.
+        """
+
+        batch_list: List[Batch] = self.get_batch_list(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            partition_request=partition_request,
+            partition_identifiers=partition_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            batch_spec_passthrough=batch_spec_passthrough,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            **kwargs,
+        )
+        # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
+        if len(batch_list) != 1:
+            raise ValueError(
+                f"Got {len(batch_list)} batches instead of a single batch."
+            )
+        return batch_list[0]
 
     @usage_statistics_enabled_method(
         event_name="data_context.run_validation_operator",
@@ -1123,6 +1211,344 @@ class BaseDataContext:
                 **kwargs,
             )
 
+    def _get_data_context_version(self, arg1: Any, **kwargs) -> Optional[str]:
+        """
+        arg1: the first positional argument (can take on various types)
+
+        **kwargs: variable arguments
+
+        Returns None if no datasources have been configured (or if there is an exception while getting the datasource).
+        Returns "v3" if the datasource is a subclass of the BaseDatasource class.
+        Returns "v2" if the datasource is an instance of the LegacyDatasource class.
+        """
+
+        if not self.datasources:
+            return None
+
+        if {
+            "datasource_name",
+            "data_connector_name",
+            "data_asset_name",
+            "batch_request",
+            "batch_data",
+        }.intersection(set(kwargs.keys())):
+            return "v3"
+
+        api_version: Optional[str] = None
+        datasource_name: Any
+        if "datasource_name" in kwargs:
+            datasource_name = kwargs.pop("datasource_name", None)
+        else:
+            datasource_name = arg1
+        try:
+            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(
+                datasource_name=datasource_name
+            )
+            if issubclass(type(datasource), BaseDatasource):
+                api_version = "v3"
+        except (ValueError, TypeError):
+            if "batch_kwargs" in kwargs:
+                batch_kwargs = kwargs.get("batch_kwargs", None)
+            else:
+                batch_kwargs = arg1
+            if isinstance(batch_kwargs, dict):
+                datasource_name = batch_kwargs.get("datasource")
+                if datasource_name is not None:
+                    try:
+                        datasource: Union[
+                            LegacyDatasource, BaseDatasource
+                        ] = self.get_datasource(datasource_name=datasource_name)
+                        if isinstance(datasource, LegacyDatasource):
+                            api_version = "v2"
+                    except (ValueError, TypeError):
+                        pass
+        return api_version
+
+    def get_batch(
+        self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
+    ) -> Union[Batch, DataAsset]:
+        """Get exactly one batch, based on a variety of flexible input types.
+        The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
+        Legacy (V2) Datasource schemas.  The version-specific implementations are contained in "_get_batch_v2()" and
+        "_get_batch_v3()", respectively, both of which are in the present module.
+
+        For the V3 API parameters, please refer to the signature and parameter description of method "_get_batch_v3()".
+        For the Legacy usage, please refer to the signature and parameter description of the method "_get_batch_v2()".
+
+        Args:
+            arg1: the first positional argument (can take on various types)
+            arg2: the second positional argument (can take on various types)
+            arg3: the third positional argument (can take on various types)
+
+            **kwargs: variable arguments
+
+        Returns:
+            Batch (V3) or DataAsset (V2) -- the requested batch
+
+        Processing Steps:
+        1. Determine the version (possible values are "v3" or "v2").
+        2. Convert the positional arguments to the appropriate named arguments, based on the version.
+        3. Package the remaining arguments as variable keyword arguments (applies only to V3).
+        4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
+        """
+
+        api_version: Optional[str] = self._get_data_context_version(arg1=arg1, **kwargs)
+        if api_version == "v3":
+            if "datasource_name" in kwargs:
+                datasource_name = kwargs.pop("datasource_name", None)
+            else:
+                datasource_name = arg1
+            if "data_connector_name" in kwargs:
+                data_connector_name = kwargs.pop("data_connector_name", None)
+            else:
+                data_connector_name = arg2
+            if "data_asset_name" in kwargs:
+                data_asset_name = kwargs.pop("data_asset_name", None)
+            else:
+                data_asset_name = arg3
+            return self._get_batch_v3(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                **kwargs,
+            )
+        if "batch_kwargs" in kwargs:
+            batch_kwargs = kwargs.get("batch_kwargs", None)
+        else:
+            batch_kwargs = arg1
+        if "expectation_suite_name" in kwargs:
+            expectation_suite_name = kwargs.get("expectation_suite_name", None)
+        else:
+            expectation_suite_name = arg2
+        if "data_asset_type" in kwargs:
+            data_asset_type = kwargs.get("data_asset_type", None)
+        else:
+            data_asset_type = arg3
+        batch_parameters = kwargs.get("batch_parameters")
+        return self._get_batch_v2(
+            batch_kwargs=batch_kwargs,
+            expectation_suite_name=expectation_suite_name,
+            data_asset_type=data_asset_type,
+            batch_parameters=batch_parameters,
+        )
+
+    def get_batch_list(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        **kwargs,
+    ) -> List[Batch]:
+        """Get the list of zero or more batches, based on a variety of flexible input types.
+        This method applies only to the new (V3) Datasource schema.
+
+        Args:
+            batch_request
+
+            datasource_name
+            data_connector_name
+            data_asset_name
+
+            batch_request
+            batch_data
+            partition_request
+            partition_identifiers
+
+            limit
+            index
+            custom_filter_function
+
+            sampling_method
+            sampling_kwargs
+
+            splitter_method
+            splitter_kwargs
+
+            batch_spec_passthrough
+
+            **kwargs
+
+        Returns:
+            (Batch) The requested batch
+
+        `get_batch` is the main user-facing API for getting batches.
+        In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
+        Instead, this method is intended to help the user pick the right parameters
+
+        This method attempts to return any number of batches, including an empty list.
+        """
+
+        datasource_name: str
+        if batch_request:
+            if not isinstance(batch_request, BatchRequest):
+                raise TypeError(
+                    f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
+                )
+            datasource_name = batch_request.datasource_name
+        else:
+            datasource_name = datasource_name
+
+        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+
+        if batch_request:
+            # TODO: Raise a warning if any parameters besides batch_requests are specified
+            return datasource.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
+        else:
+            if partition_request is None:
+                if partition_identifiers is None:
+                    partition_identifiers = kwargs
+                else:
+                    # Raise a warning if kwargs exist
+                    pass
+
+                # Currently, the implementation of splitting and sampling is inconsistent between the
+                # Datasource and SimpleSqlalchemyDatasource classes.  The former communicates these
+                # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
+                # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
+                # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
+                # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
+                # of partitions is implemented using the PartitionQuery class, it will not recognize the keys
+                # representing the splitting and sampling directives and raise an exception.  Additional work is needed
+                # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
+                partition_request_params: dict = {
+                    "partition_identifiers": partition_identifiers,
+                    "limit": limit,
+                    "index": index,
+                    "custom_filter_function": custom_filter_function,
+                }
+                if sampling_method is not None:
+                    sampling_params: dict = {
+                        "sampling_method": sampling_method,
+                    }
+                    if sampling_kwargs is not None:
+                        sampling_params["sampling_kwargs"] = sampling_kwargs
+                    partition_request_params.update(sampling_params)
+                if splitter_method is not None:
+                    splitter_params: dict = {
+                        "splitter_method": splitter_method,
+                    }
+                    if splitter_kwargs is not None:
+                        splitter_params["splitter_kwargs"] = splitter_kwargs
+                    partition_request_params.update(splitter_params)
+                partition_request = PartitionRequest(partition_request_params)
+            else:
+                # Raise a warning if partition_identifiers or kwargs exist
+                partition_request = PartitionRequest(partition_request)
+
+            batch_request: BatchRequest = BatchRequest(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                batch_data=batch_data,
+                partition_request=partition_request,
+                batch_spec_passthrough=batch_spec_passthrough,
+            )
+            return datasource.get_batch_list_from_batch_request(
+                batch_request=batch_request
+            )
+
+    def get_validator(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        *,
+        batch_request: BatchRequest = None,
+        batch_data: Any = None,
+        partition_request: Union[PartitionRequest, dict] = None,
+        partition_identifiers: dict = None,
+        limit: int = None,
+        index=None,
+        custom_filter_function: Callable = None,
+        expectation_suite_name: str = None,
+        expectation_suite: ExpectationSuite = None,
+        create_expectation_suite_with_name: str = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        sampling_method: str = None,
+        sampling_kwargs: dict = None,
+        splitter_method: str = None,
+        splitter_kwargs: dict = None,
+        **kwargs,
+    ) -> Validator:
+        """
+        This method applies only to the new (V3) Datasource schema.
+        """
+
+        if (
+            sum(
+                bool(x)
+                for x in [
+                    expectation_suite is not None,
+                    expectation_suite_name is not None,
+                    create_expectation_suite_with_name is not None,
+                ]
+            )
+            != 1
+        ):
+            raise ValueError(
+                "Exactly one of expectation_suite_name, expectation_suite, or create_expectation_suite_with_name must be specified"
+            )
+
+        if expectation_suite_name is not None:
+            expectation_suite = self.get_expectation_suite(expectation_suite_name)
+
+        if create_expectation_suite_with_name is not None:
+            expectation_suite = self.create_expectation_suite(
+                expectation_suite_name=create_expectation_suite_with_name
+            )
+
+        batch: Batch = cast(
+            Batch,
+            self.get_batch(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                batch_request=batch_request,
+                batch_data=batch_data,
+                partition_request=partition_request,
+                partition_identifiers=partition_identifiers,
+                limit=limit,
+                index=index,
+                custom_filter_function=custom_filter_function,
+                batch_spec_passthrough=batch_spec_passthrough,
+                sampling_method=sampling_method,
+                sampling_kwargs=sampling_kwargs,
+                splitter_method=splitter_method,
+                splitter_kwargs=splitter_kwargs,
+                **kwargs,
+            ),
+        )
+
+        batch_definition = batch.batch_definition
+        execution_engine = self.datasources[
+            batch_definition.datasource_name
+        ].execution_engine
+
+        validator = Validator(
+            execution_engine=execution_engine,
+            interactive_evaluation=True,
+            expectation_suite=expectation_suite,
+            data_context=self,
+            batches=[batch],
+        )
+
+        return validator
+
     def list_validation_operator_names(self):
         if not self.validation_operators:
             return []
@@ -1161,16 +1587,23 @@ class BaseDataContext:
         else:
             config = kwargs
 
+        return self._instantiate_datasource_from_config_and_update_project_config(
+            name=name,
+            config=config,
+            initialize=initialize,
+        )
+
+    def _instantiate_datasource_from_config_and_update_project_config(
+        self, name: str, config: dict, initialize: bool = True
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
         self._project_config["datasources"][name] = datasource_config
-
         datasource_config = self._project_config_with_variables_substituted.datasources[
             name
         ]
-        config = dict(datasourceConfigSchema.dump(datasource_config))
-
+        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
         datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
         if initialize:
             try:
@@ -1184,7 +1617,6 @@ class BaseDataContext:
                 raise e
         else:
             datasource = None
-
         return datasource
 
     def _instantiate_datasource_from_config(
@@ -1735,7 +2167,9 @@ class BaseDataContext:
             logger.debug("Found data_docs_sites. Building sites...")
 
             for site_name, site_config in sites.items():
-                logger.debug("Building Data Docs Site %s" % site_name,)
+                logger.debug(
+                    "Building Data Docs Site %s" % site_name,
+                )
 
                 if (site_names and (site_name in site_names)) or not site_names:
                     complete_site_config = site_config
@@ -2170,7 +2604,8 @@ class BaseDataContext:
 
         # TODO: Add batch_parameters
         batch = self.get_batch(
-            expectation_suite_name=expectation_suite_name, batch_kwargs=batch_kwargs,
+            expectation_suite_name=expectation_suite_name,
+            batch_kwargs=batch_kwargs,
         )
 
         if not profiler.validate(batch):
@@ -2225,7 +2660,12 @@ class BaseDataContext:
             """
 Profiled the data asset, with %d total rows and %d columns in %.2f seconds.
 Generated, evaluated, and stored %d Expectations during profiling. Please review results using data-docs."""
-            % (total_rows, total_columns, total_duration, total_expectations,)
+            % (
+                total_rows,
+                total_columns,
+                total_duration,
+                total_expectations,
+            )
         )
 
         profiling_results["success"] = True
@@ -2337,6 +2777,142 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
         files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
         return files
+
+    def test_yaml_config(
+        self,
+        yaml_config: str,
+        name=None,
+        pretty_print=True,
+        return_mode="instantiated_class",
+        shorten_tracebacks=False,
+    ):
+        """Convenience method for testing yaml configs
+
+        test_yaml_config is a convenience method for configuring the moving
+        parts of a Great Expectations deployment. It allows you to quickly
+        test out configs for system components, especially Datasources,
+        Checkpoints, and Stores.
+
+        For many deployments of Great Expectations, these components (plus
+        Expectations) are the only ones you'll need.
+
+        test_yaml_config is mainly intended for use within notebooks and tests.
+
+        Parameters
+        ----------
+        yaml_config : str
+            A string containing the yaml config to be tested
+
+        name: str
+            (Optional) A string containing the name of the component to instantiate
+
+        pretty_print : bool
+            Determines whether to print human-readable output
+
+        return_mode : str
+            Determines what type of object test_yaml_config will return
+            Valid modes are "instantiated_class" and "report_object"
+
+        shorten_tracebacks : bool
+            If true, catch any errors during instantiation and print only the
+            last element of the traceback stack. This can be helpful for
+            rapid iteration on configs in a notebook, because it can remove
+            the need to scroll up and down a lot.
+
+        Returns
+        -------
+        The instantiated component (e.g. a Datasource)
+        OR
+        a json object containing metadata from the component's self_check method
+
+        The returned object is determined by return_mode.
+        """
+        if pretty_print:
+            print("Attempting to instantiate class from config...")
+
+        if return_mode not in ["instantiated_class", "report_object"]:
+            raise ValueError(f"Unknown return_mode: {return_mode}.")
+
+        substituted_config_variables = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+        )
+
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        config_str_with_substituted_variables = substitute_all_config_variables(
+            yaml_config,
+            substitutions,
+        )
+
+        config = yaml.load(config_str_with_substituted_variables)
+
+        if "class_name" in config:
+            class_name = config["class_name"]
+        else:
+            class_name = None
+
+        try:
+            if class_name in [
+                "ExpectationsStore",
+                "ValidationsStore",
+                "HtmlSiteStore",
+                "EvaluationParameterStore",
+                "MetricStore",
+                "SqlAlchemyQueryStore",
+            ]:
+                print(f"\tInstantiating as a Store, since class_name is {class_name}")
+                instantiated_class = self._build_store_from_config(
+                    "my_temp_store", config
+                )
+
+            elif class_name in [
+                "Datasource",
+                "SimpleSqlalchemyDatasource",
+            ]:
+                print(
+                    f"\tInstantiating as a Datasource, since class_name is {class_name}"
+                )
+                datasource_name = name or "my_temp_datasource"
+                instantiated_class = (
+                    self._instantiate_datasource_from_config_and_update_project_config(
+                        name=datasource_name,
+                        config=config,
+                        initialize=True,
+                    )
+                )
+
+            else:
+                print(
+                    "\tNo matching class found. Attempting to instantiate class from the raw config..."
+                )
+                instantiated_class = instantiate_class_from_config(
+                    config, runtime_environment={}, config_defaults={}
+                )
+
+            if pretty_print:
+                print(
+                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
+                )
+                print()
+
+            report_object = instantiated_class.self_check(pretty_print)
+
+            if return_mode == "instantiated_class":
+                return instantiated_class
+
+            elif return_mode == "report_object":
+                return report_object
+
+        except Exception as e:
+            if shorten_tracebacks:
+                traceback.print_exc(limit=1)
+            else:
+                raise e
 
 
 class DataContext(BaseDataContext):

@@ -44,7 +44,10 @@ def test_basic_instantiation():
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
-        default_regex={"pattern": "alpha-(.*)\\.csv", "group_names": ["index"],},
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
         bucket=bucket,
         prefix="",
         assets={"alpha": {}},
@@ -53,7 +56,9 @@ def test_basic_instantiation():
     assert my_data_connector.self_check() == {
         "class_name": "ConfiguredAssetS3DataConnector",
         "data_asset_count": 1,
-        "example_data_asset_names": ["alpha",],
+        "example_data_asset_names": [
+            "alpha",
+        ],
         "data_assets": {
             "alpha": {
                 "example_data_references": [
@@ -88,8 +93,8 @@ def test_basic_instantiation():
 
 
 @mock_s3
-def test_instantiation_from_a_config(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_instantiation_from_a_config(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -129,7 +134,9 @@ def test_instantiation_from_a_config(empty_data_context_v3):
     assert report_object == {
         "class_name": "ConfiguredAssetS3DataConnector",
         "data_asset_count": 1,
-        "example_data_asset_names": ["alpha",],
+        "example_data_asset_names": [
+            "alpha",
+        ],
         "data_assets": {
             "alpha": {
                 "example_data_references": [
@@ -147,8 +154,8 @@ def test_instantiation_from_a_config(empty_data_context_v3):
 
 
 @mock_s3
-def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -193,7 +200,9 @@ assets:
     assert report_object == {
         "class_name": "ConfiguredAssetS3DataConnector",
         "data_asset_count": 1,
-        "example_data_asset_names": ["alpha",],
+        "example_data_asset_names": [
+            "alpha",
+        ],
         "data_assets": {
             "alpha": {"example_data_references": [], "batch_definition_count": 0},
         },
@@ -266,11 +275,13 @@ def test_return_all_batch_definitions_unsorted():
         my_data_connector.get_batch_definition_list_from_batch_request()
 
     # with unnamed data_asset_name
-    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name=None,
+    unsorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_s3_data_connector",
+                data_asset_name=None,
+            )
         )
     )
     expected = [
@@ -358,11 +369,13 @@ def test_return_all_batch_definitions_unsorted():
     assert expected == unsorted_batch_definition_list
 
     # with named data_asset_name
-    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
+    unsorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_s3_data_connector",
+                data_asset_name="TestFiles",
+            )
         )
     )
     assert expected == unsorted_batch_definition_list
@@ -442,11 +455,13 @@ def test_return_all_batch_definitions_sorted():
     assert self_check_report["data_assets"]["TestFiles"]["batch_definition_count"] == 10
     assert self_check_report["unmatched_data_reference_count"] == 0
 
-    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
+    sorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_s3_data_connector",
+                data_asset_name="TestFiles",
+            )
         )
     )
 
@@ -555,8 +570,10 @@ def test_return_all_batch_definitions_sorted():
     my_batch_definition: BatchDefinition
 
     # TEST 2: Should only return the specified partition
-    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=my_batch_request
+    my_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=my_batch_request
+        )
     )
 
     assert len(my_batch_definition_list) == 1
@@ -566,7 +583,11 @@ def test_return_all_batch_definitions_sorted():
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
         partition_definition=PartitionDefinition(
-            **{"name": "james", "timestamp": "20200713", "price": "1567",}
+            **{
+                "name": "james",
+                "timestamp": "20200713",
+                "price": "1567",
+            }
         ),
     )
     assert my_batch_definition == expected_batch_definition
@@ -579,8 +600,10 @@ def test_return_all_batch_definitions_sorted():
         partition_request=None,
     )
     # should return 10
-    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=my_batch_request
+    my_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=my_batch_request
+        )
     )
     assert len(my_batch_definition_list) == 10
 
@@ -648,8 +671,10 @@ def test_alpha():
         partition_request=None,
     )
 
-    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=my_batch_request
+    my_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=my_batch_request
+        )
     )
     assert len(my_batch_definition_list) == 0
 
@@ -661,8 +686,10 @@ def test_alpha():
             **{"partition_identifiers": {"part_1": "B"}}
         ),
     )
-    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=my_batch_request
+    my_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=my_batch_request
+        )
     )
     assert len(my_batch_definition_list) == 1
 
@@ -776,8 +803,10 @@ def test_foxtrot():
         data_asset_name="A",
         partition_request=None,
     )
-    my_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=my_batch_request
+    my_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=my_batch_request
+        )
     )
     assert len(my_batch_definition_list) == 3
 
@@ -842,15 +871,17 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_s3_data_connector",
-                "datasource_name": "test_environment",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: ConfiguredAssetS3DataConnector = (
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "general_s3_data_connector",
+                    "datasource_name": "test_environment",
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 
@@ -911,15 +942,17 @@ def test_return_all_batch_definitions_too_many_sorters():
     )
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetS3DataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "general_s3_data_connector",
-                "datasource_name": "test_environment",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: ConfiguredAssetS3DataConnector = (
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "general_s3_data_connector",
+                    "datasource_name": "test_environment",
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 
@@ -989,7 +1022,8 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
-                    data_connector_name="my_data_connector", data_asset_name="alpha",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="alpha",
                 )
             )
         )
@@ -1000,7 +1034,8 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
-                    data_connector_name="my_data_connector", data_asset_name="beta",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="beta",
                 )
             )
         )
@@ -1011,7 +1046,8 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
-                    data_connector_name="my_data_connector", data_asset_name="gamma",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="gamma",
                 )
             )
         )

@@ -449,7 +449,8 @@ class DefaultSiteSectionBuilder:
 
                 self.target_store.set(
                     SiteSectionIdentifier(
-                        site_section_name=self.name, resource_identifier=resource_key,
+                        site_section_name=self.name,
+                        resource_identifier=resource_key,
                     ),
                     viewable_content,
                 )
@@ -464,7 +465,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     f'{type(e).__name__}: "{str(e)}".  '
                     f'Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message, e, exc_info=True)
+                logger.error(exception_message)
 
 
 class DefaultSiteIndexBuilder:
@@ -894,7 +895,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
             )
-            logger.error(exception_message, e, exc_info=True)
+            logger.error(exception_message)
 
         return (self.target_store.write_index_page(viewable_content), index_links_dict)
 

@@ -154,7 +154,7 @@
           }
         },
         {
-          "title": "coerced_types_true__false_values",
+          "title": "coerced_types_true_false_values",
           "exact_match_out": false,
           "in": {
             "column": "b",
@@ -169,7 +169,7 @@
           "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
         },
         {
-          "title": "coerced_types_true__false_and_null",
+          "title": "coerced_types_true_false_and_null",
           "exact_match_out": false,
           "in": {
             "column": "x",
@@ -217,7 +217,7 @@
         }
       },
       "tests": [{
-        "title": "test_empty_column__should_be_false_no_observed_value_with_which_to_compare",
+        "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
         "exact_match_out": false,
         "in": {
           "column": "empty_column",

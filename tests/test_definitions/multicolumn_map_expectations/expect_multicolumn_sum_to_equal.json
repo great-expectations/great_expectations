@@ -22,7 +22,7 @@
         "success": true
       }
     },{
-      "title": "basic_positive_test___more_than_2_columns",
+      "title": "basic_positive_test_more_than_2_columns",
       "exact_match_out" : false,
       "in": {
         "column_list": ["z", "a", "b"],
@@ -46,7 +46,7 @@
         "success": false
       }
     },{
-      "title": "negative_test___different_value",
+      "title": "negative_test_different_value",
       "exact_match_out" : false,
       "in": {
         "column_list": ["w", "x"],
