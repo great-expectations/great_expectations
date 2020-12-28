@@ -167,8 +167,12 @@ def test_self_check_on_an_existing_expectation():
         ],
         "library_metadata": {
             "maturity": "production",
+            "package": "great_expectations",
             "tags" : ["arrows", "design", "flows", "prototypes", "svg", "whiteboarding", "wireframe", "wirefames"],
-            "contributors": ["Core Team"],
+            "contributors": [
+                "@shinnyshinshin",
+                "@abegong",
+            ],
             "github_issue_url": None,
             "hearts": 401,
             "downloads": 97235,
