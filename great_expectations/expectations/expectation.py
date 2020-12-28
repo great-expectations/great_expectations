@@ -706,6 +706,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
         docstring, short_description = self._get_docstring_and_short_description()
         supported_renderers = self._get_supported_renderers(snake_name)
 
+        library_metadata = self._get_library_metadata()
+
         report_obj = {
             "description": {
                 "camel_name": camel_name,
@@ -713,6 +715,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
                 "short_description" : short_description,
                 "docstring" : docstring,
             },
+            "library_metadata": library_metadata,
             "renderers": supported_renderers,
             "examples": [],
             "metrics": [],
@@ -824,6 +827,13 @@ class Expectation(ABC, metaclass=MetaExpectation):
         )
 
         return list(validation_dependencies["metrics"].keys())
+
+    def _get_library_metadata(self):
+        if hasattr(self, "library_metadata"):
+            return self.library_metadata
+        else:
+            print("here")
+            return {}
 
 
 class TableExpectation(Expectation, ABC):

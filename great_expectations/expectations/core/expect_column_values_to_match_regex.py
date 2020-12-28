@@ -245,3 +245,16 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         ]
     }]
 
+    #NOTE: Abe 20201228: These are fields that will eventually live in a database
+    #TODO: Make all of these not fake
+    library_metadata = {
+        "maturity": "production",
+        "tags" : ["arrows", "design", "flows", "prototypes", "svg", "whiteboarding", "wireframe", "wirefames"],
+        "contributors": ["Core Team"],
+        "github_issue_url": None,
+        "hearts": 401,
+        "downloads": 97235,
+        "validations": 289175619,
+        "created_at": 1556461556,
+        "updated_at": 1609165558,
+    }

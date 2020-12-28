@@ -68,7 +68,8 @@ def test_expectation_self_check():
             "PandasExecutionEngine": True,
             "SqlAlchemyExecutionEngine": True,
             "Spark": True
-        }
+        },
+        "library_metadata": {},
     }
 
 def test_all_expectation_self_checks():
@@ -163,4 +164,16 @@ def test_self_check_on_an_existing_expectation():
                     "mssql"
                 ]}
             ]}
-        ]}
+        ],
+        "library_metadata": {
+            "maturity": "production",
+            "tags" : ["arrows", "design", "flows", "prototypes", "svg", "whiteboarding", "wireframe", "wirefames"],
+            "contributors": ["Core Team"],
+            "github_issue_url": None,
+            "hearts": 401,
+            "downloads": 97235,
+            "validations": 289175619,
+            "created_at": 1556461556,
+            "updated_at": 1609165558,
+        },
+    }
