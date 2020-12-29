@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.datasource.data_connector import (
     InferredAssetFilePathDataConnector,
 )
@@ -9,6 +10,7 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
     normalize_directory_path,
 )
+from great_expectations.datasource.types import PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -36,6 +38,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         default_regex: Optional[dict] = None,
         glob_directive: str = "*",
         sorters: Optional[list] = None,
+        batch_spec_passthrough: dict = None,
     ):
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
@@ -61,6 +64,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
 
         self._base_directory = base_directory
         self._glob_directive = glob_directive
+        self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
@@ -90,3 +94,22 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             dir_path=self._base_directory,
             root_directory_path=self.data_context_root_directory,
         )
+
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+
+        batch_spec.update(
+            self._batch_spec_passthrough
+        )
+
+        return PathBatchSpec(batch_spec)
+

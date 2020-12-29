@@ -746,7 +746,7 @@ execution_engine:
 
 data_connectors:
 
-    my_data_connector:
+    my_configured_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: ConfiguredAssetFilesystemDataConnector
 
@@ -761,6 +761,20 @@ data_connectors:
                 batch_spec_passthrough:
                     reader_options:
                         skiprows: 2
+
+
+    my_inferred_data_connector:
+        module_name: great_expectations.datasource.data_connector
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: {base_directory}
+        batch_spec_passthrough:
+            reader_options:
+                skiprows: 2
+
+        default_regex:
+            pattern: (.*)\.csv
+            group_names:
+                - data_asset_name
     """,
         ),
         runtime_environment={"name": "my_datasource"},
@@ -772,7 +786,14 @@ data_connectors:
     print(json.dumps(report_obj, indent=2))
 
     assert (
-        report_obj["data_connectors"]["my_data_connector"]["example_data_reference"][
+        report_obj["data_connectors"]["my_configured_data_connector"]["example_data_reference"][
+            "n_rows"
+        ]
+        == 10
+    )
+
+    assert (
+        report_obj["data_connectors"]["my_inferred_data_connector"]["example_data_reference"][
             "n_rows"
         ]
         == 10
