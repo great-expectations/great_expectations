@@ -786,15 +786,15 @@ data_connectors:
     print(json.dumps(report_obj, indent=2))
 
     assert (
-        report_obj["data_connectors"]["my_configured_data_connector"]["example_data_reference"][
-            "n_rows"
-        ]
+        report_obj["data_connectors"]["my_configured_data_connector"][
+            "example_data_reference"
+        ]["n_rows"]
         == 10
     )
 
     assert (
-        report_obj["data_connectors"]["my_inferred_data_connector"]["example_data_reference"][
-            "n_rows"
-        ]
+        report_obj["data_connectors"]["my_inferred_data_connector"][
+            "example_data_reference"
+        ]["n_rows"]
         == 10
     )

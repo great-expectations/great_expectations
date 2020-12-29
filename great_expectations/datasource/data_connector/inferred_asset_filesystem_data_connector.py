@@ -107,9 +107,6 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         """
         batch_spec = super().build_batch_spec(batch_definition=batch_definition)
 
-        batch_spec.update(
-            self._batch_spec_passthrough
-        )
+        batch_spec.update(self._batch_spec_passthrough)
 
         return PathBatchSpec(batch_spec)
-
