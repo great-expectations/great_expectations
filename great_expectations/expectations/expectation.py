@@ -728,18 +728,11 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
         if examples != []:
             example_data, example_test = self._choose_example(examples)
-            batch = Batch(data=example_data)
-            
-            expectation_config = ExpectationConfiguration(**{
-                "expectation_type": snake_name,
-                "kwargs": example_test
-            })
-            
-            validation_results = Validator(
-                execution_engine=PandasExecutionEngine(),
-                batches=[batch]
-            ).graph_validate(
-                configurations=[expectation_config]
+
+            test_batch, expectation_config, validation_results = self._instantiate_example_objects(
+                expectation_type=snake_name,
+                example_data=example_data,
+                example_test=example_test,
             )
             validation_result = validation_results[0]
 
@@ -790,9 +783,77 @@ class Expectation(ABC, metaclass=MetaExpectation):
         example_test = example["tests"][0]["in"]
 
         return example_data, example_test
+    
+    def _instantiate_example_objects(
+        self,
+        expectation_type : str,
+        example_data : dict,
+        example_test : dict,
+    ) -> Tuple[
+        Batch,
+        ExpectationConfiguration,
+        List[ExpectationValidationResult]
+    ]:
+        test_batch = Batch(data=example_data)
+        
+        expectation_config = ExpectationConfiguration(**{
+            "expectation_type": expectation_type,
+            "kwargs": example_test
+        })
+        
+        validation_results = Validator(
+            execution_engine=PandasExecutionEngine(),
+            batches=[test_batch]
+        ).graph_validate(
+            configurations=[expectation_config]
+        )
+
+        return test_batch, expectation_config, validation_results
 
     def _get_supported_renderers(self, snake_name):
         return list(_registered_renderers[snake_name].keys())
+
+    from great_expectations.render.types import RenderedStringTemplateContent
+
+    #NOTE: Abe 20201228: This method probably belong elsewhere. Putting it here for now.
+    def _get_rendered_result_as_string(self, rendered_result):
+
+        if type(rendered_result) == str:
+            return rendered_result
+
+        elif type(rendered_result) == list:
+            sub_result_list = []
+            for sub_result in rendered_result:
+                sub_result_list.append(self._get_rendered_result_as_string(sub_result))
+            
+            return "\n".join(sub_result_list)
+
+        elif type(rendered_result) == RenderedStringTemplateContent:
+            return rendered_result.__str__()
+
+        else:
+            print(type(rendered_result))
+
+    def _get_rendered_dict(
+        self,
+        expectation_name : str,
+        supported_renderers : List[str],
+        expectation_config : ExpectationConfiguration,
+        validation_result : ExpectationValidationResult,
+    ):
+        renderer_dict = {}
+
+        for renderer_name in supported_renderers:
+            _, renderer = _registered_renderers[expectation_name][renderer_name]
+
+            rendered_result = renderer(
+                configuration=expectation_config,
+                result=validation_result,
+            )
+            renderer_dict[renderer_name] = self._get_rendered_result_as_string(rendered_result)
+
+        return renderer_dict
+
 
     def _get_question_answer_strings(self,
         expectation_config: ExpectationConfiguration,

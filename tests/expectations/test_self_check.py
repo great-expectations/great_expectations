@@ -181,3 +181,46 @@ def test_self_check_on_an_existing_expectation():
             "updated_at": 1609165558,
         },
     }
+
+def test_expectation__get_renderers():
+
+    expectation_name = "expect_column_values_to_match_regex"
+    my_expectation = _registered_expectations[expectation_name]()
+
+    supported_renderers = my_expectation._get_supported_renderers(expectation_name)
+    examples = my_expectation._get_examples()
+    example_data, example_test = my_expectation._choose_example(examples)
+    my_batch, my_expectation_config, my_validation_results = my_expectation._instantiate_example_objects(
+        expectation_name,
+        example_data,
+        example_test,
+    )
+    my_validation_result = my_validation_results[0]
+
+    renderer_dict = my_expectation._get_rendered_dict(
+        expectation_name,
+        supported_renderers,
+        my_expectation_config,
+        my_validation_result,
+    )
+    # renderer_dict = {}
+    # for renderer_name in supported_renderers:
+    #     _, renderer = _registered_renderers[expectation_name][renderer_name]
+
+    #     rendered_result = renderer(
+    #         configuration=my_expectation_config,
+    #         result=my_validation_result,
+    #     )
+    #     renderer_dict[renderer_name] = get_rendered_result_as_string(rendered_result)
+    
+    print(json.dumps(renderer_dict, indent=2))
+
+    assert renderer_dict == {
+        "answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
+        "renderer.diagnostic.observed_value": "20% unexpected",
+        "renderer.diagnostic.status_icon": "",
+        "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
+        "renderer.diagnostic.unexpected_table": None,
+        "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
+        "question": "Do at least 90.0% of values in column \"a\" match the regular expression ^a?"
+    }
