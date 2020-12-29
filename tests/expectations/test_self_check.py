@@ -203,15 +203,6 @@ def test_expectation__get_renderers():
         my_expectation_config,
         my_validation_result,
     )
-    # renderer_dict = {}
-    # for renderer_name in supported_renderers:
-    #     _, renderer = _registered_renderers[expectation_name][renderer_name]
-
-    #     rendered_result = renderer(
-    #         configuration=my_expectation_config,
-    #         result=my_validation_result,
-    #     )
-    #     renderer_dict[renderer_name] = get_rendered_result_as_string(rendered_result)
     
     print(json.dumps(renderer_dict, indent=2))
 
