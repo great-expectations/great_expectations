@@ -48,7 +48,7 @@ class ProfilerTypeMapping:
     # Future support possibility: JSON (RECORD)
     # Future support possibility: BINARY (BYTES)
     INT_TYPE_NAMES = [
-        "INTEGER",
+        "NUMERIC" "INTEGER",
         "integer",
         "int",
         "int_",
@@ -67,6 +67,7 @@ class ProfilerTypeMapping:
         "BIGINT",
         "IntegerType",
         "LongType",
+        "DECIMAL",
     ]
     FLOAT_TYPE_NAMES = [
         "FLOAT",
