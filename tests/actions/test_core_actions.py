@@ -2,7 +2,10 @@ from unittest import mock
 
 from freezegun import freeze_time
 
-from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import ValidationsStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -10,6 +13,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.validation_operators import (
     MicrosoftTeamsNotificationAction,
+    OpsgenieAlertAction,
     PagerdutyAlertAction,
     SlackNotificationAction,
     StoreValidationResultAction,
@@ -24,7 +28,9 @@ except ImportError:
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreAction():
     fake_in_memory_store = ValidationsStore(
-        store_backend={"class_name": "InMemoryStoreBackend",}
+        store_backend={
+            "class_name": "InMemoryStoreBackend",
+        }
     )
     stores = {"fake_in_memory_store": fake_in_memory_store}
 
@@ -35,7 +41,8 @@ def test_StoreAction():
     data_context.stores = stores
 
     action = StoreValidationResultAction(
-        data_context=data_context, target_store_name="fake_in_memory_store",
+        data_context=data_context,
+        target_store_name="fake_in_memory_store",
     )
     assert fake_in_memory_store.list_keys() == []
 
@@ -66,15 +73,18 @@ def test_StoreAction():
     )
     assert stored_identifier.run_id == expected_run_id
 
-    assert fake_in_memory_store.get(
-        ValidationResultIdentifier(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name="default_expectations"
-            ),
-            run_id=expected_run_id,
-            batch_identifier="1234",
+    assert (
+        fake_in_memory_store.get(
+            ValidationResultIdentifier(
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    expectation_suite_name="default_expectations"
+                ),
+                run_id=expected_run_id,
+                batch_identifier="1234",
+            )
         )
-    ) == ExpectationSuiteValidationResult(success=False, results=[])
+        == ExpectationSuiteValidationResult(success=False, results=[])
+    )
 
 
 def test_SlackNotificationAction(
@@ -97,11 +107,14 @@ def test_SlackNotificationAction(
     )
 
     # TODO: improve this test - currently it is verifying a failed call to Slack. It returns a "empty" payload
-    assert slack_action.run(
-        validation_result_suite_identifier=validation_result_suite_id,
-        validation_result_suite=validation_result_suite,
-        data_asset=None,
-    ) == {"slack_notification_result": None}
+    assert (
+        slack_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"slack_notification_result": None}
+    )
 
 
 @mock.patch("pypd.EventV2")
@@ -122,20 +135,70 @@ def test_PagerdutyAlertAction(
     # Make sure the alert is sent by default when the validation has success = False
     validation_result_suite.success = False
 
-    assert pagerduty_action.run(
-        validation_result_suite_identifier=validation_result_suite_id,
-        validation_result_suite=validation_result_suite,
-        data_asset=None,
-    ) == {"pagerduty_alert_result": "success"}
+    assert (
+        pagerduty_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"pagerduty_alert_result": "success"}
+    )
 
     # Make sure the alert is not sent by default when the validation has success = True
     validation_result_suite.success = True
 
-    assert pagerduty_action.run(
-        validation_result_suite_identifier=validation_result_suite_id,
-        validation_result_suite=validation_result_suite,
-        data_asset=None,
-    ) == {"pagerduty_alert_result": "none sent"}
+    assert (
+        pagerduty_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"pagerduty_alert_result": "none sent"}
+    )
+
+
+def test_OpsgenieAlertAction(
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
+
+    renderer = {
+        "module_name": "great_expectations.render.renderer.opsgenie_renderer",
+        "class_name": "OpsgenieRenderer",
+    }
+    opsgenie_action = OpsgenieAlertAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        api_key="testapikey",
+        region=None,
+        priority="P3",
+        notify_on="all",
+    )
+
+    # Make sure the alert is sent by default when the validation has success = False
+    validation_result_suite.success = False
+
+    assert (
+        opsgenie_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"opsgenie_alert_result": "error"}
+    )
+
+    # Make sure the alert is not sent by default when the validation has success = True
+    validation_result_suite.success = True
+
+    assert (
+        opsgenie_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"opsgenie_alert_result": "error"}
+    )
 
 
 def test_MicrosoftTeamsNotificationAction(

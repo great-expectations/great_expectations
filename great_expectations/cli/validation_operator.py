@@ -10,7 +10,7 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_dict
-from great_expectations.core import RunIdentifier
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 json_parse_exception = json.decoder.JSONDecodeError
@@ -80,10 +80,16 @@ def validation_operator_list(directory):
     help="""The path of the validation config file (JSON). """,
 )
 @click.option(
-    "--name", "-n", default=None, help="""The name of the validation operator. """,
+    "--name",
+    "-n",
+    default=None,
+    help="""The name of the validation operator. """,
 )
 @click.option(
-    "--suite", "-s", default=None, help="""The name of the expectation suite. """,
+    "--suite",
+    "-s",
+    default=None,
+    help="""The name of the expectation suite. """,
 )
 @click.option(
     "--run_name",

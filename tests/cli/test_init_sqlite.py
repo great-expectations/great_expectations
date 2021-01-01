@@ -29,7 +29,7 @@ def titanic_sqlite_db_file(sa, tmp_path_factory):
     db_path = os.path.join(temp_dir, "titanic.db")
     shutil.copy(fixture_db_path, db_path)
 
-    engine = sa.create_engine("sqlite:///{}".format(db_path))
+    engine = sa.create_engine("sqlite:///{}".format(db_path), pool_recycle=3600)
     assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
     return db_path
 
@@ -44,7 +44,7 @@ def test_cli_init_on_new_project(
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
-    engine = sa.create_engine("sqlite:///{}".format(database_path))
+    engine = sa.create_engine("sqlite:///{}".format(database_path), pool_recycle=3600)
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -108,6 +108,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
         warning.json
     notebooks/
         pandas/
@@ -160,6 +161,7 @@ great_expectations/
                             20190926T134241.000000Z/
                                 foobarbazguid.html
         validations/
+            .ge_store_backend_id
             warning/
                 20190926T134241.000000Z/
                     20190926T134241.000000Z/
@@ -188,7 +190,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
-    engine = sa.create_engine("sqlite:///{}".format(database_path))
+    engine = sa.create_engine("sqlite:///{}".format(database_path), pool_recycle=3600)
     engine_url_with_added_whitespace = "    " + str(engine.url) + "  "
 
     runner = CliRunner(mix_stderr=False)
@@ -362,7 +364,9 @@ def initialized_sqlite_project(
     """This is an initialized project through the CLI."""
     project_dir = str(tmp_path_factory.mktemp("my_rad_project"))
 
-    engine = sa.create_engine("sqlite:///{}".format(titanic_sqlite_db_file))
+    engine = sa.create_engine(
+        "sqlite:///{}".format(titanic_sqlite_db_file), pool_recycle=3600
+    )
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -423,7 +427,10 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+            cli,
+            ["init", "-d", project_dir],
+            input="n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -442,7 +449,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
-    mock_webbrowser, caplog, initialized_sqlite_project,
+    mock_webbrowser,
+    caplog,
+    initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
 
@@ -451,7 +460,10 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+            cli,
+            ["init", "-d", project_dir],
+            input="n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -470,7 +482,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
-    mock_webbrowser, caplog, initialized_sqlite_project,
+    mock_webbrowser,
+    caplog,
+    initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
 
@@ -479,7 +493,10 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="\n\n", catch_exceptions=False,
+            cli,
+            ["init", "-d", project_dir],
+            input="\n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -504,7 +521,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
-    mock_webbrowser, caplog, initialized_sqlite_project,
+    mock_webbrowser,
+    caplog,
+    initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)

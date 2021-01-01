@@ -48,6 +48,8 @@ def test_setting_config_variables_is_visible_immediately(
 ):
     context = data_context_with_variables_in_config
 
+    assert type(context.get_config()) == DataContextConfig
+
     config_variables_file_path = context.get_config()["config_variables_file_path"]
 
     assert config_variables_file_path == "uncommitted/config_variables.yml"
@@ -113,7 +115,8 @@ def test_setting_config_variables_is_visible_immediately(
         "database": "postgres",
     }
     context.save_config_variable(
-        "escaped_password_dict", dict_to_escape,
+        "escaped_password_dict",
+        dict_to_escape,
     )
 
     context._project_config["datasources"]["mydatasource"]["batch_kwargs_generators"][

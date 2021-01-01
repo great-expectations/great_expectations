@@ -1,9 +1,9 @@
 import importlib.util
+import json
 from unittest import mock
 
 import pandas as pd
 import pytest
-import json
 
 from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
 
@@ -388,11 +388,17 @@ def test_expect_column_values_to_be_json_parseable(spark_session):
     T = [
         {
             "in": {"column": "json_col"},
-            "out": {"success": True, "unexpected_list": [],},
+            "out": {
+                "success": True,
+                "unexpected_list": [],
+            },
         },
         {
             "in": {"column": "not_json"},
-            "out": {"success": False, "unexpected_list": [4, 5, 6, 7],},
+            "out": {
+                "success": False,
+                "unexpected_list": [4, 5, 6, 7],
+            },
         },
         {
             "in": {"column": "py_dict"},
@@ -408,7 +414,10 @@ def test_expect_column_values_to_be_json_parseable(spark_session):
         },
         {
             "in": {"column": "most"},
-            "out": {"success": False, "unexpected_list": ["d4"],},
+            "out": {
+                "success": False,
+                "unexpected_list": ["d4"],
+            },
         },
         {
             "in": {"column": "most", "mostly": 0.75},

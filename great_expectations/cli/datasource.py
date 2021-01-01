@@ -21,7 +21,7 @@ from great_expectations.cli.util import (
     cli_message_dict,
     verify_library_dependent_modules,
 )
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
 from great_expectations.datasource import (
@@ -39,7 +39,7 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
 
@@ -584,8 +584,8 @@ After you connect to the datasource, run great_expectations init to continue.
 
 def _should_hide_input():
     """
-        This is a workaround to help identify Windows and adjust the prompts accordingly
-        since hidden prompts may freeze in certain Windows terminals
+    This is a workaround to help identify Windows and adjust the prompts accordingly
+    since hidden prompts may freeze in certain Windows terminals
     """
     if "windows" in platform.platform().lower():
         return False
@@ -724,7 +724,8 @@ def _collect_snowflake_credentials_key_pair():
     credentials = {}
 
     credentials["private_key_path"] = click.prompt(
-        "Path to the private key used for authentication", show_default=False,
+        "Path to the private key used for authentication",
+        show_default=False,
     )
 
     credentials["private_key_passphrase"] = click.prompt(
@@ -1146,7 +1147,9 @@ We could not determine the format of the file. What is it?
         # do not use Click to check if the file exists - the get_batch
         # logic will check this
         path = click.prompt(
-            msg_prompt_file_path, type=click.Path(dir_okay=dir_okay), default=path,
+            msg_prompt_file_path,
+            type=click.Path(dir_okay=dir_okay),
+            default=path,
         )
 
         if not path.startswith("gs:") and not path.startswith("s3"):
@@ -1324,7 +1327,7 @@ Enter an SQL query
             else:
                 batch_kwargs = {"query": query, "datasource": datasource_name}
                 batch_kwargs.update(temp_table_kwargs)
-                Validator(
+                BridgeValidator(
                     batch=datasource.get_batch(batch_kwargs),
                     expectation_suite=ExpectationSuite("throwaway"),
                 ).get_dataset()
