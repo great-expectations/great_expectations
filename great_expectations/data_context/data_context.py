@@ -827,7 +827,14 @@ class BaseDataContext:
                 self.escape_all_config_variables(v, dollar_sign_escape_string)
                 for v in value
             ]
-        return value.replace("$", dollar_sign_escape_string)
+        val_frst_two_ltrs = value[0:2]
+        val_rmng_ltrs = value[2:]
+        if val_frst_two_ltrs == "${" and len(value) > 2 and value[-1] == "}":
+            value = "${" + val_rmng_ltrs.replace(
+                "$", dollar_sign_escape_string)
+        else:
+            value = value.replace("$", dollar_sign_escape_string)
+        return value
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
