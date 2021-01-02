@@ -35,6 +35,46 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     success_keys = ("mostly",)
     # default_kwarg_values = ColumnMapExpectation.default_kwarg_values
 
+class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualThree):
+
+    examples = [{
+        "data" : {
+            "mostly_threes" : [3,3,3,3,3,3,2,-1,None,None],
+        },
+        "tests": [
+        {
+            "title": "positive_test_with_mostly",
+            "exact_match_out" : False,
+            "in": {
+                "column": "mostly_threes",
+                "mostly": 0.6
+            },
+            "out": {
+                "success":True,
+                "unexpected_index_list": [6,7],
+                "unexpected_list": [2, -1]
+            },
+        }]
+    }]
+
+    library_metadata = {
+        "maturity": "experimental",
+        "package": "great_expectations",
+        "tags" : ["tag", "other_tag"],
+        "contributors": [
+            "@abegong",
+        ],
+        "github_issue_url": None,
+        "created_at": 1556461556,
+        "updated_at": 1609165558,
+    }
+
+class ExpectColumnValuesToEqualThree__ThirdIteration(ColumnMapExpectation):
+
+    map_metric = "column_values.equal_three"
+    success_keys = ("mostly",)
+
+
 def test_expectation_self_check():
 
     my_expectation = ExpectColumnValuesToEqualThree(
@@ -98,8 +138,6 @@ def test_self_check_on_an_existing_expectation():
             "snake_name": "expect_column_values_to_match_regex",
             "short_description": "Expect column entries to be strings that match a given regular expression.",
             # "docstring": "Expect column entries to be strings that match a given regular expression. Valid matches can be found     anywhere in the string, for example \"[at]+\" will identify the following strings as expected: \"cat\", \"hat\",     \"aa\", \"a\", and \"t\", and the following strings as unexpected: \"fish\", \"dog\".\n\n    expect_column_values_to_match_regex is a     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine\n    .column_map_expectation>`.\n\n    Args:\n        column (str):             The column name.\n        regex (str):             The regular expression the column entries should match.\n\n    Keyword Args:\n        mostly (None or a float between 0 and 1):             Return `\"success\": True` if at least mostly fraction of values match the expectation.             For more detail, see :ref:`mostly`.\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    See Also:\n        :func:`expect_column_values_to_not_match_regex         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_not_match_regex>`\n\n        :func:`expect_column_values_to_match_regex_list         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_match_regex_list>`\n\n    ",
-            "question": "Do at least 90.0% of values in column \"a\" match the regular expression ^a?",
-            "answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
         },
         "execution_engines": {
             "PandasExecutionEngine": True,
@@ -107,13 +145,13 @@ def test_self_check_on_an_existing_expectation():
             "Spark": True
         },
         "renderers": [
-            "answer",
+            "renderer.answer",
             "renderer.diagnostic.observed_value",
             "renderer.diagnostic.status_icon",
             "renderer.diagnostic.unexpected_statement",
             "renderer.diagnostic.unexpected_table",
             "renderer.prescriptive",
-            "question"
+            "renderer.question",
         ],
         "metrics": [
             "column_values.nonnull.unexpected_count",
@@ -174,9 +212,6 @@ def test_self_check_on_an_existing_expectation():
                 "@abegong",
             ],
             "github_issue_url": None,
-            "hearts": 401,
-            "downloads": 97235,
-            "validations": 289175619,
             "created_at": 1556461556,
             "updated_at": 1609165558,
         },
@@ -207,11 +242,44 @@ def test_expectation__get_renderers():
     print(json.dumps(renderer_dict, indent=2))
 
     assert renderer_dict == {
-        "answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
+        "renderer.answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
+        "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
         "renderer.diagnostic.observed_value": "20% unexpected",
         "renderer.diagnostic.status_icon": "",
-        "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
         "renderer.diagnostic.unexpected_table": None,
         "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
-        "question": "Do at least 90.0% of values in column \"a\" match the regular expression ^a?"
+        "renderer.question": "Do at least 90.0% of values in column \"a\" match the regular expression ^a?",
+    }
+
+
+    # Expectation with no renderers specified
+    print([x for x in _registered_expectations.keys() if "second" in x])
+    expectation_name = "expect_column_values_to_equal_three___second_iteration"
+    my_expectation = _registered_expectations[expectation_name]()
+
+    supported_renderers = my_expectation._get_supported_renderers(expectation_name)
+    examples = my_expectation._get_examples()
+    example_data, example_test = my_expectation._choose_example(examples)
+    my_batch, my_expectation_config, my_validation_results = my_expectation._instantiate_example_objects(
+        expectation_name,
+        example_data,
+        example_test,
+    )
+    my_validation_result = my_validation_results[0]
+
+    renderer_dict = my_expectation._get_rendered_dict(
+        expectation_name,
+        supported_renderers,
+        my_expectation_config,
+        my_validation_result,
+    )
+    
+    print(json.dumps(renderer_dict, indent=2))
+
+    assert renderer_dict == {
+        "renderer.diagnostic.observed_value": "20% unexpected",
+        "renderer.diagnostic.status_icon": "",
+        "renderer.diagnostic.unexpected_statement": "",
+        "renderer.diagnostic.unexpected_table": None,
+        "renderer.prescriptive": "expect_column_values_to_equal_three___second_iteration(**{'column': 'mostly_threes', 'mostly': 0.6})",
     }

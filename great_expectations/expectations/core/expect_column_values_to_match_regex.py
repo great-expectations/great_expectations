@@ -121,7 +121,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="question")
+    @renderer(renderer_type="renderer.question")
     def _question_renderer(
         cls, configuration, result=None, language=None, runtime_configuration=None
     ):
@@ -132,7 +132,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
 
     @classmethod
-    @renderer(renderer_type="answer")
+    @renderer(renderer_type="renderer.answer")
     def _answer_renderer(
         cls, configuration=None, result=None, language=None, runtime_configuration=None
     ):

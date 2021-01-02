@@ -736,15 +736,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
             )
             validation_result = validation_results[0]
 
-            question_str, answer_str = self._get_question_answer_strings(
-                expectation_config=expectation_config,
-                validation_result=validation_result
-            )
-            report_obj["description"].update({
-                "question": question_str,
-                "answer": answer_str,
-            })
-
             upstream_metrics = self._get_upstream_metrics(expectation_config)
             report_obj.update({"metrics": upstream_metrics})
 
@@ -811,7 +802,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
         return test_batch, expectation_config, validation_results
 
     def _get_supported_renderers(self, snake_name):
-        return list(_registered_renderers[snake_name].keys())
+        supported_renderers = list(_registered_renderers[snake_name].keys())
+        supported_renderers.sort()
+        return supported_renderers
 
     from great_expectations.render.types import RenderedStringTemplateContent
 
@@ -853,34 +846,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
             renderer_dict[renderer_name] = self._get_rendered_result_as_string(rendered_result)
 
         return renderer_dict
-
-
-    def _get_question_answer_strings(self,
-        expectation_config: ExpectationConfiguration,
-        validation_result
-    ) -> Tuple[str, str]:
-        expectation_name = camel_to_snake(self.__class__.__name__)
-
-        try:
-            _, question_renderer = _registered_renderers[expectation_name]["question"]
-            _, answer_renderer = _registered_renderers[expectation_name]["answer"]
-
-            question_str = question_renderer(
-                configuration=expectation_config,
-                result=validation_result,
-            )
-
-            answer_str = answer_renderer(
-                configuration=expectation_config,
-                result=validation_result,
-            )
-
-            return question_str, answer_str
-
-        except:
-            pass
-
-            return None, None
 
     def _get_upstream_metrics(self, expectation_config):
         validation_dependencies = self.get_validation_dependencies(
