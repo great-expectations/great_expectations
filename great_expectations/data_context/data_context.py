@@ -833,7 +833,6 @@ class BaseDataContext:
         else:
             value.replace("$", dollar_sign_escape_string)    
         return value
-        # return value.replace("$", dollar_sign_escape_string) 
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
