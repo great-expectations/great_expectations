@@ -213,7 +213,7 @@ class BaseDataContext:
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
-    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
+    DOLLAR_SIGN_ESCAPE_STRING = r"$"
 
     @classmethod
     def validate_config(cls, project_config):
