@@ -43,11 +43,13 @@ class DatabaseStoreBackend(StoreBackend):
         engine=None,
         store_name=None,
         suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         **kwargs,
     ):
         super().__init__(
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
         if not sa:

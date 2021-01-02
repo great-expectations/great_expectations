@@ -39,6 +39,7 @@ class DataDocsSiteAnonymizer(Anonymizer):
                 site_builder_config=site_index_builder_config
             )
         )
+        # Note AJB-20201218 show_cta_footer was removed in v 0.9.9 via PR #1249
         if "show_cta_footer" in site_index_builder_config:
             anonymized_site_index_builder[
                 "show_cta_footer"

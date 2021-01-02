@@ -839,15 +839,14 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_DATA_DOCS_SITES = {
         DEFAULT_DATA_DOCS_SITE_NAME: {
             "class_name": "SiteBuilder",
+            "show_how_to_buttons": True,
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "base_directory": "uncommitted/data_docs/local_site/",
             },
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
-                "show_cta_footer": True,
             },
-            "show_how_to_buttons": True,
         }
     }
 
@@ -968,7 +967,6 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                 },
                 "site_index_builder": {
                     "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
                 },
             }
         }
@@ -1100,7 +1098,6 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
                 "site_index_builder": {
                     "class_name": "DefaultSiteIndexBuilder",
-                    "show_cta_footer": True,
                 },
             }
         }
