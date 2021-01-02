@@ -37,12 +37,15 @@ Steps
 
 2. **Next, implement a renderer with type ``renderer.prescriptive``.**
 
-  Declare a class method in your custom Expectation class and decorate it with ``@renderer(renderer_type="renderer.prescriptive")``. The method name is arbitrary, but the convention is to camelcase the renderer type and convert the "renderer" prefix to a suffix (e.g. ``_prescriptive_renderer``). The method should have the following signature, which is shared across renderers:
+  Declare a class method in your custom Expectation class and decorate it with ``@renderer(renderer_type="renderer.prescriptive")``. The method name is arbitrary, but the convention is to camelcase the renderer type and convert the "renderer" prefix to a suffix (e.g. ``_prescriptive_renderer``).  Adding the ``@render_evaluation_parameter_string`` decorator allows :ref:`Expectations that use Evaluation Parameters <how_to_guides__creating_and_editing_expectations__how_to_create_expectations_that_span_multiple_tables_using_evaluation_parameters>` to render the values of the Evaluation Parameters along with the rest of the output.
+
+  The method should have the following signature, which is shared across renderers:
 
   .. code-block:: python
 
       @classmethod
       @renderer(renderer_type="renderer.prescriptive")
+      @render_evaluation_parameter_string
       def _prescriptive_renderer(
           cls,
           configuration: ExpectationConfiguration = None,
@@ -90,6 +93,7 @@ Steps
 
                   @classmethod
                   @renderer(renderer_type="renderer.prescriptive")
+                  @render_evaluation_parameter_string
                   def _prescriptive_renderer(
                           cls,
                           configuration: ExpectationConfiguration = None,
@@ -201,6 +205,7 @@ Steps
 
                   @classmethod
                   @renderer(renderer_type="renderer.prescriptive")
+                  @render_evaluation_parameter_string
                   def _prescriptive_renderer(
                           cls,
                           configuration: ExpectationConfiguration = None,
@@ -323,6 +328,7 @@ Steps
 
                   @classmethod
                   @renderer(renderer_type="renderer.prescriptive")
+                  @render_evaluation_parameter_string
                   def _prescriptive_renderer(
                       cls,
                       configuration=None,
@@ -465,6 +471,7 @@ Steps
 
                   @classmethod
                   @renderer(renderer_type="renderer.prescriptive")
+                  @render_evaluation_parameter_string
                   def _prescriptive_renderer(
                       cls,
                       configuration=None,
