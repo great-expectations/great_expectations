@@ -213,7 +213,7 @@ class BaseDataContext:
         os.path.expanduser("~/.great_expectations/great_expectations.conf"),
         "/etc/great_expectations.conf",
     ]
-    DOLLAR_SIGN_ESCAPE_STRING = r"$"
+    DOLLAR_SIGN_ESCAPE_STRING = r"\$"
 
     @classmethod
     def validate_config(cls, project_config):
@@ -827,7 +827,13 @@ class BaseDataContext:
                 self.escape_all_config_variables(v, dollar_sign_escape_string)
                 for v in value
             ]
-        return value.replace("$", dollar_sign_escape_string)
+        val_frst_two_ltrs = value[0:2]
+        if val_frst_two_ltrs == "${" and len(value) > 2:
+            value = "${" + value[2:].replace("$", dollar_sign_escape_string)
+        else:
+            value.replace("$", dollar_sign_escape_string)    
+        return value
+        # return value.replace("$", dollar_sign_escape_string) 
 
     def save_config_variable(self, config_variable_name, value):
         """Save config variable value
