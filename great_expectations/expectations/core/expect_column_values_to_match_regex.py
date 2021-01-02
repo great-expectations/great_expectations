@@ -256,9 +256,6 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             "@abegong",
         ],
         "github_issue_url": None,
-        "hearts": 401,
-        "downloads": 97235,
-        "validations": 289175619,
         "created_at": 1556461556,
         "updated_at": 1609165558,
     }
