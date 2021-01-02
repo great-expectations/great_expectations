@@ -828,7 +828,7 @@ class BaseDataContext:
                 for v in value
             ]
         val_frst_two_ltrs = value[0:2]
-        if val_frst_two_ltrs == "${" and len(value) > 2:
+        if val_frst_two_ltrs == "${" and len(value) > 2 and value[-1] == "}":
             value = "${" + value[2:].replace("$", dollar_sign_escape_string)
         else:
             value.replace("$", dollar_sign_escape_string)    
