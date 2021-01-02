@@ -9,7 +9,7 @@ Develop
 
 * [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169 issue #2164
 *  [BUGFIX] Fix black conflict, upgrade black, make import optional #2183
-* [BUGFIX] remove extra '/' character in config_variables.yml issue #2196
+* [BUGFIX] remove extra '\' character in config_variables.yml issue #2196
 
 
 
