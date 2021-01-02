@@ -704,8 +704,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
         camel_name = self.__class__.__name__
         snake_name = camel_to_snake(self.__class__.__name__)
         docstring, short_description = self._get_docstring_and_short_description()
-        supported_renderers = self._get_supported_renderers(snake_name)
-
         library_metadata = self._get_library_metadata()
 
         report_obj = {
@@ -716,7 +714,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
                 "docstring" : docstring,
             },
             "library_metadata": library_metadata,
-            "renderers": supported_renderers,
+            "renderers": {},
             "examples": [],
             "metrics": [],
             "execution_engines": [],
@@ -738,6 +736,13 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
             upstream_metrics = self._get_upstream_metrics(expectation_config)
             report_obj.update({"metrics": upstream_metrics})
+
+            renderers = self._get_renderer_dict(
+                expectation_name=snake_name,
+                expectation_config=expectation_config,
+                validation_result=validation_result,
+            )
+            report_obj.update({"renderers": renderers})
 
         report_obj.update({
             "execution_engines": {
@@ -801,7 +806,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
         return test_batch, expectation_config, validation_results
 
-    def _get_supported_renderers(self, snake_name):
+    def _get_supported_renderers(
+        self,
+        snake_name: str
+    ) -> List[str]:
         supported_renderers = list(_registered_renderers[snake_name].keys())
         supported_renderers.sort()
         return supported_renderers
@@ -827,25 +835,42 @@ class Expectation(ABC, metaclass=MetaExpectation):
         else:
             print(type(rendered_result))
 
-    def _get_rendered_dict(
+    def _get_renderer_dict(
         self,
         expectation_name : str,
-        supported_renderers : List[str],
         expectation_config : ExpectationConfiguration,
         validation_result : ExpectationValidationResult,
-    ):
-        renderer_dict = {}
+        standard_renderers = [
+            "renderer.answer",
+            "renderer.diagnostic.unexpected_statement",
+            "renderer.diagnostic.observed_value",
+            "renderer.diagnostic.status_icon",
+            "renderer.diagnostic.unexpected_table",
+            "renderer.prescriptive",
+            "renderer.question",
+        ]
+    ) -> Dict[str, str]:
+        supported_renderers = self._get_supported_renderers(expectation_name)
 
-        for renderer_name in supported_renderers:
-            _, renderer = _registered_renderers[expectation_name][renderer_name]
+        standard_renderer_dict = {}
 
-            rendered_result = renderer(
-                configuration=expectation_config,
-                result=validation_result,
-            )
-            renderer_dict[renderer_name] = self._get_rendered_result_as_string(rendered_result)
+        for renderer_name in standard_renderers:
+            if renderer_name in supported_renderers:
+                _, renderer = _registered_renderers[expectation_name][renderer_name]
 
-        return renderer_dict
+                rendered_result = renderer(
+                    configuration=expectation_config,
+                    result=validation_result,
+                )
+                standard_renderer_dict[renderer_name] = self._get_rendered_result_as_string(rendered_result)
+
+            else:
+                standard_renderer_dict[renderer_name] = None
+
+        return {
+            "standard": standard_renderer_dict,
+            "custom": [],
+        }
 
     def _get_upstream_metrics(self, expectation_config):
         validation_dependencies = self.get_validation_dependencies(

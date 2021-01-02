@@ -179,13 +179,7 @@ def test_expectation_self_check():
             "short_description": "",
             "docstring": ""
         },
-        "renderers": [
-            "renderer.diagnostic.observed_value",
-            "renderer.diagnostic.status_icon",
-            "renderer.diagnostic.unexpected_statement",
-            "renderer.diagnostic.unexpected_table",
-            "renderer.prescriptive"
-        ],
+        "renderers": {},
         "examples": [],
         "metrics": [],
         "execution_engines": {
@@ -228,15 +222,18 @@ def test_self_check_on_an_existing_expectation():
             "SqlAlchemyExecutionEngine": True,
             "Spark": True
         },
-        "renderers": [
-            "renderer.answer",
-            "renderer.diagnostic.observed_value",
-            "renderer.diagnostic.status_icon",
-            "renderer.diagnostic.unexpected_statement",
-            "renderer.diagnostic.unexpected_table",
-            "renderer.prescriptive",
-            "renderer.question",
-        ],
+        "renderers": {
+            "standard" : {
+                "renderer.answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
+                "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
+                "renderer.diagnostic.observed_value": "20% unexpected",
+                "renderer.diagnostic.status_icon": "",
+                "renderer.diagnostic.unexpected_table": None,
+                "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
+                "renderer.question": "Do at least 90.0% of values in column \"a\" match the regular expression ^a?"                
+            },
+            "custom": [],
+        },
         "metrics": [
             "column_values.nonnull.unexpected_count",
             "column_values.match_regex.unexpected_count",
@@ -316,9 +313,8 @@ def test_expectation__get_renderers():
     )
     my_validation_result = my_validation_results[0]
 
-    renderer_dict = my_expectation._get_rendered_dict(
+    renderer_dict = my_expectation._get_renderer_dict(
         expectation_name,
-        supported_renderers,
         my_expectation_config,
         my_validation_result,
     )
@@ -326,13 +322,16 @@ def test_expectation__get_renderers():
     print(json.dumps(renderer_dict, indent=2))
 
     assert renderer_dict == {
-        "renderer.answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
-        "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
-        "renderer.diagnostic.observed_value": "20% unexpected",
-        "renderer.diagnostic.status_icon": "",
-        "renderer.diagnostic.unexpected_table": None,
-        "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
-        "renderer.question": "Do at least 90.0% of values in column \"a\" match the regular expression ^a?",
+        "standard": {
+            "renderer.answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
+            "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
+            "renderer.diagnostic.observed_value": "20% unexpected",
+            "renderer.diagnostic.status_icon": "",
+            "renderer.diagnostic.unexpected_table": None,
+            "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
+            "renderer.question": "Do at least 90.0% of values in column \"a\" match the regular expression ^a?",
+        },
+        "custom" : [],
     }
 
 
@@ -351,9 +350,8 @@ def test_expectation__get_renderers():
     )
     my_validation_result = my_validation_results[0]
 
-    renderer_dict = my_expectation._get_rendered_dict(
+    renderer_dict = my_expectation._get_renderer_dict(
         expectation_name,
-        supported_renderers,
         my_expectation_config,
         my_validation_result,
     )
@@ -361,11 +359,16 @@ def test_expectation__get_renderers():
     print(json.dumps(renderer_dict, indent=2))
 
     assert renderer_dict == {
-        "renderer.diagnostic.observed_value": "20% unexpected",
-        "renderer.diagnostic.status_icon": "",
-        "renderer.diagnostic.unexpected_statement": "",
-        "renderer.diagnostic.unexpected_table": None,
-        "renderer.prescriptive": "expect_column_values_to_equal_three___second_iteration(**{'column': 'mostly_threes', 'mostly': 0.6})",
+        "standard": {
+            "renderer.answer": None,
+            "renderer.diagnostic.observed_value": "20% unexpected",
+            "renderer.diagnostic.status_icon": "",
+            "renderer.diagnostic.unexpected_statement": "",
+            "renderer.diagnostic.unexpected_table": None,
+            "renderer.prescriptive": "expect_column_values_to_equal_three___second_iteration(**{'column': 'mostly_threes', 'mostly': 0.6})",
+            "renderer.question": None,
+        },
+        "custom" : [],
     }
 
     # Expectation with no renderers specified
@@ -383,9 +386,8 @@ def test_expectation__get_renderers():
     )
     my_validation_result = my_validation_results[0]
 
-    renderer_dict = my_expectation._get_rendered_dict(
+    renderer_dict = my_expectation._get_renderer_dict(
         expectation_name,
-        supported_renderers,
         my_expectation_config,
         my_validation_result,
     )
@@ -393,11 +395,14 @@ def test_expectation__get_renderers():
     print(json.dumps(renderer_dict, indent=2))
 
     assert renderer_dict == {
-        "renderer.answer": "At least 60.0% of values in column \"mostly_threes\" equal 3.",
-        "renderer.diagnostic.observed_value": "20% unexpected",
-        "renderer.diagnostic.status_icon": "",
-        "renderer.diagnostic.unexpected_statement": "",
-        "renderer.diagnostic.unexpected_table": None,
-        "renderer.prescriptive": "mostly_threes values must be equal to 3, at least 60 % of the time.",
-        "renderer.question": "Do at least 60.0% of values in column \"mostly_threes\" equal 3?"
+        "standard" : {
+            "renderer.answer": "At least 60.0% of values in column \"mostly_threes\" equal 3.",
+            "renderer.diagnostic.observed_value": "20% unexpected",
+            "renderer.diagnostic.status_icon": "",
+            "renderer.diagnostic.unexpected_statement": "",
+            "renderer.diagnostic.unexpected_table": None,
+            "renderer.prescriptive": "mostly_threes values must be equal to 3, at least 60 % of the time.",
+            "renderer.question": "Do at least 60.0% of values in column \"mostly_threes\" equal 3?"
+        },
+        "custom": [],
     }
