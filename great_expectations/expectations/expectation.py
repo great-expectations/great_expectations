@@ -4,9 +4,10 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
@@ -20,17 +21,14 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
 )
 from great_expectations.expectations.registry import (
+    _registered_metrics,
+    _registered_renderers,
     get_metric_kwargs,
     register_expectation,
     register_renderer,
 )
 from great_expectations.expectations.util import legacy_method_parameters
-from great_expectations.core.batch import Batch
 from great_expectations.validator.validator import Validator
-from great_expectations.expectations.registry import (
-    _registered_metrics,
-    _registered_renderers,
-)
 
 from ..core.util import convert_to_json_serializable, nested_update
 from ..data_asset.util import recursively_convert_to_json_serializable
@@ -625,9 +623,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is None:
             configuration = self.configuration
         try:
-            assert configuration.expectation_type == self.expectation_type, (
-                f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
-            )
+            assert (
+                configuration.expectation_type == self.expectation_type
+            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
@@ -711,8 +709,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
             "description": {
                 "camel_name": camel_name,
                 "snake_name": snake_name,
-                "short_description" : short_description,
-                "docstring" : docstring,
+                "short_description": short_description,
+                "docstring": docstring,
             },
             "library_metadata": library_metadata,
             "renderers": {},
@@ -728,7 +726,11 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if examples != []:
             example_data, example_test = self._choose_example(examples)
 
-            test_batch, expectation_config, validation_results = self._instantiate_example_objects(
+            (
+                test_batch,
+                expectation_config,
+                validation_results,
+            ) = self._instantiate_example_objects(
                 expectation_type=snake_name,
                 example_data=example_data,
                 example_test=example_test,
@@ -763,7 +765,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
     def _get_docstring_and_short_description(self) -> Tuple[str, str]:
         if self.__doc__ is not None:
             docstring = self.__doc__
-            short_description = self.__doc__.split('\n')[0]
+            short_description = self.__doc__.split("\n")[0]
         else:
             docstring = ""
             short_description = ""
@@ -777,44 +779,33 @@ class Expectation(ABC, metaclass=MetaExpectation):
         example_test = example["tests"][0]["in"]
 
         return example_data, example_test
-    
+
     def _instantiate_example_objects(
         self,
-        expectation_type : str,
-        example_data : dict,
-        example_test : dict,
-    ) -> Tuple[
-        Batch,
-        ExpectationConfiguration,
-        List[ExpectationValidationResult]
-    ]:
+        expectation_type: str,
+        example_data: dict,
+        example_test: dict,
+    ) -> Tuple[Batch, ExpectationConfiguration, List[ExpectationValidationResult]]:
         test_batch = Batch(data=example_data)
-        
-        expectation_config = ExpectationConfiguration(**{
-            "expectation_type": expectation_type,
-            "kwargs": example_test
-        })
-        
-        validation_results = Validator(
-            execution_engine=PandasExecutionEngine(),
-            batches=[test_batch]
-        ).graph_validate(
-            configurations=[expectation_config]
+
+        expectation_config = ExpectationConfiguration(
+            **{"expectation_type": expectation_type, "kwargs": example_test}
         )
+
+        validation_results = Validator(
+            execution_engine=PandasExecutionEngine(), batches=[test_batch]
+        ).graph_validate(configurations=[expectation_config])
 
         return test_batch, expectation_config, validation_results
 
-    def _get_supported_renderers(
-        self,
-        snake_name: str
-    ) -> List[str]:
+    def _get_supported_renderers(self, snake_name: str) -> List[str]:
         supported_renderers = list(_registered_renderers[snake_name].keys())
         supported_renderers.sort()
         return supported_renderers
 
     from great_expectations.render.types import RenderedStringTemplateContent
 
-    #NOTE: Abe 20201228: This method probably belong elsewhere. Putting it here for now.
+    # NOTE: Abe 20201228: This method probably belong elsewhere. Putting it here for now.
     def _get_rendered_result_as_string(self, rendered_result):
 
         if type(rendered_result) == str:
@@ -824,7 +815,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
             sub_result_list = []
             for sub_result in rendered_result:
                 sub_result_list.append(self._get_rendered_result_as_string(sub_result))
-            
+
             return "\n".join(sub_result_list)
 
         elif type(rendered_result) == RenderedStringTemplateContent:
@@ -835,10 +826,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
     def _get_renderer_dict(
         self,
-        expectation_name : str,
-        expectation_config : ExpectationConfiguration,
-        validation_result : ExpectationValidationResult,
-        standard_renderers = [
+        expectation_name: str,
+        expectation_config: ExpectationConfiguration,
+        validation_result: ExpectationValidationResult,
+        standard_renderers=[
             "renderer.answer",
             "renderer.diagnostic.unexpected_statement",
             "renderer.diagnostic.observed_value",
@@ -846,7 +837,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
             "renderer.diagnostic.unexpected_table",
             "renderer.prescriptive",
             "renderer.question",
-        ]
+        ],
     ) -> Dict[str, str]:
         supported_renderers = self._get_supported_renderers(expectation_name)
 
@@ -860,7 +851,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
                     configuration=expectation_config,
                     result=validation_result,
                 )
-                standard_renderer_dict[renderer_name] = self._get_rendered_result_as_string(rendered_result)
+                standard_renderer_dict[
+                    renderer_name
+                ] = self._get_rendered_result_as_string(rendered_result)
 
             else:
                 standard_renderer_dict[renderer_name] = None
@@ -875,7 +868,11 @@ class Expectation(ABC, metaclass=MetaExpectation):
         upstream_metrics,
     ) -> Dict:
         expectation_engines = {}
-        for provider in ['PandasExecutionEngine', 'SqlAlchemyExecutionEngine', 'SparkDFExecutionEngine']:
+        for provider in [
+            "PandasExecutionEngine",
+            "SqlAlchemyExecutionEngine",
+            "SparkDFExecutionEngine",
+        ]:
             all_true = True
             for metric in upstream_metrics:
                 if not provider in _registered_metrics[metric]["providers"]:
@@ -886,12 +883,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
         return expectation_engines
 
-
-    def _get_upstream_metrics(
-        self,
-        expectation_config
-    ) -> List[str]:
-        #NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
+    def _get_upstream_metrics(self, expectation_config) -> List[str]:
+        # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
         # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.
         validation_dependencies = self.get_validation_dependencies(
             configuration=expectation_config

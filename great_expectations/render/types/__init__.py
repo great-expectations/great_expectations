@@ -1,5 +1,5 @@
-from copy import deepcopy
 import json
+from copy import deepcopy
 from string import Template as pTemplate
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
@@ -285,7 +285,9 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         return d
 
     def __str__(self):
-        string = pTemplate(self.string_template["template"]).safe_substitute(self.string_template["params"])
+        string = pTemplate(self.string_template["template"]).safe_substitute(
+            self.string_template["params"]
+        )
         return string
 
 

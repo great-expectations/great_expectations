@@ -1,32 +1,26 @@
 import json
 
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    Expectation,
+    ExpectationConfiguration,
+)
+from great_expectations.expectations.metrics import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 from great_expectations.expectations.registry import (
     _registered_expectations,
     _registered_metrics,
     _registered_renderers,
 )
-
-from great_expectations.expectations.metrics import (
-    ColumnMapMetricProvider,
-    column_condition_partial
-)
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import (
-    Expectation,
-    ColumnMapExpectation,
-    ExpectationConfiguration,
-)
-from great_expectations.execution_engine import (
-    PandasExecutionEngine
-)
-from great_expectations.render.renderer.renderer import renderer
 from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.util import (
-    num_to_str,
-    substitute_none_for_missing,
-)
+from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validator import Validator
+
 
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
     condition_metric_name = "column_values.equal_three"
@@ -35,7 +29,8 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column == 3  
+        return column == 3
+
 
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
@@ -43,32 +38,33 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     success_keys = ("mostly",)
     # default_kwarg_values = ColumnMapExpectation.default_kwarg_values
 
+
 class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualThree):
 
-    examples = [{
-        "data" : {
-            "mostly_threes" : [3,3,3,3,3,3,2,-1,None,None],
-        },
-        "tests": [
+    examples = [
         {
-            "title": "positive_test_with_mostly",
-            "exact_match_out" : False,
-            "in": {
-                "column": "mostly_threes",
-                "mostly": 0.6
+            "data": {
+                "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
             },
-            "out": {
-                "success":True,
-                "unexpected_index_list": [6,7],
-                "unexpected_list": [2, -1]
-            },
-        }]
-    }]
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly",
+                    "exact_match_out": False,
+                    "in": {"column": "mostly_threes", "mostly": 0.6},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                }
+            ],
+        }
+    ]
 
     library_metadata = {
         "maturity": "experimental",
         "package": "great_expectations",
-        "tags" : ["tag", "other_tag"],
+        "tags": ["tag", "other_tag"],
         "contributors": [
             "@abegong",
         ],
@@ -77,8 +73,10 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
         "updated_at": 1609165558,
     }
 
-class ExpectColumnValuesToEqualThree__ThirdIteration(ExpectColumnValuesToEqualThree__SecondIteration):
 
+class ExpectColumnValuesToEqualThree__ThirdIteration(
+    ExpectColumnValuesToEqualThree__SecondIteration
+):
     @classmethod
     @renderer(renderer_type="renderer.question")
     def _question_renderer(
@@ -102,7 +100,6 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(ExpectColumnValuesToEqualTh
             return f'At least {mostly * 100}% of values in column "{column}" equal 3.'
         else:
             return f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
-
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -160,15 +157,16 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(ExpectColumnValuesToEqualTh
             )
         ]
 
+
 def test_expectation_self_check():
 
     my_expectation = ExpectColumnValuesToEqualThree(
-        configuration=ExpectationConfiguration(**{
-            "expectation_type": "expect_column_values_to_equal_three",
-            "kwargs": {
-                "column": "threes"
+        configuration=ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_equal_three",
+                "kwargs": {"column": "threes"},
             }
-        })
+        )
     )
     report_object = my_expectation.self_check()
     print(json.dumps(report_object, indent=2))
@@ -178,7 +176,7 @@ def test_expectation_self_check():
             "camel_name": "ExpectColumnValuesToEqualThree",
             "snake_name": "expect_column_values_to_equal_three",
             "short_description": "",
-            "docstring": ""
+            "docstring": "",
         },
         "renderers": {},
         "examples": [],
@@ -186,6 +184,7 @@ def test_expectation_self_check():
         "execution_engines": {},
         "library_metadata": {},
     }
+
 
 def test_all_expectation_self_checks():
     library_json = {}
@@ -197,7 +196,8 @@ def test_all_expectation_self_checks():
 
     # with open('output/expectation_library.json', 'w') as f_:
     #     f_.write(json.dumps(library_json, indent=2))
-    
+
+
 def test_self_check_on_an_existing_expectation():
     expectation_name = "expect_column_values_to_match_regex"
     expectation = _registered_expectations[expectation_name]
@@ -205,7 +205,9 @@ def test_self_check_on_an_existing_expectation():
     report_object = expectation().self_check()
     print(json.dumps(report_object, indent=2))
 
-    report_object["description"].pop("docstring") # Don't try to exact match the docstring
+    report_object["description"].pop(
+        "docstring"
+    )  # Don't try to exact match the docstring
 
     assert report_object == {
         "description": {
@@ -217,17 +219,17 @@ def test_self_check_on_an_existing_expectation():
         "execution_engines": {
             "PandasExecutionEngine": True,
             "SqlAlchemyExecutionEngine": True,
-            "SparkDFExecutionEngine": True
+            "SparkDFExecutionEngine": True,
         },
         "renderers": {
-            "standard" : {
-                "renderer.answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
+            "standard": {
+                "renderer.answer": 'Less than 90.0% of values in column "a" match the regular expression ^a.',
                 "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
                 "renderer.diagnostic.observed_value": "20% unexpected",
                 "renderer.diagnostic.status_icon": "",
                 "renderer.diagnostic.unexpected_table": None,
                 "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
-                "renderer.question": "Do at least 90.0% of values in column \"a\" match the regular expression ^a?"                
+                "renderer.question": 'Do at least 90.0% of values in column "a" match the regular expression ^a?',
             },
             "custom": [],
         },
@@ -235,56 +237,54 @@ def test_self_check_on_an_existing_expectation():
             "column_values.nonnull.unexpected_count",
             "column_values.match_regex.unexpected_count",
             "table.row_count",
-            "column_values.match_regex.unexpected_values"
+            "column_values.match_regex.unexpected_values",
         ],
         "examples": [
             {
-            "data": {
-                "a": ["aaa","abb","acc","add","bee"],
-                "b": ["aaa","abb","acc","bdd",None],
-                "column_name with space": ["aaa","abb","acc","add","bee"],
-            },
-            "tests": [{
-                "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
-                "exact_match_out": False,
-                "in": {
-                    "column": "a",
-                    "regex": "^a",
-                    "mostly": 0.9
+                "data": {
+                    "a": ["aaa", "abb", "acc", "add", "bee"],
+                    "b": ["aaa", "abb", "acc", "bdd", None],
+                    "column_name with space": ["aaa", "abb", "acc", "add", "bee"],
                 },
-                "out": {
-                    "success": False,
-                    "unexpected_index_list": [4],
-                    "unexpected_list": ["bee"]
-                },
-                "suppress_test_for": [
-                    "sqlite",
-                    "mssql"
-                ]
-            },
-            {
-                "title": "positive_test_exact_mostly_w_one_non_matching_value",
-                "exact_match_out": False,
-                "in": {
-                    "column": "a",
-                    "regex": "^a",
-                    "mostly": 0.8
-                },
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [4],
-                    "unexpected_list": ["bee"]
-                },
-                "suppress_test_for": [
-                    "sqlite",
-                    "mssql"
-                ]}
-            ]}
+                "tests": [
+                    {
+                        "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
+                        "exact_match_out": False,
+                        "in": {"column": "a", "regex": "^a", "mostly": 0.9},
+                        "out": {
+                            "success": False,
+                            "unexpected_index_list": [4],
+                            "unexpected_list": ["bee"],
+                        },
+                        "suppress_test_for": ["sqlite", "mssql"],
+                    },
+                    {
+                        "title": "positive_test_exact_mostly_w_one_non_matching_value",
+                        "exact_match_out": False,
+                        "in": {"column": "a", "regex": "^a", "mostly": 0.8},
+                        "out": {
+                            "success": True,
+                            "unexpected_index_list": [4],
+                            "unexpected_list": ["bee"],
+                        },
+                        "suppress_test_for": ["sqlite", "mssql"],
+                    },
+                ],
+            }
         ],
         "library_metadata": {
             "maturity": "production",
             "package": "great_expectations",
-            "tags" : ["arrows", "design", "flows", "prototypes", "svg", "whiteboarding", "wireframe", "wirefames"],
+            "tags": [
+                "arrows",
+                "design",
+                "flows",
+                "prototypes",
+                "svg",
+                "whiteboarding",
+                "wireframe",
+                "wirefames",
+            ],
             "contributors": [
                 "@shinnyshinshin",
                 "@abegong",
@@ -295,6 +295,7 @@ def test_self_check_on_an_existing_expectation():
         },
     }
 
+
 def test_expectation__get_renderers():
 
     expectation_name = "expect_column_values_to_match_regex"
@@ -303,7 +304,11 @@ def test_expectation__get_renderers():
     supported_renderers = my_expectation._get_supported_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    my_batch, my_expectation_config, my_validation_results = my_expectation._instantiate_example_objects(
+    (
+        my_batch,
+        my_expectation_config,
+        my_validation_results,
+    ) = my_expectation._instantiate_example_objects(
         expectation_name,
         example_data,
         example_test,
@@ -315,22 +320,21 @@ def test_expectation__get_renderers():
         my_expectation_config,
         my_validation_result,
     )
-    
+
     print(json.dumps(renderer_dict, indent=2))
 
     assert renderer_dict == {
         "standard": {
-            "renderer.answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
+            "renderer.answer": 'Less than 90.0% of values in column "a" match the regular expression ^a.',
             "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
             "renderer.diagnostic.observed_value": "20% unexpected",
             "renderer.diagnostic.status_icon": "",
             "renderer.diagnostic.unexpected_table": None,
             "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
-            "renderer.question": "Do at least 90.0% of values in column \"a\" match the regular expression ^a?",
+            "renderer.question": 'Do at least 90.0% of values in column "a" match the regular expression ^a?',
         },
-        "custom" : [],
+        "custom": [],
     }
-
 
     # Expectation with no new renderers specified
     print([x for x in _registered_expectations.keys() if "second" in x])
@@ -340,7 +344,11 @@ def test_expectation__get_renderers():
     supported_renderers = my_expectation._get_supported_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    my_batch, my_expectation_config, my_validation_results = my_expectation._instantiate_example_objects(
+    (
+        my_batch,
+        my_expectation_config,
+        my_validation_results,
+    ) = my_expectation._instantiate_example_objects(
         expectation_name,
         example_data,
         example_test,
@@ -352,7 +360,7 @@ def test_expectation__get_renderers():
         my_expectation_config,
         my_validation_result,
     )
-    
+
     print(json.dumps(renderer_dict, indent=2))
 
     assert renderer_dict == {
@@ -365,7 +373,7 @@ def test_expectation__get_renderers():
             "renderer.prescriptive": "expect_column_values_to_equal_three___second_iteration(**{'column': 'mostly_threes', 'mostly': 0.6})",
             "renderer.question": None,
         },
-        "custom" : [],
+        "custom": [],
     }
 
     # Expectation with no renderers specified
@@ -376,7 +384,11 @@ def test_expectation__get_renderers():
     supported_renderers = my_expectation._get_supported_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    my_batch, my_expectation_config, my_validation_results = my_expectation._instantiate_example_objects(
+    (
+        my_batch,
+        my_expectation_config,
+        my_validation_results,
+    ) = my_expectation._instantiate_example_objects(
         expectation_name,
         example_data,
         example_test,
@@ -388,29 +400,36 @@ def test_expectation__get_renderers():
         my_expectation_config,
         my_validation_result,
     )
-    
+
     print(json.dumps(renderer_dict, indent=2))
 
     assert renderer_dict == {
-        "standard" : {
-            "renderer.answer": "At least 60.0% of values in column \"mostly_threes\" equal 3.",
+        "standard": {
+            "renderer.answer": 'At least 60.0% of values in column "mostly_threes" equal 3.',
             "renderer.diagnostic.observed_value": "20% unexpected",
             "renderer.diagnostic.status_icon": "",
             "renderer.diagnostic.unexpected_statement": "",
             "renderer.diagnostic.unexpected_table": None,
             "renderer.prescriptive": "mostly_threes values must be equal to 3, at least 60 % of the time.",
-            "renderer.question": "Do at least 60.0% of values in column \"mostly_threes\" equal 3?"
+            "renderer.question": 'Do at least 60.0% of values in column "mostly_threes" equal 3?',
         },
         "custom": [],
     }
 
-def test_expectation__get_execution_engine_dict(test_cases_for_sql_data_connector_sqlite_execution_engine):
+
+def test_expectation__get_execution_engine_dict(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
     expectation_name = "expect_column_values_to_equal_three___second_iteration"
     my_expectation = _registered_expectations[expectation_name]()
 
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    my_batch, my_expectation_config, my_validation_results = my_expectation._instantiate_example_objects(
+    (
+        my_batch,
+        my_expectation_config,
+        my_validation_results,
+    ) = my_expectation._instantiate_example_objects(
         expectation_name,
         example_data,
         example_test,
@@ -423,7 +442,7 @@ def test_expectation__get_execution_engine_dict(test_cases_for_sql_data_connecto
         upstream_metrics=upstream_metrics,
     )
     assert execution_engines == {
-        'PandasExecutionEngine': True,
-        'SparkDFExecutionEngine': False,
-        'SqlAlchemyExecutionEngine': False,
+        "PandasExecutionEngine": True,
+        "SparkDFExecutionEngine": False,
+        "SqlAlchemyExecutionEngine": False,
     }
