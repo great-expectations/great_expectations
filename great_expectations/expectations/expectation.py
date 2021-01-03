@@ -28,6 +28,7 @@ from great_expectations.expectations.util import legacy_method_parameters
 from great_expectations.core.batch import Batch
 from great_expectations.validator.validator import Validator
 from great_expectations.expectations.registry import (
+    _registered_metrics,
     _registered_renderers,
 )
 
@@ -717,7 +718,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
             "renderers": {},
             "examples": [],
             "metrics": [],
-            "execution_engines": [],
+            "execution_engines": {},
         }
 
         # Generate artifacts from an example case
@@ -744,13 +745,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
             )
             report_obj.update({"renderers": renderers})
 
-        report_obj.update({
-            "execution_engines": {
-                "PandasExecutionEngine" : True,
-                "SqlAlchemyExecutionEngine": True,
-                "Spark" : True
-            },
-        })
+            execution_engines = self._get_execution_engine_dict(
+                upstream_metrics=upstream_metrics,
+            )
+            report_obj.update({"execution_engines": execution_engines})
 
         return report_obj
 
@@ -872,7 +870,29 @@ class Expectation(ABC, metaclass=MetaExpectation):
             "custom": [],
         }
 
-    def _get_upstream_metrics(self, expectation_config):
+    def _get_execution_engine_dict(
+        self,
+        upstream_metrics,
+    ) -> Dict:
+        expectation_engines = {}
+        for provider in ['PandasExecutionEngine', 'SqlAlchemyExecutionEngine', 'SparkDFExecutionEngine']:
+            all_true = True
+            for metric in upstream_metrics:
+                if not provider in _registered_metrics[metric]["providers"]:
+                    all_true = False
+                    break
+
+            expectation_engines[provider] = all_true
+
+        return expectation_engines
+
+
+    def _get_upstream_metrics(
+        self,
+        expectation_config
+    ) -> List[str]:
+        #NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
+        # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.
         validation_dependencies = self.get_validation_dependencies(
             configuration=expectation_config
         )

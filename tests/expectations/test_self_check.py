@@ -26,6 +26,7 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.validator.validator import Validator
 
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
     condition_metric_name = "column_values.equal_three"
@@ -182,11 +183,7 @@ def test_expectation_self_check():
         "renderers": {},
         "examples": [],
         "metrics": [],
-        "execution_engines": {
-            "PandasExecutionEngine": True,
-            "SqlAlchemyExecutionEngine": True,
-            "Spark": True
-        },
+        "execution_engines": {},
         "library_metadata": {},
     }
 
@@ -220,7 +217,7 @@ def test_self_check_on_an_existing_expectation():
         "execution_engines": {
             "PandasExecutionEngine": True,
             "SqlAlchemyExecutionEngine": True,
-            "Spark": True
+            "SparkDFExecutionEngine": True
         },
         "renderers": {
             "standard" : {
@@ -405,4 +402,28 @@ def test_expectation__get_renderers():
             "renderer.question": "Do at least 60.0% of values in column \"mostly_threes\" equal 3?"
         },
         "custom": [],
+    }
+
+def test_expectation__get_execution_engine_dict(test_cases_for_sql_data_connector_sqlite_execution_engine):
+    expectation_name = "expect_column_values_to_equal_three___second_iteration"
+    my_expectation = _registered_expectations[expectation_name]()
+
+    examples = my_expectation._get_examples()
+    example_data, example_test = my_expectation._choose_example(examples)
+    my_batch, my_expectation_config, my_validation_results = my_expectation._instantiate_example_objects(
+        expectation_name,
+        example_data,
+        example_test,
+    )
+    upstream_metrics = my_expectation._get_upstream_metrics(
+        expectation_config=my_expectation_config
+    )
+
+    execution_engines = my_expectation._get_execution_engine_dict(
+        upstream_metrics=upstream_metrics,
+    )
+    assert execution_engines == {
+        'PandasExecutionEngine': True,
+        'SparkDFExecutionEngine': False,
+        'SqlAlchemyExecutionEngine': False,
     }
