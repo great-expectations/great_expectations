@@ -896,7 +896,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if hasattr(self, "library_metadata"):
             return self.library_metadata
         else:
-            print("here")
             return {}
 
 
