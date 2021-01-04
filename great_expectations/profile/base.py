@@ -23,6 +23,7 @@ class ProfilerDataType(Enum):
 
     INT = "int"
     FLOAT = "float"
+    NUMERIC = "numeric"
     STRING = "string"
     BOOLEAN = "boolean"
     DATETIME = "datetime"

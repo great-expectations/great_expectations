@@ -9,7 +9,11 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
-from great_expectations.profile.base import ProfilerCardinality, ProfilerDataType
+from great_expectations.profile.base import (
+    ProfilerCardinality,
+    ProfilerDataType,
+    ProfilerTypeMapping,
+)
 from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfilerBase,
     logger,
@@ -19,7 +23,8 @@ from great_expectations.profile.basic_dataset_profiler import (
 class UserConfigurableProfiler(BasicDatasetProfilerBase):
     # TODO: Confirm tolerance for every expectation
 
-    # TODO: Configure excluded expectations and excluded columns
+    # TODO: Decimals? sqlalchemy appears to return decimal types for numeric, whether int or float. This can create
+    #  issues when validating data types between pandas and sql alchemy.
 
     # TODO: Figure out how to build in a minimal tolerance when going between pandas and sql (and look into the reason
     #  for this - is it also a float to decimal issue)?
@@ -124,14 +129,13 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         expectation_suite = cls._build_column_description_metadata(dataset)
         logger.debug("")
-        cls.display_suite_by_column(expectation_suite)  # include in the actual profiler
-        for k, v in cache.items():  # TODO: remove printing cache
+        cls.display_suite_by_column(expectation_suite)
+        for k, v in cache.items():  # TODO: remove printing cache here and in profiler
             print(k, v)
         return expectation_suite
 
     @classmethod
     def profile_and_build_expectation_list(cls, dataset, config=None, tolerance=0):
-        # TODO: enable a partial config - like just allowing excluded_expectations without semantic types
         cache = cls._initialize_cache_with_metadata(dataset=dataset, config=config)
         ignored_columns = cache.get("ignored_columns") or {}
         value_set_threshold = cache.get("value_set_threshold")
@@ -196,7 +200,6 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             cache["primary_or_compound_key"] = config.get("primary_or_compound_key")
             cache["ignored_columns"] = config.get("ignored_columns")
             cache["value_set_threshold"] = config.get("value_set_threshold") or ["many"]
-            # TODO: Add check to make sure the type_list expectation is not in excluded expectations.
             cache["excluded_expectations"] = config.get("excluded_expectations")
 
         included_columns = [
@@ -293,6 +296,15 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
     def _get_column_type_and_build_type_expectations_with_caching(
         cls, dataset, column_name, cache
     ):
+        type_expectation_is_excluded = False
+        if "expect_column_values_to_be_in_type_list" in cache["excluded_expectations"]:
+            type_expectation_is_excluded = True
+            logger.warn(
+                "expect_column_values_to_be_in_type_list is in the excluded_expectations list. This"
+                "expectation is required to establish column data, so it will be run and then removed from the"
+                "expectation suite."
+            )
+
         column_cache_entry = cache.get(column_name)
         if not column_cache_entry:
             column_cache_entry = {}
@@ -301,11 +313,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         if not column_type:
             column_type = cls._get_column_type(dataset, column_name)
             column_cache_entry["type"] = column_type
-
-            if (
-                "expect_column_values_to_be_in_type_list"
-                in cache["excluded_expectations"]
-            ):
+            if type_expectation_is_excluded:
                 # remove the expectation
                 dataset.remove_expectation(
                     ExpectationConfiguration(
@@ -434,24 +442,18 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             cardinality = "none"
         elif pct_unique == 1.0:
             cardinality = "unique"
+        elif num_unique == 1:
+            cardinality = "one"
+        elif num_unique == 2:
+            cardinality = "two"
+        elif num_unique < 20:
+            cardinality = "very_few"
+        elif num_unique < 60:
+            cardinality = "few"
         elif pct_unique > 0.1:
             cardinality = "very_many"
-        elif pct_unique > 0.02:
-            cardinality = "many"
         else:
-            if num_unique == 1:
-                cardinality = "one"
-            elif num_unique == 2:
-                cardinality = "two"
-
-            elif num_unique < 60:
-                cardinality = "very_few"
-
-            # This previously was 1000, which seems very high. Lowering it arbitrarily to something that makes sense, but I'm open.
-            elif num_unique < 120:
-                cardinality = "few"
-            else:
-                cardinality = "many"
+            cardinality = "many"
 
         df.set_config_value("interactive_evaluation", False)
 
@@ -812,19 +814,56 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 min_value=min_value, max_value=max_value
             )
 
-    # @classmethod
-    # @property
-    # def _cardinality_enumeration(cls):
-    #     return {
-    #         "none": 0,
-    #         "one": 1,
-    #         "two": 2,
-    #         "very_few": 3,
-    #         "few": 4,
-    #         "many": 5,
-    #         "very_many": 6,
-    #         "unique": 7
-    #     }
+    @classmethod
+    def _get_column_type(cls, df, column):
+
+        # list of types is used to support pandas and sqlalchemy
+        type_ = None
+        df.set_config_value("interactive_evaluation", True)
+        try:
+            if df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
+            ).success:
+                type_ = ProfilerDataType.INT
+
+            elif df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
+            ).success:
+                if type_ == ProfilerDataType.INT:
+                    type_ = ProfilerDataType.NUMERIC
+                else:
+                    type_ = ProfilerDataType.FLOAT
+
+            elif df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.STRING_TYPE_NAMES))
+            ).success:
+                type_ = ProfilerDataType.STRING
+
+            elif df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES))
+            ).success:
+                type_ = ProfilerDataType.BOOLEAN
+
+            elif df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.DATETIME_TYPE_NAMES))
+            ).success:
+                type_ = ProfilerDataType.DATETIME
+
+            else:
+                df.expect_column_values_to_be_in_type_list(column, type_list=None)
+                type_ = ProfilerDataType.UNKNOWN
+        except NotImplementedError:
+            type_ = ProfilerDataType.UNKNOWN
+
+        if type_ == ProfilerDataType.NUMERIC:
+            df.expect_column_values_to_be_in_type_list(
+                column,
+                type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
+                + sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)),
+            )
+
+        df.set_config_value("interactive_evaluation", False)
+        return type_
 
 
 def _check_that_expectations_are_available(dataset, expectations):
