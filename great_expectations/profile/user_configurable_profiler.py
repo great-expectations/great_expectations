@@ -104,7 +104,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         cls._validate_semantic_types_config(dataset, config, cache)
         cls._build_expectations_table(dataset, cache=cache)
         ignored_columns = cache.get("ignored_columns") or {}
-        value_set_threshold = cache.get("value_set_threshold")
+        value_set_threshold = config.get("value_set_threshold")
         if value_set_threshold and "value_set" in config.get("semantic_types").keys():
             logger.warn(
                 "build_expectation_list_from_config does not make use of the value_set threshold. If you would "
