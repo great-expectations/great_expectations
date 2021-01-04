@@ -1666,7 +1666,7 @@ def test_run_checkpoint_newstyle(
 
     assert len(context.validations_store.list_keys()) == 0
 
-    print(context.list_datasources())
+    # print(context.list_datasources())
 
     context.create_expectation_suite("my_expectation_suite")
 
@@ -1674,7 +1674,7 @@ def test_run_checkpoint_newstyle(
         checkpoint_name=checkpoint_config.name
     )
     assert len(results) == 1
-    assert results[0]["success"]
+    assert results[0].success
 
     assert len(context.validations_store.list_keys()) == 1
 
