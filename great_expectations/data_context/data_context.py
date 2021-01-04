@@ -14,6 +14,7 @@ import warnings
 import webbrowser
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Union, cast
+from urllib.parse import urlparse, urlunparse
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
@@ -1760,17 +1761,32 @@ class BaseDataContext:
         return keys
 
     def list_datasources(self):
-        """List currently-configured datasources on this context.
+        """List currently-configured datasources on this context. Masks passwords.
 
         Returns:
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
+        PASSWORD_REPLACE_STRING = "********"
         datasources = []
         for (
             key,
             value,
         ) in self._project_config_with_variables_substituted.datasources.items():
             value["name"] = key
+
+            # Replace passwords with PASSWORD_REPLACE_STRING
+            # E.g. "postgresql+psycopg2://username:password@host:65432/database" ->
+            # "postgresql+psycopg2://username:********@host:65432/database"
+            if "credentials" in value:
+                if "password" in value["credentials"]:
+                    value["credentials"]["password"] = PASSWORD_REPLACE_STRING
+                if "url" in value["credentials"]:
+                    parsed_url = urlparse(value["credentials"]["url"])
+                    value["credentials"]["url"] = (
+                        f"{parsed_url.scheme}://{parsed_url.username}:{PASSWORD_REPLACE_STRING}"
+                        f"@{parsed_url.hostname}:{parsed_url.port}{parsed_url.path}"
+                    )
+
             datasources.append(value)
         return datasources
 
