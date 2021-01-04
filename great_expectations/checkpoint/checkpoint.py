@@ -55,20 +55,19 @@ class Checkpoint:
         runtime_kwargs: Optional[dict] = None,
     ):
         runtime_kwargs = runtime_kwargs or {}
+        if config is None:
+            config = self.config
+        if isinstance(config, dict):
+            config = CheckpointConfig(**config)
 
-        if self._substituted_config is not None and not runtime_kwargs.get(
-            "template_name"
-        ):
+
+        if self._substituted_config is not None and not runtime_kwargs.get("template_name") and not config.template_name:
             substituted_config = deepcopy(self._substituted_config)
             if any(runtime_kwargs.values()):
                 substituted_config.update(runtime_kwargs=runtime_kwargs)
 
             return substituted_config
         else:
-            if config is None:
-                config = self.config
-            if isinstance(config, dict):
-                config = CheckpointConfig(**config)
             template_name = runtime_kwargs.get("template_name") or config.template_name
 
             if not template_name:
