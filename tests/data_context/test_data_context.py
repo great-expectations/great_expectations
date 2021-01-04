@@ -1299,6 +1299,40 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     ]
 
 
+def test_build_data_docs_skipping_index_does_not_build_index(
+    tmp_path_factory,
+):
+    # TODO What's the latest and greatest way to use configs rather than my hackery?
+    empty_directory = str(tmp_path_factory.mktemp("empty"))
+    DataContext.create(empty_directory)
+    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
+    context = DataContext(ge_dir)
+    config = context.get_config()
+    config.data_docs_sites = {
+        "local_site": {
+            "class_name": "SiteBuilder",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": os.path.join("uncommitted", "data_docs"),
+            },
+        },
+    }
+    context._project_config = config
+
+    # TODO Workaround project config programmatic config manipulation
+    #  statefulness issues by writing to disk and re-upping a new context
+    context._save_project_config()
+    del context
+    context = DataContext(ge_dir)
+    data_docs_dir = os.path.join(ge_dir, "uncommitted", "data_docs")
+    index_path = os.path.join(data_docs_dir, "index.html")
+    assert not os.path.isfile(index_path)
+
+    context.build_data_docs(build_index=False)
+    assert os.path.isdir(os.path.join(data_docs_dir, "static"))
+    assert not os.path.isfile(index_path)
+
+
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))

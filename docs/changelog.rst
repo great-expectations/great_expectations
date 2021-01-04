@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API
 
 0.13.4
 -----------------
