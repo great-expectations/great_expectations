@@ -23,9 +23,6 @@ from great_expectations.profile.basic_dataset_profiler import (
 class UserConfigurableProfiler(BasicDatasetProfilerBase):
     # TODO: Confirm tolerance for every expectation
 
-    # TODO: Decimals? sqlalchemy appears to return decimal types for numeric, whether int or float. This can create
-    #  issues when validating data types between pandas and sql alchemy.
-
     # TODO: Figure out how to build in a minimal tolerance when going between pandas and sql (and look into the reason
     #  for this - is it also a float to decimal issue)?
     """
@@ -98,11 +95,22 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def build_expectation_list_from_config(cls, dataset, config, tolerance=0):
+        if not config or not config.get("semantic_types"):
+            raise ValueError(
+                "A config with a semantic_types dict must be included in order to use this profiler."
+            )
+
         cache = cls._initialize_cache_with_metadata(dataset, config=config)
-        cls._validate_config(dataset, config, cache)
+        cls._validate_semantic_types_config(dataset, config, cache)
         cls._build_expectations_table(dataset, cache=cache)
         ignored_columns = cache.get("ignored_columns") or {}
         value_set_threshold = cache.get("value_set_threshold")
+        if value_set_threshold and "value_set" in config.get("semantic_types").keys():
+            logger.warn(
+                "build_expectation_list_from_config does not make use of the value_set threshold. If you would "
+                "like to include value_set expectations, you can include a 'value_set' entry in your "
+                "semantic_types dict, or use profile_and_build_expectation_list with the value_set_threshold."
+            )
         cache_columns = {
             k: v
             for k, v in cache.items()
@@ -130,8 +138,6 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         expectation_suite = cls._build_column_description_metadata(dataset)
         logger.debug("")
         cls.display_suite_by_column(expectation_suite)
-        for k, v in cache.items():  # TODO: remove printing cache here and in profiler
-            print(k, v)
         return expectation_suite
 
     @classmethod
@@ -149,7 +155,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             )
         }
         primary_or_compound_key = cache.get("primary_or_compound_key")
-        if primary_or_compound_key is not None:
+        if primary_or_compound_key:
             cls._build_expectations_primary_or_compound_key(
                 dataset=dataset, column_list=primary_or_compound_key, cache=cache
             )
@@ -158,7 +164,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             data_type = column_info.get("type").value  # change types to enums
             cardinality = column_info.get("cardinality")
 
-            if data_type in ("float", "int"):
+            if data_type in ("float", "int", "numeric"):
                 cls._build_expectations_numeric(
                     dataset=dataset,
                     column=column_name,
@@ -188,19 +194,24 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         expectation_suite = cls._build_column_description_metadata(dataset)
         logger.debug("")
         cls.display_suite_by_column(expectation_suite)  # include in the actual profiler
-        for k, v in cache.items():
-            print(k, v)
         return expectation_suite
 
     @classmethod
     def _initialize_cache_with_metadata(cls, dataset, config=None):
         cache = {}
+        cache["primary_or_compound_key"] = []
+        cache["ignored_columns"] = []
+        cache["value_set_threshold"] = ["many"]
+        cache["excluded_expectations"] = []
+
         if config is not None:
             semantic_type_dict = config.get("semantic_types")
-            cache["primary_or_compound_key"] = config.get("primary_or_compound_key")
-            cache["ignored_columns"] = config.get("ignored_columns")
+            cache["primary_or_compound_key"] = (
+                config.get("primary_or_compound_key") or []
+            )
+            cache["ignored_columns"] = config.get("ignored_columns") or []
+            cache["excluded_expectations"] = config.get("excluded_expectations") or []
             cache["value_set_threshold"] = config.get("value_set_threshold") or ["many"]
-            cache["excluded_expectations"] = config.get("excluded_expectations")
 
         included_columns = [
             column_name
@@ -221,7 +232,17 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def _validate_config(cls, dataset, config, cache=None):
+        # TODO: Validate non-semantic_type_dict part of config (for both profilers, if config is included).
+        pass
+
+    @classmethod
+    def _validate_semantic_types_config(cls, dataset, config, cache=None):
         semantic_type_dict = config.get("semantic_types")
+        if not isinstance(semantic_type_dict, dict):
+            raise ValueError(
+                f"The semantic_types dict in the config must be a dictionary, but is currently a "
+                f"{type(semantic_type_dict)}. Please reformat."
+            )
         for k, v in semantic_type_dict.items():
             assert isinstance(v, list), (
                 "Entries in semantic type dict must be lists rather than scalars e.g. "
@@ -255,20 +276,13 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             if param is not None:
                 assert isinstance(
                     param, list
-                ), f"{config_parameter} must be formatted as a list rather than a scalar"
+                ), f"{config_parameter} must be formatted as a list rather than {type(param)}."
 
         cached_columns = {
             k: v
             for k, v in cache.items()
             if k not in cached_config_parameters and len(v.get("semantic_types")) > 0
         }
-        # primary_or_compound_key = cache.get("primary_or_compound_key")
-        # if primary_or_compound_key is not None:
-        # if primary_or_compound_key is not None:
-        #     if len(primary_or_compound_key) == 1:
-        #         column_name = [primary_or_compound_key]
-        #         assert cached_columns.get(column_name).get("cardinality").value == "unique", \
-        #             f"The values in column {column_name} are not unique"
 
         for column_name, column_info in cached_columns.items():
             config_semantic_types = column_info["semantic_types"]
@@ -282,9 +296,12 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                     assert column_info["type"].value in (
                         "int",
                         "float",
+                        "numeric",
                     ), f"Column {column_name} must be an int or a float but appears to be {column_info['type'].value}"
                 elif semantic_type in ("string", "value_set"):
-                    pass  # do we have any string expectations?
+                    pass
+                # Should we validate value_set expectations if the cardinality is unexpected? This behavior conflicts
+                #  with the compare two tables functionality, which is why I am not including it for now.
                 # elif semantic_type in ("boolean", "value_set"):
                 #     if column_info["cardinality"] in ("many", "very many", "unique"):
                 #         logger.warn(f"Column {column_name} appears to have high cardinality. Creating a "
@@ -297,7 +314,9 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         cls, dataset, column_name, cache
     ):
         type_expectation_is_excluded = False
-        if "expect_column_values_to_be_in_type_list" in cache["excluded_expectations"]:
+        if "expect_column_values_to_be_in_type_list" in cache.get(
+            "excluded_expectations"
+        ):
             type_expectation_is_excluded = True
             logger.warn(
                 "expect_column_values_to_be_in_type_list is in the excluded_expectations list. This"
@@ -369,8 +388,6 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             for semantic_type, column_list in semantic_type_dict.items():
                 if column_name in column_list and semantic_type in cls._semantic_types:
                     semantic_types.append(semantic_type)
-                # if semantic_type not in cls._semantic_types:
-                #     logger.warn(f"ADD Semantic_type: {semantic_type} is unknown. Skipping")
             column_cache_entry["semantic_types"] = semantic_types
 
         return semantic_types
@@ -402,7 +419,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 expectations_by_column[domain] = [expectation]
             else:
                 expectations_by_column[domain].append(expectation)
-
+        print("Creating an expectation suite with the following expectations:")
         if verbose:
             for column in expectations_by_column:
                 print(column)
@@ -436,8 +453,8 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                     column
                 )
             )
-        # TODO: Currently, if we have 25 possible categories out of 1000 rows, this comes up as many, because
-        #  it's greater 0.02. This should come up as few instead. Figure out the bins
+        # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
+        #  percentage, so it was tweaked here, but is still experimental.
         if num_unique is None or num_unique == 0 or pct_unique is None:
             cardinality = "none"
         elif pct_unique == 1.0:
@@ -826,7 +843,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             ).success:
                 type_ = ProfilerDataType.INT
 
-            elif df.expect_column_values_to_be_in_type_list(
+            if df.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
             ).success:
                 if type_ == ProfilerDataType.INT:
