@@ -2837,7 +2837,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             checkpoint_name=checkpoint_name,
-            return_config=True,
+            return_config=False,
         )
 
         return checkpoint.run(

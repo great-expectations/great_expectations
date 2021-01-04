@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from typing import List
 
 import pytest
 from freezegun import freeze_time
@@ -36,6 +37,9 @@ from great_expectations.exceptions import (
     InvalidKeyError,
 )
 from great_expectations.util import gen_directory_tree_str
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -1612,7 +1616,9 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
 
 
 # TODO: add more test cases
-def run_checkpoint_newstyle(titanic_pandas_multibatch_data_context_with_013_datasource):
+def test_run_checkpoint_newstyle(
+    titanic_pandas_multibatch_data_context_with_013_datasource,
+):
     context = titanic_pandas_multibatch_data_context_with_013_datasource
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
@@ -1660,9 +1666,15 @@ def run_checkpoint_newstyle(titanic_pandas_multibatch_data_context_with_013_data
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite("my_expectation_suite")
     print(context.list_datasources())
-    results = context.run_checkpoint(checkpoint_name=checkpoint_config.name)
+
+    context.create_expectation_suite("my_expectation_suite")
+
+    results: List[ValidationOperatorResult] = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(results) == 1
+    assert results[0]["success"]
 
     assert len(context.validations_store.list_keys()) == 1
 
