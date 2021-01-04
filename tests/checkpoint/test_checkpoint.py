@@ -744,7 +744,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
         == expected_nested_checkpoint_config_template_only.to_json_dict()
     )
 
-    # template and runtime kwargs
+    # runtime kwargs with new checkpoint template name passed at runtime
     expected_nested_checkpoint_config_template_and_runtime_template_name = (
         CheckpointConfig(
             config_version=1,
