@@ -173,7 +173,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.fixture
-def context_with_checkpoint_templates(titanic_pandas_multibatch_data_context_with_013_datasource):
+def context_with_checkpoint_templates(
+    titanic_pandas_multibatch_data_context_with_013_datasource,
+):
     context = titanic_pandas_multibatch_data_context_with_013_datasource
 
     # add simple template config
@@ -216,7 +218,8 @@ def context_with_checkpoint_templates(titanic_pandas_multibatch_data_context_wit
         configuration_key=simple_checkpoint_template_config.name
     )
     context.checkpoint_store.set(
-        key=simple_checkpoint_template_config_key, value=simple_checkpoint_template_config
+        key=simple_checkpoint_template_config_key,
+        value=simple_checkpoint_template_config,
     )
 
     # add nested template configs
@@ -231,9 +234,7 @@ def context_with_checkpoint_templates(titanic_pandas_multibatch_data_context_wit
                     "datasource_name": "my_datasource_template_1",
                     "data_connector_name": "my_special_data_connector_template_1",
                     "data_asset_name": "users_from_template_1",
-                    "partition_request": {
-                        "partition_index": -999
-                    }
+                    "partition_request": {"partition_index": -999},
                 }
             }
         ],
@@ -262,19 +263,20 @@ def context_with_checkpoint_templates(titanic_pandas_multibatch_data_context_wit
             "tolerance": "FOOBOO",
             "aux_param_0": "FOOBARBOO",
             "aux_param_1": "FOOBARBOO",
-            "template_1_key": 456
+            "template_1_key": 456,
         },
         runtime_configuration={
             "result_format": "FOOBARBOO",
             "partial_unexpected_count": "FOOBARBOO",
-            "template_1_key": 123
+            "template_1_key": 123,
         },
     )
     nested_checkpoint_template_config_1_key = ConfigurationIdentifier(
         configuration_key=nested_checkpoint_template_config_1.name
     )
     context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_1_key, value=nested_checkpoint_template_config_1
+        key=nested_checkpoint_template_config_1_key,
+        value=nested_checkpoint_template_config_1,
     )
 
     nested_checkpoint_template_config_2 = CheckpointConfig(
@@ -303,10 +305,8 @@ def context_with_checkpoint_templates(titanic_pandas_multibatch_data_context_wit
             },
             {
                 "name": "new_action_from_template_2",
-                "action": {
-                    "class_name": "Template2SpecialAction"
-                }
-            }
+                "action": {"class_name": "Template2SpecialAction"},
+            },
         ],
         evaluation_parameters={
             "environment": "$GE_ENVIRONMENT",
@@ -323,7 +323,8 @@ def context_with_checkpoint_templates(titanic_pandas_multibatch_data_context_wit
         configuration_key=nested_checkpoint_template_config_2.name
     )
     context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_2_key, value=nested_checkpoint_template_config_2
+        key=nested_checkpoint_template_config_2_key,
+        value=nested_checkpoint_template_config_2,
     )
 
     nested_checkpoint_template_config_3 = CheckpointConfig(
@@ -352,29 +353,28 @@ def context_with_checkpoint_templates(titanic_pandas_multibatch_data_context_wit
             },
             {
                 "name": "new_action_from_template_3",
-                "action": {
-                    "class_name": "Template3SpecialAction"
-                }
-            }
+                "action": {"class_name": "Template3SpecialAction"},
+            },
         ],
         evaluation_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
             "aux_param_1": "1 + $MY_PARAM",
-            "template_3_key": 123
+            "template_3_key": 123,
         },
         runtime_configuration={
             "result_format": "BASIC",
             "partial_unexpected_count": 20,
-            "template_3_key": "bloopy!"
+            "template_3_key": "bloopy!",
         },
     )
     nested_checkpoint_template_config_3_key = ConfigurationIdentifier(
         configuration_key=nested_checkpoint_template_config_3.name
     )
     context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_3_key, value=nested_checkpoint_template_config_3
+        key=nested_checkpoint_template_config_3_key,
+        value=nested_checkpoint_template_config_3,
     )
 
     return context
@@ -673,9 +673,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource_template_1",
                     "data_connector_name": "my_special_data_connector_template_1",
                     "data_asset_name": "users_from_template_1",
-                    "partition_request": {
-                        "partition_index": -999
-                    }
+                    "partition_request": {"partition_index": -999},
                 }
             },
             {
@@ -717,22 +715,20 @@ def test_newstyle_checkpoint_config_substitution_nested(
             },
             {
                 "name": "new_action_from_template_2",
-                "action": {
-                    "class_name": "Template2SpecialAction"
-                }
-            }
+                "action": {"class_name": "Template2SpecialAction"},
+            },
         ],
         evaluation_parameters={
             "environment": "$GE_ENVIRONMENT",
             "tolerance": 1.0e-2,
             "aux_param_0": "$MY_PARAM",
             "aux_param_1": "1 + $MY_PARAM",
-            "template_1_key": 456
+            "template_1_key": 456,
         },
         runtime_configuration={
             "result_format": "BASIC",
             "partial_unexpected_count": 20,
-            "template_1_key": 123
+            "template_1_key": 123,
         },
     )
 
@@ -760,9 +756,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource_template_1",
                         "data_connector_name": "my_special_data_connector_template_1",
                         "data_asset_name": "users_from_template_1",
-                        "partition_request": {
-                            "partition_index": -999
-                        }
+                        "partition_request": {"partition_index": -999},
                     }
                 },
                 {
@@ -814,15 +808,11 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 },
                 {
                     "name": "new_action_from_template_2",
-                    "action": {
-                        "class_name": "Template2SpecialAction"
-                    }
+                    "action": {"class_name": "Template2SpecialAction"},
                 },
                 {
                     "name": "new_action_from_template_3",
-                    "action": {
-                        "class_name": "Template3SpecialAction"
-                    }
+                    "action": {"class_name": "Template3SpecialAction"},
                 },
                 {
                     "name": "update_data_docs_deluxe_runtime",
@@ -850,68 +840,66 @@ def test_newstyle_checkpoint_config_substitution_nested(
         )
     )
 
-    substituted_config_template_and_runtime_kwargs = (
-        nested_checkpoint.get_substituted_config(
-            runtime_kwargs={
-                "expectation_suite_name": "runtime_suite_name",
-                "template_name": "my_nested_checkpoint_template_3",
-                "validations": [
-                    {
-                        "batch_request": {
-                            "datasource_name": "my_datasource",
-                            "data_connector_name": "my_other_data_connector_2_runtime",
-                            "data_asset_name": "users",
-                            "partition_request": {"partition_index": -3},
-                        }
-                    },
-                    {
-                        "batch_request": {
-                            "datasource_name": "my_datasource",
-                            "data_connector_name": "my_other_data_connector_3_runtime",
-                            "data_asset_name": "users",
-                            "partition_request": {"partition_index": -4},
-                        }
-                    },
-                ],
-                "run_name_template": "runtime_run_template",
-                "action_list": [
-                    {
-                        "name": "store_validation_result",
-                        "action": {
-                            "class_name": "StoreValidationResultAction",
-                        },
-                    },
-                    {
-                        "name": "store_evaluation_params",
-                        "action": {
-                            "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
-                        },
-                    },
-                    {
-                        "name": "update_data_docs",
-                        "action": None,
-                    },
-                    {
-                        "name": "update_data_docs_deluxe_runtime",
-                        "action": {
-                            "class_name": "UpdateDataDocsAction",
-                        },
-                    },
-                ],
-                "evaluation_parameters": {
-                    "environment": "runtime-$GE_ENVIRONMENT",
-                    "tolerance": 1.0e-2,
-                    "aux_param_0": "runtime-$MY_PARAM",
-                    "aux_param_1": "1 + $MY_PARAM",
-                    "new_runtime_eval_param": "bloopy!",
+    substituted_config_template_and_runtime_kwargs = nested_checkpoint.get_substituted_config(
+        runtime_kwargs={
+            "expectation_suite_name": "runtime_suite_name",
+            "template_name": "my_nested_checkpoint_template_3",
+            "validations": [
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_2_runtime",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -3},
+                    }
                 },
-                "runtime_configuration": {
-                    "result_format": "BASIC",
-                    "partial_unexpected_count": 999,
-                    "new_runtime_config_key": "bleepy!",
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_3_runtime",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -4},
+                    }
                 },
-            }
-        )
+            ],
+            "run_name_template": "runtime_run_template",
+            "action_list": [
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {
+                        "class_name": "MyCustomRuntimeStoreEvaluationParametersAction",
+                    },
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": None,
+                },
+                {
+                    "name": "update_data_docs_deluxe_runtime",
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
+                },
+            ],
+            "evaluation_parameters": {
+                "environment": "runtime-$GE_ENVIRONMENT",
+                "tolerance": 1.0e-2,
+                "aux_param_0": "runtime-$MY_PARAM",
+                "aux_param_1": "1 + $MY_PARAM",
+                "new_runtime_eval_param": "bloopy!",
+            },
+            "runtime_configuration": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 999,
+                "new_runtime_config_key": "bleepy!",
+            },
+        }
     )
     assert (
         substituted_config_template_and_runtime_kwargs.to_json_dict()
