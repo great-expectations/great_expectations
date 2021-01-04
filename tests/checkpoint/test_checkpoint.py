@@ -353,7 +353,7 @@ def context_with_checkpoint_templates(titanic_pandas_multibatch_data_context_wit
             {
                 "name": "new_action_from_template_3",
                 "action": {
-                    "class_name": "Template2SpecialAction"
+                    "class_name": "Template3SpecialAction"
                 }
             }
         ],
@@ -768,7 +768,23 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 {
                     "batch_request": {
                         "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -1},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -2},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_2_runtime",
                         "data_asset_name": "users",
                         "partition_request": {"partition_index": -3},
                     }
@@ -776,7 +792,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 {
                     "batch_request": {
                         "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3",
+                        "data_connector_name": "my_other_data_connector_3_runtime",
                         "data_asset_name": "users",
                         "partition_request": {"partition_index": -4},
                     }
@@ -805,11 +821,11 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 {
                     "name": "new_action_from_template_3",
                     "action": {
-                        "class_name": "Template2SpecialAction"
+                        "class_name": "Template3SpecialAction"
                     }
                 },
                 {
-                    "name": "update_data_docs_deluxe",
+                    "name": "update_data_docs_deluxe_runtime",
                     "action": {
                         "class_name": "UpdateDataDocsAction",
                     },
@@ -843,7 +859,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     {
                         "batch_request": {
                             "datasource_name": "my_datasource",
-                            "data_connector_name": "my_other_data_connector_2",
+                            "data_connector_name": "my_other_data_connector_2_runtime",
                             "data_asset_name": "users",
                             "partition_request": {"partition_index": -3},
                         }
@@ -851,7 +867,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     {
                         "batch_request": {
                             "datasource_name": "my_datasource",
-                            "data_connector_name": "my_other_data_connector_3",
+                            "data_connector_name": "my_other_data_connector_3_runtime",
                             "data_asset_name": "users",
                             "partition_request": {"partition_index": -4},
                         }
@@ -876,7 +892,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "action": None,
                     },
                     {
-                        "name": "update_data_docs_deluxe",
+                        "name": "update_data_docs_deluxe_runtime",
                         "action": {
                             "class_name": "UpdateDataDocsAction",
                         },
