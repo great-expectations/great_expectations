@@ -1222,13 +1222,14 @@ class BaseDataContext:
 
         **kwargs: variable arguments
 
+        First check:
+        Returns "v3" if the "0.13" entities are specified in the **kwargs.
+
+        Otherwise:
         Returns None if no datasources have been configured (or if there is an exception while getting the datasource).
         Returns "v3" if the datasource is a subclass of the BaseDatasource class.
         Returns "v2" if the datasource is an instance of the LegacyDatasource class.
         """
-
-        if not self.datasources:
-            return None
 
         if {
             "datasource_name",
@@ -1238,6 +1239,9 @@ class BaseDataContext:
             "batch_data",
         }.intersection(set(kwargs.keys())):
             return "v3"
+
+        if not self.datasources:
+            return None
 
         api_version: Optional[str] = None
         datasource_name: Any
@@ -2986,22 +2990,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
 
                 checkpoint_name: str = name or "my_temp_checkpoint"
-                instantiated_class = cast(
-                    Checkpoint,
-                    instantiate_class_from_config(
-                        config={
-                            "name": checkpoint_name,
-                            "data_context": self,
-                            "checkpoint_config": checkpoint_config,
-                        },
-                        runtime_environment={
-                            "root_directory": self.root_directory,
-                        },
-                        config_defaults={
-                            "class_name": class_name,
-                            "module_name": "great_expectations.checkpoint",
-                        },
-                    ),
+                instantiated_class = Checkpoint(
+                    data_context=self,
+                    name=checkpoint_name,
+                    checkpoint_config=checkpoint_config,
                 )
 
                 checkpoint_config = CheckpointConfig.from_commented_map(

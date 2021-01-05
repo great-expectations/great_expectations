@@ -37,33 +37,33 @@ Steps
         # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
         # run_name_template: %Y-%M-foo-bar-template-"$VAR"
         validations:
-        - batch_request:
-          datasource_name: my_datasource
-          data_connector_name: my_special_data_connector
-          data_asset_name: users
-          partition_request:
-            partition_index: -1
-          expectation_suite_name: users.delivery
-          action_list:
-          - name: store_validation_result
-            action:
-              class_name: StoreValidationResultAction
-          - name: store_evaluation_params
-            action:
-              class_name: StoreEvaluationParametersAction
-          - name: update_data_docs
-            action:
-              class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-          # param1: "$MY_PARAM"
-          # param2: 1 + "$OLD_PARAM"
-          param1: 1
-          param2: 2
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+          - batch_request:
+              datasource_name: my_datasource
+              data_connector_name: my_special_data_connector
+              data_asset_name: users
+              partition_request:
+                index: -1
+            expectation_suite_name: users.delivery
+            action_list:
+                - name: store_validation_result
+                  action:
+                    class_name: StoreValidationResultAction
+                - name: store_evaluation_params
+                  action:
+                    class_name: StoreEvaluationParametersAction
+                - name: update_data_docs
+                  action:
+                    class_name: UpdateDataDocsAction
+            evaluation_parameters:
+              # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
+              # param1: "$MY_PARAM"
+              # param2: 1 + "$OLD_PARAM"
+              param1: 1
+              param2: 2
+            runtime_configuration:
+              result_format:
+                result_format: BASIC
+                partial_unexpected_count: 20
         """
 
 #. **Run context.test_yaml_config.**
@@ -71,12 +71,12 @@ Steps
     .. code-block:: python
 
         context.test_yaml_config(
-            name="my_checkpoint",
+            name="my_fancy_checkpoint",
             yaml_config=config,
         )
 
     When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
-    
+
     In the case of a Checkpoint, this means
 
         1. validating the `yaml` configuration,
@@ -125,9 +125,13 @@ Steps
 
     .. code-block:: python
 
-        validation_results = context.run_checkpoint(
-            checkpoint_name="my_checkpoint",
+        validation_results: List[ValidationOperatorResult] = context.run_checkpoint(
+            checkpoint_name="my_fancy_checkpoint",
         )
+
+   Before running a Checkpoint, make sure that all classes referred to in the configuration exist.  The same applies to the expectation suites.
+
+   When `run_checkpoint` returns, the elements of the `validation_results` list can then be checked for the value of the `success` field and other information associated with running the specified actions.
 
 #. **Check your stored Checkpoint config.**
     If the Store Backend of your Checkpoint Store is on the local filesystem, you can navigate to the `base_directory` for (configured in `great_expectations.yml`) and find the configuration files corresponding to the Checkpoints you created.
@@ -146,19 +150,97 @@ Steps
         # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
         # run_name_template: %Y-%M-foo-bar-template-"$VAR"
         validations:
-        - batch_request:
-          datasource_name: my_datasource
-          data_connector_name: my_special_data_connector
-          data_asset_name: users
-          partition_request:
-            partition_index: -1
-        - batch_request:
-          datasource_name: my_datasource
-          data_connector_name: my_other_data_connector
-          data_asset_name: users
-          partition_request:
-            partition_index: -2
+          - batch_request:
+              datasource_name: my_datasource
+              data_connector_name: my_special_data_connector
+              data_asset_name: users
+              partition_request:
+                index: -1
+          - batch_request:
+              datasource_name: my_datasource
+              data_connector_name: my_other_data_connector
+              data_asset_name: users
+              partition_request:
+                index: -2
         expectation_suite_name: users.delivery
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
+          # param1: "$MY_PARAM"
+          # param2: 1 + "$OLD_PARAM"
+          param1: 1
+          param2: 2
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+        """
+
+
+    The following Checkpoint configuration runs the top-level `action_list` against the top-level `batch_request` as well as the locally-specified `action_list` against the top-level `batch_request`.
+
+    .. code-block:: python
+
+        config = """
+        name: airflow_users_node_3
+        config_version: 1
+        class_name: Checkpoint
+        batch_request:
+            datasource_name: my_datasource
+            data_connector_name: my_special_data_connector
+            data_asset_name: users
+            partition_request:
+                index: -1
+        validations:
+          - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
+          - expectation_suite_name: users.error  # runs the locally-specified_action_list (?UNION THE TOP LEVEL?) against the top-level batch_request
+            action_list:
+            - name: quarantine_failed_data
+              action:
+                  class_name: CreateQuarantineData
+            - name: advance_passed_data
+              action:
+                  class_name: CreatePassedData
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+            environment: $GE_ENVIRONMENT
+            tolerance: 0.01
+        runtime_configuration:
+            result_format:
+              result_format: BASIC
+              partial_unexpected_count: 20
+        """
+
+
+    The Checkpoint mechanism also offers the convenience of templates.  The first Checkpoint configuration is that of a valid Checkpoint in the sense that it can be run as long as all the parameters not present in the configuration are specified in the `run_checkpoint` API call.
+
+    .. code-block:: python
+
+        config = """
+        name: my_base_checkpoint
+        config_version: 1
+        class_name: Checkpoint
+        # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
+        # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
+        # run_name_template: %Y-%M-foo-bar-template-"$VAR"
         action_list:
         - name: store_validation_result
           action:
@@ -176,12 +258,80 @@ Steps
           param1: 1
           param2: 2
         runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+            result_format:
+              result_format: BASIC
+              partial_unexpected_count: 20
         """
 
-    The following Checkpoint configuration is suitable for the use in a pipeline managed by Airflow.
+   .. code-block:: python
+
+        validation_results: List[ValidationOperatorResult]
+
+        validation_results = data_context.run_checkpoint(
+            checkpoint_name="my_base_checkpoint",
+            validations=[
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {
+                            "index": -1,
+                        },
+                    },
+                    "expectation_suite_name": "users.delivery",
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {
+                            "index": -2,
+                        },
+                    },
+                    "expectation_suite_name": "users.delivery",
+                },
+            ],
+        )
+
+    However, the `run_checkpoint` method can be simplified by configuring a separate Checkpoint that uses the above Checkpoint as a template and includes the settings previously specified in the `run_checkpoint` method:
+
+    .. code-block:: python
+
+        config = """
+        name: my_fancy_checkpoint
+        config_version: 1
+        class_name: Checkpoint
+        template_name: my_base_checkpoint
+        validations:
+        - batch_request:
+            datasource_name: my_datasource
+            data_connector_name: my_special_data_connector
+            data_asset_name: users
+            partition_request:
+              index: -1
+        - batch_request:
+            datasource_name: my_datasource
+            data_connector_name: my_other_data_connector
+            data_asset_name: users
+            partition_request:
+              index: -2
+        expectation_suite_name: users.delivery
+        """
+
+    Now the `run_checkpoint` method is as simple as in the previous examples:
+
+    .. code-block:: python
+
+        validation_results = context.run_checkpoint(
+            checkpoint_name="my_fancy_checkpoint",
+        )
+
+    The `validation_results` in both cases (the parameterized `run_checkpoint` method and the configuration that incorporates another configuration as a template) are the same.
+
+
+    The final example presents a Checkpoint configuration that is suitable for the use in a pipeline managed by Airflow.
 
     .. code-block:: python
 
@@ -191,34 +341,39 @@ Steps
         class_name: Checkpoint
         validations:
         - batch_request:
-          datasource_name: pandas_datasource
-          data_connector_name: runtime_data_connector
-          data_asset_name: users
+            datasource_name: my_datasource
+            data_connector_name: my_runtime_data_connector
+            data_asset_name: IN_MEMORY_DATA_ASSET
         expectation_suite_name: users.delivery
         action_list:
-        - name: store_validation_result
-          action:
-            class_name: StoreValidationResultAction
-        - name: store_evaluation_params
-          action:
-            class_name: StoreEvaluationParametersAction
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
         """
 
 
-   To run this checkpoint, the `batch_request` with the `batch_data` attribute needs to be specified explicitly as part of the `run_checkpoint()` API call, because the the data to be validated is accessible only dynamically during the execution of the pipeline.
+   To run this Checkpoint, the `batch_request` with the `batch_data` attribute needs to be specified explicitly as part of the `run_checkpoint()` API call, because the the data to be validated is accessible only dynamically during the execution of the pipeline.
 
    .. code-block:: python
 
-        validation_results = context.run_checkpoint(
-            checkpoint_name="airflow_checkpoint",
+        validation_results: List[ValidationOperatorResult] = data_context.run_checkpoint(
+            checkpoint_name=checkpoint.config.name,
             batch_request={
                 "batch_data": my_data_frame,
+                "partition_request": {
+                    "partition_identifiers": {
+                        "run_id": airflow_run_id,
+                    }
+                },
             },
-            run_name=airflow_run_id
         )
+
 
 
 Additional Resources
