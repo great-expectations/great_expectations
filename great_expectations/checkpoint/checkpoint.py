@@ -2,11 +2,10 @@ import json
 import logging
 import os
 from copy import deepcopy
-from datetime import datetime
 from typing import Any, List, Optional, Union
 
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.util import nested_update
+from great_expectations.core.util import nested_update, get_current_datetime_string_from_strftime_format
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions import CheckpointError
@@ -204,10 +203,6 @@ class Checkpoint:
         self._validate_validation_dict(substituted_validation_dict)
         return substituted_validation_dict
 
-    def get_run_name_from_template(self, run_name_template: str):
-        now = datetime.now()
-        return now.strftime(run_name_template)
-
     def run(
         self,
         template_name: Optional[str] = None,
@@ -251,9 +246,7 @@ class Checkpoint:
         results = []
 
         if run_name is None and run_name_template is not None:
-            run_name: str = self.get_run_name_from_template(
-                run_name_template=run_name_template
-            )
+            run_name: str = get_current_datetime_string_from_strftime_format(format_str=run_name_template)
 
         for idx, validation_dict in enumerate(validations):
             try:
