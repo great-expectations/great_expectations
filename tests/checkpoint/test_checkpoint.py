@@ -1075,7 +1075,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                 }
             },
         ],
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
+        run_name_template="%Y-%M-foo-bar-template-test",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1097,10 +1097,10 @@ def test_newstyle_checkpoint_config_substitution_simple(
             },
         ],
         evaluation_parameters={
-            "environment": "$GE_ENVIRONMENT",
+            "environment": "my_ge_environment",
             "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
+            "aux_param_0": "1",
+            "aux_param_1": "1 + 1",
         },
         runtime_configuration={
             "result_format": {
@@ -1184,10 +1184,10 @@ def test_newstyle_checkpoint_config_substitution_simple(
                 },
             ],
             evaluation_parameters={
-                "environment": "runtime-$GE_ENVIRONMENT",
+                "environment": "runtime-my_ge_environment",
                 "tolerance": 1.0e-2,
-                "aux_param_0": "runtime-$MY_PARAM",
-                "aux_param_1": "1 + $MY_PARAM",
+                "aux_param_0": "runtime-1",
+                "aux_param_1": "1 + 1",
                 "new_runtime_eval_param": "bloopy!",
             },
             runtime_configuration={
@@ -1336,7 +1336,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 }
             },
         ],
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
+        run_name_template="%Y-%M-foo-bar-template-test-template-2",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1362,10 +1362,10 @@ def test_newstyle_checkpoint_config_substitution_nested(
             },
         ],
         evaluation_parameters={
-            "environment": "$GE_ENVIRONMENT",
+            "environment": "my_ge_environment",
             "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
+            "aux_param_0": "1",
+            "aux_param_1": "1 + 1",
             "template_1_key": 456,
         },
         runtime_configuration={
@@ -1465,10 +1465,10 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 },
             ],
             evaluation_parameters={
-                "environment": "runtime-$GE_ENVIRONMENT",
+                "environment": "runtime-my_ge_environment",
                 "tolerance": 1.0e-2,
-                "aux_param_0": "runtime-$MY_PARAM",
-                "aux_param_1": "1 + $MY_PARAM",
+                "aux_param_0": "runtime-1",
+                "aux_param_1": "1 + 1",
                 "template_1_key": 456,
                 "template_3_key": 123,
                 "new_runtime_eval_param": "bloopy!",
