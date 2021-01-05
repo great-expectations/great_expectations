@@ -74,8 +74,10 @@ def test_checkpoint_store(empty_data_context):
         "aux_param_1": "1 + $MY_PARAM",
     }
     runtime_configuration_0: dict = {
-        "result_format": "BASIC",
-        "partial_unexpected_count": 20,
+        "result_format": {
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+        },
     }
     my_checkpoint_config_0: CheckpointConfig = CheckpointConfig(
         name=checkpoint_name_0,
@@ -148,8 +150,10 @@ def test_checkpoint_store(empty_data_context):
         "aux_param_1": "1 + $MY_PARAM",
     }
     runtime_configuration_1: dict = {
-        "result_format": "BASIC",
-        "partial_unexpected_count": 20,
+        "result_format": {
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+        },
     }
     my_checkpoint_config_1: CheckpointConfig = CheckpointConfig(
         name=checkpoint_name_1,

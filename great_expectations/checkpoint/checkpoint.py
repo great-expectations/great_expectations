@@ -1,4 +1,5 @@
 import json
+import logging
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, List, Optional, Union
@@ -13,13 +14,15 @@ from great_expectations.validation_operators.types.validation_operator_result im
 )
 from great_expectations.validator.validator import Validator
 
+logger = logging.getLogger(__name__)
+
 
 class Checkpoint:
     def __init__(
         self,
         name: str,
         data_context,
-        checkpoint_config: CheckpointConfig,
+        checkpoint_config: Union[CheckpointConfig, dict],
     ):
         self._data_context = data_context
         self._name = name
@@ -31,7 +34,7 @@ class Checkpoint:
                 f"instead got {type(checkpoint_config)}"
             )
         elif isinstance(checkpoint_config, dict):
-            checkpoint_config: CheckpointConfig = CheckpointConfig(**checkpoint_config)
+            checkpoint_config = CheckpointConfig(**checkpoint_config)
         self._config = checkpoint_config
 
         self._substituted_config = None
@@ -288,7 +291,45 @@ class Checkpoint:
         report_object: dict = {"config": self.config.to_json_dict()}
 
         if pretty_print:
-            print(f"Checkpoint: {self.__class__.__name__}")
+            print(f"\nCheckpoint class name: {self.__class__.__name__}")
+
+        validations_present: bool = (
+            self.config.validations
+            and isinstance(self.config.validations, list)
+            and len(self.config.validations) > 0
+        )
+        action_list: Optional[list] = self.config.action_list
+        action_list_present: bool = (
+            action_list is not None
+            and isinstance(action_list, list)
+            and len(action_list) > 0
+        ) or (
+            validations_present
+            and all(
+                [
+                    (
+                        validation.get("action_list")
+                        and isinstance(validation["action_list"], list)
+                        and len(validation["action_list"]) > 0
+                    )
+                    for validation in self.config.validations
+                ]
+            )
+        )
+        if not validations_present:
+            logger.warning(
+                f"""Your current Checkpoint configuration has an empty or missing "validations" attribute.  This means
+                you must either update your checkpoint configuration or provide an appropriate validations list
+                programmatically (i.e., when your Checkpoint is run).
+                """
+            )
+        if not action_list_present:
+            logger.warning(
+                f"""Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This means
+                you must provide an appropriate validations list programmatically (i.e., when your Checkpoint is run),
+                with each validation having its own defined "action_list" attribute.
+                """
+            )
 
         return report_object
 
