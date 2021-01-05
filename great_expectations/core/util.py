@@ -4,7 +4,9 @@ from collections.abc import Mapping
 
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+from datetime import datetime
 from decimal import Context
+from typing import Union, Any, OrderedDict
 
 from IPython import get_ipython
 
@@ -261,3 +263,24 @@ def ensure_json_serializable(data):
 
 def requires_lossy_conversion(d):
     return d - Context(prec=sys.float_info.dig).create_decimal(d) != 0
+
+
+def substitute_all_strftime_format_strings(data: Union[dict, list, str, Any]) -> Union[str, Any]:
+    if isinstance(data, dict) or isinstance(data, OrderedDict):
+        return {
+            k: substitute_all_strftime_format_strings(v)
+            for k, v in data.items()
+        }
+    elif isinstance(data, list):
+        return [
+            substitute_all_strftime_format_strings(el) for el in data
+        ]
+    elif isinstance(data, str):
+        return get_current_datetime_string_from_strftime_format(data)
+    else:
+        return data
+
+
+def get_current_datetime_string_from_strftime_format(format_str: str) -> str:
+    now: datetime = datetime.now()
+    return now.strftime(format_str)
