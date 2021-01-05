@@ -94,22 +94,38 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
     }
 
     @classmethod
-    def build_expectation_list_from_config(cls, dataset, config, tolerance=0):
+    def build_suite(cls, dataset, config=None, tolerance=0):
+        cache = cls._initialize_cache_with_metadata(dataset=dataset, config=config)
+        if config:
+            cls._validate_config(dataset, config)
+            semantic_types = config.get("semantic_types")
+            if semantic_types:
+                cls._validate_semantic_types_dict(
+                    dataset=dataset, config=config, cache=cache
+                )
+                return cls._build_expectation_list_from_config(
+                    dataset=dataset, cache=cache, config=config, tolerance=tolerance
+                )
+
+        return cls._profile_and_build_expectation_list(
+            dataset=dataset, cache=cache, config=config, tolerance=tolerance
+        )
+
+    @classmethod
+    def _build_expectation_list_from_config(cls, dataset, cache, config, tolerance=0):
         if not config or not config.get("semantic_types"):
             raise ValueError(
                 "A config with a semantic_types dict must be included in order to use this profiler."
             )
-
-        cache = cls._initialize_cache_with_metadata(dataset, config=config)
-        cls._validate_semantic_types_config(dataset, config, cache)
         cls._build_expectations_table(dataset, cache=cache)
         ignored_columns = cache.get("ignored_columns") or {}
-        value_set_threshold = config.get("value_set_threshold")
-        if value_set_threshold and "value_set" in config.get("semantic_types").keys():
+        value_set_threshold = cache.get("value_set_threshold")
+        if value_set_threshold:
             logger.warn(
-                "build_expectation_list_from_config does not make use of the value_set threshold. If you would "
-                "like to include value_set expectations, you can include a 'value_set' entry in your "
-                "semantic_types dict, or use profile_and_build_expectation_list with the value_set_threshold."
+                "Using this profiler with a semantic_types dict will ignore the value_set_threshold parameter. If "
+                "you would like to include value_set expectations, you can include a 'value_set' entry in your "
+                "semantic_types dict with any columns for which you would like a value_set expectation, or you can "
+                "remove the semantic_types dict from the config."
             )
         cache_columns = {
             k: v
@@ -137,14 +153,17 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         expectation_suite = cls._build_column_description_metadata(dataset)
         logger.debug("")
-        cls.display_suite_by_column(expectation_suite)
+        cls._display_suite_by_column(suite=expectation_suite, cache=cache)
         return expectation_suite
 
     @classmethod
-    def profile_and_build_expectation_list(cls, dataset, config=None, tolerance=0):
-        cache = cls._initialize_cache_with_metadata(dataset=dataset, config=config)
+    def _profile_and_build_expectation_list(
+        cls, dataset, cache, config=None, tolerance=0
+    ):
         ignored_columns = cache.get("ignored_columns") or {}
         value_set_threshold = cache.get("value_set_threshold")
+        if not value_set_threshold:
+            value_set_threshold = ["many"]
         cache_columns = {
             k: v
             for k, v in cache.items()
@@ -193,7 +212,9 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         expectation_suite = cls._build_column_description_metadata(dataset)
         logger.debug("")
-        cls.display_suite_by_column(expectation_suite)  # include in the actual profiler
+        cls._display_suite_by_column(
+            suite=expectation_suite, cache=cache
+        )  # include in the actual profiler
         return expectation_suite
 
     @classmethod
@@ -201,7 +222,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         cache = {}
         cache["primary_or_compound_key"] = []
         cache["ignored_columns"] = []
-        cache["value_set_threshold"] = ["many"]
+        cache["value_set_threshold"] = []
         cache["excluded_expectations"] = []
 
         if config is not None:
@@ -211,7 +232,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             )
             cache["ignored_columns"] = config.get("ignored_columns") or []
             cache["excluded_expectations"] = config.get("excluded_expectations") or []
-            cache["value_set_threshold"] = config.get("value_set_threshold") or ["many"]
+            cache["value_set_threshold"] = config.get("value_set_threshold") or []
 
         included_columns = [
             column_name
@@ -233,10 +254,26 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
     @classmethod
     def _validate_config(cls, dataset, config, cache=None):
         # TODO: Validate non-semantic_type_dict part of config (for both profilers, if config is included).
-        pass
+        config_parameters = (
+            "ignored_columns",
+            "excluded_expectations",
+            "primary_or_compound_key",
+            "value_set_threshold",
+            "semantic_types",
+        )
+
+        for k, v in config.items():
+            if k not in config_parameters:
+                logger.warn(
+                    f"Parameter {k} from config is not recognized and will be ignored."
+                )
+            if k != "semantic_types" and v:
+                assert isinstance(
+                    v, list
+                ), f"Config parameter {k} must be formatted as a list rather than {type(v)}."
 
     @classmethod
-    def _validate_semantic_types_config(cls, dataset, config, cache=None):
+    def _validate_semantic_types_dict(cls, dataset, config, cache):
         semantic_type_dict = config.get("semantic_types")
         if not isinstance(semantic_type_dict, dict):
             raise ValueError(
@@ -245,7 +282,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             )
         for k, v in semantic_type_dict.items():
             assert isinstance(v, list), (
-                "Entries in semantic type dict must be lists rather than scalars e.g. "
+                "Entries in semantic type dict must be lists of column names e.g. "
                 '{"semantic_types": {"numeric": ["number_of_transactions"]}}'
             )
             if k not in cls._semantic_types:
@@ -261,9 +298,6 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         _check_that_columns_exist(dataset, selected_columns)
 
         dataset.set_default_expectation_argument("catch_exceptions", False)
-
-        if cache is None:
-            cls._initialize_cache_with_metadata(dataset, config)
 
         cached_config_parameters = (
             "ignored_columns",
@@ -410,7 +444,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         return expectation_suite
 
     @classmethod
-    def display_suite_by_column(cls, suite, verbose=False):
+    def _display_suite_by_column(cls, suite, cache={}):
         expectations = suite.expectations
         expectations_by_column = {}
         for expectation in expectations:
@@ -419,20 +453,47 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 expectations_by_column[domain] = [expectation]
             else:
                 expectations_by_column[domain].append(expectation)
-        print("Creating an expectation suite with the following expectations:")
-        if verbose:
-            for column in expectations_by_column:
-                print(column)
-                for expectation in expectations_by_column.get(column):
-                    print(expectation)
-                print("\n")
+        print("Creating an expectation suite with the following expectations:\n")
 
-        else:
-            for column in expectations_by_column:
-                print(column)
-                for expectation in expectations_by_column.get(column):
-                    print(expectation["expectation_type"])
-                print("\n")
+        table_level_expectations = expectations_by_column.pop(
+            "table_level_expectations"
+        )
+        print("Table-Level Expectations")
+        for expectation in sorted(
+            table_level_expectations, key=lambda x: x.expectation_type
+        ):
+            print(expectation.expectation_type)
+        print("\nExpectations by Column")
+
+        for column in sorted(expectations_by_column):
+            cached_column = cache.get(column) or {}
+
+            semantic_types = cached_column.get("semantic_types")
+            type_ = cached_column.get("type").value
+            cardinality = cached_column.get("cardinality")
+
+            if semantic_types:
+                type_string = f" | Semantic Type: {semantic_types[0] if len(semantic_types)==1 else semantic_types}"
+            elif type_:
+                type_string = f" | Column Data Type: {type_}"
+            else:
+                type_string = ""
+
+            if cardinality:
+                cardinality_string = f" | Cardinality: {cardinality}"
+            else:
+                cardinality_string = ""
+
+            column_string = (
+                f"Column Name: {column}{type_string or ''}{cardinality_string or ''}"
+            )
+            print(column_string)
+
+            for expectation in sorted(
+                expectations_by_column.get(column), key=lambda x: x.expectation_type
+            ):
+                print(expectation.expectation_type)
+            print("\n")
 
     @classmethod
     def _get_column_cardinality(cls, df, column):
