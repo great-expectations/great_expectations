@@ -64,7 +64,10 @@ def test_basic_instantiation(tmp_path_factory):
         base_directory=base_directory,
         glob_directive="*.csv",
         datasource_name="FAKE_DATASOURCE",
-        default_regex={"pattern": "(.*)", "group_names": ["file_name"],},
+        default_regex={
+            "pattern": "(.*)",
+            "group_names": ["file_name"],
+        },
         assets={"my_asset_name": {}},
     )
 
@@ -72,8 +75,10 @@ def test_basic_instantiation(tmp_path_factory):
 # TODO: <Alex>This test should be potentially moved to "tests/datasource/data_connector/test_configured_asset_filesystem_data_connector.py".</Alex>
 def test__get_instantiation_through_instantiate_class_from_config(basic_data_connector):
     # noinspection PyProtectedMember
-    data_references: list = basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
-        data_asset_name="my_asset_name"
+    data_references: list = (
+        basic_data_connector._get_data_reference_list_from_cache_by_data_asset_name(
+            data_asset_name="my_asset_name"
+        )
     )
     assert len(data_references) == 0
     assert data_references == []
@@ -99,7 +104,10 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         base_directory=base_directory,
         glob_directive="*/*/*.csv",
         datasource_name="FAKE_DATASOURCE",
-        default_regex={"pattern": "(.*).csv", "group_names": ["name"],},
+        default_regex={
+            "pattern": "(.*).csv",
+            "group_names": ["name"],
+        },
         assets={"stuff": {}},
     )
 
@@ -155,7 +163,11 @@ def test__batch_definition_matches_batch_request():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_definition=PartitionDefinition({"id": "A",}),
+        partition_definition=PartitionDefinition(
+            {
+                "id": "A",
+            }
+        ),
     )
 
     assert batch_definition_matches_batch_request(
@@ -168,20 +180,27 @@ def test__batch_definition_matches_batch_request():
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(datasource_name="A", data_connector_name="a",),
+        batch_request=BatchRequest(
+            datasource_name="A",
+            data_connector_name="a",
+        ),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
-            datasource_name="A", data_connector_name="a", data_asset_name="aaa",
+            datasource_name="A",
+            data_connector_name="a",
+            data_asset_name="aaa",
         ),
     )
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
-            datasource_name="A", data_connector_name="a", data_asset_name="bbb",
+            datasource_name="A",
+            data_connector_name="a",
+            data_asset_name="bbb",
         ),
     )
 
@@ -191,14 +210,18 @@ def test__batch_definition_matches_batch_request():
             datasource_name="A",
             data_connector_name="a",
             data_asset_name="aaa",
-            partition_request={"partition_identifiers": {"id": "B"},},
+            partition_request={
+                "partition_identifiers": {"id": "B"},
+            },
         ),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequest(
-            partition_request={"partition_identifiers": {"id": "A"},}
+            partition_request={
+                "partition_identifiers": {"id": "A"},
+            }
         ),
     )
 

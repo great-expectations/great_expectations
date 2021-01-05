@@ -14,6 +14,7 @@ from great_expectations.execution_engine.util import (
     is_valid_partition_object,
 )
 from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     RenderedContentBlockContainer,
@@ -221,7 +222,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 hist_metric_configuration = MetricConfiguration(
                     "column.histogram",
                     metric_domain_kwargs=domain_kwargs,
-                    metric_value_kwargs={"bins": tuple(bins),},
+                    metric_value_kwargs={
+                        "bins": tuple(bins),
+                    },
                 )
                 nonnull_configuration = MetricConfiguration(
                     "column_values.nonnull.count",
@@ -241,10 +244,13 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 counts_configuration = MetricConfiguration(
                     "column.value_counts",
                     metric_domain_kwargs=domain_kwargs,
-                    metric_value_kwargs={"sort": "value",},
+                    metric_value_kwargs={
+                        "sort": "value",
+                    },
                 )
                 nonnull_configuration = MetricConfiguration(
-                    "column_values.nonnull.count", metric_domain_kwargs=domain_kwargs,
+                    "column_values.nonnull.count",
+                    metric_domain_kwargs=domain_kwargs,
                 )
                 dependencies["column.value_counts"] = counts_configuration
                 dependencies["column_values.nonnull.count"] = nonnull_configuration
@@ -269,7 +275,9 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             hist_metric_configuration = MetricConfiguration(
                 "column.histogram",
                 metric_domain_kwargs=domain_kwargs,
-                metric_value_kwargs={"bins": bins,},
+                metric_value_kwargs={
+                    "bins": bins,
+                },
             )
             nonnull_configuration = MetricConfiguration(
                 "column_values.nonnull.count",
@@ -524,11 +532,17 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 expected_weights = expected_weights[1:]
 
                 comb_observed_weights = np.concatenate(
-                    (observed_weights, [above_partition / nonnull_count],)
+                    (
+                        observed_weights,
+                        [above_partition / nonnull_count],
+                    )
                 )
                 # Set aside left tail weight and above partition weight
                 observed_tail_weights = np.concatenate(
-                    ([observed_weights[0]], [above_partition / nonnull_count],)
+                    (
+                        [observed_weights[0]],
+                        [above_partition / nonnull_count],
+                    )
                 )
                 # Remove left tail weight from main observed_weights
                 observed_weights = observed_weights[1:]
@@ -554,11 +568,17 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 expected_weights = expected_weights[:-1]
 
                 comb_observed_weights = np.concatenate(
-                    ([below_partition / nonnull_count], observed_weights,)
+                    (
+                        [below_partition / nonnull_count],
+                        observed_weights,
+                    )
                 )
                 # Set aside right tail weight and below partition weight
                 observed_tail_weights = np.concatenate(
-                    ([below_partition / nonnull_count], [observed_weights[-1]],)
+                    (
+                        [below_partition / nonnull_count],
+                        [observed_weights[-1]],
+                    )
                 )
                 # Remove right tail weight from main observed_weights
                 observed_weights = observed_weights[:-1]
@@ -670,7 +690,11 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 bins_x2 = [round(value, 1) for value in bins[1:]]
 
                 df = pd.DataFrame(
-                    {"bin_min": bins_x1, "bin_max": bins_x2, "fraction": weights,}
+                    {
+                        "bin_min": bins_x1,
+                        "bin_max": bins_x2,
+                        "fraction": weights,
+                    }
                 )
 
                 bars = (
@@ -829,6 +853,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

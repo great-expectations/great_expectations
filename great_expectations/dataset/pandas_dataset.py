@@ -1869,7 +1869,8 @@ Notes:
             "expect_select_column_values_to_be_unique_within_record instead."
         )
         warnings.warn(
-            deprecation_warning, DeprecationWarning,
+            deprecation_warning,
+            DeprecationWarning,
         )
 
         return self.expect_select_column_values_to_be_unique_within_record(

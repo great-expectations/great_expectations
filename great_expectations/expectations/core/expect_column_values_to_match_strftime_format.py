@@ -10,6 +10,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
@@ -106,7 +107,8 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
                 ), 'Evaluation Parameter dict for strftime_format kwarg must have "$PARAMETER" key.'
             else:
                 datetime.strptime(
-                    datetime.strftime(datetime.now(), strftime_format), strftime_format,
+                    datetime.strftime(datetime.now(), strftime_format),
+                    strftime_format,
                 )
         except ValueError as e:
             raise ValueError("Unable to use provided strftime_format. " + str(e))
@@ -117,6 +119,7 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,
