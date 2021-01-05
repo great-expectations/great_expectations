@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, List, Optional, Union
@@ -7,6 +8,7 @@ from typing import Any, List, Optional, Union
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions import CheckpointError
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -56,7 +58,7 @@ class Checkpoint:
         self,
         config: Optional[Union[CheckpointConfig, dict]] = None,
         runtime_kwargs: Optional[dict] = None,
-    ):
+    ) -> CheckpointConfig:
         runtime_kwargs = runtime_kwargs or {}
         if config is None:
             config = self.config
@@ -71,8 +73,6 @@ class Checkpoint:
             substituted_config = deepcopy(self._substituted_config)
             if any(runtime_kwargs.values()):
                 substituted_config.update(runtime_kwargs=runtime_kwargs)
-
-            return substituted_config
         else:
             template_name = runtime_kwargs.get("template_name") or config.template_name
 
@@ -82,7 +82,6 @@ class Checkpoint:
                     substituted_config.update(runtime_kwargs=runtime_kwargs)
 
                 self._substituted_config = substituted_config
-                return substituted_config
             else:
                 template_config = self.data_context.get_checkpoint(
                     checkpoint_name=template_name, return_config=True
@@ -109,7 +108,26 @@ class Checkpoint:
                 # don't replace _substituted_config if already exists
                 if self._substituted_config is None:
                     self._substituted_config = substituted_config
-                return substituted_config
+        return self._substitute_config_variables(config=substituted_config)
+
+    def _substitute_config_variables(self, config: CheckpointConfig) -> CheckpointConfig:
+        substituted_config_variables = substitute_all_config_variables(
+            self.data_context.config_variables,
+            dict(os.environ),
+            self.data_context.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.data_context.runtime_environment,
+        }
+
+        return CheckpointConfig(
+            **substitute_all_config_variables(
+                config, substitutions, self.data_context.DOLLAR_SIGN_ESCAPE_STRING
+            )
+        )
 
     def _get_runtime_batch_request(
         self,
