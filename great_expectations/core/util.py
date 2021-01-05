@@ -268,6 +268,11 @@ def requires_lossy_conversion(d):
 def substitute_all_strftime_format_strings(
     data: Union[dict, list, str, Any], datetime_obj: Optional[datetime] = None
 ) -> Union[str, Any]:
+    """
+    This utility function will iterate over input data and for all strings, replace any strftime format
+    elements using either the provided datetime_obj or the current datetime
+    """
+
     datetime_obj: datetime = datetime_obj or datetime.now()
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
@@ -288,5 +293,9 @@ def substitute_all_strftime_format_strings(
 def get_datetime_string_from_strftime_format(
     format_str: str, datetime_obj: Optional[datetime] = None
 ) -> str:
+    """
+    This utility function takes a string with strftime format elements and substitutes those elements using
+    either the provided datetime_obj or current datetime
+    """
     datetime_obj: datetime = datetime_obj or datetime.now()
     return datetime_obj.strftime(format_str)
