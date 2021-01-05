@@ -8,7 +8,7 @@ from collections import OrderedDict
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.types.base import (
     DataContextConfig,
-    DataContextConfigSchema,
+    DataContextConfigSchema, CheckpointConfig, CheckpointConfigSchema,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
@@ -210,6 +210,9 @@ def substitute_all_config_variables(
     """
     if isinstance(data, DataContextConfig):
         data = DataContextConfigSchema().dump(data)
+
+    if isinstance(data, CheckpointConfig):
+        data = CheckpointConfigSchema().dump(data)
 
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
