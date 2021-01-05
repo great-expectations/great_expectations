@@ -14,7 +14,6 @@ import warnings
 import webbrowser
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Union, cast
-from urllib.parse import urlparse, urlunparse
 
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
@@ -58,6 +57,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
+    PasswordMasker,
     file_relative_path,
     instantiate_class_from_config,
     load_class,
@@ -1766,7 +1766,6 @@ class BaseDataContext:
         Returns:
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
         """
-        PASSWORD_REPLACE_STRING = "********"
         datasources = []
         for (
             key,
@@ -1774,17 +1773,14 @@ class BaseDataContext:
         ) in self._project_config_with_variables_substituted.datasources.items():
             value["name"] = key
 
-            # Replace passwords with PASSWORD_REPLACE_STRING
-            # E.g. "postgresql+psycopg2://username:password@host:65432/database" ->
-            # "postgresql+psycopg2://username:********@host:65432/database"
             if "credentials" in value:
                 if "password" in value["credentials"]:
-                    value["credentials"]["password"] = PASSWORD_REPLACE_STRING
+                    value["credentials"][
+                        "password"
+                    ] = PasswordMasker.MASKED_PASSWORD_STRING
                 if "url" in value["credentials"]:
-                    parsed_url = urlparse(value["credentials"]["url"])
-                    value["credentials"]["url"] = (
-                        f"{parsed_url.scheme}://{parsed_url.username}:{PASSWORD_REPLACE_STRING}"
-                        f"@{parsed_url.hostname}:{parsed_url.port}{parsed_url.path}"
+                    value["credentials"]["url"] = PasswordMasker.mask_db_url(
+                        value["credentials"]["url"]
                     )
 
             datasources.append(value)

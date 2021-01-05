@@ -3,7 +3,9 @@ import inspect
 import logging
 import os
 import re
+import warnings
 from collections import OrderedDict
+from urllib.parse import urlparse
 
 from great_expectations.data_context.types.base import (
     DataContextConfig,
@@ -11,6 +13,11 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.exceptions import MissingConfigVariableError
 from great_expectations.util import load_class, verify_dynamic_loading_support
+
+try:
+    import sqlalchemy as sa
+except ImportError:
+    sa = None
 
 logger = logging.getLogger(__name__)
 
@@ -205,3 +212,65 @@ def file_relative_path(dunderfile, relative_path):
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
     return os.path.join(os.path.dirname(dunderfile), relative_path)
+
+
+class PasswordMasker:
+    """
+    Used to mask passwords in Datasources. Does not mask sqlite urls.
+
+    Example usage
+    masked_db_url = PasswordMasker.mask_db_url(url)
+    where url = "postgresql+psycopg2://username:password@host:65432/database"
+    and masked_url = "postgresql+psycopg2://username:***@host:65432/database"
+
+    """
+
+    MASKED_PASSWORD_STRING = "***"
+
+    @staticmethod
+    def mask_db_url(url: str, use_urlparse: bool = False, **kwargs) -> str:
+        """
+        Mask password in database url.
+        Uses sqlalchemy engine parsing if sqlalchemy is installed, otherwise defaults to using urlparse from the stdlib which does not handle kwargs.
+        Args:
+            url: Database url e.g. "postgresql+psycopg2://username:password@host:65432/database"
+            use_urlparse: Skip trying to parse url with sqlalchemy and use urlparse
+            **kwargs: passed to create_engine()
+
+        Returns:
+            url with password masked e.g. "postgresql+psycopg2://username:***@host:65432/database"
+        """
+        if sa is not None and use_urlparse is False:
+            engine = sa.create_engine(url, **kwargs)
+            return engine.url.__repr__()
+        else:
+            warnings.warn(
+                "SqlAlchemy is not installed, using urlparse to mask database url password which ignores **kwargs."
+            )
+
+            # oracle+cx_oracle does not parse well using urlparse, parse as oracle then swap back
+            replace_prefix = None
+            if url.startswith("oracle+cx_oracle"):
+                replace_prefix = {"original": "oracle+cx_oracle", "temporary": "oracle"}
+                url = url.replace(
+                    replace_prefix["original"], replace_prefix["temporary"]
+                )
+
+            parsed_url = urlparse(url)
+
+            # Do not parse sqlite
+            if parsed_url.scheme == "sqlite":
+                return url
+
+            colon = ":" if parsed_url.port is not None else ""
+            masked_url = (
+                f"{parsed_url.scheme}://{parsed_url.username}:{PasswordMasker.MASKED_PASSWORD_STRING}"
+                f"@{parsed_url.hostname}{colon}{parsed_url.port or ''}{parsed_url.path or ''}"
+            )
+
+            if replace_prefix is not None:
+                masked_url = masked_url.replace(
+                    replace_prefix["temporary"], replace_prefix["original"]
+                )
+
+            return masked_url

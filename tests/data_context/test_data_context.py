@@ -347,7 +347,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
                 "host": "localhost",
                 "port": "65432",
                 "username": "username_str",
-                "password": "********",
+                "password": "***",
                 "database": "database_str",
             },
         },
@@ -360,7 +360,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
                 "module_name": "great_expectations.dataset",
             },
             "credentials": {
-                "url": "postgresql+psycopg2://username:********@host:65432/database",
+                "url": "postgresql+psycopg2://username:***@host:65432/database",
             },
         },
     ]
