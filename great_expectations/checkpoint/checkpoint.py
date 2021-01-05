@@ -6,8 +6,11 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.util import nested_update, get_datetime_string_from_strftime_format, \
-    substitute_all_strftime_format_strings
+from great_expectations.core.util import (
+    get_datetime_string_from_strftime_format,
+    nested_update,
+    substitute_all_strftime_format_strings,
+)
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions import CheckpointError
@@ -111,7 +114,9 @@ class Checkpoint:
                     self._substituted_config = substituted_config
         return self._substitute_config_variables(config=substituted_config)
 
-    def _substitute_config_variables(self, config: CheckpointConfig) -> CheckpointConfig:
+    def _substitute_config_variables(
+        self, config: CheckpointConfig
+    ) -> CheckpointConfig:
         substituted_config_variables = substitute_all_config_variables(
             self.data_context.config_variables,
             dict(os.environ),
@@ -250,8 +255,7 @@ class Checkpoint:
 
         if run_name is None and run_name_template is not None:
             run_name: str = get_datetime_string_from_strftime_format(
-                format_str=run_name_template,
-                datetime_obj=run_time
+                format_str=run_name_template, datetime_obj=run_time
             )
 
         for idx, validation_dict in enumerate(validations):
@@ -286,9 +290,10 @@ class Checkpoint:
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
                         run_id=run_id,
-                        evaluation_parameters=substitute_all_strftime_format_strings(substituted_validation_dict.get(
-                            "evaluation_parameters"
-                        ), datetime_obj=run_time),
+                        evaluation_parameters=substitute_all_strftime_format_strings(
+                            substituted_validation_dict.get("evaluation_parameters"),
+                            datetime_obj=run_time,
+                        ),
                         run_name=run_name,
                         run_time=run_time,
                         result_format=result_format,

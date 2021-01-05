@@ -7,8 +7,10 @@ from collections import OrderedDict
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    CheckpointConfigSchema,
     DataContextConfig,
-    DataContextConfigSchema, CheckpointConfig, CheckpointConfigSchema,
+    DataContextConfigSchema,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
 

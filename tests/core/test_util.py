@@ -11,13 +11,16 @@ def test_substitute_all_strftime_format_strings():
         "string_with_month_word": "Today we are in the month %B!",
         "number": "90210",
         "escaped_percent": "'%%m' is the format string for month number",
-        "inner_dict": {
-            "day_word_full": "%A"
-        },
-        "list": ["a", 123, "%a"]
+        "inner_dict": {"day_word_full": "%A"},
+        "list": ["a", 123, "%a"],
     }
-    expected_output_dict = {'month_no': '11', 'just_a_string': 'Bloopy!',
-                            'string_with_month_word': 'Today we are in the month November!', 'number': '90210',
-                            'escaped_percent': "'%m' is the format string for month number",
-                            'inner_dict': {'day_word_full': 'Saturday'}, 'list': ['a', 123, 'Sat']}
+    expected_output_dict = {
+        "month_no": "11",
+        "just_a_string": "Bloopy!",
+        "string_with_month_word": "Today we are in the month November!",
+        "number": "90210",
+        "escaped_percent": "'%m' is the format string for month number",
+        "inner_dict": {"day_word_full": "Saturday"},
+        "list": ["a", 123, "Sat"],
+    }
     assert substitute_all_strftime_format_strings(input_dict) == expected_output_dict

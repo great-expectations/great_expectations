@@ -6,7 +6,7 @@ from collections.abc import Mapping
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from datetime import datetime
 from decimal import Context
-from typing import Union, Any, OrderedDict, Optional
+from typing import Any, Optional, OrderedDict, Union
 
 from IPython import get_ipython
 
@@ -266,8 +266,7 @@ def requires_lossy_conversion(d):
 
 
 def substitute_all_strftime_format_strings(
-        data: Union[dict, list, str, Any],
-        datetime_obj: Optional[datetime] = None
+    data: Union[dict, list, str, Any], datetime_obj: Optional[datetime] = None
 ) -> Union[str, Any]:
     datetime_obj: datetime = datetime_obj or datetime.now()
     if isinstance(data, dict) or isinstance(data, OrderedDict):
@@ -277,7 +276,8 @@ def substitute_all_strftime_format_strings(
         }
     elif isinstance(data, list):
         return [
-            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj) for el in data
+            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj)
+            for el in data
         ]
     elif isinstance(data, str):
         return get_datetime_string_from_strftime_format(data, datetime_obj=datetime_obj)
@@ -285,6 +285,8 @@ def substitute_all_strftime_format_strings(
         return data
 
 
-def get_datetime_string_from_strftime_format(format_str: str, datetime_obj: Optional[datetime] = None) -> str:
+def get_datetime_string_from_strftime_format(
+    format_str: str, datetime_obj: Optional[datetime] = None
+) -> str:
     datetime_obj: datetime = datetime_obj or datetime.now()
     return datetime_obj.strftime(format_str)
