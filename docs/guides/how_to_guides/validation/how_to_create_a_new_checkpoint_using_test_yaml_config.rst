@@ -363,7 +363,7 @@ Steps
    .. code-block:: python
 
         validation_results: List[ValidationOperatorResult] = data_context.run_checkpoint(
-            checkpoint_name=checkpoint.config.name,
+            checkpoint_name="airflow_checkpoint",
             batch_request={
                 "batch_data": my_data_frame,
                 "partition_request": {
