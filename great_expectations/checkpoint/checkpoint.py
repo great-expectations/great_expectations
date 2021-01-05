@@ -2,10 +2,12 @@ import json
 import logging
 import os
 from copy import deepcopy
+from datetime import datetime
 from typing import Any, List, Optional, Union
 
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.util import nested_update, get_current_datetime_string_from_strftime_format
+from great_expectations.core.util import nested_update, get_datetime_string_from_strftime_format, \
+    substitute_all_strftime_format_strings
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions import CheckpointError
@@ -220,6 +222,7 @@ class Checkpoint:
         result_format=None,
         **kwargs,
     ) -> List[ValidationOperatorResult]:
+        run_time = run_time or datetime.now()
         runtime_configuration: dict = runtime_configuration or {}
         result_format: Optional[dict] = result_format or runtime_configuration.get(
             "result_format"
@@ -246,7 +249,10 @@ class Checkpoint:
         results = []
 
         if run_name is None and run_name_template is not None:
-            run_name: str = get_current_datetime_string_from_strftime_format(format_str=run_name_template)
+            run_name: str = get_datetime_string_from_strftime_format(
+                format_str=run_name_template,
+                datetime_obj=run_time
+            )
 
         for idx, validation_dict in enumerate(validations):
             try:
@@ -280,9 +286,9 @@ class Checkpoint:
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
                         run_id=run_id,
-                        evaluation_parameters=substituted_validation_dict.get(
+                        evaluation_parameters=substitute_all_strftime_format_strings(substituted_validation_dict.get(
                             "evaluation_parameters"
-                        ),
+                        ), datetime_obj=run_time),
                         run_name=run_name,
                         run_time=run_time,
                         result_format=result_format,
