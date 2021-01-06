@@ -150,7 +150,7 @@ class UsageStatisticsHandler:
                 # "metaflow",  # TODO: How to import?
             }
             payload_pipeline_dag_runner = [
-                d for d in sys.modules.keys() if d in DAG_RUNNERS
+                d for d in DAG_RUNNERS if d in sys.modules.keys()
             ]
         except Exception:
             logger.debug(
