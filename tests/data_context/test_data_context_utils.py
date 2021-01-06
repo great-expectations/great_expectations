@@ -15,6 +15,28 @@ def test_load_class_raises_error_when_class_not_found():
         load_class("TotallyNotARealClass", "great_expectations.datasource")
 
 
+def test_load_class_raises_error_when_class_name_is_None():
+    with pytest.raises(ValueError):
+        load_class(None, "great_expectations.datasource")
+
+
+def test_load_class_raises_error_when_class_name_is_not_string():
+    for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
+        with pytest.raises(TypeError):
+            load_class(bad_input, "great_expectations.datasource")
+
+
+def test_load_class_raises_error_when_module_name_is_None():
+    with pytest.raises(ValueError):
+        load_class("foo", None)
+
+
+def test_load_class_raises_error_when_module_name_is_not_string():
+    for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
+        with pytest.raises(TypeError):
+            load_class(bad_input, "great_expectations.datasource")
+
+
 def test_password_masker_mask_db_url():
     """
     What does this test and why?

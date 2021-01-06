@@ -4,10 +4,11 @@ import logging
 import os
 from copy import deepcopy
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import RunIdentifier
+from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import (
     get_datetime_string_from_strftime_format,
@@ -48,6 +49,9 @@ class Checkpoint:
         batches: Optional[List[dict]] = None,
     ):
         self._name = name
+        # TODO why is DataContext not importable?
+        # if not isinstance(data_context, DataContext):
+        #     raise TypeError("A checkpoint requires a valid DataContext")
         self._data_context = data_context
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -75,7 +79,7 @@ class Checkpoint:
         self._substituted_config = None
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
@@ -83,8 +87,12 @@ class Checkpoint:
         return self._data_context
 
     @property
-    def config(self):
+    def config(self) -> CheckpointConfig:
         return self._config
+
+    @property
+    def action_list(self) -> List[Dict]:
+        return self._config.action_list
 
     # TODO: (Rob) should we type the big validation dicts for better validation/prevent duplication
     def get_substituted_config(
@@ -327,8 +335,6 @@ class Checkpoint:
                 raise CheckpointError(
                     f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}"
                 )
-            except Exception as e:
-                raise e
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
         )
@@ -461,3 +467,195 @@ class LegacyCheckpoint(Checkpoint):
                 batches_to_validate.append(batch)
 
         return batches_to_validate
+
+
+class ActionDicts:
+    STORE_VALIDATION_RESULT = {
+        "name": "store_validation_result",
+        "action": {"class_name": "StoreValidationResultAction"},
+    }
+    STORE_EVALUATION_PARAMS = {
+        "name": "store_evaluation_params",
+        "action": {"class_name": "StoreEvaluationParametersAction"},
+    }
+    UPDATE_DATA_DOCS = {
+        "name": "update_data_docs",
+        "action": {"class_name": "UpdateDataDocsAction", "site_names": None},
+    }
+
+    @staticmethod
+    def build_slack_action(webhook, notify_on, notify_with):
+        return {
+            "name": "send_slack_notification",
+            "action": {
+                "class_name": "SlackNotificationAction",
+                "slack_webhook": webhook,
+                "notify_on": notify_on,
+                "notify_with": notify_with,
+                "renderer": {
+                    "module_name": "great_expectations.render.renderer.slack_renderer",
+                    "class_name": "SlackRenderer",
+                },
+            },
+        }
+
+
+class SimpleCheckpointBuilder:
+    """
+    SimpleCheckpointBuilder is a convenience class to easily configure a simple Checkpoint.
+
+    The Checkpoint performs the following actions by default:
+    1. store the validation result
+    2. store evaluation parameters
+    3. update all data docs sites
+
+    When configured, this builds a Checkpoint that sends a slack message.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        data_context,
+        site_names: Optional[Union[str, List[str]]] = "all",
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = "all",
+        notify_with: Optional[Union[str, List[str]]] = "all",
+    ):
+        # TODO nice docstring explaining arguments and example usages
+        self.name = name
+        self.data_context = data_context
+        self.site_names = site_names
+        self.notify_on = notify_on
+        self.notify_with = notify_with
+        self.slack_webhook = slack_webhook
+
+    # TODO I don't love the .build()... is there a better way?
+    def build(self):
+        self._validate_site_names(self.data_context)
+        self._validate_notify_on()
+        self._validate_notify_with()
+        self._validate_slack_webhook()
+        self._validate_slack_configuration()
+
+        checkpoint_config = self._build_checkpoint_config()
+        return Checkpoint(self.name, self.data_context, **checkpoint_config)
+
+    # def run(
+    #     self,
+    #     validations: List[dict],
+    #     run_name: Optional[str] = None,
+    #     # template_name: Optional[str] = None,
+    #     # run_name_template: Optional[str] = None,
+    #     # expectation_suite_name: Optional[str] = None,
+    #     # batch_request: Optional[Union[BatchRequest, dict]] = None,
+    #     # action_list: Optional[List[dict]] = None,
+    #     evaluation_parameters: Optional[dict] = None,
+    #     # runtime_configuration: Optional[dict] = None,
+    #     # profilers: Optional[List[dict]] = None,
+    #     # run_id = None,
+    #     # run_time = None,
+    #     result_format = None,
+    #     ** kwargs,
+    # ):
+    #
+
+    def _build_checkpoint_config(self) -> Dict:
+        action_list = self._default_action_list()
+        if self.site_names:
+            action_list = self._add_update_data_docs_action(action_list)
+        if self.slack_webhook:
+            action_list = self._add_slack_action(action_list)
+        checkpoint_config = {
+            "config_version": 1.0,
+            "class_name": "Checkpoint",
+            "action_list": action_list,
+        }
+        logger.debug(
+            f"SimpleCheckpoint built this CheckpointConfig: {json.dumps(checkpoint_config, indent=4)}"
+        )
+        return checkpoint_config
+
+    @staticmethod
+    def _default_action_list() -> List[Dict]:
+        return [
+            ActionDicts.STORE_VALIDATION_RESULT,
+            ActionDicts.STORE_EVALUATION_PARAMS,
+        ]
+
+    def _add_update_data_docs_action(self, action_list) -> List[Dict]:
+        update_docs_action = copy.deepcopy(ActionDicts.UPDATE_DATA_DOCS)
+        if isinstance(self.site_names, list):
+            update_docs_action["action"]["site_names"] = self.site_names
+        action_list.append(update_docs_action)
+        return action_list
+
+    def _add_slack_action(self, action_list: List[Dict]) -> List[Dict]:
+        """
+        The underlying SlackNotificationAction and SlackRenderer default to
+        including links to all sites if the key notify_with is not present. We
+        are intentionally hiding this from users of SimpleCheckpoint by having a
+        default of "all" that sets the configuration appropriately.
+        """
+        _notify_with = self.notify_with
+        if self.notify_with == "all":
+            _notify_with = None
+        action_list.append(
+            ActionDicts.build_slack_action(
+                self.slack_webhook, self.notify_on, _notify_with
+            )
+        )
+        return action_list
+
+    def _validate_site_names(self, data_context):
+        if not (
+            self.site_names is None
+            or self.site_names == "all"
+            or is_list_of_strings(self.site_names)
+        ):
+            raise TypeError(
+                "site_names must be one of: None, 'all', or a list of site names to update"
+            )
+        if self.site_names in ["all", None]:
+            return
+
+        configured_sites = data_context.get_site_names()
+        for site_name in self.site_names:
+            if site_name not in configured_sites:
+                raise ValueError(
+                    f"""Sites listed in site_names must exist on the data context.
+    Please either configure the selected sites ({self.site_names}) or choose from the currently configured sites:
+    {configured_sites}"""
+                )
+
+    def _validate_notify_on(self):
+        if self.notify_on not in ["all", "success", "failure"]:
+            raise ValueError("notify_on must be one of: 'all', 'failure', 'success'")
+
+    def _validate_notify_with(self):
+        if not self.notify_with:
+            return
+        if self.notify_with == "all":
+            return
+        if not is_list_of_strings(self.notify_with):
+            raise ValueError("notify_with must be a list of site names")
+
+    def _validate_slack_webhook(self):
+        if self.slack_webhook and not is_sane_slack_webhook(self.slack_webhook):
+            raise ValueError("Please provide a valid slack webhook")
+
+    def _validate_slack_configuration(self):
+        """Guide the user toward correct configuration."""
+        if isinstance(self.notify_with, list) and self.slack_webhook is None:
+            raise ValueError(
+                "It appears you wish to send a slack message because you "
+                "specified a list of sites in the notify_with parameter but "
+                "you have not yet specified a slack_webhook. Please either "
+                "specify a slack webhook or remove the notify_with parameter."
+            )
+        if self.notify_on != "all" and self.slack_webhook is None:
+            raise ValueError(
+                "It appears you wish to send a slack message because you "
+                "specified a condition in the notify_on parameter but "
+                "you have not yet specified a slack_webhook. Please either "
+                "specify a slack webhook or remove the notify_on parameter."
+            )

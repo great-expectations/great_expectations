@@ -561,6 +561,12 @@ class BaseDataContext:
                 )
         return resource_store
 
+    def get_site_names(self) -> List[str]:
+        """Get a list of configured site names."""
+        return list(
+            self._project_config_with_variables_substituted.data_docs_sites.keys()
+        )
+
     def get_docs_sites_urls(
         self,
         resource_identifier=None,

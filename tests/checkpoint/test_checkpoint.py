@@ -27,6 +27,36 @@ yaml = YAML()
 logger = logging.getLogger(__name__)
 
 
+def test_checkpoint_raises_typeerror_on_incorrect_data_context():
+    with pytest.raises(TypeError):
+        Checkpoint(
+            data_context="foo",
+            name="my_checkpoint",
+            checkpoint_config={},
+        )
+
+
+def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context):
+    checkpoint = Checkpoint(
+        "foo",
+        empty_data_context,
+        checkpoint_config={"action_list": [{"foo": "bar"}]},
+    )
+    with pytest.raises(AttributeError):
+        checkpoint.action_list
+
+
+def test_checkpoint_with_config_version_has_action_list(empty_data_context):
+    checkpoint = Checkpoint(
+        "foo",
+        empty_data_context,
+        checkpoint_config={"config_version": 1, "action_list": [{"foo": "bar"}]},
+    )
+    obs = checkpoint.action_list
+    assert isinstance(obs, list)
+    assert obs == [{"foo": "bar"}]
+
+
 def test_basic_checkpoint_config_validation(
     empty_data_context,
     caplog,
@@ -39,7 +69,7 @@ def test_basic_checkpoint_config_validation(
 
     yaml_config_erroneous = f"""
     name: misconfigured_checkpoint
-    unexpected_property: UNKOWN_PROPERTY_VALUE
+    unexpected_property: UNKNOWN_PROPERTY_VALUE
     """
     config_erroneous = yaml.load(yaml_config_erroneous)
     with pytest.raises(TypeError):

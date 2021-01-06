@@ -232,6 +232,7 @@ class BatchRequest(DictDot):
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
         limit: Union[int, None] = None,
     ):
+        # TODO test and check all logic in this validator!
         if datasource_name and not isinstance(datasource_name, str):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
@@ -244,6 +245,9 @@ class BatchRequest(DictDot):
 "{str(type(data_connector_name))}", which is illegal.
                 """
             )
+        # TODO Alex to update data connector which will allow for more strict and helpful validation
+        # if not data_asset_name:
+        #     raise TypeError("asdfasdfasdsdfaasdffasdasdfasdf")
         if data_asset_name and not isinstance(data_asset_name, str):
             raise TypeError(
                 f"""The type of a data_asset name must be a string (Python "str").  The type given is

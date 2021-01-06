@@ -1464,7 +1464,7 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(
         self,
         name: Optional[str] = None,
-        config_version: Optional[int] = None,
+        config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
