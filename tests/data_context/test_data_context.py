@@ -1668,6 +1668,14 @@ def test_run_checkpoint_newstyle(
 
     # print(context.list_datasources())
 
+    context.create_expectation_suite("my_expectation_suite")
+
+    results: List[ValidationOperatorResult] = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(results) == 1
+    assert results[0].success
+
     context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
     results: List[ValidationOperatorResult] = context.run_checkpoint(
         checkpoint_name=checkpoint_config.name
