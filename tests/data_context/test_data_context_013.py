@@ -59,7 +59,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
             module_name: great_expectations.datasource.data_connector
             class_name: RuntimeDataConnector
             runtime_keys:
-            - run_id
+            - airflow_run_id
     """
     # noinspection PyUnusedLocal
     report_object = context.test_yaml_config(
@@ -77,7 +77,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
         batch_data=test_df,
         partition_request={
             "partition_identifiers": {
-                "run_id": 1234567890,
+                "airflow_run_id": 1234567890,
             }
         },
         limit=None,
@@ -275,7 +275,7 @@ data_connectors:
       module_name: great_expectations.datasource.data_connector
       class_name: RuntimeDataConnector
       runtime_keys:
-      - run_id
+      - airflow_run_id
 """
     # noinspection PyUnusedLocal
     my_datasource = context.test_yaml_config(

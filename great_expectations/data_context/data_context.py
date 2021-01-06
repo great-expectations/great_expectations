@@ -63,6 +63,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import (
     build_store_from_config,
+    PasswordMasker,
     file_relative_path,
     instantiate_class_from_config,
     load_class,
@@ -1222,13 +1223,14 @@ class BaseDataContext:
 
         **kwargs: variable arguments
 
+        First check:
+        Returns "v3" if the "0.13" entities are specified in the **kwargs.
+
+        Otherwise:
         Returns None if no datasources have been configured (or if there is an exception while getting the datasource).
         Returns "v3" if the datasource is a subclass of the BaseDatasource class.
         Returns "v2" if the datasource is an instance of the LegacyDatasource class.
         """
-
-        if not self.datasources:
-            return None
 
         if {
             "datasource_name",
@@ -1238,6 +1240,9 @@ class BaseDataContext:
             "batch_data",
         }.intersection(set(kwargs.keys())):
             return "v3"
+
+        if not self.datasources:
+            return None
 
         api_version: Optional[str] = None
         datasource_name: Any
@@ -1763,7 +1768,7 @@ class BaseDataContext:
         return keys
 
     def list_datasources(self):
-        """List currently-configured datasources on this context.
+        """List currently-configured datasources on this context. Masks passwords.
 
         Returns:
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
@@ -1774,6 +1779,17 @@ class BaseDataContext:
             value,
         ) in self._project_config_with_variables_substituted.datasources.items():
             value["name"] = key
+
+            if "credentials" in value:
+                if "password" in value["credentials"]:
+                    value["credentials"][
+                        "password"
+                    ] = PasswordMasker.MASKED_PASSWORD_STRING
+                if "url" in value["credentials"]:
+                    value["credentials"]["url"] = PasswordMasker.mask_db_url(
+                        value["credentials"]["url"]
+                    )
+
             datasources.append(value)
         return datasources
 
@@ -2837,7 +2853,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             checkpoint_name=checkpoint_name,
-            return_config=True,
+            return_config=False,
         )
 
         return checkpoint.run(
@@ -2986,22 +3002,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
 
                 checkpoint_name: str = name or "my_temp_checkpoint"
-                instantiated_class = cast(
-                    Checkpoint,
-                    instantiate_class_from_config(
-                        config={
-                            "name": checkpoint_name,
-                            "data_context": self,
-                            "checkpoint_config": checkpoint_config,
-                        },
-                        runtime_environment={
-                            "root_directory": self.root_directory,
-                        },
-                        config_defaults={
-                            "class_name": class_name,
-                            "module_name": "great_expectations.checkpoint",
-                        },
-                    ),
+                instantiated_class = Checkpoint(
+                    data_context=self,
+                    name=checkpoint_name,
+                    checkpoint_config=checkpoint_config,
                 )
 
                 checkpoint_config = CheckpointConfig.from_commented_map(

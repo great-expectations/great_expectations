@@ -2278,21 +2278,99 @@ def titanic_pandas_multibatch_data_context_with_013_datasource(tmp_path_factory)
     context = ge.data_context.DataContext(context_path)
 
     datasource_config = f"""
-            class_name: Datasource
+        class_name: Datasource
 
-            execution_engine:
-                class_name: PandasExecutionEngine
+        execution_engine:
+            class_name: PandasExecutionEngine
 
-            data_connectors:
-                my_data_connector:
-                    class_name: InferredAssetFilesystemDataConnector
-                    base_directory: {data_path}
-                    default_regex:
-                        pattern: (.*)\\.csv
-                        group_names:
-                            - data_asset_name
+        data_connectors:
+            my_data_connector:
+                class_name: InferredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                default_regex:
+                    pattern: (.*)\\.csv
+                    group_names:
+                        - data_asset_name
             """
     context.test_yaml_config(name="titanic_multi_batch", yaml_config=datasource_config)
+    return context
+
+
+@pytest.fixture
+def titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing(
+    tmp_path_factory,
+):
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path = os.path.join(context_path, "../data/titanic")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/great_expectations_v013_no_datasource.yml"
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "../data/titanic/Titanic_19120414_1313.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "../data/titanic/Titanic_1911.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")),
+    )
+    context = ge.data_context.DataContext(context_path)
+
+    datasource_config = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: PandasExecutionEngine
+
+        data_connectors:
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                runtime_keys:
+                    - pipeline_stage_name
+                    - run_id
+                    
+            my_special_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users:
+                        base_directory: {data_path}
+                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
+                        group_names:
+                            - name
+                            - timestamp
+                            - size
+            
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users: {{}}
+        """
+
+    context.test_yaml_config(name="my_datasource", yaml_config=datasource_config)
     return context
 
 
@@ -3217,7 +3295,7 @@ data_connectors:
         class_name: RuntimeDataConnector
         runtime_keys:
         - pipeline_stage_name
-        - run_id
+        - airflow_run_id
         - custom_key_0
 
 execution_engine:

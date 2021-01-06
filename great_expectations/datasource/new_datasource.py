@@ -145,7 +145,7 @@ class BaseDatasource:
             return batches
 
         else:
-            # This is a runtime batchrequest
+            # This is a runtime batch_request
 
             if len(batch_definition_list) != 1:
                 raise ValueError(

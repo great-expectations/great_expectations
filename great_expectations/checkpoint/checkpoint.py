@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 import os
@@ -82,7 +83,7 @@ class Checkpoint:
             template_name = runtime_kwargs.get("template_name") or config.template_name
 
             if not template_name:
-                substituted_config = deepcopy(config)
+                substituted_config = copy.deepcopy(config)
                 if any(runtime_kwargs.values()):
                     substituted_config.update(runtime_kwargs=runtime_kwargs)
 
@@ -136,46 +137,37 @@ class Checkpoint:
             )
         )
 
+    # TODO: <Alex>ALEX/Rob -- since this method is static, should we move it to a "util" type of a module?</Alex>
+    @staticmethod
     def _get_runtime_batch_request(
-        self,
         substituted_runtime_config: CheckpointConfig,
-        validation_batch_request: Optional[Union[dict, BatchRequest]] = None,
+        validation_batch_request: Optional[dict] = None,
     ) -> BatchRequest:
         if substituted_runtime_config.batch_request is None:
             return (
                 validation_batch_request
-                if isinstance(validation_batch_request, (BatchRequest, type(None)))
+                if validation_batch_request is None
                 else BatchRequest(**validation_batch_request)
             )
 
-        # get batch requests as dicts; since get_json_dict() doesn't include batch_data, re-add
-        base_batch_request_batch_data: Any = (
-            substituted_runtime_config.batch_request.batch_data
-        )
-        base_batch_request_dict: dict = (
-            substituted_runtime_config.batch_request.get_json_dict()
-        )
-        base_batch_request_dict["batch_data"] = base_batch_request_batch_data
+        if validation_batch_request is None:
+            return BatchRequest(**substituted_runtime_config.batch_request)
 
-        if isinstance(validation_batch_request, BatchRequest):
-            validation_batch_request_batch_data: Any = (
-                validation_batch_request.batch_data
-            )
-            validation_batch_request: dict = validation_batch_request.get_json_dict()
-            validation_batch_request["batch_data"] = validation_batch_request_batch_data
-        elif isinstance(validation_batch_request, None):
-            return BatchRequest(**base_batch_request_dict)
-
-        runtime_batch_request_dict = deepcopy(validation_batch_request)
+        runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
         for key, val in runtime_batch_request_dict.items():
-            if val is not None and base_batch_request_dict.get(key) is not None:
+            if (
+                val is not None
+                and substituted_runtime_config.batch_request.get(key) is not None
+            ):
                 raise CheckpointError(
-                    f"BatchRequest attribute '{key}' was specified in both validation and top-level CheckpointConfig."
+                    f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
                 )
-            runtime_batch_request_dict[key] = base_batch_request_dict[key]
+        runtime_batch_request_dict.update(substituted_runtime_config.batch_request)
         return BatchRequest(**runtime_batch_request_dict)
 
-    def _validate_validation_dict(self, validation_dict):
+    # TODO: <Alex>ALEX/Rob -- since this method is static, should we move it to a "util" type of a module?</Alex>
+    @staticmethod
+    def _validate_validation_dict(validation_dict):
         if validation_dict.get("batch_request") is None:
             raise CheckpointError("validation batch_request cannot be None")
         if not validation_dict.get("expectation_suite_name"):

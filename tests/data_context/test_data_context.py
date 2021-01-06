@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from typing import List
 
 import pytest
 from freezegun import freeze_time
@@ -36,6 +37,9 @@ from great_expectations.exceptions import (
     InvalidKeyError,
 )
 from great_expectations.util import gen_directory_tree_str
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -281,6 +285,88 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
             "data_asset_type": {
                 "class_name": "PandasDataset",
                 "module_name": "great_expectations.dataset",
+            },
+        },
+    ]
+
+    # Make sure passwords are masked in password or url fields
+    data_context_parameterized_expectation_suite.add_datasource(
+        "postgres_source_with_password",
+        initialize=False,
+        module_name="great_expectations.datasource",
+        class_name="SqlAlchemyDatasource",
+        credentials={
+            "drivername": "postgresql",
+            "host": "localhost",
+            "port": "65432",
+            "username": "username_str",
+            "password": "password_str",
+            "database": "database_str",
+        },
+    )
+
+    data_context_parameterized_expectation_suite.add_datasource(
+        "postgres_source_with_password_in_url",
+        initialize=False,
+        module_name="great_expectations.datasource",
+        class_name="SqlAlchemyDatasource",
+        credentials={
+            "url": "postgresql+psycopg2://username:password@host:65432/database",
+        },
+    )
+
+    datasources = data_context_parameterized_expectation_suite.list_datasources()
+
+    assert datasources == [
+        {
+            "name": "mydatasource",
+            "class_name": "PandasDatasource",
+            "module_name": "great_expectations.datasource",
+            "data_asset_type": {"class_name": "PandasDataset"},
+            "batch_kwargs_generators": {
+                "mygenerator": {
+                    "base_directory": "../data",
+                    "class_name": "SubdirReaderBatchKwargsGenerator",
+                    "reader_options": {"engine": "python", "sep": None},
+                }
+            },
+        },
+        {
+            "name": "second_pandas_source",
+            "class_name": "PandasDatasource",
+            "module_name": "great_expectations.datasource",
+            "data_asset_type": {
+                "class_name": "PandasDataset",
+                "module_name": "great_expectations.dataset",
+            },
+        },
+        {
+            "name": "postgres_source_with_password",
+            "class_name": "SqlAlchemyDatasource",
+            "module_name": "great_expectations.datasource",
+            "data_asset_type": {
+                "class_name": "SqlAlchemyDataset",
+                "module_name": "great_expectations.dataset",
+            },
+            "credentials": {
+                "drivername": "postgresql",
+                "host": "localhost",
+                "port": "65432",
+                "username": "username_str",
+                "password": "***",
+                "database": "database_str",
+            },
+        },
+        {
+            "name": "postgres_source_with_password_in_url",
+            "class_name": "SqlAlchemyDatasource",
+            "module_name": "great_expectations.datasource",
+            "data_asset_type": {
+                "class_name": "SqlAlchemyDataset",
+                "module_name": "great_expectations.dataset",
+            },
+            "credentials": {
+                "url": "postgresql+psycopg2://username:***@host:65432/database",
             },
         },
     ]
@@ -1612,7 +1698,9 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
 
 
 # TODO: add more test cases
-def run_checkpoint_newstyle(titanic_pandas_multibatch_data_context_with_013_datasource):
+def test_run_checkpoint_newstyle(
+    titanic_pandas_multibatch_data_context_with_013_datasource,
+):
     context = titanic_pandas_multibatch_data_context_with_013_datasource
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
@@ -1660,11 +1748,22 @@ def run_checkpoint_newstyle(titanic_pandas_multibatch_data_context_with_013_data
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite("my_expectation_suite")
-    print(context.list_datasources())
-    results = context.run_checkpoint(checkpoint_name=checkpoint_config.name)
+    # print(context.list_datasources())
 
-    assert len(context.validations_store.list_keys()) == 1
+    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    results: List[ValidationOperatorResult] = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(results) == 1
+    assert results[0].success
+
+    results: List[ValidationOperatorResult] = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(results) == 1
+    assert len(context.validations_store.list_keys()) == 2
+    assert results[0].success
 
 
 def test_get_validator_with_instantiated_expectation_suite(
