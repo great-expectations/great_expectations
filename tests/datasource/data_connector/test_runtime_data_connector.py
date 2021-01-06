@@ -127,7 +127,7 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(
     partition_request = {
         "partition_identifiers": {
             "pipeline_stage_name": "core_processing",
-            "run_id": 1234567890,
+            "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
         }
     }
@@ -166,7 +166,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
     partition_request = {
         "partition_identifiers": {
             "pipeline_stage_name": "core_processing",
-            "run_id": 1234567890,
+            "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
             "custom_key_1": "custom_value_1",
         }
@@ -244,7 +244,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
 
     partition_request: dict = {
         "partition_identifiers": {
-            "run_id": 1234567890,
+            "airflow_run_id": 1234567890,
         }
     }
 
@@ -289,7 +289,7 @@ def test_get_batch_definition_list_from_batch_request_length_zero(
 
     partition_request: dict = {
         "partition_identifiers": {
-            "run_id": 1234567890,
+            "airflow_run_id": 1234567890,
         }
     }
 
@@ -337,7 +337,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
     partition_request: dict = {
         "partition_identifiers": {
             "custom_key_0": "staging",
-            "run_id": 1234567890,
+            "airflow_run_id": 1234567890,
         }
     }
 
@@ -366,7 +366,7 @@ def test__build_batch_spec(basic_datasource):
     partition_request: dict = {
         "partition_identifiers": {
             "custom_key_0": "staging",
-            "run_id": 1234567890,
+            "airflow_run_id": 1234567890,
         }
     }
 
