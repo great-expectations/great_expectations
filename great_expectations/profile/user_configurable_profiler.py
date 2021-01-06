@@ -150,7 +150,9 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 getattr(cls, semantic_type_fn)(dataset, column_name, cache, tolerance)
 
         for column_name in cache_columns.keys():
-            cls._build_expectations_other(dataset, column_name, cache=cache)
+            cls._build_expectations_for_all_column_types(
+                dataset, column_name, cache=cache
+            )
 
         expectation_suite = cls._build_column_description_metadata(dataset)
         logger.debug("")
@@ -207,7 +209,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                     dataset=dataset, column=column_name, cache=cache
                 )
 
-            cls._build_expectations_other(
+            cls._build_expectations_for_all_column_types(
                 dataset=dataset, column=column_name, cache=cache
             )
 
@@ -784,7 +786,9 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 )
 
     @classmethod
-    def _build_expectations_other(cls, dataset, column, cache=None, tolerance=0):
+    def _build_expectations_for_all_column_types(
+        cls, dataset, column, cache=None, tolerance=0
+    ):
         if "expect_column_values_to_not_be_null" not in cache.get(
             "excluded_expectations"
         ):
