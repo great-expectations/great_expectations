@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [BUGFIX] Mask passwords in DataContext.list_datasources(). Issue #2184
 
 0.13.4
 -----------------
