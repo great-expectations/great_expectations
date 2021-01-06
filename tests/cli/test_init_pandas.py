@@ -495,7 +495,13 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
         in stdout
     )
     print(f'\n[ALEX_TEST] <STDOUT497>:\n{stdout}\n</STDOUT497>')
-    assert "- Error: File is not a recognized excel file" in stdout
+    assert (
+        "- Error: File is not a recognized excel file"
+        in stdout
+    ) or (
+        "Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
+        in stdout
+    )
     assert "Try again? [Y/n]:" in stdout
     assert (
         "We have saved your setup progress. When you are ready, run great_expectations init to continue."
@@ -562,7 +568,13 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         in stdout
     )
     print(f'\n[ALEX_TEST] <STDOUT564>:\n{stdout}\n</STDOUT564>')
-    assert "- Error: File is not a recognized excel file" in stdout
+    assert (
+        "- Error: File is not a recognized excel file"
+        in stdout
+    ) or (
+        "Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
+        in stdout
+    )
     assert "Try again? [Y/n]:" in stdout
     assert "[{}]:".format(data_path) in stdout
 
