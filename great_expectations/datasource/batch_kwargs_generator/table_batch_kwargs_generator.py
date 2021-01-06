@@ -119,6 +119,9 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
     ):
         batch_kwargs = None
         # First, we check if we have a configured asset
+
+        print("this is where we are blowing up will")
+        print(self._assets)
         if data_asset_name in self._assets:
             asset_config = self._assets[data_asset_name]
             try:
@@ -174,6 +177,10 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 batch_kwargs = SqlAlchemyDatasourceTableBatchKwargs(
                     table=table_name, schema=schema_name
                 )
+            else:
+                raise BatchKwargsError(
+                    f"TableBatchKwargsGenerator cannot generate the appropriate batch_kwargs using the inputted schema"
+                    f": {schema_name} and table: {table_name}", {})
 
         if batch_kwargs is not None:
             if partition_id is not None:
@@ -187,7 +194,6 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             if offset is not None:
                 batch_kwargs["offset"] = offset
             return iter([batch_kwargs])
-
         # Otherwise, we return None
         return
 
@@ -250,6 +256,8 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         return {"names": defined_assets + tables, "is_complete_list": is_complete_list}
 
     def _build_batch_kwargs(self, batch_parameters):
+        print(batch_parameters)
+        print("hi will this is right before the error")
         return next(
             self._get_iterator(
                 data_asset_name=batch_parameters.get("data_asset_name"),
