@@ -135,10 +135,10 @@ class UsageStatisticsHandler:
             self._data_context.get_expectation_suite(expectation_suite_name)
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
-        payload_pipeline_dag_runner = "no_pipeline_dag_runner_detected"
+        payload_pipeline_dag_runner = ["no_pipeline_dag_runner_detected"]
         try:
             # Try to determine if a module has been imported from one of the common data workflow frameworks
-            DAG_RUNNERS = [
+            DAG_RUNNERS = {
                 "airflow",
                 "prefect",
                 "dagster",
@@ -148,10 +148,10 @@ class UsageStatisticsHandler:
                 # "ascend",  # TODO: How to import?
                 # "nifi",  # TODO: How to import?
                 # "metaflow",  # TODO: How to import?
+            }
+            payload_pipeline_dag_runner = [
+                d for d in sys.modules.keys() if d in DAG_RUNNERS
             ]
-            payload_pipeline_dag_runner = ", ".join(
-                [d if d in sys.modules.keys() else None for d in DAG_RUNNERS]
-            )
         except Exception:
             logger.debug(
                 "run_validation_operator_usage_statistics: Unable to create pipeline_dag_runner payload field"
