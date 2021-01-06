@@ -222,6 +222,8 @@ batches:
       - my_suite
 """
 
+# TODO is the line about "configurable Validation Operator" still true?
+# TODO probably good to also mention the python API
 CHECKPOINT_VERSION_013_TEMPLATE = f"""
 # This checkpoint was created by the command `great_expectations checkpoint new`.
 #

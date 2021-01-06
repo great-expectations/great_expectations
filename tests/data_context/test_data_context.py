@@ -1419,6 +1419,16 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     assert not os.path.isfile(index_path)
 
 
+def test_get_site_names(
+    tmp_path_factory, empty_data_context, basic_data_context_config
+):
+    assert empty_data_context.get_site_names() == ["local_site"]
+    assert basic_data_context_config.data_docs_sites == {}
+    base_path = tmp_path_factory.mktemp("foo")
+    context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
+    assert context.get_site_names() == []
+
+
 def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))

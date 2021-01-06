@@ -2241,7 +2241,7 @@ def postgresql_engine(test_backend):
 
 
 @pytest.fixture
-def empty_data_context(tmp_path_factory):
+def empty_data_context(tmp_path_factory) -> DataContext:
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
