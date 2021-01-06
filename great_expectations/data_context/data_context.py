@@ -63,6 +63,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import (
     build_store_from_config,
+    PasswordMasker,
     file_relative_path,
     instantiate_class_from_config,
     load_class,
@@ -1767,7 +1768,7 @@ class BaseDataContext:
         return keys
 
     def list_datasources(self):
-        """List currently-configured datasources on this context.
+        """List currently-configured datasources on this context. Masks passwords.
 
         Returns:
             List(dict): each dictionary includes "name", "class_name", and "module_name" keys
@@ -1778,6 +1779,17 @@ class BaseDataContext:
             value,
         ) in self._project_config_with_variables_substituted.datasources.items():
             value["name"] = key
+
+            if "credentials" in value:
+                if "password" in value["credentials"]:
+                    value["credentials"][
+                        "password"
+                    ] = PasswordMasker.MASKED_PASSWORD_STRING
+                if "url" in value["credentials"]:
+                    value["credentials"]["url"] = PasswordMasker.mask_db_url(
+                        value["credentials"]["url"]
+                    )
+
             datasources.append(value)
         return datasources
 
