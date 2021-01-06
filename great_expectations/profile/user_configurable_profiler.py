@@ -305,7 +305,10 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             for column_list in semantic_type_dict.values()
             for column in column_list
         ]
-        _check_that_columns_exist(dataset, selected_columns)
+        if selected_columns:
+            for column in selected_columns:
+                if column not in dataset.get_table_columns():
+                    raise ProfilerError(f"Column {column} does not exist.")
 
         dataset.set_default_expectation_argument("catch_exceptions", False)
 
@@ -505,48 +508,6 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             print("\n")
 
     @classmethod
-    def _get_column_cardinality(cls, df, column):
-        num_unique = None
-        pct_unique = None
-        df.set_config_value("interactive_evaluation", True)
-
-        try:
-            num_unique = df.expect_column_unique_value_count_to_be_between(
-                column, None, None
-            ).result["observed_value"]
-            pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
-                column, None, None
-            ).result["observed_value"]
-        except KeyError:  # if observed_value value is not set
-            logger.error(
-                "Failed to get cardinality of column {:s} - continuing...".format(
-                    column
-                )
-            )
-        # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
-        #  percentage, so it was tweaked here, but is still experimental.
-        if num_unique is None or num_unique == 0 or pct_unique is None:
-            cardinality = "none"
-        elif pct_unique == 1.0:
-            cardinality = "unique"
-        elif num_unique == 1:
-            cardinality = "one"
-        elif num_unique == 2:
-            cardinality = "two"
-        elif num_unique < 20:
-            cardinality = "very_few"
-        elif num_unique < 60:
-            cardinality = "few"
-        elif pct_unique > 0.1:
-            cardinality = "very_many"
-        else:
-            cardinality = "many"
-
-        df.set_config_value("interactive_evaluation", False)
-
-        return cardinality
-
-    @classmethod
     def _build_expectations_value_set(cls, dataset, column, cache=None, tolerance=0):
         if "expect_column_distinct_values_to_be_in_set" not in cache.get(
             "excluded_expectations"
@@ -572,7 +533,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             observed_min = dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_min):
+            if not cls._is_nan(observed_min):
                 # places = len(str(observed_min)[str(observed_min).find('.') + 1:])
                 # tolerance = 10 ** int(-places)
                 # tolerance = float(decimal.Decimal.from_float(float(observed_min)) - decimal.Decimal(str(observed_min)))
@@ -599,7 +560,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             observed_max = dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_max):
+            if not cls._is_nan(observed_max):
                 # tolerance = float(decimal.Decimal.from_float(float(observed_max)) - decimal.Decimal(str(observed_max)))
                 dataset.expect_column_max_to_be_between(
                     column,
@@ -624,7 +585,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             observed_mean = dataset.expect_column_mean_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_mean):
+            if not cls._is_nan(observed_mean):
                 # tolerance = float(decimal.Decimal.from_float(float(observed_mean)) - decimal.Decimal(str(observed_mean)))
                 dataset.expect_column_mean_to_be_between(
                     column,
@@ -651,7 +612,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             observed_median = dataset.expect_column_median_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_median):
+            if not cls._is_nan(observed_median):
                 # places = len(str(observed_median)[str(observed_median).find('.') + 1:])
                 # tolerance = 10 ** int(-places)
                 # tolerance = float(decimal.Decimal.from_float(float(observed_median)) - decimal.Decimal(str(observed_median)))
@@ -863,7 +824,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 ).result["observed_value"]
             )
 
-            if not _is_nan(pct_unique):
+            if not cls._is_nan(pct_unique):
                 dataset.expect_column_proportion_of_unique_values_to_be_between(
                     column, min_value=pct_unique, max_value=pct_unique
                 )
@@ -952,16 +913,51 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         df.set_config_value("interactive_evaluation", False)
         return type_
 
+    @classmethod
+    def _get_column_cardinality(cls, df, column):
+        num_unique = None
+        pct_unique = None
+        df.set_config_value("interactive_evaluation", True)
 
-def _check_that_columns_exist(dataset, columns):
-    if columns:
-        for column in columns:
-            if column not in dataset.get_table_columns():
-                raise ProfilerError(f"Column {column} does not exist.")
+        try:
+            num_unique = df.expect_column_unique_value_count_to_be_between(
+                column, None, None
+            ).result["observed_value"]
+            pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
+                column, None, None
+            ).result["observed_value"]
+        except KeyError:  # if observed_value value is not set
+            logger.error(
+                "Failed to get cardinality of column {:s} - continuing...".format(
+                    column
+                )
+            )
+        # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
+        #  percentage, so it was tweaked here, but is still experimental.
+        if num_unique is None or num_unique == 0 or pct_unique is None:
+            cardinality = "none"
+        elif pct_unique == 1.0:
+            cardinality = "unique"
+        elif num_unique == 1:
+            cardinality = "one"
+        elif num_unique == 2:
+            cardinality = "two"
+        elif num_unique < 20:
+            cardinality = "very_few"
+        elif num_unique < 60:
+            cardinality = "few"
+        elif pct_unique > 0.1:
+            cardinality = "very_many"
+        else:
+            cardinality = "many"
 
+        df.set_config_value("interactive_evaluation", False)
 
-def _is_nan(value):
-    try:
-        return np.isnan(value)
-    except TypeError:
-        return False
+        return cardinality
+
+    @classmethod
+    def _is_nan(cls, value):
+        try:
+            return np.isnan(value)
+        except TypeError:
+            return False
