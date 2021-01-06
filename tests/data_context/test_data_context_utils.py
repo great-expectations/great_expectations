@@ -18,7 +18,7 @@ def test_load_class_raises_error_when_class_not_found():
 def test_password_masker_mask_db_url():
     """
     What does this test and why?
-    The PasswordMasker.mask_db_url() should mask passwords consistently in database urls.
+    The PasswordMasker.mask_db_url() should mask passwords consistently in database urls. The output of mask_db_url should be the same whether user_urlparse is set to True or False.
     This test uses database url examples from
     https://docs.sqlalchemy.org/en/14/core/engines.html#database-urls
     """

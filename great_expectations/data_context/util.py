@@ -245,7 +245,7 @@ class PasswordMasker:
             return engine.url.__repr__()
         else:
             warnings.warn(
-                "SqlAlchemy is not installed, using urlparse to mask database url password which ignores **kwargs."
+                "SQLAlchemy is not installed, using urlparse to mask database url password which ignores **kwargs."
             )
 
             # oracle+cx_oracle does not parse well using urlparse, parse as oracle then swap back
