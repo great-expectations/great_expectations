@@ -283,6 +283,88 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         },
     ]
 
+    # Make sure passwords are masked in password or url fields
+    data_context_parameterized_expectation_suite.add_datasource(
+        "postgres_source_with_password",
+        initialize=False,
+        module_name="great_expectations.datasource",
+        class_name="SqlAlchemyDatasource",
+        credentials={
+            "drivername": "postgresql",
+            "host": "localhost",
+            "port": "65432",
+            "username": "username_str",
+            "password": "password_str",
+            "database": "database_str",
+        },
+    )
+
+    data_context_parameterized_expectation_suite.add_datasource(
+        "postgres_source_with_password_in_url",
+        initialize=False,
+        module_name="great_expectations.datasource",
+        class_name="SqlAlchemyDatasource",
+        credentials={
+            "url": "postgresql+psycopg2://username:password@host:65432/database",
+        },
+    )
+
+    datasources = data_context_parameterized_expectation_suite.list_datasources()
+
+    assert datasources == [
+        {
+            "name": "mydatasource",
+            "class_name": "PandasDatasource",
+            "module_name": "great_expectations.datasource",
+            "data_asset_type": {"class_name": "PandasDataset"},
+            "batch_kwargs_generators": {
+                "mygenerator": {
+                    "base_directory": "../data",
+                    "class_name": "SubdirReaderBatchKwargsGenerator",
+                    "reader_options": {"engine": "python", "sep": None},
+                }
+            },
+        },
+        {
+            "name": "second_pandas_source",
+            "class_name": "PandasDatasource",
+            "module_name": "great_expectations.datasource",
+            "data_asset_type": {
+                "class_name": "PandasDataset",
+                "module_name": "great_expectations.dataset",
+            },
+        },
+        {
+            "name": "postgres_source_with_password",
+            "class_name": "SqlAlchemyDatasource",
+            "module_name": "great_expectations.datasource",
+            "data_asset_type": {
+                "class_name": "SqlAlchemyDataset",
+                "module_name": "great_expectations.dataset",
+            },
+            "credentials": {
+                "drivername": "postgresql",
+                "host": "localhost",
+                "port": "65432",
+                "username": "username_str",
+                "password": "***",
+                "database": "database_str",
+            },
+        },
+        {
+            "name": "postgres_source_with_password_in_url",
+            "class_name": "SqlAlchemyDatasource",
+            "module_name": "great_expectations.datasource",
+            "data_asset_type": {
+                "class_name": "SqlAlchemyDataset",
+                "module_name": "great_expectations.dataset",
+            },
+            "credentials": {
+                "url": "postgresql+psycopg2://username:***@host:65432/database",
+            },
+        },
+    ]
+
 
 @freeze_time("09/26/2019 13:42:41")
 def test_data_context_get_validation_result(titanic_data_context):
