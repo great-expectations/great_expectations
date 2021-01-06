@@ -49,7 +49,8 @@ class ProfilerTypeMapping:
     # Future support possibility: JSON (RECORD)
     # Future support possibility: BINARY (BYTES)
     INT_TYPE_NAMES = [
-        "NUMERIC" "INTEGER",
+        "NUMERIC",
+        "INTEGER",
         "integer",
         "int",
         "int_",
