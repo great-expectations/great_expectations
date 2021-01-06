@@ -186,7 +186,7 @@ def test_graph_validate(basic_datasource):
                     **{
                         "partition_identifiers": {
                             "pipeline_stage_name": 0,
-                            "run_id": 0,
+                            "airflow_run_id": 0,
                             "custom_key_0": 0,
                         }
                     }
@@ -236,7 +236,7 @@ def test_graph_validate_with_bad_config(basic_datasource):
                     **{
                         "partition_identifiers": {
                             "pipeline_stage_name": 0,
-                            "run_id": 0,
+                            "airflow_run_id": 0,
                             "custom_key_0": 0,
                         }
                     }
@@ -275,7 +275,7 @@ def test_graph_validate_with_runtime_config(basic_datasource):
                     **{
                         "partition_identifiers": {
                             "pipeline_stage_name": 0,
-                            "run_id": 0,
+                            "airflow_run_id": 0,
                             "custom_key_0": 0,
                         }
                     }
@@ -338,7 +338,7 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
                     **{
                         "partition_identifiers": {
                             "pipeline_stage_name": 0,
-                            "run_id": 0,
+                            "airflow_run_id": 0,
                             "custom_key_0": 0,
                         }
                     }
