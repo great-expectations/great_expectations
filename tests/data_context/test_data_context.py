@@ -1680,7 +1680,7 @@ def test_run_checkpoint_newstyle(
         checkpoint_name=checkpoint_config.name
     )
     assert len(results) == 1
-    assert len(context.validations_store.list_keys()) == 1
+    assert len(context.validations_store.list_keys()) == 2
     assert results[0].success
 
 
