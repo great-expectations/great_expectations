@@ -122,7 +122,7 @@ class CheckpointResult(DictDot):
         if self._data_asset_names is None:
             self._data_asset_names = list(
                 {
-                    data_asset["batch_kwargs"].get("data_asset_name") or "__none__"
+                    data_asset["batch_definition"].data_asset_name or "__none__"
                     for data_asset in self.list_data_assets_validated()
                 }
             )
@@ -189,13 +189,13 @@ class CheckpointResult(DictDot):
                     validation_results_by_data_asset_name[data_asset_name] = [
                         data_asset["validation_results"]
                         for data_asset in self.list_data_assets_validated()
-                        if data_asset["batch_kwargs"].get("data_asset_name") is None
+                        if data_asset["batch_definition"].data_asset_name is None
                     ]
                 else:
                     validation_results_by_data_asset_name[data_asset_name] = [
                         data_asset["validation_results"]
                         for data_asset in self.list_data_assets_validated()
-                        if data_asset["batch_kwargs"].get("data_asset_name")
+                        if data_asset["batch_definition"].data_asset_name
                         == data_asset_name
                     ]
             self._validation_results_by_data_asset_name = (
@@ -220,14 +220,14 @@ class CheckpointResult(DictDot):
             assets_validated_by_batch_id = {}
 
             for validation_result in self.list_validation_results():
-                batch_kwargs = validation_result.meta["batch_kwargs"]
-                batch_id = BatchKwargs(batch_kwargs).to_id()
+                active_batch_definition = validation_result.meta["active_batch_definition"]
+                batch_id = active_batch_definition.id
                 expectation_suite_name = validation_result.meta[
                     "expectation_suite_name"
                 ]
                 if batch_id not in assets_validated_by_batch_id:
                     assets_validated_by_batch_id[batch_id] = {
-                        "batch_kwargs": batch_kwargs,
+                        "batch_definition": active_batch_definition,
                         "validation_results": [validation_result],
                         "expectation_suite_names": [expectation_suite_name],
                     }
