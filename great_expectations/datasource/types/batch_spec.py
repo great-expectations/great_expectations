@@ -102,3 +102,7 @@ class RuntimeDataBatchSpec(BatchSpec):
     @property
     def batch_data(self):
         return self.get("batch_data")
+
+    @batch_data.setter
+    def batch_data(self, batch_data):
+        self["batch_data"] = batch_data
