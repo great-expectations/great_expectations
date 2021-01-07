@@ -2,6 +2,7 @@ import logging
 import sys
 from collections.abc import Mapping
 
+
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from decimal import Context
@@ -13,6 +14,20 @@ from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
+
+import datetime
+import decimal
+
+import numpy as np
+import pandas as pd
+
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+    )
 
 
 def nested_update(d, u):
@@ -56,20 +71,6 @@ def convert_to_json_serializable(data):
     Warning:
         test_obj may also be converted in place.
     """
-    import datetime
-    import decimal
-    import sys
-
-    import numpy as np
-    import pandas as pd
-
-    try:
-        import pyspark
-    except ImportError:
-        pyspark = None
-        logger.debug(
-            "Unable to load pyspark and pyspark.sql; install optional spark dependency for support."
-        )
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
@@ -182,19 +183,6 @@ def ensure_json_serializable(data):
     Warning:
         test_obj may also be converted in place.
     """
-    import datetime
-    import decimal
-
-    import numpy as np
-    import pandas as pd
-
-    try:
-        import pyspark
-    except ImportError:
-        pyspark = None
-        logger.debug(
-            "Unable to load pyspark and pyspark.sql; install optional spark dependency for support."
-        )
 
     if isinstance(data, SerializableDictDot):
         return
