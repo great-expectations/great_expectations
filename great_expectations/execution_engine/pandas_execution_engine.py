@@ -256,7 +256,7 @@ Notes:
             return {"reader_method": "read_pickle"}
         elif path.endswith(".feather"):
             return {"reader_method": "read_feather"}
-        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+        elif path.endswith(".csv.gz") or path.endswith(".tsv.gz"):
             return {
                 "reader_method": "read_csv",
                 "reader_options": {"compression": "gzip"},
