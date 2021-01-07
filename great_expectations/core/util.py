@@ -16,7 +16,6 @@ from great_expectations.types import SerializableDictDot
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 
 
-
 logger = logging.getLogger(__name__)
 
 try:
