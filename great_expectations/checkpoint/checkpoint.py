@@ -12,7 +12,6 @@ from great_expectations.core.util import (
     nested_update,
     substitute_all_strftime_format_strings,
 )
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions import CheckpointError
@@ -148,7 +147,7 @@ class Checkpoint:
         substituted_config_variables = substitute_all_config_variables(
             self.data_context.config_variables,
             dict(os.environ),
-            BaseDataContext.DOLLAR_SIGN_ESCAPE_STRING,
+            self.data_context.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
         substitutions = {
@@ -159,7 +158,7 @@ class Checkpoint:
 
         return CheckpointConfig(
             **substitute_all_config_variables(
-                config, substitutions, BaseDataContext.DOLLAR_SIGN_ESCAPE_STRING
+                config, substitutions, self.data_context.DOLLAR_SIGN_ESCAPE_STRING
             )
         )
 
