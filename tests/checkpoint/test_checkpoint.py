@@ -11,6 +11,7 @@ from ruamel.yaml.comments import CommentedMap
 import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
@@ -175,10 +176,10 @@ def test_basic_checkpoint_config_validation(
     empty_data_context.create_expectation_suite(
         expectation_suite_name="my_expectation_suite"
     )
-    results: List[ValidationOperatorResult] = empty_data_context.run_checkpoint(
+    result: CheckpointResult = empty_data_context.run_checkpoint(
         checkpoint_name=checkpoint.config.name,
     )
-    assert len(results) == 0
+    assert len(result.list_validation_results()) == 0
 
 
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
@@ -291,12 +292,12 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
-    results: List[ValidationOperatorResult] = data_context.run_checkpoint(
+    result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.config.name,
     )
-    assert len(results) == 1
+    assert len(result.list_validation_results()) == 1
     assert len(data_context.validations_store.list_keys()) == 1
-    assert results[0].success
+    assert result.success
 
 
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
@@ -418,12 +419,12 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
-    results: List[ValidationOperatorResult] = data_context.run_checkpoint(
+    result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.config.name,
     )
-    assert len(results) == 2
+    assert len(result.list_validation_results()) == 2
     assert len(data_context.validations_store.list_keys()) == 2
-    assert all([result.success for result in results])
+    assert result.success
 
 
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
@@ -506,7 +507,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    results: List[ValidationOperatorResult] = data_context.run_checkpoint(
+    result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.config.name,
         batch_request={
             "batch_data": test_df,
@@ -518,9 +519,9 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         },
         run_name="airflow_run_1234567890",
     )
-    assert len(results) == 1
+    assert len(result.list_validation_results()) == 1
     assert len(data_context.validations_store.list_keys()) == 1
-    assert results[0].success
+    assert result.success
 
 
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
@@ -649,12 +650,12 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     data_context.create_expectation_suite(expectation_suite_name="users.warning")
     data_context.create_expectation_suite(expectation_suite_name="users.error")
-    results: List[ValidationOperatorResult] = data_context.run_checkpoint(
+    result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.config.name,
     )
-    assert len(results) == 2
+    assert len(result.list_validation_results()) == 2
     assert len(data_context.validations_store.list_keys()) == 2
-    assert all([result.success for result in results])
+    assert result.success
 
 
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
@@ -667,7 +668,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     checkpoint: Checkpoint
     yaml_config: str
     expected_checkpoint_config: dict
-    results: List[ValidationOperatorResult]
+    result: CheckpointResult
 
     data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing
 
@@ -745,7 +746,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
 
-    results = data_context.run_checkpoint(
+    result = data_context.run_checkpoint(
         checkpoint_name="my_base_checkpoint",
         validations=[
             {
@@ -772,9 +773,9 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
             },
         ],
     )
-    assert len(results) == 2
+    assert len(result.list_validation_results()) == 2
     assert len(data_context.validations_store.list_keys()) == 2
-    assert all([result.success for result in results])
+    assert result.success
 
     yaml_config = f"""
     name: my_fancy_checkpoint
@@ -846,12 +847,12 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
     assert len(data_context.list_checkpoints()) == 2
 
-    results: List[ValidationOperatorResult] = data_context.run_checkpoint(
+    result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.config.name,
     )
-    assert len(results) == 2
+    assert len(result.list_validation_results()) == 2
     assert len(data_context.validations_store.list_keys()) == 4
-    assert all([result.success for result in results])
+    assert result.success
 
 
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
