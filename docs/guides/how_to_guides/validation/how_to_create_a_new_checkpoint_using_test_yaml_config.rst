@@ -368,10 +368,11 @@ Steps
                 "batch_data": my_data_frame,
                 "partition_request": {
                     "partition_identifiers": {
-                        "run_id": airflow_run_id,
+                        "airflow_run_id": airflow_run_id,
                     }
                 },
             },
+            run_name=airflow_run_id,
         )
 
 

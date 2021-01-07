@@ -62,8 +62,8 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
-    build_store_from_config,
     PasswordMasker,
+    build_store_from_config,
     file_relative_path,
     instantiate_class_from_config,
     load_class,
@@ -2689,7 +2689,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
-    def create_checkpoint(
+    def add_checkpoint(
         self,
         checkpoint_name: str,
         checkpoint_config: Optional[Union[CheckpointConfig, dict]] = None,
@@ -3013,7 +3013,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
 
                 # noinspection PyUnusedLocal
-                checkpoint: Checkpoint = self.create_checkpoint(
+                checkpoint: Checkpoint = self.add_checkpoint(
                     checkpoint_name=checkpoint_name,
                     checkpoint_config=checkpoint_config,
                 )
