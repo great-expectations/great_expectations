@@ -84,6 +84,10 @@ class CheckpointResult(DictDot):
         self._validation_results_by_validation_result_identifier = None
 
     @property
+    def name(self):
+        return self.checkpoint_config.name
+
+    @property
     def checkpoint_config(self) -> CheckpointConfig:
         return self._checkpoint_config
 
