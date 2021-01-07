@@ -7,6 +7,7 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -1752,18 +1753,18 @@ def test_run_checkpoint_newstyle(
 
     context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
 
-    results: List[ValidationOperatorResult] = context.run_checkpoint(
+    result: CheckpointResult = context.run_checkpoint(
         checkpoint_name=checkpoint_config.name
     )
-    assert len(results) == 1
-    assert results[0].success
+    assert len(result.list_validation_results()) == 1
+    assert result.success
 
-    results: List[ValidationOperatorResult] = context.run_checkpoint(
+    result: CheckpointResult = context.run_checkpoint(
         checkpoint_name=checkpoint_config.name
     )
-    assert len(results) == 1
+    assert len(result.list_validation_results()) == 1
     assert len(context.validations_store.list_keys()) == 2
-    assert results[0].success
+    assert result.success
 
 
 def test_get_validator_with_instantiated_expectation_suite(
