@@ -1,11 +1,12 @@
+import datetime
+import decimal
 import logging
 import sys
 from collections.abc import Mapping
 
-# Updated from the stack overflow version below to concatenate lists
-# https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+import numpy as np
+import pandas as pd
 from datetime import datetime
-from decimal import Context
 from typing import Any, Optional, OrderedDict, Union
 
 from IPython import get_ipython
@@ -14,7 +15,19 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
 
+# Updated from the stack overflow version below to concatenate lists
+# https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+
+
 logger = logging.getLogger(__name__)
+
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+    )
 
 
 def nested_update(d, u):
@@ -58,12 +71,6 @@ def convert_to_json_serializable(data):
     Warning:
         test_obj may also be converted in place.
     """
-    import datetime
-    import decimal
-    import sys
-
-    import numpy as np
-    import pandas as pd
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
@@ -142,6 +149,13 @@ def convert_to_json_serializable(data):
     elif isinstance(data, pd.DataFrame):
         return convert_to_json_serializable(data.to_dict(orient="records"))
 
+    elif pyspark and isinstance(data, pyspark.sql.DataFrame):
+        # using StackOverflow suggestion for converting pyspark df into dictionary
+        # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
+        return convert_to_json_serializable(
+            dict(zip(data.schema.names, zip(*data.collect())))
+        )
+
     elif isinstance(data, decimal.Decimal):
         if requires_lossy_conversion(data):
             logger.warning(
@@ -169,11 +183,6 @@ def ensure_json_serializable(data):
     Warning:
         test_obj may also be converted in place.
     """
-    import datetime
-    import decimal
-
-    import numpy as np
-    import pandas as pd
 
     if isinstance(data, SerializableDictDot):
         return
@@ -245,6 +254,14 @@ def ensure_json_serializable(data):
             for idx, val in data.iteritems()
         ]
         return
+
+    elif pyspark and isinstance(data, pyspark.sql.DataFrame):
+        # using StackOverflow suggestion for converting pyspark df into dictionary
+        # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
+        return ensure_json_serializable(
+            dict(zip(data.schema.names, zip(*data.collect())))
+        )
+
     elif isinstance(data, pd.DataFrame):
         return ensure_json_serializable(data.to_dict(orient="records"))
 
@@ -262,7 +279,7 @@ def ensure_json_serializable(data):
 
 
 def requires_lossy_conversion(d):
-    return d - Context(prec=sys.float_info.dig).create_decimal(d) != 0
+    return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
 
 
 def substitute_all_strftime_format_strings(
