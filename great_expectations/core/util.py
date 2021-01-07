@@ -3,12 +3,11 @@ import decimal
 import logging
 import sys
 from collections.abc import Mapping
+import datetime
+from typing import Any, Optional, OrderedDict, Union
 
 import numpy as np
 import pandas as pd
-from datetime import datetime
-from typing import Any, Optional, OrderedDict, Union
-
 from IPython import get_ipython
 
 from great_expectations.core.run_identifier import RunIdentifier
@@ -283,14 +282,14 @@ def requires_lossy_conversion(d):
 
 
 def substitute_all_strftime_format_strings(
-    data: Union[dict, list, str, Any], datetime_obj: Optional[datetime] = None
+    data: Union[dict, list, str, Any], datetime_obj: Optional[datetime.datetime] = None
 ) -> Union[str, Any]:
     """
     This utility function will iterate over input data and for all strings, replace any strftime format
     elements using either the provided datetime_obj or the current datetime
     """
 
-    datetime_obj: datetime = datetime_obj or datetime.now()
+    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
             k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
@@ -308,11 +307,11 @@ def substitute_all_strftime_format_strings(
 
 
 def get_datetime_string_from_strftime_format(
-    format_str: str, datetime_obj: Optional[datetime] = None
+    format_str: str, datetime_obj: Optional[datetime.datetime] = None
 ) -> str:
     """
     This utility function takes a string with strftime format elements and substitutes those elements using
     either the provided datetime_obj or current datetime
     """
-    datetime_obj: datetime = datetime_obj or datetime.now()
+    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
     return datetime_obj.strftime(format_str)
