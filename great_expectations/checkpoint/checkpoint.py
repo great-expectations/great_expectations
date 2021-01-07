@@ -6,6 +6,8 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any, List, Optional, Union
 
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import (
     get_datetime_string_from_strftime_format,
@@ -218,7 +220,11 @@ class Checkpoint:
         run_time=None,
         result_format=None,
         **kwargs,
-    ) -> List[ValidationOperatorResult]:
+    ) -> CheckpointResult:
+        assert not (run_id and run_name) and not (
+                run_id and run_time
+        ), "Please provide either a run_id or run_name and/or run_time."
+
         run_time = run_time or datetime.now()
         runtime_configuration: dict = runtime_configuration or {}
         result_format: Optional[dict] = result_format or runtime_configuration.get(
@@ -243,12 +249,17 @@ class Checkpoint:
         )
         run_name_template: Optional[str] = substituted_runtime_config.run_name_template
         validations: list = substituted_runtime_config.validations
-        results = []
+        run_results = {}
 
         if run_name is None and run_name_template is not None:
             run_name: str = get_datetime_string_from_strftime_format(
                 format_str=run_name_template, datetime_obj=run_time
             )
+
+        run_id = run_id or RunIdentifier(
+            run_name=run_name,
+            run_time=run_time
+        )
 
         for idx, validation_dict in enumerate(validations):
             try:
@@ -278,7 +289,7 @@ class Checkpoint:
                         name=f"{self.name}-checkpoint-validation[{idx}]",
                     )
                 )
-                run_result: ValidationOperatorResult = (
+                val_op_run_result: ValidationOperatorResult = (
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
                         run_id=run_id,
@@ -286,19 +297,21 @@ class Checkpoint:
                             substituted_validation_dict.get("evaluation_parameters"),
                             datetime_obj=run_time,
                         ),
-                        run_name=run_name,
-                        run_time=run_time,
                         result_format=result_format,
                     )
                 )
-                results.append(run_result)
+                run_results.update(val_op_run_result.run_results)
             except CheckpointError as e:
                 raise CheckpointError(
                     f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}"
                 )
             except Exception as e:
                 raise e
-        return results
+        return CheckpointResult(
+            run_id=run_id,
+            run_results=run_results,
+            checkpoint_config=self.config
+        )
 
     def self_check(self, pretty_print=True) -> dict:
         # Provide visibility into parameters that Checkpoint was instantiated with.
