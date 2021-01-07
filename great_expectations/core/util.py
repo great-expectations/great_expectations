@@ -63,6 +63,14 @@ def convert_to_json_serializable(data):
     import numpy as np
     import pandas as pd
 
+    try:
+        import pyspark
+    except ImportError:
+        pyspark = None
+        logger.debug(
+            "Unable to load pyspark and pyspark.sql; install optional spark dependency for support."
+        )
+
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(data, SerializableDictDot):
@@ -140,6 +148,11 @@ def convert_to_json_serializable(data):
     elif isinstance(data, pd.DataFrame):
         return convert_to_json_serializable(data.to_dict(orient="records"))
 
+    elif pyspark and isinstance(data, pyspark.sql.DataFrame):
+        # using StackOverflow suggestion for converting pyspark df into dictionary
+        # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
+        return convert_to_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
+
     elif isinstance(data, decimal.Decimal):
         if requires_lossy_conversion(data):
             logger.warning(
@@ -172,6 +185,14 @@ def ensure_json_serializable(data):
 
     import numpy as np
     import pandas as pd
+
+    try:
+        import pyspark
+    except ImportError:
+        pyspark = None
+        logger.debug(
+            "Unable to load pyspark and pyspark.sql; install optional spark dependency for support."
+        )
 
     if isinstance(data, SerializableDictDot):
         return
@@ -243,6 +264,12 @@ def ensure_json_serializable(data):
             for idx, val in data.iteritems()
         ]
         return
+
+    elif pyspark and isinstance(data, pyspark.sql.DataFrame):
+        # using StackOverflow suggestion for converting pyspark df into dictionary
+        # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
+        return ensure_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
+
     elif isinstance(data, pd.DataFrame):
         return ensure_json_serializable(data.to_dict(orient="records"))
 
