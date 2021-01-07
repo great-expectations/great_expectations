@@ -151,7 +151,9 @@ def convert_to_json_serializable(data):
     elif pyspark and isinstance(data, pyspark.sql.DataFrame):
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return convert_to_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
+        return convert_to_json_serializable(
+            dict(zip(data.schema.names, zip(*data.collect())))
+        )
 
     elif isinstance(data, decimal.Decimal):
         if requires_lossy_conversion(data):
@@ -268,7 +270,9 @@ def ensure_json_serializable(data):
     elif pyspark and isinstance(data, pyspark.sql.DataFrame):
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
-        return ensure_json_serializable(dict(zip(data.schema.names, zip(*data.collect()))))
+        return ensure_json_serializable(
+            dict(zip(data.schema.names, zip(*data.collect())))
+        )
 
     elif isinstance(data, pd.DataFrame):
         return ensure_json_serializable(data.to_dict(orient="records"))
