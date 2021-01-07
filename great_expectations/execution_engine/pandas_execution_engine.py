@@ -4,7 +4,7 @@ import hashlib
 import logging
 import random
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
 from ruamel.yaml.compat import StringIO
@@ -118,6 +118,7 @@ Notes:
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
+            batch_spec.batch_data = "PandasDataFrame"
 
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.get("reader_method")
