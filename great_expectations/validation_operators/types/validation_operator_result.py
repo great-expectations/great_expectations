@@ -1,6 +1,6 @@
 import json
 from copy import deepcopy
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional, Union
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,

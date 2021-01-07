@@ -1,6 +1,6 @@
 import json
 from copy import deepcopy
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional, Union
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -8,7 +8,10 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.types.base import CheckpointConfigSchema, CheckpointConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    CheckpointConfigSchema,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -220,7 +223,9 @@ class CheckpointResult(DictDot):
             assets_validated_by_batch_id = {}
 
             for validation_result in self.list_validation_results():
-                active_batch_definition = validation_result.meta["active_batch_definition"]
+                active_batch_definition = validation_result.meta[
+                    "active_batch_definition"
+                ]
                 batch_id = active_batch_definition.id
                 expectation_suite_name = validation_result.meta[
                     "expectation_suite_name"

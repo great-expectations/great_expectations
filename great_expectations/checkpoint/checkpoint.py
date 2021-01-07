@@ -222,7 +222,7 @@ class Checkpoint:
         **kwargs,
     ) -> CheckpointResult:
         assert not (run_id and run_name) and not (
-                run_id and run_time
+            run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
         run_time = run_time or datetime.now()
@@ -256,10 +256,7 @@ class Checkpoint:
                 format_str=run_name_template, datetime_obj=run_time
             )
 
-        run_id = run_id or RunIdentifier(
-            run_name=run_name,
-            run_time=run_time
-        )
+        run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
         for idx, validation_dict in enumerate(validations):
             try:
@@ -308,9 +305,7 @@ class Checkpoint:
             except Exception as e:
                 raise e
         return CheckpointResult(
-            run_id=run_id,
-            run_results=run_results,
-            checkpoint_config=self.config
+            run_id=run_id, run_results=run_results, checkpoint_config=self.config
         )
 
     def self_check(self, pretty_print=True) -> dict:
