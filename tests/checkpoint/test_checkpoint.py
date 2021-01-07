@@ -512,7 +512,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
             "batch_data": test_df,
             "partition_request": {
                 "partition_identifiers": {
-                    "run_id": 1234567890,
+                    "airflow_run_id": 1234567890,
                 }
             },
         },
