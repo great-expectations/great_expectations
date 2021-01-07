@@ -2337,7 +2337,7 @@ def titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_t
                 class_name: RuntimeDataConnector
                 runtime_keys:
                     - pipeline_stage_name
-                    - run_id
+                    - airflow_run_id
                     
             my_special_data_connector:
                 class_name: ConfiguredAssetFilesystemDataConnector

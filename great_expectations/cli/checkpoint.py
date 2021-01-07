@@ -189,7 +189,7 @@ def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
             sys.exit(1)
         _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
 
-        _ = context.create_checkpoint(
+        _ = context.add_checkpoint(
             checkpoint,
             {
                 "class_name": "LegacyCheckpoint",
