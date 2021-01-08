@@ -88,10 +88,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         asset: Asset = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector.asset",
-                "class_name": "Asset",
-            },
+            config_defaults={},
         )
         if not asset:
             raise ge_exceptions.ClassInstantiationError(
