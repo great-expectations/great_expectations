@@ -124,25 +124,37 @@ class BaseYamlConfig(SerializableDictDot):
 class AssetConfig(DictDot):
     def __init__(
         self,
-        name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        module_name: Optional[str] = None,
+        name=None,
+        class_name=None,
+        module_name=None,
+        bucket=None,
+        prefix=None,
+        delimiter=None,
+        max_keys=None,
         **kwargs,
     ):
         if name is not None:
             self.name = name
         self._class_name = class_name
         self._module_name = module_name
+        if bucket is not None:
+            self.bucket = bucket
+        if prefix is not None:
+            self.prefix = prefix
+        if delimiter is not None:
+            self.delimiter = delimiter
+        if max_keys is not None:
+            self.max_keys = max_keys
         for k, v in kwargs.items():
             setattr(self, k, v)
 
     @property
-    def module_name(self):
-        return self._module_name
-
-    @property
     def class_name(self):
         return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
 
 
 class AssetConfigSchema(Schema):
@@ -162,6 +174,10 @@ class AssetConfigSchema(Schema):
     group_names = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
+    bucket = fields.String(required=False, allow_none=True)
+    prefix = fields.String(required=False, allow_none=True)
+    delimiter = fields.String(required=False, allow_none=True)
+    max_keys = fields.Integer(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
