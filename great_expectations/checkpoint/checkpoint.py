@@ -305,20 +305,21 @@ class Checkpoint:
                 ]
             )
         )
-        if not validations_present:
-            logger.warning(
-                f"""Your current Checkpoint configuration has an empty or missing "validations" attribute.  This means
-                you must either update your checkpoint configuration or provide an appropriate validations list
-                programmatically (i.e., when your Checkpoint is run).
-                """
-            )
-        if not action_list_present:
-            logger.warning(
-                f"""Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This means
-                you must provide an appropriate validations list programmatically (i.e., when your Checkpoint is run),
-                with each validation having its own defined "action_list" attribute.
-                """
-            )
+        if not self.config.template_name:
+            if not validations_present:
+                logger.warning(
+                    f"""Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
+                    means you must either update your checkpoint configuration or provide an appropriate validations
+                    list programmatically (i.e., when your Checkpoint is run).
+                    """
+                )
+            if not action_list_present:
+                logger.warning(
+                    f"""Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This
+                    means you must provide an appropriate validations list programmatically (i.e., when your Checkpoint
+                    is run), with each validation having its own defined "action_list" attribute.
+                    """
+                )
 
         return report_object
 
