@@ -510,6 +510,10 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     context.save_config_variable(
         "DB_HOST", "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}"
     )
+    context.save_config_variable("DB_NAME", "${DB_NAME_to_be_subbed_by_config_var}")
+    context.save_config_variable(
+        "DB_NAME_to_be_subbed_by_config_var", "DB_NAME_subbed_by_config_var"
+    )
 
     config_vars_file_contents = context._load_config_variables_file()
 
@@ -518,6 +522,11 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         "DB_USER": "DB_USER_saved_before_adding_datasource",
         # Note Escaped $ in DB_HOST in config_variables.yml
         "DB_HOST": r"\${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}",
+        # Note Escaped $
+        "DB_NAME": r"\${DB_NAME_to_be_subbed_by_config_var}",
+        # This will not be substituted:
+        "DB_NAME_to_be_subbed_by_config_var": "DB_NAME_subbed_by_config_var",
+        # Use the generated instance_id:
         "instance_id": config_vars_file_contents["instance_id"],
     }
 
@@ -527,7 +536,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
             "drivername": "postgresql",
             "host": "$DB_HOST",
             "port": "65432",
-            "database": "test_database",
+            "database": "${DB_NAME}",
             "username": "${DB_USER}",
             "password": "${DB_PWD}",
         },
@@ -545,7 +554,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         "drivername": "postgresql",
         "host": "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}",
         "port": "65432",
-        "database": "test_database",
+        "database": "${DB_NAME_to_be_subbed_by_config_var}",
         "username": "DB_USER_saved_before_adding_datasource",
         # Note masking of "password" field
         "password": "***",
@@ -572,6 +581,10 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     assert (
         test_datasource_credentials["password"]
         == "DB_PWD_saved_before_adding_datasource"
+    )
+    assert (
+        test_datasource_credentials["database"]
+        == "${DB_NAME_to_be_subbed_by_config_var}"
     )
 
     # Set env variable and check again, making sure that variable in config_variables.yml is substituted correctly with an env variable.
@@ -603,4 +616,8 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     assert (
         test_datasource_credentials["password"]
         == "DB_PWD_saved_before_adding_datasource"
+    )
+    assert (
+        test_datasource_credentials["database"]
+        == "${DB_NAME_to_be_subbed_by_config_var}"
     )
