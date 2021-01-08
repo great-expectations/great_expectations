@@ -190,7 +190,7 @@ def test_basic_checkpoint_config_validation(
 
 
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
     os.environ["VAR"] = "test"
     os.environ["MY_PARAM"] = "1"
@@ -198,7 +198,9 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing
+    data_context: DataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+    )
 
     yaml_config: str = f"""
     name: my_fancy_checkpoint
@@ -308,7 +310,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
 
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
     os.environ["VAR"] = "test"
     os.environ["MY_PARAM"] = "1"
@@ -316,7 +318,9 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
 
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing
+    data_context: DataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+    )
 
     yaml_config: str = f"""
     name: my_fancy_checkpoint
@@ -435,11 +439,13 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
 
 
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing
+    data_context: DataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+    )
 
     yaml_config: str = f"""
     name: airflow_checkpoint
@@ -532,13 +538,15 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 
 
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
     os.environ["GE_ENVIRONMENT"] = "my_ge_environment"
 
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing
+    data_context: DataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+    )
 
     yaml_config: str = f"""
     name: airflow_users_node_3
@@ -666,7 +674,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
 
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
     os.environ["VAR"] = "test"
     os.environ["MY_PARAM"] = "1"
@@ -677,7 +685,9 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     expected_checkpoint_config: dict
     results: List[ValidationOperatorResult]
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_for_checkpoints_v1_config_testing
+    data_context: DataContext = (
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+    )
 
     yaml_config = f"""
     name: my_base_checkpoint
@@ -904,9 +914,9 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 # TODO: add more test cases
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-    titanic_pandas_multibatch_data_context_with_013_datasource,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
-    context = titanic_pandas_multibatch_data_context_with_013_datasource
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         config_version=1,
@@ -936,8 +946,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[
             {
                 "batch_request": {
-                    "datasource_name": "titanic_multi_batch",
-                    "data_connector_name": "my_data_connector",
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_basic_data_connector",
                     "data_asset_name": "Titanic_1911",
                 }
             }
@@ -966,9 +976,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 # TODO: Add test case for recusrive template cases (nested templates) and template_name specified at runtime
 def test_newstyle_checkpoint_config_substitution_simple(
-    titanic_pandas_multibatch_data_context_with_013_datasource,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
-    context = titanic_pandas_multibatch_data_context_with_013_datasource
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
 
     # add template config
     checkpoint_template_config = CheckpointConfig(

@@ -7,6 +7,7 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
@@ -28,14 +29,6 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.exceptions import (
-    BatchKwargsError,
-    CheckpointError,
-    ConfigNotFoundError,
-    DataContextError,
-    InvalidCheckpointConfigError,
-    InvalidKeyError,
-)
 from great_expectations.util import gen_directory_tree_str
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -71,7 +64,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     # attempt to create expectation suite with name that already exists on data asset
-    with pytest.raises(DataContextError):
+    with pytest.raises(ge_exceptions.DataContextError):
         titanic_data_context.create_expectation_suite(
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
@@ -791,9 +784,9 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
         context_path = os.path.join(project_path, "great_expectations")
         os.makedirs(context_path, exist_ok=True)
         os.chdir(context_path)
-        with pytest.raises(DataContextError) as err:
+        with pytest.raises(ge_exceptions.DataContextError) as err:
             DataContext.find_context_root_dir()
-        assert isinstance(err.value, ConfigNotFoundError)
+        assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
 
         shutil.copy(
             file_relative_path(
@@ -1450,14 +1443,14 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(DataContextError):
+    with pytest.raises(ge_exceptions.DataContextError):
         titanic_data_context.get_batch({}, 99)
 
 
 def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(BatchKwargsError):
+    with pytest.raises(ge_exceptions.BatchKwargsError):
         titanic_data_context.get_batch(99, "foo")
 
 
@@ -1546,7 +1539,7 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    with pytest.raises(InvalidKeyError):
+    with pytest.raises(ge_exceptions.CheckpointNotFoundError):
         context.get_checkpoint("not_a_checkpoint")
 
 
@@ -1562,7 +1555,7 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
     assert os.path.isfile(checkpoint_file_path)
     assert context.list_checkpoints() == ["my_checkpoint"]
 
-    with pytest.raises(InvalidCheckpointConfigError):
+    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError):
         context.get_checkpoint("my_checkpoint")
 
 
@@ -1630,7 +1623,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1649,7 +1642,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(InvalidCheckpointConfigError) as e:
+    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1674,7 +1667,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1693,15 +1686,15 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
 # TODO: add more test cases
 def test_run_checkpoint_newstyle(
-    titanic_pandas_multibatch_data_context_with_013_datasource,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
-    context = titanic_pandas_multibatch_data_context_with_013_datasource
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         config_version=1,
@@ -1731,8 +1724,8 @@ def test_run_checkpoint_newstyle(
         validations=[
             {
                 "batch_request": {
-                    "datasource_name": "titanic_multi_batch",
-                    "data_connector_name": "my_data_connector",
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_basic_data_connector",
                     "data_asset_name": "Titanic_1911",
                 }
             }
@@ -1743,7 +1736,9 @@ def test_run_checkpoint_newstyle(
     )
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
 
-    with pytest.raises(DataContextError, match=r"expectation_suite .* not found"):
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
         context.run_checkpoint(checkpoint_name=checkpoint_config.name)
 
     assert len(context.validations_store.list_keys()) == 0
