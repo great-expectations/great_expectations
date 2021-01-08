@@ -124,17 +124,41 @@ class BaseYamlConfig(SerializableDictDot):
 class AssetConfig(DictDot):
     def __init__(
         self,
+        name: str,
+        class_name: Optional[str],
+        module_name: Optional[str],
         **kwargs,
     ):
+        self._name = name
+        self._class_name = class_name
+        self._module_name = module_name
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @property
+    def class_name(self):
+        return self._class_name
 
 
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
+    name = fields.String(required=True, allow_none=False)
     class_name = fields.String(required=False, allow_none=True, missing="Asset")
+    module_name = fields.String(
+        required=False,
+        all_none=True,
+        missing="great_expectations.datasource.data_connector.asset",
+    )
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
     pattern = fields.String(required=False, allow_none=True)
@@ -173,12 +197,12 @@ class SorterConfig(DictDot):
         return self._name
 
     @property
-    def class_name(self):
-        return self._class_name
-
-    @property
     def module_name(self):
         return self._module_name
+
+    @property
+    def class_name(self):
+        return self._class_name
 
     @property
     def orderby(self):
