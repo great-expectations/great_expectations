@@ -2765,9 +2765,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
         try:
             checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
-        except ValidationError as exc:
+        except ge_exceptions.InvalidKeyError as exc_ik:
+            raise ge_exceptions.CheckpointNotFoundError(
+                message=f'Non-existent checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+            )
+        except ValidationError as exc_ve:
             raise ge_exceptions.InvalidCheckpointConfigError(
-                message="Invalid checkpoint configuration", validation_error=exc
+                message="Invalid checkpoint configuration", validation_error=exc_ve
             )
 
         if checkpoint_config.config_version is None:
