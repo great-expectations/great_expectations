@@ -83,7 +83,6 @@ def create_expectation_suite(
             "\n<cyan>========== Create sample Expectations ==========</cyan>\n\n"
         )
 
-    # <WILL> this is where the logic has changed
     data_source = select_datasource(context, datasource_name=datasource_name)
 
     if data_source is None:
@@ -374,7 +373,6 @@ def select_datasource(
                 "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
             )
         elif len(data_sources) == 1:
-
             datasource_name = data_sources[0]["name"]
         else:
             choices = "\n".join(

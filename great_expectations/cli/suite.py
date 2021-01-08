@@ -307,7 +307,6 @@ def _suite_new(
         if batch_kwargs is not None:
             batch_kwargs = json.loads(batch_kwargs)
 
-        print("hello will this is working")
         success, suite_name, profiling_results = toolkit.create_expectation_suite(
             context,
             datasource_name=datasource_name,

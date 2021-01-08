@@ -77,7 +77,7 @@ def test_cli_init_on_new_project(
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
     assert (
-        "Does the expectation suite involve data from a single table or multiple tables?"
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
         in stdout
     )
     assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
@@ -242,7 +242,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
     assert (
-        "Does the expectation suite involve data from a single table or multiple tables?"
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
         in stdout
     )
     assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
@@ -353,7 +353,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     )
     assert "What is the url/connection string for the sqlalchemy connection?" in stdout
     assert (
-        "Does the expectation suite involve data from a single table or multiple tables?"
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
         in stdout
     )
     assert "Great Expectations connected to your database" in stdout
@@ -646,7 +646,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
 
     assert "Always know what to expect from your data" in stdout
     assert (
-        "Does the expectation suite involve data from a single table or multiple tables?"
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
         in stdout
     )
     assert "Generating example Expectation Suite..." in stdout
