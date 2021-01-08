@@ -155,7 +155,7 @@ anonymized_data_docs_site_schema = {
 
 anonymized_expectation_suite_schema = {
     "$schema": "https://json-schema.org/draft-04/schema",
-    "title": "anonymized_expectation_suite_schema",
+    "title": "anonymized-expectation_suite_schema",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
         {
@@ -191,6 +191,13 @@ anonymized_expectation_suite_schema = {
     ],
 }
 
+pipeline_dag_runner_string_schema = {
+    "$schema": "https://json-schema.org/draft-04/schema",
+    "title": "pipeline-dag-runner",
+    "type": "string",
+    "maxLength": 256,
+}
+
 init_payload_schema = {
     "$schema": "https://json-schema.org/draft-04/schema",
     "definitions": {
@@ -202,6 +209,7 @@ init_payload_schema = {
         "anonymized_store": anonymized_store_schema,
         "anonymized_action": anonymized_action_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
+        "pipeline_dag_runner": pipeline_dag_runner_string_schema,
     },
     "type": "object",
     "properties": {
@@ -232,6 +240,10 @@ init_payload_schema = {
         "anonymized_expectation_suites": {
             "type": "array",
             "items": {"$ref": "#/definitions/anonymized_expectation_suite"},
+        },
+        "pipeline_dag_runners": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/pipeline_dag_runner"},
         },
     },
     "required": [

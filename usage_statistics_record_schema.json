@@ -1,18 +1,18 @@
 {
-  "$schema": "http://json-schema.org/schema#",
+  "$schema": "https://json-schema.org/draft-04/schema",
   "definitions": {
     "anonymized_string": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "type": "string",
       "minLength": 32,
       "maxLength": 32
     },
     "anonymized_datasource": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "title": "anonymized-datasource",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
@@ -46,21 +46,21 @@
       ]
     },
     "anonymized_store": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "title": "anonymized-store",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_class_info": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-class-info",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
@@ -116,11 +116,11 @@
       ]
     },
     "anonymized_class_info": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "title": "anonymized-class-info",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
@@ -149,21 +149,21 @@
       ]
     },
     "anonymized_validation_operator": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "title": "anonymized-validation-operator",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_action": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-action",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
@@ -224,11 +224,11 @@
       ]
     },
     "anonymized_action": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "title": "anonymized-action",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
@@ -258,26 +258,26 @@
       ]
     },
     "empty_payload": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "type": "object",
       "properties": {},
       "additionalProperties": false
     },
     "init_payload": {
-      "$schema": "https://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_class_info": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-class-info",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
@@ -306,11 +306,11 @@
           ]
         },
         "anonymized_datasource": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-datasource",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
@@ -344,21 +344,21 @@
           ]
         },
         "anonymized_validation_operator": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-validation-operator",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_action": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "title": "anonymized-action",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/schema#",
+                  "$schema": "https://json-schema.org/draft-04/schema",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
@@ -419,21 +419,21 @@
           ]
         },
         "anonymized_data_docs_site": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-validation-operator",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_class_info": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "title": "anonymized-class-info",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/schema#",
+                  "$schema": "https://json-schema.org/draft-04/schema",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
@@ -492,21 +492,21 @@
           ]
         },
         "anonymized_store": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-store",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
             },
             "anonymized_class_info": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "title": "anonymized-class-info",
               "definitions": {
                 "anonymized_string": {
-                  "$schema": "http://json-schema.org/schema#",
+                  "$schema": "https://json-schema.org/draft-04/schema",
                   "type": "string",
                   "minLength": 32,
                   "maxLength": 32
@@ -562,11 +562,11 @@
           ]
         },
         "anonymized_action": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-action",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
@@ -596,11 +596,11 @@
           ]
         },
         "anonymized_expectation_suite": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-expectation_suite_schema",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
@@ -631,7 +631,7 @@
                 "expectation_count": {
                   "type": "number"
                 },
-                "anonymized_expectation_types_list": {
+                "anonymized_expectation_counts": {
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -652,6 +652,12 @@
               "additionalProperties": false
             }
           ]
+        },
+        "pipeline_dag_runner": {
+          "$schema": "https://json-schema.org/draft-04/schema",
+          "title": "pipeline-dag-runner",
+          "type": "string",
+          "maxLength": 256
         }
       },
       "type": "object",
@@ -706,6 +712,12 @@
           "items": {
             "$ref": "#/definitions/anonymized_expectation_suite"
           }
+        },
+        "pipeline_dag_runners": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pipeline_dag_runner"
+          }
         }
       },
       "required": [
@@ -721,20 +733,20 @@
       "additionalProperties": false
     },
     "run_validation_operator_payload": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_batch": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-batch",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
@@ -792,21 +804,21 @@
       "additionalProperties": false
     },
     "anonymized_data_docs_site": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "title": "anonymized-validation-operator",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
         },
         "anonymized_class_info": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "title": "anonymized-class-info",
           "definitions": {
             "anonymized_string": {
-              "$schema": "http://json-schema.org/schema#",
+              "$schema": "https://json-schema.org/draft-04/schema",
               "type": "string",
               "minLength": 32,
               "maxLength": 32
@@ -865,11 +877,11 @@
       ]
     },
     "anonymized_batch": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "title": "anonymized-batch",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
@@ -908,11 +920,11 @@
       ]
     },
     "anonymized_expectation_suite": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "title": "anonymized-expectation_suite_schema",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32
@@ -943,7 +955,7 @@
             "expectation_count": {
               "type": "number"
             },
-            "anonymized_expectation_types_list": {
+            "anonymized_expectation_counts": {
               "type": "array",
               "items": {
                 "type": "object",
@@ -966,10 +978,10 @@
       ]
     },
     "save_or_edit_expectation_suite_payload": {
-      "$schema": "http://json-schema.org/schema#",
+      "$schema": "https://json-schema.org/draft-04/schema",
       "definitions": {
         "anonymized_string": {
-          "$schema": "http://json-schema.org/schema#",
+          "$schema": "https://json-schema.org/draft-04/schema",
           "type": "string",
           "minLength": 32,
           "maxLength": 32

@@ -38,6 +38,7 @@ from great_expectations.core.usage_statistics.anonymizers.validation_operator_an
 from great_expectations.core.usage_statistics.schemas import (
     usage_statistics_record_schema,
 )
+from great_expectations.core.usage_statistics.util import get_pipeline_dag_runners
 from great_expectations.core.util import nested_update
 
 STOP_SIGNAL = object()
@@ -45,36 +46,6 @@ STOP_SIGNAL = object()
 logger = logging.getLogger(__name__)
 
 _anonymizers = dict()
-
-
-def determine_pipeline_dag_runner():
-    pipeline_dag_runner = ["no_pipeline_dag_runner_detected"]
-    try:
-        # Try to determine if a module has been imported from one of the common data workflow frameworks
-        DAG_RUNNERS = {
-            "airflow",
-            "prefect",
-            "dagster",
-            "kedro",
-            # "argo",  # TODO: Argo is written in Go, how to include?
-            # "flytekit",  # TODO: Check import name
-            # "ascend",  # TODO: How to import?
-            # "nifi",  # TODO: How to import?
-            # "metaflow",  # TODO: How to import?
-        }
-        payload_pipeline_dag_runner_check = [
-            d for d in DAG_RUNNERS if d in sys.modules.keys()
-        ]
-        if payload_pipeline_dag_runner_check != []:
-            pipeline_dag_runner = payload_pipeline_dag_runner_check
-    except Exception:
-        logger.debug(
-            "run_validation_operator_usage_statistics: Unable to create pipeline_dag_runner payload field"
-        )
-    return pipeline_dag_runner
-
-
-print(determine_pipeline_dag_runner())
 
 
 class UsageStatisticsHandler:
@@ -165,28 +136,7 @@ class UsageStatisticsHandler:
             self._data_context.get_expectation_suite(expectation_suite_name)
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
-        print(determine_pipeline_dag_runner())
-        # payload_pipeline_dag_runner = ["no_pipeline_dag_runner_detected"]
-        # try:
-        #     # Try to determine if a module has been imported from one of the common data workflow frameworks
-        #     DAG_RUNNERS = {
-        #         "airflow",
-        #         "prefect",
-        #         "dagster",
-        #         "kedro",
-        #         # "argo",  # TODO: Argo is written in Go, how to include?
-        #         # "flytekit",  # TODO: Check import name
-        #         # "ascend",  # TODO: How to import?
-        #         # "nifi",  # TODO: How to import?
-        #         # "metaflow",  # TODO: How to import?
-        #     }
-        #     payload_pipeline_dag_runner = [
-        #         d for d in DAG_RUNNERS if d in sys.modules.keys()
-        #     ]
-        # except Exception:
-        #     logger.debug(
-        #         "run_validation_operator_usage_statistics: Unable to create pipeline_dag_runner payload field"
-        #     )
+        pipeline_dag_runners = get_pipeline_dag_runners()
         return {
             "platform.system": platform.system(),
             "platform.release": platform.release(),
@@ -220,7 +170,7 @@ class UsageStatisticsHandler:
                 )
                 for expectation_suite in expectation_suites
             ],
-            "pipeline_dag_runner": determine_pipeline_dag_runner(),
+            "pipeline_dag_runners": pipeline_dag_runners,
         }
 
     def build_envelope(self, message):
@@ -378,58 +328,6 @@ def run_validation_operator_usage_statistics(
             logger.debug(
                 "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
             )
-
-    # payload_pipeline_dag_runner = ["no_pipeline_dag_runner_detected"]
-    # try:
-    #     # Try to determine if a module has been imported from one of the common data workflow frameworks
-    #     DAG_RUNNERS = {
-    #         "airflow",
-    #         "prefect",
-    #         "dagster",
-    #         "kedro",
-    #         # "argo",  # TODO: Argo is written in Go, how to include?
-    #         # "flytekit",  # TODO: Check import name
-    #         # "ascend",  # TODO: How to import?
-    #         # "nifi",  # TODO: How to import?
-    #         # "metaflow",  # TODO: How to import?
-    #     }
-    #     payload_pipeline_dag_runner_check = [
-    #         d for d in DAG_RUNNERS if d in sys.modules.keys()
-    #     ]
-    #     if payload_pipeline_dag_runner_check != []:
-    #         payload_pipeline_dag_runner = payload_pipeline_dag_runner_check
-    # except Exception:
-    #     logger.debug(
-    #         "run_validation_operator_usage_statistics: Unable to create pipeline_dag_runner payload field"
-    #     )
-
-    payload["pipeline_dag_runner"] = determine_pipeline_dag_runner()
-    #
-    # try:
-    #     # Try to determine if a module has been imported from one of the common data workflow frameworks
-    #     DAG_RUNNERS = [
-    #         "airflow",
-    #         "prefect",
-    #         "dagster",
-    #         "kedro",
-    #         # "argo",  # TODO: Argo is written in Go, how to include?
-    #         # "flytekit",  # TODO: Check import name
-    #         # "ascend",  # TODO: How to import?
-    #         # "nifi",  # TODO: How to import?
-    #         # "metaflow",  # TODO: How to import?
-    #     ]
-    #     payload["pipeline_dag_runner"] = ", ".join(
-    #         [d if d in sys.modules.keys() else None for d in DAG_RUNNERS]
-    #     )
-    # except Exception:
-    #     logger.debug(
-    #         "run_validation_operator_usage_statistics: Unable to create pipeline_dag_runner payload field"
-    #     )
-    #
-    # import pdb;
-    # pdb.set_trace()
-
-    print(payload)
 
     return payload
 
