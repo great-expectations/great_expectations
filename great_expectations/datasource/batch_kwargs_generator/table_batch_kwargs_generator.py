@@ -176,10 +176,11 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 )
             else:
                 raise BatchKwargsError(
-                    "TableBatchKwargsGenerator cannot access the following data:" 
+                    "TableBatchKwargsGenerator cannot access the following data:"
                     f"SCHEMA : {schema_name}"
                     f"TABLE : {table_name}",
-                    {})
+                    {},
+                )
         if batch_kwargs is not None:
             if partition_id is not None:
                 logger.warning(

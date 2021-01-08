@@ -1270,9 +1270,12 @@ You have selected a datasource that is a SQL database. How would you like to spe
         )
         if single_or_multiple_data_asset_selection == "1":  # name the table and schema
             schema_name = click.prompt(
-                "Please provide the schema name of the table (this is optional)", default=default_schema
+                "Please provide the schema name of the table (this is optional)",
+                default=default_schema,
             )
-            table_name = click.prompt("Please provide the table name (this is required)")
+            table_name = click.prompt(
+                "Please provide the table name (this is required)"
+            )
             data_asset_name = f"{schema_name}.{table_name}"
 
         elif single_or_multiple_data_asset_selection == "2":  # SQL query
@@ -1281,18 +1284,19 @@ You have selected a datasource that is a SQL database. How would you like to spe
 
         elif single_or_multiple_data_asset_selection == "3":  # list it all
             # how can we change the color here?
-            msg_prompt_warning = (
-                f"""Warning: If you have a large number of tables in your datasource, this may take a very long time. \m
+            msg_prompt_warning = f"""Warning: If you have a large number of tables in your datasource, this may take a very long time. \m
                     Would you like to continue?"""
+            confirmation = click.prompt(
+                msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
             )
-            confirmation = click.prompt(msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True)
             if confirmation == "y":
                 # avoid this call until necessary
-                available_data_asset_names = temp_generator.get_available_data_asset_names()[
-                    "names"
-                ]
+                available_data_asset_names = (
+                    temp_generator.get_available_data_asset_names()["names"]
+                )
                 available_data_asset_names_str = [
-                    "{} ({})".format(name[0], name[1]) for name in available_data_asset_names
+                    "{} ({})".format(name[0], name[1])
+                    for name in available_data_asset_names
                 ]
 
                 data_asset_names_to_display = available_data_asset_names_str
@@ -1305,11 +1309,7 @@ You have selected a datasource that is a SQL database. How would you like to spe
                 msg_prompt_enter_data_asset_name = (
                     "\nWhich table would you like to use? (Choose one)\n"
                 )
-                prompt = (
-                        msg_prompt_enter_data_asset_name
-                        + choices
-                        + os.linesep
-                )
+                prompt = msg_prompt_enter_data_asset_name + choices + os.linesep
                 selection = click.prompt(prompt, show_default=False)
                 selection = selection.strip()
                 try:
@@ -1320,10 +1320,14 @@ You have selected a datasource that is a SQL database. How would you like to spe
                         ][data_asset_index]
 
                     except IndexError:
-                        print(f"You have specified {selection}, which is an incorrect index")
+                        print(
+                            f"You have specified {selection}, which is an incorrect index"
+                        )
                         pass
                 except ValueError:
-                    print(f"You have specified {selection}, which is an incorrect value")
+                    print(
+                        f"You have specified {selection}, which is an incorrect value"
+                    )
                     pass
 
     if additional_batch_kwargs is None:
@@ -1348,7 +1352,7 @@ You have selected a datasource that is a SQL database. How would you like to spe
     # now building the actual batch_kwargs
     if sql_query is None:
         batch_kwargs = temp_generator.build_batch_kwargs(
-        data_asset_name, **additional_batch_kwargs
+            data_asset_name, **additional_batch_kwargs
         )
         batch_kwargs.update(temp_table_kwargs)
     else:
