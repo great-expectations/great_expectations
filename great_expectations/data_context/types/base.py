@@ -124,20 +124,17 @@ class BaseYamlConfig(SerializableDictDot):
 class AssetConfig(DictDot):
     def __init__(
         self,
-        name: str,
-        class_name: Optional[str],
-        module_name: Optional[str],
+        name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        module_name: Optional[str] = None,
         **kwargs,
     ):
-        self._name = name
+        if name is not None:
+            self.name = name
         self._class_name = class_name
         self._module_name = module_name
         for k, v in kwargs.items():
             setattr(self, k, v)
-
-    @property
-    def name(self):
-        return self._name
 
     @property
     def module_name(self):
@@ -152,7 +149,7 @@ class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    name = fields.String(required=True, allow_none=False)
+    name = fields.String(required=False, allow_none=True)
     class_name = fields.String(required=False, allow_none=True, missing="Asset")
     module_name = fields.String(
         required=False,
