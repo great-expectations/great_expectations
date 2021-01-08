@@ -1699,9 +1699,9 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
 
 # TODO: add more test cases
 def test_run_checkpoint_newstyle(
-    titanic_pandas_multibatch_data_context_with_013_datasource,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
-    context = titanic_pandas_multibatch_data_context_with_013_datasource
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         config_version=1,
@@ -1731,8 +1731,8 @@ def test_run_checkpoint_newstyle(
         validations=[
             {
                 "batch_request": {
-                    "datasource_name": "titanic_multi_batch",
-                    "data_connector_name": "my_data_connector",
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_basic_data_connector",
                     "data_asset_name": "Titanic_1911",
                 }
             }
