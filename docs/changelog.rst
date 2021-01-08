@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API
 * [BUGFIX] Mask passwords in DataContext.list_datasources(). Issue #2184
 
 0.13.4
