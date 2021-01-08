@@ -8,6 +8,8 @@ import great_expectations as ge
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
+    DatasourceConfig,
+    DatasourceConfigSchema,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -488,4 +490,117 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
             value=value_str_custom_escape_string2, dollar_sign_escape_string="@*&$"
         )
         == escaped_value_str_custom_escape_string2
+    )
+
+
+def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypatch):
+    """
+    What does this test and why?
+    Creating a DataContext via .create(), then using .save_config_variable() to save a variable that will eventually be substituted (e.g. ${SOME_VAR}) should result in the proper escaping of $.
+    This is in response to issue #2196
+    """
+
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context = ge.DataContext.create(
+        project_root_dir=project_path,
+        usage_statistics_enabled=False,
+    )
+    context.save_config_variable("DB_PWD", "DB_PWD_saved_before_adding_datasource")
+    context.save_config_variable("DB_USER", "DB_USER_saved_before_adding_datasource")
+    context.save_config_variable(
+        "DB_HOST", "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}"
+    )
+
+    config_vars_file_contents = context._load_config_variables_file()
+
+    assert config_vars_file_contents == {
+        "DB_PWD": "DB_PWD_saved_before_adding_datasource",
+        "DB_USER": "DB_USER_saved_before_adding_datasource",
+        # Note Escaped $ in DB_HOST in config_variables.yml
+        "DB_HOST": r"\${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}",
+        "instance_id": config_vars_file_contents["instance_id"],
+    }
+
+    datasource_config = DatasourceConfig(
+        class_name="SqlAlchemyDatasource",
+        credentials={
+            "drivername": "postgresql",
+            "host": "$DB_HOST",
+            "port": "65432",
+            "database": "test_database",
+            "username": "${DB_USER}",
+            "password": "${DB_PWD}",
+        },
+    )
+    datasource_config_schema = DatasourceConfigSchema()
+
+    # use context.add_datasource to test this by adding a datasource with values to substitute.
+    context.add_datasource(
+        initialize=False,
+        name="test_datasource",
+        **datasource_config_schema.dump(datasource_config)
+    )
+
+    assert context.list_datasources()[0]["credentials"] == {
+        "drivername": "postgresql",
+        "host": "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}",
+        "port": "65432",
+        "database": "test_database",
+        "username": "DB_USER_saved_before_adding_datasource",
+        # Note masking of "password" field
+        "password": "***",
+    }
+
+    # Check context substitutes escaped variables appropriately
+    data_context_config_schema = DataContextConfigSchema()
+    context_with_variables_substituted_dict = data_context_config_schema.dump(
+        context.get_config_with_variables_substituted()
+    )
+
+    test_datasource_credentials = context_with_variables_substituted_dict[
+        "datasources"
+    ]["test_datasource"]["credentials"]
+
+    assert (
+        test_datasource_credentials["host"]
+        == "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}"
+    )
+    assert (
+        test_datasource_credentials["username"]
+        == "DB_USER_saved_before_adding_datasource"
+    )
+    assert (
+        test_datasource_credentials["password"]
+        == "DB_PWD_saved_before_adding_datasource"
+    )
+
+    # Set env variable and check again, making sure that variable in config_variables.yml is substituted correctly with an env variable.
+    monkeypatch.setenv(
+        "DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource", "DB_HOST_FROM_ENV_VAR"
+    )
+    assert (
+        os.environ.get("DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource")
+        == "DB_HOST_FROM_ENV_VAR"
+    )
+    context_with_variables_substituted_dict = data_context_config_schema.dump(
+        context.get_config_with_variables_substituted()
+    )
+
+    test_datasource_credentials = context_with_variables_substituted_dict[
+        "datasources"
+    ]["test_datasource"]["credentials"]
+
+    # 20210108 - AJB - Env var substitution not yet supported in config_variables.yml
+    # https://discuss.greatexpectations.io/t/environment-variable-substitution-is-not-working-for-me-when-connecting-ge-to-my-database/72
+    assert (
+        test_datasource_credentials["host"]
+        == "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}"
+    )
+    assert (
+        test_datasource_credentials["username"]
+        == "DB_USER_saved_before_adding_datasource"
+    )
+    assert (
+        test_datasource_credentials["password"]
+        == "DB_PWD_saved_before_adding_datasource"
     )
