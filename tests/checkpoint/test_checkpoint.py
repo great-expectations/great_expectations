@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 def test_basic_checkpoint_config_validation(
     empty_data_context,
     caplog,
+    capsys,
 ):
     yaml_config_erroneous: str
     config_erroneous: CommentedMap
@@ -84,13 +85,20 @@ def test_basic_checkpoint_config_validation(
         name="my_erroneous_checkpoint",
         class_name="Checkpoint",
     )
-    assert (
-        'Your current Checkpoint configuration has an empty or missing "validations" attribute'
-        in caplog.text
+    captured = capsys.readouterr()
+    assert any(
+        [
+            'Your current Checkpoint configuration has an empty or missing "validations" attribute'
+            in message
+            for message in [caplog.text, captured.out]
+        ]
     )
-    assert (
-        'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
-        in caplog.text
+    assert any(
+        [
+            'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
+            in message
+            for message in [caplog.text, captured.out]
+        ]
     )
 
     assert len(empty_data_context.list_checkpoints()) == 1
