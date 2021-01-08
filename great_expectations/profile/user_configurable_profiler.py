@@ -64,35 +64,6 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
     provide convenience methods to inspect and modify that list of ECs (view by expectation type, view by domain, remove
     individual ECs, remove by column, remove by expectation type.
     """
-    semantic_type_functions = {
-        "datetime": "_build_expectations_datetime",
-        "numeric": "_build_expectations_numeric",
-        "string": "_build_expectations_string",
-        "value_set": "_build_expectations_value_set",
-        "boolean": "_build_expectations_value_set",
-        "other": "_build_expectations_other",
-    }
-
-    _cardinality_enumeration = {
-        "none": 0,
-        "one": 1,
-        "two": 2,
-        "very_few": 3,
-        "few": 4,
-        "many": 5,
-        "very_many": 6,
-        "unique": 7,
-    }
-    _semantic_types = {
-        "datetime",
-        "numeric",
-        "string",
-        "value_set",
-        "boolean",
-        "other",
-    }
-
-    _data_types = {}
 
     @classmethod
     def build_suite(cls, dataset, config=None, tolerance=0):
@@ -107,7 +78,8 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 return cls._build_expectation_list_from_config(
                     dataset=dataset, cache=cache, config=config, tolerance=tolerance
                 )
-
+        for k, v in cache.items():
+            print(k, v)
         return cls._profile_and_build_expectation_list(
             dataset=dataset, cache=cache, config=config, tolerance=tolerance
         )
@@ -239,12 +211,12 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             cache["value_set_threshold"] = config.get("value_set_threshold")
             cache["table_expectations_only"] = config.get("table_expectations_only")
 
-        if config.get("table_expectations_only") is True:
-            cache["ignored_columns"] = dataset.get_table_columns()
-            logger.debug(
-                "table_expectations_only is set to True. Ignoring all columns and creating expectations only \
-                       at the table level"
-            )
+            if config.get("table_expectations_only") is True:
+                cache["ignored_columns"] = dataset.get_table_columns()
+                logger.debug(
+                    "table_expectations_only is set to True. Ignoring all columns and creating expectations only \
+                           at the table level"
+                )
 
         included_columns = [
             column_name
@@ -466,16 +438,22 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 expectations_by_column[domain] = [expectation]
             else:
                 expectations_by_column[domain].append(expectation)
-        print("Creating an expectation suite with the following expectations:\n")
 
-        table_level_expectations = expectations_by_column.pop(
-            "table_level_expectations"
-        )
-        print("Table-Level Expectations")
-        for expectation in sorted(
-            table_level_expectations, key=lambda x: x.expectation_type
-        ):
-            print(expectation.expectation_type)
+        if not expectations_by_column:
+            print("No expectations included in suite.")
+        else:
+            print("Creating an expectation suite with the following expectations:\n")
+
+        if "table_level_expectations" in expectations_by_column:
+            table_level_expectations = expectations_by_column.pop(
+                "table_level_expectations"
+            )
+            print("Table-Level Expectations")
+            for expectation in sorted(
+                table_level_expectations, key=lambda x: x.expectation_type
+            ):
+                print(expectation.expectation_type)
+
         if expectations_by_column:
             print("\nExpectations by Column")
 
@@ -511,7 +489,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
     @classmethod
     def _build_expectations_value_set(cls, dataset, column, cache=None, tolerance=0):
-        if "expect_column_distinct_values_to_be_in_set" not in cache.get(
+        if "expect_column_values_to_be_in_set" not in cache.get(
             "excluded_expectations"
         ):
             value_set = dataset.expect_column_distinct_values_to_be_in_set(
@@ -873,18 +851,26 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         type_ = None
         df.set_config_value("interactive_evaluation", True)
         try:
-            if df.expect_column_values_to_be_in_type_list(
+
+            if (
+                df.expect_column_values_to_be_in_type_list(
+                    column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
+                ).success
+                and df.expect_column_values_to_be_in_type_list(
+                    column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
+                ).success
+            ):
+                type_ = "numeric"
+
+            elif df.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
             ).success:
                 type_ = "int"
 
-            if df.expect_column_values_to_be_in_type_list(
+            elif df.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
             ).success:
-                if type_ == "int":
-                    type_ = "numeric"
-                else:
-                    type_ = "float"
+                type_ = "float"
 
             elif df.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.STRING_TYPE_NAMES))
@@ -965,3 +951,31 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             return np.isnan(value)
         except TypeError:
             return False
+
+    semantic_type_functions = {
+        "datetime": "_build_expectations_datetime",
+        "numeric": "_build_expectations_numeric",
+        "string": "_build_expectations_string",
+        "value_set": "_build_expectations_value_set",
+        "boolean": "_build_expectations_value_set",
+        "other": "_build_expectations_for_all_column_types",
+    }
+
+    _cardinality_enumeration = {
+        "none": 0,
+        "one": 1,
+        "two": 2,
+        "very_few": 3,
+        "few": 4,
+        "many": 5,
+        "very_many": 6,
+        "unique": 7,
+    }
+    _semantic_types = {
+        "datetime",
+        "numeric",
+        "string",
+        "value_set",
+        "boolean",
+        "other",
+    }
