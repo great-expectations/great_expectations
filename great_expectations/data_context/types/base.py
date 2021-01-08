@@ -134,6 +134,7 @@ class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
+    class_name = fields.String(required=False, allow_none=True, missing="Asset")
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
     pattern = fields.String(required=False, allow_none=True)
