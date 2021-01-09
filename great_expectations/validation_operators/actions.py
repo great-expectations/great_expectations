@@ -367,7 +367,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
                     type(validation_result_suite_identifier)
                 )
             )
-
         validation_success = validation_result_suite.success
         data_docs_pages = None
 
@@ -393,10 +392,9 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             teams_notif_result = send_microsoft_teams_notifications(
                 query, microsoft_teams_webhook=self.teams_webhook
             )
-
             return {"microsoft_teams_notification_result": teams_notif_result}
         else:
-            return {"microsoft_teams_notification_result": ""}
+            return {"microsoft_teams_notification_result": None}
 
 
 class OpsgenieAlertAction(ValidationAction):

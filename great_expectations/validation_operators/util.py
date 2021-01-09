@@ -76,7 +76,6 @@ def send_opsgenie_alert(query, suite_name, settings):
 
 def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     session = requests.Session()
-
     try:
         response = session.post(url=microsoft_teams_webhook, json=query)
     except requests.ConnectionError:
@@ -98,13 +97,13 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
                     text=response.text,
                 )
             )
+            return
         else:
             return "Microsoft Teams notification succeeded."
 
 
 def send_webhook_notifications(query, webhook, target_platform):
     session = requests.Session()
-
     try:
         response = session.post(url=webhook, json=query)
     except requests.ConnectionError:
