@@ -2150,7 +2150,11 @@ class BaseDataContext:
 
     @usage_statistics_enabled_method(event_name="data_context.build_data_docs")
     def build_data_docs(
-        self, site_names=None, resource_identifiers=None, dry_run=False
+        self,
+        site_names=None,
+        resource_identifiers=None,
+        dry_run=False,
+        build_index: bool = True,
     ):
         """
         Build Data Docs for your project.
@@ -2173,6 +2177,8 @@ class BaseDataContext:
                             these sites. The motivation for adding this flag was to allow
                             the CLI to display the the URLs before building and to let users
                             confirm.
+
+        :param build_index: a flag if False, skips building the index page
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
@@ -2215,7 +2221,7 @@ class BaseDataContext:
                         ] = site_builder.get_resource_url(only_if_exists=False)
                     else:
                         index_page_resource_identifier_tuple = site_builder.build(
-                            resource_identifiers
+                            resource_identifiers, build_index=build_index
                         )
                         if index_page_resource_identifier_tuple:
                             index_page_locator_infos[
