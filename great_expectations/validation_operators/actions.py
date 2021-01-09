@@ -769,7 +769,7 @@ class UpdateDataDocsAction(ValidationAction):
             )
 
         # build_data_docs will return the index page for the validation results, but we want to return the url for the valiation result using the code below
-        data_docs_index_pages = self.data_context.build_data_docs(
+        self.data_context.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[
                 validation_result_suite_identifier,
