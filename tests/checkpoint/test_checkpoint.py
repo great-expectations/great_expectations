@@ -1,7 +1,7 @@
 import logging
 import os
 import unittest.mock as mock
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 import pytest
@@ -33,7 +33,7 @@ def test_basic_checkpoint_config_validation(
 ):
     yaml_config_erroneous: str
     config_erroneous: CommentedMap
-    checkpoint_config: CheckpointConfig
+    checkpoint_config: Union[CheckpointConfig, dict]
     checkpoint: Checkpoint
 
     yaml_config_erroneous = f"""
@@ -143,10 +143,10 @@ def test_basic_checkpoint_config_validation(
 
     config: CommentedMap = yaml.load(yaml_config)
     checkpoint_config = CheckpointConfig(**config)
+    checkpoint_config = checkpoint_config.to_json_dict()
     checkpoint = Checkpoint(
         data_context=empty_data_context,
-        name="my_checkpoint",
-        checkpoint_config=checkpoint_config,
+        **checkpoint_config,
     )
     assert (
         filter_properties_dict(
@@ -885,6 +885,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     }
 
     checkpoint_config_dict = {
+        "name": "my_checkpoint",
         "validation_operator_name": "action_list_operator",
         "batches": [
             {"batch_kwargs": batch_kwargs, "expectation_suite_names": ["my_suite"]}
@@ -893,8 +894,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
     checkpoint = LegacyCheckpoint(
         data_context=filesystem_csv_data_context,
-        name="my_checkpoint",
-        checkpoint_config=checkpoint_config_dict,
+        **checkpoint_config_dict,
     )
 
     with pytest.raises(
@@ -1058,9 +1058,8 @@ def test_newstyle_checkpoint_config_substitution_simple(
     )
 
     simplified_checkpoint = Checkpoint(
-        name=simplified_checkpoint_config.name,
         data_context=context,
-        checkpoint_config=simplified_checkpoint_config,
+        **simplified_checkpoint_config.to_json_dict(),
     )
 
     # template only
