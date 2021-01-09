@@ -1203,7 +1203,6 @@ We could not determine the format of the file. What is it?
                     batch = datasource.get_batch(batch_kwargs=batch_kwargs)
                     break
         else:
-            # TODO: read the file and confirm with user that we read it correctly (headers, columns, etc.)
             try:
                 batch_kwargs["reader_method"] = reader_method
                 if isinstance(datasource, SparkDFDatasource) and reader_method == "csv":

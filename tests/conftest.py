@@ -3217,7 +3217,7 @@ data_connectors:
         class_name: RuntimeDataConnector
         runtime_keys:
         - pipeline_stage_name
-        - run_id
+        - airflow_run_id
         - custom_key_0
 
 execution_engine:

@@ -201,7 +201,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         )
 
         if isinstance(batch_spec, RuntimeDataBatchSpec):
+            # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
+            batch_spec.batch_data = "SparkDataFrame"
         elif isinstance(batch_spec, (PathBatchSpec, S3BatchSpec)):
             reader_method: str = batch_spec.get("reader_method")
             reader_options: dict = batch_spec.get("reader_options") or {}
