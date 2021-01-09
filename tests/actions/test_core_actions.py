@@ -25,7 +25,7 @@ from great_expectations.validation_operators import (
 class MockTeamsResponse:
     def __init__(self, status_code):
         self.status_code = status_code
-        self.text = "HELLO"
+        self.text = "test_text"
 
 
 @freeze_time("09/26/2019 13:42:41")
