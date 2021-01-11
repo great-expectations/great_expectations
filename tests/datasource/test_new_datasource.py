@@ -47,7 +47,7 @@ data_connectors:
         class_name: RuntimeDataConnector
         runtime_keys:
             - pipeline_stage_name
-            - run_id
+            - airflow_run_id
 
     my_filesystem_data_connector:
         class_name: ConfiguredAssetFilesystemDataConnector
@@ -100,7 +100,7 @@ data_connectors:
         class_name: RuntimeDataConnector
         runtime_keys:
             - pipeline_stage_name
-            - run_id
+            - airflow_run_id
     simple_filesystem_data_connector:
         class_name: InferredAssetFilesystemDataConnector
         base_directory: {base_directory}
@@ -141,7 +141,7 @@ data_connectors:
         class_name: RuntimeDataConnector
         runtime_keys:
             - pipeline_stage_name
-            - run_id
+            - airflow_run_id
 
     my_filesystem_data_connector:
         class_name: InferredAssetFilesystemDataConnector
@@ -430,7 +430,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource):
         "batch_data": test_df,
         "partition_request": {
             "partition_identifiers": {
-                "run_id": 1234567890,
+                "airflow_run_id": 1234567890,
             }
         },
         "limit": None,
@@ -497,7 +497,7 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
         "batch_data": test_df,
         "partition_request": {
             "partition_identifiers": {
-                "run_id": 1234567890,
+                "airflow_run_id": 1234567890,
             }
         },
         "limit": None,
@@ -613,7 +613,7 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
         "batch_data": test_df,
         "partition_request": {
             "partition_identifiers": {
-                "run_id": 1234567890,
+                "airflow_run_id": 1234567890,
             },
             "limit": None,
         },
