@@ -1254,8 +1254,8 @@ def _get_batch_kwargs_for_sqlalchemy_datasource(
     datasource = context.get_datasource(datasource_name)
     msg_prompt_how_to_connect_to_data = """
 You have selected a datasource that is a SQL database. How would you like to specify the data?
-1. Name the table and schema I am interested in
-2. Input a custom SQL query
+1. Name the schema and table (SELECT from a single table)
+2. Input a custom SQL query (with additional SQL clauses e.g. WHERE/JOIN/GROUP BY)
 3. Search for the table to add (will display all tables in database)
 """
     default_schema = _get_default_schema(datasource)
@@ -1282,7 +1282,6 @@ You have selected a datasource that is a SQL database. How would you like to spe
             data_asset_name = "custom_sql_query"
 
         elif single_or_multiple_data_asset_selection == "3":  # list it all
-            # how can we change the color here?
             msg_prompt_warning = f"""Warning: If you have a large number of tables in your datasource, this may take a very long time. \m
                     Would you like to continue?"""
             confirmation = click.prompt(
