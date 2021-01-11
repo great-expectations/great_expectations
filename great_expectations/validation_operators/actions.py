@@ -91,6 +91,7 @@ class SlackNotificationAction(ValidationAction):
         action:
           class_name: StoreValidationResultAction
           # put the actual webhook URL in the uncommitted/config_variables.yml file
+          # or pass in as environment variable
           slack_webhook: ${validation_notification_slack_webhook}
           notify_on: all # possible values: "all", "failure", "success"
           notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
@@ -297,6 +298,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         action:
           class_name: MicrosoftTeamsNotificationAction
           # put the actual webhook URL in the uncommitted/config_variables.yml file
+          # or pass in as environment variable
           microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
           notify_on: all # possible values: "all", "failure", "success"
           renderer:
@@ -409,6 +411,7 @@ class OpsgenieAlertAction(ValidationAction):
         action:
           class_name: OpsgenieAlertAction
           # put the actual webhook URL in the uncommitted/config_variables.yml file
+          # or pass in as environment variable
           api_key: ${opsgenie_api_key} # Opsgenie API key
           region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise leave empty
           priority: specify the priority of the alert (P1 - P5) defaults to P3

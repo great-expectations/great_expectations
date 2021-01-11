@@ -182,25 +182,13 @@ class MicrosoftTeamsRenderer(Renderer):
 
     @staticmethod
     def _render_validation_result_element(key, value, validation_result=None):
-
+        validation_result_element = {
+            "type": "TextBlock",
+            "text": "**{key}:** {value}".format(key=key, value=value),
+            "horizontalAlignment": "left",
+        }
         if validation_result and validation_result.success:
-            validation_result_element = {
-                "type": "TextBlock",
-                "text": "**{key}:** {value}".format(key=key, value=value),
-                "horizontalAlignment": "left",
-                "color": "good",
-            }
+            validation_result_element["color"] = "good"
         elif validation_result and not validation_result.success:
-            validation_result_element = {
-                "type": "TextBlock",
-                "text": "**{key}:** {value}".format(key=key, value=value),
-                "horizontalAlignment": "left",
-                "color": "attention",
-            }
-        else:
-            validation_result_element = {
-                "type": "TextBlock",
-                "text": "**{key}:** {value}".format(key=key, value=value),
-                "horizontalAlignment": "left",
-            }
+            validation_result_element["color"] = "attention"
         return validation_result_element

@@ -1,3 +1,4 @@
+import logging
 from unittest import mock
 
 import pytest
@@ -20,6 +21,8 @@ from great_expectations.validation_operators import (
     SlackNotificationAction,
     StoreValidationResultAction,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class MockTeamsResponse:
@@ -325,7 +328,9 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
     data_context_parameterized_expectation_suite,
     validation_result_suite,
     validation_result_suite_extended_id,
+    caplog,
 ):
+    caplog.set_level(logging.WARNING)
     renderer = {
         "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
         "class_name": "MicrosoftTeamsRenderer",
@@ -347,6 +352,11 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
             data_asset=None,
         )
         == {"microsoft_teams_notification_result": None}
+    )
+
+    assert (
+        "Request to Microsoft Teams webhook at http://testing returned error 400"
+        in caplog.text
     )
 
 
