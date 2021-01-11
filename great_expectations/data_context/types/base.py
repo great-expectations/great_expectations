@@ -1206,9 +1206,6 @@ class DataContextConfig(SerializableDictDot):
             commented_map = CommentedMap()
         self._commented_map = commented_map
         self._config_version = config_version
-        if datasources is None:
-            datasources = {}
-        self.datasources = datasources
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
@@ -1229,6 +1226,7 @@ class DataContextConfig(SerializableDictDot):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
+        self.datasources = datasources
 
     @property
     def commented_map(self):

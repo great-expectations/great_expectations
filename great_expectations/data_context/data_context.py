@@ -283,6 +283,9 @@ class BaseDataContext:
         # Store cached datasources but don't init them
         self._cached_datasources = {}
 
+        # build the datasources, but don't worry about the ones that we can't handle yet.
+        self._init_datasources(self._project_config_with_variables_substituted)
+
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
@@ -355,9 +358,17 @@ class BaseDataContext:
 
         Note that stores do NOT manage plugins.
         """
-
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
+
+    # make this a better comment
+    def _init_datasources(self, config):
+        for datasource in config.datasources:
+            try:
+                self._cached_datasources[datasource] = self.get_datasource(datasource_name=datasource)
+            except ge_exceptions.DatasourceInitializationError:
+                # if the configuration is old, then we dont worry about it
+                pass
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
@@ -695,6 +706,10 @@ class BaseDataContext:
         )
 
     @property
+    def project_config_with_variables_substituted(self):
+        return self.get_config_with_variables_substituted()
+
+    @property
     def _project_config_with_variables_substituted(self):
         return self.get_config_with_variables_substituted()
 
@@ -716,10 +731,7 @@ class BaseDataContext:
     @property
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         """A single holder for all Datasources in this context"""
-        return {
-            datasource: self.get_datasource(datasource_name=datasource)
-            for datasource in self._project_config_with_variables_substituted.datasources
-        }
+        return self._cached_datasources
 
     @property
     def expectations_store_name(self):
@@ -1114,7 +1126,6 @@ class BaseDataContext:
         This method attempts to return exactly one batch.
         If 0 or more than 1 batches would be returned, it raises an error.
         """
-
         batch_list: List[Batch] = self.get_batch_list(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -1223,7 +1234,7 @@ class BaseDataContext:
         Returns "v2" if the datasource is an instance of the LegacyDatasource class.
         """
 
-        if not self.datasources:
+        if self.datasources is {}:
             return None
 
         if {
@@ -1625,7 +1636,8 @@ class BaseDataContext:
     ) -> Union[LegacyDatasource, BaseDatasource]:
         """Instantiate a new datasource to the data context, with configuration provided as kwargs.
         Args:
-            kwargs (keyword arguments): the configuration for the new datasource
+            name(str): name of datasource
+            config(dict): dictionary of configuration
 
         Returns:
             datasource (Datasource)
@@ -1633,6 +1645,7 @@ class BaseDataContext:
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
+
         try:
             datasource: Union[
                 LegacyDatasource, BaseDatasource
@@ -1739,9 +1752,7 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
-
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config(
