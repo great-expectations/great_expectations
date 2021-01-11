@@ -49,7 +49,6 @@ from great_expectations.data_context.types.base import (
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
-    CheckpointConfigDefaults,
     DataContextConfig,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
@@ -76,7 +75,10 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    verify_dynamic_loading_support,
+)
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -2697,10 +2699,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
     def add_checkpoint(
         self,
-        checkpoint_name: str,
-        checkpoint_config: Optional[Union[CheckpointConfig, dict]] = None,
+        name: str,
         config_version: Optional[Union[int, float]] = None,
-        template: Optional[str] = None,
+        template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
@@ -2714,60 +2715,50 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        commented_map: Optional[CommentedMap] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
-        if not checkpoint_config:
-            checkpoint_config = {
-                "name": checkpoint_name,
-                "config_version": config_version,
-                "template": template,
-                "module_name": module_name,
-                "class_name": class_name,
-                "run_name_template": run_name_template,
-                "expectation_suite_name": expectation_suite_name,
-                "batch_request": batch_request,
-                "action_list": action_list,
-                "evaluation_parameters": evaluation_parameters,
-                "runtime_configuration": runtime_configuration,
-                "validations": validations,
-                "profilers": profilers,
-                # Next two fields are for LegacyCheckpoint configuration
-                "validation_operator_name": validation_operator_name,
-                "batches": batches,
-                "commented_map": commented_map,
-            }
-
-        if isinstance(checkpoint_config, dict):
-            checkpoint_config = CheckpointConfig(**checkpoint_config)
-
+        checkpoint_config: Union[CheckpointConfig, dict]
+        checkpoint_config = {
+            "name": name,
+            "config_version": config_version,
+            "template_name": template_name,
+            "module_name": module_name,
+            "class_name": class_name,
+            "run_name_template": run_name_template,
+            "expectation_suite_name": expectation_suite_name,
+            "batch_request": batch_request,
+            "action_list": action_list,
+            "evaluation_parameters": evaluation_parameters,
+            "runtime_configuration": runtime_configuration,
+            "validations": validations,
+            "profilers": profilers,
+            # Next two fields are for LegacyCheckpoint configuration
+            "validation_operator_name": validation_operator_name,
+            "batches": batches,
+        }
+        checkpoint_config = filter_properties_dict(properties=checkpoint_config)
         new_checkpoint: Union[
             Checkpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
-            config={
-                "checkpoint_config": checkpoint_config,
-                "class_name": checkpoint_config.class_name,
-            },
+            config=checkpoint_config,
             runtime_environment={
                 "data_context": self,
-                "name": checkpoint_name,
             },
             config_defaults={
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
         )
-
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=checkpoint_name,
+            configuration_key=name,
         )
+        checkpoint_config = CheckpointConfig(**checkpoint_config)
         self.checkpoint_store.set(key=key, value=checkpoint_config)
-
         return new_checkpoint
 
     def get_checkpoint(
-        self, checkpoint_name: str, return_config: bool = True
+        self, name: str, return_config: bool = True
     ) -> Union[CheckpointConfig, Checkpoint, LegacyCheckpoint]:
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=checkpoint_name,
+            configuration_key=name,
         )
         try:
             checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
@@ -2808,14 +2799,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if return_config:
             return checkpoint_config
 
+        config: dict = checkpoint_config.to_json_dict()
+        config.update({"name": name})
+        config = filter_properties_dict(properties=config)
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
-            config={
-                "checkpoint_config": checkpoint_config,
-                "class_name": checkpoint_config.class_name,
-            },
+            config=config,
             runtime_environment={
                 "data_context": self,
-                "name": checkpoint_name,
             },
             config_defaults={
                 "module_name": "great_expectations.checkpoint",
@@ -2827,7 +2817,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def list_checkpoints(self) -> List[str]:
         return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 
-    # TODO: <Alex>ALEX/Rob</Alex>
     def run_checkpoint(
         self,
         checkpoint_name: str,
@@ -2862,7 +2851,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             result_format = {"result_format": "SUMMARY"}
 
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
-            checkpoint_name=checkpoint_name,
+            name=checkpoint_name,
             return_config=False,
         )
 
@@ -2964,7 +2953,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if "class_name" in config:
             class_name = config["class_name"]
 
-        instantiated_class: Union[Any]
+        instantiated_class: Any
+
         try:
             if class_name in [
                 "ExpectationsStore",
@@ -3007,25 +2997,29 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
                 )
 
-                checkpoint_config: CheckpointConfig = (
-                    CheckpointConfig.from_commented_map(commented_map=config)
-                )
-
                 checkpoint_name: str = name or "my_temp_checkpoint"
+
+                checkpoint_config: Union[CheckpointConfig, dict]
+
+                checkpoint_config = CheckpointConfig.from_commented_map(
+                    commented_map=config
+                )
+                checkpoint_config = checkpoint_config.to_json_dict()
+                checkpoint_config.update({"name": checkpoint_name})
+
                 instantiated_class = Checkpoint(
                     data_context=self,
-                    name=checkpoint_name,
-                    checkpoint_config=checkpoint_config,
+                    **checkpoint_config,
                 )
 
                 checkpoint_config = CheckpointConfig.from_commented_map(
                     commented_map=instantiated_class.config.commented_map
                 )
+                checkpoint_config = checkpoint_config.to_json_dict()
 
                 # noinspection PyUnusedLocal
                 checkpoint: Checkpoint = self.add_checkpoint(
-                    checkpoint_name=checkpoint_name,
-                    checkpoint_config=checkpoint_config,
+                    **checkpoint_config,
                 )
             else:
                 print(

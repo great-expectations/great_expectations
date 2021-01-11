@@ -2,7 +2,7 @@ import copy
 import json
 import logging
 from datetime import datetime
-from typing import Any, List, Optional, Union
+from typing import List, Optional, Union
 
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import nested_update
@@ -22,19 +22,45 @@ class Checkpoint:
         self,
         name: str,
         data_context,
-        checkpoint_config: Union[CheckpointConfig, dict],
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
     ):
-        self._data_context = data_context
         self._name = name
+        self._data_context = data_context
 
-        if not isinstance(checkpoint_config, (CheckpointConfig, dict)):
-            raise CheckpointError(
-                f"Invalid checkpoint_config type - must be CheckpointConfig or "
-                f"dict, "
-                f"instead got {type(checkpoint_config)}"
-            )
-        elif isinstance(checkpoint_config, dict):
-            checkpoint_config = CheckpointConfig(**checkpoint_config)
+        checkpoint_config: CheckpointConfig = CheckpointConfig(
+            **{
+                "name": name,
+                "config_version": config_version,
+                "template_name": template_name,
+                "module_name": module_name,
+                "class_name": class_name,
+                "run_name_template": run_name_template,
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request,
+                "action_list": action_list,
+                "evaluation_parameters": evaluation_parameters,
+                "runtime_configuration": runtime_configuration,
+                "validations": validations,
+                "profilers": profilers,
+                # Next two fields are for LegacyCheckpoint configuration
+                "validation_operator_name": validation_operator_name,
+                "batches": batches,
+            }
+        )
         self._config = checkpoint_config
 
         self._substituted_config = None
@@ -83,7 +109,7 @@ class Checkpoint:
                 return substituted_config
             else:
                 template_config = self.data_context.get_checkpoint(
-                    checkpoint_name=template_name, return_config=True
+                    name=template_name, return_config=True
                 )
 
                 if template_config.config_version != config.config_version:
@@ -175,6 +201,7 @@ class Checkpoint:
         self._validate_validation_dict(substituted_validation_dict)
         return substituted_validation_dict
 
+    # TODO: <Alex>ALEX/Rob -- since this method is static, should we move it to a "util" type of a module?</Alex>
     def get_run_name_from_template(self, run_name_template: str):
         now = datetime.now()
         return now.strftime(run_name_template)
@@ -329,12 +356,14 @@ class LegacyCheckpoint(Checkpoint):
         self,
         name: str,
         data_context,
-        checkpoint_config: Union[CheckpointConfig, dict],
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
     ):
         super().__init__(
             name=name,
             data_context=data_context,
-            checkpoint_config=checkpoint_config,
+            validation_operator_name=validation_operator_name,
+            batches=batches,
         )
 
     @property

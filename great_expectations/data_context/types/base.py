@@ -1403,6 +1403,7 @@ class CheckpointConfigSchema(Schema):
     config_version = fields.Number(
         validate=lambda x: (0 < x < 100) or x is None,
         error_messages={"invalid": "config version must " "be a number or None."},
+        required=False,
         allow_none=True,
     )
     template_name = fields.String(required=False, allow_none=True)
