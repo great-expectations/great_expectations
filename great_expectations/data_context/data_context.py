@@ -365,7 +365,9 @@ class BaseDataContext:
     def _init_datasources(self, config):
         for datasource in config.datasources:
             try:
-                self._cached_datasources[datasource] = self.get_datasource(datasource_name=datasource)
+                self._cached_datasources[datasource] = self.get_datasource(
+                    datasource_name=datasource
+                )
             except ge_exceptions.DatasourceInitializationError:
                 # if the configuration is old, then we dont worry about it
                 pass
