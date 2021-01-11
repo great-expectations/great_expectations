@@ -942,7 +942,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         configuration_key=checkpoint_config.name
     )
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
-    checkpoint = context.get_checkpoint(checkpoint_config.name, return_config=False)
+    checkpoint = context.get_checkpoint(checkpoint_config.name)
 
     with pytest.raises(
         ge_exceptions.DataContextError, match=r"expectation_suite .* not found"

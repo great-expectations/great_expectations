@@ -116,9 +116,8 @@ class Checkpoint:
 
                 self._substituted_config = substituted_config
             else:
-                template_config = self.data_context.get_checkpoint(
-                    name=template_name, return_config=True
-                )
+                checkpoint = self.data_context.get_checkpoint(name=template_name)
+                template_config = checkpoint.config
 
                 if template_config.config_version != config.config_version:
                     raise CheckpointError(

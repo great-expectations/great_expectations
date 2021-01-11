@@ -8,6 +8,7 @@ from freezegun import freeze_time
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -1597,26 +1598,31 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
 def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     obs = context.get_checkpoint("my_checkpoint")
-    assert isinstance(obs.to_json_dict(), dict)
-    assert {
-        "validation_operator_name": "action_list_operator",
+    assert isinstance(obs, Checkpoint)
+    config = obs.config
+    assert isinstance(config.to_json_dict(), dict)
+    assert config.to_json_dict() == {
+        "class_name": "LegacyCheckpoint",
+        "config_version": None,
+        "name": "my_checkpoint",
         "batches": [
             {
                 "batch_kwargs": {
-                    "path": "/Users/me/projects/my_project/data/data.csv",
                     "datasource": "my_filesystem_datasource",
+                    "path": "/Users/me/projects/my_project/data/data.csv",
                     "reader_method": "read_csv",
                 },
                 "expectation_suite_names": ["suite_one", "suite_two"],
             },
             {
                 "batch_kwargs": {
-                    "query": "SELECT * FROM users WHERE status = 1",
                     "datasource": "my_redshift_datasource",
+                    "query": "SELECT * FROM users WHERE status = 1",
                 },
                 "expectation_suite_names": ["suite_three"],
             },
         ],
+        "validation_operator_name": "action_list_operator",
     }
 
 
@@ -1633,15 +1639,15 @@ def test_get_checkpoint_default_validation_operator(empty_data_context):
     assert os.path.isfile(checkpoint_file_path)
 
     obs = context.get_checkpoint("foo")
-    assert isinstance(obs.to_json_dict(), dict)
+    assert isinstance(obs, Checkpoint)
+    assert isinstance(obs.config.to_json_dict(), dict)
     expected = {
         "class_name": "LegacyCheckpoint",
         "config_version": None,
-        "name": None,
+        "name": "foo",
         "validation_operator_name": "action_list_operator",
-        "batches": [],
     }
-    assert obs.to_json_dict() == expected
+    assert obs.config.to_json_dict() == expected
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
