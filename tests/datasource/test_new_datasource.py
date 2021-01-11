@@ -710,3 +710,91 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
 
 def test_get_available_data_asset_names_with_caching():
     pass
+
+
+def test__data_source_batch_spec_passthrough(tmp_path_factory):
+    base_directory = str(
+        tmp_path_factory.mktemp("data_connector_batch_spec_passthrough")
+    )
+    with open(
+        os.path.join(base_directory, "csv_with_extra_header_rows.csv"), "w"
+    ) as f_:
+        f_.write(
+            """--- extra ---
+--- extra ---
+x,y
+0,a
+1,b
+2,c
+3,d
+4,e
+5,f
+6,g
+7,h
+8,i
+9,j
+"""
+        )
+
+    my_datasource: Datasource = instantiate_class_from_config(
+        yaml.load(
+            f"""
+class_name: Datasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+
+    my_configured_data_connector:
+        module_name: great_expectations.datasource.data_connector
+        class_name: ConfiguredAssetFilesystemDataConnector
+
+        base_directory: {base_directory}
+        glob_directive: "*.csv"
+        default_regex:
+            pattern: "(.*)"
+            group_names:
+                - file_name
+        assets:
+            stuff:
+                batch_spec_passthrough:
+                    reader_options:
+                        skiprows: 2
+
+
+    my_inferred_data_connector:
+        module_name: great_expectations.datasource.data_connector
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: {base_directory}
+        batch_spec_passthrough:
+            reader_options:
+                skiprows: 2
+
+        default_regex:
+            pattern: (.*)\.csv
+            group_names:
+                - data_asset_name
+    """,
+        ),
+        runtime_environment={"name": "my_datasource"},
+        config_defaults={"module_name": "great_expectations.datasource"},
+    )
+
+    report_obj = my_datasource.self_check()
+
+    print(json.dumps(report_obj, indent=2))
+
+    assert (
+        report_obj["data_connectors"]["my_configured_data_connector"][
+            "example_data_reference"
+        ]["n_rows"]
+        == 10
+    )
+
+    assert (
+        report_obj["data_connectors"]["my_inferred_data_connector"][
+            "example_data_reference"
+        ]["n_rows"]
+        == 10
+    )
