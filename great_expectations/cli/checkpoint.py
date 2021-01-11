@@ -190,8 +190,8 @@ def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
         _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
 
         _ = context.add_checkpoint(
-            checkpoint,
-            {
+            name=checkpoint,
+            **{
                 "class_name": "LegacyCheckpoint",
                 "validation_operator_name": "action_list_operator",
                 "batches": [

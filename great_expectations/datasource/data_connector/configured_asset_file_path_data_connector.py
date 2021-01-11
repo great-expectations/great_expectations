@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
+from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.file_path_data_connector import (
@@ -74,21 +75,20 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         for name, asset_config in config.items():
             if asset_config is None:
                 asset_config = {}
+            asset_config.update({"name": name})
             new_asset: Asset = self._build_asset_from_config(
-                name=name,
                 config=asset_config,
             )
             self.assets[name] = new_asset
 
-    def _build_asset_from_config(self, name: str, config: dict):
-        runtime_environment: dict = {"name": name, "data_connector": self}
+    def _build_asset_from_config(self, config: dict):
+        runtime_environment: dict = {"data_connector": self}
+        config = assetConfigSchema.load(config)
+        config = assetConfigSchema.dump(config)
         asset: Asset = instantiate_class_from_config(
             config=config,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector.asset",
-                "class_name": "Asset",
-            },
+            config_defaults={},
         )
         if not asset:
             raise ge_exceptions.ClassInstantiationError(

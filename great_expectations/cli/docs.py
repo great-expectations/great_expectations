@@ -145,7 +145,7 @@ def build_docs(context, site_name=None, view=True, assume_yes=False):
         toolkit.confirm_proceed_or_exit()
 
     cli_message("\nBuilding Data Docs...\n")
-    index_page_locator_infos = context.build_data_docs(site_names=site_names)
+    context.build_data_docs(site_names=site_names)
 
     cli_message("Done building Data Docs")
 
