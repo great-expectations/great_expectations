@@ -8,16 +8,15 @@ from typing import Dict, List, Optional, Union
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import RunIdentifier
-from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import (
     get_datetime_string_from_strftime_format,
     nested_update,
-    substitute_all_strftime_format_strings,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions import CheckpointError
+from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
