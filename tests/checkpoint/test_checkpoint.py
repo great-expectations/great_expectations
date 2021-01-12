@@ -1466,9 +1466,8 @@ def test_newstyle_checkpoint_config_substitution_nested(
         ],
     )
     nested_checkpoint = Checkpoint(
-        name=nested_checkpoint_config.name,
         data_context=context,
-        checkpoint_config=nested_checkpoint_config,
+        **nested_checkpoint_config.to_json_dict(),
     )
 
     # template only
