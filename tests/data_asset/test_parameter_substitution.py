@@ -39,7 +39,7 @@ def single_expectation_custom_data_asset():
 
 @pytest.fixture
 def validator_with_titanic_1911_asset(
-    titanic_pandas_multibatch_data_context_with_013_datasource,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
     class ExpectNothing(Expectation):
         success_keys = ("expectation_argument",)
@@ -59,15 +59,15 @@ def validator_with_titanic_1911_asset(
 
     register_expectation(ExpectNothing)
 
-    titanic_pandas_multibatch_data_context_with_013_datasource.create_expectation_suite(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1.create_expectation_suite(
         expectation_suite_name="titanic_1911_suite"
     )
     batch_request = BatchRequest(
-        datasource_name="titanic_multi_batch",
-        data_connector_name="my_data_connector",
+        datasource_name="my_datasource",
+        data_connector_name="my_basic_data_connector",
         data_asset_name="Titanic_1911",
     )
-    return titanic_pandas_multibatch_data_context_with_013_datasource.get_validator(
+    return titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1.get_validator(
         batch_request=batch_request, expectation_suite_name="titanic_1911_suite"
     )
 

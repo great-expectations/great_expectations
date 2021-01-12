@@ -11,6 +11,7 @@ from ruamel.yaml.compat import StringIO
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
@@ -20,17 +21,15 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.types.base import MINIMUM_SUPPORTED_CONFIG_VERSION
+from great_expectations.data_context.types.base import (
+    MINIMUM_SUPPORTED_CONFIG_VERSION,
+    CheckpointConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.datasource import Datasource
-from great_expectations.exceptions import (
-    CheckpointError,
-    CheckpointNotFoundError,
-    InvalidKeyError,
-)
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 
@@ -347,14 +346,17 @@ def load_checkpoint(
     checkpoint_name: str,
     usage_event: str,
     return_config: bool = True,
-) -> dict:
+) -> Union[CheckpointConfig, Checkpoint, LegacyCheckpoint]:
     """Load a checkpoint or raise helpful errors."""
     try:
         checkpoint_config = context.get_checkpoint(
             checkpoint_name, return_config=return_config
         )
         return checkpoint_config
-    except InvalidKeyError as e:
+    except (
+        ge_exceptions.CheckpointNotFoundError,
+        ge_exceptions.InvalidCheckpointConfigError,
+    ):
         exit_with_failure_message_and_stats(
             context,
             usage_event,
@@ -363,7 +365,7 @@ def load_checkpoint(
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
-    except CheckpointError as e:
+    except ge_exceptions.CheckpointError as e:
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 

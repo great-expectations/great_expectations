@@ -303,10 +303,10 @@ data_connectors:
 
 
 def test_in_memory_data_context_configuration(
-    titanic_pandas_multibatch_data_context_with_013_datasource,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
 ):
     project_config_dict: dict = (
-        titanic_pandas_multibatch_data_context_with_013_datasource.get_config(
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1.get_config(
             mode="dict"
         )
     )
@@ -333,12 +333,12 @@ def test_in_memory_data_context_configuration(
     project_config: DataContextConfig = DataContextConfig(**project_config_dict)
     data_context = BaseDataContext(
         project_config=project_config,
-        context_root_dir=titanic_pandas_multibatch_data_context_with_013_datasource.root_directory,
+        context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1.root_directory,
     )
 
     my_validator: Validator = data_context.get_validator(
-        datasource_name="titanic_multi_batch",
-        data_connector_name="my_data_connector",
+        datasource_name="my_datasource",
+        data_connector_name="my_basic_data_connector",
         data_asset_name="Titanic_1912",
         create_expectation_suite_with_name="my_test_titanic_expectation_suite",
     )
