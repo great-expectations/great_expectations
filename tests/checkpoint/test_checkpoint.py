@@ -29,18 +29,14 @@ logger = logging.getLogger(__name__)
 
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
     with pytest.raises(TypeError):
-        Checkpoint(
-            data_context="foo",
-            name="my_checkpoint",
-            checkpoint_config={},
-        )
+        Checkpoint(name="my_checkpoint", data_context="foo", config_version=1)
 
 
 def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context):
     checkpoint = Checkpoint(
         "foo",
         empty_data_context,
-        checkpoint_config={"action_list": [{"foo": "bar"}]},
+        config_version=None,
     )
     with pytest.raises(AttributeError):
         checkpoint.action_list
@@ -48,9 +44,7 @@ def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context
 
 def test_checkpoint_with_config_version_has_action_list(empty_data_context):
     checkpoint = Checkpoint(
-        "foo",
-        empty_data_context,
-        checkpoint_config={"config_version": 1, "action_list": [{"foo": "bar"}]},
+        "foo", empty_data_context, config_version=1, action_list=[{"foo": "bar"}]
     )
     obs = checkpoint.action_list
     assert isinstance(obs, list)

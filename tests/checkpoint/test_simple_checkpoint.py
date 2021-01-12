@@ -469,9 +469,9 @@ def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
         expectation_suite_name="one",
         validations=[{"expectation_suite_name": "one"}],
     )
-    # TODO why is this returning nothing?
     assert isinstance(result, CheckpointResult)
     assert result.success
+    assert len(result.run_results) == 1
 
 
 def test_simple_checkpoint_defaults_run_multiple_validations_without_persistence(
