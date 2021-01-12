@@ -924,11 +924,14 @@ class DataContextConfigSchema(Schema):
                 validation_error=ValidationError(message="config version too high"),
             )
 
-        if data["config_version"] < CURRENT_GE_CONFIG_VERSION and any(
-            [
-                store_config["class_name"] == "CheckpointStore"
-                for store_config in data["stores"].values()
-            ]
+        if data["config_version"] < CURRENT_GE_CONFIG_VERSION and (
+            data["checkpoint_store_name"]
+            or any(
+                [
+                    store_config["class_name"] == "CheckpointStore"
+                    for store_config in data["stores"].values()
+                ]
+            )
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
                 "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this configuration version uses legacy datasources, which cannot be used with a checkpoint store.  Please update your Datasource and the version number to {} before adding a checkpoint store.".format(
