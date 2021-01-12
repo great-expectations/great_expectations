@@ -75,16 +75,9 @@ def simple_checkpoint_defaults(context_with_data_source_and_empty_suite):
 
 
 @pytest.fixture
-def two_validations():
+def two_validations(one_validation):
     return [
-        {
-            "batch_request": {
-                "datasource_name": "my_datasource",
-                "data_connector_name": "my_special_data_connector",
-                "data_asset_name": "users",
-            },
-            "expectation_suite_name": "one",
-        },
+        one_validation,
         {
             "batch_request": {
                 "datasource_name": "my_datasource",
@@ -347,7 +340,7 @@ def test_simple_checkpoint_has_no_update_data_docs_action_when_site_names_is_non
 
 
 def test_simple_checkpoint_persisted_to_store(
-    context_with_data_source_and_empty_suite, webhook
+    context_with_data_source_and_empty_suite, webhook, one_validation
 ):
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
     initial_checkpoint = SimpleCheckpointBuilder(
@@ -390,18 +383,7 @@ def test_simple_checkpoint_persisted_to_store(
         "template_name": None,
         "validations": [],
     }
-    results = checkpoint.run(
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                },
-                "expectation_suite_name": "one",
-            }
-        ]
-    )
+    results = checkpoint.run(validations=[one_validation])
     assert results.success
 
 
@@ -417,22 +399,13 @@ def test_simple_checkpoint_defaults_run_and_no_run_params_returns_empty_checkpoi
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_checkpoint(
-    context_with_data_source_and_empty_suite, simple_checkpoint_defaults
+    context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
     # verify checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
     result = simple_checkpoint_defaults.run(
         run_name="bar",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    # TODO Alex why is a lack of data_asset_name working here?
-                },
-                "expectation_suite_name": "one",
-            },
-        ],
+        validations=[one_validation],
     )
     assert isinstance(result, CheckpointResult)
     assert result.run_id.run_name == "bar"
@@ -442,7 +415,10 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_checkpoint_loaded_from_store(
-    context_with_data_source_and_empty_suite, simple_checkpoint_defaults, webhook
+    context_with_data_source_and_empty_suite,
+    simple_checkpoint_defaults,
+    webhook,
+    one_validation,
 ):
     context = context_with_data_source_and_empty_suite
     checkpoint = SimpleCheckpointBuilder(
@@ -458,22 +434,26 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
 
     result = checkpoint.run(
         run_name="bar",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                },
-                "expectation_suite_name": "one",
-            }
-        ],
+        validations=[one_validation],
     )
     assert isinstance(result, CheckpointResult)
     assert result.run_id.run_name == "bar"
     assert result.list_expectation_suite_names() == ["one"]
     assert len(result.list_validation_results()) == 1
     assert result.success
+
+
+@pytest.fixture
+def one_validation():
+    return {
+        "batch_request": {
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_special_data_connector",
+            # TODO Alex why does a lack of data_asset_name working here?
+            "data_asset_name": "users",
+        },
+        "expectation_suite_name": "one",
+    }
 
 
 def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
