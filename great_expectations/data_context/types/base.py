@@ -1,9 +1,10 @@
 import abc
 import enum
+import itertools
 import logging
 import uuid
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -20,6 +21,7 @@ from great_expectations.marshmallow__shade import (
     post_load,
     validates_schema,
 )
+from great_expectations.marshmallow__shade.exceptions import SCHEMA
 from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
@@ -29,7 +31,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 
 logger = logging.getLogger(__name__)
 
-CURRENT_GE_CONFIG_VERSION = 2
+CURRENT_GE_CONFIG_VERSION = 3
 CURRENT_CHECKPOINT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
@@ -865,9 +867,20 @@ class DataContextConfigSchema(Schema):
     # noinspection PyUnusedLocal
     def handle_error(self, exc, data, **kwargs):
         """Log and raise our custom exception when (de)serialization fails."""
-        logger.error(exc.messages)
+        if (
+            exc
+            and exc.messages
+            and isinstance(exc.messages, dict)
+            and all([key is None for key in exc.messages.keys()])
+        ):
+            exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
+
+        message: str = (
+            f"Error while processing DataContextConfig: {' '.join(exc.messages)}"
+        )
+        logger.error(message)
         raise ge_exceptions.InvalidDataContextConfigError(
-            "Error while processing DataContextConfig.", exc
+            message=message,
         )
 
     @validates_schema
@@ -875,19 +888,21 @@ class DataContextConfigSchema(Schema):
         if "config_version" not in data:
             raise ge_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` is missing; please check your config file.",
-                validation_error=ValidationError("no config_version key"),
+                validation_error=ValidationError(message="no config_version key"),
             )
 
         if not isinstance(data["config_version"], (int, float)):
             raise ge_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` must be a number. Please check your config file.",
-                validation_error=ValidationError("config version not a number"),
+                validation_error=ValidationError(message="config version not a number"),
             )
 
         # When migrating from 0.7.x to 0.8.0
-        if data["config_version"] == 0 and (
-            "validations_store" in list(data.keys())
-            or "validations_stores" in list(data.keys())
+        if data["config_version"] == 0 and any(
+            [
+                store_config["class_name"] == "ValidationsStore"
+                for store_config in data["stores"].values()
+            ]
         ):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
@@ -904,7 +919,23 @@ class DataContextConfigSchema(Schema):
                 "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
                     data["config_version"], CURRENT_GE_CONFIG_VERSION
                 ),
-                validation_error=ValidationError("config version too high"),
+                validation_error=ValidationError(message="config version too high"),
+            )
+        if data["config_version"] < CURRENT_GE_CONFIG_VERSION and any(
+            [
+                store_config["class_name"] == "CheckpointStore"
+                for store_config in data["stores"].values()
+            ]
+        ):
+            raise ge_exceptions.InvalidDataContextConfigError(
+                "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this configuration version uses legacy datasources, which cannot be used with a checkpoint store.  Please update your Datasource and the version number to {} before adding a checkpoint store.".format(
+                    data["config_version"], CURRENT_GE_CONFIG_VERSION
+                ),
+                validation_error=ValidationError(
+                    message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this configuration version uses legacy datasources, which cannot be used with a checkpoint store.  Please update your Datasource and the version number to {} before adding a checkpoint store.".format(
+                        data["config_version"], CURRENT_GE_CONFIG_VERSION
+                    )
+                ),
             )
 
 
@@ -1710,28 +1741,6 @@ class CheckpointValidationConfig(DictDot):
 
 class CheckpointValidationConfigSchema(Schema):
     pass
-
-
-# TODO: <Alex>Rob</Alex>
-# class SimpleCheckpointConfig(CheckpointConfig):
-#     def __init__(
-#             self,
-#             name: str,
-#             config_version: Optional[int] = None,
-#             template: Optional[str] = None,
-#             module_name: Optional[str] = None,
-#             class_name: Optional[str] = None,
-#             run_name_template: Optional[str] = None,
-#             expectation_suite_name: Optional[str] = None,
-#             batch_request: Optional[BatchRequest] = None,
-#             action_list: Optional[List[dict]] = None,
-#             evaluation_parameters: Optional[dict] = None,
-#             runtime_configuration: Optional[dict] = None,
-#             validations: Optional[List[dict]] = None,
-#             profilers: Optional[List[dict]] = None,
-#             commented_map: Optional[CommentedMap] = None,
-#     ):
-#         pass
 
 
 dataContextConfigSchema = DataContextConfigSchema()
