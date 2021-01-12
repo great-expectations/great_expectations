@@ -517,6 +517,3 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert sorted(result.list_expectation_suite_names()) == sorted(["one", "two"])
     assert len(result.list_validation_results()) == 2
     assert result.success
-
-
-# TODO what other combinations of run() params need to be tested?
