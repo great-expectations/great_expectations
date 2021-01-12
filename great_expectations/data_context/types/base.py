@@ -907,20 +907,23 @@ class DataContextConfigSchema(Schema):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
             )
-        elif data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
+
+        if data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to have an invalid config version ({}).\n    The version number must be at least {}. "
                 "Please see the migration guide at https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html".format(
                     data["config_version"], MINIMUM_SUPPORTED_CONFIG_VERSION
                 ),
             )
-        elif data["config_version"] > CURRENT_GE_CONFIG_VERSION:
+
+        if data["config_version"] > CURRENT_GE_CONFIG_VERSION:
             raise ge_exceptions.InvalidDataContextConfigError(
                 "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
                     data["config_version"], CURRENT_GE_CONFIG_VERSION
                 ),
                 validation_error=ValidationError(message="config version too high"),
             )
+
         if data["config_version"] < CURRENT_GE_CONFIG_VERSION and any(
             [
                 store_config["class_name"] == "CheckpointStore"
@@ -935,6 +938,16 @@ class DataContextConfigSchema(Schema):
                     message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this configuration version uses legacy datasources, which cannot be used with a checkpoint store.  Please update your Datasource and the version number to {} before adding a checkpoint store.".format(
                         data["config_version"], CURRENT_GE_CONFIG_VERSION
                     )
+                ),
+            )
+
+        if (
+            data["config_version"] >= CURRENT_GE_CONFIG_VERSION
+            and data["validation_operators"] is not None
+        ):
+            logger.warning(
+                "You appear to be using a legacy capability with config version ({}).\n    Your data context with this configuration version uses validation_operators, which have been deprecated.  Please update your configuration to be compatible with the version number {}.".format(
+                    data["config_version"], CURRENT_GE_CONFIG_VERSION
                 ),
             )
 
