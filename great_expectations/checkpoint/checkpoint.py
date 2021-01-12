@@ -228,6 +228,7 @@ class Checkpoint:
         self._validate_validation_dict(substituted_validation_dict)
         return substituted_validation_dict
 
+    # TODO: Add eval param processing using updated EvaluationParameterParser and parse_evaluation_parameters function
     def run(
         self,
         template_name: Optional[str] = None,
@@ -308,10 +309,7 @@ class Checkpoint:
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
                         run_id=run_id,
-                        evaluation_parameters=substitute_all_strftime_format_strings(
-                            substituted_validation_dict.get("evaluation_parameters"),
-                            datetime_obj=run_time,
-                        ),
+                        evaluation_parameters=substituted_validation_dict.get("evaluation_parameters"),
                         run_name=run_name,
                         run_time=run_time,
                         result_format=result_format,
