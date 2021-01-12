@@ -204,9 +204,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
-    # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
-    # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
-    # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
     validations:
       - batch_request:
           datasource_name: my_datasource
@@ -277,7 +275,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         ],
         "template_name": None,
         "module_name": "great_expectations.checkpoint",
-        "run_name_template": None,
+        "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
         "action_list": [],
@@ -322,9 +320,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
-    # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
-    # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
-    # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
     validations:
       - batch_request:
           datasource_name: my_datasource
@@ -408,7 +404,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         },
         "template_name": None,
         "module_name": "great_expectations.checkpoint",
-        "run_name_template": None,
+        "run_name_template": "%Y-%M-foo-bar-template-test",
         "batch_request": None,
         "profilers": [],
     }
@@ -683,9 +679,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     name: my_base_checkpoint
     config_version: 1
     class_name: Checkpoint
-    # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
-    # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
-    # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
     action_list:
     - name: store_validation_result
       action:
@@ -714,7 +708,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         "template_name": None,
         "module_name": "great_expectations.checkpoint",
         "class_name": "Checkpoint",
-        "run_name_template": None,
+        "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
         "action_list": [
