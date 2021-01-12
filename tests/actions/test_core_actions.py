@@ -1,6 +1,9 @@
+import logging
 from unittest import mock
 
+import pytest
 from freezegun import freeze_time
+from requests import Session
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -12,16 +15,20 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.validation_operators import (
+    MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
     PagerdutyAlertAction,
     SlackNotificationAction,
     StoreValidationResultAction,
 )
 
-try:
-    from unittest import mock
-except ImportError:
-    from unittest import mock
+logger = logging.getLogger(__name__)
+
+
+class MockTeamsResponse:
+    def __init__(self, status_code):
+        self.status_code = status_code
+        self.text = "test_text"
 
 
 @freeze_time("09/26/2019 13:42:41")
@@ -197,6 +204,159 @@ def test_OpsgenieAlertAction(
             data_asset=None,
         )
         == {"opsgenie_alert_result": "error"}
+    )
+
+
+@mock.patch.object(Session, "post", return_value=MockTeamsResponse(200))
+def test_MicrosoftTeamsNotificationAction_good_request(
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_extended_id,
+):
+    renderer = {
+        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+        "class_name": "MicrosoftTeamsRenderer",
+    }
+    teams_webhook = "http://testing"
+    notify_on = "all"
+    teams_action = MicrosoftTeamsNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        microsoft_teams_webhook=teams_webhook,
+        notify_on=notify_on,
+    )
+
+    # validation_result_suite is None
+    assert (
+        teams_action.run(
+            validation_result_suite_identifier=validation_result_suite_extended_id,
+            validation_result_suite=None,
+            data_asset=None,
+        )
+        is None
+    )
+
+    # if validation_result_suite_identifier is not ValidationResultIdentifier
+    with pytest.raises(TypeError):
+        teams_action.run(
+            validation_result_suite_identifier="i_wont_work",
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+
+    assert teams_action.run(
+        validation_result_suite_identifier=validation_result_suite_extended_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {
+        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
+    }
+
+    # notify_on = success will return "Microsoft Teams notification succeeded" message
+    # only if validation_result_suite.success = True
+    validation_result_suite.success = False
+    notify_on = "success"
+    teams_action = MicrosoftTeamsNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        microsoft_teams_webhook=teams_webhook,
+        notify_on=notify_on,
+    )
+    assert (
+        teams_action.run(
+            validation_result_suite_identifier=validation_result_suite_extended_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"microsoft_teams_notification_result": None}
+    )
+
+    validation_result_suite.success = True
+    notify_on = "success"
+    teams_action = MicrosoftTeamsNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        microsoft_teams_webhook=teams_webhook,
+        notify_on=notify_on,
+    )
+    assert teams_action.run(
+        validation_result_suite_identifier=validation_result_suite_extended_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {
+        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
+    }
+
+    # notify_on failure will return "Microsoft Teams notification succeeded" message
+    # only if validation_result_suite.success = False
+    validation_result_suite.success = False
+    notify_on = "failure"
+    teams_action = MicrosoftTeamsNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        microsoft_teams_webhook=teams_webhook,
+        notify_on=notify_on,
+    )
+    assert teams_action.run(
+        validation_result_suite_identifier=validation_result_suite_extended_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {
+        "microsoft_teams_notification_result": "Microsoft Teams notification succeeded."
+    }
+
+    validation_result_suite.success = True
+    notify_on = "failure"
+    teams_action = MicrosoftTeamsNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        microsoft_teams_webhook=teams_webhook,
+        notify_on=notify_on,
+    )
+    assert (
+        teams_action.run(
+            validation_result_suite_identifier=validation_result_suite_extended_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"microsoft_teams_notification_result": None}
+    )
+
+
+@mock.patch.object(Session, "post", return_value=MockTeamsResponse(400))
+def test_MicrosoftTeamsNotificationAction_bad_request(
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_extended_id,
+    caplog,
+):
+    caplog.set_level(logging.WARNING)
+    renderer = {
+        "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+        "class_name": "MicrosoftTeamsRenderer",
+    }
+    teams_webhook = "http://testing"
+
+    # notify : all
+    notify_on = "all"
+    teams_action = MicrosoftTeamsNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        microsoft_teams_webhook=teams_webhook,
+        notify_on=notify_on,
+    )
+    assert (
+        teams_action.run(
+            validation_result_suite_identifier=validation_result_suite_extended_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == {"microsoft_teams_notification_result": None}
+    )
+
+    assert (
+        "Request to Microsoft Teams webhook at http://testing returned error 400"
+        in caplog.text
     )
 
 
