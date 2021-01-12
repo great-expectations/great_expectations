@@ -39,7 +39,7 @@ def single_expectation_custom_data_asset():
 
 @pytest.fixture
 def validator_with_titanic_1911_asset(
-        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
     class ExpectNothing(Expectation):
         success_keys = ("expectation_argument",)

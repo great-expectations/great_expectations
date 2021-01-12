@@ -303,12 +303,10 @@ data_connectors:
 
 
 def test_in_memory_data_context_configuration(
-        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    project_config_dict: dict = (
-        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.get_config(
-            mode="dict"
-        )
+    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.get_config(
+        mode="dict"
     )
     project_config_dict["plugins_directory"] = None
     project_config_dict["validation_operators"] = {

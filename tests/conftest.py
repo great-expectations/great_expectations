@@ -23,7 +23,8 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier, ConfigurationIdentifier,
+    ConfigurationIdentifier,
+    ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -2337,7 +2338,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 
 @pytest.fixture
 def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates(
-        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
 

@@ -4,7 +4,7 @@ from typing import Any
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.util import parse_string_to_datetime, datetime_to_int
+from great_expectations.core.util import datetime_to_int, parse_string_to_datetime
 from great_expectations.datasource.data_connector.sorter import Sorter
 
 logger = logging.getLogger(__name__)
