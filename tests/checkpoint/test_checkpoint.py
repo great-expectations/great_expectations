@@ -190,7 +190,7 @@ def test_basic_checkpoint_config_validation(
 
 
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
     os.environ["VAR"] = "test"
     os.environ["MY_PARAM"] = "1"
@@ -199,7 +199,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     checkpoint: Checkpoint
 
     data_context: DataContext = (
-        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     )
 
     yaml_config: str = f"""
@@ -310,7 +310,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
 
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
     os.environ["VAR"] = "test"
     os.environ["MY_PARAM"] = "1"
@@ -319,7 +319,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     checkpoint: Checkpoint
 
     data_context: DataContext = (
-        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     )
 
     yaml_config: str = f"""
@@ -439,12 +439,12 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
 
 
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
     checkpoint: Checkpoint
 
     data_context: DataContext = (
-        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     )
 
     yaml_config: str = f"""
@@ -538,14 +538,14 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 
 
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
     os.environ["GE_ENVIRONMENT"] = "my_ge_environment"
 
     checkpoint: Checkpoint
 
     data_context: DataContext = (
-        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     )
 
     yaml_config: str = f"""
@@ -674,7 +674,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
 
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
     os.environ["VAR"] = "test"
     os.environ["MY_PARAM"] = "1"
@@ -686,7 +686,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     results: List[ValidationOperatorResult]
 
     data_context: DataContext = (
-        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     )
 
     yaml_config = f"""
@@ -914,9 +914,9 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 # TODO: add more test cases
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         config_version=1,
@@ -974,220 +974,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert len(context.validations_store.list_keys()) == 1
 
 
-@pytest.fixture
-def context_with_checkpoint_templates(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
-):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
-
-    # add simple template config
-    simple_checkpoint_template_config = CheckpointConfig(
-        config_version=1,
-        name="my_simple_template_checkpoint",
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
-        evaluation_parameters={
-            "environment": "$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-        },
-        runtime_configuration={
-            "result_format": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 20,
-            }
-        },
-    )
-    simple_checkpoint_template_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_template_config.name
-    )
-    context.checkpoint_store.set(
-        key=simple_checkpoint_template_config_key,
-        value=simple_checkpoint_template_config,
-    )
-
-    # add nested template configs
-    nested_checkpoint_template_config_1 = CheckpointConfig(
-        config_version=1,
-        name="my_nested_checkpoint_template_1",
-        run_name_template="%Y-%M-foo-bar-template-$VAR",
-        expectation_suite_name="suite_from_template_1",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource_template_1",
-                    "data_connector_name": "my_special_data_connector_template_1",
-                    "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
-                }
-            }
-        ],
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
-        evaluation_parameters={
-            "environment": "FOO",
-            "tolerance": "FOOBOO",
-            "aux_param_0": "FOOBARBOO",
-            "aux_param_1": "FOOBARBOO",
-            "template_1_key": 456,
-        },
-        runtime_configuration={
-            "result_format": "FOOBARBOO",
-            "partial_unexpected_count": "FOOBARBOO",
-            "template_1_key": 123,
-        },
-    )
-    nested_checkpoint_template_config_1_key = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_1.name
-    )
-    context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_1_key,
-        value=nested_checkpoint_template_config_1,
-    )
-
-    nested_checkpoint_template_config_2 = CheckpointConfig(
-        config_version=1,
-        name="my_nested_checkpoint_template_2",
-        template_name="my_nested_checkpoint_template_1",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-            {
-                "name": "new_action_from_template_2",
-                "action": {"class_name": "Template2SpecialAction"},
-            },
-        ],
-        evaluation_parameters={
-            "environment": "$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-        },
-        runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 20,
-        },
-    )
-    nested_checkpoint_template_config_2_key = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_2.name
-    )
-    context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_2_key,
-        value=nested_checkpoint_template_config_2,
-    )
-
-    nested_checkpoint_template_config_3 = CheckpointConfig(
-        config_version=1,
-        name="my_nested_checkpoint_template_3",
-        template_name="my_nested_checkpoint_template_2",
-        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-            {
-                "name": "new_action_from_template_3",
-                "action": {"class_name": "Template3SpecialAction"},
-            },
-        ],
-        evaluation_parameters={
-            "environment": "$GE_ENVIRONMENT",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "$MY_PARAM",
-            "aux_param_1": "1 + $MY_PARAM",
-            "template_3_key": 123,
-        },
-        runtime_configuration={
-            "result_format": "BASIC",
-            "partial_unexpected_count": 20,
-            "template_3_key": "bloopy!",
-        },
-    )
-    nested_checkpoint_template_config_3_key = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_3.name
-    )
-    context.checkpoint_store.set(
-        key=nested_checkpoint_template_config_3_key,
-        value=nested_checkpoint_template_config_3,
-    )
-
-    return context
-
-
 def test_newstyle_checkpoint_config_substitution_simple(
-    context_with_checkpoint_templates,
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
 ):
-    context = context_with_checkpoint_templates
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     simplified_checkpoint_config = CheckpointConfig(
         config_version=1,
@@ -1437,9 +1227,9 @@ def test_newstyle_checkpoint_config_substitution_simple(
 
 
 def test_newstyle_checkpoint_config_substitution_nested(
-    context_with_checkpoint_templates,
+        titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
 ):
-    context = context_with_checkpoint_templates
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     nested_checkpoint_config = CheckpointConfig(
         config_version=1,
