@@ -2630,7 +2630,7 @@ def data_context_with_bad_datasource(tmp_path_factory):
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
 
-    This DataContext has a connection to a datasource named post_gres_db
+    This DataContext has a connection to a datasource named my_postgres_db
     which is not a valid datasource.
 
     It is used by test_get_batch_multiple_datasources_do_not_scan_all()
