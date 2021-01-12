@@ -946,7 +946,7 @@ class DataContextConfigSchema(Schema):
             and data["validation_operators"] is not None
         ):
             logger.warning(
-                "You appear to be using a legacy capability with config version ({}).\n    Your data context with this configuration version uses validation_operators, which have been deprecated.  Please update your configuration to be compatible with the version number {}.".format(
+                "You appear to be using a legacy capability with the latest config version ({}).\n    Your data context with this configuration version uses validation_operators, which have been deprecated.  Please update your configuration to be compatible with the version number {}.".format(
                     data["config_version"], CURRENT_GE_CONFIG_VERSION
                 ),
             )
