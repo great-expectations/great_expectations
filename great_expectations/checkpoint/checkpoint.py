@@ -309,7 +309,9 @@ class Checkpoint:
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
                         run_id=run_id,
-                        evaluation_parameters=substituted_validation_dict.get("evaluation_parameters"),
+                        evaluation_parameters=substituted_validation_dict.get(
+                            "evaluation_parameters"
+                        ),
                         run_name=run_name,
                         run_time=run_time,
                         result_format=result_format,

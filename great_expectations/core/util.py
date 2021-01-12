@@ -3,7 +3,6 @@ import decimal
 import logging
 import sys
 from collections.abc import Mapping
-
 from typing import Any, Optional, OrderedDict, Union
 
 import numpy as np
