@@ -1,12 +1,11 @@
 import pytest
 
-from great_expectations.checkpoint.checkpoint import Checkpoint, SimpleCheckpointBuilder
-
-# TODO remove this after CheckpointResult PR is merged
-from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
+from great_expectations.checkpoint.checkpoint import (
+    Checkpoint,
+    SimpleCheckpointBuilder,
+    CheckpointResult,
 )
+from great_expectations.data_context.types.base import CheckpointConfig
 
 
 @pytest.fixture
@@ -57,9 +56,9 @@ def slack_notification_action(webhook):
 
 @pytest.fixture
 def context_with_data_source_and_empty_suite(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     datasources = context.list_datasources()
     assert datasources[0]["class_name"] == "Datasource"
     assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
@@ -73,6 +72,28 @@ def simple_checkpoint_defaults(context_with_data_source_and_empty_suite):
     return SimpleCheckpointBuilder(
         "foo", context_with_data_source_and_empty_suite
     ).build()
+
+
+@pytest.fixture
+def two_validations():
+    return [
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_special_data_connector",
+                "data_asset_name": "users",
+            },
+            "expectation_suite_name": "one",
+        },
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_special_data_connector",
+                "data_asset_name": "users",
+            },
+            "expectation_suite_name": "two",
+        },
+    ]
 
 
 def test_simple_checkpoint_default_properties_with_no_optional_arguments(
@@ -342,10 +363,7 @@ def test_simple_checkpoint_persisted_to_store(
         **initial_checkpoint.config.to_json_dict()
     )
     assert context_with_data_source_and_empty_suite.list_checkpoints() == ["foo"]
-    # TODO fix after get_checkpoint returns Checkpoint PR
-    checkpoint = context_with_data_source_and_empty_suite.get_checkpoint(
-        "foo", return_config=False
-    )
+    checkpoint = context_with_data_source_and_empty_suite.get_checkpoint("foo")
     assert isinstance(checkpoint, Checkpoint)
     assert isinstance(checkpoint.config, CheckpointConfig)
     assert checkpoint.config.to_json_dict() == {
@@ -384,21 +402,18 @@ def test_simple_checkpoint_persisted_to_store(
             }
         ]
     )
-    assert results
-    # TODO more assertions here probably?
-    assert results[0].success
+    assert results.success
 
 
 def test_simple_checkpoint_defaults_run_and_no_run_params_returns_empty_checkpoint_result(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults
 ):
     result = simple_checkpoint_defaults.run()
-    # TODO this test will need major adjustment after PR 2238 is merged
-    assert result == []
-    # assert isinstance(result, CheckpointResult)
-    # assert result.success
-    # TODO assert all other properties of the CheckpointResult
-    # assert result.run_name == "bar"
+    assert isinstance(result, CheckpointResult)
+    assert result.success
+    assert result.run_results == {}
+    assert result.name == "foo"
+    assert result.list_expectation_suite_names() == []
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_checkpoint(
@@ -406,7 +421,7 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
 ):
     # verify checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
-    results = simple_checkpoint_defaults.run(
+    result = simple_checkpoint_defaults.run(
         run_name="bar",
         validations=[
             {
@@ -419,13 +434,10 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
             },
         ],
     )
-    # TODO this test will need major adjustment after PR 2238 is merged
-    result = results[0]
-    assert isinstance(result, ValidationOperatorResult)
+    assert isinstance(result, CheckpointResult)
     assert result.run_id.run_name == "bar"
     assert result.list_expectation_suite_names() == ["one"]
     assert len(result.list_validation_results()) == 1
-    # assert isinstance(result, CheckpointResult)
     assert result.success
 
 
@@ -441,11 +453,10 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
     assert context.list_checkpoints() == [checkpoint_name]
 
     del checkpoint
-    # TODO fix after get_checkpoint returns Checkpoint PR
-    checkpoint = context.get_checkpoint(checkpoint_name, return_config=False)
+    checkpoint = context.get_checkpoint(checkpoint_name)
     assert isinstance(checkpoint, Checkpoint)
 
-    results = checkpoint.run(
+    result = checkpoint.run(
         run_name="bar",
         validations=[
             {
@@ -458,20 +469,17 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
             }
         ],
     )
-    # TODO this test will need major adjustment after PR 2238 is merged
-    result = results[0]
-    assert isinstance(result, ValidationOperatorResult)
+    assert isinstance(result, CheckpointResult)
     assert result.run_id.run_name == "bar"
     assert result.list_expectation_suite_names() == ["one"]
     assert len(result.list_validation_results()) == 1
-    # assert isinstance(result, CheckpointResult)
     assert result.success
 
 
 def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults
 ):
-    results = simple_checkpoint_defaults.run(
+    result = simple_checkpoint_defaults.run(
         run_name="bar",
         batch_request={
             "datasource_name": "my_datasource",
@@ -482,55 +490,32 @@ def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
         validations=[{"expectation_suite_name": "one"}],
     )
     # TODO why is this returning nothing?
-    assert results
-    # TODO this test will need major adjustment after PR 2238 is merged
-    result = results[0]
-    assert isinstance(result, ValidationOperatorResult)
-    # assert isinstance(result, CheckpointResult)
+    assert isinstance(result, CheckpointResult)
     assert result.success
 
 
 def test_simple_checkpoint_defaults_run_multiple_validations_without_persistence(
-    context_with_data_source_and_empty_suite, simple_checkpoint_defaults
+    context_with_data_source_and_empty_suite,
+    simple_checkpoint_defaults,
+    two_validations,
 ):
     context_with_data_source_and_empty_suite.create_expectation_suite("two")
     assert len(context_with_data_source_and_empty_suite.list_expectation_suites()) == 2
-    # TODO test after reload from data context
-    results = simple_checkpoint_defaults.run(
+    result = simple_checkpoint_defaults.run(
         run_name="bar",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                },
-                "expectation_suite_name": "one",
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                },
-                "expectation_suite_name": "two",
-            },
-        ],
+        validations=two_validations,
     )
-    # TODO this test will need major adjustment after PR 2238 is merged
-    result = results[0]
-    assert isinstance(result, ValidationOperatorResult)
+    assert isinstance(result, CheckpointResult)
     assert result.run_id.run_name == "bar"
-    assert result.list_expectation_suite_names() == ["one"]
-    # assert result.list_expectation_suite_names() == ["one", "two"]
-    assert len(result.list_validation_results()) == 1
-    # assert len(result.list_validation_results()) == 2
-    # assert isinstance(result, CheckpointResult)
+    assert sorted(result.list_expectation_suite_names()) == sorted(["one", "two"])
+    assert len(result.list_validation_results()) == 2
     assert result.success
 
 
 def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_checkpoint_loaded_from_store(
-    context_with_data_source_and_empty_suite, simple_checkpoint_defaults
+    context_with_data_source_and_empty_suite,
+    simple_checkpoint_defaults,
+    two_validations,
 ):
     context = context_with_data_source_and_empty_suite
     context.create_expectation_suite("two")
@@ -542,38 +527,15 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert context.list_checkpoints() == [checkpoint_name]
     # reload from store
     del simple_checkpoint_defaults
-    # TODO fix after get_checkpoint returns Checkpoint PR
-    checkpoint = context.get_checkpoint(checkpoint_name, return_config=False)
-    results = checkpoint.run(
+    checkpoint = context.get_checkpoint(checkpoint_name)
+    result = checkpoint.run(
         run_name="bar",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                },
-                "expectation_suite_name": "one",
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                },
-                "expectation_suite_name": "two",
-            },
-        ],
+        validations=two_validations,
     )
-    # TODO this test will need major adjustment after PR 2238 is merged
-    result = results[0]
-    assert isinstance(result, ValidationOperatorResult)
+    assert isinstance(result, CheckpointResult)
     assert result.run_id.run_name == "bar"
-    assert result.list_expectation_suite_names() == ["one"]
-    # assert result.list_expectation_suite_names() == ["one", "two"]
-    assert len(result.list_validation_results()) == 1
-    # assert len(result.list_validation_results()) == 2
-    # assert isinstance(result, CheckpointResult)
+    assert sorted(result.list_expectation_suite_names()) == sorted(["one", "two"])
+    assert len(result.list_validation_results()) == 2
     assert result.success
 
 
