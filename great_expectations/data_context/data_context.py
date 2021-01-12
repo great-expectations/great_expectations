@@ -283,7 +283,7 @@ class BaseDataContext:
         # Store cached datasources but don't init them
         self._cached_datasources = {}
 
-        # build the datasources, but don't worry about the ones that we can't handle yet.
+        # Build the datasources we know about and have access to
         self._init_datasources(self._project_config_with_variables_substituted)
 
         # Init validation operators
