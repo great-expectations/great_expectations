@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from IPython import get_ipython
 
+from great_expectations import exceptions as ge_exceptions
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -315,3 +316,24 @@ def get_datetime_string_from_strftime_format(
     """
     datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
     return datetime_obj.strftime(format_str)
+
+
+def parse_string_to_datetime(
+    datetime_string: str, datetime_format_string: str
+) -> datetime.date:
+    if not isinstance(datetime_string, str):
+        raise ge_exceptions.SorterError(
+            f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
+            """
+        )
+    if datetime_format_string and not isinstance(datetime_format_string, str):
+        raise ge_exceptions.SorterError(
+            f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
+"{str(type(datetime_format_string))}").
+            """
+        )
+    return datetime.datetime.strptime(datetime_string, datetime_format_string).date()
+
+
+def datetime_to_int(dt: datetime.date) -> int:
+    return int(dt.strftime("%Y%m%d%H%M%S"))
