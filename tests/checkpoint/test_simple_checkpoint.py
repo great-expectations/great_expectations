@@ -342,7 +342,10 @@ def test_simple_checkpoint_persisted_to_store(
         **initial_checkpoint.config.to_json_dict()
     )
     assert context_with_data_source_and_empty_suite.list_checkpoints() == ["foo"]
-    checkpoint = context_with_data_source_and_empty_suite.get_checkpoint("foo")
+    # TODO fix after get_checkpoint returns Checkpoint PR
+    checkpoint = context_with_data_source_and_empty_suite.get_checkpoint(
+        "foo", return_config=False
+    )
     assert isinstance(checkpoint, Checkpoint)
     assert isinstance(checkpoint.config, CheckpointConfig)
     assert checkpoint.config.to_json_dict() == {
@@ -438,7 +441,8 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
     assert context.list_checkpoints() == [checkpoint_name]
 
     del checkpoint
-    checkpoint = context.get_checkpoint(checkpoint_name)
+    # TODO fix after get_checkpoint returns Checkpoint PR
+    checkpoint = context.get_checkpoint(checkpoint_name, return_config=False)
     assert isinstance(checkpoint, Checkpoint)
 
     results = checkpoint.run(
@@ -538,7 +542,8 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert context.list_checkpoints() == [checkpoint_name]
     # reload from store
     del simple_checkpoint_defaults
-    checkpoint = context.get_checkpoint(checkpoint_name)
+    # TODO fix after get_checkpoint returns Checkpoint PR
+    checkpoint = context.get_checkpoint(checkpoint_name, return_config=False)
     results = checkpoint.run(
         run_name="bar",
         validations=[
