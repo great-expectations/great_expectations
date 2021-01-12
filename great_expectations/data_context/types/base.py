@@ -1226,6 +1226,8 @@ class DataContextConfig(SerializableDictDot):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
+        if datasources is None:
+            datasources = {}
         self.datasources = datasources
 
     @property
