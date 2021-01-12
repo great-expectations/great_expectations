@@ -6,6 +6,7 @@ import click
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
+from great_expectations.checkpoint import Checkpoint
 from great_expectations.cli import toolkit
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_list
@@ -291,11 +292,10 @@ def checkpoint_run(checkpoint, directory):
     context = toolkit.load_data_context_with_error_handling(directory)
     usage_event = "cli.checkpoint.run"
 
-    checkpoint = toolkit.load_checkpoint(
+    checkpoint: Checkpoint = toolkit.load_checkpoint(
         context,
         checkpoint,
         usage_event,
-        return_config=False,
     )
 
     try:

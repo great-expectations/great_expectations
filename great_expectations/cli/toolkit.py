@@ -17,14 +17,12 @@ from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.cli.util import cli_colorize_string, cli_message
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.types.base import (
-    MINIMUM_SUPPORTED_CONFIG_VERSION,
-    CheckpointConfig,
-)
+from great_expectations.data_context.types.base import MINIMUM_SUPPORTED_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -299,10 +297,10 @@ def load_batch(
     context: DataContext,
     suite: Union[str, ExpectationSuite],
     batch_kwargs: Union[dict, BatchKwargs],
-) -> DataAsset:
-    batch: DataAsset = context.get_batch(batch_kwargs, suite)
-    assert isinstance(
-        batch, DataAsset
+) -> Union[Batch, DataAsset]:
+    batch: Union[Batch, DataAsset] = context.get_batch(batch_kwargs, suite)
+    assert isinstance(batch, DataAsset) or isinstance(
+        batch, Batch
     ), "Batch failed to load. Please check your batch_kwargs"
     return batch
 
@@ -345,14 +343,13 @@ def load_checkpoint(
     context: DataContext,
     checkpoint_name: str,
     usage_event: str,
-    return_config: bool = True,
-) -> Union[CheckpointConfig, Checkpoint, LegacyCheckpoint]:
+) -> Union[Checkpoint, LegacyCheckpoint]:
     """Load a checkpoint or raise helpful errors."""
     try:
-        checkpoint_config = context.get_checkpoint(
-            checkpoint_name, return_config=return_config
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+            checkpoint_name
         )
-        return checkpoint_config
+        return checkpoint
     except (
         ge_exceptions.CheckpointNotFoundError,
         ge_exceptions.InvalidCheckpointConfigError,
