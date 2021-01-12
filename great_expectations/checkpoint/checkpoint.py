@@ -48,9 +48,9 @@ class Checkpoint:
         batches: Optional[List[dict]] = None,
     ):
         self._name = name
-        # TODO why is DataContext not importable?
-        # if not isinstance(data_context, DataContext):
-        #     raise TypeError("A checkpoint requires a valid DataContext")
+        # Note the gross typechecking to avoid a circular import
+        if "DataContext" not in str(type(data_context)):
+            raise TypeError("A checkpoint requires a valid DataContext")
         self._data_context = data_context
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -501,14 +501,8 @@ class ActionDicts:
 
 class SimpleCheckpointBuilder:
     """
-    SimpleCheckpointBuilder is a convenience class to easily configure a simple Checkpoint.
-
-    The Checkpoint performs the following actions by default:
-    1. store the validation result
-    2. store evaluation parameters
-    3. update all data docs sites
-
-    When configured, this builds a Checkpoint that sends a slack message.
+    SimpleCheckpointBuilder is a convenience class to easily configure a simple
+    Checkpoint.
     """
 
     def __init__(
@@ -520,7 +514,45 @@ class SimpleCheckpointBuilder:
         notify_on: Optional[str] = "all",
         notify_with: Optional[Union[str, List[str]]] = "all",
     ):
-        # TODO nice docstring explaining arguments and example usages
+        """
+        After instantiation, call the .build() method to get a new Checkpoint.
+
+        By default, the Checkpoint created will:
+        1. store the validation result
+        2. store evaluation parameters
+        3. update all data docs sites
+
+        When configured, this builds a Checkpoint that sends a slack message.
+
+        Args:
+            name: The Checkpoint name
+            data_context: a valid DataContext
+            site_names: Names of sites to update. Defaults to "all". Set to None to skip updating data docs.
+            slack_webhook: If present, a sleck message will be sent.
+            notify_on: When to send a slack notification. Defaults to "all". Possible values: "all", "failure", "success"
+            notify_with: optional list of DataDocs site names to display in Slack message. Defaults to showing all
+
+        Examples:
+
+        Most simple usage:
+        ```
+        checkpoint = SimpleCheckpointBuilder("foo", data_context).build()
+        ```
+
+        A Checkpoint that sends a slack message on all validation events.
+        ```
+        checkpoint = SimpleCheckpointBuilder(
+            "foo",
+            data_context,
+            slack_webhook="https://hooks.slack.com/foo/bar"
+        ).build()
+        ```
+
+        A Checkpoint that does not update data docs.
+        ```
+        checkpoint = SimpleCheckpointBuilder("foo", data_context, site_names=None).build()
+        ```
+        """
         self.name = name
         self.data_context = data_context
         self.site_names = site_names
@@ -528,8 +560,8 @@ class SimpleCheckpointBuilder:
         self.notify_with = notify_with
         self.slack_webhook = slack_webhook
 
-    # TODO I don't love the .build()... is there a better way?
     def build(self):
+        """Build a Checkpoint."""
         self._validate_site_names(self.data_context)
         self._validate_notify_on()
         self._validate_notify_with()
@@ -538,25 +570,6 @@ class SimpleCheckpointBuilder:
 
         checkpoint_config = self._build_checkpoint_config()
         return Checkpoint(self.name, self.data_context, **checkpoint_config)
-
-    # def run(
-    #     self,
-    #     validations: List[dict],
-    #     run_name: Optional[str] = None,
-    #     # template_name: Optional[str] = None,
-    #     # run_name_template: Optional[str] = None,
-    #     # expectation_suite_name: Optional[str] = None,
-    #     # batch_request: Optional[Union[BatchRequest, dict]] = None,
-    #     # action_list: Optional[List[dict]] = None,
-    #     evaluation_parameters: Optional[dict] = None,
-    #     # runtime_configuration: Optional[dict] = None,
-    #     # profilers: Optional[List[dict]] = None,
-    #     # run_id = None,
-    #     # run_time = None,
-    #     result_format = None,
-    #     ** kwargs,
-    # ):
-    #
 
     def _build_checkpoint_config(self) -> Dict:
         action_list = self._default_action_list()
