@@ -361,15 +361,18 @@ class BaseDataContext:
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
-    # make this a better comment
     def _init_datasources(self, config):
+        if not config.datasources:
+            return
         for datasource in config.datasources:
             try:
                 self._cached_datasources[datasource] = self.get_datasource(
                     datasource_name=datasource
                 )
             except ge_exceptions.DatasourceInitializationError:
-                # if the configuration is old, then we dont worry about it
+                # this error will happen if our configuration contains datasources that GE can no longer connect to.
+                # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
+                # caught at the context.get_batch() step. So we just pass here.
                 pass
 
     def _apply_global_config_overrides(self):
