@@ -1,12 +1,21 @@
 import copy
 import json
 import logging
+import os
+from copy import deepcopy
 from datetime import datetime
 from typing import List, Optional, Union
 
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.util import nested_update
+from great_expectations.core.util import (
+    get_datetime_string_from_strftime_format,
+    nested_update,
+    substitute_all_strftime_format_strings,
+)
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions import CheckpointError
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -82,22 +91,22 @@ class Checkpoint:
         self,
         config: Optional[Union[CheckpointConfig, dict]] = None,
         runtime_kwargs: Optional[dict] = None,
-    ):
+    ) -> CheckpointConfig:
         runtime_kwargs = runtime_kwargs or {}
+        if config is None:
+            config = self.config
+        if isinstance(config, dict):
+            config = CheckpointConfig(**config)
 
-        if self._substituted_config is not None and not runtime_kwargs.get(
-            "template_name"
+        if (
+            self._substituted_config is not None
+            and not runtime_kwargs.get("template_name")
+            and not config.template_name
         ):
-            substituted_config = copy.deepcopy(self._substituted_config)
+            substituted_config = deepcopy(self._substituted_config)
             if any(runtime_kwargs.values()):
                 substituted_config.update(runtime_kwargs=runtime_kwargs)
-
-            return substituted_config
         else:
-            if config is None:
-                config = self.config
-            if isinstance(config, dict):
-                config = CheckpointConfig(**config)
             template_name = runtime_kwargs.get("template_name") or config.template_name
 
             if not template_name:
@@ -106,7 +115,6 @@ class Checkpoint:
                     substituted_config.update(runtime_kwargs=runtime_kwargs)
 
                 self._substituted_config = substituted_config
-                return substituted_config
             else:
                 template_config = self.data_context.get_checkpoint(
                     name=template_name, return_config=True
@@ -133,7 +141,28 @@ class Checkpoint:
                 # don't replace _substituted_config if already exists
                 if self._substituted_config is None:
                     self._substituted_config = substituted_config
-                return substituted_config
+        return self._substitute_config_variables(config=substituted_config)
+
+    def _substitute_config_variables(
+        self, config: CheckpointConfig
+    ) -> CheckpointConfig:
+        substituted_config_variables = substitute_all_config_variables(
+            self.data_context.config_variables,
+            dict(os.environ),
+            self.data_context.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        substitutions = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.data_context.runtime_environment,
+        }
+
+        return CheckpointConfig(
+            **substitute_all_config_variables(
+                config, substitutions, self.data_context.DOLLAR_SIGN_ESCAPE_STRING
+            )
+        )
 
     # TODO: <Alex>ALEX/Rob -- since this method is static, should we move it to a "util" type of a module?</Alex>
     @staticmethod
@@ -201,11 +230,7 @@ class Checkpoint:
         self._validate_validation_dict(substituted_validation_dict)
         return substituted_validation_dict
 
-    # TODO: <Alex>ALEX/Rob -- since this method is static, should we move it to a "util" type of a module?</Alex>
-    def get_run_name_from_template(self, run_name_template: str):
-        now = datetime.now()
-        return now.strftime(run_name_template)
-
+    # TODO: Add eval param processing using updated EvaluationParameterParser and parse_evaluation_parameters function
     def run(
         self,
         template_name: Optional[str] = None,
@@ -222,7 +247,12 @@ class Checkpoint:
         run_time=None,
         result_format=None,
         **kwargs,
-    ) -> List[ValidationOperatorResult]:
+    ) -> CheckpointResult:
+        assert not (run_id and run_name) and not (
+            run_id and run_time
+        ), "Please provide either a run_id or run_name and/or run_time."
+
+        run_time = run_time or datetime.now()
         runtime_configuration: dict = runtime_configuration or {}
         result_format: Optional[dict] = result_format or runtime_configuration.get(
             "result_format"
@@ -246,12 +276,14 @@ class Checkpoint:
         )
         run_name_template: Optional[str] = substituted_runtime_config.run_name_template
         validations: list = substituted_runtime_config.validations
-        results = []
+        run_results = {}
 
         if run_name is None and run_name_template is not None:
-            run_name: str = self.get_run_name_from_template(
-                run_name_template=run_name_template
+            run_name: str = get_datetime_string_from_strftime_format(
+                format_str=run_name_template, datetime_obj=run_time
             )
+
+        run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
 
         for idx, validation_dict in enumerate(validations):
             try:
@@ -281,26 +313,26 @@ class Checkpoint:
                         name=f"{self.name}-checkpoint-validation[{idx}]",
                     )
                 )
-                run_result: ValidationOperatorResult = (
+                val_op_run_result: ValidationOperatorResult = (
                     action_list_validation_operator.run(
                         assets_to_validate=[validator],
                         run_id=run_id,
                         evaluation_parameters=substituted_validation_dict.get(
                             "evaluation_parameters"
                         ),
-                        run_name=run_name,
-                        run_time=run_time,
                         result_format=result_format,
                     )
                 )
-                results.append(run_result)
+                run_results.update(val_op_run_result.run_results)
             except CheckpointError as e:
                 raise CheckpointError(
                     f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}"
                 )
             except Exception as e:
                 raise e
-        return results
+        return CheckpointResult(
+            run_id=run_id, run_results=run_results, checkpoint_config=self.config
+        )
 
     def self_check(self, pretty_print=True) -> dict:
         # Provide visibility into parameters that Checkpoint was instantiated with.

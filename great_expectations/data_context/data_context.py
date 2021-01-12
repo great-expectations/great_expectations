@@ -791,7 +791,7 @@ class BaseDataContext:
             config = self._project_config
 
         substituted_config_variables = substitute_all_config_variables(
-            dict(self._load_config_variables_file()),
+            self.config_variables,
             dict(os.environ),
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
