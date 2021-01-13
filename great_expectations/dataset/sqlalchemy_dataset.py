@@ -463,7 +463,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         *args,
         **kwargs,
     ):
-
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
@@ -495,7 +494,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
         else:
-            self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
+            try:
+                # use the schema name configured for the datasource
+                query_schema = self.engine.url.query.get("schema")
+            except AttributeError as err:
+                # sqlite/mssql dialects use a Connection object instead of Engine and override self.engine
+                # retrieve the schema from the Connection object i.e. self.engine
+                conn_object = self.engine
+                query_schema = conn_object.engine.url.query.get("schema")
+
+            self._table = sa.Table(table_name, sa.MetaData(), schema=query_schema)
 
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
@@ -555,7 +563,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
 
         if custom_sql:
-            self.create_temporary_table(table_name, custom_sql, schema_name=schema)
+            self.create_temporary_table(
+                table_name, custom_sql, schema_name=query_schema
+            )
 
             if self.generated_table_name is not None:
                 if self.engine.dialect.name.lower() == "bigquery":
@@ -573,7 +583,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
-            self.columns = insp.get_columns(table_name, schema=schema)
+            self.columns = insp.get_columns(table_name, schema=query_schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
