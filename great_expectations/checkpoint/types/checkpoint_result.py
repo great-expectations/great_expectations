@@ -55,7 +55,7 @@ class CheckpointResult(DictDot):
         run_id: RunIdentifier,
         run_results: Dict[
             ValidationResultIdentifier,
-            Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
+            Dict[str, Union[ExpectationSuiteValidationResult, dict]],
         ],
         checkpoint_config: CheckpointConfig,
         success: Optional[bool] = None,
@@ -66,25 +66,33 @@ class CheckpointResult(DictDot):
         if success is None:
             self._success = all(
                 [
-                    run_result["validation_result"].success
+                    run_result["validation_result"]["success"]
                     for run_result in run_results.values()
                 ]
             )
         else:
             self._success = success
 
-        self._validation_results = None
-        self._data_assets_validated = None
-        self._data_assets_validated_by_batch_id = None
-        self._validation_result_identifiers = None
-        self._expectation_suite_names = None
-        self._data_asset_names = None
-        self._validation_results_by_expectation_suite_name = None
-        self._validation_results_by_data_asset_name = None
-        self._batch_identifiers = None
-        self._statistics = None
-        self._validation_statistics = None
-        self._validation_results_by_validation_result_identifier = None
+        self._validation_results: Optional[
+            List[Union[ExpectationSuiteValidationResult, dict]]
+        ] = None
+        self._data_assets_validated: Optional[List] = None
+        self._data_assets_validated_by_batch_id: Optional[dict] = None
+        self._validation_result_identifiers: Optional[
+            List[ValidationResultIdentifier]
+        ] = None
+        self._expectation_suite_names: Optional[List[str]] = None
+        self._data_asset_names: Optional[List] = None
+        self._validation_results_by_expectation_suite_name: Optional[
+            Dict[str, List[Union[ExpectationSuiteValidationResult, dict]]]
+        ] = None
+        self._validation_results_by_data_asset_name: Optional[
+            Dict[str, List[ExpectationSuiteValidationResult]]
+        ] = None
+        self._batch_identifiers: Optional[List] = None
+        self._statistics: Optional[dict] = None
+        self._validation_statistics: Optional[dict] = None
+        self._validation_results_by_validation_result_identifier: Optional[dict] = None
 
     @property
     def name(self):
@@ -148,7 +156,7 @@ class CheckpointResult(DictDot):
 
     def list_validation_results(
         self, group_by=None
-    ) -> Union[List[ExpectationSuiteValidationResult], dict]:
+    ) -> Union[List[Union[ExpectationSuiteValidationResult, dict]], dict]:
         if group_by is None:
             if self._validation_results is None:
                 self._validation_results = [
@@ -162,6 +170,7 @@ class CheckpointResult(DictDot):
             return self._list_validation_results_by_expectation_suite_name()
         elif group_by == "data_asset_name":
             return self._list_validation_results_by_data_asset_name()
+        return []
 
     def _list_validation_results_by_validation_result_identifier(self) -> dict:
         if self._validation_results_by_validation_result_identifier is None:
@@ -177,7 +186,7 @@ class CheckpointResult(DictDot):
                 expectation_suite_name: [
                     run_result["validation_result"]
                     for run_result in self.run_results.values()
-                    if run_result["validation_result"].meta["expectation_suite_name"]
+                    if run_result["validation_result"]["meta"]["expectation_suite_name"]
                     == expectation_suite_name
                 ]
                 for expectation_suite_name in self.list_expectation_suite_names()
@@ -217,17 +226,18 @@ class CheckpointResult(DictDot):
             return self._data_assets_validated
         if group_by == "batch_id":
             return self._list_data_assets_validated_by_batch_id()
+        return []
 
     def _list_data_assets_validated_by_batch_id(self) -> dict:
         if self._data_assets_validated_by_batch_id is None:
             assets_validated_by_batch_id = {}
 
             for validation_result in self.list_validation_results():
-                active_batch_definition = validation_result.meta[
+                active_batch_definition = validation_result["meta"][
                     "active_batch_definition"
                 ]
                 batch_id = active_batch_definition.id
-                expectation_suite_name = validation_result.meta[
+                expectation_suite_name = validation_result["meta"][
                     "expectation_suite_name"
                 ]
                 if batch_id not in assets_validated_by_batch_id:
@@ -254,7 +264,7 @@ class CheckpointResult(DictDot):
                 [
                     validation_result
                     for validation_result in self.list_validation_results()
-                    if validation_result.success
+                    if validation_result["success"]
                 ]
             )
             unsuccessful_validation_count = (
@@ -279,7 +289,9 @@ class CheckpointResult(DictDot):
     def _list_validation_statistics(self) -> Dict[ValidationResultIdentifier, dict]:
         if self._validation_statistics is None:
             self._validation_statistics = {
-                validation_result_identifier: run_result["validation_result"].statistics
+                validation_result_identifier: run_result["validation_result"][
+                    "statistics"
+                ]
                 for validation_result_identifier, run_result in self.run_results.items()
             }
         return self._validation_statistics
