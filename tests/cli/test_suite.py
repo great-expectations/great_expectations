@@ -7,7 +7,10 @@ from click.testing import CliRunner
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.core.expectation_suite import ExpectationSuite
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import (
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    assert_no_logging_messages_or_tracebacks,
+)
 
 
 def test_suite_help_output(caplog):
@@ -24,7 +27,10 @@ def test_suite_help_output(caplog):
   scaffold  Scaffold a new Expectation Suite."""
         in result.stdout
     )
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -58,7 +64,10 @@ def test_suite_demo_on_context_with_no_datasources(
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -115,7 +124,11 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -192,7 +205,11 @@ def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
     )
     assert f"file://{foo}" in mock_webbrowser.call_args[0][0]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -274,7 +291,11 @@ def test_suite_new_creates_empty_suite(
 
     assert mock_webbroser.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -350,7 +371,11 @@ def test_suite_new_empty_with_no_jupyter(
     assert mock_subprocess.call_count == 0
     assert mock_webbroser.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -427,7 +452,10 @@ def test_suite_demo_one_datasource_without_generator_without_suite_name_argument
     assert mock_webbrowser.call_count == 1
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -508,7 +536,10 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -574,7 +605,10 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     assert mock_webbrowser.call_count == 2
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 def test_suite_edit_without_suite_name_raises_error():
@@ -616,7 +650,10 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -651,7 +688,10 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -681,7 +721,10 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -715,7 +758,10 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -797,7 +843,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -864,7 +913,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -957,7 +1009,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -1008,7 +1063,10 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -1064,7 +1122,10 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -1145,7 +1206,10 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 def test_suite_list_with_zero_suites(caplog, empty_data_context):
@@ -1160,7 +1224,10 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
     assert result.exit_code == 0
     assert "No Expectation Suites found" in result.output
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 def test_suite_list_with_one_suite(caplog, empty_data_context):
@@ -1177,7 +1244,10 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
     assert result.exit_code == 0
     assert "1 Expectation Suite found" in result.output
     assert "a.warning" in result.output
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 def test_suite_list_with_multiple_suites(caplog, empty_data_context):
@@ -1201,7 +1271,10 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     assert "b.warning" in output
     assert "c.warning" in output
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -1229,7 +1302,10 @@ def test_suite_delete_with_zero_suites(
         mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -1260,7 +1336,10 @@ def test_suite_delete_with_non_existent_suite(
         ),
         mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
     ]
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -1299,7 +1378,10 @@ def test_suite_delete_with_one_suite(
         mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": True}),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -1344,7 +1426,10 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -1392,7 +1477,10 @@ def test_suite_scaffold_on_existing_suite_raises_error(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -1443,7 +1531,11 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
             {"event": "cli.suite.scaffold", "event_payload": {}, "success": True}
         ),
     ]
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -1497,4 +1589,8 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )

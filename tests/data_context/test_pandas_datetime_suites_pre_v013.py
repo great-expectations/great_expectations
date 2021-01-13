@@ -10,7 +10,7 @@ from great_expectations.dataset import PandasDataset
 
 
 def test_save_expectation_suite_with_datetime_objects(
-    data_context_parameterized_expectation_suite,
+    data_context_parameterized_expectation_suite_no_checkpoint_store,
 ):
     # create datetime evaluation parameters
     evaluation_parameters = {
@@ -30,7 +30,7 @@ def test_save_expectation_suite_with_datetime_objects(
         # ge_path = os.path.join(tempdir, "great_expectations")
         # ge.DataContext.create(tempdir, usage_statistics_enabled=False)
         # context = ge.DataContext(ge_path)
-        context = data_context_parameterized_expectation_suite
+        context = data_context_parameterized_expectation_suite_no_checkpoint_store
         ge_path = context.root_directory
 
         context.add_datasource(dataset_name, class_name="PandasDatasource")

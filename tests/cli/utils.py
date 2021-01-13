@@ -3,6 +3,8 @@ import traceback
 from _pytest.logging import LogCaptureFixture
 from click.testing import Result
 
+VALIDATION_OPERATORS_DEPRECATION_MESSAGE: str = "Your data context with this configuration version uses validation_operators, which have been deprecated."
+
 
 def assert_dict_key_and_val_in_stdout(dict_, stdout):
     """Use when stdout contains color info and command chars"""
@@ -15,7 +17,9 @@ def assert_dict_key_and_val_in_stdout(dict_, stdout):
             assert str(val) in stdout
 
 
-def assert_no_logging_messages_or_tracebacks(my_caplog, click_result):
+def assert_no_logging_messages_or_tracebacks(
+    my_caplog, click_result, allowed_deprecation_message=None
+):
     """
     Use this assertion in all CLI tests unless you have a very good reason.
 
@@ -36,9 +40,33 @@ def assert_no_logging_messages_or_tracebacks(my_caplog, click_result):
 
     :param my_caplog: the caplog pytest fixutre
     :param click_result: the Result object returned from click runner.invoke()
+    :param allowed_deprecation_message: Deprecation message that may be allowed
     """
-    assert_no_logging_messages(my_caplog)
+    if allowed_deprecation_message:
+        assert_logging_message_present(
+            my_caplog=my_caplog, message=allowed_deprecation_message
+        )
+    else:
+        assert_no_logging_messages(my_caplog)
     assert_no_tracebacks(click_result)
+
+
+def assert_logging_message_present(my_caplog, message):
+    """
+    Assert presence of message in logging output messages.
+
+    :param my_caplog: the caplog pytest fixutre
+    :param message: message to be searched in caplog
+    """
+    assert isinstance(
+        my_caplog, LogCaptureFixture
+    ), "Please pass in the caplog object from your test."
+    messages = my_caplog.messages
+    assert isinstance(messages, list)
+    if messages:
+        print("Found logging messages:\n")
+        print("\n".join([m for m in messages]))
+    assert any([message in element for element in messages])
 
 
 def assert_no_logging_messages(my_caplog):

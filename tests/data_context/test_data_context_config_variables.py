@@ -202,13 +202,13 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     create_data_context_files(
         context_path,
         asset_config_path,
-        ge_config_fixture_filename="great_expectations_basic_with_exhaustive_variables.yml",
+        ge_config_fixture_filename="great_expectations_v013_basic_with_exhaustive_variables.yml",
         config_variables_fixture_filename="config_variables_exhaustive.yml",
     )
 
     # load ge config fixture for expected
     path_to_yml = (
-        "../test_fixtures/great_expectations_basic_with_exhaustive_variables.yml"
+        "../test_fixtures/great_expectations_v013_basic_with_exhaustive_variables.yml"
     )
     path_to_yml = file_relative_path(__file__, path_to_yml)
     with open(path_to_yml) as data:

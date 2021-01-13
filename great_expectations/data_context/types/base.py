@@ -21,7 +21,6 @@ from great_expectations.marshmallow__shade import (
     post_load,
     validates_schema,
 )
-from great_expectations.marshmallow__shade.exceptions import SCHEMA
 from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
@@ -50,7 +49,7 @@ def object_to_yaml_str(obj):
 class BaseYamlConfig(SerializableDictDot):
     _config_schema_class = None
 
-    def __init__(self, commented_map: CommentedMap = None, **kwargs):
+    def __init__(self, commented_map: CommentedMap = None):
         if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
@@ -852,9 +851,11 @@ class DataContextConfigSchema(Schema):
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
-    checkpoint_store_name = fields.Str()
+    checkpoint_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
-    validation_operators = fields.Dict(keys=fields.Str(), values=fields.Dict())
+    validation_operators = fields.Dict(
+        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
+    )
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     notebooks = fields.Nested(NotebooksConfigSchema, allow_none=True)
     data_docs_sites = fields.Dict(
@@ -925,7 +926,7 @@ class DataContextConfigSchema(Schema):
             )
 
         if data["config_version"] < CURRENT_GE_CONFIG_VERSION and (
-            data["checkpoint_store_name"]
+            "checkpoint_store_name" in data
             or any(
                 [
                     store_config["class_name"] == "CheckpointStore"
@@ -934,11 +935,11 @@ class DataContextConfigSchema(Schema):
             )
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
-                "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this configuration version uses legacy datasources, which cannot be used with a checkpoint store.  Please update your Datasource and the version number to {} before adding a checkpoint store.".format(
+                "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to use the new version number {} before adding a checkpoint store.".format(
                     data["config_version"], CURRENT_GE_CONFIG_VERSION
                 ),
                 validation_error=ValidationError(
-                    message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this configuration version uses legacy datasources, which cannot be used with a checkpoint store.  Please update your Datasource and the version number to {} before adding a checkpoint store.".format(
+                    message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to use the new version number {} before adding a checkpoint store.".format(
                         data["config_version"], CURRENT_GE_CONFIG_VERSION
                     )
                 ),
@@ -946,6 +947,7 @@ class DataContextConfigSchema(Schema):
 
         if (
             data["config_version"] >= CURRENT_GE_CONFIG_VERSION
+            and "validation_operators" in data
             and data["validation_operators"] is not None
         ):
             logger.warning(
@@ -1050,10 +1052,6 @@ class BaseStoreBackendDefaults(DictDot):
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
-        if validation_operators is None:
-            validation_operators = deepcopy(
-                DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
-            )
         self.validation_operators = validation_operators
         if stores is None:
             stores = deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
@@ -1374,10 +1372,6 @@ class DataContextConfig(BaseYamlConfig):
                 evaluation_parameter_store_name = (
                     store_backend_defaults.evaluation_parameter_store_name
                 )
-            if checkpoint_store_name is None:
-                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
-            if validation_operators is None:
-                validation_operators = store_backend_defaults.validation_operators
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
 
@@ -1388,13 +1382,11 @@ class DataContextConfig(BaseYamlConfig):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
+        if checkpoint_store_name is not None:
+            self.checkpoint_store_name = checkpoint_store_name
         self.plugins_directory = plugins_directory
-        if not isinstance(validation_operators, dict):
-            raise ValueError(
-                "validation_operators must be configured with a dictionary"
-            )
-        self.validation_operators = validation_operators
+        if validation_operators is not None:
+            self.validation_operators = validation_operators
         self.stores = stores
         self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites

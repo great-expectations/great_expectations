@@ -873,11 +873,17 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
 
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-    filesystem_csv_data_context,
+    filesystem_csv_data_context_with_validation_operators,
 ):
-    base_directory = filesystem_csv_data_context.list_datasources()[0][
-        "batch_kwargs_generators"
-    ]["subdir_reader"]["base_directory"]
+    rad_datasource = list(
+        filter(
+            lambda element: element["name"] == "rad_datasource",
+            filesystem_csv_data_context_with_validation_operators.list_datasources(),
+        )
+    )[0]
+    base_directory = rad_datasource["batch_kwargs_generators"]["subdir_reader"][
+        "base_directory"
+    ]
     batch_kwargs = {
         "path": base_directory + "/f1.csv",
         "datasource": "rad_datasource",
@@ -893,7 +899,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     }
 
     checkpoint = LegacyCheckpoint(
-        data_context=filesystem_csv_data_context,
+        data_context=filesystem_csv_data_context_with_validation_operators,
         **checkpoint_config_dict,
     )
 
@@ -902,14 +908,26 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     ):
         checkpoint.run()
 
-    assert len(filesystem_csv_data_context.validations_store.list_keys()) == 0
+    assert (
+        len(
+            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
+        )
+        == 0
+    )
 
-    filesystem_csv_data_context.create_expectation_suite("my_suite")
-    print(filesystem_csv_data_context.list_datasources())
+    filesystem_csv_data_context_with_validation_operators.create_expectation_suite(
+        "my_suite"
+    )
+    print(filesystem_csv_data_context_with_validation_operators.list_datasources())
     # noinspection PyUnusedLocal
     results = checkpoint.run()
 
-    assert len(filesystem_csv_data_context.validations_store.list_keys()) == 1
+    assert (
+        len(
+            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
+        )
+        == 1
+    )
 
 
 # TODO: add more test cases
