@@ -1823,3 +1823,40 @@ data_connectors:
         create_expectation_suite_with_name="A_expectation_suite",
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
+
+
+
+
+
+def test_get_batch_mssql_database(
+    data_context_with_mssql_datasource,
+):
+    """
+    What does this test and why?
+    A DataContext can have "stale" datasources in its configuration (ie. connections to DBs that are now offline).
+    If we configure a new datasource and are only using it (like the PandasDatasource below), then we don't
+    want to be dependant on all the "stale" datasources working too.
+    data_context_with_bad_datasource is a fixture that contains a configuration for an invalid datasource
+    (with "fake_port" and "fake_host")
+    In the test we configure a new expectation_suite, a local pandas_datasource and retrieve a single batch.
+    This tests a fix for the following issue:
+    https://github.com/great-expectations/great_expectations/issues/2241
+    """
+
+    context = data_context_with_mssql_datasource
+    context.create_expectation_suite(expectation_suite_name="local_test.default")
+    expectation_suite = context.get_expectation_suite("local_test.default")
+
+    expectation_suite.expectations = []
+
+    batch_kwargs = {
+        "data_asset_name": "imdb_100k_main",
+        "datasource": "my_mysql_db",
+        "limit": 1000,
+        "schema": "testdb",
+        "table": "imdb_100k_main",
+    }
+    batch = context.get_batch(batch_kwargs, expectation_suite)
+    #print(batch)
+    batch.expect_column_values_to_be_unique(column="movieId")
+

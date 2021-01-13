@@ -1236,8 +1236,14 @@ We have saved your setup progress. When you are ready, run great_expectations in
 def _get_batch_kwargs_for_sqlalchemy_datasource(
     context, datasource_name, additional_batch_kwargs=None
 ):
-    msg_prompt_query = """
-Enter an SQL query
+    data_asset_name = None
+    sql_query = None
+    datasource = context.get_datasource(datasource_name)
+    msg_prompt_how_to_connect_to_data = """
+You have selected a datasource that is a SQL database. How would you like to specify the data?
+1. Enter a table name and schema
+2. Enter a custom SQL query
+3. List all tables in the database (this may take a very long time)
 """
 
     msg_prompt_enter_data_asset_name = (
