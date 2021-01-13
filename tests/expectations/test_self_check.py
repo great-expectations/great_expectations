@@ -196,8 +196,8 @@ def test_all_expectation_self_checks():
         library_json[expectation_name] = report_object
         print(report_object["metrics"])
 
-    with open('output/expectation_library.json', 'w') as f_:
-        f_.write(json.dumps(library_json, indent=2))
+    # with open('output/expectation_library.json', 'w') as f_:
+    #     f_.write(json.dumps(library_json, indent=2))
 
 
 def test_self_check_on_an_existing_expectation():
