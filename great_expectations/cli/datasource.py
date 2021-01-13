@@ -1254,9 +1254,9 @@ def _get_batch_kwargs_for_sqlalchemy_datasource(
     datasource = context.get_datasource(datasource_name)
     msg_prompt_how_to_connect_to_data = """
 You have selected a datasource that is a SQL database. How would you like to specify the data?
-1. Name the schema and table (SELECT from a single table)
-2. Input a custom SQL query (with additional SQL clauses e.g. WHERE/JOIN/GROUP BY)
-3. Search for the table to add (will display all tables in database)
+1. Enter a table name and schema
+2. Enter a custom SQL query
+3. List all tables in the database (this may take a very long time)
 """
     default_schema = _get_default_schema(datasource)
     temp_generator = TableBatchKwargsGenerator(name="temp", datasource=datasource)
