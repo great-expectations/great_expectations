@@ -258,7 +258,4 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             "@shinnyshinshin",
             "@abegong",
         ],
-        "github_issue_url": None,
-        "created_at": 1556461556,
-        "updated_at": 1609165558,
     }

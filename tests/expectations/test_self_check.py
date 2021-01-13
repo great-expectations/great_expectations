@@ -68,9 +68,6 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
         "contributors": [
             "@abegong",
         ],
-        "github_issue_url": None,
-        "created_at": 1556461556,
-        "updated_at": 1609165558,
     }
 
 
@@ -182,7 +179,12 @@ def test_expectation_self_check():
         "examples": [],
         "metrics": [],
         "execution_engines": {},
-        "library_metadata": {},
+        "library_metadata": {
+            "maturity": None,
+            "package": None,
+            "tags": [],
+            "contributors": []            
+        },
     }
 
 
@@ -194,8 +196,8 @@ def test_all_expectation_self_checks():
         library_json[expectation_name] = report_object
         print(report_object["metrics"])
 
-    # with open('output/expectation_library.json', 'w') as f_:
-    #     f_.write(json.dumps(library_json, indent=2))
+    with open('output/expectation_library.json', 'w') as f_:
+        f_.write(json.dumps(library_json, indent=2))
 
 
 def test_self_check_on_an_existing_expectation():
@@ -289,9 +291,6 @@ def test_self_check_on_an_existing_expectation():
                 "@shinnyshinshin",
                 "@abegong",
             ],
-            "github_issue_url": None,
-            "created_at": 1556461556,
-            "updated_at": 1609165558,
         },
     }
 
