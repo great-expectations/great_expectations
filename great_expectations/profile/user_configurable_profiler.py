@@ -65,194 +65,26 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
     individual ECs, remove by column, remove by expectation type.
     """
 
-    # def __init__(self, dataset, config=None, tolerance=0):
-    #     self.dataset = dataset
-    #     self.primary_or_compound_key = []
-    #     self.ignored_columns = []
-    #     self.value_set_threshold = None
-    #     self.table_expectations_only = None
-    #     self.excluded_expectations = []
-    #
-    #     if config is not None:
-    #         self.semantic_type_dict = config.get("semantic_types")
-    #         self.primary_or_compound_key = (
-    #             config.get("primary_or_compound_key") or []
-    #         )
-    #         self.ignored_columns = config.get("ignored_columns") or []
-    #         self.excluded_expectations = config.get("excluded_expectations") or []
-    #         self.value_set_threshold = config.get("value_set_threshold")
-    #         self.table_expectations_only = config.get("table_expectations_only")
-    #
-    #         if self.table_expectations_only is True:
-    #             self.ignored_columns = dataset.get_table_columns()
-    #             logger.debug(
-    #                 "table_expectations_only is set to True. Ignoring all columns and creating expectations only \
-    #                        at the table level"
-    #             )
-    #
-    #     included_columns = [
-    #         column_name
-    #         for column_name in dataset.get_table_columns()
-    #         if column_name not in self.ignored_columns
-    #     ]
-    #     for column_name in included_columns:
-    #         cls._get_column_cardinality_with_caching(dataset, column_name, cache)
-    #         cls._add_column_type_to_cache_and_build_type_expectations(
-    #             dataset, column_name, cache
-    #         )
-    #         if config is not None and config.get("semantic_types") is not None:
-    #             cls._add_semantic_types_by_column_from_config_to_cache(
-    #                 dataset, config, column_name, cache
-    #             )
-
-    @classmethod
-    def build_suite(cls, dataset, config=None, tolerance=0):
-        cache = cls._initialize_cache_with_metadata(dataset=dataset, config=config)
-        if config:
-            cls._validate_config(config)
-            semantic_types = config.get("semantic_types")
-            if semantic_types:
-                cls._validate_semantic_types_dict(
-                    dataset=dataset, config=config, cache=cache
-                )
-                return cls._build_expectation_list_from_config(
-                    dataset=dataset, cache=cache, config=config, tolerance=tolerance
-                )
-        for k, v in cache.items():
-            print(k, v)
-        return cls._profile_and_build_expectation_list(
-            dataset=dataset, cache=cache, config=config, tolerance=tolerance
-        )
-
-    @classmethod
-    def _build_expectation_list_from_config(cls, dataset, cache, config, tolerance=0):
-        if not config or not config.get("semantic_types"):
-            raise ValueError(
-                "A config with a semantic_types dict must be included in order to use this profiler."
-            )
-        cls._build_expectations_table(dataset, cache=cache)
-        ignored_columns = cache.get("ignored_columns") or {}
-        value_set_threshold = cache.get("value_set_threshold")
-        if value_set_threshold:
-            logger.debug(
-                "Using this profiler with a semantic_types dict will ignore the value_set_threshold parameter. If "
-                "you would like to include value_set expectations, you can include a 'value_set' entry in your "
-                "semantic_types dict with any columns for which you would like a value_set expectation, or you can "
-                "remove the semantic_types dict from the config."
-            )
-        cache_columns = {
-            k: v
-            for k, v in cache.items()
-            if (
-                isinstance(v, dict)
-                and "cardinality" in v.keys()
-                and k not in ignored_columns
-            )
-        }
-        primary_or_compound_key = cache.get("primary_or_compound_key")
-        if primary_or_compound_key is not None:
-            cls._build_expectations_primary_or_compound_key(
-                dataset, primary_or_compound_key, cache=cache
-            )
-
-        for column_name, column_info in cache_columns.items():
-            semantic_types = column_info.get("semantic_types")
-            for semantic_type in semantic_types:
-                semantic_type_fn = cls.semantic_type_functions.get(semantic_type)
-                getattr(cls, semantic_type_fn)(dataset, column_name, cache, tolerance)
-
-        for column_name in cache_columns.keys():
-            cls._build_expectations_for_all_column_types(
-                dataset, column_name, cache=cache
-            )
-
-        expectation_suite = cls._build_column_description_metadata(dataset)
-        logger.debug("")
-        cls._display_suite_by_column(suite=expectation_suite, cache=cache)
-        return expectation_suite
-
-    @classmethod
-    def _profile_and_build_expectation_list(
-        cls, dataset, cache, config=None, tolerance=0
-    ):
-        ignored_columns = cache.get("ignored_columns") or {}
-        value_set_threshold = cache.get("value_set_threshold")
-        if not value_set_threshold:
-            value_set_threshold = "many"
-        cache_columns = {
-            k: v
-            for k, v in cache.items()
-            if (
-                isinstance(v, dict)
-                and "cardinality" in v.keys()
-                and k not in ignored_columns
-            )
-        }
-        primary_or_compound_key = cache.get("primary_or_compound_key")
-        if primary_or_compound_key:
-            cls._build_expectations_primary_or_compound_key(
-                dataset=dataset, column_list=primary_or_compound_key, cache=cache
-            )
-        cls._build_expectations_table(dataset=dataset, cache=cache, tolerance=tolerance)
-        for column_name, column_info in cache_columns.items():
-            data_type = column_info.get("type")
-            cardinality = column_info.get("cardinality")
-
-            if data_type in ("float", "int", "numeric"):
-                cls._build_expectations_numeric(
-                    dataset=dataset,
-                    column=column_name,
-                    cache=cache,
-                    tolerance=tolerance,
-                )
-
-            if data_type == "datetime":
-                cls._build_expectations_datetime(
-                    dataset=dataset,
-                    column=column_name,
-                    cache=cache,
-                    tolerance=tolerance,
-                )
-
-            if cls._cardinality_enumeration.get(
-                value_set_threshold
-            ) >= cls._cardinality_enumeration.get(cardinality):
-                cls._build_expectations_value_set(
-                    dataset=dataset, column=column_name, cache=cache
-                )
-
-            cls._build_expectations_for_all_column_types(
-                dataset=dataset, column=column_name, cache=cache
-            )
-
-        expectation_suite = cls._build_column_description_metadata(dataset)
-        logger.debug("")
-        cls._display_suite_by_column(
-            suite=expectation_suite, cache=cache
-        )  # include in the actual profiler
-        return expectation_suite
-
-    @classmethod
-    def _initialize_cache_with_metadata(cls, dataset, config=None):
-        cache = {}
-        cache["primary_or_compound_key"] = []
-        cache["ignored_columns"] = []
-        cache["value_set_threshold"] = None
-        cache["table_expectations_only"] = None
-        cache["excluded_expectations"] = []
+    def __init__(self, dataset, config=None, tolerance=0):
+        self.dataset = dataset
+        self.config = config
+        self.primary_or_compound_key = []
+        self.ignored_columns = []
+        self.value_set_threshold = None
+        self.table_expectations_only = None
+        self.excluded_expectations = []
+        self.column_info = {}
 
         if config is not None:
-            semantic_type_dict = config.get("semantic_types")
-            cache["primary_or_compound_key"] = (
-                config.get("primary_or_compound_key") or []
-            )
-            cache["ignored_columns"] = config.get("ignored_columns") or []
-            cache["excluded_expectations"] = config.get("excluded_expectations") or []
-            cache["value_set_threshold"] = config.get("value_set_threshold")
-            cache["table_expectations_only"] = config.get("table_expectations_only")
+            self.semantic_type_dict = config.get("semantic_types")
+            self.primary_or_compound_key = config.get("primary_or_compound_key") or []
+            self.ignored_columns = config.get("ignored_columns") or []
+            self.excluded_expectations = config.get("excluded_expectations") or []
+            self.value_set_threshold = config.get("value_set_threshold")
+            self.table_expectations_only = config.get("table_expectations_only")
 
-            if config.get("table_expectations_only") is True:
-                cache["ignored_columns"] = dataset.get_table_columns()
+            if self.table_expectations_only is True:
+                self.ignored_columns = dataset.get_table_columns()
                 logger.debug(
                     "table_expectations_only is set to True. Ignoring all columns and creating expectations only \
                            at the table level"
@@ -261,22 +93,108 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         included_columns = [
             column_name
             for column_name in dataset.get_table_columns()
-            if column_name not in cache.get("ignored_columns")
+            if column_name not in self.ignored_columns
         ]
         for column_name in included_columns:
-            cls._get_column_cardinality_with_caching(dataset, column_name, cache)
-            cls._add_column_type_to_cache_and_build_type_expectations(
-                dataset, column_name, cache
-            )
+            self._get_column_cardinality_with_caching(dataset, column_name)
+            self._add_column_type_and_build_type_expectations(dataset, column_name)
             if config is not None and config.get("semantic_types") is not None:
-                cls._add_semantic_types_by_column_from_config_to_cache(
-                    dataset, config, column_name, cache
+                self._add_semantic_types_by_column_from_config_to_column_info(
+                    dataset, config, column_name
                 )
 
-        return cache
+    def build_suite(self, dataset, config=None, tolerance=0):
+        if config:
+            self._validate_config(config)
+            semantic_types = config.get("semantic_types")
+            if semantic_types:
+                self._validate_semantic_types_dict(dataset=dataset, config=config)
+                return self._build_expectation_list_from_config(
+                    dataset=dataset, config=config, tolerance=tolerance
+                )
 
-    @classmethod
-    def _validate_config(cls, config):
+        return self._profile_and_build_expectation_list(
+            dataset=dataset, config=config, tolerance=tolerance
+        )
+
+    def _build_expectation_list_from_config(self, dataset, config, tolerance=0):
+        if not self.semantic_type_dict:
+            raise ValueError(
+                "A config with a semantic_types dict must be included in order to use this profiler."
+            )
+        self._build_expectations_table(dataset)
+
+        if self.value_set_threshold:
+            logger.debug(
+                "Using this profiler with a semantic_types dict will ignore the value_set_threshold parameter. If "
+                "you would like to include value_set expectations, you can include a 'value_set' entry in your "
+                "semantic_types dict with any columns for which you would like a value_set expectation, or you can "
+                "remove the semantic_types dict from the config."
+            )
+
+        if self.primary_or_compound_key is not None:
+            self._build_expectations_primary_or_compound_key(
+                dataset, self.primary_or_compound_key
+            )
+
+        for column_name, column_info in self.column_info.items():
+            semantic_types = column_info.get("semantic_types")
+            for semantic_type in semantic_types:
+                semantic_type_fn = self.semantic_type_functions.get(semantic_type)
+                getattr(self, semantic_type_fn)(dataset, column_name, tolerance)
+
+        for column_name in self.column_info.keys():
+            self._build_expectations_for_all_column_types(dataset, column_name)
+
+        expectation_suite = self._build_column_description_metadata(dataset)
+        logger.debug("")
+        self._display_suite_by_column(suite=expectation_suite)
+        return expectation_suite
+
+    def _profile_and_build_expectation_list(self, dataset, config=None, tolerance=0):
+        if not self.value_set_threshold:
+            self.value_set_threshold = "many"
+
+        if self.primary_or_compound_key:
+            self._build_expectations_primary_or_compound_key(
+                dataset=dataset, column_list=self.primary_or_compound_key
+            )
+        self._build_expectations_table(dataset=dataset, tolerance=tolerance)
+        for column_name, column_info in self.column_info.items():
+            data_type = column_info.get("type")
+            cardinality = column_info.get("cardinality")
+
+            if data_type in ("float", "int", "numeric"):
+                self._build_expectations_numeric(
+                    dataset=dataset,
+                    column=column_name,
+                    tolerance=tolerance,
+                )
+
+            if data_type == "datetime":
+                self._build_expectations_datetime(
+                    dataset=dataset,
+                    column=column_name,
+                    tolerance=tolerance,
+                )
+
+            if self._cardinality_enumeration.get(
+                self.value_set_threshold
+            ) >= self._cardinality_enumeration.get(cardinality):
+                self._build_expectations_value_set(dataset=dataset, column=column_name)
+
+            self._build_expectations_for_all_column_types(
+                dataset=dataset, column=column_name
+            )
+
+        expectation_suite = self._build_column_description_metadata(dataset)
+        logger.debug("")
+        self._display_suite_by_column(
+            suite=expectation_suite
+        )  # include in the actual profiler
+        return expectation_suite
+
+    def _validate_config(self, config):
         config_parameters = {
             "ignored_columns": list,
             "excluded_expectations": list,
@@ -295,8 +213,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                     v, config_parameters.get(k)
                 ), f"Config parameter {k} must be formatted as a {config_parameters.get(k)} rather than a {type(v)}."
 
-    @classmethod
-    def _validate_semantic_types_dict(cls, dataset, config, cache):
+    def _validate_semantic_types_dict(self, dataset, config):
         semantic_type_dict = config.get("semantic_types")
         if not isinstance(semantic_type_dict, dict):
             raise ValueError(
@@ -308,7 +225,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 "Entries in semantic type dict must be lists of column names e.g. "
                 "{'semantic_types': {'numeric': ['number_of_transactions']}}"
             )
-            if k not in cls._semantic_types:
+            if k not in self._semantic_types:
                 logger.debug(
                     f"{k} is not a recognized semantic_type and will be skipped."
                 )
@@ -325,21 +242,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         dataset.set_default_expectation_argument("catch_exceptions", False)
 
-        cached_config_parameters = (
-            "ignored_columns",
-            "excluded_expectations",
-            "primary_or_compound_key",
-            "value_set_threshold",
-            "table_expectations_only",
-        )
-
-        cached_columns = {
-            k: v
-            for k, v in cache.items()
-            if k not in cached_config_parameters and len(v.get("semantic_types")) > 0
-        }
-
-        for column_name, column_info in cached_columns.items():
+        for column_name, column_info in self.column_info.items():
             config_semantic_types = column_info["semantic_types"]
             for semantic_type in config_semantic_types:
                 if semantic_type == "datetime":
@@ -367,14 +270,9 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 # else:
                 #     logger.debug(f"Semantic_type: {semantic_type} is unknown. Skipping")
 
-    @classmethod
-    def _add_column_type_to_cache_and_build_type_expectations(
-        cls, dataset, column_name, cache
-    ):
+    def _add_column_type_and_build_type_expectations(self, dataset, column_name):
         type_expectation_is_excluded = False
-        if "expect_column_values_to_be_in_type_list" in cache.get(
-            "excluded_expectations"
-        ):
+        if "expect_column_values_to_be_in_type_list" in self.excluded_expectations:
             type_expectation_is_excluded = True
             logger.debug(
                 "expect_column_values_to_be_in_type_list is in the excluded_expectations list. This"
@@ -382,14 +280,14 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 "expectation suite."
             )
 
-        column_cache_entry = cache.get(column_name)
-        if not column_cache_entry:
-            column_cache_entry = {}
-            cache[column_name] = column_cache_entry
-        column_type = column_cache_entry.get("type")
+        column_info_entry = self.column_info.get(column_name)
+        if not column_info_entry:
+            column_info_entry = {}
+            self.column_info[column_name] = column_info_entry
+        column_type = column_info_entry.get("type")
         if not column_type:
-            column_type = cls._get_column_type(dataset, column_name)
-            column_cache_entry["type"] = column_type
+            column_type = self._get_column_type(dataset, column_name)
+            column_info_entry["type"] = column_type
             if type_expectation_is_excluded:
                 # remove the expectation
                 dataset.remove_expectation(
@@ -402,16 +300,15 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         return column_type
 
-    @classmethod
-    def _get_column_cardinality_with_caching(cls, dataset, column_name, cache):
-        column_cache_entry = cache.get(column_name)
-        if not column_cache_entry:
-            column_cache_entry = {}
-            cache[column_name] = column_cache_entry
-        column_cardinality = column_cache_entry.get("cardinality")
+    def _get_column_cardinality_with_caching(self, dataset, column_name):
+        column_info_entry = self.column_info.get(column_name)
+        if not column_info_entry:
+            column_info_entry = {}
+            self.column_info[column_name] = column_info_entry
+        column_cardinality = column_info_entry.get("cardinality")
         if not column_cardinality:
-            column_cardinality = cls._get_column_cardinality(dataset, column_name)
-            column_cache_entry["cardinality"] = column_cardinality
+            column_cardinality = self._get_column_cardinality(dataset, column_name)
+            column_info_entry["cardinality"] = column_cardinality
             # remove the expectations
             dataset.remove_expectation(
                 ExpectationConfiguration(
@@ -429,32 +326,29 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         return column_cardinality
 
-    @classmethod
-    def _add_semantic_types_by_column_from_config_to_cache(
-        cls, dataset, config, column_name, cache
+    def _add_semantic_types_by_column_from_config_to_column_info(
+        self, dataset, config, column_name
     ):
-        column_cache_entry = cache.get(column_name)
-        if not column_cache_entry:
-            column_cache_entry = {}
-            cache[column_name] = column_cache_entry
+        column_info_entry = self.column_info.get(column_name)
+        if not column_info_entry:
+            column_info_entry = {}
+            self.column_info[column_name] = column_info_entry
 
-        semantic_types = column_cache_entry.get("semantic_types")
+        semantic_types = column_info_entry.get("semantic_types")
 
         if not semantic_types:
-            semantic_type_dict = config.get("semantic_types")
             assert isinstance(
-                semantic_type_dict, dict
-            ), f"The semantic_types dict in the config must be a dictionary, but is currently a {type(semantic_type_dict)}. Please reformat."
+                self.semantic_type_dict, dict
+            ), f"The semantic_types dict in the config must be a dictionary, but is currently a {type(self.semantic_type_dict)}. Please reformat."
             semantic_types = []
-            for semantic_type, column_list in semantic_type_dict.items():
-                if column_name in column_list and semantic_type in cls._semantic_types:
+            for semantic_type, column_list in self.semantic_type_dict.items():
+                if column_name in column_list and semantic_type in self._semantic_types:
                     semantic_types.append(semantic_type)
-            column_cache_entry["semantic_types"] = semantic_types
+            column_info_entry["semantic_types"] = semantic_types
 
         return semantic_types
 
-    @classmethod
-    def _build_column_description_metadata(cls, dataset):
+    def _build_column_description_metadata(self, dataset):
         columns = dataset.get_table_columns()
         expectation_suite = dataset.get_expectation_suite(
             suppress_warnings=True, discard_failed_expectations=False
@@ -470,8 +364,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         return expectation_suite
 
-    @classmethod
-    def _display_suite_by_column(cls, suite, cache={}):
+    def _display_suite_by_column(self, suite):
         expectations = suite.expectations
         expectations_by_column = {}
         for expectation in expectations:
@@ -500,11 +393,11 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             print("\nExpectations by Column")
 
         for column in sorted(expectations_by_column):
-            cached_column = cache.get(column) or {}
+            info_column = self.column_info.get(column) or {}
 
-            semantic_types = cached_column.get("semantic_types")
-            type_ = cached_column.get("type")
-            cardinality = cached_column.get("cardinality")
+            semantic_types = info_column.get("semantic_types")
+            type_ = info_column.get("type")
+            cardinality = info_column.get("cardinality")
 
             if semantic_types:
                 type_string = f" | Semantic Type: {semantic_types[0] if len(semantic_types)==1 else semantic_types}"
@@ -529,11 +422,8 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 print(expectation.expectation_type)
             print("\n")
 
-    @classmethod
-    def _build_expectations_value_set(cls, dataset, column, cache=None, tolerance=0):
-        if "expect_column_values_to_be_in_set" not in cache.get(
-            "excluded_expectations"
-        ):
+    def _build_expectations_value_set(self, dataset, column, tolerance=0):
+        if "expect_column_values_to_be_in_set" not in self.excluded_expectations:
             value_set = dataset.expect_column_distinct_values_to_be_in_set(
                 column, value_set=None, result_format="SUMMARY"
             ).result["observed_value"]
@@ -548,14 +438,13 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
             dataset.expect_column_values_to_be_in_set(column, value_set=value_set)
 
-    @classmethod
-    def _build_expectations_numeric(cls, dataset, column, cache=None, tolerance=0):
+    def _build_expectations_numeric(self, dataset, column, tolerance=0):
         # min
-        if "expect_column_min_to_be_between" not in cache.get("excluded_expectations"):
+        if "expect_column_min_to_be_between" not in self.excluded_expectations:
             observed_min = dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not cls._is_nan(observed_min):
+            if not self._is_nan(observed_min):
                 # places = len(str(observed_min)[str(observed_min).find('.') + 1:])
                 # tolerance = 10 ** int(-places)
                 # tolerance = float(decimal.Decimal.from_float(float(observed_min)) - decimal.Decimal(str(observed_min)))
@@ -578,11 +467,11 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 )
 
         # max
-        if "expect_column_max_to_be_between" not in cache.get("excluded_expectations"):
+        if "expect_column_max_to_be_between" not in self.excluded_expectations:
             observed_max = dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not cls._is_nan(observed_max):
+            if not self._is_nan(observed_max):
                 # tolerance = float(decimal.Decimal.from_float(float(observed_max)) - decimal.Decimal(str(observed_max)))
                 dataset.expect_column_max_to_be_between(
                     column,
@@ -603,11 +492,11 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 )
 
         # mean
-        if "expect_column_mean_to_be_between" not in cache.get("excluded_expectations"):
+        if "expect_column_mean_to_be_between" not in self.excluded_expectations:
             observed_mean = dataset.expect_column_mean_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not cls._is_nan(observed_mean):
+            if not self._is_nan(observed_mean):
                 # tolerance = float(decimal.Decimal.from_float(float(observed_mean)) - decimal.Decimal(str(observed_mean)))
                 dataset.expect_column_mean_to_be_between(
                     column,
@@ -628,13 +517,11 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 )
 
         # median
-        if "expect_column_median_to_be_between" not in cache.get(
-            "excluded_expectations"
-        ):
+        if "expect_column_median_to_be_between" not in self.excluded_expectations:
             observed_median = dataset.expect_column_median_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not cls._is_nan(observed_median):
+            if not self._is_nan(observed_median):
                 # places = len(str(observed_median)[str(observed_median).find('.') + 1:])
                 # tolerance = 10 ** int(-places)
                 # tolerance = float(decimal.Decimal.from_float(float(observed_median)) - decimal.Decimal(str(observed_median)))
@@ -657,8 +544,9 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 )
 
         # quantile values
-        if "expect_column_quantile_values_to_be_between" not in cache.get(
-            "excluded_expectations"
+        if (
+            "expect_column_quantile_values_to_be_between"
+            not in self.excluded_expectations
         ):
             allow_relative_error: bool = dataset.attempt_allowing_relative_error()
             quantile_result = dataset.expect_column_quantile_values_to_be_between(
@@ -709,15 +597,11 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 )
                 dataset.set_config_value("interactive_evaluation", True)
 
-    @classmethod
-    def _build_expectations_primary_or_compound_key(
-        cls, dataset, column_list, cache=None
-    ):
+    def _build_expectations_primary_or_compound_key(self, dataset, column_list):
         # uniqueness
-        if len(
-            column_list
-        ) > 1 and "expect_compound_columns_to_be_unique" not in cache.get(
-            "excluded_expectations"
+        if (
+            len(column_list) > 1
+            and "expect_compound_columns_to_be_unique" not in self.excluded_expectations
         ):
             dataset.expect_compound_columns_to_be_unique(column_list)
         elif len(column_list) < 1:
@@ -726,27 +610,22 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             )
         else:
             [column] = column_list
-            if "expect_column_values_to_be_unique" not in cache.get(
-                "excluded_expectations"
-            ):
+            if "expect_column_values_to_be_unique" not in self.excluded_expectations:
                 dataset.expect_column_values_to_be_unique(column)
 
-    @classmethod
-    def _build_expectations_string(cls, dataset, column, cache=None, tolerance=0):
+    def _build_expectations_string(self, dataset, column, tolerance=0):
         # value_lengths
 
-        if "expect_column_value_lengths_to_be_between" not in cache.get(
-            "excluded_expectations"
+        if (
+            "expect_column_value_lengths_to_be_between"
+            not in self.excluded_expectations
         ):
             # With the 0.12 API there isn't a quick way to introspect for value_lengths - if we did that, we could
             #  build a potentially useful value_lengths expectation here.
             pass
 
-    @classmethod
-    def _build_expectations_datetime(cls, dataset, column, cache=None, tolerance=0):
-        if "expect_column_values_to_be_between" not in cache.get(
-            "excluded_expectations"
-        ):
+    def _build_expectations_datetime(self, dataset, column, tolerance=0):
+        if "expect_column_values_to_be_between" not in self.excluded_expectations:
             min_value = dataset.expect_column_min_to_be_between(
                 column,
                 min_value=None,
@@ -805,13 +684,8 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                     parse_strings_as_datetimes=True,
                 )
 
-    @classmethod
-    def _build_expectations_for_all_column_types(
-        cls, dataset, column, cache=None, tolerance=0
-    ):
-        if "expect_column_values_to_not_be_null" not in cache.get(
-            "excluded_expectations"
-        ):
+    def _build_expectations_for_all_column_types(self, dataset, column, tolerance=0):
+        if "expect_column_values_to_not_be_null" not in self.excluded_expectations:
             not_null_result = dataset.expect_column_values_to_not_be_null(column)
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
@@ -825,8 +699,9 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                         ),
                         match_type="domain",
                     )
-                    if "expect_column_values_to_be_null" not in cache.get(
-                        "excluded_expectations"
+                    if (
+                        "expect_column_values_to_be_null"
+                        not in self.excluded_expectations
                     ):
                         dataset.expect_column_values_to_be_null(
                             column, mostly=safe_mostly_value
@@ -839,8 +714,9 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                     dataset.expect_column_values_to_not_be_null(
                         column, mostly=safe_mostly_value
                     )
-        if "expect_column_proportion_of_unique_values_to_be_between" not in cache.get(
-            "excluded_expectations"
+        if (
+            "expect_column_proportion_of_unique_values_to_be_between"
+            not in self.excluded_expectations
         ):
             pct_unique = (
                 dataset.expect_column_proportion_of_unique_values_to_be_between(
@@ -848,7 +724,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 ).result["observed_value"]
             )
 
-            if not cls._is_nan(pct_unique):
+            if not self._is_nan(pct_unique):
                 dataset.expect_column_proportion_of_unique_values_to_be_between(
                     column, min_value=pct_unique, max_value=pct_unique
                 )
@@ -865,17 +741,15 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                     f"Skipping expect_column_proportion_of_unique_values_to_be_between because observed value is nan: {pct_unique}"
                 )
 
-    @classmethod
-    def _build_expectations_table(cls, dataset, cache=None, tolerance=0):
-        if "expect_table_columns_to_match_ordered_list" not in cache.get(
-            "excluded_expectations"
+    def _build_expectations_table(self, dataset, tolerance=0):
+        if (
+            "expect_table_columns_to_match_ordered_list"
+            not in self.excluded_expectations
         ):
             columns = dataset.get_table_columns()
             dataset.expect_table_columns_to_match_ordered_list(columns)
 
-        if "expect_table_row_count_to_be_between" not in cache.get(
-            "excluded_expectations"
-        ):
+        if "expect_table_row_count_to_be_between" not in self.excluded_expectations:
             row_count = dataset.expect_table_row_count_to_be_between(
                 min_value=0, max_value=None
             ).result["observed_value"]
@@ -886,8 +760,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 min_value=min_value, max_value=max_value
             )
 
-    @classmethod
-    def _get_column_type(cls, df, column):
+    def _get_column_type(self, df, column):
 
         # list of types is used to support pandas and sqlalchemy
         type_ = None
@@ -945,8 +818,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         df.set_config_value("interactive_evaluation", False)
         return type_
 
-    @classmethod
-    def _get_column_cardinality(cls, df, column):
+    def _get_column_cardinality(self, df, column):
         num_unique = None
         pct_unique = None
         df.set_config_value("interactive_evaluation", True)
@@ -987,8 +859,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         return cardinality
 
-    @classmethod
-    def _is_nan(cls, value):
+    def _is_nan(self, value):
         try:
             return np.isnan(value)
         except TypeError:

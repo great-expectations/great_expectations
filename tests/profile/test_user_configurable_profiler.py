@@ -213,7 +213,8 @@ def test__validate_semantic_types_dict(
 
 
 def test_build_suite_no_config(titanic_dataset, possible_expectations_set):
-    suite = UserConfigurableProfiler.build_suite(titanic_dataset)
+    profiler = UserConfigurableProfiler(titanic_dataset)
+    suite = profiler.build_suite(dataset=profiler.dataset)
     expectations_from_suite = {i.expectation_type for i in suite.expectations}
 
     assert expectations_from_suite.issubset(possible_expectations_set)
@@ -228,8 +229,8 @@ def test_build_suite_with_config(titanic_dataset, possible_expectations_set):
         "table_expectations_only": False,
         "value_set_threshold": "very_few",
     }
-
-    suite = UserConfigurableProfiler.build_suite(dataset=titanic_dataset, config=config)
+    profiler = UserConfigurableProfiler(titanic_dataset, config=config)
+    suite = profiler.build_suite(dataset=profiler.dataset, config=profiler.config)
     (
         columns_with_expectations,
         expectations_from_suite,
