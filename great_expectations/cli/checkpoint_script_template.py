@@ -42,10 +42,8 @@ for batch in checkpoint.batches:
 
 # run the validation operator
 results = context.run_validation_operator(
-    checkpoint["validation_operator_name"],
+    checkpoint.validation_operator_name,
     assets_to_validate=batches_to_validate,
-    # TODO prepare for new RunID - checkpoint name and timestamp
-    # run_id=RunID(checkpoint)
 )
 
 # take action based on results

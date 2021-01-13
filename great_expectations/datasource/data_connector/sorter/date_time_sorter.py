@@ -4,30 +4,10 @@ from typing import Any
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.util import datetime_to_int, parse_string_to_datetime
 from great_expectations.datasource.data_connector.sorter import Sorter
 
 logger = logging.getLogger(__name__)
-
-
-def parse_string_to_datetime(
-    datetime_string: str, datetime_format_string: str
-) -> datetime.date:
-    if not isinstance(datetime_string, str):
-        raise ge_exceptions.SorterError(
-            f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
-            """
-        )
-    if datetime_format_string and not isinstance(datetime_format_string, str):
-        raise ge_exceptions.SorterError(
-            f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
-"{str(type(datetime_format_string))}").
-            """
-        )
-    return datetime.datetime.strptime(datetime_string, datetime_format_string).date()
-
-
-def datetime_to_int(dt: datetime.date) -> int:
-    return int(dt.strftime("%Y%m%d%H%M%S"))
 
 
 class DateTimeSorter(Sorter):

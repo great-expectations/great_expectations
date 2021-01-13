@@ -796,7 +796,7 @@ class BaseDataContext:
             config = self._project_config
 
         substituted_config_variables = substitute_all_config_variables(
-            dict(self._load_config_variables_file()),
+            self.config_variables,
             dict(os.environ),
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
@@ -2763,9 +2763,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self.checkpoint_store.set(key=key, value=checkpoint_config)
         return new_checkpoint
 
-    def get_checkpoint(
-        self, name: str, return_config: bool = True
-    ) -> Union[CheckpointConfig, Checkpoint, LegacyCheckpoint]:
+    def get_checkpoint(self, name: str) -> Union[Checkpoint, LegacyCheckpoint]:
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_key=name,
         )
@@ -2804,9 +2802,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 raise ge_exceptions.CheckpointError(
                     message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
                 )
-
-        if return_config:
-            return checkpoint_config
 
         config: dict = checkpoint_config.to_json_dict()
         config.update({"name": name})
@@ -2861,7 +2856,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             name=checkpoint_name,
-            return_config=False,
         )
 
         return checkpoint.run(
