@@ -65,11 +65,51 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
     individual ECs, remove by column, remove by expectation type.
     """
 
+    # def __init__(self, dataset, config=None, tolerance=0):
+    #     self.dataset = dataset
+    #     self.primary_or_compound_key = []
+    #     self.ignored_columns = []
+    #     self.value_set_threshold = None
+    #     self.table_expectations_only = None
+    #     self.excluded_expectations = []
+    #
+    #     if config is not None:
+    #         self.semantic_type_dict = config.get("semantic_types")
+    #         self.primary_or_compound_key = (
+    #             config.get("primary_or_compound_key") or []
+    #         )
+    #         self.ignored_columns = config.get("ignored_columns") or []
+    #         self.excluded_expectations = config.get("excluded_expectations") or []
+    #         self.value_set_threshold = config.get("value_set_threshold")
+    #         self.table_expectations_only = config.get("table_expectations_only")
+    #
+    #         if self.table_expectations_only is True:
+    #             self.ignored_columns = dataset.get_table_columns()
+    #             logger.debug(
+    #                 "table_expectations_only is set to True. Ignoring all columns and creating expectations only \
+    #                        at the table level"
+    #             )
+    #
+    #     included_columns = [
+    #         column_name
+    #         for column_name in dataset.get_table_columns()
+    #         if column_name not in self.ignored_columns
+    #     ]
+    #     for column_name in included_columns:
+    #         cls._get_column_cardinality_with_caching(dataset, column_name, cache)
+    #         cls._add_column_type_to_cache_and_build_type_expectations(
+    #             dataset, column_name, cache
+    #         )
+    #         if config is not None and config.get("semantic_types") is not None:
+    #             cls._add_semantic_types_by_column_from_config_to_cache(
+    #                 dataset, config, column_name, cache
+    #             )
+
     @classmethod
     def build_suite(cls, dataset, config=None, tolerance=0):
         cache = cls._initialize_cache_with_metadata(dataset=dataset, config=config)
         if config:
-            cls._validate_config(dataset, config)
+            cls._validate_config(config)
             semantic_types = config.get("semantic_types")
             if semantic_types:
                 cls._validate_semantic_types_dict(
@@ -236,7 +276,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         return cache
 
     @classmethod
-    def _validate_config(cls, dataset, config, cache=None):
+    def _validate_config(cls, config):
         config_parameters = {
             "ignored_columns": list,
             "excluded_expectations": list,
@@ -247,14 +287,13 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         }
 
         for k, v in config.items():
-            if k not in config_parameters:
-                logger.debug(
-                    f"Parameter {k} from config is not recognized and will be ignored."
-                )
+            assert (
+                k in config_parameters
+            ), f"Parameter {k} from config is not recognized."
             if v:
                 assert isinstance(
                     v, config_parameters.get(k)
-                ), f"Config parameter {k} must be formatted as a {config_parameters.get(k)} rather than {type(v)}."
+                ), f"Config parameter {k} must be formatted as a {config_parameters.get(k)} rather than a {type(v)}."
 
     @classmethod
     def _validate_semantic_types_dict(cls, dataset, config, cache):
@@ -267,7 +306,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         for k, v in semantic_type_dict.items():
             assert isinstance(v, list), (
                 "Entries in semantic type dict must be lists of column names e.g. "
-                '{"semantic_types": {"numeric": ["number_of_transactions"]}}'
+                "{'semantic_types': {'numeric': ['number_of_transactions']}}"
             )
             if k not in cls._semantic_types:
                 logger.debug(
@@ -403,6 +442,9 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         if not semantic_types:
             semantic_type_dict = config.get("semantic_types")
+            assert isinstance(
+                semantic_type_dict, dict
+            ), f"The semantic_types dict in the config must be a dictionary, but is currently a {type(semantic_type_dict)}. Please reformat."
             semantic_types = []
             for semantic_type, column_list in semantic_type_dict.items():
                 if column_name in column_list and semantic_type in cls._semantic_types:
