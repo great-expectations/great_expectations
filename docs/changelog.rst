@@ -6,7 +6,11 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] Add MicrosoftTeamsNotificationAction (Thanks @Antoninj!)
+* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API
+* [ENHANCEMENT] Speed up new suite creation flow when connecting to Databases. Issue #1670 (Thanks @armaandhull!)
 * [BUGFIX] Mask passwords in DataContext.list_datasources(). Issue #2184
+
 
 0.13.4
 -----------------
