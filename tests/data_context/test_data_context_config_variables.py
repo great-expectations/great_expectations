@@ -113,7 +113,7 @@ def test_setting_config_variables_is_visible_immediately(
         "host": "localhost",
         "port": "5432",
         "username": "postgres",
-        "password": "$pas$wor$d1$",
+        "password": "pas$wor$d1$",
         "database": "postgres",
     }
     context.save_config_variable(
@@ -152,7 +152,7 @@ def test_setting_config_variables_is_visible_immediately(
         "host": "localhost",
         "port": "5432",
         "username": "postgres",
-        "password": r"\$pas\$wor\$d1\$",
+        "password": r"pas\$wor\$d1\$",
         "database": "postgres",
     }
 
@@ -391,8 +391,8 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     escaped_value_str = r"pas\$word1"
     assert context.escape_all_config_variables(value=value_str) == escaped_value_str
 
-    value_str2 = "$pas$wor$d1$"
-    escaped_value_str2 = r"\$pas\$wor\$d1\$"
+    value_str2 = "pas$wor$d1$"
+    escaped_value_str2 = r"pas\$wor\$d1\$"
     assert context.escape_all_config_variables(value=value_str2) == escaped_value_str2
 
     # dict
@@ -418,7 +418,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     value_ordered_dict = OrderedDict(
         [
             ("UNCOMMITTED", "uncommitted"),
-            ("docs_test_folder", "$test$folder"),
+            ("docs_test_folder", "test$folder"),
             (
                 "test_db",
                 {
@@ -435,7 +435,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     escaped_value_ordered_dict = OrderedDict(
         [
             ("UNCOMMITTED", "uncommitted"),
-            ("docs_test_folder", r"\$test\$folder"),
+            ("docs_test_folder", r"test\$folder"),
             (
                 "test_db",
                 {
@@ -483,13 +483,258 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
         == escaped_value_str_custom_escape_string
     )
 
-    value_str_custom_escape_string2 = "$pas$wor$d1$"
-    escaped_value_str_custom_escape_string2 = "@*&$pas@*&$wor@*&$d1@*&$"
+    value_str_custom_escape_string2 = "pas$wor$d1$"
+    escaped_value_str_custom_escape_string2 = "pas@*&$wor@*&$d1@*&$"
     assert (
         context.escape_all_config_variables(
             value=value_str_custom_escape_string2, dollar_sign_escape_string="@*&$"
         )
         == escaped_value_str_custom_escape_string2
+    )
+
+
+def test_escape_all_config_variables_skip_substitution_vars(
+    empty_data_context_with_config_variables,
+):
+    """
+    What does this test and why?
+    escape_all_config_variables(skip_if_substitution_variable=True/False) should function as documented.
+    """
+    context = empty_data_context_with_config_variables
+
+    # str
+    value_str = "$VALUE_STR"
+    escaped_value_str = r"\$VALUE_STR"
+    assert (
+        context.escape_all_config_variables(
+            value=value_str, skip_if_substitution_variable=True
+        )
+        == value_str
+    )
+    assert (
+        context.escape_all_config_variables(
+            value=value_str, skip_if_substitution_variable=False
+        )
+        == escaped_value_str
+    )
+
+    value_str2 = "VALUE_$TR"
+    escaped_value_str2 = r"VALUE_\$TR"
+    assert (
+        context.escape_all_config_variables(
+            value=value_str2, skip_if_substitution_variable=True
+        )
+        == escaped_value_str2
+    )
+    assert (
+        context.escape_all_config_variables(
+            value=value_str2, skip_if_substitution_variable=False
+        )
+        == escaped_value_str2
+    )
+
+    multi_value_str = "${USER}:pas$word@${HOST}:${PORT}/${DATABASE}"
+    escaped_multi_value_str = r"\${USER}:pas\$word@\${HOST}:\${PORT}/\${DATABASE}"
+    assert (
+        context.escape_all_config_variables(
+            value=multi_value_str, skip_if_substitution_variable=True
+        )
+        == multi_value_str
+    )
+    assert (
+        context.escape_all_config_variables(
+            value=multi_value_str, skip_if_substitution_variable=False
+        )
+        == escaped_multi_value_str
+    )
+
+    multi_value_str2 = "$USER:pas$word@$HOST:${PORT}/${DATABASE}"
+    escaped_multi_value_str2 = r"\$USER:pas\$word@\$HOST:\${PORT}/\${DATABASE}"
+    assert (
+        context.escape_all_config_variables(
+            value=multi_value_str2, skip_if_substitution_variable=True
+        )
+        == multi_value_str2
+    )
+    assert (
+        context.escape_all_config_variables(
+            value=multi_value_str2, skip_if_substitution_variable=False
+        )
+        == escaped_multi_value_str2
+    )
+
+    multi_value_str3 = "USER:pas$word@$HOST:${PORT}/${DATABASE}"
+    escaped_multi_value_str3 = r"USER:pas\$word@\$HOST:\${PORT}/\${DATABASE}"
+    assert (
+        context.escape_all_config_variables(
+            value=multi_value_str3, skip_if_substitution_variable=True
+        )
+        == escaped_multi_value_str3
+    )
+    assert (
+        context.escape_all_config_variables(
+            value=multi_value_str3, skip_if_substitution_variable=False
+        )
+        == escaped_multi_value_str3
+    )
+
+    # dict
+    value_dict = {
+        "drivername": "postgresql",
+        "host": "${HOST}",
+        "port": "5432",
+        "username": "postgres",
+        "password": "pass$word1",
+        "database": "$postgres",
+        "sub_dict": {
+            "test_val_no_escaping": "test_val",
+            "test_val_escaping": "te$t_val",
+            "test_val_substitution": "$test_val",
+            "test_val_substitution_braces": "${test_val}",
+        },
+    }
+    escaped_value_dict = {
+        "drivername": "postgresql",
+        "host": r"\${HOST}",
+        "port": "5432",
+        "username": "postgres",
+        "password": r"pass\$word1",
+        "database": r"\$postgres",
+        "sub_dict": {
+            "test_val_no_escaping": "test_val",
+            "test_val_escaping": r"te\$t_val",
+            "test_val_substitution": r"\$test_val",
+            "test_val_substitution_braces": r"\${test_val}",
+        },
+    }
+    escaped_value_dict_skip_substitution_variables = {
+        "drivername": "postgresql",
+        "host": "${HOST}",
+        "port": "5432",
+        "username": "postgres",
+        "password": r"pass\$word1",
+        "database": "$postgres",
+        "sub_dict": {
+            "test_val_no_escaping": "test_val",
+            "test_val_escaping": r"te\$t_val",
+            "test_val_substitution": "$test_val",
+            "test_val_substitution_braces": "${test_val}",
+        },
+    }
+    assert (
+        context.escape_all_config_variables(
+            value=value_dict, skip_if_substitution_variable=False
+        )
+        == escaped_value_dict
+    )
+    assert (
+        context.escape_all_config_variables(
+            value=value_dict, skip_if_substitution_variable=True
+        )
+        == escaped_value_dict_skip_substitution_variables
+    )
+
+    # OrderedDict
+    value_ordered_dict = OrderedDict(
+        [
+            ("UNCOMMITTED", "uncommitted"),
+            ("docs_test_folder", "test$folder"),
+            (
+                "test_db",
+                {
+                    "drivername": "$postgresql",
+                    "host": "some_host",
+                    "port": "5432",
+                    "username": "${USERNAME}",
+                    "password": "pa$sword1",
+                    "database": "postgres",
+                },
+            ),
+        ]
+    )
+    escaped_value_ordered_dict = OrderedDict(
+        [
+            ("UNCOMMITTED", "uncommitted"),
+            ("docs_test_folder", r"test\$folder"),
+            (
+                "test_db",
+                {
+                    "drivername": r"\$postgresql",
+                    "host": "some_host",
+                    "port": "5432",
+                    "username": r"\${USERNAME}",
+                    "password": r"pa\$sword1",
+                    "database": "postgres",
+                },
+            ),
+        ]
+    )
+    escaped_value_ordered_dict_skip_substitution_variables = OrderedDict(
+        [
+            ("UNCOMMITTED", "uncommitted"),
+            ("docs_test_folder", r"test\$folder"),
+            (
+                "test_db",
+                {
+                    "drivername": "$postgresql",
+                    "host": "some_host",
+                    "port": "5432",
+                    "username": "${USERNAME}",
+                    "password": r"pa\$sword1",
+                    "database": "postgres",
+                },
+            ),
+        ]
+    )
+    assert (
+        context.escape_all_config_variables(
+            value=value_ordered_dict, skip_if_substitution_variable=False
+        )
+        == escaped_value_ordered_dict
+    )
+    assert (
+        context.escape_all_config_variables(
+            value=value_ordered_dict, skip_if_substitution_variable=True
+        )
+        == escaped_value_ordered_dict_skip_substitution_variables
+    )
+
+    # list
+    value_list = [
+        "postgresql",
+        "localhost",
+        "5432",
+        "$postgres",
+        "pass$word1",
+        "${POSTGRES}",
+    ]
+    escaped_value_list = [
+        "postgresql",
+        "localhost",
+        "5432",
+        r"\$postgres",
+        r"pass\$word1",
+        r"\${POSTGRES}",
+    ]
+    escaped_value_list_skip_substitution_variables = [
+        "postgresql",
+        "localhost",
+        "5432",
+        "$postgres",
+        r"pass\$word1",
+        "${POSTGRES}",
+    ]
+    assert (
+        context.escape_all_config_variables(
+            value=value_list, skip_if_substitution_variable=False
+        )
+        == escaped_value_list
+    )
+    assert (
+        context.escape_all_config_variables(
+            value=value_list, skip_if_substitution_variable=True
+        )
+        == escaped_value_list_skip_substitution_variables
     )
 
 
@@ -505,30 +750,34 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         project_root_dir=project_path,
         usage_statistics_enabled=False,
     )
-    context.save_config_variable("DB_PWD", "DB_PWD_saved_before_adding_datasource")
-    context.save_config_variable("DB_USER", "DB_USER_saved_before_adding_datasource")
-    context.save_config_variable(
-        "DB_HOST", "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}"
-    )
-    context.save_config_variable("DB_NAME", "${DB_NAME_to_be_subbed_by_config_var}")
-    context.save_config_variable(
-        "DB_NAME_to_be_subbed_by_config_var", "DB_NAME_subbed_by_config_var"
-    )
+
+    CONFIG_VARS = {
+        "DB_HOST": "${DB_HOST_FROM_ENV_VAR}",
+        "DB_NAME": "DB_NAME",
+        "DB_USER": "DB_USER",
+        "DB_PWD": "pas$word",
+    }
+    for k, v in CONFIG_VARS.items():
+        context.save_config_variable(k, v)
 
     config_vars_file_contents = context._load_config_variables_file()
 
-    assert config_vars_file_contents == {
-        "DB_PWD": "DB_PWD_saved_before_adding_datasource",
-        "DB_USER": "DB_USER_saved_before_adding_datasource",
-        # Note Escaped $ in DB_HOST in config_variables.yml
-        "DB_HOST": r"\${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}",
-        # Note Escaped $
-        "DB_NAME": r"\${DB_NAME_to_be_subbed_by_config_var}",
-        # This will not be substituted:
-        "DB_NAME_to_be_subbed_by_config_var": "DB_NAME_subbed_by_config_var",
-        # Use the generated instance_id:
-        "instance_id": config_vars_file_contents["instance_id"],
-    }
+    # Add escaping for DB_PWD since it is not of the form ${SOMEVAR} or $SOMEVAR
+    CONFIG_VARS_WITH_ESCAPING = CONFIG_VARS.copy()
+    CONFIG_VARS_WITH_ESCAPING["DB_PWD"] = r"pas\$word"
+
+    # Ensure all config vars saved are in the config_variables.yml file
+    # and that escaping was added for "pas$word" -> "pas\$word"
+    assert all(
+        item in config_vars_file_contents.items()
+        for item in CONFIG_VARS_WITH_ESCAPING.items()
+    )
+    assert not all(
+        item in config_vars_file_contents.items() for item in CONFIG_VARS.items()
+    )
+
+    # Add env var for substitution
+    monkeypatch.setenv("DB_HOST_FROM_ENV_VAR", "DB_HOST_FROM_ENV_VAR_VALUE")
 
     datasource_config = DatasourceConfig(
         class_name="SqlAlchemyDatasource",
@@ -552,10 +801,10 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
 
     assert context.list_datasources()[0]["credentials"] == {
         "drivername": "postgresql",
-        "host": "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}",
+        "host": "DB_HOST_FROM_ENV_VAR_VALUE",
         "port": "65432",
-        "database": "${DB_NAME_to_be_subbed_by_config_var}",
-        "username": "DB_USER_saved_before_adding_datasource",
+        "database": "DB_NAME",
+        "username": "DB_USER",
         # Note masking of "password" field
         "password": "***",
     }
@@ -570,54 +819,21 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         "datasources"
     ]["test_datasource"]["credentials"]
 
-    assert (
-        test_datasource_credentials["host"]
-        == "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}"
-    )
-    assert (
-        test_datasource_credentials["username"]
-        == "DB_USER_saved_before_adding_datasource"
-    )
-    assert (
-        test_datasource_credentials["password"]
-        == "DB_PWD_saved_before_adding_datasource"
-    )
-    assert (
-        test_datasource_credentials["database"]
-        == "${DB_NAME_to_be_subbed_by_config_var}"
-    )
+    assert test_datasource_credentials["host"] == "DB_HOST_FROM_ENV_VAR_VALUE"
+    assert test_datasource_credentials["username"] == "DB_USER"
+    assert test_datasource_credentials["password"] == "pas$word"
+    assert test_datasource_credentials["database"] == "DB_NAME"
 
-    # Set env variable and check again, making sure that variable in config_variables.yml is substituted correctly with an env variable.
-    monkeypatch.setenv(
-        "DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource", "DB_HOST_FROM_ENV_VAR"
+    # Ensure skip_if_substitution_variable=False works as documented
+    context.save_config_variable(
+        "escaped", "$SOME_VAR", skip_if_substitution_variable=False
     )
-    assert (
-        os.environ.get("DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource")
-        == "DB_HOST_FROM_ENV_VAR"
+    context.save_config_variable(
+        "escaped_curly", "${SOME_VAR}", skip_if_substitution_variable=False
     )
-    context_with_variables_substituted_dict = data_context_config_schema.dump(
-        context.get_config_with_variables_substituted()
-    )
+    context
 
-    test_datasource_credentials = context_with_variables_substituted_dict[
-        "datasources"
-    ]["test_datasource"]["credentials"]
+    config_vars_file_contents = context._load_config_variables_file()
 
-    # 20210108 - AJB - Env var substitution not yet supported in config_variables.yml
-    # https://discuss.greatexpectations.io/t/environment-variable-substitution-is-not-working-for-me-when-connecting-ge-to-my-database/72
-    assert (
-        test_datasource_credentials["host"]
-        == "${DB_HOST_FROM_ENV_VAR_saved_before_adding_datasource}"
-    )
-    assert (
-        test_datasource_credentials["username"]
-        == "DB_USER_saved_before_adding_datasource"
-    )
-    assert (
-        test_datasource_credentials["password"]
-        == "DB_PWD_saved_before_adding_datasource"
-    )
-    assert (
-        test_datasource_credentials["database"]
-        == "${DB_NAME_to_be_subbed_by_config_var}"
-    )
+    assert config_vars_file_contents["escaped"] == r"\$SOME_VAR"
+    assert config_vars_file_contents["escaped_curly"] == r"\${SOME_VAR}"
