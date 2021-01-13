@@ -46,11 +46,24 @@ def test_cli_init_on_new_project(
     shutil.copy(titanic_sqlite_db_file, database_path)
     engine = sa.create_engine("sqlite:///{}".format(database_path), pool_recycle=3600)
 
+    inspector = sa.inspect(engine)
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
+
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(engine.url),
+        input="\n\n2\n6\ntitanic\n{url}\n\n\n1\n{schema}\n{table}\nwarning\n\n\n\n".format(
+            url=engine.url, schema=default_schema, table=default_table
+        ),
         catch_exceptions=False,
     )
     stdout = result.output
@@ -63,7 +76,10 @@ def test_cli_init_on_new_project(
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
+        in stdout
+    )
     assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
@@ -194,12 +210,25 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     engine = sa.create_engine("sqlite:///{}".format(database_path), pool_recycle=3600)
     engine_url_with_added_whitespace = "    " + str(engine.url) + "  "
 
+    inspector = sa.inspect(engine)
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
+
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(
-            engine_url_with_added_whitespace
+        input="\n\n2\n6\ntitanic\n{url}\n\n\n1\n{schema}\n{table}\nwarning\n\n\n\n".format(
+            url=engine_url_with_added_whitespace,
+            schema=default_schema,
+            table=default_table,
         ),
         catch_exceptions=False,
     )
@@ -213,7 +242,10 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
+        in stdout
+    )
     assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
@@ -279,13 +311,27 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
     runner = CliRunner(mix_stderr=False)
     url = "sqlite:///{}".format(titanic_sqlite_db_file)
+
+    inspector = sa.inspect(sa.create_engine(url))
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
+
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="\n\n2\n6\nsqlite\n{}\n\n\n1\nmy_suite\n\n\n\n".format(url),
+            input="\n\n2\n6\nsqlite\n{url}\n\n\n1\n{schema}\n{table}\nmy_suite\n\n\n\n".format(
+                url=url, schema=default_schema, table=default_table
+            ),
             catch_exceptions=False,
         )
     stdout = result.stdout
@@ -307,7 +353,10 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         in stdout
     )
     assert "What is the url/connection string for the sqlalchemy connection?" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
+        in stdout
+    )
     assert "Great Expectations connected to your database" in stdout
     assert "This looks like an existing project that" not in stdout
 
@@ -369,11 +418,24 @@ def initialized_sqlite_project(
         "sqlite:///{}".format(titanic_sqlite_db_file), pool_recycle=3600
     )
 
+    inspector = sa.inspect(engine)
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
+
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["init", "-d", project_dir],
-        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(engine.url),
+        input="\n\n2\n6\ntitanic\n{url}\n\n\n1\n{schema}\n{table}\nwarning\n\n\n\n".format(
+            url=engine.url, schema=default_schema, table=default_table
+        ),
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -522,9 +584,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
-    mock_webbrowser,
-    caplog,
-    initialized_sqlite_project,
+    mock_webbrowser, caplog, initialized_sqlite_project, sa
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -540,6 +600,24 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     _delete_and_recreate_dir(validations_dir)
 
     context = DataContext(ge_dir)
+
+    # get the datasource from data context
+    all_datasources = context.list_datasources()
+    datasource = all_datasources[0] if all_datasources else None
+
+    # create a sqlalchemy engine using the URL of existing datasource
+    engine = sa.create_engine(datasource.get("credentials", dict()).get("url"))
+    inspector = sa.inspect(engine)
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
+
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
@@ -549,8 +627,10 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
         result = runner.invoke(
             cli,
             ["init", "-d", project_dir],
-            input="\n1\nsink_me\n\n\n\n".format(
-                os.path.join(project_dir, "data/Titanic.csv")
+            input="\n1\n{schema}\n{table}\nsink_me\n\n\n\n".format(
+                os.path.join(project_dir, "data/Titanic.csv"),
+                schema=default_schema,
+                table=default_table,
             ),
             catch_exceptions=False,
         )
@@ -566,7 +646,10 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     )
 
     assert "Always know what to expect from your data" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "The following Data Docs sites will be built" in stdout
     assert "Great Expectations is now set up" in stdout

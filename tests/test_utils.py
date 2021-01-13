@@ -287,7 +287,6 @@ def get_dataset(
             engine = create_engine(f"sqlite:////{sqlite_db_path}")
         else:
             engine = create_engine("sqlite://")
-        conn = engine.connect()
         # Add the data to the database as a new table
 
         sql_dtypes = {}
@@ -331,7 +330,7 @@ def get_dataset(
             )
         df.to_sql(
             name=table_name,
-            con=conn,
+            con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
@@ -339,7 +338,7 @@ def get_dataset(
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
-            table_name, engine=conn, profiler=profiler, caching=caching
+            table_name, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "postgresql":

@@ -43,6 +43,14 @@ from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sqlalchemy = None
+
 
 class DatasourceTypes(enum.Enum):
     PANDAS = "pandas"
@@ -1233,52 +1241,95 @@ We have saved your setup progress. When you are ready, run great_expectations in
     return (data_asset_name, batch_kwargs)
 
 
+def _get_default_schema(datasource):
+    inspector = sqlalchemy.inspect(datasource.engine)
+    return inspector.default_schema_name
+
+
 def _get_batch_kwargs_for_sqlalchemy_datasource(
     context, datasource_name, additional_batch_kwargs=None
 ):
-    msg_prompt_query = """
-Enter an SQL query
+    data_asset_name = None
+    sql_query = None
+    datasource = context.get_datasource(datasource_name)
+    msg_prompt_how_to_connect_to_data = """
+You have selected a datasource that is a SQL database. How would you like to specify the data?
+1. Enter a table name and schema
+2. Enter a custom SQL query
+3. List all tables in the database (this may take a very long time)
 """
+    default_schema = _get_default_schema(datasource)
+    temp_generator = TableBatchKwargsGenerator(name="temp", datasource=datasource)
 
-    msg_prompt_enter_data_asset_name = (
-        "\nWhich table would you like to use? (Choose one)\n"
-    )
+    while data_asset_name is None:
+        single_or_multiple_data_asset_selection = click.prompt(
+            msg_prompt_how_to_connect_to_data,
+            type=click.Choice(["1", "2", "3"]),
+            show_choices=False,
+        )
+        if single_or_multiple_data_asset_selection == "1":  # name the table and schema
+            schema_name = click.prompt(
+                "Please provide the schema name of the table (this is optional)",
+                default=default_schema,
+            )
+            table_name = click.prompt(
+                "Please provide the table name (this is required)"
+            )
+            data_asset_name = f"{schema_name}.{table_name}"
 
-    msg_prompt_enter_data_asset_name_suffix = (
-        "    Do not see the table in the list above? Just type the SQL query\n"
-    )
+        elif single_or_multiple_data_asset_selection == "2":  # SQL query
+            sql_query = click.prompt("Please provide the SQL query")
+            data_asset_name = "custom_sql_query"
+
+        elif single_or_multiple_data_asset_selection == "3":  # list it all
+            msg_prompt_warning = f"""Warning: If you have a large number of tables in your datasource, this may take a very long time. \m
+                    Would you like to continue?"""
+            confirmation = click.prompt(
+                msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
+            )
+            if confirmation == "y":
+                # avoid this call until necessary
+                available_data_asset_names = (
+                    temp_generator.get_available_data_asset_names()["names"]
+                )
+                available_data_asset_names_str = [
+                    "{} ({})".format(name[0], name[1])
+                    for name in available_data_asset_names
+                ]
+
+                data_asset_names_to_display = available_data_asset_names_str
+                choices = "\n".join(
+                    [
+                        "    {}. {}".format(i, name)
+                        for i, name in enumerate(data_asset_names_to_display, 1)
+                    ]
+                )
+                msg_prompt_enter_data_asset_name = (
+                    "\nWhich table would you like to use? (Choose one)\n"
+                )
+                prompt = msg_prompt_enter_data_asset_name + choices + os.linesep
+                selection = click.prompt(prompt, show_default=False)
+                selection = selection.strip()
+                try:
+                    data_asset_index = int(selection) - 1
+                    try:
+                        data_asset_name = [
+                            name[0] for name in available_data_asset_names
+                        ][data_asset_index]
+
+                    except IndexError:
+                        print(
+                            f"You have specified {selection}, which is an incorrect index"
+                        )
+                        pass
+                except ValueError:
+                    print(
+                        f"You have specified {selection}, which is an incorrect value"
+                    )
+                    pass
 
     if additional_batch_kwargs is None:
         additional_batch_kwargs = {}
-
-    data_asset_name = None
-
-    datasource = context.get_datasource(datasource_name)
-
-    temp_generator = TableBatchKwargsGenerator(name="temp", datasource=datasource)
-
-    available_data_asset_names = temp_generator.get_available_data_asset_names()[
-        "names"
-    ]
-    available_data_asset_names_str = [
-        "{} ({})".format(name[0], name[1]) for name in available_data_asset_names
-    ]
-
-    data_asset_names_to_display = available_data_asset_names_str[:5]
-    choices = "\n".join(
-        [
-            "    {}. {}".format(i, name)
-            for i, name in enumerate(data_asset_names_to_display, 1)
-        ]
-    )
-    prompt = (
-        msg_prompt_enter_data_asset_name
-        + choices
-        + os.linesep
-        + msg_prompt_enter_data_asset_name_suffix.format(
-            len(data_asset_names_to_display)
-        )
-    )
 
     # Some backends require named temporary table parameters. We specifically elicit those and add them
     # where appropriate.
@@ -1287,58 +1338,30 @@ Enter an SQL query
 
     if datasource.engine.dialect.name.lower() == "bigquery":
         # bigquery also requires special handling
-        table_name = click.prompt(
+        bigquery_temp_table = click.prompt(
             "GE will create a table to use for "
             "validation." + os.linesep + "Please enter a name for this table: ",
             default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
         )
         temp_table_kwargs = {
-            "bigquery_temp_table": table_name,
+            "bigquery_temp_table": bigquery_temp_table,
         }
 
-    while True:
-        try:
-            query = None
-
-            if len(available_data_asset_names) > 0:
-                selection = click.prompt(prompt, show_default=False)
-
-                selection = selection.strip()
-                try:
-                    data_asset_index = int(selection) - 1
-                    try:
-                        data_asset_name = [
-                            name[0] for name in available_data_asset_names
-                        ][data_asset_index]
-                    except IndexError:
-                        pass
-                except ValueError:
-                    query = selection
-
-            else:
-                query = click.prompt(msg_prompt_query, show_default=False)
-
-            if query is None:
-                batch_kwargs = temp_generator.build_batch_kwargs(
-                    data_asset_name, **additional_batch_kwargs
-                )
-                batch_kwargs.update(temp_table_kwargs)
-            else:
-                batch_kwargs = {"query": query, "datasource": datasource_name}
-                batch_kwargs.update(temp_table_kwargs)
-                BridgeValidator(
-                    batch=datasource.get_batch(batch_kwargs),
-                    expectation_suite=ExpectationSuite("throwaway"),
-                ).get_dataset()
-
-            break
-        except ge_exceptions.GreatExpectationsError as error:
-            cli_message("""<red>ERROR: {}</red>""".format(str(error)))
-        except KeyError as error:
-            cli_message("""<red>ERROR: {}</red>""".format(str(error)))
+    # now building the actual batch_kwargs
+    if sql_query is None:
+        batch_kwargs = temp_generator.build_batch_kwargs(
+            data_asset_name, **additional_batch_kwargs
+        )
+        batch_kwargs.update(temp_table_kwargs)
+    else:
+        batch_kwargs = {"query": sql_query, "datasource": datasource_name}
+        batch_kwargs.update(temp_table_kwargs)
+        BridgeValidator(
+            batch=datasource.get_batch(batch_kwargs),
+            expectation_suite=ExpectationSuite("throwaway"),
+        ).get_dataset()
 
     batch_kwargs["data_asset_name"] = data_asset_name
-
     return data_asset_name, batch_kwargs
 
 

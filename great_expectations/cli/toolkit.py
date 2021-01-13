@@ -85,6 +85,7 @@ def create_expectation_suite(
         )
 
     data_source = select_datasource(context, datasource_name=datasource_name)
+
     if data_source is None:
         # select_datasource takes care of displaying an error message, so all is left here is to exit.
         sys.exit(1)
