@@ -831,7 +831,6 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     context.save_config_variable(
         "escaped_curly", "${SOME_VAR}", skip_if_substitution_variable=False
     )
-    context
 
     config_vars_file_contents = context._load_config_variables_file()
 
