@@ -1239,7 +1239,7 @@ class BaseDataContext:
         Returns "v2" if the datasource is an instance of the LegacyDatasource class.
         """
 
-        if self.datasources is {}:
+        if not self.datasources:
             return None
 
         if {
