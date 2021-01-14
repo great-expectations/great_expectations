@@ -1,10 +1,3 @@
-from great_expectations.util import verify_dynamic_loading_support
-
-from .validation_operators import (
-    ActionListValidationOperator,
-    ValidationOperator,
-    WarningAndFailureExpectationSuitesValidationOperator,
-)
 from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     NoOpAction,
@@ -16,6 +9,13 @@ from great_expectations.checkpoint.actions import (
     StoreValidationResultAction,
     UpdateDataDocsAction,
     ValidationAction,
+)
+from great_expectations.util import verify_dynamic_loading_support
+
+from .validation_operators import (
+    ActionListValidationOperator,
+    ValidationOperator,
+    WarningAndFailureExpectationSuitesValidationOperator,
 )
 
 for module_name, package_name in [

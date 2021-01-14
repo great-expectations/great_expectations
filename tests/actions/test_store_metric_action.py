@@ -1,5 +1,6 @@
 from freezegun import freeze_time
 
+from great_expectations.checkpoint.actions import StoreMetricsAction
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -11,7 +12,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.checkpoint.actions import StoreMetricsAction
 
 
 @freeze_time("09/26/2019 13:42:41")
