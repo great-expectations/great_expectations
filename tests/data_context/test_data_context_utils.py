@@ -16,7 +16,7 @@ def test_load_class_raises_error_when_class_not_found():
 
 
 def test_load_class_raises_error_when_class_name_is_None():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         load_class(None, "great_expectations.datasource")
 
 
@@ -27,7 +27,7 @@ def test_load_class_raises_error_when_class_name_is_not_string():
 
 
 def test_load_class_raises_error_when_module_name_is_None():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         load_class("foo", None)
 
 
