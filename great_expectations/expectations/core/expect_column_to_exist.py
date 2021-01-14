@@ -190,41 +190,6 @@ class ExpectColumnToExist(TableExpectation):
             )
         ]
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        """Validates given column count against expected value"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        columns = metric_vals.get("columns")
-        column = self.get_success_kwargs().get(
-            "column", self.default_kwarg_values.get("column")
-        )
-        column_index = self.get_success_kwargs().get(
-            "column_index", self.default_kwarg_values.get("column_index")
-        )
-
-        if column in columns:
-            return {
-                # FIXME: list.index does not check for duplicate values.
-                "success": (column_index is None)
-                or (columns.index(column) == column_index)
-            }
-        else:
-            return {"success": False}
-
     def _validate(
         self,
         configuration: ExpectationConfiguration,
