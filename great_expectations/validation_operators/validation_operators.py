@@ -18,7 +18,7 @@ from great_expectations.validation_operators.types.validation_operator_result im
 from great_expectations.validator.validator import Validator
 
 from ..core.run_identifier import RunIdentifier
-from .util import send_slack_notification
+from great_expectations.checkpoint.util import send_slack_notification
 
 logger = logging.getLogger(__name__)
 
