@@ -704,7 +704,7 @@ class BaseDataContext:
         return self._normalize_absolute_or_relative_path(
             self._project_config_with_variables_substituted.plugins_directory
         )
-      
+
     @property
     def _project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()

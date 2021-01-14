@@ -32,10 +32,10 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
-from tests.datasource.conftest import postgresql_sqlalchemy_datasource
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+from tests.datasource.conftest import postgresql_sqlalchemy_datasource
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
