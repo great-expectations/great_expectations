@@ -6,7 +6,7 @@ from .validation_operators import (
     ValidationOperator,
     WarningAndFailureExpectationSuitesValidationOperator,
 )
-from great_expectations.checkpoint import (
+from great_expectations.checkpoint.actions import (
     MicrosoftTeamsNotificationAction,
     NoOpAction,
     OpsgenieAlertAction,
