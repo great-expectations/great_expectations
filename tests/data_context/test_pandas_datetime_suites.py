@@ -1,10 +1,8 @@
 import datetime
-import os
 from tempfile import TemporaryDirectory
 
 import pandas as pd
 
-import great_expectations as ge
 from great_expectations.data_context.data_context import ExpectationSuite
 from great_expectations.dataset import PandasDataset
 
@@ -27,9 +25,6 @@ def test_save_expectation_suite_with_datetime_objects(
     dataset_name = "test_pandas_source"
 
     with TemporaryDirectory() as tempdir:
-        # ge_path = os.path.join(tempdir, "great_expectations")
-        # ge.DataContext.create(tempdir, usage_statistics_enabled=False)
-        # context = ge.DataContext(ge_path)
         context = data_context_parameterized_expectation_suite
         ge_path = context.root_directory
 
@@ -69,7 +64,6 @@ def test_save_expectation_suite_with_datetime_objects(
             "run_time": datetime.datetime.now(),
         }
         results = context.run_validation_operator(
-            # "action_list_operator",
             "default",
             assets_to_validate=[batch],
             run_id=run_id,
@@ -94,7 +88,6 @@ def test_save_expectation_suite_with_datetime_objects(
             "run_time": datetime.datetime.now(),
         }
         reloaded_results = context.run_validation_operator(
-            # "action_list_operator",
             "default",
             assets_to_validate=[reloaded_batch],
             run_id=run_id,
