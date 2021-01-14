@@ -125,7 +125,7 @@ Steps
 
     .. code-block:: python
 
-        checkpoint_run_result: List[CheckpointResult] = context.run_checkpoint(
+        checkpoint_run_result: CheckpointResult = context.run_checkpoint(
             checkpoint_name="my_fancy_checkpoint",
         )
 
