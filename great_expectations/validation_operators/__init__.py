@@ -20,6 +20,6 @@ from .validation_operators import (
 
 for module_name, package_name in [
     (".validation_operators", "great_expectations.validation_operators"),
-    (".util", "great_expectations.validation_operators"),
+
 ]:
     verify_dynamic_loading_support(module_name=module_name, package_name=package_name)
