@@ -30,6 +30,7 @@ checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
   local_site:
+    show_how_to_buttons: true
     class_name: SiteBuilder
     store_backend:
       class_name: TupleFilesystemStoreBackend
