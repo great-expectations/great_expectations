@@ -3,14 +3,14 @@ import enum
 import logging
 import uuid
 from copy import deepcopy
-from typing import Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -20,14 +20,17 @@ from great_expectations.marshmallow__shade import (
     post_load,
     validates_schema,
 )
+from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
 
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+
 logger = logging.getLogger(__name__)
 
-yaml = YAML()
-
-CURRENT_CONFIG_VERSION = 2
+CURRENT_GE_CONFIG_VERSION = 2
+CURRENT_CHECKPOINT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
     "https://stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -42,25 +45,139 @@ def object_to_yaml_str(obj):
     return output_str
 
 
+class BaseYamlConfig(SerializableDictDot):
+    _config_schema_class = None
+
+    def __init__(self, commented_map: CommentedMap = None, **kwargs):
+        if commented_map is None:
+            commented_map = CommentedMap()
+        self._commented_map = commented_map
+
+    @classmethod
+    def _get_schema_instance(cls) -> Schema:
+        if not issubclass(cls.get_schema_class(), Schema):
+            raise ge_exceptions.InvalidConfigError(
+                "Invalid type: A configuration schema class needs to inherit from the Marshmallow Schema class."
+            )
+        if not issubclass(cls.get_config_class(), BaseYamlConfig):
+            raise ge_exceptions.InvalidConfigError(
+                "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
+            )
+        if hasattr(cls.get_config_class(), "_schema_instance"):
+            schema_instance: Schema = cls.get_config_class()._schema_instance
+            if schema_instance is None:
+                cls.get_config_class()._schema_instance = (cls.get_schema_class())()
+            else:
+                return schema_instance
+        else:
+            cls.get_config_class().schema_instance = (cls.get_schema_class())()
+            return cls.get_config_class().schema_instance
+
+    @classmethod
+    def from_commented_map(cls, commented_map: CommentedMap):
+        try:
+            config: dict = cls._get_schema_instance().load(commented_map)
+            return cls.get_config_class()(commented_map=commented_map, **config)
+        except ValidationError:
+            logger.error(
+                "Encountered errors during loading config.  See ValidationError for more details."
+            )
+            raise
+
+    def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
+        commented_map: CommentedMap = deepcopy(self._commented_map)
+        commented_map.update(self._get_schema_instance().dump(self))
+        return commented_map
+
+    def to_yaml(self, outfile):
+        """
+        :returns None (but writes a YAML file containing the project configuration)
+        """
+        yaml.dump(self.commented_map, outfile)
+
+    def to_yaml_str(self) -> str:
+        """
+        :returns a YAML string containing the project configuration
+        """
+        return object_to_yaml_str(self.commented_map)
+
+    def to_json_dict(self) -> dict:
+        """
+        :returns a JSON-serialiable dict containing the project configuration
+        """
+        commented_map: CommentedMap = self.commented_map
+        return convert_to_json_serializable(data=commented_map)
+
+    @property
+    def commented_map(self) -> CommentedMap:
+        return self._get_schema_validated_updated_commented_map()
+
+    @classmethod
+    def get_config_class(cls):
+        raise NotImplementedError
+
+    @classmethod
+    def get_schema_class(cls):
+        raise NotImplementedError
+
+
 class AssetConfig(DictDot):
     def __init__(
         self,
+        name=None,
+        class_name=None,
+        module_name=None,
+        bucket=None,
+        prefix=None,
+        delimiter=None,
+        max_keys=None,
         **kwargs,
     ):
+        if name is not None:
+            self.name = name
+        self._class_name = class_name
+        self._module_name = module_name
+        if bucket is not None:
+            self.bucket = bucket
+        if prefix is not None:
+            self.prefix = prefix
+        if delimiter is not None:
+            self.delimiter = delimiter
+        if max_keys is not None:
+            self.max_keys = max_keys
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @property
+    def module_name(self):
+        return self._module_name
 
 
 class AssetConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
+    name = fields.String(required=False, allow_none=True)
+    class_name = fields.String(required=False, allow_none=True, missing="Asset")
+    module_name = fields.String(
+        required=False,
+        all_none=True,
+        missing="great_expectations.datasource.data_connector.asset",
+    )
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
     pattern = fields.String(required=False, allow_none=True)
     group_names = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
+    bucket = fields.String(required=False, allow_none=True)
+    prefix = fields.String(required=False, allow_none=True)
+    delimiter = fields.String(required=False, allow_none=True)
+    max_keys = fields.Integer(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -93,12 +210,12 @@ class SorterConfig(DictDot):
         return self._name
 
     @property
-    def class_name(self):
-        return self._class_name
-
-    @property
     def module_name(self):
         return self._module_name
+
+    @property
+    def class_name(self):
+        return self._class_name
 
     @property
     def orderby(self):
@@ -733,6 +850,7 @@ class DataContextConfigSchema(Schema):
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
+    checkpoint_store_name = fields.Str()
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(keys=fields.Str(), values=fields.Dict())
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
@@ -781,20 +899,21 @@ class DataContextConfigSchema(Schema):
                     data["config_version"], MINIMUM_SUPPORTED_CONFIG_VERSION
                 ),
             )
-        elif data["config_version"] > CURRENT_CONFIG_VERSION:
+        elif data["config_version"] > CURRENT_GE_CONFIG_VERSION:
             raise ge_exceptions.InvalidDataContextConfigError(
                 "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
-                    data["config_version"], CURRENT_CONFIG_VERSION
+                    data["config_version"], CURRENT_GE_CONFIG_VERSION
                 ),
                 validation_error=ValidationError("config version too high"),
             )
 
 
 class DataContextConfigDefaults(enum.Enum):
-    DEFAULT_CONFIG_VERSION = CURRENT_CONFIG_VERSION
+    DEFAULT_CONFIG_VERSION = CURRENT_GE_CONFIG_VERSION
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
+    DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     DEFAULT_PLUGINS_DIRECTORY = "plugins/"
@@ -835,6 +954,13 @@ class DataContextConfigDefaults(enum.Enum):
         DEFAULT_EVALUATION_PARAMETER_STORE_NAME: {
             "class_name": "EvaluationParameterStore"
         },
+        DEFAULT_CHECKPOINT_STORE_NAME: {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "base_directory": "checkpoints/",
+            },
+        },
     }
     DEFAULT_DATA_DOCS_SITES = {
         DEFAULT_DATA_DOCS_SITE_NAME: {
@@ -851,6 +977,10 @@ class DataContextConfigDefaults(enum.Enum):
     }
 
 
+class CheckpointConfigDefaults(enum.Enum):
+    DEFAULT_CONFIG_VERSION = CURRENT_CHECKPOINT_CONFIG_VERSION
+
+
 class BaseStoreBackendDefaults(DictDot):
     """
     Define base defaults for platform specific StoreBackendDefaults.
@@ -861,22 +991,18 @@ class BaseStoreBackendDefaults(DictDot):
     def __init__(
         self,
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
-        validations_store_name=(
-            DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value
-        ),
-        evaluation_parameter_store_name=(
-            DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value
-        ),
-        data_docs_site_name=(
-            DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
-        ),
-        validation_operators=None,
-        stores=None,
-        data_docs_sites=None,
+        validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
+        evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
+        data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
+        validation_operators: dict = None,
+        stores: dict = None,
+        data_docs_sites: dict = None,
     ):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.checkpoint_store_name = checkpoint_store_name
         if validation_operators is None:
             validation_operators = deepcopy(
                 DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
@@ -1157,7 +1283,10 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         }
 
 
-class DataContextConfig(SerializableDictDot):
+class DataContextConfig(BaseYamlConfig):
+    # TODO: <Alex>ALEX (does not work yet)</Alex>
+    # _config_schema_class = DataContextConfigSchema
+
     def __init__(
         self,
         config_version: Optional[float] = None,
@@ -1170,6 +1299,7 @@ class DataContextConfig(SerializableDictDot):
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
+        checkpoint_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
@@ -1177,8 +1307,8 @@ class DataContextConfig(SerializableDictDot):
         notebooks=None,
         config_variables_file_path: Optional[str] = None,
         anonymous_usage_statistics=None,
-        commented_map=None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
+        commented_map: Optional[CommentedMap] = None,
     ):
         # Set defaults
         if config_version is None:
@@ -1197,14 +1327,13 @@ class DataContextConfig(SerializableDictDot):
                 evaluation_parameter_store_name = (
                     store_backend_defaults.evaluation_parameter_store_name
                 )
+            if checkpoint_store_name is None:
+                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
             if validation_operators is None:
                 validation_operators = store_backend_defaults.validation_operators
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
 
-        if commented_map is None:
-            commented_map = CommentedMap()
-        self._commented_map = commented_map
         self._config_version = config_version
         if datasources is None:
             datasources = {}
@@ -1212,6 +1341,7 @@ class DataContextConfig(SerializableDictDot):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.checkpoint_store_name = checkpoint_store_name
         self.plugins_directory = plugins_directory
         if not isinstance(validation_operators, dict):
             raise ValueError(
@@ -1230,48 +1360,378 @@ class DataContextConfig(SerializableDictDot):
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
 
-    @property
-    def commented_map(self):
-        return self._commented_map
+        super().__init__(commented_map=commented_map)
+
+    # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
+    @classmethod
+    def get_config_class(cls):
+        return cls  # DataContextConfig
+
+    @classmethod
+    def get_schema_class(cls):
+        return DataContextConfigSchema
 
     @property
     def config_version(self):
         return self._config_version
 
-    @classmethod
-    def from_commented_map(cls, commented_map):
-        try:
-            config = dataContextConfigSchema.load(commented_map)
-            return cls(commented_map=commented_map, **config)
-        except ValidationError:
-            logger.error(
-                "Encountered errors during loading data context config. See ValidationError for more details."
+
+class CheckpointConfigSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+        fields = (
+            "name",
+            "config_version",
+            "template_name",
+            "module_name",
+            "class_name",
+            "run_name_template",
+            "expectation_suite_name",
+            "batch_request",
+            "action_list",
+            "evaluation_parameters",
+            "runtime_configuration",
+            "validations",
+            "profilers",
+            # Next two fields are for LegacyCheckpoint configuration
+            "validation_operator_name",
+            "batches",
+        )
+        ordered = True
+
+    name = fields.String(required=False, allow_none=True)
+    config_version = fields.Number(
+        validate=lambda x: (0 < x < 100) or x is None,
+        error_messages={"invalid": "config version must " "be a number or None."},
+        required=False,
+        allow_none=True,
+    )
+    template_name = fields.String(required=False, allow_none=True)
+    module_name = fields.String(required=False, missing="great_expectations.checkpoint")
+    class_name = fields.Str(required=False, allow_none=True)
+    run_name_template = fields.String(required=False, allow_none=True)
+    expectation_suite_name = fields.String(required=False, allow_none=True)
+    batch_request = fields.Dict(required=False, allow_none=True)
+    action_list = fields.List(
+        cls_or_instance=fields.Dict(), required=False, allow_none=True
+    )
+    evaluation_parameters = fields.Dict(required=False, allow_none=True)
+    runtime_configuration = fields.Dict(required=False, allow_none=True)
+    validations = fields.List(
+        cls_or_instance=fields.Dict(), required=False, allow_none=True
+    )
+    profilers = fields.List(
+        cls_or_instance=fields.Dict(), required=False, allow_none=True
+    )
+    # Next two fields are for LegacyCheckpoint configuration
+    validation_operator_name = fields.Str(required=False, allow_none=True)
+    batches = fields.List(
+        cls_or_instance=fields.Dict(
+            keys=fields.Str(
+                validate=OneOf(["batch_kwargs", "expectation_suite_names"]),
+                required=False,
+                allow_none=True,
             )
-            raise
+        ),
+        required=False,
+        allow_none=True,
+    )
 
-    def get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        commented_map: CommentedMap = deepcopy(self.commented_map)
-        commented_map.update(dataContextConfigSchema.dump(self))
-        return commented_map
+    @validates_schema
+    def validate_schema(self, data, **kwargs):
+        if not (
+            "name" in data or "validation_operator_name" in data or "batches" in data
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f"""Your current Checkpoint configuration is incomplete.  Please update your checkpoint configuration to
+                continue.
+                """
+            )
 
-    def to_yaml(self, outfile):
-        """
-        :returns None (but writes a YAML file containing the project configuration)
-        """
-        yaml.dump(self.get_schema_validated_updated_commented_map(), outfile)
+        if data.get("config_version"):
+            if "name" not in data:
+                raise ge_exceptions.InvalidConfigError(
+                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current checkpoint
+                    configuration to continue.
+                    """
+                )
 
-    def to_yaml_str(self) -> str:
-        """
-        :returns a YAML string containing the project configuration
-        """
-        return object_to_yaml_str(self.get_schema_validated_updated_commented_map())
 
-    def to_json_dict(self) -> dict:
-        """
-        :returns a JSON-serialiable dict containing the project configuration
-        """
-        commented_map: CommentedMap = self.get_schema_validated_updated_commented_map()
-        return convert_to_json_serializable(data=commented_map)
+class CheckpointConfig(BaseYamlConfig):
+    # TODO: <Alex>ALEX (does not work yet)</Alex>
+    # _config_schema_class = CheckpointConfigSchema
+
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        config_version: Optional[int] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[dict] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        commented_map: Optional[CommentedMap] = None,
+    ):
+        self._name = name
+        self._config_version = config_version
+        if self.config_version is None:
+            if class_name is None:
+                class_name = "LegacyCheckpoint"
+            if validation_operator_name is None:
+                validation_operator_name = "action_list_operator"
+            self.validation_operator_name = validation_operator_name
+            if batches is not None and isinstance(batches, list):
+                self.batches = batches
+        else:
+            if class_name is None:
+                class_name = "Checkpoint"
+            self._template_name = template_name
+            self._module_name = module_name or "great_expectations.checkpoint"
+            self._run_name_template = run_name_template
+            self._expectation_suite_name = expectation_suite_name
+            self._batch_request = batch_request
+            self._action_list = action_list or []
+            self._evaluation_parameters = evaluation_parameters or {}
+            self._runtime_configuration = runtime_configuration or {}
+            self._validations = validations or []
+            self._profilers = profilers or []
+
+        self._class_name = class_name
+
+        super().__init__(commented_map=commented_map)
+
+    def update(
+        self,
+        other_config: Optional["CheckpointConfig"] = None,
+        runtime_kwargs: Optional[dict] = None,
+    ):
+        assert other_config is not None or runtime_kwargs is not None, (
+            "other_config and runtime_kwargs cannot both " "be None"
+        )
+
+        if other_config is not None:
+            self.name = other_config.name
+            # replace
+            if other_config.module_name is not None:
+                self.module_name = other_config.module_name
+            if other_config.class_name is not None:
+                self.class_name = other_config.class_name
+            if other_config.run_name_template is not None:
+                self.run_name_template = other_config.run_name_template
+            if other_config.expectation_suite_name is not None:
+                self.expectation_suite_name = other_config.expectation_suite_name
+            # update
+            if other_config.batch_request is not None:
+                if self.batch_request is None:
+                    batch_request = {}
+                else:
+                    batch_request = self.batch_request
+
+                other_batch_request = other_config.batch_request
+
+                updated_batch_request = nested_update(
+                    batch_request, other_batch_request
+                )
+                self._batch_request = updated_batch_request
+            if other_config.action_list is not None:
+                self.action_list = self.get_updated_action_list(
+                    base_action_list=self.action_list,
+                    other_action_list=other_config.action_list,
+                )
+            if other_config.evaluation_parameters is not None:
+                nested_update(
+                    self.evaluation_parameters, other_config.evaluation_parameters
+                )
+            if other_config.runtime_configuration is not None:
+                nested_update(
+                    self.runtime_configuration, other_config.runtime_configuration
+                )
+            if other_config.validations is not None:
+                self.validations.extend(other_config.validations)
+            if other_config.profilers is not None:
+                self.profilers.extend(other_config.profilers)
+        if runtime_kwargs is not None and any(runtime_kwargs.values()):
+            # replace
+            if runtime_kwargs.get("run_name_template") is not None:
+                self.run_name_template = runtime_kwargs.get("run_name_template")
+            if runtime_kwargs.get("expectation_suite_name") is not None:
+                self.expectation_suite_name = runtime_kwargs.get(
+                    "expectation_suite_name"
+                )
+            # update
+            if runtime_kwargs.get("batch_request") is not None:
+                batch_request = self.batch_request
+                batch_request = batch_request or {}
+                runtime_batch_request = runtime_kwargs.get("batch_request")
+                batch_request.update(runtime_batch_request)
+                self._batch_request = batch_request
+            if runtime_kwargs.get("action_list") is not None:
+                self.action_list = self.get_updated_action_list(
+                    base_action_list=self.action_list,
+                    other_action_list=runtime_kwargs.get("action_list"),
+                )
+            if runtime_kwargs.get("evaluation_parameters") is not None:
+                nested_update(
+                    self.evaluation_parameters,
+                    runtime_kwargs.get("evaluation_parameters"),
+                )
+            if runtime_kwargs.get("runtime_configuration") is not None:
+                nested_update(
+                    self.runtime_configuration,
+                    runtime_kwargs.get("runtime_configuration"),
+                )
+            if runtime_kwargs.get("validations") is not None:
+                self.validations.extend(runtime_kwargs.get("validations"))
+            if runtime_kwargs.get("profilers") is not None:
+                self.profilers.extend(runtime_kwargs.get("profilers"))
+
+    # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
+    @classmethod
+    def get_config_class(cls):
+        return cls  # CheckpointConfig
+
+    @classmethod
+    def get_schema_class(cls):
+        return CheckpointConfigSchema
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value: str):
+        self._name = value
+
+    @property
+    def template_name(self):
+        return self._template_name
+
+    @template_name.setter
+    def template_name(self, value: str):
+        self._template_name = value
+
+    @property
+    def config_version(self):
+        return self._config_version
+
+    @property
+    def validations(self):
+        return self._validations
+
+    @property
+    def profilers(self):
+        return self._profilers
+
+    @property
+    def module_name(self):
+        return self._module_name
+
+    @module_name.setter
+    def module_name(self, value: str):
+        self._module_name = value
+
+    @property
+    def class_name(self):
+        return self._class_name
+
+    @class_name.setter
+    def class_name(self, value: str):
+        self._class_name = value
+
+    @property
+    def run_name_template(self):
+        return self._run_name_template
+
+    @run_name_template.setter
+    def run_name_template(self, value: str):
+        self._run_name_template = value
+
+    @property
+    def batch_request(self):
+        return self._batch_request
+
+    @property
+    def expectation_suite_name(self):
+        return self._expectation_suite_name
+
+    @expectation_suite_name.setter
+    def expectation_suite_name(self, value: str):
+        self._expectation_suite_name = value
+
+    @property
+    def action_list(self):
+        return self._action_list
+
+    @action_list.setter
+    def action_list(self, value: List[dict]):
+        self._action_list = value
+
+    @classmethod
+    def get_updated_action_list(
+        cls,
+        base_action_list: list,
+        other_action_list: list,
+    ) -> List[dict]:
+        base_action_list_dict = {action["name"]: action for action in base_action_list}
+        for other_action in other_action_list:
+            other_action_name = other_action["name"]
+            if other_action_name in base_action_list_dict:
+                if other_action["action"] is None:
+                    base_action_list_dict.pop(other_action_name)
+                else:
+                    nested_update(
+                        base_action_list_dict[other_action_name], other_action
+                    )
+            else:
+                base_action_list_dict[other_action_name] = other_action
+        return list(base_action_list_dict.values())
+
+    @property
+    def evaluation_parameters(self):
+        return self._evaluation_parameters
+
+    @property
+    def runtime_configuration(self):
+        return self._runtime_configuration
+
+
+class CheckpointValidationConfig(DictDot):
+    pass
+
+
+class CheckpointValidationConfigSchema(Schema):
+    pass
+
+
+# TODO: <Alex>Rob</Alex>
+# class SimpleCheckpointConfig(CheckpointConfig):
+#     def __init__(
+#             self,
+#             name: str,
+#             config_version: Optional[int] = None,
+#             template: Optional[str] = None,
+#             module_name: Optional[str] = None,
+#             class_name: Optional[str] = None,
+#             run_name_template: Optional[str] = None,
+#             expectation_suite_name: Optional[str] = None,
+#             batch_request: Optional[BatchRequest] = None,
+#             action_list: Optional[List[dict]] = None,
+#             evaluation_parameters: Optional[dict] = None,
+#             runtime_configuration: Optional[dict] = None,
+#             validations: Optional[List[dict]] = None,
+#             profilers: Optional[List[dict]] = None,
+#             commented_map: Optional[CommentedMap] = None,
+#     ):
+#         pass
 
 
 dataContextConfigSchema = DataContextConfigSchema()
@@ -1281,3 +1741,4 @@ assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
+checkpointConfigSchema = CheckpointConfigSchema()

@@ -278,7 +278,48 @@ class SiteSectionIdentifier(DataContextKey):
             )
 
 
+class ConfigurationIdentifier(DataContextKey):
+    def __init__(self, configuration_key: str):
+        super().__init__()
+        if not isinstance(configuration_key, str):
+            raise InvalidDataContextKeyError(
+                f"configuration_key must be a string, not {type(configuration_key).__name__}"
+            )
+        self._configuration_key = configuration_key
+
+    @property
+    def configuration_key(self) -> str:
+        return self._configuration_key
+
+    def to_tuple(self):
+        return tuple(self.configuration_key.split("."))
+
+    def to_fixed_length_tuple(self):
+        return self.configuration_key
+
+    @classmethod
+    def from_tuple(cls, tuple_):
+        return cls(".".join(tuple_))
+
+    @classmethod
+    def from_fixed_length_tuple(cls, tuple_):
+        return cls(configuration_key=tuple_[0])
+
+    def __repr__(self):
+        return self.__class__.__name__ + "::" + self._configuration_key
+
+
+class ConfigurationIdentifierSchema(Schema):
+    configuration_key = fields.Str()
+
+    # noinspection PyUnusedLocal
+    @post_load
+    def make_configuration_identifier(self, data, **kwargs):
+        return ConfigurationIdentifier(**data)
+
+
 expectationSuiteIdentifierSchema = ExpectationSuiteIdentifierSchema()
 validationResultIdentifierSchema = ValidationResultIdentifierSchema()
 runIdentifierSchema = RunIdentifierSchema()
 batchIdentifierSchema = BatchIdentifierSchema()
+configurationIdentifierSchema = ConfigurationIdentifierSchema()

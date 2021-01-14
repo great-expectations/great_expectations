@@ -41,6 +41,7 @@ def construct_data_context_config():
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
         validation_operators: Optional[Dict] = None,
@@ -63,6 +64,7 @@ def construct_data_context_config():
             "expectations_store_name": expectations_store_name,
             "validations_store_name": validations_store_name,
             "evaluation_parameter_store_name": evaluation_parameter_store_name,
+            "checkpoint_store_name": checkpoint_store_name,
             "plugins_directory": plugins_directory,
             "validation_operators": validation_operators,
             "stores": stores,
@@ -874,10 +876,19 @@ def test_override_general_defaults(
             "custom_evaluation_parameter_store": {
                 "class_name": "EvaluationParameterStore"
             },
+            "checkpoint_S3_store": {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "class_name": "TupleS3StoreBackend",
+                    "bucket": "REPLACE_ME",
+                    "prefix": "REPLACE_ME",
+                },
+            },
         },
         expectations_store_name="custom_expectations_store_name",
         validations_store_name="custom_validations_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="checkpoint_S3_store",
         data_docs_sites={
             "s3_site": {
                 "class_name": "SiteBuilder",
@@ -957,6 +968,14 @@ def test_override_general_defaults(
                 "prefix": "REPLACE_ME",
             },
         },
+        "checkpoint_S3_store": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "REPLACE_ME",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "REPLACE_ME",
+            },
+        },
     }
 
     desired_data_docs_sites_config = {
@@ -1012,6 +1031,7 @@ def test_override_general_defaults(
         expectations_store_name="custom_expectations_store_name",
         validations_store_name="custom_validations_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="checkpoint_S3_store",
         stores=desired_stores,
         validation_operators=desired_validation_operators,
         data_docs_sites=desired_data_docs_sites_config,

@@ -11,11 +11,13 @@ from ruamel.yaml.compat import StringIO
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.cli.util import cli_colorize_string, cli_message
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
@@ -25,8 +27,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.datasource import LegacyDatasource
-from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
+from great_expectations.datasource import Datasource
 from great_expectations.profile import BasicSuiteBuilderProfiler
 
 
@@ -297,10 +298,10 @@ def load_batch(
     context: DataContext,
     suite: Union[str, ExpectationSuite],
     batch_kwargs: Union[dict, BatchKwargs],
-) -> DataAsset:
-    batch: DataAsset = context.get_batch(batch_kwargs, suite)
-    assert isinstance(
-        batch, DataAsset
+) -> Union[Batch, DataAsset]:
+    batch: Union[Batch, DataAsset] = context.get_batch(batch_kwargs, suite)
+    assert isinstance(batch, DataAsset) or isinstance(
+        batch, Batch
     ), "Batch failed to load. Please check your batch_kwargs"
     return batch
 
@@ -340,13 +341,20 @@ def exit_with_failure_message_and_stats(
 
 
 def load_checkpoint(
-    context: DataContext, checkpoint_name: str, usage_event: str
-) -> dict:
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+) -> Union[Checkpoint, LegacyCheckpoint]:
     """Load a checkpoint or raise helpful errors."""
     try:
-        checkpoint_config = context.get_checkpoint(checkpoint_name)
-        return checkpoint_config
-    except CheckpointNotFoundError as e:
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+            checkpoint_name
+        )
+        return checkpoint
+    except (
+        ge_exceptions.CheckpointNotFoundError,
+        ge_exceptions.InvalidCheckpointConfigError,
+    ):
         exit_with_failure_message_and_stats(
             context,
             usage_event,
@@ -355,13 +363,11 @@ def load_checkpoint(
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
-    except CheckpointError as e:
+    except ge_exceptions.CheckpointError as e:
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
-def select_datasource(
-    context: DataContext, datasource_name: str = None
-) -> LegacyDatasource:
+def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source = None

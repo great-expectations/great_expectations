@@ -3,13 +3,14 @@ import os
 import shutil
 from typing import List
 
-import pandas as pd
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -18,23 +19,23 @@ from great_expectations.data_context import (
     ExplorerDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    DataContextConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.exceptions import (
-    BatchKwargsError,
-    CheckpointError,
-    CheckpointNotFoundError,
-    ConfigNotFoundError,
-    DataContextError,
-)
 from great_expectations.util import gen_directory_tree_str
 from tests.datasource.conftest import postgresql_sqlalchemy_datasource
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -66,7 +67,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     # attempt to create expectation suite with name that already exists on data asset
-    with pytest.raises(DataContextError):
+    with pytest.raises(ge_exceptions.DataContextError):
         titanic_data_context.create_expectation_suite(
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
@@ -532,6 +533,7 @@ project_path/
         .gitignore
         great_expectations.yml
         checkpoints/
+            .ge_store_backend_id
         expectations/
             .ge_store_backend_id
             titanic/
@@ -785,9 +787,9 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
         context_path = os.path.join(project_path, "great_expectations")
         os.makedirs(context_path, exist_ok=True)
         os.chdir(context_path)
-        with pytest.raises(DataContextError) as err:
+        with pytest.raises(ge_exceptions.DataContextError) as err:
             DataContext.find_context_root_dir()
-        assert isinstance(err.value, ConfigNotFoundError)
+        assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
 
         shutil.copy(
             file_relative_path(
@@ -1091,6 +1093,7 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
+        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
     notebooks/
@@ -1123,6 +1126,7 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
+        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
     notebooks/
@@ -1476,14 +1480,14 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(DataContextError):
+    with pytest.raises(ge_exceptions.DataContextError):
         titanic_data_context.get_batch({}, 99)
 
 
 def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(BatchKwargsError):
+    with pytest.raises(ge_exceptions.BatchKwargsError):
         titanic_data_context.get_batch(99, "foo")
 
 
@@ -1572,7 +1576,7 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    with pytest.raises(CheckpointNotFoundError):
+    with pytest.raises(ge_exceptions.CheckpointNotFoundError):
         context.get_checkpoint("not_a_checkpoint")
 
 
@@ -1588,33 +1592,38 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
     assert os.path.isfile(checkpoint_file_path)
     assert context.list_checkpoints() == ["my_checkpoint"]
 
-    with pytest.raises(CheckpointError):
+    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError):
         context.get_checkpoint("my_checkpoint")
 
 
 def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     obs = context.get_checkpoint("my_checkpoint")
-    assert isinstance(obs, dict)
-    assert {
-        "validation_operator_name": "action_list_operator",
+    assert isinstance(obs, Checkpoint)
+    config = obs.config
+    assert isinstance(config.to_json_dict(), dict)
+    assert config.to_json_dict() == {
+        "class_name": "LegacyCheckpoint",
+        "config_version": None,
+        "name": "my_checkpoint",
         "batches": [
             {
                 "batch_kwargs": {
-                    "path": "/Users/me/projects/my_project/data/data.csv",
                     "datasource": "my_filesystem_datasource",
+                    "path": "/Users/me/projects/my_project/data/data.csv",
                     "reader_method": "read_csv",
                 },
                 "expectation_suite_names": ["suite_one", "suite_two"],
             },
             {
                 "batch_kwargs": {
-                    "query": "SELECT * FROM users WHERE status = 1",
                     "datasource": "my_redshift_datasource",
+                    "query": "SELECT * FROM users WHERE status = 1",
                 },
                 "expectation_suite_names": ["suite_three"],
             },
         ],
+        "validation_operator_name": "action_list_operator",
     }
 
 
@@ -1631,12 +1640,15 @@ def test_get_checkpoint_default_validation_operator(empty_data_context):
     assert os.path.isfile(checkpoint_file_path)
 
     obs = context.get_checkpoint("foo")
-    assert isinstance(obs, dict)
+    assert isinstance(obs, Checkpoint)
+    assert isinstance(obs.config.to_json_dict(), dict)
     expected = {
+        "class_name": "LegacyCheckpoint",
+        "config_version": None,
+        "name": "foo",
         "validation_operator_name": "action_list_operator",
-        "batches": [],
     }
-    assert expected == obs
+    assert obs.config.to_json_dict() == expected
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
@@ -1653,7 +1665,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1672,7 +1684,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1697,7 +1709,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1716,8 +1728,79 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
+
+
+# TODO: add more test cases
+def test_run_checkpoint_newstyle(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    # add checkpoint config
+    checkpoint_config = CheckpointConfig(
+        config_version=1,
+        name="my_checkpoint",
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_basic_data_connector",
+                    "data_asset_name": "Titanic_1911",
+                }
+            }
+        ],
+    )
+    checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=checkpoint_config.name
+    )
+    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
+
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        context.run_checkpoint(checkpoint_name=checkpoint_config.name)
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    # print(context.list_datasources())
+
+    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(result.list_validation_results()) == 1
+    assert result.success
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(result.list_validation_results()) == 1
+    assert len(context.validations_store.list_keys()) == 2
+    assert result.success
 
 
 def test_get_validator_with_instantiated_expectation_suite(

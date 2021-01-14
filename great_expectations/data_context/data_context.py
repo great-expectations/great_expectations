@@ -3,6 +3,7 @@ import copy
 import datetime
 import errno
 import glob
+import itertools
 import json
 import logging
 import os
@@ -21,13 +22,14 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.core.usage_statistics.usage_statistics import (  # TODO: deprecate
+from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
     run_validation_operator_usage_statistics,
@@ -36,16 +38,17 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # TODO:
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import TupleStoreBackend
+from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
 from great_expectations.data_context.types.base import (
-    CURRENT_CONFIG_VERSION,
+    CURRENT_GE_CONFIG_VERSION,
     MINIMUM_SUPPORTED_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
+    CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
@@ -53,11 +56,13 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
+    build_store_from_config,
     file_relative_path,
     instantiate_class_from_config,
     load_class,
@@ -70,7 +75,10 @@ from great_expectations.datasource.new_datasource import BaseDatasource, Datasou
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    verify_dynamic_loading_support,
+)
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -305,47 +313,34 @@ class BaseDataContext:
 
     def _build_store_from_config(self, store_name, store_config):
         module_name = "great_expectations.data_context.store"
-        try:
-            # Set expectations_store.store_backend_id to the data_context_id from the project_config if
-            # the expectations_store doesnt yet exist by:
-            # adding the data_context_id from the project_config
-            # to the store_config under the key manually_initialize_store_backend_id
-            if (store_name == self.expectations_store_name) and store_config.get(
-                "store_backend"
-            ):
-                store_config["store_backend"].update(
-                    {
-                        "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
-                    }
-                )
+        # Set expectations_store.store_backend_id to the data_context_id from the project_config if
+        # the expectations_store doesnt yet exist by:
+        # adding the data_context_id from the project_config
+        # to the store_config under the key manually_initialize_store_backend_id
+        if (store_name == self.expectations_store_name) and store_config.get(
+            "store_backend"
+        ):
+            store_config["store_backend"].update(
+                {
+                    "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                }
+            )
 
-            # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
-            if (
-                store_name not in [store["name"] for store in self.list_active_stores()]
-                and store_config.get("store_backend") is not None
-            ):
-                store_config["store_backend"].update(
-                    {"suppress_store_backend_id": True}
-                )
+        # Set suppress_store_backend_id = True if store is inactive and has a store_backend.
+        if (
+            store_name not in [store["name"] for store in self.list_active_stores()]
+            and store_config.get("store_backend") is not None
+        ):
+            store_config["store_backend"].update({"suppress_store_backend_id": True})
 
-            new_store = instantiate_class_from_config(
-                config=store_config,
-                runtime_environment={
-                    "root_directory": self.root_directory,
-                },
-                config_defaults={"module_name": module_name, "store_name": store_name},
-            )
-        except ge_exceptions.DataContextError as e:
-            new_store = None
-            logger.critical(
-                f"While attempting to instantiate the store named {store_name} an error occurred: {e}"
-            )
-        if not new_store:
-            raise ge_exceptions.ClassInstantiationError(
-                module_name=module_name,
-                package_name=None,
-                class_name=store_config["class_name"],
-            )
+        new_store = build_store_from_config(
+            store_name=store_name,
+            store_config=store_config,
+            module_name=module_name,
+            runtime_environment={
+                "root_directory": self.root_directory,
+            },
+        )
         self._stores[store_name] = new_store
         return new_store
 
@@ -709,13 +704,9 @@ class BaseDataContext:
         return self._normalize_absolute_or_relative_path(
             self._project_config_with_variables_substituted.plugins_directory
         )
-
+      
     @property
-    def project_config_with_variables_substituted(self):
-        return self.get_config_with_variables_substituted()
-
-    @property
-    def _project_config_with_variables_substituted(self):
+    def _project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 
     @property
@@ -739,8 +730,20 @@ class BaseDataContext:
         return self._cached_datasources
 
     @property
+    def checkpoint_store_name(self):
+        return self._project_config_with_variables_substituted.checkpoint_store_name
+
+    @property
+    def checkpoint_store(self):
+        return self.stores[self.checkpoint_store_name]
+
+    @property
     def expectations_store_name(self):
         return self._project_config_with_variables_substituted.expectations_store_name
+
+    @property
+    def expectations_store(self):
+        return self.stores[self.expectations_store_name]
 
     @property
     def data_context_id(self):
@@ -795,13 +798,13 @@ class BaseDataContext:
         else:
             return {}
 
-    def get_config_with_variables_substituted(self, config=None):
+    def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
 
         if not config:
             config = self._project_config
 
         substituted_config_variables = substitute_all_config_variables(
-            dict(self._load_config_variables_file()),
+            self.config_variables,
             dict(os.environ),
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
@@ -1234,13 +1237,14 @@ class BaseDataContext:
 
         **kwargs: variable arguments
 
+        First check:
+        Returns "v3" if the "0.13" entities are specified in the **kwargs.
+
+        Otherwise:
         Returns None if no datasources have been configured (or if there is an exception while getting the datasource).
         Returns "v3" if the datasource is a subclass of the BaseDatasource class.
         Returns "v2" if the datasource is an instance of the LegacyDatasource class.
         """
-
-        if not self.datasources:
-            return None
 
         if {
             "datasource_name",
@@ -1250,6 +1254,9 @@ class BaseDataContext:
             "batch_data",
         }.intersection(set(kwargs.keys())):
             return "v3"
+
+        if not self.datasources:
+            return None
 
         api_version: Optional[str] = None
         datasource_name: Any
@@ -1571,7 +1578,6 @@ class BaseDataContext:
             return []
         return list(self.validation_operators.keys())
 
-    # TODO: deprecate
     @usage_statistics_enabled_method(
         event_name="data_context.add_datasource",
         args_payload_fn=add_datasource_usage_statistics,
@@ -1661,7 +1667,6 @@ class BaseDataContext:
             )
         return datasource
 
-    # TODO: deprecate
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
@@ -1769,7 +1774,7 @@ class BaseDataContext:
     def list_expectation_suites(self):
         """Return a list of available expectation suite names."""
         try:
-            keys = self.stores[self.expectations_store_name].list_keys()
+            keys = self.expectations_store.list_keys()
         except KeyError as e:
             raise ge_exceptions.InvalidConfigError(
                 "Unable to find configured store: %s" % str(e)
@@ -1819,12 +1824,14 @@ class BaseDataContext:
         List active Stores on this context. Active stores are identified by setting the following parameters:
             expectations_store_name,
             validations_store_name,
-            evaluation_parameter_store_name
+            evaluation_parameter_store_name,
+            checkpoint_store_name
         """
         active_store_names = [
             self.expectations_store_name,
             self.validations_store_name,
             self.evaluation_parameter_store_name,
+            self.checkpoint_store_name,
         ]
         return [
             store for store in self.list_stores() if store["name"] in active_store_names
@@ -1865,10 +1872,7 @@ class BaseDataContext:
         )
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
-        if (
-            self._stores[self.expectations_store_name].has_key(key)
-            and not overwrite_existing
-        ):
+        if self.expectations_store.has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True.".format(
@@ -1876,7 +1880,7 @@ class BaseDataContext:
                 )
             )
         else:
-            self._stores[self.expectations_store_name].set(key, expectation_suite)
+            self.expectations_store.set(key, expectation_suite)
 
         return expectation_suite
 
@@ -1890,12 +1894,12 @@ class BaseDataContext:
             True for Success and False for Failure.
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name)
-        if not self._stores[self.expectations_store_name].has_key(key):
+        if not self.expectations_store.has_key(key):
             raise ge_exceptions.DataContextError(
                 "expectation_suite with name {} does not exist."
             )
         else:
-            self._stores[self.expectations_store_name].remove_key(key)
+            self.expectations_store.remove_key(key)
             return True
 
     def get_expectation_suite(self, expectation_suite_name):
@@ -1909,8 +1913,8 @@ class BaseDataContext:
         """
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
 
-        if self.stores[self.expectations_store_name].has_key(key):
-            return self.stores[self.expectations_store_name].get(key)
+        if self.expectations_store.has_key(key):
+            return self.expectations_store.get(key)
         else:
             raise ge_exceptions.DataContextError(
                 "expectation_suite %s not found" % expectation_suite_name
@@ -1949,7 +1953,7 @@ class BaseDataContext:
                 expectation_suite_name=expectation_suite_name
             )
 
-        self.stores[self.expectations_store_name].set(key, expectation_suite)
+        self.expectations_store.set(key, expectation_suite)
         self._evaluation_parameter_dependencies_compiled = False
 
     def _store_metrics(self, requested_metrics, validation_results, target_store_name):
@@ -2060,8 +2064,8 @@ class BaseDataContext:
 
     def _compile_evaluation_parameter_dependencies(self):
         self._evaluation_parameter_dependencies = {}
-        for key in self.stores[self.expectations_store_name].list_keys():
-            expectation_suite = self.stores[self.expectations_store_name].get(key)
+        for key in self.expectations_store.list_keys():
+            expectation_suite = self.expectations_store.get(key)
             if not expectation_suite:
                 continue
 
@@ -2705,66 +2709,134 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
-    @staticmethod
-    def _validate_checkpoint(checkpoint: Dict, checkpoint_name: str) -> dict:
-        if checkpoint is None:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` has no contents. Please fix this."
-            )
-        if "validation_operator_name" not in checkpoint:
-            checkpoint["validation_operator_name"] = "action_list_operator"
+    def add_checkpoint(
+        self,
+        name: str,
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+    ) -> Union[Checkpoint, LegacyCheckpoint]:
+        checkpoint_config: Union[CheckpointConfig, dict]
+        checkpoint_config = {
+            "name": name,
+            "config_version": config_version,
+            "template_name": template_name,
+            "module_name": module_name,
+            "class_name": class_name,
+            "run_name_template": run_name_template,
+            "expectation_suite_name": expectation_suite_name,
+            "batch_request": batch_request,
+            "action_list": action_list,
+            "evaluation_parameters": evaluation_parameters,
+            "runtime_configuration": runtime_configuration,
+            "validations": validations,
+            "profilers": profilers,
+            # Next two fields are for LegacyCheckpoint configuration
+            "validation_operator_name": validation_operator_name,
+            "batches": batches,
+        }
+        checkpoint_config = filter_properties_dict(properties=checkpoint_config)
+        new_checkpoint: Union[
+            Checkpoint, LegacyCheckpoint
+        ] = instantiate_class_from_config(
+            config=checkpoint_config,
+            runtime_environment={
+                "data_context": self,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint.checkpoint",
+            },
+        )
+        key: ConfigurationIdentifier = ConfigurationIdentifier(
+            configuration_key=name,
+        )
+        checkpoint_config = CheckpointConfig(**checkpoint_config)
+        self.checkpoint_store.set(key=key, value=checkpoint_config)
+        return new_checkpoint
 
-        if "batches" not in checkpoint:
-            raise ge_exceptions.CheckpointError(
-                f"Checkpoint `{checkpoint_name}` is missing required key: `batches`."
+    def get_checkpoint(self, name: str) -> Union[Checkpoint, LegacyCheckpoint]:
+        key: ConfigurationIdentifier = ConfigurationIdentifier(
+            configuration_key=name,
+        )
+        try:
+            checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
+        except ge_exceptions.InvalidKeyError as exc_ik:
+            raise ge_exceptions.CheckpointNotFoundError(
+                message=f'Non-existent checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
             )
-        batches = checkpoint["batches"]
-        if not isinstance(batches, list):
-            raise ge_exceptions.CheckpointError(
-                f"In the checkpoint `{checkpoint_name}`, the key `batches` must be a list"
+        except ValidationError as exc_ve:
+            raise ge_exceptions.InvalidCheckpointConfigError(
+                message="Invalid checkpoint configuration", validation_error=exc_ve
             )
 
-        for batch in batches:
-            for required in ["expectation_suite_names", "batch_kwargs"]:
-                if required not in batch:
-                    raise ge_exceptions.CheckpointError(
-                        f"Items in `batches` must have a key `{required}`"
+        if checkpoint_config.config_version is None:
+            if not (
+                "batches" in checkpoint_config.to_json_dict()
+                and (
+                    len(checkpoint_config.to_json_dict()["batches"]) == 0
+                    or {"batch_kwargs", "expectation_suite_names",}.issubset(
+                        set(
+                            list(
+                                itertools.chain.from_iterable(
+                                    [
+                                        item.keys()
+                                        for item in checkpoint_config.to_json_dict()[
+                                            "batches"
+                                        ]
+                                    ]
+                                )
+                            )
+                        )
                     )
+                )
+            ):
+                raise ge_exceptions.CheckpointError(
+                    message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
+                )
+
+        config: dict = checkpoint_config.to_json_dict()
+        config.update({"name": name})
+        config = filter_properties_dict(properties=config)
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                "data_context": self,
+            },
+            config_defaults={
+                "module_name": "great_expectations.checkpoint",
+            },
+        )
 
         return checkpoint
 
     def list_checkpoints(self) -> List[str]:
-        """List checkpoints. (Experimental)"""
-        # TODO mark experimental
-        files = self._list_ymls_in_checkpoints_directory()
-        return [
-            os.path.basename(f)[:-4]
-            for f in files
-            if os.path.basename(f).endswith(".yml")
-        ]
-
-    def get_checkpoint(self, checkpoint_name: str) -> dict:
-        """Load a checkpoint. (Experimental)"""
-        # TODO mark experimental
-        yaml = YAML(typ="safe")
-        # TODO make a serializable class with a schema
-        checkpoint_path = os.path.join(
-            self.root_directory, self.CHECKPOINTS_DIR, f"{checkpoint_name}.yml"
-        )
-        try:
-            with open(checkpoint_path) as f:
-                checkpoint = yaml.load(f.read())
-                return self._validate_checkpoint(checkpoint, checkpoint_name)
-        except FileNotFoundError:
-            raise ge_exceptions.CheckpointNotFoundError(
-                f"Could not find checkpoint `{checkpoint_name}`."
-            )
+        return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 
     def run_checkpoint(
         self,
         checkpoint_name: str,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
         run_id=None,
-        evaluation_parameters=None,
         run_name=None,
         run_time=None,
         result_format=None,
@@ -2785,40 +2857,35 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if result_format is None:
             result_format = {"result_format": "SUMMARY"}
 
-        checkpoint = self.get_checkpoint(checkpoint_name)
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
+            name=checkpoint_name,
+        )
 
-        batches_to_validate = []
-        for batch in checkpoint["batches"]:
-            batch_kwargs = batch["batch_kwargs"]
-            for suite_name in batch["expectation_suite_names"]:
-                suite = self.get_expectation_suite(suite_name)
-                batch = self.get_batch(batch_kwargs, suite)
-                batches_to_validate.append(batch)
-
-        results = self.run_validation_operator(
-            checkpoint["validation_operator_name"],
-            assets_to_validate=batches_to_validate,
-            run_id=run_id,
+        return checkpoint.run(
+            template_name=template_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
             evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            run_id=run_id,
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
             **kwargs,
         )
-        return results
-
-    def _list_ymls_in_checkpoints_directory(self):
-        checkpoints_dir = os.path.join(self.root_directory, self.CHECKPOINTS_DIR)
-        files = glob.glob(os.path.join(checkpoints_dir, "*.yml"), recursive=False)
-        return files
 
     def test_yaml_config(
         self,
         yaml_config: str,
-        name=None,
-        pretty_print=True,
-        return_mode="instantiated_class",
-        shorten_tracebacks=False,
+        name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        pretty_print: bool = True,
+        return_mode: str = "instantiated_class",
+        shorten_tracebacks: bool = False,
     ):
         """Convenience method for testing yaml configs
 
@@ -2867,28 +2934,32 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")
 
-        substituted_config_variables = substitute_all_config_variables(
+        substituted_config_variables: Union[
+            DataContextConfig, dict
+        ] = substitute_all_config_variables(
             self.config_variables,
             dict(os.environ),
         )
 
-        substitutions = {
+        substitutions: dict = {
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
         }
 
-        config_str_with_substituted_variables = substitute_all_config_variables(
+        config_str_with_substituted_variables: Union[
+            DataContextConfig, dict
+        ] = substitute_all_config_variables(
             yaml_config,
             substitutions,
         )
 
-        config = yaml.load(config_str_with_substituted_variables)
+        config: CommentedMap = yaml.load(config_str_with_substituted_variables)
 
         if "class_name" in config:
             class_name = config["class_name"]
-        else:
-            class_name = None
+
+        instantiated_class: Any
 
         try:
             if class_name in [
@@ -2898,12 +2969,19 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "EvaluationParameterStore",
                 "MetricStore",
                 "SqlAlchemyQueryStore",
+                "CheckpointStore",
             ]:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                instantiated_class = self._build_store_from_config(
-                    "my_temp_store", config
+                store_name: str = name or "my_temp_store"
+                instantiated_class = cast(
+                    Store,
+                    self._build_store_from_config(
+                        store_name=store_name,
+                        store_config=config,
+                    ),
                 )
-
+                store_name = instantiated_class.store_name or store_name
+                self._project_config["stores"][store_name] = config
             elif class_name in [
                 "Datasource",
                 "SimpleSqlalchemyDatasource",
@@ -2911,21 +2989,54 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 print(
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
-                datasource_name = name or "my_temp_datasource"
-                instantiated_class = (
+                datasource_name: str = name or "my_temp_datasource"
+                instantiated_class = cast(
+                    Datasource,
                     self._instantiate_datasource_from_config_and_update_project_config(
                         name=datasource_name,
                         config=config,
                         initialize=True,
-                    )
+                    ),
+                )
+            elif class_name == "Checkpoint":
+                print(
+                    f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
                 )
 
+                checkpoint_name: str = name or "my_temp_checkpoint"
+
+                checkpoint_config: Union[CheckpointConfig, dict]
+
+                checkpoint_config = CheckpointConfig.from_commented_map(
+                    commented_map=config
+                )
+                checkpoint_config = checkpoint_config.to_json_dict()
+                checkpoint_config.update({"name": checkpoint_name})
+
+                instantiated_class = Checkpoint(
+                    data_context=self,
+                    **checkpoint_config,
+                )
+
+                checkpoint_config = CheckpointConfig.from_commented_map(
+                    commented_map=instantiated_class.config.commented_map
+                )
+                checkpoint_config = checkpoint_config.to_json_dict()
+
+                # noinspection PyUnusedLocal
+                checkpoint: Checkpoint = self.add_checkpoint(
+                    **checkpoint_config,
+                )
             else:
                 print(
                     "\tNo matching class found. Attempting to instantiate class from the raw config..."
                 )
                 instantiated_class = instantiate_class_from_config(
-                    config, runtime_environment={}, config_defaults={}
+                    config=config,
+                    runtime_environment={
+                        "root_directory": self.root_directory,
+                    },
+                    config_defaults={},
                 )
 
             if pretty_print:
@@ -2934,13 +3045,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
                 print()
 
-            report_object = instantiated_class.self_check(pretty_print)
+            report_object: dict = instantiated_class.self_check(
+                pretty_print=pretty_print
+            )
 
             if return_mode == "instantiated_class":
                 return instantiated_class
 
-            elif return_mode == "report_object":
-                return report_object
+            return report_object
 
         except Exception as e:
             if shorten_tracebacks:
@@ -3180,7 +3292,7 @@ class DataContext(BaseDataContext):
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
-                config_dict = yaml.load(data)
+                config_commented_map_from_yaml = yaml.load(data)
 
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
@@ -3196,7 +3308,9 @@ class DataContext(BaseDataContext):
             raise ge_exceptions.ConfigNotFoundError()
 
         try:
-            return DataContextConfig.from_commented_map(config_dict)
+            return DataContextConfig.from_commented_map(
+                commented_map=config_commented_map_from_yaml
+            )
         except ge_exceptions.InvalidDataContextConfigError:
             # Just to be explicit about what we intended to catch
             raise
@@ -3263,9 +3377,9 @@ class DataContext(BaseDataContext):
             return
 
         with open(yml_path) as f:
-            config_dict = yaml.load(f)
+            config_commented_map_from_yaml = yaml.load(f)
 
-        config_version = config_dict.get("config_version")
+        config_version = config_commented_map_from_yaml.get("config_version")
         return float(config_version) if config_version else None
 
     @classmethod
@@ -3284,10 +3398,10 @@ class DataContext(BaseDataContext):
                         config_version, MINIMUM_SUPPORTED_CONFIG_VERSION
                     ),
                 )
-            elif config_version > CURRENT_CONFIG_VERSION:
+            elif config_version > CURRENT_GE_CONFIG_VERSION:
                 raise ge_exceptions.UnsupportedConfigVersionError(
                     "Invalid config version ({}).\n    The maximum valid version is {}.".format(
-                        config_version, CURRENT_CONFIG_VERSION
+                        config_version, CURRENT_GE_CONFIG_VERSION
                     ),
                 )
 
@@ -3296,11 +3410,11 @@ class DataContext(BaseDataContext):
             return False
 
         with open(yml_path) as f:
-            config_dict = yaml.load(f)
-            config_dict["config_version"] = config_version
+            config_commented_map_from_yaml = yaml.load(f)
+            config_commented_map_from_yaml["config_version"] = config_version
 
         with open(yml_path, "w") as f:
-            yaml.dump(config_dict, f)
+            yaml.dump(config_commented_map_from_yaml, f)
 
         return True
 

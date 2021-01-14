@@ -1,3 +1,38 @@
+import os
+import sys
+from typing import Dict
+
+import click
+from ruamel.yaml import YAML
+
+from great_expectations import DataContext
+from great_expectations.checkpoint import Checkpoint
+from great_expectations.cli import toolkit
+from great_expectations.cli.mark import Mark as mark
+from great_expectations.cli.util import cli_message, cli_message_list
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.data_context.util import file_relative_path
+from great_expectations.util import lint_code
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
+
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    SQLAlchemyError = RuntimeError
+
+
+try:
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    SQLAlchemyError = RuntimeError
+
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+
+
 """
 --ge-feature-maturity-info--
 
@@ -39,7 +74,7 @@
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html
     maturity: Experimental
     maturity_details:
-        api_stability: Unstable (expect changes to batch validation; no checkpoint store)
+        api_stability: Unstable (expect changes to batch request; no checkpoint store)
         implementation_completeness: Complete
         unit_test_coverage: Complete
         integration_infrastructure_test_coverage: N/A
@@ -109,40 +144,6 @@
 --ge-feature-maturity-info--
 """
 
-import os
-import sys
-from typing import Dict
-
-import click
-from ruamel.yaml import YAML
-
-from great_expectations import DataContext
-from great_expectations.cli import toolkit
-from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.util import cli_message, cli_message_list
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import DataContextError
-from great_expectations.util import lint_code
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
-)
-
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
-    SQLAlchemyError = RuntimeError
-
-
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
-    SQLAlchemyError = RuntimeError
-
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-
 
 @click.group(short_help="Checkpoint operations")
 def checkpoint():
@@ -171,34 +172,46 @@ def checkpoint():
     default=None,
     help="The project's great_expectations directory.",
 )
+@click.option("--legacy/--non-legacy", default=True)
 @mark.cli_as_experimental
-def checkpoint_new(checkpoint, suite, directory, datasource):
+def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
     """Create a new checkpoint for easy deployments. (Experimental)"""
-    suite_name = suite
-    usage_event = "cli.checkpoint.new"
-    context = toolkit.load_data_context_with_error_handling(directory)
-    _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
-    suite: ExpectationSuite = toolkit.load_expectation_suite(
-        context, suite_name, usage_event
-    )
-    datasource = toolkit.select_datasource(context, datasource_name=datasource)
-    if datasource is None:
-        send_usage_message(context, usage_event, success=False)
-        sys.exit(1)
-    _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
+    if legacy:
+        suite_name = suite
+        usage_event = "cli.checkpoint.new"
+        context = toolkit.load_data_context_with_error_handling(directory)
+        _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
+        suite: ExpectationSuite = toolkit.load_expectation_suite(
+            context, suite_name, usage_event
+        )
+        datasource = toolkit.select_datasource(context, datasource_name=datasource)
+        if datasource is None:
+            send_usage_message(context, usage_event, success=False)
+            sys.exit(1)
+        _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
 
-    template = _load_checkpoint_yml_template()
-    # This picky update helps template comments stay in place
-    template["batches"][0]["batch_kwargs"] = dict(batch_kwargs)
-    template["batches"][0]["expectation_suite_names"] = [suite.expectation_suite_name]
+        _ = context.add_checkpoint(
+            name=checkpoint,
+            **{
+                "class_name": "LegacyCheckpoint",
+                "validation_operator_name": "action_list_operator",
+                "batches": [
+                    {
+                        "batch_kwargs": dict(batch_kwargs),
+                        "expectation_suite_names": [suite.expectation_suite_name],
+                    }
+                ],
+            },
+        )
 
-    checkpoint_file = _write_checkpoint_to_disk(context, template, checkpoint)
-    cli_message(
-        f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
-  - To edit this checkpoint edit the checkpoint file: {checkpoint_file}
-  - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
-    )
-    send_usage_message(context, usage_event, success=True)
+        cli_message(
+            f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
+      - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
+        )
+        send_usage_message(context, usage_event, success=True)
+    # TODO: <Rob>Rob</Rob> Add flow for new style checkpoints
+    else:
+        pass
 
 
 def _verify_checkpoint_does_not_exist(
@@ -279,36 +292,15 @@ def checkpoint_run(checkpoint, directory):
     context = toolkit.load_data_context_with_error_handling(directory)
     usage_event = "cli.checkpoint.run"
 
-    checkpoint_config = toolkit.load_checkpoint(context, checkpoint, usage_event)
-    checkpoint_file = f"great_expectations/checkpoints/{checkpoint}.yml"
+    checkpoint: Checkpoint = toolkit.load_checkpoint(
+        context,
+        checkpoint,
+        usage_event,
+    )
 
-    # TODO loading batches will move into DataContext eventually
-    batches_to_validate = []
-    for batch in checkpoint_config["batches"]:
-        _validate_at_least_one_suite_is_listed(context, batch, checkpoint_file)
-        batch_kwargs = batch["batch_kwargs"]
-        for suite_name in batch["expectation_suite_names"]:
-            suite = toolkit.load_expectation_suite(context, suite_name, usage_event)
-            try:
-                batch = toolkit.load_batch(context, suite, batch_kwargs)
-            except (FileNotFoundError, SQLAlchemyError, OSError, DataContextError) as e:
-                toolkit.exit_with_failure_message_and_stats(
-                    context,
-                    usage_event,
-                    f"""<red>There was a problem loading a batch:
-  - Batch: {batch_kwargs}
-  - {e}
-  - Please verify these batch kwargs in the checkpoint file: `{checkpoint_file}`</red>""",
-                )
-            batches_to_validate.append(batch)
     try:
-        results = context.run_validation_operator(
-            checkpoint_config["validation_operator_name"],
-            assets_to_validate=batches_to_validate,
-            # TODO prepare for new RunID - checkpoint name and timestamp
-            # run_id=RunID(checkpoint)
-        )
-    except DataContextError as e:
+        results = checkpoint.run()
+    except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
             context, usage_event, f"<red>{e}</red>"
         )
@@ -397,21 +389,6 @@ def checkpoint_script(checkpoint, directory):
   - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
     )
     send_usage_message(context, event=usage_event, success=True)
-
-
-def _validate_at_least_one_suite_is_listed(
-    context: DataContext, batch: Dict, checkpoint_file: str
-) -> None:
-    batch_kwargs = batch["batch_kwargs"]
-    suites = batch["expectation_suite_names"]
-    if not suites:
-        toolkit.exit_with_failure_message_and_stats(
-            context,
-            "cli.checkpoint.run",
-            f"""<red>A batch has no suites associated with it. At least one suite is required.
-  - Batch: {batch_kwargs}
-  - Please add at least one suite to your checkpoint file: {checkpoint_file}</red>""",
-        )
 
 
 def _load_script_template() -> str:
