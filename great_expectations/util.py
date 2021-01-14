@@ -185,11 +185,11 @@ def is_library_loadable(library_name: str) -> bool:
 
 def load_class(class_name: str, module_name: str):
     if class_name is None:
-        raise ValueError("class_name must not be none")
+        raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
         raise TypeError("class_name must be a string")
     if module_name is None:
-        raise ValueError("module_name must not be none")
+        raise TypeError("module_name must not be None")
     if not isinstance(module_name, str):
         raise TypeError("module_name must be a string")
     try:
