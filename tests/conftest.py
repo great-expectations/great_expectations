@@ -3005,7 +3005,7 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store_with_usage_
     )
     shutil.copy(
         os.path.join(
-            fixture_dir, "/great_expectations_basic_with_usage_stats_enabled.yml"
+            fixture_dir, "great_expectations_basic_with_usage_stats_enabled.yml"
         ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
