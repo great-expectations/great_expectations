@@ -2625,7 +2625,7 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context_with_mssql_datasource(tmp_path_factory):
+def data_context_with_mysql_datasource(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
@@ -2642,7 +2642,7 @@ def data_context_with_mssql_datasource(tmp_path_factory):
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_mssql_datasource.yml"),
+        os.path.join(fixture_dir, "great_expectations_mysql_datasource.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     return ge.data_context.DataContext(context_path)

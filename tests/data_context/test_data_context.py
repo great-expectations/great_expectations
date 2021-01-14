@@ -1828,22 +1828,13 @@ data_connectors:
 
 
 
-def test_get_batch_mssql_database(
-    data_context_with_mssql_datasource,
+def test_get_batch_mysql_database(
+    data_context_with_mysql_datasource,
 ):
-    """
-    What does this test and why?
-    A DataContext can have "stale" datasources in its configuration (ie. connections to DBs that are now offline).
-    If we configure a new datasource and are only using it (like the PandasDatasource below), then we don't
-    want to be dependant on all the "stale" datasources working too.
-    data_context_with_bad_datasource is a fixture that contains a configuration for an invalid datasource
-    (with "fake_port" and "fake_host")
-    In the test we configure a new expectation_suite, a local pandas_datasource and retrieve a single batch.
-    This tests a fix for the following issue:
-    https://github.com/great-expectations/great_expectations/issues/2241
-    """
+    #import logging
+    #logging.basicConfig()
 
-    context = data_context_with_mssql_datasource
+    context = data_context_with_mysql_datasource
     context.create_expectation_suite(expectation_suite_name="local_test.default")
     expectation_suite = context.get_expectation_suite("local_test.default")
 
@@ -1857,6 +1848,67 @@ def test_get_batch_mssql_database(
         "table": "imdb_100k_main",
     }
     batch = context.get_batch(batch_kwargs, expectation_suite)
-    #print(batch)
-    batch.expect_column_values_to_be_unique(column="movieId")
+    print(batch)
+    #logger.error('error message')
+    # batch.expect_column_mean_to_be_between(
+    #             column="movieId",
+    #             min_value=0
+    #         )
+    # batch.expect_column_values_to_be_between(
+    #     column="movieId",
+    #     min_value=0
+    # )
+    #
+    # batch.expect_column_values_to_not_be_null(
+    #     column="movieId"
+    # )
+
+    #batch.expect_compound_columns_to_be_unique(column_list=["movieId", "title"])
+    #ret = batch.expect_column_values_to_be_unique(column="movieId")
+    ret = batch.expect_column_values_to_be_unique(column="movieId")
+    #ret = batch.expect_column_values_to_be_unique(column="genres")
+    print(ret)
+    #batch.expect_column_values_to_not_be_in_set("movieId", ["a", "b"])
+
+
+
+
+def test_get_batch_mysql_database_alrightalright(
+    data_context_with_mysql_datasource,
+):
+    #import logging
+    #logging.basicConfig()
+
+    context = data_context_with_mysql_datasource
+    context.create_expectation_suite(expectation_suite_name="local_test.default")
+    expectation_suite = context.get_expectation_suite("local_test.default")
+
+    expectation_suite.expectations = []
+
+    batch_kwargs = {
+        "data_asset_name": "table_1",
+        "datasource": "my_postgres_db",
+        "limit": 1000,
+        "table": "table_name_1",
+    }
+    batch = context.get_batch(batch_kwargs, expectation_suite)
+    print(batch)
+    #logger.error('error message')
+    # batch.expect_column_mean_to_be_between(
+    #             column="movieId",
+    #             min_value=0
+    #         )
+    # batch.expect_column_values_to_be_between(
+    #     column="movieId",
+    #     min_value=0
+    # )
+    #
+    # batch.expect_column_values_to_not_be_null(
+    #     column="movieId"
+    # )
+
+    #batch.expect_compound_columns_to_be_unique(column_list=["movieId"])
+    batch.expect_column_values_to_be_unique(column="index")
+    #batch.expect_column_values_to_not_be_in_set("movieId", ["a", "b"])
+
 

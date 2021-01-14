@@ -23,13 +23,28 @@ datasources:
       class_name: SqlAlchemyDataset
     module_name: great_expectations.datasource
     credentials:
-        drivername: mysql+pymysql
-        host: ge-alex-test-mysql-0.cvqwgt8yqwtz.us-east-2.rds.amazonaws.com
-        port: '3306'
-        username: testuser
-        password: hello1234%^&*
-        database: testdb
+      drivername: mysql+pymysql
+      host: ge-alex-test-mysql-0.cvqwgt8yqwtz.us-east-2.rds.amazonaws.com
+      port: '3306'
+      username: testuser
+      password: hello1234%^&*
+      database: testdb
     class_name: SqlAlchemyDatasource
+  my_postgres_db:
+    data_asset_type:
+      module_name: great_expectations.dataset
+      class_name: SqlAlchemyDataset
+    module_name: great_expectations.datasource
+    credentials:
+      drivername: postgresql
+      host: localhost
+      port: '5433'
+      username: postgres
+      password: ''
+      database: many_tables
+    class_name: SqlAlchemyDatasource
+
+
 
 config_variables_file_path: uncommitted/config_variables.yml
 
