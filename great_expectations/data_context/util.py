@@ -224,7 +224,7 @@ def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
         substitution_variable: string to be parsed
 
     Returns:
-        string of variable name e.g. SOME_VAR or None if not parsable
+        string of variable name e.g. SOME_VAR or None if not parsable. If there are multiple substitution variables this currently returns the first e.g. $SOME_$TRING -> $SOME_
     """
     substitution_variable_name = pp.Word(pp.alphanums + "_").setResultsName(
         "substitution_variable_name"
