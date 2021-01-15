@@ -2,7 +2,7 @@ import pytest
 
 from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
-    SimpleCheckpointBuilder,
+    SimpleCheckpointConfigurator,
     CheckpointResult,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -69,7 +69,7 @@ def context_with_data_source_and_empty_suite(
 
 @pytest.fixture
 def simple_checkpoint_defaults(context_with_data_source_and_empty_suite):
-    return SimpleCheckpointBuilder(
+    return SimpleCheckpointConfigurator(
         "foo", context_with_data_source_and_empty_suite
     ).build()
 
@@ -96,7 +96,7 @@ def test_simple_checkpoint_default_properties_with_no_optional_arguments(
     update_data_docs_action,
 ):
     """This demonstrates the simplest possible usage."""
-    checkpoint = SimpleCheckpointBuilder("foo", empty_data_context).build()
+    checkpoint = SimpleCheckpointConfigurator("foo", empty_data_context).build()
     assert isinstance(checkpoint, Checkpoint)
 
     assert checkpoint.name == "foo"
@@ -117,7 +117,7 @@ def test_simple_checkpoint_raises_error_on_invalid_slack_webhook(
     empty_data_context,
 ):
     with pytest.raises(ValueError):
-        SimpleCheckpointBuilder("foo", empty_data_context, slack_webhook="bad").build()
+        SimpleCheckpointConfigurator("foo", empty_data_context, slack_webhook="bad").build()
 
 
 def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_present(
@@ -128,7 +128,7 @@ def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_
     slack_notification_action,
     webhook,
 ):
-    checkpoint = SimpleCheckpointBuilder(
+    checkpoint = SimpleCheckpointConfigurator(
         "foo", empty_data_context, slack_webhook=webhook
     ).build()
     expected = [
@@ -172,14 +172,14 @@ def test_simple_checkpoint_raises_error_on_invalid_notify_on(
 ):
     for bad in [1, "bar", None, []]:
         with pytest.raises(ValueError):
-            SimpleCheckpointBuilder("foo", empty_data_context, notify_on=bad).build()
+            SimpleCheckpointConfigurator("foo", empty_data_context, notify_on=bad).build()
 
 
 def test_simple_checkpoint_raises_error_on_missing_slack_webhook_when_notify_on_is_list(
     empty_data_context, slack_notification_action, webhook
 ):
     with pytest.raises(ValueError):
-        SimpleCheckpointBuilder(
+        SimpleCheckpointConfigurator(
             "foo", empty_data_context, notify_with=["prod", "dev"]
         ).build()
 
@@ -189,7 +189,7 @@ def test_simple_checkpoint_raises_error_on_missing_slack_webhook_when_notify_on_
 ):
     for condition in ["faliure", "success"]:
         with pytest.raises(ValueError):
-            SimpleCheckpointBuilder(
+            SimpleCheckpointConfigurator(
                 "foo", empty_data_context, notify_on=condition
             ).build()
 
@@ -199,7 +199,7 @@ def test_simple_checkpoint_raises_error_on_invalid_notify_with(
 ):
     for bad in [1, "bar", ["local_site", 3]]:
         with pytest.raises(ValueError):
-            SimpleCheckpointBuilder("foo", empty_data_context, notify_with=bad).build()
+            SimpleCheckpointConfigurator("foo", empty_data_context, notify_with=bad).build()
 
 
 def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specified(
@@ -211,7 +211,7 @@ def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specif
     intentionally hiding this from users of SimpleCheckpoint by having a default
     of "all" that sets the configuration appropriately.
     """
-    checkpoint = SimpleCheckpointBuilder(
+    checkpoint = SimpleCheckpointConfigurator(
         "foo", empty_data_context, slack_webhook=webhook, notify_with="all"
     ).build()
 
@@ -228,7 +228,7 @@ def test_simple_checkpoint_has_slack_action_with_notify_adjustments_slack_webhoo
     slack_notification_action,
     webhook,
 ):
-    checkpoint = SimpleCheckpointBuilder(
+    checkpoint = SimpleCheckpointConfigurator(
         "foo",
         empty_data_context,
         slack_webhook=webhook,
@@ -253,7 +253,7 @@ def test_simple_checkpoint_has_no_slack_action_when_no_slack_webhook_is_present(
     store_eval_parameter_action,
     update_data_docs_action,
 ):
-    checkpoint = SimpleCheckpointBuilder("foo", empty_data_context).build()
+    checkpoint = SimpleCheckpointConfigurator("foo", empty_data_context).build()
     assert checkpoint.action_list == [
         store_validation_result_action,
         store_eval_parameter_action,
@@ -267,7 +267,7 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_all_si
     store_eval_parameter_action,
     update_data_docs_action,
 ):
-    checkpoint = SimpleCheckpointBuilder(
+    checkpoint = SimpleCheckpointConfigurator(
         "foo", empty_data_context, site_names="all"
     ).build()
     # This is confusing: the UpdateDataDocsAction default behavior is to update
@@ -285,7 +285,7 @@ def test_simple_checkpoint_raises_errors_on_invalid_site_name_types(
 ):
     for junk_input in [[1, "local"], 1, ["local", None]]:
         with pytest.raises(TypeError):
-            SimpleCheckpointBuilder(
+            SimpleCheckpointConfigurator(
                 "foo", empty_data_context, site_names=junk_input
             ).build()
 
@@ -296,7 +296,7 @@ def test_simple_checkpoint_raises_errors_on_site_name_that_does_not_exist_on_dat
     # assert the fixture is adequate
     assert "prod" not in empty_data_context.get_site_names()
     with pytest.raises(ValueError):
-        SimpleCheckpointBuilder("foo", empty_data_context, site_names=["prod"]).build()
+        SimpleCheckpointConfigurator("foo", empty_data_context, site_names=["prod"]).build()
 
 
 def test_simple_checkpoint_has_update_data_docs_action_that_should_update_selected_sites_when_sites_are_selected(
@@ -308,7 +308,7 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_select
     # assert the fixture is adequate
     assert "local_site" in empty_data_context.get_site_names()
 
-    checkpoint = SimpleCheckpointBuilder(
+    checkpoint = SimpleCheckpointConfigurator(
         "foo", empty_data_context, site_names=["local_site"]
     ).build()
     # This is confusing: the UpdateDataDocsAction default behavior is to update
@@ -330,7 +330,7 @@ def test_simple_checkpoint_has_no_update_data_docs_action_when_site_names_is_non
     # assert the fixture is adequate
     assert "local_site" in empty_data_context.get_site_names()
 
-    checkpoint = SimpleCheckpointBuilder(
+    checkpoint = SimpleCheckpointConfigurator(
         "foo", empty_data_context, site_names=None
     ).build()
     assert checkpoint.action_list == [
@@ -343,7 +343,7 @@ def test_simple_checkpoint_persisted_to_store(
     context_with_data_source_and_empty_suite, webhook, one_validation
 ):
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
-    initial_checkpoint = SimpleCheckpointBuilder(
+    initial_checkpoint = SimpleCheckpointConfigurator(
         "foo",
         context_with_data_source_and_empty_suite,
         site_names=None,
@@ -421,7 +421,7 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
     one_validation,
 ):
     context = context_with_data_source_and_empty_suite
-    checkpoint = SimpleCheckpointBuilder(
+    checkpoint = SimpleCheckpointConfigurator(
         "foo", context_with_data_source_and_empty_suite, slack_webhook=webhook
     ).build()
     context.add_checkpoint(**checkpoint.config.to_json_dict())

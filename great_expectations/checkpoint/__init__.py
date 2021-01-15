@@ -1,1 +1,1 @@
-from .checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpointBuilder
+from .checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpointConfigurator

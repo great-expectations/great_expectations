@@ -499,7 +499,18 @@ class ActionDicts:
         }
 
 
-class SimpleCheckpointBuilder:
+# TODO Options in no order:
+#  1. slim version of config must be a valid Checkpoint config perhaps by:
+#     templates? a folder of yml files?
+#  2. configuration builder as a parameter to Checkpoint()
+#  3. subclass with defaults
+#  - move parameter validation into base Checkpoint?
+#  - other ideas?
+# Key requirement: simpler appearing configuration
+# pattern in data context config with default enums
+#
+
+class SimpleCheckpointConfigurator:
     """
     SimpleCheckpointBuilder is a convenience class to easily configure a simple
     Checkpoint.
