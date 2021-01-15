@@ -110,36 +110,6 @@ config_variables_file_path: {DataContextConfigDefaults.DEFAULT_CONFIG_VARIABLES_
 # used to override and extend Great Expectations.
 plugins_directory: {DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value}
 
-# Validation Operators are customizable workflows that bundle the validation of
-# one or more expectation suites and subsequent actions. The example below
-# stores validations and send a slack notification. To read more about
-# customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html
-validation_operators:
-  action_list_operator:
-    # To learn how to configure sending Slack notifications during evaluation
-    # (and other customizations), read: https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/validation_operators/index.html#great_expectations.validation_operators.ActionListValidationOperator
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-      # - name: send_slack_notification_on_validation_result
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     # put the actual webhook URL in the uncommitted/config_variables.yml file
-      #     slack_webhook: ${{validation_notification_slack_webhook}}
-      #     notify_on: all # possible values: "all", "failure", "success"
-      #     notify_with: # optional list containing the DataDocs sites to include in the notification.
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
-
 stores:
 # Stores are configurable places to store things like Expectations, Validations
 # Data Docs, and more. These are for advanced users only - most users can simply
@@ -147,7 +117,7 @@ stores:
 #
 # Three stores are required: expectations, validations, and
 # evaluation_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, validation_operators, etc.
+# stores can be configured for uses such as data_docs, etc.
   {EXPECTATIONS_STORE_STRING}
   {VALIDATIONS_STORE_STRING}
   evaluation_parameter_store:
@@ -197,54 +167,3 @@ PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED = (
     + PROJECT_OPTIONAL_CONFIG_COMMENT
     + ANONYMIZED_USAGE_STATISTICS_DISABLED
 )
-
-LEGACY_CHECKPOINT_VERSION_012_TEMPLATE = f"""
-# This checkpoint was created by the command `great_expectations checkpoint new`.
-#
-# A checkpoint is a list of one or more batches paired with one or more
-# Expectation Suites and a configurable Validation Operator.
-#
-# It can be run with the `great_expectations checkpoint run` command.
-# You can edit this file to add batches of data and expectation suites.
-#
-# For more details please see
-# https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
-validation_operator_name: action_list_operator
-# Batches are a list of batch_kwargs paired with a list of one or more suite
-# names. A checkpoint can have one or more batches. This makes deploying
-# Great Expectations in your pipelines easy!
-batches:
-  - batch_kwargs:
-      path: /path/to/npi.csv
-      datasource: files_datasource
-      reader_method: read_csv
-    expectation_suite_names:
-      - my_suite
-"""
-
-CHECKPOINT_VERSION_013_TEMPLATE = f"""
-# This checkpoint was created by the command `great_expectations checkpoint new`.
-#
-# A checkpoint is a list of one or more batch requests paired with one or more
-# Expectation Suites and a configurable Validation Operator.
-#
-# It can be run with the `great_expectations checkpoint run` command.
-# You can edit this file to add batch requests and expectation suites.
-#
-# For more details please see
-# https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
-
-name: my_checkpoint
-config_version: 1.0
-validations: []
-action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-  - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-"""

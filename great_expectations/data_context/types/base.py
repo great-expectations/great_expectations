@@ -1,9 +1,10 @@
 import abc
 import enum
+import itertools
 import logging
 import uuid
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -29,7 +30,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 
 logger = logging.getLogger(__name__)
 
-CURRENT_GE_CONFIG_VERSION = 2
+CURRENT_GE_CONFIG_VERSION = 3
+GE_CONFIG_VERSION_WITH_EXPERIMENTAL_CHECKPOINTS = 2
 CURRENT_CHECKPOINT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
@@ -48,7 +50,7 @@ def object_to_yaml_str(obj):
 class BaseYamlConfig(SerializableDictDot):
     _config_schema_class = None
 
-    def __init__(self, commented_map: CommentedMap = None, **kwargs):
+    def __init__(self, commented_map: CommentedMap = None):
         if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
@@ -131,6 +133,7 @@ class AssetConfig(DictDot):
         prefix=None,
         delimiter=None,
         max_keys=None,
+        batch_spec_passthrough=None,
         **kwargs,
     ):
         if name is not None:
@@ -145,6 +148,8 @@ class AssetConfig(DictDot):
             self.delimiter = delimiter
         if max_keys is not None:
             self.max_keys = max_keys
+        if batch_spec_passthrough is not None:
+            self.batch_spec_passthrough = batch_spec_passthrough
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -178,6 +183,7 @@ class AssetConfigSchema(Schema):
     prefix = fields.String(required=False, allow_none=True)
     delimiter = fields.String(required=False, allow_none=True)
     max_keys = fields.Integer(required=False, allow_none=True)
+    batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -850,9 +856,11 @@ class DataContextConfigSchema(Schema):
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
-    checkpoint_store_name = fields.Str()
+    checkpoint_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
-    validation_operators = fields.Dict(keys=fields.Str(), values=fields.Dict())
+    validation_operators = fields.Dict(
+        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
+    )
     stores = fields.Dict(keys=fields.Str(), values=fields.Dict())
     notebooks = fields.Nested(NotebooksConfigSchema, allow_none=True)
     data_docs_sites = fields.Dict(
@@ -865,9 +873,20 @@ class DataContextConfigSchema(Schema):
     # noinspection PyUnusedLocal
     def handle_error(self, exc, data, **kwargs):
         """Log and raise our custom exception when (de)serialization fails."""
-        logger.error(exc.messages)
+        if (
+            exc
+            and exc.messages
+            and isinstance(exc.messages, dict)
+            and all([key is None for key in exc.messages.keys()])
+        ):
+            exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
+
+        message: str = (
+            f"Error while processing DataContextConfig: {' '.join(exc.messages)}"
+        )
+        logger.error(message)
         raise ge_exceptions.InvalidDataContextConfigError(
-            "Error while processing DataContextConfig.", exc
+            message=message,
         )
 
     @validates_schema
@@ -875,36 +894,71 @@ class DataContextConfigSchema(Schema):
         if "config_version" not in data:
             raise ge_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` is missing; please check your config file.",
-                validation_error=ValidationError("no config_version key"),
+                validation_error=ValidationError(message="no config_version key"),
             )
 
         if not isinstance(data["config_version"], (int, float)):
             raise ge_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` must be a number. Please check your config file.",
-                validation_error=ValidationError("config version not a number"),
+                validation_error=ValidationError(message="config version not a number"),
             )
 
         # When migrating from 0.7.x to 0.8.0
-        if data["config_version"] == 0 and (
-            "validations_store" in list(data.keys())
-            or "validations_stores" in list(data.keys())
+        if data["config_version"] == 0 and any(
+            [
+                store_config["class_name"] == "ValidationsStore"
+                for store_config in data["stores"].values()
+            ]
         ):
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
             )
-        elif data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
+
+        if data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to have an invalid config version ({}).\n    The version number must be at least {}. "
                 "Please see the migration guide at https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html".format(
                     data["config_version"], MINIMUM_SUPPORTED_CONFIG_VERSION
                 ),
             )
-        elif data["config_version"] > CURRENT_GE_CONFIG_VERSION:
+
+        if data["config_version"] > CURRENT_GE_CONFIG_VERSION:
             raise ge_exceptions.InvalidDataContextConfigError(
                 "You appear to have an invalid config version ({}).\n    The maximum valid version is {}.".format(
                     data["config_version"], CURRENT_GE_CONFIG_VERSION
                 ),
-                validation_error=ValidationError("config version too high"),
+                validation_error=ValidationError(message="config version too high"),
+            )
+
+        if data["config_version"] < CURRENT_GE_CONFIG_VERSION and (
+            "checkpoint_store_name" in data
+            or any(
+                [
+                    store_config["class_name"] == "CheckpointStore"
+                    for store_config in data["stores"].values()
+                ]
+            )
+        ):
+            raise ge_exceptions.InvalidDataContextConfigError(
+                "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to use the new version number {} before adding a checkpoint store.".format(
+                    data["config_version"], CURRENT_GE_CONFIG_VERSION
+                ),
+                validation_error=ValidationError(
+                    message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to use the new version number {} before adding a checkpoint store.".format(
+                        data["config_version"], CURRENT_GE_CONFIG_VERSION
+                    )
+                ),
+            )
+
+        if (
+            data["config_version"] > GE_CONFIG_VERSION_WITH_EXPERIMENTAL_CHECKPOINTS
+            and "validation_operators" in data
+            and data["validation_operators"] is not None
+        ):
+            logger.warning(
+                "You appear to be using a legacy capability with the latest config version ({}).\n    Your data context with this configuration version uses validation_operators, which have been deprecated.  Please update your configuration to be compatible with the version number {}.".format(
+                    data["config_version"], CURRENT_GE_CONFIG_VERSION
+                ),
             )
 
 
@@ -1003,10 +1057,6 @@ class BaseStoreBackendDefaults(DictDot):
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
-        if validation_operators is None:
-            validation_operators = deepcopy(
-                DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
-            )
         self.validation_operators = validation_operators
         if stores is None:
             stores = deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
@@ -1327,10 +1377,6 @@ class DataContextConfig(BaseYamlConfig):
                 evaluation_parameter_store_name = (
                     store_backend_defaults.evaluation_parameter_store_name
                 )
-            if checkpoint_store_name is None:
-                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
-            if validation_operators is None:
-                validation_operators = store_backend_defaults.validation_operators
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
 
@@ -1341,13 +1387,11 @@ class DataContextConfig(BaseYamlConfig):
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
-        self.checkpoint_store_name = checkpoint_store_name
+        if checkpoint_store_name is not None:
+            self.checkpoint_store_name = checkpoint_store_name
         self.plugins_directory = plugins_directory
-        if not isinstance(validation_operators, dict):
-            raise ValueError(
-                "validation_operators must be configured with a dictionary"
-            )
-        self.validation_operators = validation_operators
+        if validation_operators is not None:
+            self.validation_operators = validation_operators
         self.stores = stores
         self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites
@@ -1710,28 +1754,6 @@ class CheckpointValidationConfig(DictDot):
 
 class CheckpointValidationConfigSchema(Schema):
     pass
-
-
-# TODO: <Alex>Rob</Alex>
-# class SimpleCheckpointConfig(CheckpointConfig):
-#     def __init__(
-#             self,
-#             name: str,
-#             config_version: Optional[int] = None,
-#             template: Optional[str] = None,
-#             module_name: Optional[str] = None,
-#             class_name: Optional[str] = None,
-#             run_name_template: Optional[str] = None,
-#             expectation_suite_name: Optional[str] = None,
-#             batch_request: Optional[BatchRequest] = None,
-#             action_list: Optional[List[dict]] = None,
-#             evaluation_parameters: Optional[dict] = None,
-#             runtime_configuration: Optional[dict] = None,
-#             validations: Optional[List[dict]] = None,
-#             profilers: Optional[List[dict]] = None,
-#             commented_map: Optional[CommentedMap] = None,
-#     ):
-#         pass
 
 
 dataContextConfigSchema = DataContextConfigSchema()

@@ -66,6 +66,7 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
     load_class,
+    parse_substitution_variable,
     substitute_all_config_variables,
     substitute_config_variable,
 )
@@ -296,14 +297,19 @@ class BaseDataContext:
         # the way that execution environments (AKA datasources), validation operators, site builders and other
         # plugins are built.
         self.validation_operators = {}
-        for (
-            validation_operator_name,
-            validation_operator_config,
-        ) in self._project_config.validation_operators.items():
-            self.add_validation_operator(
+        # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
+        if (
+            "validation_operators" in self.get_config().commented_map
+            and self._project_config.validation_operators
+        ):
+            for (
                 validation_operator_name,
                 validation_operator_config,
-            )
+            ) in self._project_config.validation_operators.items():
+                self.add_validation_operator(
+                    validation_operator_name,
+                    validation_operator_config,
+                )
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
@@ -812,6 +818,7 @@ class BaseDataContext:
         self,
         value: Union[str, dict, list],
         dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+        skip_if_substitution_variable: bool = True,
     ) -> Union[str, dict, list]:
         """
         Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
@@ -819,6 +826,7 @@ class BaseDataContext:
         Args:
             value: config variable value
             dollar_sign_escape_string: replaces instances of `$`
+            skip_if_substitution_variable: skip if the value is of the form ${MYVAR} or $MYVAR
 
         Returns:
             input value with all `$` characters replaced with the escape string
@@ -826,29 +834,47 @@ class BaseDataContext:
 
         if isinstance(value, dict) or isinstance(value, OrderedDict):
             return {
-                k: self.escape_all_config_variables(v, dollar_sign_escape_string)
+                k: self.escape_all_config_variables(
+                    v, dollar_sign_escape_string, skip_if_substitution_variable
+                )
                 for k, v in value.items()
             }
 
         elif isinstance(value, list):
             return [
-                self.escape_all_config_variables(v, dollar_sign_escape_string)
+                self.escape_all_config_variables(
+                    v, dollar_sign_escape_string, skip_if_substitution_variable
+                )
                 for v in value
             ]
-        return value.replace("$", dollar_sign_escape_string)
+        if skip_if_substitution_variable:
+            if parse_substitution_variable(value) is None:
+                return value.replace("$", dollar_sign_escape_string)
+            else:
+                return value
+        else:
+            return value.replace("$", dollar_sign_escape_string)
 
-    def save_config_variable(self, config_variable_name, value):
-        """Save config variable value
+    def save_config_variable(
+        self, config_variable_name, value, skip_if_substitution_variable: bool = True
+    ):
+        r"""Save config variable value
+        Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
 
         Args:
             config_variable_name: name of the property
             value: the value to save for the property
+            skip_if_substitution_variable: set to False to escape $ in values in substitution variable form e.g. ${SOME_VAR} -> r"\${SOME_VAR}" or $SOME_VAR -> r"\$SOME_VAR"
 
         Returns:
             None
         """
         config_variables = self._load_config_variables_file()
-        value = self.escape_all_config_variables(value, self.DOLLAR_SIGN_ESCAPE_STRING)
+        value = self.escape_all_config_variables(
+            value,
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+            skip_if_substitution_variable=skip_if_substitution_variable,
+        )
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
@@ -1819,8 +1845,12 @@ class BaseDataContext:
             self.expectations_store_name,
             self.validations_store_name,
             self.evaluation_parameter_store_name,
-            self.checkpoint_store_name,
         ]
+        try:
+            active_store_names.append(self.checkpoint_store_name)
+        except AttributeError:
+            pass
+
         return [
             store for store in self.list_stores() if store["name"] in active_store_names
         ]
@@ -3259,10 +3289,10 @@ class DataContext(BaseDataContext):
         self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
-        project_config_dict = dataContextConfigSchema.dump(project_config)
         super().__init__(project_config, context_root_directory, runtime_environment)
 
         # save project config if data_context_id auto-generated or global config values applied
+        project_config_dict = dataContextConfigSchema.dump(project_config)
         if (
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)

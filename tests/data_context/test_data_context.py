@@ -779,7 +779,7 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
-def test_load_data_context_from_environment_variables(tmp_path_factory):
+def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypatch):
     curdir = os.path.abspath(os.getcwd())
     try:
         project_path = str(tmp_path_factory.mktemp("data_context"))
@@ -796,14 +796,14 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
             ),
             str(os.path.join(context_path, "great_expectations.yml")),
         )
-        os.environ["GE_HOME"] = context_path
+        monkeypatch.setenv("GE_HOME", context_path)
         assert DataContext.find_context_root_dir() == context_path
     except Exception:
         raise
     finally:
         # Make sure we unset the environment variable we're using
-        if "GE_HOME" in os.environ:
-            del os.environ["GE_HOME"]
+        if os.getenv("GE_HOME"):
+            monkeypatch.delenv("GE_HOME")
         os.chdir(curdir)
 
 
@@ -1419,7 +1419,9 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     assert not os.path.isfile(index_path)
 
 
-def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
+def test_load_config_variables_file(
+    basic_data_context_config, tmp_path_factory, monkeypatch
+):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
@@ -1437,11 +1439,11 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
 
     try:
         # We should be able to load different files based on an environment variable
-        os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars["env"] == "dev"
-        os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars["env"] == "prod"
@@ -1449,7 +1451,7 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
         raise
     finally:
         # Make sure we unset the environment variable we're using
-        del os.environ["TEST_CONFIG_FILE_ENV"]
+        monkeypatch.delenv("TEST_CONFIG_FILE_ENV")
 
 
 def test_list_expectation_suite_with_no_suites(titanic_data_context):
