@@ -9,14 +9,20 @@ from great_expectations.render.renderer.suite_scaffold_notebook_renderer import 
 )
 
 
-def test_render_snapshot_test(titanic_data_context):
-    batch_kwargs = titanic_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", "Titanic"
+def test_render_snapshot_test(titanic_data_context_stats_enabled_no_config_store):
+    batch_kwargs = (
+        titanic_data_context_stats_enabled_no_config_store.build_batch_kwargs(
+            "mydatasource", "mygenerator", "Titanic"
+        )
     )
     csv_path = batch_kwargs["path"]
     suite_name = "my_suite"
-    suite = titanic_data_context.create_expectation_suite(suite_name)
-    renderer = SuiteScaffoldNotebookRenderer(titanic_data_context, suite, batch_kwargs)
+    suite = titanic_data_context_stats_enabled_no_config_store.create_expectation_suite(
+        suite_name
+    )
+    renderer = SuiteScaffoldNotebookRenderer(
+        titanic_data_context_stats_enabled_no_config_store, suite, batch_kwargs
+    )
     obs = renderer.render(None)
     assert isinstance(obs, nbformat.NotebookNode)
     ## NOTE!!! - When updating this snapshot be sure to include the dynamic
@@ -109,6 +115,7 @@ contains a list of possible expectations.""",
     del obs["nbformat_minor"]
 
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 

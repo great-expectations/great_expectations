@@ -2612,7 +2612,7 @@ def titanic_data_context(tmp_path_factory):
     data_path = os.path.join(context_path, "../data")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_titanic.yml"
+        __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
     )
     shutil.copy(
         titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
