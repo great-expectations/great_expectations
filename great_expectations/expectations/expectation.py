@@ -893,10 +893,17 @@ class Expectation(ABC, metaclass=MetaExpectation):
         return list(validation_dependencies["metrics"].keys())
 
     def _get_library_metadata(self):
+        library_metadata = {
+            "maturity": None,
+            "package": None,
+            "tags": [],
+            "contributors": [],
+        }
+
         if hasattr(self, "library_metadata"):
-            return self.library_metadata
-        else:
-            return {}
+            library_metadata.update(self.library_metadata)
+        
+        return library_metadata
 
 
 class TableExpectation(Expectation, ABC):
