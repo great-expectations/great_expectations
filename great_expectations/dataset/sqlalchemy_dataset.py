@@ -25,7 +25,6 @@ from .dataset import Dataset
 from .pandas_dataset import PandasDataset
 
 logger = logging.getLogger(__name__)
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 try:
     import sqlalchemy as sa
@@ -236,9 +235,6 @@ class MetaSqlAlchemyDataset(Dataset):
                     ignore_values_condition=ignore_values_condition,
                 )
 
-            print("\n\n\n this is count query")
-            print(count_query)
-            print("\n\n\n")
             count_results: dict = dict(self.engine.execute(count_query).fetchone())
 
             # Handle case of empty table gracefully:
@@ -1789,8 +1785,9 @@ WHERE
         # mysql will not allow the temp_table to be referred to more than once
         # which means the .select_from(self._table) in dup_query will cause an error
         # in the case of mysql, execute the query and pass in the entire list
-        if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
-            dup_query = self.engine.execute(dup_query).fetchall()
+        # <WILL> Commenting out to confirm that the test is failing on Azure
+        #if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
+        #    dup_query = self.engine.execute(dup_query).fetchall()
 
         return sa.column(column).notin_(dup_query)
 
