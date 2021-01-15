@@ -1,7 +1,8 @@
 import json
 import os
 import shutil
-from typing import List
+
+import pandas as pd
 
 import pytest
 from freezegun import freeze_time
