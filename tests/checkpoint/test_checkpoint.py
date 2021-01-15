@@ -921,7 +921,6 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     filesystem_csv_data_context_with_validation_operators.create_expectation_suite(
         "my_suite"
     )
-    print(filesystem_csv_data_context_with_validation_operators.list_datasources())
     # noinspection PyUnusedLocal
     results = checkpoint.run()
 
@@ -988,7 +987,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert len(context.validations_store.list_keys()) == 0
 
     context.create_expectation_suite("my_expectation_suite")
-    print(context.list_datasources())
     # noinspection PyUnusedLocal
     results = checkpoint.run()
 

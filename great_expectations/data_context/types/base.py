@@ -31,6 +31,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 logger = logging.getLogger(__name__)
 
 CURRENT_GE_CONFIG_VERSION = 3
+GE_CONFIG_VERSION_WITH_EXPERIMENTAL_CHECKPOINTS = 2
 CURRENT_CHECKPOINT_CONFIG_VERSION = 1
 MINIMUM_SUPPORTED_CONFIG_VERSION = 2
 DEFAULT_USAGE_STATISTICS_URL = (
@@ -950,7 +951,7 @@ class DataContextConfigSchema(Schema):
             )
 
         if (
-            data["config_version"] >= CURRENT_GE_CONFIG_VERSION
+            data["config_version"] > GE_CONFIG_VERSION_WITH_EXPERIMENTAL_CHECKPOINTS
             and "validation_operators" in data
             and data["validation_operators"] is not None
         ):
