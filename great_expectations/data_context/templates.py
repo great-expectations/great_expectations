@@ -113,7 +113,7 @@ plugins_directory: {DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value}
 # Validation Operators are customizable workflows that bundle the validation of
 # one or more expectation suites and subsequent actions. The example below
 # stores validations and send a slack notification. To read more about
-# customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html
+# customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
 validation_operators:
   action_list_operator:
     # To learn how to configure sending Slack notifications during evaluation
