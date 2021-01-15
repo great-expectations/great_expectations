@@ -192,10 +192,11 @@ def test_basic_checkpoint_config_validation(
 
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    monkeypatch,
 ):
-    os.environ["VAR"] = "test"
-    os.environ["MY_PARAM"] = "1"
-    os.environ["OLD_PARAM"] = "2"
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
 
     checkpoint: Checkpoint
 
@@ -305,13 +306,18 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success
 
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
 
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    monkeypatch,
 ):
-    os.environ["VAR"] = "test"
-    os.environ["MY_PARAM"] = "1"
-    os.environ["OLD_PARAM"] = "2"
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
 
     checkpoint: Checkpoint
 
@@ -430,6 +436,10 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
 
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
 
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
@@ -530,8 +540,9 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    monkeypatch,
 ):
-    os.environ["GE_ENVIRONMENT"] = "my_ge_environment"
+    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
 
     checkpoint: Checkpoint
 
@@ -661,13 +672,16 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
 
+    monkeypatch.delenv("GE_ENVIRONMENT")
+
 
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    monkeypatch,
 ):
-    os.environ["VAR"] = "test"
-    os.environ["MY_PARAM"] = "1"
-    os.environ["OLD_PARAM"] = "2"
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
 
     checkpoint: Checkpoint
     yaml_config: str
@@ -856,13 +870,23 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 4
     assert result.success
 
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
 
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-    filesystem_csv_data_context,
+    filesystem_csv_data_context_with_validation_operators,
 ):
-    base_directory = filesystem_csv_data_context.list_datasources()[0][
-        "batch_kwargs_generators"
-    ]["subdir_reader"]["base_directory"]
+    rad_datasource = list(
+        filter(
+            lambda element: element["name"] == "rad_datasource",
+            filesystem_csv_data_context_with_validation_operators.list_datasources(),
+        )
+    )[0]
+    base_directory = rad_datasource["batch_kwargs_generators"]["subdir_reader"][
+        "base_directory"
+    ]
     batch_kwargs = {
         "path": base_directory + "/f1.csv",
         "datasource": "rad_datasource",
@@ -878,7 +902,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     }
 
     checkpoint = LegacyCheckpoint(
-        data_context=filesystem_csv_data_context,
+        data_context=filesystem_csv_data_context_with_validation_operators,
         **checkpoint_config_dict,
     )
 
@@ -887,14 +911,25 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     ):
         checkpoint.run()
 
-    assert len(filesystem_csv_data_context.validations_store.list_keys()) == 0
+    assert (
+        len(
+            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
+        )
+        == 0
+    )
 
-    filesystem_csv_data_context.create_expectation_suite("my_suite")
-    print(filesystem_csv_data_context.list_datasources())
+    filesystem_csv_data_context_with_validation_operators.create_expectation_suite(
+        "my_suite"
+    )
     # noinspection PyUnusedLocal
     results = checkpoint.run()
 
-    assert len(filesystem_csv_data_context.validations_store.list_keys()) == 1
+    assert (
+        len(
+            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
+        )
+        == 1
+    )
 
 
 # TODO: add more test cases
@@ -952,7 +987,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert len(context.validations_store.list_keys()) == 0
 
     context.create_expectation_suite("my_expectation_suite")
-    print(context.list_datasources())
     # noinspection PyUnusedLocal
     results = checkpoint.run()
 
@@ -961,7 +995,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 def test_newstyle_checkpoint_config_substitution_simple(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    monkeypatch,
 ):
+    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     simplified_checkpoint_config = CheckpointConfig(
@@ -1210,10 +1250,21 @@ def test_newstyle_checkpoint_config_substitution_simple(
         == expected_substituted_checkpoint_config_template_and_runtime_kwargs.to_json_dict()
     )
 
+    monkeypatch.delenv("GE_ENVIRONMENT")
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
 
 def test_newstyle_checkpoint_config_substitution_nested(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    monkeypatch,
 ):
+    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     nested_checkpoint_config = CheckpointConfig(
@@ -1488,3 +1539,8 @@ def test_newstyle_checkpoint_config_substitution_nested(
         substituted_config_template_and_runtime_kwargs.to_json_dict()
         == expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict()
     )
+
+    monkeypatch.delenv("GE_ENVIRONMENT")
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")

@@ -9,7 +9,10 @@ from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import (
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    assert_no_logging_messages_or_tracebacks,
+)
 
 
 @pytest.fixture
@@ -148,7 +151,11 @@ def test_checkpoint_new_raises_error_on_no_suite_found(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -270,7 +277,11 @@ batches:
         in obs_file
     )
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -315,7 +326,11 @@ def test_checkpoint_new_specify_datasource(
     context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -364,7 +379,11 @@ def test_checkpoint_new_works_if_checkpoints_directory_is_missing(
     context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -398,7 +417,10 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -431,7 +453,10 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -496,7 +521,11 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -555,7 +584,11 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -611,7 +644,11 @@ def test_checkpoint_run_on_non_existent_validation_operator(
     assert usage_emits[1][0][0]["success"] is False
     assert usage_emits[2][0][0]["success"] is False
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -649,7 +686,11 @@ def test_checkpoint_run_happy_path_with_successful_validation(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -693,7 +734,11 @@ def test_checkpoint_run_happy_path_with_failed_validation(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -728,7 +773,11 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -775,7 +824,11 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     with open(script_path) as f:
         assert f.read() == "script here"
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -823,7 +876,11 @@ def test_checkpoint_script_happy_path_generates_script(
     )
     assert os.path.isfile(expected_script)
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 def test_checkpoint_script_happy_path_executable_successful_validation(
@@ -850,7 +907,11 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
     script_path = os.path.abspath(
         os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
@@ -872,7 +933,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
 
     assert status == 0
-    assert output == "Validation succeeded!"
+    assert "Validation succeeded!" in output
 
 
 def test_checkpoint_script_happy_path_executable_failed_validation(
@@ -902,9 +963,12 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
         f"checkpoint script my_checkpoint -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
     script_path = os.path.abspath(
         os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
@@ -925,7 +989,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
-    assert output == "Validation failed!"
+    assert "Validation failed!" in output
 
 
 def _write_checkpoint_dict_to_file(bad, checkpoint_file_path):

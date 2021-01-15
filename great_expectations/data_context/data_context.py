@@ -296,14 +296,19 @@ class BaseDataContext:
         # the way that execution environments (AKA datasources), validation operators, site builders and other
         # plugins are built.
         self.validation_operators = {}
-        for (
-            validation_operator_name,
-            validation_operator_config,
-        ) in self._project_config.validation_operators.items():
-            self.add_validation_operator(
+        # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
+        if (
+            "validation_operators" in self.get_config().commented_map
+            and self._project_config.validation_operators
+        ):
+            for (
                 validation_operator_name,
                 validation_operator_config,
-            )
+            ) in self._project_config.validation_operators.items():
+                self.add_validation_operator(
+                    validation_operator_name,
+                    validation_operator_config,
+                )
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
@@ -1819,8 +1824,12 @@ class BaseDataContext:
             self.expectations_store_name,
             self.validations_store_name,
             self.evaluation_parameter_store_name,
-            self.checkpoint_store_name,
         ]
+        try:
+            active_store_names.append(self.checkpoint_store_name)
+        except AttributeError:
+            pass
+
         return [
             store for store in self.list_stores() if store["name"] in active_store_names
         ]
@@ -3259,10 +3268,10 @@ class DataContext(BaseDataContext):
         self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
-        project_config_dict = dataContextConfigSchema.dump(project_config)
         super().__init__(project_config, context_root_directory, runtime_environment)
 
         # save project config if data_context_id auto-generated or global config values applied
+        project_config_dict = dataContextConfigSchema.dump(project_config)
         if (
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)
