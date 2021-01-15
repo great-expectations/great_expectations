@@ -1066,6 +1066,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -1125,6 +1126,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
