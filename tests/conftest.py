@@ -2648,7 +2648,6 @@ def data_context_with_mysql_datasource(tmp_path_factory):
     return ge.data_context.DataContext(context_path)
 
 
-
 @pytest.fixture
 def data_context_with_bad_notebooks(tmp_path_factory):
     """

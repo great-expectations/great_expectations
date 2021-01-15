@@ -1778,15 +1778,15 @@ WHERE
         # Duplicates are found by filtering a group by query
         dup_query = (
             sa.select([sa.column(column)])
-                .select_from(self._table)
-                .group_by(sa.column(column))
-                .having(sa.func.count(sa.column(column)) > 1)
+            .select_from(self._table)
+            .group_by(sa.column(column))
+            .having(sa.func.count(sa.column(column)) > 1)
         )
         # mysql will not allow the temp_table to be referred to more than once
         # which means the .select_from(self._table) in dup_query will cause an error
         # in the case of mysql, execute the query and pass in the entire list
         # <WILL> Commenting out to confirm that the test is failing on Azure
-        #if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
+        # if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
         #    dup_query = self.engine.execute(dup_query).fetchall()
 
         return sa.column(column).notin_(dup_query)
@@ -2164,4 +2164,3 @@ WHERE
                 for like_pattern in like_pattern_list
             ]
         )
-

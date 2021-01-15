@@ -23,14 +23,14 @@
         "mult_dup": "StringType"
       },
       "mssql": {
-        "a": "VARCHAR",
-        "b": "NVARCHAR",
+        "a": "CHAR",
+        "b": "CHAR",
         "c": "INTEGER",
-        "d": "NVARCHAR",
+        "d": "CHAR",
         "n": "INTEGER",
         "unique": "INTEGER",
-        "null": "NVARCHAR",
-        "mult_dup": "VARCHAR"
+        "null": "CHAR",
+        "mult_dup": "CHAR"
       },
       "mysql": {
         "a": "VARCHAR",

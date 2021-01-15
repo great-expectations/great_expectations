@@ -1824,73 +1824,71 @@ data_connectors:
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
+    # def test_get_batch_mysql_database(
+    #     data_context_with_mysql_datasource,
+    # ):
+    #     #import logging
+    #     #logging.basicConfig()
+    #
+    #     context = data_context_with_mysql_datasource
+    #     context.create_expectation_suite(expectation_suite_name="local_test.default")
+    #     expectation_suite = context.get_expectation_suite("local_test.default")
+    #
+    #     expectation_suite.expectations = []
+    #
+    #     batch_kwargs = {
+    #         "data_asset_name": "imdb_100k_main",
+    #         "datasource": "my_mysql_db",
+    #         "limit": 1000,
+    #         "schema": "testdb",
+    #         "table": "imdb_100k_main",
+    #     }
+    #     batch = context.get_batch(batch_kwargs, expectation_suite)
+    #     print(batch)
+    #     #logger.error('error message')
+    #     # batch.expect_column_mean_to_be_between(
+    #     #             column="movieId",
+    #     #             min_value=0
+    #     #         )
+    #     # batch.expect_column_values_to_be_between(
+    #     #     column="movieId",
+    #     #     min_value=0
+    #     # )
+    #     #
+    #     # batch.expect_column_values_to_not_be_null(
+    #     #     column="movieId"
+    #     # )
+    #
+    #     #batch.expect_compound_columns_to_be_unique(column_list=["movieId", "title"])
+    #     #ret = batch.expect_column_values_to_be_unique(column="movieId")
+    #     ret = batch.expect_column_values_to_be_unique(column="movieId")
+    #     #ret = batch.expect_column_values_to_be_unique(column="genres")
+    #     print(ret)
+    #     #batch.expect_column_values_to_not_be_in_set("movieId", ["a", "b"])
 
-# def test_get_batch_mysql_database(
-#     data_context_with_mysql_datasource,
-# ):
-#     #import logging
-#     #logging.basicConfig()
-#
-#     context = data_context_with_mysql_datasource
-#     context.create_expectation_suite(expectation_suite_name="local_test.default")
-#     expectation_suite = context.get_expectation_suite("local_test.default")
-#
-#     expectation_suite.expectations = []
-#
-#     batch_kwargs = {
-#         "data_asset_name": "imdb_100k_main",
-#         "datasource": "my_mysql_db",
-#         "limit": 1000,
-#         "schema": "testdb",
-#         "table": "imdb_100k_main",
-#     }
-#     batch = context.get_batch(batch_kwargs, expectation_suite)
-#     print(batch)
-#     #logger.error('error message')
-#     # batch.expect_column_mean_to_be_between(
-#     #             column="movieId",
-#     #             min_value=0
-#     #         )
-#     # batch.expect_column_values_to_be_between(
-#     #     column="movieId",
-#     #     min_value=0
-#     # )
-#     #
-#     # batch.expect_column_values_to_not_be_null(
-#     #     column="movieId"
-#     # )
-#
-#     #batch.expect_compound_columns_to_be_unique(column_list=["movieId", "title"])
-#     #ret = batch.expect_column_values_to_be_unique(column="movieId")
-#     ret = batch.expect_column_values_to_be_unique(column="movieId")
-#     #ret = batch.expect_column_values_to_be_unique(column="genres")
-#     print(ret)
-#     #batch.expect_column_values_to_not_be_in_set("movieId", ["a", "b"])
-
-
-#
-#
-# def test_get_batch_mysql_database_alrightalright(
-#     data_context_with_mysql_datasource,
-# ):
-#     #import logging
-#     #logging.basicConfig()
-#
-#     context = data_context_with_mysql_datasource
-#     context.create_expectation_suite(expectation_suite_name="local_test.default")
-#     expectation_suite = context.get_expectation_suite("local_test.default")
-#
-#     expectation_suite.expectations = []
-#
-#     batch_kwargs = {
-#         "data_asset_name": "table_1",
-#         "datasource": "my_postgres_db",
-#         "limit": 1000,
-#         "table": "table_name_1",
-#     }
-#     batch = context.get_batch(batch_kwargs, expectation_suite)
-#     print(batch)
-    #logger.error('error message')
+    #
+    #
+    # def test_get_batch_mysql_database_alrightalright(
+    #     data_context_with_mysql_datasource,
+    # ):
+    #     #import logging
+    #     #logging.basicConfig()
+    #
+    #     context = data_context_with_mysql_datasource
+    #     context.create_expectation_suite(expectation_suite_name="local_test.default")
+    #     expectation_suite = context.get_expectation_suite("local_test.default")
+    #
+    #     expectation_suite.expectations = []
+    #
+    #     batch_kwargs = {
+    #         "data_asset_name": "table_1",
+    #         "datasource": "my_postgres_db",
+    #         "limit": 1000,
+    #         "table": "table_name_1",
+    #     }
+    #     batch = context.get_batch(batch_kwargs, expectation_suite)
+    #     print(batch)
+    # logger.error('error message')
     # batch.expect_column_mean_to_be_between(
     #             column="movieId",
     #             min_value=0
@@ -1904,8 +1902,6 @@ data_connectors:
     #     column="movieId"
     # )
 
-    #batch.expect_compound_columns_to_be_unique(column_list=["movieId"])
+    # batch.expect_compound_columns_to_be_unique(column_list=["movieId"])
     batch.expect_column_values_to_be_unique(column="index")
-    #batch.expect_column_values_to_not_be_in_set("movieId", ["a", "b"])
-
-
+    # batch.expect_column_values_to_not_be_in_set("movieId", ["a", "b"])
