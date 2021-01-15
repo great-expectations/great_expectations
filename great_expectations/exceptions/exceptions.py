@@ -1,4 +1,5 @@
 import importlib
+import itertools
 import json
 
 from great_expectations.marshmallow__shade import ValidationError
@@ -11,9 +12,16 @@ class GreatExpectationsError(Exception):
 
 
 class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
-    def __init__(self, message, validation_error):
+    def __init__(self, message, validation_error=None):
         self.message = message
-        self.messages = validation_error.messages
+        self.messages = None
+        if validation_error is not None:
+            self.messages = validation_error.messages
+
+    def __str__(self) -> str:
+        if self.message is None:
+            return self.messages
+        return self.message
 
 
 class SuiteEditNotebookCustomTemplateModuleNotFoundError(ModuleNotFoundError):
@@ -59,7 +67,17 @@ class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
 
 
 class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
-    def __init__(self, message, validation_error, field_name=None):
+    def __init__(self, message, validation_error=None, field_name=None):
+        if validation_error is not None:
+            if (
+                validation_error
+                and validation_error.messages
+                and isinstance(validation_error.messages, dict)
+                and all([key is None for key in validation_error.messages.keys()])
+            ):
+                validation_error.messages = list(
+                    itertools.chain.from_iterable(validation_error.messages.values())
+                )
         super().__init__(message=message, validation_error=validation_error)
         self.field_name = field_name
 

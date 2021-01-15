@@ -93,9 +93,9 @@ def assert_how_to_buttons(
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
 def test_configuration_driven_site_builder(
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    context = site_builder_data_context_with_html_store_titanic_random
+    context = site_builder_data_context_v013_with_html_store_titanic_random
 
     context.add_validation_operator(
         "validate_and_store",
@@ -244,7 +244,7 @@ def test_configuration_driven_site_builder(
         shutil.rmtree("./tests/render/output/documentation")
     shutil.copytree(
         os.path.join(
-            site_builder_data_context_with_html_store_titanic_random.root_directory,
+            site_builder_data_context_v013_with_html_store_titanic_random.root_directory,
             "uncommitted/data_docs/",
         ),
         "./tests/render/output/documentation",
@@ -346,7 +346,7 @@ def test_configuration_driven_site_builder(
     assert len(obs) == 0
 
     # restore site
-    context = site_builder_data_context_with_html_store_titanic_random
+    context = site_builder_data_context_v013_with_html_store_titanic_random
     site_builder = SiteBuilder(
         data_context=context,
         runtime_environment={"root_directory": context.root_directory},
