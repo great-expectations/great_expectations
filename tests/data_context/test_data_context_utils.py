@@ -247,3 +247,5 @@ def test_parse_substitution_variable():
     assert parse_substitution_variable("$some_var") == "some_var"
     assert parse_substitution_variable("some_string") is None
     assert parse_substitution_variable("some_$tring") is None
+    assert parse_substitution_variable("${SOME_$TRING}") is None
+    assert parse_substitution_variable("$SOME_$TRING") == "SOME_"
