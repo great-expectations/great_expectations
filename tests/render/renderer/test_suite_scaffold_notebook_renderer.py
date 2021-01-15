@@ -109,6 +109,7 @@ contains a list of possible expectations.""",
     del obs["nbformat_minor"]
 
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
