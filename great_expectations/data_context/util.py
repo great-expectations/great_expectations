@@ -5,7 +5,10 @@ import os
 import re
 import warnings
 from collections import OrderedDict
+from typing import Optional
 from urllib.parse import urlparse
+
+import pyparsing as pp
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.types.base import (
@@ -250,6 +253,28 @@ def file_relative_path(dunderfile, relative_path):
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
     return os.path.join(os.path.dirname(dunderfile), relative_path)
+
+
+def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
+    """
+    Parse and check whether the string contains a substitution variable of the case insensitive form ${SOME_VAR} or $SOME_VAR
+    Args:
+        substitution_variable: string to be parsed
+
+    Returns:
+        string of variable name e.g. SOME_VAR or None if not parsable. If there are multiple substitution variables this currently returns the first e.g. $SOME_$TRING -> $SOME_
+    """
+    substitution_variable_name = pp.Word(pp.alphanums + "_").setResultsName(
+        "substitution_variable_name"
+    )
+    curly_brace_parser = "${" + substitution_variable_name + "}"
+    non_curly_brace_parser = "$" + substitution_variable_name
+    both_parser = curly_brace_parser | non_curly_brace_parser
+    try:
+        parsed_substitution_variable = both_parser.parseString(substitution_variable)
+        return parsed_substitution_variable.substitution_variable_name
+    except pp.ParseException:
+        return None
 
 
 class PasswordMasker:
