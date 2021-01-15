@@ -23,16 +23,6 @@
         "mult_dup": "StringType"
       },
       "mssql": {
-        "a": "CHAR",
-        "b": "CHAR",
-        "c": "INTEGER",
-        "d": "CHAR",
-        "n": "INTEGER",
-        "unique": "INTEGER",
-        "null": "CHAR",
-        "mult_dup": "CHAR"
-      },
-      "mysql": {
         "a": "VARCHAR",
         "b": "NVARCHAR",
         "c": "INTEGER",
@@ -41,6 +31,16 @@
         "unique": "INTEGER",
         "null": "NVARCHAR",
         "mult_dup": "VARCHAR"
+      },
+      "mysql": {
+        "a": "CHAR",
+        "b": "CHAR",
+        "c": "INTEGER",
+        "d": "CHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "CHAR",
+        "mult_dup": "CHAR"
       }
     },
     "tests" : [
