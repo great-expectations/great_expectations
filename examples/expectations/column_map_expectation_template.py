@@ -1,5 +1,3 @@
-"""
-
 import json
 
 #!!! This giant block of imports should be something simpler, such as:
@@ -34,22 +32,24 @@ from great_expectations.validator.validator import Validator
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
-    
+
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.equal_three"
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
+
+
 #     @column_condition_partial(engine=PandasExecutionEngine)
 #     def _pandas(cls, column, **kwargs):
 #         return column == 3
 
-    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
+# This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
 #     def _sqlalchemy(cls, column, _dialect, **kwargs):
 #         return column.in_([3])
 
-    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
+# This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
 #     @column_condition_partial(engine=SparkDFExecutionEngine)
 #     def _spark(cls, column, **kwargs):
 #         return column.isin([3])
@@ -59,42 +59,41 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
-# These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-# You can learn more in {some doc}
-# examples = [{
-#     "data": {
-#         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-#     },
-#     "tests": [
-#         {
-#             "title": "positive_test_with_mostly",
-#             "exact_match_out": False,
-#             "in": {"column": "mostly_threes", "mostly": 0.6},
-#             "out": {
-#                 "success": True,
-#                 "unexpected_index_list": [6, 7],
-#                 "unexpected_list": [2, -1],
-#             },
-#         }
-#     ],
-# }]
+    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
+    # You can learn more in {some doc}
+    # examples = [{
+    #     "data": {
+    #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
+    #     },
+    #     "tests": [
+    #         {
+    #             "title": "positive_test_with_mostly",
+    #             "exact_match_out": False,
+    #             "in": {"column": "mostly_threes", "mostly": 0.6},
+    #             "out": {
+    #                 "success": True,
+    #                 "unexpected_index_list": [6, 7],
+    #                 "unexpected_list": [2, -1],
+    #             },
+    #         }
+    #     ],
+    # }]
 
-
-# This dictionary contains metadata for display in the public gallery
-library_metadata = {
-    "maturity": "experimental", # "experimental", "beta", or "production"
-    "tags": [  # Tags for this Expectation in the gallery
-#         "experimental"
-    ],
-    "contributors": [ # Github handles for all contributors to this Expectation.
-#         "@your_name_here", # Don't forget to add your github handle here!
-    ],
-    "package": "experimental_expectations",
-}
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "tags": [  # Tags for this Expectation in the gallery
+            #         "experimental"
+        ],
+        "contributors": [  # Github handles for all contributors to this Expectation.
+            #         "@your_name_here", # Don't forget to add your github handle here!
+        ],
+        "package": "experimental_expectations",
+    }
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
     map_metric = "column_values.equal_three"
-    
+
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
     success_keys = ("mostly",)
@@ -105,6 +104,8 @@ library_metadata = {
     # This method defines a question Renderer
     # For more info on Renderers, see {some doc}
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
+
+
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
@@ -115,8 +116,8 @@ library_metadata = {
 
 #         return f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
 
-    # This method defines an answer Renderer
-    #!!! This example renderer should render RenderedStringTemplateContent, not just a string
+# This method defines an answer Renderer
+#!!! This example renderer should render RenderedStringTemplateContent, not just a string
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
@@ -130,7 +131,7 @@ library_metadata = {
 #         else:
 #             return f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
 
-    # This method defines a prescriptive Renderer
+# This method defines a prescriptive Renderer
 #     @classmethod
 #     @renderer(renderer_type="renderer.prescriptive")
 #     @render_evaluation_parameter_string
