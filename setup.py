@@ -34,7 +34,7 @@ config = {
         "s3": ["boto3>=1.14"],
         "snowflake": ["snowflake-sqlalchemy>=1.2"],
     },
-    "packages": find_packages(exclude=["docs*", "tests*", "examples*"]),
+    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
