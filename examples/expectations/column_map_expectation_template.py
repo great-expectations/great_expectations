@@ -1,15 +1,4 @@
 """
-### TODO:
-* Create a set of shared imports to support something like: `from great_expectations.helpers.expectation_creation import *`
-* When a metric is overwritten, remove methods that no longer exist from the registry.
-* Create a utility to search for duplicate Metrics, Expectations, Renderers, etc.
-* Run tests on examples included in modules as part of self_check, also as part of the unit test suite.
-* Move `examples` outside the Expectation class declaration itself
-    * Add an Optional `examples` parameter in `Expectation.self_check`. If it's None, the Expectation will attempt to introspect the module that contains it to find examples.
-    * Move `examples` out of the class in `expect_column_values_to_match_regex`.
-* Make sure that `default_kwarg_values` are inherited properly from parent classes.
-* Create an example question renderer that produces 
-"""
 
 import json
 
