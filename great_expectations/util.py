@@ -29,6 +29,7 @@ from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
+from great_expectations.expectations.registry import _registered_expectations
 
 try:
     # This library moved in python 3.8
@@ -865,3 +866,14 @@ def get_context():
     from great_expectations.data_context.data_context import DataContext
 
     return DataContext()
+
+
+def generate_library_json_from_registered_expectations():
+    """Generate the JSON object used to populate the public gallery"""
+    library_json = {}
+
+    for expectation_name, expectation in _registered_expectations.items():
+        report_object = expectation().self_check()
+        library_json[expectation_name] = report_object
+
+    return library_json
