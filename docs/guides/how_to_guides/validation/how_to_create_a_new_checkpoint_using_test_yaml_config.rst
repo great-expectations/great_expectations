@@ -125,13 +125,13 @@ Steps
 
     .. code-block:: python
 
-        validation_results: List[ValidationOperatorResult] = context.run_checkpoint(
+        checkpoint_run_result: CheckpointResult = context.run_checkpoint(
             checkpoint_name="my_fancy_checkpoint",
         )
 
    Before running a Checkpoint, make sure that all classes referred to in the configuration exist.  The same applies to the expectation suites.
 
-   When `run_checkpoint` returns, the elements of the `validation_results` list can then be checked for the value of the `success` field and other information associated with running the specified actions.
+   When `run_checkpoint` returns, the `checkpoint_run_result` CheckpointResult can then be checked for the value of the `success` field (all validations passed) and other information associated with running the specified actions.
 
 #. **Check your stored Checkpoint config.**
     If the Store Backend of your Checkpoint Store is on the local filesystem, you can navigate to the `base_directory` for (configured in `great_expectations.yml`) and find the configuration files corresponding to the Checkpoints you created.
@@ -265,9 +265,9 @@ Steps
 
    .. code-block:: python
 
-        validation_results: List[ValidationOperatorResult]
+        checkpoint_run_result: CheckpointResult
 
-        validation_results = data_context.run_checkpoint(
+        checkpoint_run_result = data_context.run_checkpoint(
             checkpoint_name="my_base_checkpoint",
             validations=[
                 {
@@ -324,11 +324,11 @@ Steps
 
     .. code-block:: python
 
-        validation_results = context.run_checkpoint(
+        checkpoint_run_result = context.run_checkpoint(
             checkpoint_name="my_fancy_checkpoint",
         )
 
-    The `validation_results` in both cases (the parameterized `run_checkpoint` method and the configuration that incorporates another configuration as a template) are the same.
+    The `checkpoint_run_result` in both cases (the parameterized `run_checkpoint` method and the configuration that incorporates another configuration as a template) are the same.
 
 
     The final example presents a Checkpoint configuration that is suitable for the use in a pipeline managed by Airflow.
@@ -362,7 +362,7 @@ Steps
 
    .. code-block:: python
 
-        validation_results: List[ValidationOperatorResult] = data_context.run_checkpoint(
+        checkpoint_run_result: CheckpointResult = data_context.run_checkpoint(
             checkpoint_name="airflow_checkpoint",
             batch_request={
                 "batch_data": my_data_frame,

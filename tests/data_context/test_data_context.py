@@ -1,8 +1,8 @@
 import json
 import os
 import shutil
-from typing import List
 
+import pandas as pd
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
@@ -35,6 +35,7 @@ from great_expectations.util import gen_directory_tree_str
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+from tests.datasource.conftest import postgresql_sqlalchemy_datasource
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -779,7 +780,7 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
-def test_load_data_context_from_environment_variables(tmp_path_factory):
+def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypatch):
     curdir = os.path.abspath(os.getcwd())
     try:
         project_path = str(tmp_path_factory.mktemp("data_context"))
@@ -796,14 +797,14 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
             ),
             str(os.path.join(context_path, "great_expectations.yml")),
         )
-        os.environ["GE_HOME"] = context_path
+        monkeypatch.setenv("GE_HOME", context_path)
         assert DataContext.find_context_root_dir() == context_path
     except Exception:
         raise
     finally:
         # Make sure we unset the environment variable we're using
-        if "GE_HOME" in os.environ:
-            del os.environ["GE_HOME"]
+        if os.getenv("GE_HOME"):
+            monkeypatch.delenv("GE_HOME")
         os.chdir(curdir)
 
 
@@ -1418,7 +1419,6 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     assert os.path.isdir(os.path.join(data_docs_dir, "static"))
     assert not os.path.isfile(index_path)
 
-
 def test_get_site_names(
     tmp_path_factory, empty_data_context, basic_data_context_config
 ):
@@ -1428,8 +1428,9 @@ def test_get_site_names(
     context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
     assert context.get_site_names() == []
 
-
-def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
+def test_load_config_variables_file(
+    basic_data_context_config, tmp_path_factory, monkeypatch
+):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
@@ -1447,11 +1448,11 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
 
     try:
         # We should be able to load different files based on an environment variable
-        os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars["env"] == "dev"
-        os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars["env"] == "prod"
@@ -1459,7 +1460,7 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
         raise
     finally:
         # Make sure we unset the environment variable we're using
-        del os.environ["TEST_CONFIG_FILE_ENV"]
+        monkeypatch.delenv("TEST_CONFIG_FILE_ENV")
 
 
 def test_list_expectation_suite_with_no_suites(titanic_data_context):
@@ -1916,3 +1917,34 @@ data_connectors:
         create_expectation_suite_with_name="A_expectation_suite",
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
+
+
+def test_get_batch_multiple_datasources_do_not_scan_all(
+    data_context_with_bad_datasource,
+):
+    """
+    What does this test and why?
+
+    A DataContext can have "stale" datasources in its configuration (ie. connections to DBs that are now offline).
+    If we configure a new datasource and are only using it (like the PandasDatasource below), then we don't
+    want to be dependant on all the "stale" datasources working too.
+
+    data_context_with_bad_datasource is a fixture that contains a configuration for an invalid datasource
+    (with "fake_port" and "fake_host")
+
+    In the test we configure a new expectation_suite, a local pandas_datasource and retrieve a single batch.
+
+    This tests a fix for the following issue:
+    https://github.com/great-expectations/great_expectations/issues/2241
+    """
+
+    context = data_context_with_bad_datasource
+    context.create_expectation_suite(expectation_suite_name="local_test.default")
+    expectation_suite = context.get_expectation_suite("local_test.default")
+    context.add_datasource("pandas_datasource", class_name="PandasDatasource")
+    df = pd.DataFrame({"a": [1, 2, 3]})
+    batch = context.get_batch(
+        batch_kwargs={"datasource": "pandas_datasource", "dataset": df},
+        expectation_suite_name=expectation_suite,
+    )
+    assert len(batch) == 3
