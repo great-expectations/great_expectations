@@ -18,7 +18,11 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from ..data_context.store.metric_store import MetricStore
 from ..data_context.types.resource_identifiers import ValidationResultIdentifier
 from ..exceptions import ClassInstantiationError, DataContextError
-from .util import send_opsgenie_alert, send_slack_notification
+from .util import (
+    send_microsoft_teams_notifications,
+    send_opsgenie_alert,
+    send_slack_notification,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +91,7 @@ class SlackNotificationAction(ValidationAction):
         action:
           class_name: StoreValidationResultAction
           # put the actual webhook URL in the uncommitted/config_variables.yml file
+          # or pass in as environment variable
           slack_webhook: ${validation_notification_slack_webhook}
           notify_on: all # possible values: "all", "failure", "success"
           notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
@@ -281,6 +286,119 @@ class PagerdutyAlertAction(ValidationAction):
         return {"pagerduty_alert_result": "none sent"}
 
 
+class MicrosoftTeamsNotificationAction(ValidationAction):
+    """
+    MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given webhook.
+
+    **Configuration**
+
+    .. code-block:: yaml
+
+        - name: send_microsoft_teams_notification_on_validation_result
+        action:
+          class_name: MicrosoftTeamsNotificationAction
+          # put the actual webhook URL in the uncommitted/config_variables.yml file
+          # or pass in as environment variable
+          microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
+          notify_on: all # possible values: "all", "failure", "success"
+          renderer:
+            # the class that implements the message to be sent
+            # this is the default implementation, but you can
+            # implement a custom one
+            module_name: great_expectations.render.renderer.microsoft_teams_renderer
+            class_name: MicrosoftTeamsRenderer
+
+    """
+
+    def __init__(
+        self,
+        data_context,
+        renderer,
+        microsoft_teams_webhook,
+        notify_on="all",
+    ):
+        """Construct a MicrosoftTeamsNotificationAction
+
+        Args:
+            data_context:
+            renderer: dictionary specifying the renderer used to generate a query consumable by teams API, for example:
+                {
+                   "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+                   "class_name": "MicrosoftTeamsRenderer",
+               }
+            microsoft_teams_webhook: incoming Microsoft Teams webhook to which to send notifications
+            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
+            payload: *Optional* payload from other ValidationActions
+        """
+        super().__init__(data_context)
+        self.renderer = instantiate_class_from_config(
+            config=renderer,
+            runtime_environment={},
+            config_defaults={},
+        )
+        module_name = renderer["module_name"]
+        if not self.renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=renderer["class_name"],
+            )
+        self.teams_webhook = microsoft_teams_webhook
+        assert (
+            microsoft_teams_webhook
+        ), "No Microsoft teams webhook found in action config."
+        self.notify_on = notify_on
+
+    def _run(
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset=None,
+        payload=None,
+    ):
+        logger.debug("MicrosoftTeamsNotificationAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
+        validation_success = validation_result_suite.success
+        data_docs_pages = None
+
+        if payload:
+            # process the payload
+            for action_names in payload.keys():
+                if payload[action_names]["class"] == "UpdateDataDocsAction":
+                    data_docs_pages = payload[action_names]
+
+        if (
+            self.notify_on == "all"
+            or self.notify_on == "success"
+            and validation_success
+            or self.notify_on == "failure"
+            and not validation_success
+        ):
+            query = self.renderer.render(
+                validation_result_suite,
+                validation_result_suite_identifier,
+                data_docs_pages,
+            )
+            # this will actually sent the POST request to the Microsoft Teams webapp server
+            teams_notif_result = send_microsoft_teams_notifications(
+                query, microsoft_teams_webhook=self.teams_webhook
+            )
+            return {"microsoft_teams_notification_result": teams_notif_result}
+        else:
+            return {"microsoft_teams_notification_result": None}
+
+
 class OpsgenieAlertAction(ValidationAction):
     """
     OpsgenieAlertAction creates and sends an Opsgenie alert
@@ -293,6 +411,7 @@ class OpsgenieAlertAction(ValidationAction):
         action:
           class_name: OpsgenieAlertAction
           # put the actual webhook URL in the uncommitted/config_variables.yml file
+          # or pass in as environment variable
           api_key: ${opsgenie_api_key} # Opsgenie API key
           region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise leave empty
           priority: specify the priority of the alert (P1 - P5) defaults to P3
@@ -653,7 +772,7 @@ class UpdateDataDocsAction(ValidationAction):
             )
 
         # build_data_docs will return the index page for the validation results, but we want to return the url for the valiation result using the code below
-        data_docs_index_pages = self.data_context.build_data_docs(
+        self.data_context.build_data_docs(
             site_names=self._site_names,
             resource_identifiers=[
                 validation_result_suite_identifier,
