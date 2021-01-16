@@ -251,7 +251,7 @@ stages:
               echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" >> mysql_setup_script.sql
               echo "USE test_ci;" >> mysql_setup_script.sql
               echo "CREATE TABLE titanic (rowname VARCHAR(50) PRIMARY KEY, name VARCHAR(100), pclass VARCHAR(50), age VARCHAR(10), sex VARCHAR(10), survived INT, sexcode INT);" >> mysql_setup_script.sql
-              echo "load data infile `/etc/mysql/data/Titanic.csv` into table titanic fields terminated by `,` optionally enclosed by `"` lines terminated by `\n` ignore 1 lines;" >> mysql_setup_script.sql
+              echo "load data infile '/etc/mysql/data/Titanic.csv' into table titanic fields terminated by ',' optionally enclosed by '"' lines terminated by '\n' ignore 1 lines;" >> mysql_setup_script.sql
               mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
             displayName: 'Configure mysql'
 
