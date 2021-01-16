@@ -12,6 +12,8 @@ class ExpectNelsonsColumnToExist(TableExpectation):
     <great_expectations.validator.validator.Validator.expectation>`. It is designed
     to show how it is possible to access experimental Expectations.
 
+    This expectation can serve as a template.
+
     Returns:
         ExpectationSuiteValidationResult
 
