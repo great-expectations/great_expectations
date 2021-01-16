@@ -79,7 +79,7 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
                         "unexpected_index_list": [6, 7],
                         "unexpected_list": [2, -1],
                     },
-                }
+                },
             ],
         }
     ]
@@ -199,9 +199,10 @@ def test_expectation_self_check():
             "maturity": None,
             "package": None,
             "tags": [],
-            "contributors": []            
+            "contributors": [],
         },
     }
+
 
 def test_include_in_gallery_flag():
 
@@ -221,6 +222,7 @@ def test_include_in_gallery_flag():
             "unexpected_list": [2, -1],
         },
     }
+
 
 def test_all_expectation_self_checks():
     library_json = {}

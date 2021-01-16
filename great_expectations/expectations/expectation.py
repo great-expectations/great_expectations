@@ -761,7 +761,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
         If no examples exist, then return []
         """
         try:
-            all_examples = self.examples        
+            all_examples = self.examples
         except AttributeError:
             return []
 
@@ -771,7 +771,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
             included_tests = []
             for test in example["tests"]:
-                if ("include_in_gallery" in test) and (test["include_in_gallery"] == True):
+                if ("include_in_gallery" in test) and (
+                    test["include_in_gallery"] == True
+                ):
                     included_tests.append(test)
 
             if len(included_tests) > 0:
@@ -921,7 +923,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
         if hasattr(self, "library_metadata"):
             library_metadata.update(self.library_metadata)
-        
+
         return library_metadata
 
 
