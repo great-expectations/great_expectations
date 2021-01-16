@@ -222,6 +222,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                         "unexpected_index_list": [4],
                         "unexpected_list": ["bee"],
                     },
+                    "include_in_gallery": True,
                     "suppress_test_for": ["sqlite", "mssql"],
                 },
                 {
@@ -233,6 +234,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                         "unexpected_index_list": [4],
                         "unexpected_list": ["bee"],
                     },
+                    "include_in_gallery": True,
                     "suppress_test_for": ["sqlite", "mssql"],
                 },
             ],

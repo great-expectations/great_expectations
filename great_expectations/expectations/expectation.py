@@ -755,12 +755,31 @@ class Expectation(ABC, metaclass=MetaExpectation):
         return report_obj
 
     def _get_examples(self) -> List[Dict]:
-        try:
-            examples = self.examples
-        except:
-            examples = []
+        """Get a list of examples from class metadata.
 
-        return examples
+        Only include test examples where `include_in_gallery` is true.
+        If no examples exist, then return []
+        """
+        try:
+            all_examples = self.examples        
+        except AttributeError:
+            return []
+
+        included_examples = []
+        for example in all_examples:
+            # print(example)
+
+            included_tests = []
+            for test in example["tests"]:
+                if ("include_in_gallery" in test) and (test["include_in_gallery"] == True):
+                    included_tests.append(test)
+
+            if len(included_tests) > 0:
+                copied_example = deepcopy(example)
+                copied_example["tests"] = included_tests
+                included_examples.append(copied_example)
+
+        return included_examples
 
     def _get_docstring_and_short_description(self) -> Tuple[str, str]:
         if self.__doc__ is not None:
