@@ -956,7 +956,7 @@ class DataContextConfigSchema(Schema):
             and data["validation_operators"] is not None
         ):
             logger.warning(
-                "You appear to be using a legacy capability with the latest config version ({}).\n    Your data context with this configuration version uses validation_operators, which have been deprecated.  Please update your configuration to be compatible with the version number {}.".format(
+                "You appear to be using a legacy capability with the latest config version ({}).\n    Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number {}.".format(
                     data["config_version"], CURRENT_GE_CONFIG_VERSION
                 ),
             )
@@ -965,12 +965,29 @@ class DataContextConfigSchema(Schema):
 class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VERSION = CURRENT_GE_CONFIG_VERSION
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
+    EXPECTATIONS_BASE_DIRECTORY = "expectations"
+    DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
+        f"{EXPECTATIONS_BASE_DIRECTORY}/"
+    )
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
+    VALIDATIONS_BASE_DIRECTORY = "validations"
+    DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
+        f"uncommitted/{VALIDATIONS_BASE_DIRECTORY}/"
+    )
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
+    DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
+        "evaluation_parameters/"
+    )
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
+    CHECKPOINTS_BASE_DIRECTORY = "checkpoints"
+    DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
+        f"{CHECKPOINTS_BASE_DIRECTORY}/"
+    )
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
-    DEFAULT_PLUGINS_DIRECTORY = "plugins/"
+    PLUGINS_BASE_DIRECTORY = "plugins"
+    DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
+    NOTEBOOKS_BASE_DIRECTORY = "notebooks"
     DEFAULT_VALIDATION_OPERATORS = {
         "action_list_operator": {
             "class_name": "ActionListValidationOperator",
@@ -995,14 +1012,14 @@ class DataContextConfigDefaults(enum.Enum):
             "class_name": "ExpectationsStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "expectations/",
+                "base_directory": DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
         DEFAULT_VALIDATIONS_STORE_NAME: {
             "class_name": "ValidationsStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/validations/",
+                "base_directory": DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
         DEFAULT_EVALUATION_PARAMETER_STORE_NAME: {
@@ -1012,7 +1029,7 @@ class DataContextConfigDefaults(enum.Enum):
             "class_name": "CheckpointStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "checkpoints/",
+                "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
     }

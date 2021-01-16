@@ -102,7 +102,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 self._process_metrics_store_for_checklist(store_name, store)
 
         sites = (
-            self.data_context._project_config_with_variables_substituted.data_docs_sites
+            self.data_context.project_config_with_variables_substituted.data_docs_sites
         )
 
         if sites:

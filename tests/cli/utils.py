@@ -3,7 +3,7 @@ import traceback
 from _pytest.logging import LogCaptureFixture
 from click.testing import Result
 
-VALIDATION_OPERATORS_DEPRECATION_MESSAGE: str = "Your data context with this configuration version uses validation_operators, which have been deprecated."
+VALIDATION_OPERATORS_DEPRECATION_MESSAGE: str = "Your data context with this configuration version uses validation_operators, which are being deprecated."
 
 
 def assert_dict_key_and_val_in_stdout(dict_, stdout):

@@ -22,6 +22,7 @@ from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
+    DataContextConfigDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -1549,7 +1550,9 @@ def test_list_checkpoints_on_context_with_twwo_checkpoints(
 ):
     context = empty_context_with_checkpoint
     checkpoints_file = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_checkpoint.yml",
     )
     shutil.copy(
         checkpoints_file, os.path.join(os.path.dirname(checkpoints_file), "another.yml")
@@ -1564,7 +1567,9 @@ def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoi
 
     for extension in [".json", ".txt", "", ".py"]:
         path = os.path.join(
-            context.root_directory, context.CHECKPOINTS_DIR, f"foo{extension}"
+            context.root_directory,
+            DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+            f"foo{extension}",
         )
         with open(path, "w") as f:
             f.write("foo: bar")
@@ -1586,7 +1591,9 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
 ):
     context = empty_context_with_checkpoint
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_checkpoint.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         f.write("# Not a checkpoint file")
@@ -1634,7 +1641,9 @@ def test_get_checkpoint_default_validation_operator(empty_data_context):
 
     checkpoint = {"batches": []}
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
@@ -1660,7 +1669,9 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
         "validation_operator_name": "action_list_operator",
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
@@ -1679,7 +1690,9 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         "batches": {"stuff": 33},
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
@@ -1704,7 +1717,9 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
         ],
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
@@ -1723,7 +1738,9 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         "batches": [{"expectation_suite_names": ["foo"]}],
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
