@@ -29,9 +29,7 @@ from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-)
+from great_expectations.expectations.registry import _registered_expectations
 
 try:
     # This library moved in python 3.8
