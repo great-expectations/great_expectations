@@ -2,8 +2,10 @@ version: '3.2'
 services:
   mysql_db:
     image: mysql:8.0.20
+    command: --secure-file-priv=/etc/mysql/data
     volumes:
         - ./conf.d:/etc/mysql/conf.d
+        - ./data:/etc/mysql/data
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
       MYSQL_DATABASE: test_ci
@@ -11,7 +13,6 @@ services:
       - dbnet
     ports:
       - "3306:3306"
-
 networks:
   dbnet:
     driver: bridge
