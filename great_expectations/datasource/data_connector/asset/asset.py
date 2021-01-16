@@ -21,6 +21,7 @@ class Asset:
         prefix: str = None,
         delimiter: str = None,
         max_keys: int = None,
+        batch_spec_passthrough: dict = None,
     ):
         self._name = name
         self._base_directory = base_directory
@@ -34,6 +35,7 @@ class Asset:
         self._prefix = prefix
         self._delimiter = delimiter
         self._max_keys = max_keys
+        self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
     def name(self) -> str:
@@ -70,3 +72,7 @@ class Asset:
     @property
     def max_keys(self) -> int:
         return self._max_keys
+
+    @property
+    def batch_spec_passthrough(self) -> dict:
+        return self._batch_spec_passthrough
