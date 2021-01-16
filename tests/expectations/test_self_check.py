@@ -220,6 +220,7 @@ def test_include_in_gallery_flag():
             "unexpected_index_list": [6, 7],
             "unexpected_list": [2, -1],
         },
+    }
 
 def test_self_check_on_an_existing_expectation():
     expectation_name = "expect_column_values_to_match_regex"
