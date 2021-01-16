@@ -183,7 +183,7 @@ def test_expectation_self_check():
             "maturity": None,
             "package": None,
             "tags": [],
-            "contributors": []            
+            "contributors": [],
         },
     }
 

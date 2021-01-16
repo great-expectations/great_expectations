@@ -902,7 +902,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
         if hasattr(self, "library_metadata"):
             library_metadata.update(self.library_metadata)
-        
+
         return library_metadata
 
 
