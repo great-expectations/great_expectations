@@ -46,3 +46,16 @@ def test_lossy_conversion():
 
     d = Decimal("0.1")
     assert not requires_lossy_conversion(d)
+
+
+# TODO add unittests for convert_to_json_serializable() and ensure_json_serializable()
+def test_serialization_of_spark_df(spark_session):
+    import pandas as pd
+
+    df = pd.DataFrame({"a": [1, 2, 3]})
+    sdf = spark_session.createDataFrame(df)
+    assert convert_to_json_serializable(sdf) == {"a": [1, 2, 3]}
+
+    df = pd.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})
+    sdf = spark_session.createDataFrame(df)
+    assert convert_to_json_serializable(sdf) == {"a": [1, 2, 3], "b": [4, 5, 6]}
