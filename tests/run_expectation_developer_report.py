@@ -147,7 +147,10 @@ def build_test_backends_list():
             test_backends += ["mssql"]
     return test_backends
 
-def generate_expectation_tests(expectation_type, examples_config, expectation_execution_engines_dict=None):
+
+def generate_expectation_tests(
+    expectation_type, examples_config, expectation_execution_engines_dict=None
+):
     """
 
     :param expectation_type: snake_case name of the expectation type
@@ -182,9 +185,7 @@ def generate_expectation_tests(expectation_type, examples_config, expectation_ex
                             "sqlite_db"
                             + "".join(
                                 [
-                                    random.choice(
-                                        string.ascii_letters + string.digits
-                                    )
+                                    random.choice(string.ascii_letters + string.digits)
                                     for _ in range(8)
                                 ]
                             )
@@ -216,11 +217,17 @@ def generate_expectation_tests(expectation_type, examples_config, expectation_ex
                     supress_test_for = test.get("suppress_test_for")
                     if supress_test_for is None:
                         supress_test_for = []
-                    if not expectation_execution_engines_dict.get("PandasExecutionEngine"):
+                    if not expectation_execution_engines_dict.get(
+                        "PandasExecutionEngine"
+                    ):
                         supress_test_for.append("pandas")
-                    if not expectation_execution_engines_dict.get("SqlAlchemyExecutionEngine"):
+                    if not expectation_execution_engines_dict.get(
+                        "SqlAlchemyExecutionEngine"
+                    ):
                         supress_test_for.append("sqlalchemy")
-                    if not expectation_execution_engines_dict.get("SparkDFExecutionEngine"):
+                    if not expectation_execution_engines_dict.get(
+                        "SparkDFExecutionEngine"
+                    ):
                         supress_test_for.append("spark")
 
                     if len(supress_test_for) > 0:
@@ -399,13 +406,11 @@ def generate_expectation_tests(expectation_type, examples_config, expectation_ex
                             "validator_with_data": validator_with_data,
                             "test": test,
                             "skip": skip_expectation or skip_test,
-                            "backend": c
+                            "backend": c,
                         }
                     )
 
     return parametrized_tests
-
-
 
 
 def run(expectation_module_file_path):
@@ -447,14 +452,15 @@ def run(expectation_module_file_path):
 
     module_name = os.path.splitext(os.path.basename(expectation_module_file_path))[0]
 
-    module_spec = importlib.util.spec_from_file_location(module_name, expectation_module_file_path)
+    module_spec = importlib.util.spec_from_file_location(
+        module_name, expectation_module_file_path
+    )
     module = importlib.util.module_from_spec(module_spec)
     module_spec.loader.exec_module(module)
 
-    expectation_class_name = ''.join(x.title() for x in module_name.split('_'))
+    expectation_class_name = "".join(x.title() for x in module_name.split("_"))
 
     expectation_class = getattr(module, expectation_class_name)
-
 
     self_check_report = expectation_class().self_check()
     res["self_check_report"] = self_check_report
@@ -465,7 +471,11 @@ def run(expectation_module_file_path):
 
     if hasattr(module, "examples"):
 
-        exp_tests = generate_expectation_tests(expectation_type, module.examples, expectation_execution_engines_dict=self_check_report["execution_engines"])
+        exp_tests = generate_expectation_tests(
+            expectation_type,
+            module.examples,
+            expectation_execution_engines_dict=self_check_report["execution_engines"],
+        )
 
         for exp_test in exp_tests:
             try:
@@ -478,7 +488,7 @@ def run(expectation_module_file_path):
                     {
                         "test title": exp_test["test"]["title"],
                         "backend": exp_test["backend"],
-                        "success": "true"
+                        "success": "true",
                     }
                 )
             except Exception as e:
@@ -488,18 +498,17 @@ def run(expectation_module_file_path):
                         "backend": exp_test["backend"],
                         "success": "false",
                         "error_message": str(e),
-                        "stack_trace": traceback.format_exc()
+                        "stack_trace": traceback.format_exc(),
                     }
                 )
-
 
     res["test_report"] = test_results
 
     return res
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     if len(sys.argv) > 0:
         res = run(sys.argv[1])
 
         print(json.dumps(res, indent=2))
-
