@@ -30,6 +30,35 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 from great_expectations.validator.validator import Validator
 
 
+# This class defines a Metric to support your Expectation
+# For most Expectations, the main business logic for calculation will live here.
+# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
+class ColumnValuesEqualThree(ColumnMapMetricProvider):
+    
+    # This is the id string that will be used to reference your metric.
+    # Please see {some doc} for information on how to choose an id string for your Metric.
+    condition_metric_name = "column_values.equal_three"
+
+    # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
+#     @column_condition_partial(engine=PandasExecutionEngine)
+#     def _pandas(cls, column, **kwargs):
+#         return column == 3
+
+    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
+#     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+#     def _sqlalchemy(cls, column, _dialect, **kwargs):
+#         return column.in_([3])
+
+    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
+#     @column_condition_partial(engine=SparkDFExecutionEngine)
+#     def _spark(cls, column, **kwargs):
+#         return column.isin([3])
+
+
+# This class defines the Expectation itself
+# The main business logic for calculation lives here.
+class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
+
 # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
 # You can learn more in {some doc}
 # examples = [{
@@ -62,37 +91,6 @@ library_metadata = {
     ],
     "package": "experimental_expectations",
 }
-
-
-# This class defines a Metric to support your Expectation
-# For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
-    
-    # This is the id string that will be used to reference your metric.
-    # Please see {some doc} for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.equal_three"
-
-    # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
-
-    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
-#     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-#     def _sqlalchemy(cls, column, _dialect, **kwargs):
-#         return column.in_([3])
-
-    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-#     @column_condition_partial(engine=SparkDFExecutionEngine)
-#     def _spark(cls, column, **kwargs):
-#         return column.isin([3])
-
-
-# This class defines the Expectation itself
-# The main business logic for calculation lives here.
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
     map_metric = "column_values.equal_three"
