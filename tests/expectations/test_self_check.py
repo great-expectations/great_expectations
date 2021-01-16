@@ -188,18 +188,6 @@ def test_expectation_self_check():
     }
 
 
-def test_all_expectation_self_checks():
-    library_json = {}
-
-    for expectation_name, expectation in _registered_expectations.items():
-        report_object = expectation().self_check()
-        library_json[expectation_name] = report_object
-        print(report_object["metrics"])
-
-    # with open('output/expectation_library.json', 'w') as f_:
-    #     f_.write(json.dumps(library_json, indent=2))
-
-
 def test_self_check_on_an_existing_expectation():
     expectation_name = "expect_column_values_to_match_regex"
     expectation = _registered_expectations[expectation_name]
