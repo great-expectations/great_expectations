@@ -20,7 +20,7 @@ resources:
       MYSQL_DATABASE: test_ci
     command: --secure-file-priv=/etc/mysql/data
     volumes:
-        - assets/docker/mysql/data:/etc/mysql/data
+        - /assets/docker/mysql/data:/etc/mysql/data
   - container: mssql
     image: microsoft/mssql-server-linux
     env:
