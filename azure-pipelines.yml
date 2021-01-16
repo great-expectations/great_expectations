@@ -18,9 +18,9 @@ resources:
     env:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: test_ci
-    command: --secure-file-priv=/etc/mysql/data
+    command: --secure-file-priv=/etc/data
     volumes:
-        - $(cat ./assets/docker/mysql/data):/etc/mysql/data
+        - ./assets/docker/mysql/data:/etc/data
   - container: mssql
     image: microsoft/mssql-server-linux
     env:
