@@ -1727,6 +1727,7 @@ def generate_expectation_tests(
 
     for c in backends:
         for d in examples_config:
+            d = copy.deepcopy(d)
             datasets = []
             if candidate_test_is_on_temporary_notimplemented_list_cfe(
                 c, expectation_type

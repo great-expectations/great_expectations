@@ -51,12 +51,35 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
                     "title": "positive_test_with_mostly",
                     "exact_match_out": False,
                     "in": {"column": "mostly_threes", "mostly": 0.6},
+                    "include_in_gallery": True,
                     "out": {
                         "success": True,
                         "unexpected_index_list": [6, 7],
                         "unexpected_list": [2, -1],
                     },
-                }
+                },
+                {
+                    "title": "negative_test_with_mostly",
+                    "exact_match_out": False,
+                    "in": {"column": "mostly_threes", "mostly": 0.9},
+                    "include_in_gallery": False,
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                },
+                {
+                    "title": "other_negative_test_with_mostly",
+                    "exact_match_out": False,
+                    "in": {"column": "mostly_threes", "mostly": 0.9},
+                    # "include_in_gallery": False, #This key is omitted, so the example shouldn't show up in the gallery
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                },
             ],
         }
     ]
@@ -157,14 +180,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
 
 def test_expectation_self_check():
 
-    my_expectation = ExpectColumnValuesToEqualThree(
-        configuration=ExpectationConfiguration(
-            **{
-                "expectation_type": "expect_column_values_to_equal_three",
-                "kwargs": {"column": "threes"},
-            }
-        )
-    )
+    my_expectation = ExpectColumnValuesToEqualThree()
     report_object = my_expectation.self_check()
     print(json.dumps(report_object, indent=2))
 
@@ -184,6 +200,26 @@ def test_expectation_self_check():
             "package": None,
             "tags": [],
             "contributors": [],
+        },
+    }
+
+
+def test_include_in_gallery_flag():
+
+    my_expectation = ExpectColumnValuesToEqualThree__SecondIteration()
+    report_object = my_expectation.self_check()
+    print(json.dumps(report_object["examples"], indent=2))
+
+    assert len(report_object["examples"][0]["tests"]) == 1
+    assert report_object["examples"][0]["tests"][0] == {
+        "title": "positive_test_with_mostly",
+        "exact_match_out": False,
+        "in": {"column": "mostly_threes", "mostly": 0.6},
+        "include_in_gallery": True,
+        "out": {
+            "success": True,
+            "unexpected_index_list": [6, 7],
+            "unexpected_list": [2, -1],
         },
     }
 
@@ -247,6 +283,7 @@ def test_self_check_on_an_existing_expectation():
                             "unexpected_list": ["bee"],
                         },
                         "suppress_test_for": ["sqlite", "mssql"],
+                        "include_in_gallery": True,
                     },
                     {
                         "title": "positive_test_exact_mostly_w_one_non_matching_value",
@@ -258,6 +295,7 @@ def test_self_check_on_an_existing_expectation():
                             "unexpected_list": ["bee"],
                         },
                         "suppress_test_for": ["sqlite", "mssql"],
+                        "include_in_gallery": True,
                     },
                 ],
             }

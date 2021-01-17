@@ -757,50 +757,43 @@ class Expectation(ABC, metaclass=MetaExpectation):
             )
             report_obj.update({"execution_engines": execution_engines})
 
-            test_results = []
-
-            exp_tests = generate_expectation_tests(
+            test_results = self._get_test_results(
                 snake_name,
                 examples,
-                expectation_execution_engines_dict=execution_engines,
+                execution_engines,
             )
-
-            for exp_test in exp_tests:
-                try:
-                    evaluate_json_test_cfe(
-                        validator=exp_test["validator_with_data"],
-                        expectation_type=exp_test["expectation_type"],
-                        test=exp_test["test"],
-                    )
-                    test_results.append(
-                        {
-                            "test title": exp_test["test"]["title"],
-                            "backend": exp_test["backend"],
-                            "success": "true",
-                        }
-                    )
-                except Exception as e:
-                    test_results.append(
-                        {
-                            "test title": exp_test["test"]["title"],
-                            "backend": exp_test["backend"],
-                            "success": "false",
-                            "error_message": str(e),
-                            "stack_trace": traceback.format_exc(),
-                        }
-                    )
-
             report_obj.update({"test_report": test_results})
 
         return report_obj
 
     def _get_examples(self) -> List[Dict]:
-        try:
-            examples = self.examples
-        except:
-            examples = []
+        """Get a list of examples from class metadata.
 
-        return examples
+        Only include test examples where `include_in_gallery` is true.
+        If no examples exist, then return []
+        """
+        try:
+            all_examples = self.examples
+        except AttributeError:
+            return []
+
+        included_examples = []
+        for example in all_examples:
+            # print(example)
+
+            included_tests = []
+            for test in example["tests"]:
+                if ("include_in_gallery" in test) and (
+                    test["include_in_gallery"] == True
+                ):
+                    included_tests.append(test)
+
+            if len(included_tests) > 0:
+                copied_example = deepcopy(example)
+                copied_example["tests"] = included_tests
+                included_examples.append(copied_example)
+
+        return included_examples
 
     def _get_docstring_and_short_description(self) -> Tuple[str, str]:
         if self.__doc__ is not None:
@@ -842,6 +835,47 @@ class Expectation(ABC, metaclass=MetaExpectation):
         supported_renderers = list(_registered_renderers[snake_name].keys())
         supported_renderers.sort()
         return supported_renderers
+
+    def _get_test_results(
+        self,
+        snake_name,
+        examples,
+        execution_engines,
+    ):
+        test_results = []
+
+        exp_tests = generate_expectation_tests(
+            snake_name,
+            examples,
+            expectation_execution_engines_dict=execution_engines,
+        )
+
+        for exp_test in exp_tests:
+            try:
+                evaluate_json_test_cfe(
+                    validator=exp_test["validator_with_data"],
+                    expectation_type=exp_test["expectation_type"],
+                    test=exp_test["test"],
+                )
+                test_results.append(
+                    {
+                        "test title": exp_test["test"]["title"],
+                        "backend": exp_test["backend"],
+                        "success": "true",
+                    }
+                )
+            except Exception as e:
+                test_results.append(
+                    {
+                        "test title": exp_test["test"]["title"],
+                        "backend": exp_test["backend"],
+                        "success": "false",
+                        "error_message": str(e),
+                        "stack_trace": traceback.format_exc(),
+                    }
+                )
+        
+        return test_results
 
     from great_expectations.render.types import RenderedStringTemplateContent
 
