@@ -322,14 +322,14 @@ def test_self_check_on_an_existing_expectation():
             {
                 "test title": "negative_test_insufficient_mostly_and_one_non_matching_value",
                 "backend": "pandas",
-                "success": "true"
+                "success": "true",
             },
             {
                 "test title": "positive_test_exact_mostly_w_one_non_matching_value",
                 "backend": "pandas",
-                "success": "true"
-            }
-        ]
+                "success": "true",
+            },
+        ],
     }
 
 
