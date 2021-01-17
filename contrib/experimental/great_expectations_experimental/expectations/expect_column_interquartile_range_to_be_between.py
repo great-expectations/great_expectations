@@ -208,24 +208,36 @@ class ExpectColumnInterquartileRangeToBeBetween(ColumnExpectation):
             execution_engine=execution_engine,
         )
 
+    library_metadata = {
+        "maturity": "experimental",
+        "tags": [
+            "expirimental",
+            "hackathon"
+        ],
+        "contributors": [
+            "aworld1"
+        ],
+        "package": "experimental_expectations",
+    }
 
-examples = [{
-    "data": {
-        "my_data": [2, 4, 7, 9, 11, 12],
-    },
-    "tests": [
-        {
-            "title": "passing_test_1",
-            "exact_match_out": False,
-            "in": {"column": "my_data"},
-            "out": {
-                "success": True,
-                "unexpected_index_list": [],
-                "unexpected_list": [],
-            },
-        }
-    ],
-}]
+    examples = [{
+        "data": {
+            "my_data": [2, 4, 7, 9, 11, 12],
+        },
+        "tests": [
+            {
+                "title": "passing_test_1",
+                "exact_match_out": False,
+                "in": {"column": "my_data"},
+                "out": {
+                    "success": True,
+                    "unexpected_index_list": [],
+                    "unexpected_list": [],
+                },
+            }
+        ],
+    }]
+
 
 if __name__ == "__main__":
     self_check_report = ExpectColumnInterquartileRangeToBeBetween().self_check()
