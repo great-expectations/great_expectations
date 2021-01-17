@@ -182,7 +182,7 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
 
     examples = [
         {
-            "data": {"a": [0, 1, 3], "b": [1, 2, 4]},
+            "data": {"a": [0, 1, 3], "b": [3, 4, 5]},
             "tests": [
                 {
                     "title": "test_raw_values",
@@ -203,11 +203,12 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
                     "exact_match_out": False,
                     "in": {
                         "column": "b", 
-                        "partition":{
-                            "values": [3, 4, 5],
+                        "partition": {
+                            "values": [1, 2, 4],
                             "weights": [0.5, 0.25, 0.25]
                         },
-                        "max_value": 5, "strict_max": True,
+                        "max_value": 5,
+                        "strict_max": True,
                     },
                     "out": {"success": True, "observed_value": 2},
                     "include_in_gallery": True,
