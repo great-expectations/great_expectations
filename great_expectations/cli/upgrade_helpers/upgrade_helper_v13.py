@@ -24,6 +24,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
         self.upgrade_log = {
             "skipped_upgrade": False,
+            "update_version": True,
             "added_checkpoint_store": {},
         }
 
@@ -116,7 +117,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 ++====================================++\
 </cyan>
 
-UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.11.x.
+UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.13.x.
 """
         stores_upgrade_checklist = [
             config_attribute
@@ -202,10 +203,7 @@ Would you like to proceed with the project upgrade?\
 
     def _generate_upgrade_report(self):
         upgrade_log_path = self._save_upgrade_log()
-        if self.upgrade_log["skipped_upgrade"]:
-            increment_version = False
-        else:
-            increment_version = True
+        increment_version = self.upgrade_log["update_version"]
         upgrade_report = f"""\
 <cyan>\
 ++================++
@@ -233,7 +231,8 @@ A log detailing the upgrade can be found here:
     - {upgrade_log_path}\
 </yellow>\
 """
-        return upgrade_report, increment_version
+        exception_occurred = False
+        return upgrade_report, increment_version, exception_occurred
 
     def upgrade_project(self):
         try:
@@ -243,5 +242,9 @@ A log detailing the upgrade can be found here:
 
         # return a report of what happened, boolean indicating whether version should be incremented if the version
         # should not be incremented, the report should include instructions for steps to be performed manually
-        upgrade_report, increment_version = self._generate_upgrade_report()
-        return upgrade_report, increment_version
+        (
+            upgrade_report,
+            increment_version,
+            exception_occurred,
+        ) = self._generate_upgrade_report()
+        return upgrade_report, increment_version, exception_occurred

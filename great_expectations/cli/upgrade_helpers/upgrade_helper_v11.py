@@ -587,6 +587,7 @@ Would you like to proceed with the project upgrade?\
     def _generate_upgrade_report(self):
         upgrade_log_path = self._save_upgrade_log()
         skipped_stores_or_sites = any(self._get_skipped_store_and_site_names())
+        exception_occurred = False
         exceptions = self.upgrade_log.get("exceptions")
         if skipped_stores_or_sites or exceptions:
             increment_version = False
@@ -612,6 +613,7 @@ A log detailing the upgrade can be found here:
 """
         else:
             if exceptions:
+                exception_occurred = True
                 upgrade_report += f"""
 <red>\
 The Upgrade Helper encountered some exceptions during the upgrade process.
@@ -632,7 +634,7 @@ A log detailing the upgrade can be found here:
     - {upgrade_log_path}\
 </yellow>\
 """
-        return upgrade_report, increment_version
+        return upgrade_report, increment_version, exception_occurred
 
     def upgrade_project(self):
         try:
@@ -662,5 +664,9 @@ A log detailing the upgrade can be found here:
         # return a report of what happened, boolean indicating whether version should be incremented
         # if the version should not be incremented, the report should include instructions for steps to
         # be performed manually
-        upgrade_report, increment_version = self._generate_upgrade_report()
-        return upgrade_report, increment_version
+        (
+            upgrade_report,
+            increment_version,
+            exception_occurred,
+        ) = self._generate_upgrade_report()
+        return upgrade_report, increment_version, exception_occurred

@@ -11,7 +11,10 @@ from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import (
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    assert_no_logging_messages_or_tracebacks,
+)
 
 try:
     from unittest import mock
@@ -41,7 +44,11 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
 
     assert "Checking project..." in stdout
     assert "Your project is up-to-date - no upgrade is necessary." in stdout
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplog):
@@ -58,7 +65,7 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
     stdout = result.stdout
 
     assert (
-        "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2."
+        "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3."
         in stdout
     )
     assert "In order to proceed, your project must be upgraded." in stdout
@@ -176,6 +183,7 @@ great_expectations/
         logs/
             project_upgrades/
                 UpgradeHelperV11_20190926T134241.000000Z.json
+                UpgradeHelperV13_20190926T134241.000000Z.json
         validations/
             .ge_store_backend_id
             diabetic_data/
@@ -188,7 +196,7 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 2
+        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 3
     )
 
     with open(

@@ -20,22 +20,21 @@ def test_docs_help_output(caplog):
     result = runner.invoke(cli, ["docs"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "build  Build Data Docs for a project." in result.stdout
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_view(
-    mock_webbrowser,
-    caplog,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    mock_webbrowser, caplog, site_builder_data_context_with_html_store_titanic_random
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["docs", "build", "-d", root_dir], input="\n", catch_exceptions=False
+        cli, ["docs", "build", "-d", root_dir], input="\n\n", catch_exceptions=False
     )
     stdout = result.stdout
 
@@ -68,19 +67,15 @@ def test_docs_build_view(
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_no_view(
-    mock_webbrowser,
-    caplog,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    mock_webbrowser, caplog, site_builder_data_context_with_html_store_titanic_random
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["docs", "build", "--no-view", "-d", root_dir],
-        input="\n",
+        input="\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -113,11 +108,9 @@ def test_docs_build_no_view(
 
 
 def test_docs_build_assume_yes(
-    caplog, site_builder_data_context_v013_with_html_store_titanic_random
+    caplog, site_builder_data_context_with_html_store_titanic_random
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(

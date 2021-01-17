@@ -421,11 +421,15 @@ def load_data_context_with_error_handling(
         context: Optional[DataContext] = DataContext(directory)
         ge_config_version: int = context.get_config().config_version
         if int(ge_config_version) >= GE_CONFIG_VERSION_WITH_EXPERIMENTAL_CHECKPOINTS:
-            if upgrade_project_one_version_increment(
+            (
+                increment_version,
+                exception_occurred,
+            ) = upgrade_project_one_version_increment(
                 context_root_dir=directory,
                 ge_config_version=ge_config_version,
                 continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-            ):
+            )
+            if not exception_occurred and increment_version:
                 context = DataContext(directory)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
@@ -493,11 +497,14 @@ def upgrade_project(
 
     # use loop in case multiple upgrades need to take place
     while ge_config_version < CURRENT_GE_CONFIG_VERSION:
-        if upgrade_project_one_version_increment(
+        increment_version, exception_occurred = upgrade_project_one_version_increment(
             context_root_dir=context_root_dir,
             ge_config_version=ge_config_version,
             continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-        ):
+        )
+        if exception_occurred:
+            break
+        if increment_version:
             ge_config_version += 1
 
     cli_message(SECTION_SEPARATOR)
@@ -521,10 +528,10 @@ To learn more about the upgrade process, visit \
 
 def upgrade_project_one_version_increment(
     context_root_dir, ge_config_version, continuation_message
-) -> bool:
+) -> [bool, bool]:
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
     if not upgrade_helper_class:
-        return False
+        return False, False
     target_ge_config_version = int(ge_config_version) + 1
     # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
     DataContext.set_ge_config_version(
@@ -547,9 +554,21 @@ def upgrade_project_one_version_increment(
         cli_message("\nUpgrading project...")
         cli_message(SECTION_SEPARATOR)
         # run upgrade and get report of what was done, if version number should be incremented
-        upgrade_report, increment_version = upgrade_helper.upgrade_project()
+        (
+            upgrade_report,
+            increment_version,
+            exception_occurred,
+        ) = upgrade_helper.upgrade_project()
         # display report to user
         cli_message(upgrade_report)
+        if exception_occurred:
+            # restore version number to current number
+            DataContext.set_ge_config_version(
+                ge_config_version, context_root_dir, validate_config_version=False
+            )
+            # display report to user
+            cli_message(upgrade_report)
+            return [False, True]
         # set config version to target version
         if increment_version:
             DataContext.set_ge_config_version(
@@ -557,12 +576,12 @@ def upgrade_project_one_version_increment(
                 context_root_dir,
                 validate_config_version=False,
             )
-            return True
+            return True, False
         # restore version number to current number
         DataContext.set_ge_config_version(
             ge_config_version, context_root_dir, validate_config_version=False
         )
-        return False
+        return False, False
 
     # restore version number to current number
     DataContext.set_ge_config_version(
