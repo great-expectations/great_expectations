@@ -1,7 +1,8 @@
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.metrics import ColumnMetricProvider, column_aggregate_value
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from great_expectations.render.renderer.renderer import renderer
@@ -75,6 +76,34 @@ class ExpectColumnInterquartileRangeToBeBetween(ColumnExpectation):
                 <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_stdev_to_be_between>`
 
             """
+    library_metadata = {
+        "maturity": "experimental",
+        "tags": [
+            "experimental",
+            "hackathon"
+        ],
+        "contributors": [
+            "aworld1"
+        ],
+        "package": "experimental_expectations",
+    }
+
+    examples = [{
+        "data": {
+            "my_data": [2, 4, 7, 9, 11, 12],
+        },
+        "tests": [
+            {
+                "title": "passing_test_1",
+                "include_in_gallery": True,
+                "exact_match_out": False,
+                "in": {"column": "my_data", "min_value": 5, "max_value": 8},
+                "out": {
+                    "success": True
+                },
+            }
+        ],
+    }]
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.interquartile_range",)
@@ -208,35 +237,16 @@ class ExpectColumnInterquartileRangeToBeBetween(ColumnExpectation):
             execution_engine=execution_engine,
         )
 
-    library_metadata = {
-        "maturity": "experimental",
-        "tags": [
-            "expirimental",
-            "hackathon"
-        ],
-        "contributors": [
-            "aworld1"
-        ],
-        "package": "experimental_expectations",
-    }
 
-    examples = [{
-        "data": {
-            "my_data": [2, 4, 7, 9, 11, 12],
-        },
-        "tests": [
-            {
-                "title": "passing_test_1",
-                "exact_match_out": False,
-                "in": {"column": "my_data"},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [],
-                    "unexpected_list": [],
-                },
-            }
-        ],
-    }]
+class ColumnInterquartileRange(ColumnMetricProvider):
+    """MetricProvider Class for Aggregate Interquartile Range MetricProvider"""
+
+    metric_name = "column.interquartile_range"
+
+    @column_aggregate_value(engine=PandasExecutionEngine)
+    def _pandas(cls, column, **kwargs):
+        """Pandas Interquartile Range Implementation"""
+        return column.quantile(0.75) - column.quantile(0.25)
 
 
 if __name__ == "__main__":
