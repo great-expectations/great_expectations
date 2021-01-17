@@ -8,13 +8,12 @@ import locale
 import os
 import random
 import string
-import threading
 import tempfile
+import threading
 import uuid
 from functools import wraps
-from typing import List, Union
 from types import ModuleType
-
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -36,14 +35,12 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-
-from great_expectations.util import import_library_module
-
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.profile import ColumnsExistProfiler
+from great_expectations.util import import_library_module
 from great_expectations.validator.validator import Validator
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
