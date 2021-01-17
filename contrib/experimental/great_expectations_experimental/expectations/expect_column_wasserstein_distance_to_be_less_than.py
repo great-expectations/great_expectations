@@ -48,18 +48,23 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
     """MetricProvider Class for Wasserstein Distance MetricProvider"""
 
     metric_name = "column.custom.wasserstein"
-    value_keys = ("raw_values",)
+    value_keys = ("raw_values", "partition")
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, raw_values=None, **kwargs):
+    def _pandas(cls, column, raw_values=None, partition=None, **kwargs):
         if raw_values is not None:
             w_value = stats.wasserstein_distance(
                 raw_values,
                 column,
             )
-
+        elif partition is not None:
+            w_value = stats.wasserstein_distance(
+                partition["values"],
+                column,
+                partition["weights"],
+            )
         else:
-            raise NotImplementedError("partition object hasn't been implemented")
+            raise ValueError("raw_values and partition object cannot both be None!")
 
         return w_value
 
@@ -160,7 +165,7 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
 class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.wasserstein",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max", "raw_values")
+    success_keys = ("min_value", "strict_min", "max_value", "strict_max", "raw_values", "partition")
 
     # Default values
     default_kwarg_values = {
@@ -169,6 +174,7 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
         "strict_min": None,
         "strict_max": None,
         "raw_values": None,
+        "partition": None,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -176,13 +182,34 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
 
     examples = [
         {
-            "data": {"a": [0, 1, 3]},
+            "data": {"a": [0, 1, 3], "b": [1, 2, 4]},
             "tests": [
                 {
-                    "title": "foobar",
+                    "title": "test_raw_values",
                     "exact_match_out": False,
                     "in": {"column": "a", "raw_values": [5, 6, 8], "max_value": 6},
                     "out": {"success": True, "observed_value": 5},
+                    "include_in_gallery": True,
+                },
+                {
+                    "title": "test_raw_values_strict",
+                    "exact_match_out": False,
+                    "in": {"column": "a", "raw_values": [5, 6, 8], "max_value": 5, "strict_max": True},
+                    "out": {"success": False, "observed_value": 5},
+                    "include_in_gallery": True,
+                },
+                {
+                    "title": "test_partition",
+                    "exact_match_out": False,
+                    "in": {
+                        "column": "b", 
+                        "partition":{
+                            "values": [3, 4, 5],
+                            "weights": [0.5, 0.25, 0.25]
+                        },
+                        "max_value": 5, "strict_max": True,
+                    },
+                    "out": {"success": True, "observed_value": 2},
                     "include_in_gallery": True,
                 },
             ],
