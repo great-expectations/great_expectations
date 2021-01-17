@@ -167,6 +167,17 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
     metric_dependencies = ("column.custom.wasserstein",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max", "raw_values", "partition")
 
+    library_metadata = {
+        "maturity": "experimental",
+        "package": "great_expectations_experimental",
+        "tags": [],
+        "contributors": [
+            "rexboyce",
+            "abegong",
+            "lodeous",
+        ]
+    }   
+
     # Default values
     default_kwarg_values = {
         "min_value": None,
