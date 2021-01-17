@@ -1,6 +1,6 @@
 import logging
-import traceback
 import re
+import traceback
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
@@ -28,13 +28,12 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
+from great_expectations.expectations.self_check_util import (
+    evaluate_json_test_cfe,
+    generate_expectation_tests,
+)
 from great_expectations.expectations.util import legacy_method_parameters
 from great_expectations.validator.validator import Validator
-
-from great_expectations.expectations.self_check_util import (
-    generate_expectation_tests,
-    evaluate_json_test_cfe,
-)
 
 from ..core.util import convert_to_json_serializable, nested_update
 from ..data_asset.util import recursively_convert_to_json_serializable
@@ -758,39 +757,11 @@ class Expectation(ABC, metaclass=MetaExpectation):
             )
             report_obj.update({"execution_engines": execution_engines})
 
-            test_results = []
-
-            exp_tests = generate_expectation_tests(
+            test_results = self._get_test_results(
                 snake_name,
                 examples,
-                expectation_execution_engines_dict=execution_engines,
+                execution_engines,
             )
-
-            for exp_test in exp_tests:
-                try:
-                    evaluate_json_test_cfe(
-                        validator=exp_test["validator_with_data"],
-                        expectation_type=exp_test["expectation_type"],
-                        test=exp_test["test"],
-                    )
-                    test_results.append(
-                        {
-                            "test title": exp_test["test"]["title"],
-                            "backend": exp_test["backend"],
-                            "success": "true",
-                        }
-                    )
-                except Exception as e:
-                    test_results.append(
-                        {
-                            "test title": exp_test["test"]["title"],
-                            "backend": exp_test["backend"],
-                            "success": "false",
-                            "error_message": str(e),
-                            "stack_trace": traceback.format_exc(),
-                        }
-                    )
-
             report_obj.update({"test_report": test_results})
 
         return report_obj
@@ -864,6 +835,47 @@ class Expectation(ABC, metaclass=MetaExpectation):
         supported_renderers = list(_registered_renderers[snake_name].keys())
         supported_renderers.sort()
         return supported_renderers
+
+    def _get_test_results(
+        self,
+        snake_name,
+        examples,
+        execution_engines,
+    ):
+        test_results = []
+
+        exp_tests = generate_expectation_tests(
+            snake_name,
+            examples,
+            expectation_execution_engines_dict=execution_engines,
+        )
+
+        for exp_test in exp_tests:
+            try:
+                evaluate_json_test_cfe(
+                    validator=exp_test["validator_with_data"],
+                    expectation_type=exp_test["expectation_type"],
+                    test=exp_test["test"],
+                )
+                test_results.append(
+                    {
+                        "test title": exp_test["test"]["title"],
+                        "backend": exp_test["backend"],
+                        "success": "true",
+                    }
+                )
+            except Exception as e:
+                test_results.append(
+                    {
+                        "test title": exp_test["test"]["title"],
+                        "backend": exp_test["backend"],
+                        "success": "false",
+                        "error_message": str(e),
+                        "stack_trace": traceback.format_exc(),
+                    }
+                )
+
+        return test_results
 
     from great_expectations.render.types import RenderedStringTemplateContent
 
