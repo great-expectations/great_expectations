@@ -502,10 +502,9 @@ def upgrade_project(
             ge_config_version=ge_config_version,
             continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
         )
-        if exception_occurred:
+        if exception_occurred or not increment_version:
             break
-        if increment_version:
-            ge_config_version += 1
+        ge_config_version += 1
 
     cli_message(SECTION_SEPARATOR)
     upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
@@ -528,7 +527,7 @@ To learn more about the upgrade process, visit \
 
 def upgrade_project_one_version_increment(
     context_root_dir, ge_config_version, continuation_message
-) -> [bool, bool]:
+) -> [bool, bool]:  # Returns increment_version, exception_occurred
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
     if not upgrade_helper_class:
         return False, False
@@ -568,7 +567,7 @@ def upgrade_project_one_version_increment(
             )
             # display report to user
             cli_message(upgrade_report)
-            return [False, True]
+            return False, True
         # set config version to target version
         if increment_version:
             DataContext.set_ge_config_version(

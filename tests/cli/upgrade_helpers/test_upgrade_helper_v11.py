@@ -259,6 +259,11 @@ def test_project_upgrade_with_manual_steps(
         )
         assert stdout == expected_stdout
 
+    pycache_dir_path = os.path.join(
+        v10_project_directory, "plugins", "custom_store_backends", "__pycache__"
+    )
+    shutil.rmtree(pycache_dir_path)
+
     expected_project_tree_str = """\
 great_expectations/
     .gitignore
