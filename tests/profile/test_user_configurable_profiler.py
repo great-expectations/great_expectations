@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -94,91 +95,131 @@ def get_set_of_columns_and_expectations_from_suite(suite):
     return columns, expectations
 
 
-def test__initialize_cache_with_metadata_no_config(
+def test_profiler_init_no_config(
     cardinality_dataset,
 ):
-    cache = UserConfigurableProfiler._initialize_cache_with_metadata(
-        cardinality_dataset,
-    )
-    assert cache.get("primary_or_compound_key") == []
-    assert cache.get("ignored_columns") == []
-    assert not cache.get("value_set_threshold")
-    assert not cache.get("table_expectations_only")
-    assert cache.get("excluded_expectations") == []
+    profiler = UserConfigurableProfiler(cardinality_dataset)
+    assert profiler.primary_or_compound_key == []
+    assert profiler.ignored_columns == []
+    assert not profiler.value_set_threshold
+    assert not profiler.table_expectations_only
+    assert profiler.excluded_expectations == []
 
 
-def test__initialize_cache_with_metadata_full_config_no_semantic_types(
+def test_profiler_init_full_config_no_semantic_types(
     cardinality_dataset, full_config_cardinality_dataset_no_semantic_types
 ):
-    cache = UserConfigurableProfiler._initialize_cache_with_metadata(
+    profiler = UserConfigurableProfiler(
         cardinality_dataset, full_config_cardinality_dataset_no_semantic_types
     )
-    assert cache.get("primary_or_compound_key") == ["col_unique"]
-    assert cache.get("ignored_columns") == [
+    assert profiler.primary_or_compound_key == ["col_unique"]
+    assert profiler.ignored_columns == [
         "col_one",
     ]
-    assert cache.get("value_set_threshold") == "unique"
-    assert not cache.get("table_expectations_only")
-    assert cache.get("excluded_expectations") == ["expect_column_values_to_not_be_null"]
+    assert profiler.value_set_threshold == "unique"
+    assert not profiler.table_expectations_only
+    assert profiler.excluded_expectations == ["expect_column_values_to_not_be_null"]
 
-    assert "col_one" not in cache.keys()
+    assert "col_one" not in profiler.column_info
+
+
+def test_config_with_not_null_only(possible_expectations_set):
+    excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
+
+    df = pd.DataFrame(
+        {
+            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
+            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
+        }
+    )
+    batch_df = ge.dataset.PandasDataset(df)
+
+    config_without_not_null_only = {
+        "excluded_expectations": excluded_expectations,
+        "not_null_only": False,
+    }
+    profiler = UserConfigurableProfiler(batch_df, config_without_not_null_only)
+    suite = profiler.build_suite()
+    _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
+    assert expectations == {
+        "expect_column_values_to_be_null",
+        "expect_column_values_to_not_be_null",
+    }
+
+    config_with_not_null_only = {
+        "excluded_expectations": excluded_expectations,
+        "not_null_only": True,
+    }
+    not_null_only_profiler = UserConfigurableProfiler(
+        batch_df, config_with_not_null_only
+    )
+    not_null_only_suite = not_null_only_profiler.build_suite()
+    _, expectations = get_set_of_columns_and_expectations_from_suite(
+        not_null_only_suite
+    )
+    assert expectations == {"expect_column_values_to_not_be_null"}
+
+    no_config_profiler = UserConfigurableProfiler(batch_df)
+    no_config_suite = no_config_profiler.build_suite()
+    _, expectations = get_set_of_columns_and_expectations_from_suite(no_config_suite)
+    assert "expect_column_values_to_be_null" in expectations
 
 
 def test__initialize_cach_with_metadata_with_semantic_types(
     cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
 ):
-    cache = UserConfigurableProfiler._initialize_cache_with_metadata(
+    profiler = UserConfigurableProfiler(
         cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
     )
 
-    assert not cache.get("col_one")
+    assert "col_one" not in profiler.column_info
 
-    assert cache.get("col_none") == {
+    assert profiler.column_info.get("col_none") == {
         "cardinality": "none",
         "type": "numeric",
         "semantic_types": [],
     }
-    assert cache.get("col_two") == {
+    assert profiler.column_info.get("col_two") == {
         "cardinality": "two",
         "type": "int",
         "semantic_types": ["value_set"],
     }
-    assert cache.get("col_very_few") == {
+    assert profiler.column_info.get("col_very_few") == {
         "cardinality": "very_few",
         "type": "int",
         "semantic_types": ["value_set"],
     }
-    assert cache.get("col_few") == {
+    assert profiler.column_info.get("col_few") == {
         "cardinality": "few",
         "type": "int",
         "semantic_types": ["numeric"],
     }
-    assert cache.get("col_many") == {
+    assert profiler.column_info.get("col_many") == {
         "cardinality": "many",
         "type": "int",
         "semantic_types": ["numeric"],
     }
-    assert cache.get("col_very_many") == {
+    assert profiler.column_info.get("col_very_many") == {
         "cardinality": "very_many",
         "type": "int",
         "semantic_types": ["numeric"],
     }
-    assert cache.get("col_unique") == {
+    assert profiler.column_info.get("col_unique") == {
         "cardinality": "unique",
         "type": "int",
         "semantic_types": [],
     }
 
 
-def test__validate_config():
-    bad_keyword = {"bad_keyword": 100}
+def test__validate_config(cardinality_dataset):
+    bad_keyword_config = {"bad_keyword": 100}
     with pytest.raises(AssertionError) as e:
-        UserConfigurableProfiler._validate_config(bad_keyword)
+        UserConfigurableProfiler(cardinality_dataset, bad_keyword_config)
     assert e.value.args[0] == "Parameter bad_keyword from config is not recognized."
 
     bad_param_type_ignored_columns = {"ignored_columns": "col_name"}
     with pytest.raises(AssertionError) as e:
-        UserConfigurableProfiler._validate_config(bad_param_type_ignored_columns)
+        UserConfigurableProfiler(cardinality_dataset, bad_param_type_ignored_columns)
     assert (
         e.value.args[0]
         == "Config parameter ignored_columns must be formatted as a <class 'list'> rather than a <class 'str'>."
@@ -186,8 +227,8 @@ def test__validate_config():
 
     bad_param_type_table_expectations_only = {"table_expectations_only": "True"}
     with pytest.raises(AssertionError) as e:
-        UserConfigurableProfiler._validate_config(
-            bad_param_type_table_expectations_only
+        UserConfigurableProfiler(
+            cardinality_dataset, bad_param_type_table_expectations_only
         )
     assert (
         e.value.args[0]
@@ -199,13 +240,8 @@ def test__validate_semantic_types_dict(
     cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
 ):
     bad_semantic_types_dict_type = {"semantic_types": {"value_set": "few"}}
-    cache = UserConfigurableProfiler._initialize_cache_with_metadata(
-        dataset=cardinality_dataset, config=bad_semantic_types_dict_type
-    )
     with pytest.raises(AssertionError) as e:
-        UserConfigurableProfiler._validate_semantic_types_dict(
-            cardinality_dataset, bad_semantic_types_dict_type, cache
-        )
+        UserConfigurableProfiler(cardinality_dataset, bad_semantic_types_dict_type)
     assert e.value.args[0] == (
         "Entries in semantic type dict must be lists of column names e.g. "
         "{'semantic_types': {'numeric': ['number_of_transactions']}}"
@@ -214,7 +250,7 @@ def test__validate_semantic_types_dict(
 
 def test_build_suite_no_config(titanic_dataset, possible_expectations_set):
     profiler = UserConfigurableProfiler(titanic_dataset)
-    suite = profiler.build_suite(dataset=profiler.dataset)
+    suite = profiler.build_suite()
     expectations_from_suite = {i.expectation_type for i in suite.expectations}
 
     assert expectations_from_suite.issubset(possible_expectations_set)
@@ -230,7 +266,7 @@ def test_build_suite_with_config(titanic_dataset, possible_expectations_set):
         "value_set_threshold": "very_few",
     }
     profiler = UserConfigurableProfiler(titanic_dataset, config=config)
-    suite = profiler.build_suite(dataset=profiler.dataset, config=profiler.config)
+    suite = profiler.build_suite()
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -248,9 +284,10 @@ def test_build_suite_with_semantic_types_dict(
     possible_expectations_set,
     full_config_cardinality_dataset_with_semantic_types,
 ):
-    suite = UserConfigurableProfiler.build_suite(
+    profiler = UserConfigurableProfiler(
         cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
     )
+    suite = profiler.build_suite()
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -270,3 +307,23 @@ def test_build_suite_with_semantic_types_dict(
 
     assert len(value_set_columns) == 2
     assert value_set_columns == {"col_two", "col_very_few"}
+
+
+def test_build_suite_when_suite_already_exists(cardinality_dataset):
+    config = {
+        "table_expectations_only": True,
+        "excluded_expectations": ["expect_table_row_count_to_be_between"],
+    }
+
+    profiler = UserConfigurableProfiler(cardinality_dataset, config)
+
+    suite = profiler.build_suite()
+    _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
+    assert len(suite.expectations) == 1
+    assert "expect_table_columns_to_match_ordered_list" in expectations
+
+    profiler.excluded_expectations = ["expect_table_columns_to_match_ordered_list"]
+    suite = profiler.build_suite()
+    _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
+    assert len(suite.expectations) == 1
+    assert "expect_table_row_count_to_be_between" in expectations
