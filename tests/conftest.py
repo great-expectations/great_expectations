@@ -2947,6 +2947,28 @@ def v10_project_directory(tmp_path_factory):
 
 
 @pytest.fixture
+def v20_project_directory(tmp_path_factory):
+    """
+    GE config_version: 2 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v20_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v20_project/"
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
 def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
