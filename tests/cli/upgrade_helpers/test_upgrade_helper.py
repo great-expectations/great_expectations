@@ -260,7 +260,10 @@ def test_project_upgrade_with_manual_steps(
     pycache_dir_path = os.path.join(
         v10_project_directory, "plugins", "custom_store_backends", "__pycache__"
     )
-    shutil.rmtree(pycache_dir_path)
+    try:
+        shutil.rmtree(pycache_dir_path)
+    except FileNotFoundError:
+        pass
 
     expected_project_tree_str = """\
 great_expectations/
