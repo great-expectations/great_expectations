@@ -1615,6 +1615,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     config = obs.config
     assert isinstance(config.to_json_dict(), dict)
     assert config.to_json_dict() == {
+        "module_name": "great_expectations.checkpoint",
         "class_name": "LegacyCheckpoint",
         "config_version": None,
         "name": "my_checkpoint",
@@ -1655,6 +1656,7 @@ def test_get_checkpoint_default_validation_operator(empty_data_context):
     assert isinstance(obs, Checkpoint)
     assert isinstance(obs.config.to_json_dict(), dict)
     expected = {
+        "module_name": "great_expectations.checkpoint",
         "class_name": "LegacyCheckpoint",
         "config_version": None,
         "name": "foo",
