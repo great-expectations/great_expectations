@@ -52,6 +52,7 @@ class SimpleCheckpointConfigurator:
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = "all",
         notify_with: Optional[Union[str, List[str]]] = "all",
+        **kwargs
     ):
         """
         After instantiation, call the .build() method to get a new Checkpoint.
