@@ -4,7 +4,7 @@
 Changelog
 #########
 
-Develop
+0.13.5
 -----------------
 * [FEATURE] Add MicrosoftTeamsNotificationAction (Thanks @Antoninj!)
 * [FEATURE] New ``contrib`` package #2264
