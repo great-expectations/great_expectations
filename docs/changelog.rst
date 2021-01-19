@@ -6,12 +6,27 @@ Changelog
 
 Develop
 -----------------
+
+
+0.13.5
+-----------------
 * [FEATURE] Add MicrosoftTeamsNotificationAction (Thanks @Antoninj!)
-* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API
+* [FEATURE] New ``contrib`` package #2264
+* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API #2224
 * [ENHANCEMENT] Speed up new suite creation flow when connecting to Databases. Issue #1670 (Thanks @armaandhull!)
+* [ENHANCEMENT] Serialize PySpark DataFrame by converting to dictionary #2237
 * [BUGFIX] Mask passwords in DataContext.list_datasources(). Issue #2184
 * [BUGFIX] Skip escaping substitution variables in escape_all_config_variables #2243. Issue #2196 (Thanks @
 varundunga!)
+* [BUGFIX] Pandas extension guessing #2239 (Thanks @sbrugman!)
+* [BUGFIX] Replace runtime batch_data DataFrame with string #2240
+* [BUGFIX] Update Notebook Render Tests to Reflect Updated Python Packages #2262
+* [DOCS] Updated the code of conduct to mention events #2278
+* [DOCS] Update the diagram for batch metadata #2161
+* [DOCS] Update metrics.rst #2257
+* [MAINTENANCE] Different versions of Pandas react differently to corrupt XLS files. #2230
+* [MAINTENANCE] remove the obsolete TODO comments #2229 (Thanks @beyondacm!)
+* [MAINTENANCE] Update run_id to airflow_run_id for clarity. #2233
 
 
 0.13.4
