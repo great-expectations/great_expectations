@@ -1,10 +1,7 @@
 import pytest
 
-from great_expectations.checkpoint.checkpoint import (
-    Checkpoint,
-    CheckpointResult,
-)
 from great_expectations.checkpoint import SimpleCheckpointConfigurator
+from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
 from great_expectations.data_context.types.base import CheckpointConfig
 
 

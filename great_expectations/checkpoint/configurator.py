@@ -1,6 +1,6 @@
 import copy
 import json
-from typing import Optional, Union, List, Dict
+from typing import Dict, List, Optional, Union
 
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.checkpoint import logger
@@ -52,7 +52,7 @@ class SimpleCheckpointConfigurator:
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = "all",
         notify_with: Optional[Union[str, List[str]]] = "all",
-        **kwargs
+        **kwargs,
     ):
         """
         After instantiation, call the .build() method to get a new Checkpoint.

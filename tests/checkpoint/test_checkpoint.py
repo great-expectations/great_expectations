@@ -33,11 +33,7 @@ def test_checkpoint_raises_typeerror_on_incorrect_data_context():
 
 
 def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context):
-    checkpoint = Checkpoint(
-        "foo",
-        empty_data_context,
-        config_version=None,
-    )
+    checkpoint = Checkpoint("foo", empty_data_context, config_version=None)
     with pytest.raises(AttributeError):
         checkpoint.action_list
 
@@ -169,10 +165,7 @@ def test_basic_checkpoint_config_validation(
     config: CommentedMap = yaml.load(yaml_config)
     checkpoint_config = CheckpointConfig(**config)
     checkpoint_config = checkpoint_config.to_json_dict()
-    checkpoint = Checkpoint(
-        data_context=empty_data_context,
-        **checkpoint_config,
-    )
+    checkpoint = Checkpoint(data_context=empty_data_context, **checkpoint_config)
     assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
@@ -1053,8 +1046,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
         ],
     )
     simplified_checkpoint = Checkpoint(
-        data_context=context,
-        **simplified_checkpoint_config.to_json_dict(),
+        data_context=context, **simplified_checkpoint_config.to_json_dict()
     )
 
     # template only
@@ -1316,8 +1308,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
         ],
     )
     nested_checkpoint = Checkpoint(
-        data_context=context,
-        **nested_checkpoint_config.to_json_dict(),
+        data_context=context, **nested_checkpoint_config.to_json_dict()
     )
 
     # template only

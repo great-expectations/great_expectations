@@ -3049,10 +3049,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 checkpoint_config = checkpoint_config.to_json_dict()
                 checkpoint_config.update({"name": checkpoint_name})
 
-                instantiated_class = Checkpoint(
-                    data_context=self,
-                    **checkpoint_config,
-                )
+                instantiated_class = Checkpoint(data_context=self, **checkpoint_config)
 
                 checkpoint_config = CheckpointConfig.from_commented_map(
                     commented_map=instantiated_class.config.commented_map
