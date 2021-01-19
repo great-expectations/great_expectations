@@ -496,12 +496,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             try:
                 # use the schema name configured for the datasource
-                query_schema = self.engine.url.query.get("schema")
+                temp_table_schema_name = self.engine.url.query.get("schema")
             except AttributeError as err:
                 # sqlite/mssql dialects use a Connection object instead of Engine and override self.engine
                 # retrieve the schema from the Connection object i.e. self.engine
                 conn_object = self.engine
-                query_schema = conn_object.engine.url.query.get("schema")
+                temp_table_schema_name = conn_object.engine.url.query.get("schema")
 
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
@@ -564,7 +564,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql:
             self.create_temporary_table(
-                table_name, custom_sql, schema_name=query_schema
+                table_name, custom_sql, schema_name=temp_table_schema_name
             )
 
             if self.generated_table_name is not None:
