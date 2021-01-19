@@ -503,7 +503,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 conn_object = self.engine
                 query_schema = conn_object.engine.url.query.get("schema")
 
-            self._table = sa.Table(table_name, sa.MetaData(), schema=query_schema)
+            self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
@@ -583,7 +583,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
-            self.columns = insp.get_columns(table_name, schema=query_schema)
+            self.columns = insp.get_columns(table_name, schema=schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
