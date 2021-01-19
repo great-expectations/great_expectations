@@ -238,6 +238,7 @@ stages:
 
           - script: |
               printf 'Waiting for MySQL database to accept connections'
+              head assets/docker/mysql/data/Titanic.csv
               until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
                 printf '.'
                 sleep 1;
