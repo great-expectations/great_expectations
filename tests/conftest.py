@@ -2703,6 +2703,95 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
 
 
 @pytest.fixture
+def data_context_v3_parameterized_expectation_suite(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+    )
+
+    context = ge.data_context.DataContext(context_path)
+
+    datasource_config = f"""
+            class_name: Datasource
+
+            execution_engine:
+                class_name: PandasExecutionEngine
+
+            data_connectors:
+                my_runtime_data_connector:
+                    module_name: great_expectations.datasource.data_connector
+                    class_name: RuntimeDataConnector
+                    runtime_keys:
+                        - pipeline_stage_name
+                        - airflow_run_id
+
+                my_special_data_connector:
+                    class_name: ConfiguredAssetFilesystemDataConnector
+                    base_directory: {data_path}
+                    glob_directive: "*.csv"
+
+                    default_regex:
+                        pattern: (.+)\\.csv
+                        group_names:
+                            - name
+                    assets:
+                        users:
+                            base_directory: {data_path}
+                            pattern: (.+)_(\\d+)_(\\d+)\\.csv
+                            group_names:
+                                - name
+                                - timestamp
+                                - size
+
+                my_other_data_connector:
+                    class_name: ConfiguredAssetFilesystemDataConnector
+                    base_directory: {data_path}
+                    glob_directive: "*.csv"
+
+                    default_regex:
+                        pattern: (.+)\\.csv
+                        group_names:
+                            - name
+                    assets:
+                        users: {{}}
+            """
+
+    context.test_yaml_config(name="my_datasource", yaml_config=datasource_config)
+
+
+@pytest.fixture
 def data_context_with_bad_notebooks(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs

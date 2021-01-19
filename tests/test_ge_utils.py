@@ -139,6 +139,35 @@ def test_validate_using_data_context(
     assert res.statistics["evaluated_expectations"] == 2
 
 
+def test_validate_using_newstyle_data_context(
+    dataset, data_context_v3_parameterized_expectation_suite
+):
+    # Before running, the data context should not have compiled parameters
+    assert (
+        data_context_v3_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled
+        is False
+    )
+    with pytest.warns(
+        Warning, match=r"This configuration object was built using version"
+    ):
+        res = ge.validate(
+            dataset,
+            expectation_suite_name="my_dag_node.default",
+            data_context=data_context_v3_parameterized_expectation_suite,
+        )
+
+    # Since the handling of evaluation parameters is no longer happening without an action,
+    # the context should still be not compiles after validation.
+    assert (
+        data_context_v3_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled
+        is False
+    )
+
+    # And, we should have validated the right number of expectations from the context-provided config
+    assert res.success is False
+    assert res.statistics["evaluated_expectations"] == 2
+
+
 def test_validate_using_data_context_path(
     dataset, data_context_parameterized_expectation_suite
 ):
