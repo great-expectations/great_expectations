@@ -26,7 +26,7 @@ confidence, and acceleration to data science and data engineering teams.
 Why would I use Great Expectations?
 ***********************************
 
-One of the key statements we hear from data engineering teams that use Great Expectations is: *"Our stakeholders would notice data issues before we did - which eroded trust in our data!"*
+One of the key statements we hear from data engineering teams that use Great Expectations is: *"Our stakeholders would notice data issues before we did -- which eroded trust in our data!"*
 
 With Great Expectations, you can assert what you *expect* from the data you load and transform, and catch data issues quickly -- *Expectations are basically unit tests for your data*. Not only that, but Great Expectations also creates data documentation and data quality reports from those Expectations. Data engineering teams use Great Expectations to:
 
@@ -65,7 +65,7 @@ Key features
 
 **Data Docs**
 
-    Great Expectations renders Expectations to clean, human-readable documentation, which we call *Data Docs*, see the screenshot below. These HTML docs contain both your Expectation Suites as well as your data validation results each time validation is run -- think of it as a continuously updated data quality report.
+    Great Expectations renders Expectations to clean, human-readable documentation, which we call :ref:`Data Docs<data_docs>`, see the screenshot below. These HTML docs contain both your Expectation Suites as well as your data validation results each time validation is run -- think of it as a continuously updated data quality report.
 
 .. image:: images/datadocs.png
     :width: 800
