@@ -10,8 +10,11 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import (
+    OrderedProfilerCardinality,
     ProfilerCardinality,
     ProfilerDataType,
+    ProfilerDataTypesWithMapping,
+    ProfilerSemanticTypes,
     ProfilerTypeMapping,
 )
 from great_expectations.profile.basic_dataset_profiler import (
@@ -74,22 +77,32 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             self._validate_config(self.config)
 
         self.ignored_columns = self.config.get("ignored_columns") or []
+
         self.excluded_expectations = self.config.get("excluded_expectations") or []
         self.value_set_threshold = self.config.get("value_set_threshold")
-        self.primary_or_compound_key = self.config.get("primary_or_compound_key") or []
         self.not_null_only = self.config.get("not_null_only")
         self.table_expectations_only = self.config.get("table_expectations_only")
-        if self.table_expectations_only is True:
+        if self.table_expectations_only:
             self.ignored_columns = self.dataset.get_table_columns()
+        self.primary_or_compound_key = self.config.get("primary_or_compound_key") or []
+
+        if self.primary_or_compound_key:
+            for column in self.primary_or_compound_key:
+                if column not in dataset.get_table_columns():
+                    raise ValueError(
+                        f"Column {column} not found. Please ensure that this column is in the dataset if"
+                        f"you would like to use it as a primary_or_compound_key."
+                    )
 
         included_columns = [
             column_name
             for column_name in dataset.get_table_columns()
             if column_name not in self.ignored_columns
         ]
+
         for column_name in included_columns:
-            self._get_column_cardinality_with_caching(dataset, column_name)
-            self._add_column_type_and_build_type_expectations(dataset, column_name)
+            self._add_column_cardinality_to_column_info(dataset, column_name)
+            self._add_column_type_to_column_info(dataset, column_name)
 
         self.semantic_type_dict = self.config.get("semantic_types")
         if self.semantic_type_dict is not None:
@@ -159,7 +172,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
     def _profile_and_build_expectation_list(self, tolerance=0):
         if not self.value_set_threshold:
-            self.value_set_threshold = "many"
+            self.value_set_threshold = "MANY"
 
         if self.primary_or_compound_key:
             self._build_expectations_primary_or_compound_key(
@@ -170,23 +183,24 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             data_type = column_info.get("type")
             cardinality = column_info.get("cardinality")
 
-            if data_type in ("float", "int", "numeric"):
+            if data_type in ("FLOAT", "INT", "NUMERIC"):
                 self._build_expectations_numeric(
                     dataset=self.dataset,
                     column=column_name,
                     tolerance=tolerance,
                 )
 
-            if data_type == "datetime":
+            if data_type == "DATETIME":
                 self._build_expectations_datetime(
                     dataset=self.dataset,
                     column=column_name,
                     tolerance=tolerance,
                 )
 
-            if self._cardinality_enumeration.get(
-                self.value_set_threshold
-            ) >= self._cardinality_enumeration.get(cardinality):
+            if (
+                OrderedProfilerCardinality[self.value_set_threshold.upper()]
+                >= OrderedProfilerCardinality[cardinality.upper()]
+            ):
                 self._build_expectations_value_set(
                     dataset=self.dataset, column=column_name
                 )
@@ -234,7 +248,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 "Entries in semantic type dict must be lists of column names e.g. "
                 "{'semantic_types': {'numeric': ['number_of_transactions']}}"
             )
-            if k not in self._semantic_types:
+            if k.upper() not in ProfilerSemanticTypes.__members__:
                 logger.debug(
                     f"{k} is not a recognized semantic_type and will be skipped."
                 )
@@ -256,19 +270,19 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 processed_column = self.column_info.get(column_name)
                 if semantic_type == "datetime":
                     assert processed_column.get("type") in (
-                        "datetime",
-                        "string",
+                        "DATETIME",
+                        "STRING",
                     ), (  # TODO: Should we allow strings here?
                         f"Column {column_name} must be a datetime column or a string but appears to be "
                         f"{processed_column.get('type')}"
                     )
                 elif semantic_type == "numeric":
                     assert processed_column.get("type") in (
-                        "int",
-                        "float",
-                        "numeric",
+                        "INT",
+                        "FLOAT",
+                        "NUMERIC",
                     ), f"Column {column_name} must be an int or a float but appears to be {processed_column.get('type')}"
-                elif semantic_type in ("string", "value_set"):
+                elif semantic_type in ("STRING", "VALUE_SET"):
                     pass
                 # Should we validate value_set expectations if the cardinality is unexpected? This behavior conflicts
                 #  with the compare two tables functionality, which is why I am not including it for now.
@@ -279,16 +293,13 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 # else:
                 #     logger.debug(f"Semantic_type: {semantic_type} is unknown. Skipping")
 
-    def _add_column_type_and_build_type_expectations(self, dataset, column_name):
-        type_expectation_is_excluded = False
+    def _add_column_type_to_column_info(self, dataset, column_name):
         if "expect_column_values_to_be_in_type_list" in self.excluded_expectations:
-            type_expectation_is_excluded = True
             logger.debug(
                 "expect_column_values_to_be_in_type_list is in the excluded_expectations list. This"
                 "expectation is required to establish column data, so it will be run and then removed from the"
                 "expectation suite."
             )
-
         column_info_entry = self.column_info.get(column_name)
         if not column_info_entry:
             column_info_entry = {}
@@ -302,7 +313,70 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         return column_type
 
-    def _get_column_cardinality_with_caching(self, dataset, column_name):
+    def _get_column_type(self, df, column):
+        # list of types is used to support pandas and sqlalchemy
+        type_ = None
+        df.set_config_value("interactive_evaluation", True)
+        try:
+
+            if (
+                df.expect_column_values_to_be_in_type_list(
+                    column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
+                ).success
+                and df.expect_column_values_to_be_in_type_list(
+                    column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
+                ).success
+            ):
+                type_ = "NUMERIC"
+
+            elif df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
+            ).success:
+                type_ = "INT"
+
+            elif df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
+            ).success:
+                type_ = "FLOAT"
+
+            elif df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.STRING_TYPE_NAMES))
+            ).success:
+                type_ = "STRING"
+
+            elif df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES))
+            ).success:
+                type_ = "BOOLEAN"
+
+            elif df.expect_column_values_to_be_in_type_list(
+                column, type_list=sorted(list(ProfilerTypeMapping.DATETIME_TYPE_NAMES))
+            ).success:
+                type_ = "DATETIME"
+
+            else:
+                df.expect_column_values_to_be_in_type_list(column, type_list=None)
+                type_ = "UNKNOWN"
+        except NotImplementedError:
+            type_ = "unknown"
+
+        if type_ == "numeric":
+            df.expect_column_values_to_be_in_type_list(
+                column,
+                type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
+                + sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)),
+            )
+
+        df.set_config_value("interactive_evaluation", False)
+        df.remove_expectation(
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_type_list",
+                kwargs={"column": column},
+            )
+        )
+        return type_
+
+    def _add_column_cardinality_to_column_info(self, dataset, column_name):
         column_info_entry = self.column_info.get(column_name)
         if not column_info_entry:
             column_info_entry = {}
@@ -328,6 +402,34 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         return column_cardinality
 
+    def _get_column_cardinality(self, df, column):
+        num_unique = None
+        pct_unique = None
+        df.set_config_value("interactive_evaluation", True)
+
+        try:
+            num_unique = df.expect_column_unique_value_count_to_be_between(
+                column, None, None
+            ).result["observed_value"]
+            pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
+                column, None, None
+            ).result["observed_value"]
+        except KeyError:  # if observed_value value is not set
+            logger.error(
+                "Failed to get cardinality of column {:s} - continuing...".format(
+                    column
+                )
+            )
+        # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
+        #  percentage, so it was tweaked here, but is still experimental.
+        cardinality = OrderedProfilerCardinality.get_basic_column_cardinality(
+            num_unique, pct_unique
+        )
+
+        df.set_config_value("interactive_evaluation", False)
+
+        return cardinality
+
     def _add_semantic_types_by_column_from_config_to_column_info(
         self, dataset, config, column_name
     ):
@@ -344,7 +446,10 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             ), f"The semantic_types dict in the config must be a dictionary, but is currently a {type(self.semantic_type_dict)}. Please reformat."
             semantic_types = []
             for semantic_type, column_list in self.semantic_type_dict.items():
-                if column_name in column_list and semantic_type in self._semantic_types:
+                if (
+                    column_name in column_list
+                    and semantic_type.upper() in ProfilerSemanticTypes.__members__
+                ):
                     semantic_types.append(semantic_type)
             column_info_entry["semantic_types"] = semantic_types
 
@@ -745,7 +850,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         if "expect_column_values_to_be_in_type_list" not in self.excluded_expectations:
             col_type = self.column_info.get(column).get("type")
-            type_list = self._type_list_mapping.get(col_type)
+            type_list = ProfilerDataTypesWithMapping[col_type.upper()].value
             dataset.expect_column_values_to_be_in_type_list(column, type_list=type_list)
 
     def _build_expectations_table(self, dataset, tolerance=0):
@@ -767,143 +872,8 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 min_value=min_value, max_value=max_value
             )
 
-    def _get_column_type(self, df, column):
-
-        # list of types is used to support pandas and sqlalchemy
-        type_ = None
-        df.set_config_value("interactive_evaluation", True)
-        try:
-
-            if (
-                df.expect_column_values_to_be_in_type_list(
-                    column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
-                ).success
-                and df.expect_column_values_to_be_in_type_list(
-                    column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
-                ).success
-            ):
-                type_ = "numeric"
-
-            elif df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
-            ).success:
-                type_ = "int"
-
-            elif df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
-            ).success:
-                type_ = "float"
-
-            elif df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(ProfilerTypeMapping.STRING_TYPE_NAMES))
-            ).success:
-                type_ = "string"
-
-            elif df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES))
-            ).success:
-                type_ = "boolean"
-
-            elif df.expect_column_values_to_be_in_type_list(
-                column, type_list=sorted(list(ProfilerTypeMapping.DATETIME_TYPE_NAMES))
-            ).success:
-                type_ = "datetime"
-
-            else:
-                df.expect_column_values_to_be_in_type_list(column, type_list=None)
-                type_ = "unknown"
-        except NotImplementedError:
-            type_ = "unknown"
-
-        if type_ == "numeric":
-            df.expect_column_values_to_be_in_type_list(
-                column,
-                type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
-                + sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)),
-            )
-
-        df.set_config_value("interactive_evaluation", False)
-        df.remove_expectation(
-            ExpectationConfiguration(
-                expectation_type="expect_column_values_to_be_in_type_list",
-                kwargs={"column": column},
-            )
-        )
-        return type_
-
-    def _get_column_cardinality(self, df, column):
-        num_unique = None
-        pct_unique = None
-        df.set_config_value("interactive_evaluation", True)
-
-        try:
-            num_unique = df.expect_column_unique_value_count_to_be_between(
-                column, None, None
-            ).result["observed_value"]
-            pct_unique = df.expect_column_proportion_of_unique_values_to_be_between(
-                column, None, None
-            ).result["observed_value"]
-        except KeyError:  # if observed_value value is not set
-            logger.error(
-                "Failed to get cardinality of column {:s} - continuing...".format(
-                    column
-                )
-            )
-        # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
-        #  percentage, so it was tweaked here, but is still experimental.
-        if num_unique is None or num_unique == 0 or pct_unique is None:
-            cardinality = "none"
-        elif pct_unique == 1.0:
-            cardinality = "unique"
-        elif num_unique == 1:
-            cardinality = "one"
-        elif num_unique == 2:
-            cardinality = "two"
-        elif num_unique < 20:
-            cardinality = "very_few"
-        elif num_unique < 60:
-            cardinality = "few"
-        elif pct_unique > 0.1:
-            cardinality = "very_many"
-        else:
-            cardinality = "many"
-
-        df.set_config_value("interactive_evaluation", False)
-
-        return cardinality
-
     def _is_nan(self, value):
         try:
             return np.isnan(value)
         except TypeError:
             return False
-
-    _cardinality_enumeration = {
-        "none": 0,
-        "one": 1,
-        "two": 2,
-        "very_few": 3,
-        "few": 4,
-        "many": 5,
-        "very_many": 6,
-        "unique": 7,
-    }
-    _semantic_types = {
-        "datetime",
-        "numeric",
-        "string",
-        "value_set",
-        "boolean",
-        "other",
-    }
-
-    _type_list_mapping = {
-        "int": list(ProfilerTypeMapping.INT_TYPE_NAMES),
-        "float": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
-        "numeric": list(ProfilerTypeMapping.INT_TYPE_NAMES)
-        + list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
-        "string": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
-        "boolean": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
-        "datetime": list(ProfilerTypeMapping.DATETIME_TYPE_NAMES),
-        "unknown": ["unknown"],
-    }

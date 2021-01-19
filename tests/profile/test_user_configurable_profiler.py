@@ -175,38 +175,38 @@ def test__initialize_cach_with_metadata_with_semantic_types(
     assert "col_one" not in profiler.column_info
 
     assert profiler.column_info.get("col_none") == {
-        "cardinality": "none",
-        "type": "numeric",
+        "cardinality": "NONE",
+        "type": "NUMERIC",
         "semantic_types": [],
     }
     assert profiler.column_info.get("col_two") == {
-        "cardinality": "two",
-        "type": "int",
+        "cardinality": "TWO",
+        "type": "INT",
         "semantic_types": ["value_set"],
     }
     assert profiler.column_info.get("col_very_few") == {
-        "cardinality": "very_few",
-        "type": "int",
+        "cardinality": "VERY_FEW",
+        "type": "INT",
         "semantic_types": ["value_set"],
     }
     assert profiler.column_info.get("col_few") == {
-        "cardinality": "few",
-        "type": "int",
+        "cardinality": "FEW",
+        "type": "INT",
         "semantic_types": ["numeric"],
     }
     assert profiler.column_info.get("col_many") == {
-        "cardinality": "many",
-        "type": "int",
+        "cardinality": "MANY",
+        "type": "INT",
         "semantic_types": ["numeric"],
     }
     assert profiler.column_info.get("col_very_many") == {
-        "cardinality": "very_many",
-        "type": "int",
+        "cardinality": "VERY_MANY",
+        "type": "INT",
         "semantic_types": ["numeric"],
     }
     assert profiler.column_info.get("col_unique") == {
-        "cardinality": "unique",
-        "type": "int",
+        "cardinality": "UNIQUE",
+        "type": "INT",
         "semantic_types": [],
     }
 
@@ -327,3 +327,48 @@ def test_build_suite_when_suite_already_exists(cardinality_dataset):
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
     assert len(suite.expectations) == 1
     assert "expect_table_row_count_to_be_between" in expectations
+
+
+def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
+    # regular case, should pass
+    working_config = {"primary_or_compound_key": ["col_unique"]}
+    working_profiler = UserConfigurableProfiler(cardinality_dataset, working_config)
+    assert working_profiler.primary_or_compound_key == ["col_unique"]
+
+    # key includes a non-existent column, should fail
+    bad_key_config = {
+        "primary_or_compound_key": ["col_unique", "col_that_does_not_exist"]
+    }
+    with pytest.raises(ValueError) as e:
+        bad_key_profiler = UserConfigurableProfiler(cardinality_dataset, bad_key_config)
+    assert e.value.args[0] == (
+        f"Column col_that_does_not_exist not found. Please ensure that this column is in the dataset if"
+        f"you would like to use it as a primary_or_compound_key."
+    )
+
+    # key includes a column that exists, but is in ignored_columns, should pass
+    ignored_column_config = {
+        "primary_or_compound_key": ["col_unique", "col_one"],
+        "ignored_columns": ["col_none", "col_one"],
+    }
+    ignored_column_profiler = UserConfigurableProfiler(
+        cardinality_dataset, ignored_column_config
+    )
+    assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
+
+
+def test_profiled_dataset_passes_own_validation(
+    cardinality_dataset, titanic_data_context
+):
+    context = titanic_data_context
+    config = {"ignored_columns": ["col_none"]}
+    profiler = UserConfigurableProfiler(cardinality_dataset, config)
+    suite = profiler.build_suite()
+
+    context.save_expectation_suite(cardinality_dataset.get_expectation_suite())
+    results = context.run_validation_operator(
+        "action_list_operator", assets_to_validate=[cardinality_dataset]
+    )
+    validation_result_identifier = results.list_validation_result_identifiers()[0]
+
+    assert results["success"]

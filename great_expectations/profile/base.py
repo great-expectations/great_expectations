@@ -18,6 +18,81 @@ from ..dataset import Dataset
 logger = logging.getLogger(__name__)
 
 
+class OrderedEnum(Enum):
+    def __ge__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value >= other.value
+        return NotImplemented
+
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value > other.value
+        return NotImplemented
+
+    def __le__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value <= other.value
+        return NotImplemented
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
+
+
+class OrderedProfilerCardinality(OrderedEnum):
+    NONE = 0
+    ONE = 1
+    TWO = 2
+    VERY_FEW = 3
+    FEW = 4
+    MANY = 5
+    VERY_MANY = 6
+    UNIQUE = 7
+
+    @staticmethod
+    def get_basic_column_cardinality(num_unique=None, pct_unique=None):
+        if num_unique is None or num_unique == 0 or pct_unique is None:
+            cardinality = "NONE"
+        elif pct_unique == 1.0:
+            cardinality = "UNIQUE"
+        elif num_unique == 1:
+            cardinality = "ONE"
+        elif num_unique == 2:
+            cardinality = "TWO"
+        elif num_unique < 20:
+            cardinality = "VERY_FEW"
+        elif num_unique < 60:
+            cardinality = "FEW"
+        elif pct_unique > 0.1:
+            cardinality = "VERY_MANY"
+        else:
+            cardinality = "MANY"
+
+        return cardinality
+
+    # def __init__(self, config=None, config_parser=None):
+    #     if not config:
+    #         cardinality_enumeration = {
+    #             "none": 0,
+    #             "one": 1,
+    #             "two": 2,
+    #             "very_few": 3,
+    #             "few": 4,
+    #             "many": 5,
+    #             "very_many": 6,
+    #             "unique": 7,
+    #         }
+    #         return cardinality_enumeration
+    #
+    #     else:
+    #           return parse_config(config)
+    #
+    # def parse_config(self, config):
+    #     ...
+    #
+
+
 class ProfilerDataType(Enum):
     """Useful data types for building profilers."""
 
@@ -115,6 +190,27 @@ class ProfilerTypeMapping:
         "datetime64",
         "Timestamp",
     ]
+
+
+class ProfilerDataTypesWithMapping(Enum):
+    INT = list(ProfilerTypeMapping.INT_TYPE_NAMES)
+    FLOAT = list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)
+    NUMERIC = list(ProfilerTypeMapping.INT_TYPE_NAMES) + list(
+        ProfilerTypeMapping.FLOAT_TYPE_NAMES
+    )
+    STRING = list(ProfilerTypeMapping.STRING_TYPE_NAMES)
+    BOOLEAN = list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES)
+    DATETIME = list(ProfilerTypeMapping.DATETIME_TYPE_NAMES)
+    UNKNOWN = ["unknown"]
+
+
+class ProfilerSemanticTypes(Enum):
+    DATETIME = 0
+    NUMERIC = 1
+    STRING = 2
+    VALUE_SET = 3
+    BOOLEAN = 4
+    OTHER = 5
 
 
 class Profiler(metaclass=abc.ABCMeta):
