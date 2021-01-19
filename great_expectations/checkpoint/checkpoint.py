@@ -14,7 +14,7 @@ from great_expectations.core.util import (
     nested_update,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.data_context.util import substitute_all_config_variables
+from great_expectations.data_context.util import substitute_all_config_variables, instantiate_class_from_config
 from great_expectations.exceptions import CheckpointError
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -34,7 +34,7 @@ class Checkpoint:
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
-        configurator=None,
+        configurator: Optional[dict] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequest, dict]] = None,
@@ -52,26 +52,59 @@ class Checkpoint:
             raise TypeError("A checkpoint requires a valid DataContext")
         self._data_context = data_context
 
-        checkpoint_config: CheckpointConfig = CheckpointConfig(
-            **{
-                "name": name,
-                "config_version": config_version,
-                "template_name": template_name,
-                "module_name": module_name,
-                "class_name": class_name,
-                "run_name_template": run_name_template,
-                "expectation_suite_name": expectation_suite_name,
-                "batch_request": batch_request,
-                "action_list": action_list,
-                "evaluation_parameters": evaluation_parameters,
-                "runtime_configuration": runtime_configuration,
-                "validations": validations,
-                "profilers": profilers,
-                # Next two fields are for LegacyCheckpoint configuration
-                "validation_operator_name": validation_operator_name,
-                "batches": batches,
-            }
-        )
+        if configurator:
+            configurator_obj = instantiate_class_from_config(
+                config={
+                    "class_name": configurator.get("class_name"),
+                    "name": name,
+                    "data_context": data_context,
+                    "config_version": config_version,
+                    "template_name": template_name,
+                    # "class_name": class_name,
+                    "configurator": configurator,
+                    "run_name_template": run_name_template,
+                    "expectation_suite_name": expectation_suite_name,
+                    "batch_request": batch_request,
+                    "action_list": action_list,
+                    "evaluation_parameters": evaluation_parameters,
+                    "runtime_configuration": runtime_configuration,
+                    "validations": validations,
+                    "profilers": profilers,
+                    # Next two fields are for LegacyCheckpoint configuration
+                    "validation_operator_name": validation_operator_name,
+                    "batches": batches,
+                },
+                config_defaults={
+                    "module_name": "great_expectations.checkpoint"
+                },
+                runtime_environment={
+                    "data_context": data_context,
+                }
+            )
+            checkpoint_config: CheckpointConfig = configurator_obj.build()
+            if class_name is not None:
+                checkpoint_config.class_name = class_name
+        else:
+            checkpoint_config: CheckpointConfig = CheckpointConfig(
+                **{
+                    "name": name,
+                    "config_version": config_version,
+                    "template_name": template_name,
+                    "module_name": module_name,
+                    "class_name": class_name,
+                    "run_name_template": run_name_template,
+                    "expectation_suite_name": expectation_suite_name,
+                    "batch_request": batch_request,
+                    "action_list": action_list,
+                    "evaluation_parameters": evaluation_parameters,
+                    "runtime_configuration": runtime_configuration,
+                    "validations": validations,
+                    "profilers": profilers,
+                    # Next two fields are for LegacyCheckpoint configuration
+                    "validation_operator_name": validation_operator_name,
+                    "batches": batches,
+                }
+            )
         self._config = checkpoint_config
 
         self._substituted_config = None
