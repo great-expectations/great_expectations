@@ -46,7 +46,7 @@ Steps
 
         python expect_column_values_to_equal_three.py
 
-    Running the script will execute the ``self_check`` method for your new class. Initially, it will just return:
+    Running the script will execute the ``run_diagnostics`` method for your new class. Initially, it will just return:
 
     .. code-block:: json
 
@@ -77,7 +77,7 @@ Steps
 
 #. Add an example test in the ``examples`` dictionary staring on line 46.
 
-    Most of the other functionality in ``self_check`` depends on having an example to work from.
+    Most of the other functionality in ``run_diagnostics`` depends on having an example to work from.
 
     The ``examples`` dictionary contains 
     

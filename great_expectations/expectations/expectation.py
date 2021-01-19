@@ -703,7 +703,28 @@ class Expectation(ABC, metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def self_check(self, pretty_print=True):
+    def run_diagnostics(self, pretty_print=True):
+        """
+        Produce a diagnostic report about this expectation.
+        The current uses for this method's output are
+        using the JSON structure to populate the Public Expectation Gallery
+        and enabling a fast devloop for developing new expectations where the
+        contributors can quickly check the completeness of their expectations.
+
+        The content of the report:
+        * name and description
+        * "library metadata", such as the GitHub usernames of the expectation's authors
+        * the execution engines the expectation is implemented for
+        * the implemented renderers
+        * tests in "examples" member variable
+        * the tests are executed against the execution engines for which the expectation
+        is implemented and the output of the test runs is included in the report.
+
+        :param pretty_print: TODO: this argument is not currently used. The intent is to return
+        a well formatted and easily readable text instead of the dictionary when the argument is set
+        to True
+        :return: a dictionary view of the report
+        """
 
         camel_name = self.__class__.__name__
         snake_name = camel_to_snake(self.__class__.__name__)

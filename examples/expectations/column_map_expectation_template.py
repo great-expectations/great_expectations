@@ -190,5 +190,5 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnValuesToEqualThree().self_check()
+    self_check_report = ExpectColumnValuesToEqualThree().run_diagnostics()
     print(json.dumps(self_check_report, indent=2))

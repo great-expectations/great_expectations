@@ -379,5 +379,5 @@ class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnCustomMedianToBeBetween().self_check()
+    self_check_report = ExpectColumnCustomMedianToBeBetween().run_diagnostics()
     print(json.dumps(self_check_report, indent=2))
