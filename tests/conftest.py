@@ -2344,8 +2344,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
 
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
-        config_version=1,
         name="my_simple_template_checkpoint",
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
         action_list=[
             {
@@ -2390,20 +2390,10 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
 
     # add nested template configs
     nested_checkpoint_template_config_1 = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint_template_1",
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
         expectation_suite_name="suite_from_template_1",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource_template_1",
-                    "data_connector_name": "my_special_data_connector_template_1",
-                    "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
-                }
-            }
-        ],
         action_list=[
             {
                 "name": "store_validation_result",
@@ -2436,6 +2426,16 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
             "partial_unexpected_count": "FOOBARBOO",
             "template_1_key": 123,
         },
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource_template_1",
+                    "data_connector_name": "my_special_data_connector_template_1",
+                    "data_asset_name": "users_from_template_1",
+                    "partition_request": {"partition_index": -999},
+                }
+            }
+        ],
     )
     nested_checkpoint_template_config_1_key = ConfigurationIdentifier(
         configuration_key=nested_checkpoint_template_config_1.name
@@ -2446,8 +2446,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     )
 
     nested_checkpoint_template_config_2 = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint_template_2",
+        config_version=1,
         template_name="my_nested_checkpoint_template_1",
         run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
         action_list=[
@@ -2494,8 +2494,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     )
 
     nested_checkpoint_template_config_3 = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint_template_3",
+        config_version=1,
         template_name="my_nested_checkpoint_template_2",
         run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
         action_list=[

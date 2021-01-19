@@ -510,6 +510,7 @@ class ActionDicts:
 # pattern in data context config with default enums
 #
 
+
 class SimpleCheckpointConfigurator:
     """
     SimpleCheckpointBuilder is a convenience class to easily configure a simple

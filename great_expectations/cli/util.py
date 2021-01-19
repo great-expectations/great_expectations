@@ -11,10 +11,7 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.python_subprocess import (
     execute_shell_command_with_progress_polling,
 )
-from great_expectations.util import (
-    import_library_module,
-    is_library_loadable,
-)
+from great_expectations.util import import_library_module, is_library_loadable
 
 try:
     from termcolor import colored

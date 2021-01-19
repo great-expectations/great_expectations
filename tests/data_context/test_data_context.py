@@ -1419,6 +1419,7 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     assert os.path.isdir(os.path.join(data_docs_dir, "static"))
     assert not os.path.isfile(index_path)
 
+
 def test_get_site_names(
     tmp_path_factory, empty_data_context, basic_data_context_config
 ):
@@ -1427,6 +1428,7 @@ def test_get_site_names(
     base_path = tmp_path_factory.mktemp("foo")
     context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
     assert context.get_site_names() == []
+
 
 def test_load_config_variables_file(
     basic_data_context_config, tmp_path_factory, monkeypatch
@@ -1749,8 +1751,8 @@ def test_run_checkpoint_newstyle(
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
-        config_version=1,
         name="my_checkpoint",
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=[

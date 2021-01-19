@@ -2,8 +2,8 @@ import pytest
 
 from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
-    SimpleCheckpointConfigurator,
     CheckpointResult,
+    SimpleCheckpointConfigurator,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
 
@@ -117,7 +117,9 @@ def test_simple_checkpoint_raises_error_on_invalid_slack_webhook(
     empty_data_context,
 ):
     with pytest.raises(ValueError):
-        SimpleCheckpointConfigurator("foo", empty_data_context, slack_webhook="bad").build()
+        SimpleCheckpointConfigurator(
+            "foo", empty_data_context, slack_webhook="bad"
+        ).build()
 
 
 def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_present(
@@ -172,7 +174,9 @@ def test_simple_checkpoint_raises_error_on_invalid_notify_on(
 ):
     for bad in [1, "bar", None, []]:
         with pytest.raises(ValueError):
-            SimpleCheckpointConfigurator("foo", empty_data_context, notify_on=bad).build()
+            SimpleCheckpointConfigurator(
+                "foo", empty_data_context, notify_on=bad
+            ).build()
 
 
 def test_simple_checkpoint_raises_error_on_missing_slack_webhook_when_notify_on_is_list(
@@ -199,7 +203,9 @@ def test_simple_checkpoint_raises_error_on_invalid_notify_with(
 ):
     for bad in [1, "bar", ["local_site", 3]]:
         with pytest.raises(ValueError):
-            SimpleCheckpointConfigurator("foo", empty_data_context, notify_with=bad).build()
+            SimpleCheckpointConfigurator(
+                "foo", empty_data_context, notify_with=bad
+            ).build()
 
 
 def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specified(
@@ -296,7 +302,9 @@ def test_simple_checkpoint_raises_errors_on_site_name_that_does_not_exist_on_dat
     # assert the fixture is adequate
     assert "prod" not in empty_data_context.get_site_names()
     with pytest.raises(ValueError):
-        SimpleCheckpointConfigurator("foo", empty_data_context, site_names=["prod"]).build()
+        SimpleCheckpointConfigurator(
+            "foo", empty_data_context, site_names=["prod"]
+        ).build()
 
 
 def test_simple_checkpoint_has_update_data_docs_action_that_should_update_selected_sites_when_sites_are_selected(

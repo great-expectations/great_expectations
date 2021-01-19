@@ -963,8 +963,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
-        config_version=1,
         name="my_checkpoint",
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=[
@@ -1029,8 +1029,8 @@ def test_newstyle_checkpoint_config_substitution_simple(
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     simplified_checkpoint_config = CheckpointConfig(
-        config_version=1,
         name="my_simplified_checkpoint",
+        config_version=1,
         template_name="my_simple_template_checkpoint",
         expectation_suite_name="users.delivery",
         validations=[
@@ -1059,28 +1059,10 @@ def test_newstyle_checkpoint_config_substitution_simple(
 
     # template only
     expected_substituted_checkpoint_config_template_only = CheckpointConfig(
-        config_version=1,
         name="my_simplified_checkpoint",
-        expectation_suite_name="users.delivery",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
-                }
-            },
-        ],
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template-test",
+        expectation_suite_name="users.delivery",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1113,6 +1095,24 @@ def test_newstyle_checkpoint_config_substitution_simple(
                 "partial_unexpected_count": 20,
             }
         },
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {"partition_index": -1},
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_other_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {"partition_index": -2},
+                }
+            },
+        ],
     )
 
     substituted_config_template_only = simplified_checkpoint.get_substituted_config()
@@ -1130,44 +1130,10 @@ def test_newstyle_checkpoint_config_substitution_simple(
     # template and runtime kwargs
     expected_substituted_checkpoint_config_template_and_runtime_kwargs = (
         CheckpointConfig(
-            config_version=1,
             name="my_simplified_checkpoint",
-            expectation_suite_name="runtime_suite_name",
-            validations=[
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_special_data_connector",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -1},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -2},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
-                    }
-                },
-            ],
+            config_version=1,
             run_name_template="runtime_run_template",
+            expectation_suite_name="runtime_suite_name",
             action_list=[
                 {
                     "name": "store_validation_result",
@@ -1202,6 +1168,40 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "new_runtime_config_key": "bleepy!",
                 }
             },
+            validations=[
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -1},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -2},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_2",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -3},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_3",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -4},
+                    }
+                },
+            ],
         )
     )
 
@@ -1292,8 +1292,8 @@ def test_newstyle_checkpoint_config_substitution_nested(
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     nested_checkpoint_config = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint",
+        config_version=1,
         template_name="my_nested_checkpoint_template_2",
         expectation_suite_name="users.delivery",
         validations=[
@@ -1322,36 +1322,10 @@ def test_newstyle_checkpoint_config_substitution_nested(
 
     # template only
     expected_nested_checkpoint_config_template_only = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint",
-        expectation_suite_name="users.delivery",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource_template_1",
-                    "data_connector_name": "my_special_data_connector_template_1",
-                    "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
-                }
-            },
-        ],
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template-test-template-2",
+        expectation_suite_name="users.delivery",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1388,6 +1362,32 @@ def test_newstyle_checkpoint_config_substitution_nested(
             "partial_unexpected_count": 20,
             "template_1_key": 123,
         },
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource_template_1",
+                    "data_connector_name": "my_special_data_connector_template_1",
+                    "data_asset_name": "users_from_template_1",
+                    "partition_request": {"partition_index": -999},
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {"partition_index": -1},
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_other_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {"partition_index": -2},
+                }
+            },
+        ],
     )
 
     substituted_config_template_only = nested_checkpoint.get_substituted_config()
@@ -1405,52 +1405,10 @@ def test_newstyle_checkpoint_config_substitution_nested(
     # runtime kwargs with new checkpoint template name passed at runtime
     expected_nested_checkpoint_config_template_and_runtime_template_name = (
         CheckpointConfig(
-            config_version=1,
             name="my_nested_checkpoint",
-            expectation_suite_name="runtime_suite_name",
-            validations=[
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource_template_1",
-                        "data_connector_name": "my_special_data_connector_template_1",
-                        "data_asset_name": "users_from_template_1",
-                        "partition_request": {"partition_index": -999},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_special_data_connector",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -1},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -2},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2_runtime",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3_runtime",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
-                    }
-                },
-            ],
+            config_version=1,
             run_name_template="runtime_run_template",
+            expectation_suite_name="runtime_suite_name",
             action_list=[
                 {
                     "name": "store_validation_result",
@@ -1495,6 +1453,48 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 "template_3_key": "bloopy!",
                 "new_runtime_config_key": "bleepy!",
             },
+            validations=[
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource_template_1",
+                        "data_connector_name": "my_special_data_connector_template_1",
+                        "data_asset_name": "users_from_template_1",
+                        "partition_request": {"partition_index": -999},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -1},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -2},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_2_runtime",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -3},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_3_runtime",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -4},
+                    }
+                },
+            ],
         )
     )
 
