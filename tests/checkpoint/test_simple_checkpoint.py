@@ -93,21 +93,22 @@ def test_simple_checkpoint_default_properties_with_no_optional_arguments(
     update_data_docs_action,
 ):
     """This demonstrates the simplest possible usage."""
-    checkpoint = SimpleCheckpointConfigurator("foo", empty_data_context).build()
-    assert isinstance(checkpoint, Checkpoint)
+    Checkpoint(configurator={"class_name": "SimpleCheckpointConfigurator"}, name="blah",
+               data_context=empty_data_context, expectation_suite_name="my_suite_name")
+    checkpoint_config = SimpleCheckpointConfigurator("foo", empty_data_context).build()
+    assert isinstance(checkpoint_config, CheckpointConfig)
 
-    assert checkpoint.name == "foo"
-    assert checkpoint.data_context == empty_data_context
-    assert checkpoint.action_list == [
+    assert checkpoint_config.name == "foo"
+    assert checkpoint_config.action_list == [
         store_validation_result_action,
         store_eval_parameter_action,
         update_data_docs_action,
     ]
-    assert checkpoint.config.config_version == 1.0
-    assert checkpoint.config.class_name == "Checkpoint"
-    assert checkpoint.config.evaluation_parameters == {}
-    assert checkpoint.config.runtime_configuration == {}
-    assert checkpoint.config.validations == []
+    assert checkpoint_config.config_version == 1.0
+    assert checkpoint_config.class_name == "Checkpoint"
+    assert checkpoint_config.evaluation_parameters == {}
+    assert checkpoint_config.runtime_configuration == {}
+    assert checkpoint_config.validations == []
 
 
 def test_simple_checkpoint_raises_error_on_invalid_slack_webhook(
