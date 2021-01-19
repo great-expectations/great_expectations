@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Union
 
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.checkpoint import logger
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 
 
@@ -99,8 +100,9 @@ class SimpleCheckpointConfigurator:
         self.notify_on = notify_on
         self.notify_with = notify_with
         self.slack_webhook = slack_webhook
+        self.other_kwargs = kwargs
 
-    def build(self):
+    def build(self) -> CheckpointConfig:
         """Build a Checkpoint."""
         self._validate_site_names(self.data_context)
         self._validate_notify_on()
@@ -108,22 +110,29 @@ class SimpleCheckpointConfigurator:
         self._validate_slack_webhook()
         self._validate_slack_configuration()
 
-        checkpoint_config = self._build_checkpoint_config()
-        return Checkpoint(self.name, self.data_context, **checkpoint_config)
+        return self._build_checkpoint_config()
 
-    def _build_checkpoint_config(self) -> Dict:
+    def _build_checkpoint_config(self) -> CheckpointConfig:
         action_list = self._default_action_list()
         if self.site_names:
             action_list = self._add_update_data_docs_action(action_list)
         if self.slack_webhook:
             action_list = self._add_slack_action(action_list)
-        checkpoint_config = {
+        checkpoint_config = CheckpointConfig(**{
             "config_version": 1.0,
+            "name": self.name,
             "class_name": "Checkpoint",
             "action_list": action_list,
-        }
+        })
+        if self.other_kwargs:
+            checkpoint_config.update(
+                other_config=CheckpointConfig(**{
+                    "config_version": self.other_kwargs.pop("config_version", 1.0) or 1.0,
+                    **self.other_kwargs
+                })
+            )
         logger.debug(
-            f"SimpleCheckpoint built this CheckpointConfig: {json.dumps(checkpoint_config, indent=4)}"
+            f"SimpleCheckpoint built this CheckpointConfig: {json.dumps(checkpoint_config.to_json_dict(), indent=4)}"
         )
         return checkpoint_config
 

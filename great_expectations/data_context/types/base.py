@@ -1452,7 +1452,7 @@ class CheckpointConfigSchema(Schema):
     )
     template_name = fields.String(required=False, allow_none=True)
     module_name = fields.String(required=False, missing="great_expectations.checkpoint")
-    class_name = fields.Str(required=False, allow_none=True)
+    class_name = fields.Str(required=False, missing="Checkpoint")
     configurator = fields.Dict(
         required=False,
         allow_none=True,
@@ -1522,7 +1522,7 @@ class CheckpointConfig(BaseYamlConfig):
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
-        configurator=None,
+        configurator: Optional[dict] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
@@ -1572,8 +1572,9 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         if other_config is not None:
-            self.name = other_config.name
             # replace
+            if other_config.name is not None:
+                self.name = other_config.name
             if other_config.module_name is not None:
                 self.module_name = other_config.module_name
             if other_config.class_name is not None:
