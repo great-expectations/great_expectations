@@ -26,26 +26,14 @@ logger = logging.getLogger(__name__)
 
 
 class Checkpoint:
-    def __init__(
-        self,
-        name: str,
-        data_context,
-        config_version: Optional[Union[int, float]] = None,
-        template_name: Optional[str] = None,
-        module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
-    ):
+    def __init__(self, name: str, data_context, config_version: Optional[Union[int, float]] = None,
+                 template_name: Optional[str] = None, module_name: Optional[str] = None,
+                 class_name: Optional[str] = None, configurator=None, run_name_template: Optional[str] = None,
+                 expectation_suite_name: Optional[str] = None,
+                 batch_request: Optional[Union[BatchRequest, dict]] = None, action_list: Optional[List[dict]] = None,
+                 evaluation_parameters: Optional[dict] = None, runtime_configuration: Optional[dict] = None,
+                 validations: Optional[List[dict]] = None, profilers: Optional[List[dict]] = None,
+                 validation_operator_name: Optional[str] = None, batches: Optional[List[dict]] = None):
         self._name = name
         # Note the gross typechecking to avoid a circular import
         if "DataContext" not in str(type(data_context)):
@@ -394,12 +382,8 @@ class LegacyCheckpoint(Checkpoint):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
     ):
-        super().__init__(
-            name=name,
-            data_context=data_context,
-            validation_operator_name=validation_operator_name,
-            batches=batches,
-        )
+        super().__init__(name=name, data_context=data_context, validation_operator_name=validation_operator_name,
+                         batches=batches)
 
     @property
     def validation_operator_name(self):
