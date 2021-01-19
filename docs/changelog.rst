@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [MAINTENANCE] Ensure compatibility with new pip resolver v20.3+ #2256
 
 0.13.5
 -----------------
