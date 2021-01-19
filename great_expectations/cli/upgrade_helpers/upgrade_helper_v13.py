@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+from typing import Optional
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -59,24 +60,32 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         config_commented_map: CommentedMap = (
             self.data_context.get_config().commented_map
         )
-        if not (
-            config_commented_map["stores"].get(
+        checkpoint_store_name: Optional[str] = config_commented_map.get(
+            "checkpoint_store_name"
+        )
+        stores: dict = config_commented_map["stores"]
+        if checkpoint_store_name:
+            if stores.get(checkpoint_store_name):
+                self.upgrade_log["skipped_upgrade"] = True
+            else:
+                self.upgrade_checklist["stores"] = {
+                    checkpoint_store_name: DataContextConfigDefaults.DEFAULT_STORES.value[
+                        DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+                    ]
+                }
+        else:
+            checkpoint_store_name = (
                 DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             )
-            and config_commented_map.get("checkpoint_store_name")
-        ):
-            self.upgrade_checklist["stores"] = {
-                DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value: DataContextConfigDefaults.DEFAULT_STORES.value[
-                    DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-                ]
-            }
-            self.upgrade_checklist[
-                "checkpoint_store_name"
-            ] = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-        else:
-            self.upgrade_log["skipped_upgrade"] = True
+            self.upgrade_checklist["checkpoint_store_name"] = checkpoint_store_name
+            if not stores.get(checkpoint_store_name):
+                self.upgrade_checklist["stores"] = {
+                    checkpoint_store_name: DataContextConfigDefaults.DEFAULT_STORES.value[
+                        checkpoint_store_name
+                    ]
+                }
 
-    def upgrade_configuration(self):
+    def _upgrade_configuration(self):
         if self.upgrade_log["skipped_upgrade"]:
             return
         config_commented_map: CommentedMap = (
@@ -173,8 +182,7 @@ No manual upgrade steps are required.
 Upgrade Confirmation
 =====================
 </cyan>
-Please consult the 0.13.x migration guide for instructions on how to complete any required manual steps or
-to learn more about the automated upgrade process:
+Please consult the 0.13.x migration guide to learn more about the automated upgrade process:
 
     <cyan>https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html</cyan>
 
@@ -236,7 +244,7 @@ A log detailing the upgrade can be found here:
 
     def upgrade_project(self):
         try:
-            self.upgrade_configuration()
+            self._upgrade_configuration()
         except Exception:
             pass
 

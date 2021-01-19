@@ -566,7 +566,6 @@ def upgrade_project_one_version_increment(
                 ge_config_version, context_root_dir, validate_config_version=False
             )
             # display report to user
-            cli_message(upgrade_report)
             return False, True
         # set config version to target version
         if increment_version:

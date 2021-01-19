@@ -7,7 +7,6 @@ from dateutil.parser import parse
 
 from great_expectations import DataContext
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
-from great_expectations.cli.util import cli_message
 from great_expectations.data_context.store import (
     DatabaseStoreBackend,
     HtmlSiteStore,
@@ -185,7 +184,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 }
             )
 
-    def upgrade_store_backend(self, store_backend, store_name=None, site_name=None):
+    def _upgrade_store_backend(self, store_backend, store_name=None, site_name=None):
         assert store_name or site_name, "Must pass either store_name or site_name."
         assert not (
             store_name and site_name
@@ -645,7 +644,7 @@ A log detailing the upgrade can be found here:
                     "validations_updated": [],
                     "exceptions": False,
                 }
-                self.upgrade_store_backend(store_backend, store_name=store_name)
+                self._upgrade_store_backend(store_backend, store_name=store_name)
         except Exception:
             pass
 
@@ -657,7 +656,7 @@ A log detailing the upgrade can be found here:
                     "validation_result_pages_updated": [],
                     "exceptions": False,
                 }
-                self.upgrade_store_backend(store_backend, site_name=site_name)
+                self._upgrade_store_backend(store_backend, site_name=site_name)
         except Exception:
             pass
 
