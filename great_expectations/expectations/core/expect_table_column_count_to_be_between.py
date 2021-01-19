@@ -19,7 +19,6 @@ from ..expectation import (
     TableExpectation,
     _format_map_output,
 )
-from ..registry import extract_metrics
 
 
 class ExpectTableColumnCountToBeBetween(TableExpectation):
