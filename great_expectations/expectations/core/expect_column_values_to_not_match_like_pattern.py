@@ -27,7 +27,6 @@ from ..expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from ..registry import extract_metrics, get_metric_kwargs
 
 try:
     import sqlalchemy as sa

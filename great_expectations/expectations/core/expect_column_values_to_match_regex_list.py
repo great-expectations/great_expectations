@@ -21,18 +21,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from ..registry import extract_metrics, get_metric_kwargs
-
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
+from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
 
 
 class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
