@@ -465,6 +465,7 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -534,6 +535,7 @@ def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_c
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -617,6 +619,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -701,6 +704,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -784,6 +788,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -866,6 +871,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -968,6 +974,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -1303,6 +1310,7 @@ def test_complex_suite(warning_suite, empty_data_context):
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -1491,5 +1499,6 @@ def test_notebook_execution_with_custom_notebooks(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected

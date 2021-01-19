@@ -17,7 +17,7 @@ Steps
   .. admonition:: Note:
 
     - In the ``great_expectations.yml`` config file, environment variables take precedence over variables defined in a config variables YAML
-    - Environment variable substitution is also supported in the ``great_expectations.yml`` config file.
+    - Environment variable substitution is supported in both the ``great_expectations.yml`` and config variables ``config_variables.yml`` config file.
 
   If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another YAML file of your choosing:
 

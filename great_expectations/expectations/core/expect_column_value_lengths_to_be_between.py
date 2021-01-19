@@ -23,8 +23,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, Expectation, _format_map_output
-from ..registry import extract_metrics
+from ..expectation import ColumnMapExpectation
 
 try:
     import sqlalchemy as sa
