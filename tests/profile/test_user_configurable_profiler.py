@@ -87,6 +87,13 @@ def full_config_cardinality_dataset_with_semantic_types():
 
 
 def get_set_of_columns_and_expectations_from_suite(suite):
+    """
+    Args:
+        suite: An expectation suite
+
+    Returns:
+        A tuple containing a set of columns and a set of expectations found in a suite
+    """
     columns = {
         i.kwargs.get("column") for i in suite.expectations if i.kwargs.get("column")
     }
@@ -98,6 +105,10 @@ def get_set_of_columns_and_expectations_from_suite(suite):
 def test_profiler_init_no_config(
     cardinality_dataset,
 ):
+    """
+    What does this test do and why?
+    Confirms that profiler can initialize with no config.
+    """
     profiler = UserConfigurableProfiler(cardinality_dataset)
     assert profiler.primary_or_compound_key == []
     assert profiler.ignored_columns == []
@@ -109,6 +120,10 @@ def test_profiler_init_no_config(
 def test_profiler_init_full_config_no_semantic_types(
     cardinality_dataset, full_config_cardinality_dataset_no_semantic_types
 ):
+    """
+    What does this test do and why?
+    Confirms that profiler initializes properly with a full config, without a semantic_types dict
+    """
     profiler = UserConfigurableProfiler(
         cardinality_dataset, full_config_cardinality_dataset_no_semantic_types
     )
@@ -123,51 +138,13 @@ def test_profiler_init_full_config_no_semantic_types(
     assert "col_one" not in profiler.column_info
 
 
-def test_config_with_not_null_only(possible_expectations_set):
-    excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
-
-    df = pd.DataFrame(
-        {
-            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
-            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
-        }
-    )
-    batch_df = ge.dataset.PandasDataset(df)
-
-    config_without_not_null_only = {
-        "excluded_expectations": excluded_expectations,
-        "not_null_only": False,
-    }
-    profiler = UserConfigurableProfiler(batch_df, config_without_not_null_only)
-    suite = profiler.build_suite()
-    _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
-    assert expectations == {
-        "expect_column_values_to_be_null",
-        "expect_column_values_to_not_be_null",
-    }
-
-    config_with_not_null_only = {
-        "excluded_expectations": excluded_expectations,
-        "not_null_only": True,
-    }
-    not_null_only_profiler = UserConfigurableProfiler(
-        batch_df, config_with_not_null_only
-    )
-    not_null_only_suite = not_null_only_profiler.build_suite()
-    _, expectations = get_set_of_columns_and_expectations_from_suite(
-        not_null_only_suite
-    )
-    assert expectations == {"expect_column_values_to_not_be_null"}
-
-    no_config_profiler = UserConfigurableProfiler(batch_df)
-    no_config_suite = no_config_profiler.build_suite()
-    _, expectations = get_set_of_columns_and_expectations_from_suite(no_config_suite)
-    assert "expect_column_values_to_be_null" in expectations
-
-
-def test__initialize_cach_with_metadata_with_semantic_types(
+def test_init_with_semantic_types(
     cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
 ):
+    """
+    What does this test do and why?
+    Confirms that profiler initializes properly with a full config and a semantic_types dict
+    """
     profiler = UserConfigurableProfiler(
         cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
     )
@@ -212,6 +189,10 @@ def test__initialize_cach_with_metadata_with_semantic_types(
 
 
 def test__validate_config(cardinality_dataset):
+    """
+    What does this test do and why?
+    Tests the validate config function on the profiler
+    """
     bad_keyword_config = {"bad_keyword": 100}
     with pytest.raises(AssertionError) as e:
         UserConfigurableProfiler(cardinality_dataset, bad_keyword_config)
@@ -239,7 +220,11 @@ def test__validate_config(cardinality_dataset):
 def test__validate_semantic_types_dict(
     cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
 ):
-    bad_semantic_types_dict_type = {"semantic_types": {"value_set": "few"}}
+    """
+    What does this test do and why?
+    Tests that validate semantic_types function errors when not formatted correctly
+    """
+    bad_semantic_types_dict_type = {"semantic_types": {"value_set": "col_few"}}
     with pytest.raises(AssertionError) as e:
         UserConfigurableProfiler(cardinality_dataset, bad_semantic_types_dict_type)
     assert e.value.args[0] == (
@@ -247,8 +232,22 @@ def test__validate_semantic_types_dict(
         "{'semantic_types': {'numeric': ['number_of_transactions']}}"
     )
 
+    bad_semantic_types_incorrect_type = {
+        "semantic_types": {"incorrect_type": ["col_few"]}
+    }
+    with pytest.raises(ValueError) as e:
+        UserConfigurableProfiler(cardinality_dataset, bad_semantic_types_incorrect_type)
+    assert e.value.args[0] == (
+        "incorrect_type is not a recognized semantic_type. Please only include one of "
+        "['DATETIME', 'NUMERIC', 'STRING', 'VALUE_SET', 'BOOLEAN', 'OTHER']"
+    )
+
 
 def test_build_suite_no_config(titanic_dataset, possible_expectations_set):
+    """
+    What does this test do and why?
+    Tests that the build_suite function works as expected with no config
+    """
     profiler = UserConfigurableProfiler(titanic_dataset)
     suite = profiler.build_suite()
     expectations_from_suite = {i.expectation_type for i in suite.expectations}
@@ -257,7 +256,13 @@ def test_build_suite_no_config(titanic_dataset, possible_expectations_set):
     assert len(suite.expectations) == 48
 
 
-def test_build_suite_with_config(titanic_dataset, possible_expectations_set):
+def test_build_suite_with_config_and_no_semantic_types_dict(
+    titanic_dataset, possible_expectations_set
+):
+    """
+    What does this test do and why?
+    Tests that the build_suite function works as expected with a config and without a semantic_types dict
+    """
     config = {
         "ignored_columns": ["Survived", "Unnamed: 0"],
         "excluded_expectations": ["expect_column_mean_to_be_between"],
@@ -284,6 +289,10 @@ def test_build_suite_with_semantic_types_dict(
     possible_expectations_set,
     full_config_cardinality_dataset_with_semantic_types,
 ):
+    """
+    What does this test do and why?
+    Tests that the build_suite function works as expected with a semantic_types dict
+    """
     profiler = UserConfigurableProfiler(
         cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
     )
@@ -310,6 +319,10 @@ def test_build_suite_with_semantic_types_dict(
 
 
 def test_build_suite_when_suite_already_exists(cardinality_dataset):
+    """
+    What does this test do and why?
+    Confirms that creating a new suite on an existing profiler wipes the previous suite
+    """
     config = {
         "table_expectations_only": True,
         "excluded_expectations": ["expect_table_row_count_to_be_between"],
@@ -330,6 +343,10 @@ def test_build_suite_when_suite_already_exists(cardinality_dataset):
 
 
 def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
+    """
+    What does this test do and why?
+    Confirms that an error is raised if a primary_or_compound key is specified with a column not found in the dataset
+    """
     # regular case, should pass
     working_config = {"primary_or_compound_key": ["col_unique"]}
     working_profiler = UserConfigurableProfiler(cardinality_dataset, working_config)
@@ -357,9 +374,60 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
 
 
+def test_config_with_not_null_only(possible_expectations_set):
+    """
+    What does this test do and why?
+    Confirms that the not_null_only key in config works as expected.
+    """
+
+    excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
+
+    df = pd.DataFrame(
+        {
+            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
+            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
+        }
+    )
+    batch_df = ge.dataset.PandasDataset(df)
+
+    config_without_not_null_only = {
+        "excluded_expectations": excluded_expectations,
+        "not_null_only": False,
+    }
+    profiler = UserConfigurableProfiler(batch_df, config_without_not_null_only)
+    suite = profiler.build_suite()
+    _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
+    assert expectations == {
+        "expect_column_values_to_be_null",
+        "expect_column_values_to_not_be_null",
+    }
+
+    config_with_not_null_only = {
+        "excluded_expectations": excluded_expectations,
+        "not_null_only": True,
+    }
+    not_null_only_profiler = UserConfigurableProfiler(
+        batch_df, config_with_not_null_only
+    )
+    not_null_only_suite = not_null_only_profiler.build_suite()
+    _, expectations = get_set_of_columns_and_expectations_from_suite(
+        not_null_only_suite
+    )
+    assert expectations == {"expect_column_values_to_not_be_null"}
+
+    no_config_profiler = UserConfigurableProfiler(batch_df)
+    no_config_suite = no_config_profiler.build_suite()
+    _, expectations = get_set_of_columns_and_expectations_from_suite(no_config_suite)
+    assert "expect_column_values_to_be_null" in expectations
+
+
 def test_profiled_dataset_passes_own_validation(
     cardinality_dataset, titanic_data_context
 ):
+    """
+    What does this test do and why?
+    Confirms that a suite created on a dataset with no config will pass when validated against itself
+    """
     context = titanic_data_context
     config = {"ignored_columns": ["col_none"]}
     profiler = UserConfigurableProfiler(cardinality_dataset, config)
@@ -369,6 +437,5 @@ def test_profiled_dataset_passes_own_validation(
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[cardinality_dataset]
     )
-    validation_result_identifier = results.list_validation_result_identifiers()[0]
 
     assert results["success"]
