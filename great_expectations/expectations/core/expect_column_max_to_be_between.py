@@ -27,8 +27,7 @@ except ImportError:
 
 
 from ...render.renderer.renderer import renderer
-from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
-from ..registry import extract_metrics
+from ..expectation import ColumnExpectation
 
 
 class ExpectColumnMaxToBeBetween(ColumnExpectation):
