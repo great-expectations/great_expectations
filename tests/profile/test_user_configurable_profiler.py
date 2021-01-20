@@ -4,6 +4,7 @@ import pytest
 import great_expectations as ge
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.dataset import PandasDataset
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
@@ -23,7 +24,7 @@ def cardinality_dataset():
             "col_unique": [i for i in range(0, 1000)],
         }
     )
-    batch_df = ge.dataset.PandasDataset(df)
+    batch_df = PandasDataset(df)
 
     return batch_df
 
@@ -31,7 +32,7 @@ def cardinality_dataset():
 @pytest.fixture()
 def titanic_dataset():
     df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
-    batch_df = ge.dataset.PandasDataset(df)
+    batch_df = PandasDataset(df)
 
     return batch_df
 
@@ -53,36 +54,6 @@ def possible_expectations_set():
         "expect_column_values_to_be_in_set",
         "expect_column_values_to_be_between",
         "expect_column_values_to_be_unique",
-    }
-
-
-@pytest.fixture()
-def full_config_cardinality_dataset_no_semantic_types():
-    return {
-        "primary_or_compound_key": ["col_unique"],
-        "ignored_columns": [
-            "col_one",
-        ],
-        "value_set_threshold": "unique",
-        "table_expectations_only": False,
-        "excluded_expectations": ["expect_column_values_to_not_be_null"],
-    }
-
-
-@pytest.fixture()
-def full_config_cardinality_dataset_with_semantic_types():
-    return {
-        "semantic_types": {
-            "numeric": ["col_few", "col_many", "col_very_many"],
-            "value_set": ["col_one", "col_two", "col_very_few"],
-        },
-        "primary_or_compound_key": ["col_unique"],
-        "ignored_columns": [
-            "col_one",
-        ],
-        "value_set_threshold": "unique",
-        "table_expectations_only": False,
-        "excluded_expectations": ["expect_column_values_to_not_be_null"],
     }
 
 
@@ -112,41 +83,54 @@ def test_profiler_init_no_config(
     profiler = UserConfigurableProfiler(cardinality_dataset)
     assert profiler.primary_or_compound_key == []
     assert profiler.ignored_columns == []
-    assert not profiler.value_set_threshold
+    assert profiler.value_set_threshold == "MANY"
     assert not profiler.table_expectations_only
     assert profiler.excluded_expectations == []
 
 
-def test_profiler_init_full_config_no_semantic_types(
-    cardinality_dataset, full_config_cardinality_dataset_no_semantic_types
-):
+def test_profiler_init_full_config_no_semantic_types(cardinality_dataset):
     """
     What does this test do and why?
     Confirms that profiler initializes properly with a full config, without a semantic_types dict
     """
+
     profiler = UserConfigurableProfiler(
-        cardinality_dataset, full_config_cardinality_dataset_no_semantic_types
+        cardinality_dataset,
+        primary_or_compound_key=["col_unique"],
+        ignored_columns=["col_one"],
+        value_set_threshold="UNIQUE",
+        table_expectations_only=False,
+        excluded_expectations=["expect_column_values_to_not_be_null"],
     )
     assert profiler.primary_or_compound_key == ["col_unique"]
     assert profiler.ignored_columns == [
         "col_one",
     ]
-    assert profiler.value_set_threshold == "unique"
+    assert profiler.value_set_threshold == "UNIQUE"
     assert not profiler.table_expectations_only
     assert profiler.excluded_expectations == ["expect_column_values_to_not_be_null"]
 
     assert "col_one" not in profiler.column_info
 
 
-def test_init_with_semantic_types(
-    cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
-):
+def test_init_with_semantic_types(cardinality_dataset):
     """
     What does this test do and why?
     Confirms that profiler initializes properly with a full config and a semantic_types dict
     """
+
+    semantic_types = {
+        "numeric": ["col_few", "col_many", "col_very_many"],
+        "value_set": ["col_one", "col_two", "col_very_few"],
+    }
     profiler = UserConfigurableProfiler(
-        cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
+        cardinality_dataset,
+        semantic_types_dict=semantic_types,
+        primary_or_compound_key=["col_unique"],
+        ignored_columns=["col_one"],
+        value_set_threshold="unique",
+        table_expectations_only=False,
+        excluded_expectations=["expect_column_values_to_not_be_null"],
     )
 
     assert "col_one" not in profiler.column_info
@@ -193,50 +177,37 @@ def test__validate_config(cardinality_dataset):
     What does this test do and why?
     Tests the validate config function on the profiler
     """
-    bad_keyword_config = {"bad_keyword": 100}
+
     with pytest.raises(AssertionError) as e:
-        UserConfigurableProfiler(cardinality_dataset, bad_keyword_config)
-    assert e.value.args[0] == "Parameter bad_keyword from config is not recognized."
+        UserConfigurableProfiler(cardinality_dataset, ignored_columns="col_name")
+    assert e.typename == "AssertionError"
 
-    bad_param_type_ignored_columns = {"ignored_columns": "col_name"}
     with pytest.raises(AssertionError) as e:
-        UserConfigurableProfiler(cardinality_dataset, bad_param_type_ignored_columns)
-    assert (
-        e.value.args[0]
-        == "Config parameter ignored_columns must be formatted as a <class 'list'> rather than a <class 'str'>."
-    )
-
-    bad_param_type_table_expectations_only = {"table_expectations_only": "True"}
-    with pytest.raises(AssertionError) as e:
-        UserConfigurableProfiler(
-            cardinality_dataset, bad_param_type_table_expectations_only
-        )
-    assert (
-        e.value.args[0]
-        == "Config parameter table_expectations_only must be formatted as a <class 'bool'> rather than a <class 'str'>."
-    )
+        UserConfigurableProfiler(cardinality_dataset, table_expectations_only="True")
+    assert e.typename == "AssertionError"
 
 
-def test__validate_semantic_types_dict(
-    cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
-):
+def test__validate_semantic_types_dict(cardinality_dataset):
     """
     What does this test do and why?
     Tests that validate semantic_types function errors when not formatted correctly
     """
-    bad_semantic_types_dict_type = {"semantic_types": {"value_set": "col_few"}}
+
+    bad_semantic_types_dict_type = {"value_set": "col_few"}
     with pytest.raises(AssertionError) as e:
-        UserConfigurableProfiler(cardinality_dataset, bad_semantic_types_dict_type)
+        UserConfigurableProfiler(
+            cardinality_dataset, semantic_types_dict=bad_semantic_types_dict_type
+        )
     assert e.value.args[0] == (
         "Entries in semantic type dict must be lists of column names e.g. "
         "{'semantic_types': {'numeric': ['number_of_transactions']}}"
     )
 
-    bad_semantic_types_incorrect_type = {
-        "semantic_types": {"incorrect_type": ["col_few"]}
-    }
+    bad_semantic_types_incorrect_type = {"incorrect_type": ["col_few"]}
     with pytest.raises(ValueError) as e:
-        UserConfigurableProfiler(cardinality_dataset, bad_semantic_types_incorrect_type)
+        UserConfigurableProfiler(
+            cardinality_dataset, semantic_types_dict=bad_semantic_types_incorrect_type
+        )
     assert e.value.args[0] == (
         "incorrect_type is not a recognized semantic_type. Please only include one of "
         "['DATETIME', 'NUMERIC', 'STRING', 'VALUE_SET', 'BOOLEAN', 'OTHER']"
@@ -270,7 +241,14 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
         "table_expectations_only": False,
         "value_set_threshold": "very_few",
     }
-    profiler = UserConfigurableProfiler(titanic_dataset, config=config)
+    profiler = UserConfigurableProfiler(
+        titanic_dataset,
+        ignored_columns=["Survived", "Unnamed: 0"],
+        excluded_expectations=["expect_column_mean_to_be_between"],
+        primary_or_compound_key=["Name"],
+        table_expectations_only=False,
+        value_set_threshold="very_few",
+    )
     suite = profiler.build_suite()
     (
         columns_with_expectations,
@@ -287,14 +265,25 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
 def test_build_suite_with_semantic_types_dict(
     cardinality_dataset,
     possible_expectations_set,
-    full_config_cardinality_dataset_with_semantic_types,
 ):
     """
     What does this test do and why?
     Tests that the build_suite function works as expected with a semantic_types dict
     """
+
+    semantic_types = {
+        "numeric": ["col_few", "col_many", "col_very_many"],
+        "value_set": ["col_one", "col_two", "col_very_few"],
+    }
+
     profiler = UserConfigurableProfiler(
-        cardinality_dataset, full_config_cardinality_dataset_with_semantic_types
+        cardinality_dataset,
+        semantic_types_dict=semantic_types,
+        primary_or_compound_key=["col_unique"],
+        ignored_columns=["col_one"],
+        value_set_threshold="unique",
+        table_expectations_only=False,
+        excluded_expectations=["expect_column_values_to_not_be_null"],
     )
     suite = profiler.build_suite()
     (
@@ -323,12 +312,11 @@ def test_build_suite_when_suite_already_exists(cardinality_dataset):
     What does this test do and why?
     Confirms that creating a new suite on an existing profiler wipes the previous suite
     """
-    config = {
-        "table_expectations_only": True,
-        "excluded_expectations": ["expect_table_row_count_to_be_between"],
-    }
-
-    profiler = UserConfigurableProfiler(cardinality_dataset, config)
+    profiler = UserConfigurableProfiler(
+        cardinality_dataset,
+        table_expectations_only=True,
+        excluded_expectations=["expect_table_row_count_to_be_between"],
+    )
 
     suite = profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
@@ -348,8 +336,9 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
     Confirms that an error is raised if a primary_or_compound key is specified with a column not found in the dataset
     """
     # regular case, should pass
-    working_config = {"primary_or_compound_key": ["col_unique"]}
-    working_profiler = UserConfigurableProfiler(cardinality_dataset, working_config)
+    working_profiler = UserConfigurableProfiler(
+        cardinality_dataset, primary_or_compound_key=["col_unique"]
+    )
     assert working_profiler.primary_or_compound_key == ["col_unique"]
 
     # key includes a non-existent column, should fail
@@ -357,7 +346,10 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
         "primary_or_compound_key": ["col_unique", "col_that_does_not_exist"]
     }
     with pytest.raises(ValueError) as e:
-        bad_key_profiler = UserConfigurableProfiler(cardinality_dataset, bad_key_config)
+        bad_key_profiler = UserConfigurableProfiler(
+            cardinality_dataset,
+            primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
+        )
     assert e.value.args[0] == (
         f"Column col_that_does_not_exist not found. Please ensure that this column is in the dataset if"
         f"you would like to use it as a primary_or_compound_key."
@@ -369,7 +361,9 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
         "ignored_columns": ["col_none", "col_one"],
     }
     ignored_column_profiler = UserConfigurableProfiler(
-        cardinality_dataset, ignored_column_config
+        cardinality_dataset,
+        primary_or_compound_key=["col_unique", "col_one"],
+        ignored_columns=["col_none", "col_one"],
     )
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
 
@@ -388,28 +382,24 @@ def test_config_with_not_null_only(possible_expectations_set):
             "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
         }
     )
-    batch_df = ge.dataset.PandasDataset(df)
+    batch_df = PandasDataset(df)
 
-    config_without_not_null_only = {
-        "excluded_expectations": excluded_expectations,
-        "not_null_only": False,
-    }
-    profiler = UserConfigurableProfiler(batch_df, config_without_not_null_only)
-    suite = profiler.build_suite()
-    _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
+    profiler_without_not_null_only = UserConfigurableProfiler(
+        batch_df, excluded_expectations, not_null_only=False
+    )
+    suite_without_not_null_only = profiler_without_not_null_only.build_suite()
+    _, expectations = get_set_of_columns_and_expectations_from_suite(
+        suite_without_not_null_only
+    )
     assert expectations == {
         "expect_column_values_to_be_null",
         "expect_column_values_to_not_be_null",
     }
 
-    config_with_not_null_only = {
-        "excluded_expectations": excluded_expectations,
-        "not_null_only": True,
-    }
-    not_null_only_profiler = UserConfigurableProfiler(
-        batch_df, config_with_not_null_only
+    profiler_with_not_null_only = UserConfigurableProfiler(
+        batch_df, excluded_expectations, not_null_only=True
     )
-    not_null_only_suite = not_null_only_profiler.build_suite()
+    not_null_only_suite = profiler_with_not_null_only.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(
         not_null_only_suite
     )
@@ -429,8 +419,9 @@ def test_profiled_dataset_passes_own_validation(
     Confirms that a suite created on a dataset with no config will pass when validated against itself
     """
     context = titanic_data_context
-    config = {"ignored_columns": ["col_none"]}
-    profiler = UserConfigurableProfiler(cardinality_dataset, config)
+    profiler = UserConfigurableProfiler(
+        cardinality_dataset, ignored_columns=["col_none"]
+    )
     suite = profiler.build_suite()
 
     context.save_expectation_suite(cardinality_dataset.get_expectation_suite())

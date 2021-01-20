@@ -23,7 +23,7 @@ from great_expectations.profile.basic_dataset_profiler import (
 )
 
 
-class UserConfigurableProfiler(BasicDatasetProfilerBase):
+class UserConfigurableProfiler:
     # TODO: Confirm tolerance for every expectation
 
     """
@@ -72,7 +72,17 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
     suite = profiler.build_suite()
     """
 
-    def __init__(self, dataset, config=None):
+    def __init__(
+        self,
+        dataset,
+        excluded_expectations: list = None,
+        ignored_columns: list = None,
+        not_null_only: bool = False,
+        primary_or_compound_key: list = False,
+        semantic_types_dict: dict = None,
+        table_expectations_only: bool = False,
+        value_set_threshold: str = "MANY",
+    ):
         """
         The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
         instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
@@ -111,21 +121,31 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                     it might make the most sense to set this to "unique"
         """
         self.dataset = dataset
-        self.config = config or {}
         self.column_info = {}
-        self.semantic_type_dict = None
-        if self.config is not None:
-            self._validate_config(self.config)
 
-        self.ignored_columns = self.config.get("ignored_columns") or []
+        self.semantic_type_dict = semantic_types_dict
+        assert isinstance(self.semantic_type_dict, (dict, type(None)))
 
-        self.excluded_expectations = self.config.get("excluded_expectations") or []
-        self.value_set_threshold = self.config.get("value_set_threshold")
-        self.not_null_only = self.config.get("not_null_only")
-        self.table_expectations_only = self.config.get("table_expectations_only")
+        self.ignored_columns = ignored_columns or []
+        assert isinstance(self.ignored_columns, list)
+
+        self.excluded_expectations = excluded_expectations or []
+        assert isinstance(self.excluded_expectations, list)
+
+        self.value_set_threshold = value_set_threshold
+        assert isinstance(self.value_set_threshold, str)
+
+        self.not_null_only = not_null_only
+        assert isinstance(self.not_null_only, bool)
+
+        self.table_expectations_only = table_expectations_only
+        assert isinstance(self.table_expectations_only, bool)
+
+        self.primary_or_compound_key = primary_or_compound_key or []
+        assert isinstance(self.primary_or_compound_key, list)
+
         if self.table_expectations_only:
             self.ignored_columns = self.dataset.get_table_columns()
-        self.primary_or_compound_key = self.config.get("primary_or_compound_key") or []
 
         if self.primary_or_compound_key:
             for column in self.primary_or_compound_key:
@@ -145,9 +165,8 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             self._add_column_cardinality_to_column_info(dataset, column_name)
             self._add_column_type_to_column_info(dataset, column_name)
 
-        self.semantic_type_dict = self.config.get("semantic_types")
         if self.semantic_type_dict is not None:
-            self._validate_semantic_types_dict(self.dataset, self.config)
+            self._validate_semantic_types_dict(self.dataset)
             for column_name in included_columns:
                 self._add_semantic_types_by_column_from_config_to_column_info(
                     column_name
@@ -241,9 +260,6 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         Returns:
             An expectation suite built after profiling the dataset
         """
-        if not self.value_set_threshold:
-            self.value_set_threshold = "MANY"
-
         if self.primary_or_compound_key:
             self._build_expectations_primary_or_compound_key(
                 dataset=self.dataset, column_list=self.primary_or_compound_key
@@ -286,37 +302,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
         )  # include in the actual profiler
         return expectation_suite
 
-    def _validate_config(self, config):
-        """
-        Validates a config dict to ensure that value types are correct.
-        Args:
-            config: A config dict (see __init__ for more details)
-
-        Returns:
-            The validated config dict
-        """
-        config_parameters = {
-            "ignored_columns": list,
-            "excluded_expectations": list,
-            "primary_or_compound_key": list,
-            "value_set_threshold": str,
-            "semantic_types": dict,
-            "table_expectations_only": bool,
-            "not_null_only": bool,
-        }
-
-        for k, v in config.items():
-            assert (
-                k in config_parameters
-            ), f"Parameter {k} from config is not recognized."
-            if v:
-                assert isinstance(
-                    v, config_parameters.get(k)
-                ), f"Config parameter {k} must be formatted as a {config_parameters.get(k)} rather than a {type(v)}."
-
-        return config
-
-    def _validate_semantic_types_dict(self, dataset, config):
+    def _validate_semantic_types_dict(self, dataset):
         """
         Validates a semantic_types dict to ensure correct formatting, that all semantic_types are recognized, and that
         the semantic_types align with the column data types
@@ -328,13 +314,12 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
             The validated semantic_types dictionary
 
         """
-        semantic_type_dict = config.get("semantic_types")
-        if not isinstance(semantic_type_dict, dict):
+        if not isinstance(self.semantic_type_dict, dict):
             raise ValueError(
                 f"The semantic_types dict in the config must be a dictionary, but is currently a "
-                f"{type(semantic_type_dict)}. Please reformat."
+                f"{type(self.semantic_type_dict)}. Please reformat."
             )
-        for k, v in semantic_type_dict.items():
+        for k, v in self.semantic_type_dict.items():
             assert isinstance(v, list), (
                 "Entries in semantic type dict must be lists of column names e.g. "
                 "{'semantic_types': {'numeric': ['number_of_transactions']}}"
@@ -347,7 +332,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
 
         selected_columns = [
             column
-            for column_list in semantic_type_dict.values()
+            for column_list in self.semantic_type_dict.values()
             for column in column_list
         ]
         if selected_columns:
@@ -384,7 +369,7 @@ class UserConfigurableProfiler(BasicDatasetProfilerBase):
                 #                     f"{semantic_type} expectation, but ensure that this is correctly configured.")
                 # else:
                 #     logger.debug(f"Semantic_type: {semantic_type} is unknown. Skipping")
-        return semantic_type_dict
+        return self.semantic_type_dict
 
     def _add_column_type_to_column_info(self, dataset, column_name):
         """
