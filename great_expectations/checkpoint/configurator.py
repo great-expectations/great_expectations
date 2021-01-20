@@ -1,11 +1,12 @@
 import copy
 import json
+import logging
 from typing import Dict, List, Optional, Union
 
-from great_expectations.checkpoint import Checkpoint
-from great_expectations.checkpoint.checkpoint import logger
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
+
+logger = logging.getLogger(__name__)
 
 
 class ActionDicts:

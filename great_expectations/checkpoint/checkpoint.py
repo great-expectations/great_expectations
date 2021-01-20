@@ -4,8 +4,9 @@ import logging
 import os
 from copy import deepcopy
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 
+from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import BatchRequest
@@ -37,7 +38,7 @@ class Checkpoint:
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
-        configurator: Optional[dict] = None,
+        configurator: Optional[Any] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequest, dict]] = None,
@@ -56,15 +57,15 @@ class Checkpoint:
         self._data_context = data_context
 
         if configurator:
-            configurator_obj = instantiate_class_from_config(
-                config={
+            configurator_obj = configurator(
+                **{
                     "class_name": configurator.get("class_name"),
                     "name": name,
                     "data_context": data_context,
                     "config_version": config_version,
                     "template_name": template_name,
-                    # "class_name": class_name,
-                    "configurator": configurator,
+                    "class_name": class_name,
+                    "module_name": module_name,
                     "run_name_template": run_name_template,
                     "expectation_suite_name": expectation_suite_name,
                     "batch_request": batch_request,
@@ -77,14 +78,8 @@ class Checkpoint:
                     "validation_operator_name": validation_operator_name,
                     "batches": batches,
                 },
-                config_defaults={"module_name": "great_expectations.checkpoint"},
-                runtime_environment={
-                    "data_context": data_context,
-                },
             )
             checkpoint_config: CheckpointConfig = configurator_obj.build()
-            if class_name is not None:
-                checkpoint_config.class_name = class_name
         else:
             checkpoint_config: CheckpointConfig = CheckpointConfig(
                 **{
@@ -499,6 +494,48 @@ class LegacyCheckpoint(Checkpoint):
                 batches_to_validate.append(batch)
 
         return batches_to_validate
+
+
+class SimpleCheckpoint:
+    def __init__(
+        self,
+        name: str,
+        data_context,
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        configurator: Optional[dict] = SimpleCheckpointConfigurator,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+    ):
+        super().__init__(
+            name=name,
+            data_context=data_context,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            configurator=configurator,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            validation_operator_name=validation_operator_name,
+            batches=batches,
+        )
 
 
 # TODO Options in no order:
