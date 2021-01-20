@@ -1471,16 +1471,6 @@ class CheckpointConfigSchema(Schema):
     template_name = fields.String(required=False, allow_none=True)
     module_name = fields.String(required=False, missing="great_expectations.checkpoint")
     class_name = fields.Str(required=False, missing="Checkpoint")
-    configurator = fields.Dict(
-        required=False,
-        allow_none=True,
-        keys=fields.Str(
-            validate=OneOf(["class_name", "module_name"]),
-            required=False,
-            allow_none=True,
-        ),
-        values=fields.Str(required=False, allow_none=True),
-    )
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
@@ -1540,7 +1530,6 @@ class CheckpointConfig(BaseYamlConfig):
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
-        configurator: Optional[dict] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
@@ -1564,7 +1553,6 @@ class CheckpointConfig(BaseYamlConfig):
                 self.batches = batches
         else:
             class_name = class_name or "Checkpoint"
-            self._configurator = configurator or {}
             self._template_name = template_name
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
@@ -1597,8 +1585,6 @@ class CheckpointConfig(BaseYamlConfig):
                 self.module_name = other_config.module_name
             if other_config.class_name is not None:
                 self.class_name = other_config.class_name
-            if other_config.configurator is not None:
-                self.configurator = other_config.configurator
             if other_config.run_name_template is not None:
                 self.run_name_template = other_config.run_name_template
             if other_config.expectation_suite_name is not None:
@@ -1704,14 +1690,6 @@ class CheckpointConfig(BaseYamlConfig):
     @property
     def profilers(self):
         return self._profilers
-
-    @property
-    def configurator(self):
-        return self._configurator
-
-    @configurator.setter
-    def configurator(self, value: dict):
-        self._configurator = value
 
     @property
     def module_name(self):

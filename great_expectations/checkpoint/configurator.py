@@ -118,18 +118,23 @@ class SimpleCheckpointConfigurator:
             action_list = self._add_update_data_docs_action(action_list)
         if self.slack_webhook:
             action_list = self._add_slack_action(action_list)
-        checkpoint_config = CheckpointConfig(**{
-            "config_version": 1.0,
-            "name": self.name,
-            "class_name": "Checkpoint",
-            "action_list": action_list,
-        })
+        checkpoint_config = CheckpointConfig(
+            **{
+                "config_version": 1.0,
+                "name": self.name,
+                "class_name": "Checkpoint",
+                "action_list": action_list,
+            }
+        )
         if self.other_kwargs:
             checkpoint_config.update(
-                other_config=CheckpointConfig(**{
-                    "config_version": self.other_kwargs.pop("config_version", 1.0) or 1.0,
-                    **self.other_kwargs
-                })
+                other_config=CheckpointConfig(
+                    **{
+                        "config_version": self.other_kwargs.pop("config_version", 1.0)
+                        or 1.0,
+                        **self.other_kwargs,
+                    }
+                )
             )
         logger.debug(
             f"SimpleCheckpoint built this CheckpointConfig: {json.dumps(checkpoint_config.to_json_dict(), indent=4)}"

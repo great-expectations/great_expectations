@@ -93,8 +93,12 @@ def test_simple_checkpoint_default_properties_with_no_optional_arguments(
     update_data_docs_action,
 ):
     """This demonstrates the simplest possible usage."""
-    Checkpoint(configurator={"class_name": "SimpleCheckpointConfigurator"}, name="blah",
-               data_context=empty_data_context, expectation_suite_name="my_suite_name")
+    Checkpoint(
+        configurator={"class_name": "SimpleCheckpointConfigurator"},
+        name="blah",
+        data_context=empty_data_context,
+        expectation_suite_name="my_suite_name",
+    )
     checkpoint_config = SimpleCheckpointConfigurator("foo", empty_data_context).build()
     assert isinstance(checkpoint_config, CheckpointConfig)
 

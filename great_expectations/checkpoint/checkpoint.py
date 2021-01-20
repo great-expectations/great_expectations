@@ -14,7 +14,10 @@ from great_expectations.core.util import (
     nested_update,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.data_context.util import substitute_all_config_variables, instantiate_class_from_config
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+    substitute_all_config_variables,
+)
 from great_expectations.exceptions import CheckpointError
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -74,12 +77,10 @@ class Checkpoint:
                     "validation_operator_name": validation_operator_name,
                     "batches": batches,
                 },
-                config_defaults={
-                    "module_name": "great_expectations.checkpoint"
-                },
+                config_defaults={"module_name": "great_expectations.checkpoint"},
                 runtime_environment={
                     "data_context": data_context,
-                }
+                },
             )
             checkpoint_config: CheckpointConfig = configurator_obj.build()
             if class_name is not None:
