@@ -464,7 +464,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     We call the "suite demo" command without the suite name argument
@@ -477,16 +477,14 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     - open Data Docs
     - NOT open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir],
-        input="1\n1\n1\nmy_new_suite\n\n",
+        input="\n1\n1\n1\nmy_new_suite\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -551,7 +549,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     We call the "suite demo" command with the suite name argument
@@ -562,16 +560,14 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     - open Data Docs
     - NOT open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
-        input="2\n1\n1\n\n",
+        input="\n2\n1\n1\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -776,7 +772,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify the batch
@@ -795,15 +791,13 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
-        input="2\n1\n1\n\n",
+        input="\n2\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -830,7 +824,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
             "-d",
             root_dir,
         ],
-        input="2\n1\n1\n\n",
+        input="\n2\n1\n1\n\n",
         catch_exceptions=False,
     )
 
@@ -864,7 +858,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command uses the batch kwargs found in
@@ -880,15 +874,13 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - NOT open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
-        input="2\n1\n1\n\n",
+        input="\n2\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert mock_webbrowser.call_count == 2
@@ -904,7 +896,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     result = runner.invoke(
         cli,
         ["suite", "edit", "foo_suite", "-d", root_dir],
-        input="2\n1\n1\n\n",
+        input="\n2\n1\n1\n\n",
         catch_exceptions=False,
     )
 
@@ -937,7 +929,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    site_builder_data_context_with_html_store_titanic_random,
 ):
     """
     Here we verify that when the "suite edit" command is called with batch_kwargs arg
@@ -958,14 +950,12 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
-        input="2\n1\n1\n\n",
+        input="\n2\n1\n1\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout

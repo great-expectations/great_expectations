@@ -50,6 +50,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
+    DataContextConfigDefaults,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
@@ -206,12 +207,11 @@ class BaseDataContext:
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
-    CHECKPOINTS_DIR = "checkpoints"
     BASE_DIRECTORIES = [
-        CHECKPOINTS_DIR,
-        "expectations",
-        "notebooks",
-        "plugins",
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.NOTEBOOKS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         GE_UNCOMMITTED_DIR,
     ]
     NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
@@ -276,7 +276,7 @@ class BaseDataContext:
 
         # Init stores
         self._stores = dict()
-        self._init_stores(self._project_config_with_variables_substituted.stores)
+        self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -293,7 +293,7 @@ class BaseDataContext:
         self._cached_datasources = {}
 
         # Build the datasources we know about and have access to
-        self._init_datasources(self._project_config_with_variables_substituted)
+        self._init_datasources(self.project_config_with_variables_substituted)
 
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
@@ -328,7 +328,7 @@ class BaseDataContext:
         ):
             store_config["store_backend"].update(
                 {
-                    "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
                 }
             )
 
@@ -489,7 +489,7 @@ class BaseDataContext:
 
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
-            self._project_config_with_variables_substituted.expectations_store_name
+            self.project_config_with_variables_substituted.expectations_store_name
         ]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
@@ -498,7 +498,7 @@ class BaseDataContext:
         # Otherwise choose the id stored in the project_config
         else:
             return (
-                self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
             )
 
     def _initialize_usage_statistics(
@@ -546,7 +546,7 @@ class BaseDataContext:
         self._project_config["validation_operators"][
             validation_operator_name
         ] = validation_operator_config
-        config = self._project_config_with_variables_substituted.validation_operators[
+        config = self.project_config_with_variables_substituted.validation_operators[
             validation_operator_name
         ]
         module_name = "great_expectations.validation_operators"
@@ -611,7 +611,7 @@ class BaseDataContext:
                 data docs site
         """
         unfiltered_sites = (
-            self._project_config_with_variables_substituted.data_docs_sites
+            self.project_config_with_variables_substituted.data_docs_sites
         )
 
         # Filter out sites that are not in site_names
@@ -708,22 +708,20 @@ class BaseDataContext:
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
         return self._normalize_absolute_or_relative_path(
-            self._project_config_with_variables_substituted.plugins_directory
+            self.project_config_with_variables_substituted.plugins_directory
         )
 
     @property
-    def _project_config_with_variables_substituted(self) -> DataContextConfig:
+    def project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 
     @property
     def anonymous_usage_statistics(self):
-        return (
-            self._project_config_with_variables_substituted.anonymous_usage_statistics
-        )
+        return self.project_config_with_variables_substituted.anonymous_usage_statistics
 
     @property
     def notebooks(self):
-        return self._project_config_with_variables_substituted.notebooks
+        return self.project_config_with_variables_substituted.notebooks
 
     @property
     def stores(self):
@@ -737,7 +735,7 @@ class BaseDataContext:
 
     @property
     def checkpoint_store_name(self):
-        return self._project_config_with_variables_substituted.checkpoint_store_name
+        return self.project_config_with_variables_substituted.checkpoint_store_name
 
     @property
     def checkpoint_store(self):
@@ -745,7 +743,7 @@ class BaseDataContext:
 
     @property
     def expectations_store_name(self):
-        return self._project_config_with_variables_substituted.expectations_store_name
+        return self.project_config_with_variables_substituted.expectations_store_name
 
     @property
     def expectations_store(self):
@@ -754,7 +752,7 @@ class BaseDataContext:
     @property
     def data_context_id(self):
         return (
-            self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
         )
 
     @property
@@ -926,7 +924,7 @@ class BaseDataContext:
             datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
                 # remove key until we have a delete method on project_config
-                # self._project_config_with_variables_substituted.datasources[
+                # self.project_config_with_variables_substituted.datasources[
                 # datasource_name].remove()
                 del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
@@ -1649,7 +1647,7 @@ class BaseDataContext:
             CommentedMap(**config)
         )
         self._project_config["datasources"][name] = datasource_config
-        datasource_config = self._project_config_with_variables_substituted.datasources[
+        datasource_config = self.project_config_with_variables_substituted.datasources[
             name
         ]
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
@@ -1715,6 +1713,9 @@ class BaseDataContext:
         )
         return generator
 
+    def set_config(self, project_config: DataContextConfig):
+        self._project_config = project_config
+
     def get_config(
         self, mode="typed"
     ) -> Union[DataContextConfig, CommentedMap, dict, str]:
@@ -1777,10 +1778,10 @@ class BaseDataContext:
             return self._cached_datasources[datasource_name]
         if (
             datasource_name
-            in self._project_config_with_variables_substituted.datasources
+            in self.project_config_with_variables_substituted.datasources
         ):
             datasource_config: DatasourceConfig = copy.deepcopy(
-                self._project_config_with_variables_substituted.datasources[
+                self.project_config_with_variables_substituted.datasources[
                     datasource_name
                 ]
             )
@@ -1817,7 +1818,7 @@ class BaseDataContext:
         for (
             key,
             value,
-        ) in self._project_config_with_variables_substituted.datasources.items():
+        ) in self.project_config_with_variables_substituted.datasources.items():
             value["name"] = key
 
             if "credentials" in value:
@@ -1840,7 +1841,7 @@ class BaseDataContext:
         for (
             name,
             value,
-        ) in self._project_config_with_variables_substituted.stores.items():
+        ) in self.project_config_with_variables_substituted.stores.items():
             value["name"] = name
             stores.append(value)
         return stores
@@ -1875,7 +1876,7 @@ class BaseDataContext:
             name,
             value,
         ) in (
-            self._project_config_with_variables_substituted.validation_operators.items()
+            self.project_config_with_variables_substituted.validation_operators.items()
         ):
             value["name"] = name
             validation_operators.append(value)
@@ -2081,12 +2082,12 @@ class BaseDataContext:
     @property
     def evaluation_parameter_store_name(self):
         return (
-            self._project_config_with_variables_substituted.evaluation_parameter_store_name
+            self.project_config_with_variables_substituted.evaluation_parameter_store_name
         )
 
     @property
     def validations_store_name(self):
-        return self._project_config_with_variables_substituted.validations_store_name
+        return self.project_config_with_variables_substituted.validations_store_name
 
     @property
     def validations_store(self):
@@ -2230,7 +2231,7 @@ class BaseDataContext:
 
         index_page_locator_infos = {}
 
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        sites = self.project_config_with_variables_substituted.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -2276,7 +2277,7 @@ class BaseDataContext:
         return index_page_locator_infos
 
     def clean_data_docs(self, site_name=None):
-        sites123 = self._project_config_with_variables_substituted.data_docs_sites
+        sites123 = self.project_config_with_variables_substituted.data_docs_sites
         cleaned = False
         for sname, site_config in sites123.items():
             if site_name is None:
@@ -3314,7 +3315,7 @@ class DataContext(BaseDataContext):
     def _load_project_config(self):
         """
         Reads the project configuration from the project configuration file.
-        The file may contain ${SOME_VARIABLE} variables - see self._project_config_with_variables_substituted
+        The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
         :return: the configuration object read from the file
@@ -3441,7 +3442,7 @@ class DataContext(BaseDataContext):
 
         with open(yml_path) as f:
             config_commented_map_from_yaml = yaml.load(f)
-            config_commented_map_from_yaml["config_version"] = config_version
+            config_commented_map_from_yaml["config_version"] = float(config_version)
 
         with open(yml_path, "w") as f:
             yaml.dump(config_commented_map_from_yaml, f)

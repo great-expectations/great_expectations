@@ -628,7 +628,7 @@ def test_site_builder_usage_statistics_enabled(
     context = site_builder_data_context_with_html_store_titanic_random
 
     sites = (
-        site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.data_docs_sites
+        site_builder_data_context_with_html_store_titanic_random.project_config_with_variables_substituted.data_docs_sites
     )
     local_site_config = sites["local_site"]
     site_builder = instantiate_class_from_config(
@@ -678,7 +678,7 @@ def test_site_builder_usage_statistics_disabled(
     data_context_id = context.anonymous_usage_statistics["data_context_id"]
 
     sites = (
-        site_builder_data_context_with_html_store_titanic_random._project_config_with_variables_substituted.data_docs_sites
+        site_builder_data_context_with_html_store_titanic_random.project_config_with_variables_substituted.data_docs_sites
     )
     local_site_config = sites["local_site"]
     site_builder = instantiate_class_from_config(
