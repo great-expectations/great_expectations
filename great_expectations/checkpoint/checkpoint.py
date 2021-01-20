@@ -49,6 +49,7 @@ class Checkpoint:
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
+        **kwargs
     ):
         self._name = name
         # Note the gross typechecking to avoid a circular import
@@ -58,29 +59,28 @@ class Checkpoint:
 
         if configurator:
             configurator_obj = configurator(
-                **{
-                    "class_name": configurator.get("class_name"),
-                    "name": name,
-                    "data_context": data_context,
-                    "config_version": config_version,
-                    "template_name": template_name,
-                    "class_name": class_name,
-                    "module_name": module_name,
-                    "run_name_template": run_name_template,
-                    "expectation_suite_name": expectation_suite_name,
-                    "batch_request": batch_request,
-                    "action_list": action_list,
-                    "evaluation_parameters": evaluation_parameters,
-                    "runtime_configuration": runtime_configuration,
-                    "validations": validations,
-                    "profilers": profilers,
-                    # Next two fields are for LegacyCheckpoint configuration
-                    "validation_operator_name": validation_operator_name,
-                    "batches": batches,
-                },
+                name=name,
+                data_context=data_context,
+                config_version=config_version,
+                template_name=template_name,
+                class_name=class_name,
+                module_name=module_name,
+                run_name_template=run_name_template,
+                expectation_suite_name=expectation_suite_name,
+                batch_request=batch_request,
+                action_list=action_list,
+                evaluation_parameters=evaluation_parameters,
+                runtime_configuration=runtime_configuration,
+                validations=validations,
+                profilers=profilers,
+                # Next two fields are for LegacyCheckpoint configuration
+                validation_operator_name=validation_operator_name,
+                batches=batches,
+                **kwargs
             )
             checkpoint_config: CheckpointConfig = configurator_obj.build()
         else:
+            assert len(kwargs) == 0, f"Invalid arguments: {list(kwargs.keys())}"
             checkpoint_config: CheckpointConfig = CheckpointConfig(
                 **{
                     "name": name,
