@@ -3,40 +3,55 @@
 How to contribute a new Expectation to the shared library
 =========================================================
 
-This guide will help you add a new Expectation to Great Expectations’ shared library. {{Talk about why this is cool - will appear in the gallery - can be bite-sized - collaborative community effort}}
+This guide will help you add a new Expectation to Great Expectations’ shared library. Your Expectation will be featured in the Expectations Gallery, along with many others developed by data practitioners from around the world as part of this collaborative community effort.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-  - :ref:`Set up your dev environment to contribute <_contributing_setting_up_your_dev_environment>`
-  - Set up a github account and signed the Contributor License Agreement (CLA)
+  - :ref:`Set up your dev environment to contribute <contributing_setting_up_your_dev_environment>`
+  - :ref:`Signed the Contributor License Agreement (CLA) <contributing_cla>`
 
 Steps
 -----
 
 #. Choose the type of Expectation you want to create.
 
-    There are four main Expectation classes, listed here from most specific to most general:
+    There are four Expectation classes that make the development of particular types of Expectations significantly easier by hiding the "crud" code and letting you focus on the business logic of your Expectation. Decide which one suites your Expectation:
 
-        - ``ColumnMapExpectations`` are evaluated for a single column, producing True or False on a row by row basis.
-        - ``ColumnAggregateExpectation`` are also evaluated for a single column, but produce an aggregate metric, such as a mean, standard deviation, number of unique values, type, etc.
-        - ``ColumnPairMapExpectation`` are similar to ``ColumnMapExpectations``, except that they are based on two columns, instead of one.
+        - ``ColumnMapExpectation`` - Expectations of this type validate a single column of tabular data. First they ask a yes/no question from every row in that column. Then they ask what percentage of rows gave a positive answer to the first question. If the answer to the second question is above a specified threshold, the Expectation considers the data valid.
+        - ``ColumnExpectation`` s are also evaluated for a single column, but produce an aggregate metric, such as a mean, standard deviation, number of unique values, type, etc.
+        - ``ColumnPairMapExpectation`` s are similar to ``ColumnMapExpectations``, except that they are based on two columns, instead of one.
         - ``TableExpectation`` are a generic catchall for other types of Expectations applied to tabular data.
 
-    For more details on classes of Expectations, please check out {{link to doc in Core Concepts.}}
 
     Find the appropriate template file in ``great_expectations/examples/expectations/``.
 
-#. Pick a name for your Expectation and copy the template file into the appropriate `contrib/` directory.
+#. Copy the template file into the appropriate `contrib/` directory.
 
-    {{Explain naming conventions for Expectations.}}
+    Recently we introduced a fast-track release process for Expectations that a contributor places in one of the subdirectories of ``contrib``.
+    They are released as PyPI packages separate from ``great-expectations``. When you create a new Expectation in ``contrib/experimental/great_expectations_experimental/expectations/``,
+    once your PR is approved and merged, a new version of PyPI package ``great-expectations-experimental``is automatically published.
 
-    {{Explain the roles of `contrib/` and `experimental_expectations/`}}
+#. Pick a name for your Expectation, rename the file and the class within it.
 
-    If your Expectation was called ``ExpectColumnValuesToEqualThree``, you would copy it to ``contrib/experimental_expectations/expectations/expect_column_values_to_equal_three.py``
+    Great Expectations follows a naming convention. Classes that implement Expectations have CamelCase names (e.g., "ExpectColumnValuesToBeThree"). The framework will
+    automatically translate this class name into a method with the snake_case name of "expect_column_values_to_be_three".
+    The Python file that contains the class should be given the snake_case name of the Expectation (e.g., "expect_column_values_to_be_three.py").
+
+    Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
+
+    * Column map Expectations: ``expect_column_values_...`` (e.g., "expect_column_values_to_match_regex")
+    * Column aggregate Expectations: ``expect_column_...`` (e.g., "expect_column_mean_to_be_between")
+    * Column air map Expectations: ``expect_column_pair_values_...`` (e.g., "expect_column_pair_values_to_be_in_set")
+    * Tabe Expectatons: ``expect_table_...`` (e.g., "expect_table_row_count_to_be_equal")
+
+    For example, if you call your Expectation ``ExpectColumnValuesToEqualThree``, you will copy it to ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
 
 #. Within the file, update the name of your Expectation.
 
-    You'll to do this in two places: {{...}}
+    You'll to do this in two places:
+
+    * Class declaration (search for ``class ExpectColumnValuesToEqualThree``)
+    * A call to ``run_diagnostic`` in the very end of the template (search for ``diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()``). Next section explains the role this code plays.
 
 #. Execute the template file.
 
@@ -90,46 +105,71 @@ Steps
 
     {{Execute again}}
 
-#. Implement the ``_pandas`` method within your Metric class.
 
-    Rename the metric in three places:
-        1. The class name in your Metric class
-        2. condition_metric_name in your Metric class
-        3. map_metric in your Expectation class
+.. content-tabs::
 
-    Uncomment the ``_pandas`` method with its decorator. Lines AAA through BBB.
+    .. tab-container:: tab0
+        :title: ColumnMapExpectations
 
-    Add logic.
+        :ref:`Core Concepts: Expectations and Metrics <reference__core_concepts__expectations>`
 
-    About adding arguments:
+        #. Implement the ``_pandas`` method within your Metric class.
 
-        Can I add a positional argument to the method signature, or must it be a keyword argument?
+            Rename the metric in three places:
+                1. The class name in your Metric class
+                2. condition_metric_name in your Metric class
+                3. map_metric in your Expectation class
 
-        Aside from the method sig itself, where else do you need to make changes to add an argument?
+            Uncomment the ``_pandas`` method with its decorator. Lines AAA through BBB.
 
-            Metric.condition_value_keys
-            Expectation.success_keys
+            Add logic.
 
-        Add validation, if necessary.
+            About adding arguments:
 
-            If I'm adding validation, what error do I throw?
+                Can I add a positional argument to the method signature, or must it be a keyword argument?
 
-        What is the ``column`` argument?
+                Aside from the method sig itself, where else do you need to make changes to add an argument?
 
-        What about ``column_A`` and ``column_B``?
+                    Metric.condition_value_keys
+                    Expectation.success_keys
 
-        How do I add additional arguments?
-            ``column``
+                Add validation, if necessary.
+
+                    If I'm adding validation, what error do I throw?
+
+                What is the ``column`` argument?
+
+                What about ``column_A`` and ``column_B``?
+
+                How do I add additional arguments?
+                    ``column``
 
 
-    {{Execute again}}
+            {{Execute again}}
 
-    If tests pass, great! 
+            If tests pass, great!
 
-#. Fill in the ``library_metadata`` dictionary.
-#. Add Renderers.
-#. Implement the ``_sql`` method within the Metric class.
-#. Implement the ``_spark`` method within the Metric class.
+        #. Fill in the ``library_metadata`` dictionary.
+        #. Add Renderers.
+        #. Implement the ``_sql`` method within the Metric class.
+        #. Implement the ``_spark`` method within the Metric class.
+
+    .. tab-container:: tab1
+        :title: ColumnExpectation
+
+        TODO
+
+    .. tab-container:: tab2
+        :title: ColumnPairMapExpectation
+
+        TODO
+
+    .. tab-container:: tab3
+        :title: TableExpectation
+
+        TODO
+
+
 
 Additional notes
 ----------------
