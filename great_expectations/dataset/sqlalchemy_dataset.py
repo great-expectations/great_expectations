@@ -493,6 +493,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if self.engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
+            query_schema = None
         else:
             try:
                 # use the schema name configured for the datasource
@@ -564,7 +565,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql:
             self.create_temporary_table(
-                table_name, custom_sql, schema_name=schema
+                table_name, custom_sql, schema_name=query_schema
             )
 
             if self.generated_table_name is not None:
@@ -583,7 +584,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
-            self.columns = insp.get_columns(table_name, schema=schema)
+            self.columns = insp.get_columns(table_name, schema=query_schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
