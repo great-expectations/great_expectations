@@ -22,10 +22,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.types.base import (
-    CURRENT_GE_CONFIG_VERSION,
-    GE_CONFIG_VERSION_WITH_EXPERIMENTAL_CHECKPOINTS,
-)
+from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -420,7 +417,7 @@ def load_data_context_with_error_handling(
     try:
         context: Optional[DataContext] = DataContext(directory)
         ge_config_version: int = context.get_config().config_version
-        if int(ge_config_version) >= GE_CONFIG_VERSION_WITH_EXPERIMENTAL_CHECKPOINTS:
+        if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
             (
                 increment_version,
                 exception_occurred,
