@@ -564,7 +564,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql:
             self.create_temporary_table(
-                table_name, custom_sql, schema_name=query_schema
+                table_name, custom_sql, schema_name=schema
             )
 
             if self.generated_table_name is not None:
@@ -583,7 +583,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
-            self.columns = insp.get_columns(table_name, schema=query_schema)
+            self.columns = insp.get_columns(table_name, schema=schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
