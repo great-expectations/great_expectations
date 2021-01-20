@@ -516,6 +516,11 @@ class SimpleCheckpoint:
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
+        # the following are arguments used by SimpleCheckpointConfigurator
+        site_names: Optional[Union[str, List[str]]] = "all",
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = "all",
+        notify_with: Optional[Union[str, List[str]]] = "all",
     ):
         super().__init__(
             name=name,
@@ -535,6 +540,10 @@ class SimpleCheckpoint:
             profilers=profilers,
             validation_operator_name=validation_operator_name,
             batches=batches,
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
         )
 
 
