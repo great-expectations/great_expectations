@@ -23,7 +23,7 @@ Steps
         - ``TableExpectation`` are a generic catchall for other types of Expectations applied to tabular data.
 
 
-    Find the appropriate template file in ``great_expectations/examples/expectations/``.
+    Find the appropriate template file in ``great_expectations/examples/expectations/``. Starting your development with these templates is significantly easier than developing from scratch.
 
 #. Copy the template file into the appropriate `contrib/` directory.
 
@@ -41,10 +41,12 @@ Steps
 
     * Column map Expectations: ``expect_column_values_...`` (e.g., "expect_column_values_to_match_regex")
     * Column aggregate Expectations: ``expect_column_...`` (e.g., "expect_column_mean_to_be_between")
-    * Column air map Expectations: ``expect_column_pair_values_...`` (e.g., "expect_column_pair_values_to_be_in_set")
+    * Column pair map Expectations: ``expect_column_pair_values_...`` (e.g., "expect_column_pair_values_to_be_in_set")
     * Tabe Expectatons: ``expect_table_...`` (e.g., "expect_table_row_count_to_be_equal")
 
     For example, if you call your Expectation ``ExpectColumnValuesToEqualThree``, you will copy it to ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
+
+    For more style conventions that your code should follow consult our :ref:`Style Guide <contributing__style_guide>`
 
 #. Within the file, update the name of your Expectation.
 
@@ -65,46 +67,94 @@ Steps
 
     .. code-block:: json
 
-      {
-        "description": {
-          "camel_name": "ExpectColumnValuesToEqualThree",
-          "snake_name": "expect_column_values_to_equal_three",
-          "short_description": "",
-          "docstring": ""
-        },
-        "library_metadata": {},
-        "renderers": {},
-        "examples": [],
-        "metrics": [],
-        "execution_engines": {}
-      }
+        {
+          "description": {
+            "camel_name": "ExpectColumnValuesToEqualThree",
+            "snake_name": "expect_column_values_to_equal_three",
+            "short_description": "",
+            "docstring": ""
+          },
+          "library_metadata": {
+            "maturity": "experimental",
+            "package": "experimental_expectations",
+            "tags": [],
+            "contributors": []
+          },
+          "renderers": {},
+          "examples": [],
+          "metrics": [],
+          "execution_engines": {}
+        }
+
+    This output is a report on the completeness of your Expectation.
+
+    You will repeat this step many times during developing your Expectation. ``run_diagnostics`` creates an easy and fast "dev loop" for you -
+    make a small change in the code, run ``run_diagnostics``, examine its output for failures and next steps.
 
     From this point on, we'll start filling in the pieces of your Expectation. You can stop this at any point.
 
-    Recommended order:
+#. Add an example test.
 
-        #. Create an example
-        #. Implement a single method in the Metric. Probably the ``_pandas`` method.
-        #. Fill in the ``library_metadata`` dictionary.
-        #. Add Renderers.
-        #. Implement the other Metric methods.
+    Search for ``examples = [`` in your file.
+
+    These examples serve a dual purpose:
+
+        * help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. When your Expectation is released, its entry in the Expectations Gallery site will render these examples.
+        * provide test cases that the Great Expectations testing framework can execute automatically
+
+    We will explain the structure of these tests using the example provided in one of the templates that implements ``expect_column_values_to_equal_three``.
+
+    .. code-block:: python
+
+        examples = [{
+            "data": {
+                "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
+            },
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly",
+                    "exact_match_out": False,
+                    "in": {"column": "mostly_threes", "mostly": 0.6},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                }
+            ],
+        }]
 
 
-#. Add an example test in the ``examples`` dictionary staring on line 46.
 
-    Most of the other functionality in ``run_diagnostics`` depends on having an example to work from.
+    The value of ``examples`` is a list of examples.
 
-    The ``examples`` dictionary contains 
-    
-    ...
+    Each example is a dictionary with two keys:
+    * data: defines the input data of the example as a table/data frame. In this example the table has one column named "mostly_threes" with 10 rows.
+    * tests: a list of test cases that use the data defined above as input to validate
+        * ‘in’ contains exactly the parameters that you want to pass in to the Expectation. ``"in": {"column": "mostly_threes", "mostly": 0.6}`` in the example above is equivalent to ``expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)``
+        * ‘out’ is based on the Validation Result returned when executing the Expectation. If you set exact_match=False, then you don’t need to include all the elements of the result object---only the ones that are important to test.
 
-    Add a corresponding test in the ``examples`` dictionary.
+    Uncomment that code snippet and replace with your examples.
 
-    Within ``in``, you will need to add parameters.
+    Run ``run_diagnostics`` again. The newly added examples will appear in the output. They are not executed as tests yet, because most of the code in the Expectation is still commented out.
+
+    .. admonition:: Note:
+
+        - When you define data in your examples, we will mostly guess the type of the columns. Sometimes you need to specify the precise type of the columns for each backend. Then you use ``schema`` atribute in an example to achieve this:
+
+        .. code-block:: json
+
+            "schemas": {
+              "spark": {
+                "mostly_threes": "IntegerType",
+              },
+              "sqlite": {
+                "mostly_threes": "INTEGER",
+              },
 
 
-    {{Execute again}}
 
+    Next implementation steps differ based on the type of Expectations you are implementing. Click on the appropriate tab below.
 
 .. content-tabs::
 
