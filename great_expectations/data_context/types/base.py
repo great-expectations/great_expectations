@@ -1470,7 +1470,7 @@ class CheckpointConfigSchema(Schema):
     )
     template_name = fields.String(required=False, allow_none=True)
     module_name = fields.String(required=False, missing="great_expectations.checkpoint")
-    class_name = fields.Str(required=False, missing="Checkpoint")
+    class_name = fields.Str(required=False, allow_none=True)
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
     batch_request = fields.Dict(required=False, allow_none=True)
