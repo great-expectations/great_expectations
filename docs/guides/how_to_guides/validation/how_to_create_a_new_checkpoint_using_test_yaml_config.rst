@@ -33,9 +33,7 @@ Steps
         name: my_fancy_checkpoint
         config_version: 1
         class_name: Checkpoint
-        # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
-        # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
-        # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+        run_name_template: "%Y-%M-foo-bar-template-$VAR"
         validations:
           - batch_request:
               datasource_name: my_datasource
@@ -55,11 +53,8 @@ Steps
                   action:
                     class_name: UpdateDataDocsAction
             evaluation_parameters:
-              # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-              # param1: "$MY_PARAM"
-              # param2: 1 + "$OLD_PARAM"
-              param1: 1
-              param2: 2
+              param1: "$MY_PARAM"
+              param2: 1 + "$OLD_PARAM"
             runtime_configuration:
               result_format:
                 result_format: BASIC
@@ -146,9 +141,7 @@ Steps
         name: my_fancy_checkpoint
         config_version: 1
         class_name: Checkpoint
-        # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
-        # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
-        # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+        run_name_template: "%Y-%M-foo-bar-template-$VAR"
         validations:
           - batch_request:
               datasource_name: my_datasource
@@ -174,11 +167,8 @@ Steps
               action:
                 class_name: UpdateDataDocsAction
         evaluation_parameters:
-          # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-          # param1: "$MY_PARAM"
-          # param2: 1 + "$OLD_PARAM"
-          param1: 1
-          param2: 2
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
         runtime_configuration:
           result_format:
             result_format: BASIC
@@ -238,9 +228,7 @@ Steps
         name: my_base_checkpoint
         config_version: 1
         class_name: Checkpoint
-        # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
-        # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
-        # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+        run_name_template: "%Y-%M-foo-bar-template-$VAR"
         action_list:
         - name: store_validation_result
           action:
@@ -252,11 +240,8 @@ Steps
           action:
             class_name: UpdateDataDocsAction
         evaluation_parameters:
-          # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-          # param1: "$MY_PARAM"
-          # param2: 1 + "$OLD_PARAM"
-          param1: 1
-          param2: 2
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
         runtime_configuration:
             result_format:
               result_format: BASIC

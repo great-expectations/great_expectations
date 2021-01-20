@@ -464,7 +464,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     We call the "suite demo" command without the suite name argument
@@ -477,7 +477,9 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     - open Data Docs
     - NOT open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     os.chdir(root_dir)
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
@@ -539,6 +541,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -548,7 +551,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     We call the "suite demo" command with the suite name argument
@@ -559,7 +562,9 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     - open Data Docs
     - NOT open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     os.chdir(root_dir)
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
@@ -608,6 +613,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -770,7 +776,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify the batch
@@ -789,7 +795,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -846,6 +854,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -855,7 +864,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command uses the batch kwargs found in
@@ -871,7 +880,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - NOT open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -916,6 +927,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -925,7 +937,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     Here we verify that when the "suite edit" command is called with batch_kwargs arg
@@ -946,7 +958,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
@@ -1012,6 +1026,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
