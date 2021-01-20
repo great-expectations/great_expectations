@@ -14,85 +14,117 @@ This is useful if your pipeline environment or orchestration engine does not hav
 Steps
 -----
 
-1. First, generate the python with the command:
+.. content-tabs::
 
-.. code-block:: bash
+    .. tab-container:: tab0
+        :title: Experimental Checkpoints (up to 0.12.x)
 
-    great_expectations checkpoint script my_checkpoint
+        1. First, generate the python with the command:
 
-2. Next, you will see a message about where the python script was created like:
+        .. code-block:: bash
 
-.. code-block:: bash
+            great_expectations checkpoint script my_checkpoint
 
-    A python script was created that runs the checkpoint named: `my_checkpoint`
-      - The script is located in `great_expectations/uncommitted/run_my_checkpoint.py`
-      - The script can be run with `python great_expectations/uncommitted/run_my_checkpoint.py`
+        2. Next, you will see a message about where the python script was created like:
 
-3. Next, open the script which should look like this:
+        .. code-block:: bash
 
-.. code-block:: python
+            A python script was created that runs the checkpoint named: `my_checkpoint`
+              - The script is located in `great_expectations/uncommitted/run_my_checkpoint.py`
+              - The script can be run with `python great_expectations/uncommitted/run_my_checkpoint.py`
 
-    """
-    This is a basic generated Great Expectations script that runs a checkpoint.
+        3. Next, open the script which should look like this:
 
-    A checkpoint is a list of one or more batches paired with one or more
-    Expectation Suites and a configurable Validation Operator.
+        .. code-block:: python
 
-    Checkpoints can be run directly without this script using the
-    `great_expectations checkpoint run` command. This script is provided for those
-    who wish to run checkpoints via python.
+            """
+            This is a basic generated Great Expectations script that runs a checkpoint.
 
-    Data that is validated is controlled by BatchKwargs, which can be adjusted in
-    the checkpoint file: great_expectations/checkpoints/my_checkpoint.yml.
+            A checkpoint is a list of one or more batches paired with one or more
+            Expectation Suites and a configurable Validation Operator.
 
-    Data are validated by use of the `ActionListValidationOperator` which is
-    configured by default. The default configuration of this Validation Operator
-    saves validation results to your results store and then updates Data Docs.
+            Checkpoints can be run directly without this script using the
+            `great_expectations checkpoint run` command. This script is provided for those
+            who wish to run checkpoints via python.
 
-    This makes viewing validation results easy for you and your team.
+            Data that is validated is controlled by BatchKwargs, which can be adjusted in
+            the checkpoint file: great_expectations/checkpoints/my_checkpoint.yml.
 
-    Usage:
-    - Run this file: `python great_expectations/uncommitted/run_my_checkpoint.py`.
-    - This can be run manually or via a scheduler such as cron.
-    - If your pipeline runner supports python snippets you can paste this into your
-    pipeline.
-    """
-    import sys
+            Data are validated by use of the `ActionListValidationOperator` which is
+            configured by default. The default configuration of this Validation Operator
+            saves validation results to your results store and then updates Data Docs.
 
-    from great_expectations import DataContext
+            This makes viewing validation results easy for you and your team.
 
-    # checkpoint configuration
-    context = DataContext("/home/ubuntu/my_project/great_expectations")
-    checkpoint = context.get_checkpoint("my_checkpoint")
+            Usage:
+            - Run this file: `python great_expectations/uncommitted/run_my_checkpoint.py`.
+            - This can be run manually or via a scheduler such as cron.
+            - If your pipeline runner supports python snippets you can paste this into your
+            pipeline.
+            """
+            import sys
 
-    # load batches of data
-    batches_to_validate = []
-    for batch in checkpoint["batches"]:
-      batch_kwargs = batch["batch_kwargs"]
-      for suite_name in batch["expectation_suite_names"]:
-          suite = context.get_expectation_suite(suite_name)
-          batch = context.get_batch(batch_kwargs, suite)
-          batches_to_validate.append(batch)
+            from great_expectations import DataContext
 
-    # run the validation operator
-    results = context.run_validation_operator(
-      checkpoint["validation_operator_name"],
-      assets_to_validate=batches_to_validate,
-      # TODO prepare for new RunID - checkpoint name and timestamp
-      # run_id=RunID(checkpoint)
-    )
+            # checkpoint configuration
+            context = DataContext("/home/ubuntu/my_project/great_expectations")
+            checkpoint = context.get_checkpoint("my_checkpoint")
 
-    # take action based on results
-    if not results["success"]:
-      print("Validation failed!")
-      sys.exit(1)
+            # load batches of data
+            batches_to_validate = []
+            for batch in checkpoint["batches"]:
+              batch_kwargs = batch["batch_kwargs"]
+              for suite_name in batch["expectation_suite_names"]:
+                  suite = context.get_expectation_suite(suite_name)
+                  batch = context.get_batch(batch_kwargs, suite)
+                  batches_to_validate.append(batch)
 
-    print("Validation succeeded!")
-    sys.exit(0)
+            # run the validation operator
+            results = context.run_validation_operator(
+              checkpoint["validation_operator_name"],
+              assets_to_validate=batches_to_validate,
+              # TODO prepare for new RunID - checkpoint name and timestamp
+              # run_id=RunID(checkpoint)
+            )
+
+            # take action based on results
+            if not results["success"]:
+              print("Validation failed!")
+              sys.exit(1)
+
+            print("Validation succeeded!")
+            sys.exit(0)
 
 
-4. This python can then be invoked directly using python `python great_expectations/uncommitted/run_my_checkpoint.py`
-or the python code can be embedded in your pipeline.
+        4. This python can then be invoked directly using python `python great_expectations/uncommitted/run_my_checkpoint.py`
+        or the python code can be embedded in your pipeline.
+
+    .. tab-container:: tab1
+        :title: Checkpoints (0.13 -- with CheckpointStore)
+
+        #. **Instantiate a DataContext**
+
+            Instantiate a DataContext using the following lines:
+
+            .. code-block:: python
+
+                import great_expectations as ge
+                context = ge.get_context()
+
+        #. **Run context.test_yaml_config.**
+
+            Use the name of your configured checkpoint as the argument to the following call:
+
+            .. code-block:: python
+
+                checkpoint_run_result: CheckpointResult = context.run_checkpoint(
+                    checkpoint_name="my_checkpoint",
+                )
+
+            Other arguments to the `DataContext.run_checkpoint()` method may be required, depending on the amount and specifics of the Checkpoint configuration previously saved in the configuration file of the Checkpoint with the corresponding `name`.  The dynamically specified Checkpoint configuration, provided to the runtime as arguments to `DataContext.run_checkpoint()` must complement the settings in the Checkpoint configuration file so as to comprise a properly and sufficiently configured Checkpoint with the given `name`.
+
+        Please see :ref:`How to configure a New Checkpoint using "test_yaml_config" <how_to_guides_how_to_configure_a_new_checkpoint_using_test_yaml_config>` for additional Checkpoint configuration and `DataContext.run_checkpoint()` examples.
+
 
 .. discourse::
     :topic_identifier: 225
