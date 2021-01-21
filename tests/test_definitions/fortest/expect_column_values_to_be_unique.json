@@ -67,19 +67,6 @@
           "unexpected_index_list": [0, 1, 2]
         }
       },{
-        "title": "multi_type_column_contains_2_and_quoted_2_suppressed_for_sqalchemy",
-        "suppress_test_for": ["sqlalchemy"],
-        "exact_match_out": false,
-        "in": {
-          "column": "c",
-          "mostly": 0.3
-        },
-        "out": {
-          "success": true,
-          "unexpected_list": [1, 1],
-          "unexpected_index_list": [0, 1]
-        }
-      },{
         "title": "positive_case_using_mostly",
         "exact_match_out": false,
         "in": {

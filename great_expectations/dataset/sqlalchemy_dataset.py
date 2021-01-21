@@ -224,6 +224,9 @@ class MetaSqlAlchemyDataset(Dataset):
                 )
 
             count_query: Select
+
+
+
             if self.sql_engine_dialect.name.lower() == "mssql":
                 count_query = self._get_count_query_mssql(
                     expected_condition=expected_condition,
@@ -234,7 +237,12 @@ class MetaSqlAlchemyDataset(Dataset):
                     expected_condition=expected_condition,
                     ignore_values_condition=ignore_values_condition,
                 )
-
+            print("-----------------")
+            #print(count_query)
+            print(expected_condition)
+            print(ignore_values_condition)
+            print(count_query)
+            print(self.engine.execute(count_query).fetchone())
             count_results: dict = dict(self.engine.execute(count_query).fetchone())
 
             # Handle case of empty table gracefully:
@@ -268,7 +276,6 @@ class MetaSqlAlchemyDataset(Dataset):
                 )
                 .limit(unexpected_count_limit)
             )
-
             nonnull_count: int = (
                 count_results["element_count"] - count_results["null_count"]
             )
@@ -400,7 +407,9 @@ class MetaSqlAlchemyDataset(Dataset):
         expected_condition: BinaryExpression,
         ignore_values_condition: BinaryExpression,
     ) -> Select:
-        return sa.select(
+
+        # this was the query that also included
+        query =  sa.select(
             [
                 sa.func.count().label("element_count"),
                 sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
@@ -422,7 +431,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 ).label("unexpected_count"),
             ]
         ).select_from(self._table)
-
+        return query
 
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     """
@@ -1782,13 +1791,50 @@ WHERE
             .group_by(sa.column(column))
             .having(sa.func.count(sa.column(column)) > 1)
         )
+        print("THIS IS WHAT SHOULD BE PRINTED")
+        print(column)
+        print(dup_query)
+        #print("hi i am dup_query")
+        #print(dup_query)
+
         # mysql will not allow the temp_table to be referred to more than once
         # which means the .select_from(self._table) in dup_query will cause an error
         # in the case of mysql, execute the query and pass in the entire list
         # <WILL> Commenting out to confirm that the test is failing on Azure
-        # if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
-        #    dup_query = self.engine.execute(dup_query).fetchall()
+        if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
+            #dup_query = self.engine.execute(dup_query)
+            rows = self.engine.execute(dup_query).fetchall()
+            #https: // stackoverflow.com / questions / 1958219 / convert - sqlalchemy - row - object - to - python - dict / 1958228  # 1958228
+            query_ran = []
+            for row in rows:
+                row_as_dict = dict(row)
+                query_ran.append(row_as_dict)
+            #query_ran = {"dups": self.engine.execute(dup_query).fetchall}
+            #query_ran = query_ran["dups"]
+            #dup_query = query_ran[column]
+            print("DUP QUERY")
+            print(query_ran)
+            dup_query = query_ran
+            for item in dup_query:
+                print(type(item))
+            # sending in an empty list will run
+            # we know for sure that this works
+            dup_query = [('Will Shin',), ('Carlsson, Mr Frans Olof',), ('Connolly, Miss Kate',), ('Kelly, Mr James',)]
+            print(dup_query)
+            for item in dup_query:
+                print(type(item))
 
+            #print("this is the executed dup query")
+            #print(dup_query)
+        #    print(dup_query)
+        #    print("this has executed")
+        #    print(dup_query)
+        #print("hi i am self._table")
+        #print(self._table)
+
+        #print("hi i am full")
+        #print(sa.column(column).notin_(dup_query))
+        # shouldn't this be just a non-null?
         return sa.column(column).notin_(dup_query)
 
     def _get_dialect_regex_expression(self, column, regex, positive=True):
