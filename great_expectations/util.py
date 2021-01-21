@@ -183,7 +183,15 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name, module_name):
+def load_class(class_name: str, module_name: str):
+    if class_name is None:
+        raise TypeError("class_name must not be None")
+    if not isinstance(class_name, str):
+        raise TypeError("class_name must be a string")
+    if module_name is None:
+        raise TypeError("module_name must not be None")
+    if not isinstance(module_name, str):
+        raise TypeError("module_name must be a string")
     try:
         verify_dynamic_loading_support(module_name=module_name)
     except FileNotFoundError:
@@ -866,3 +874,15 @@ def get_context():
     from great_expectations.data_context.data_context import DataContext
 
     return DataContext()
+
+
+def is_sane_slack_webhook(url: str) -> bool:
+    """Really basic sanity checking."""
+    if url is None:
+        return False
+
+    return url.strip().startswith("https://hooks.slack.com/")
+
+
+def is_list_of_strings(_list) -> bool:
+    return isinstance(_list, list) and all([isinstance(site, str) for site in _list])

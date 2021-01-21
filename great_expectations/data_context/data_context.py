@@ -583,6 +583,12 @@ class BaseDataContext:
                 )
         return resource_store
 
+    def get_site_names(self) -> List[str]:
+        """Get a list of configured site names."""
+        return list(
+            self.project_config_with_variables_substituted.data_docs_sites.keys()
+        )
+
     def get_docs_sites_urls(
         self,
         resource_identifier=None,
@@ -3044,10 +3050,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 checkpoint_config = checkpoint_config.to_json_dict()
                 checkpoint_config.update({"name": checkpoint_name})
 
-                instantiated_class = Checkpoint(
-                    data_context=self,
-                    **checkpoint_config,
-                )
+                instantiated_class = Checkpoint(data_context=self, **checkpoint_config)
 
                 checkpoint_config = CheckpointConfig.from_commented_map(
                     commented_map=instantiated_class.config.commented_map

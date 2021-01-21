@@ -23,12 +23,13 @@ from great_expectations.cli.cli_messages import (
 )
 from great_expectations.cli.datasource import add_datasource as add_datasource_impl
 from great_expectations.cli.docs import build_docs
-from great_expectations.cli.util import cli_message, is_sane_slack_webhook
+from great_expectations.cli.util import cli_message
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.exceptions import (
     DataContextError,
     DatasourceInitializationError,
 )
+from great_expectations.util import is_sane_slack_webhook
 
 try:
     from sqlalchemy.exc import SQLAlchemyError

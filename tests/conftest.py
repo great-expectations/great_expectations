@@ -2241,7 +2241,7 @@ def postgresql_engine(test_backend):
 
 
 @pytest.fixture
-def empty_data_context(tmp_path_factory):
+def empty_data_context(tmp_path_factory) -> DataContext:
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
@@ -2344,8 +2344,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
 
     # add simple template config
     simple_checkpoint_template_config = CheckpointConfig(
-        config_version=1,
         name="my_simple_template_checkpoint",
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
         action_list=[
             {
@@ -2390,20 +2390,10 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
 
     # add nested template configs
     nested_checkpoint_template_config_1 = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint_template_1",
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
         expectation_suite_name="suite_from_template_1",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource_template_1",
-                    "data_connector_name": "my_special_data_connector_template_1",
-                    "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
-                }
-            }
-        ],
         action_list=[
             {
                 "name": "store_validation_result",
@@ -2436,6 +2426,16 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
             "partial_unexpected_count": "FOOBARBOO",
             "template_1_key": 123,
         },
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource_template_1",
+                    "data_connector_name": "my_special_data_connector_template_1",
+                    "data_asset_name": "users_from_template_1",
+                    "partition_request": {"partition_index": -999},
+                }
+            }
+        ],
     )
     nested_checkpoint_template_config_1_key = ConfigurationIdentifier(
         configuration_key=nested_checkpoint_template_config_1.name
@@ -2446,8 +2446,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     )
 
     nested_checkpoint_template_config_2 = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint_template_2",
+        config_version=1,
         template_name="my_nested_checkpoint_template_1",
         run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
         action_list=[
@@ -2494,8 +2494,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     )
 
     nested_checkpoint_template_config_3 = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint_template_3",
+        config_version=1,
         template_name="my_nested_checkpoint_template_2",
         run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
         action_list=[
@@ -2541,6 +2541,66 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_3_key,
         value=nested_checkpoint_template_config_3,
+    )
+
+    # add minimal SimpleCheckpoint
+    simple_checkpoint_config = CheckpointConfig(
+        name="my_minimal_simple_checkpoint",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+    )
+    simple_checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_config_key,
+        value=simple_checkpoint_config,
+    )
+
+    # add SimpleCheckpoint with slack webhook
+    simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_slack",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        slack_webhook="https://hooks.slack.com/foo/bar",
+    )
+    simple_checkpoint_with_slack_webhook_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_slack_webhook_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_slack_webhook_config_key,
+        value=simple_checkpoint_with_slack_webhook_config,
+    )
+
+    # add SimpleCheckpoint with slack webhook and notify_with
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_slack_and_notify_with_all",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        slack_webhook="https://hooks.slack.com/foo/bar",
+        notify_with="all",
+    )
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key,
+        value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
+    )
+
+    # add SimpleCheckpoint with site_names
+    simple_checkpoint_with_site_names_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_site_names",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        site_names=["local_site"],
+    )
+    simple_checkpoint_with_site_names_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_site_names_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_site_names_config_key,
+        value=simple_checkpoint_with_site_names_config,
     )
 
     return context
