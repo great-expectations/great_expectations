@@ -1577,6 +1577,11 @@ class CheckpointConfig(BaseYamlConfig):
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
             self._profilers = profilers or []
+            # the following attributes are used by optional configurator
+            self._site_names = site_names
+            self._slack_webhook = slack_webhook
+            self._notify_on = notify_on
+            self._notify_with = notify_with
 
         self._module_name = module_name or "great_expectations.checkpoint"
         self._class_name = class_name
@@ -1749,6 +1754,22 @@ class CheckpointConfig(BaseYamlConfig):
     @action_list.setter
     def action_list(self, value: List[dict]):
         self._action_list = value
+
+    @property
+    def site_names(self):
+        return self._site_names
+
+    @property
+    def slack_webhook(self):
+        return self._slack_webhook
+
+    @property
+    def notify_on(self):
+        return self._notify_on
+
+    @property
+    def notify_with(self):
+        return self._notify_with
 
     @classmethod
     def get_updated_action_list(

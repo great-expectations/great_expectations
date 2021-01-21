@@ -496,7 +496,7 @@ class LegacyCheckpoint(Checkpoint):
         return batches_to_validate
 
 
-class SimpleCheckpoint:
+class SimpleCheckpoint(Checkpoint):
     def __init__(
         self,
         name: str,

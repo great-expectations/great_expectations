@@ -138,7 +138,8 @@ class SimpleCheckpointConfigurator:
                 )
             )
         logger.debug(
-            f"SimpleCheckpoint built this CheckpointConfig: {json.dumps(checkpoint_config.to_json_dict(), indent=4)}"
+            f"SimpleCheckpointConfigurator built this CheckpointConfig:"
+            f" {json.dumps(checkpoint_config.to_json_dict(), indent=4)}"
         )
         return checkpoint_config
 
