@@ -97,7 +97,6 @@ def test_checkpoint_store(empty_data_context):
 
     assert filter_properties_dict(
         properties=checkpoint_store.get(key=key_0).to_json_dict(),
-        delete_fields=["module_name"],
     ) == filter_properties_dict(
         properties=my_checkpoint_config_0.to_json_dict(),
     )
@@ -174,7 +173,6 @@ def test_checkpoint_store(empty_data_context):
 
     assert filter_properties_dict(
         properties=checkpoint_store.get(key=key_1).to_json_dict(),
-        delete_fields=["module_name"],
     ) == filter_properties_dict(
         properties=my_checkpoint_config_1.to_json_dict(),
     )

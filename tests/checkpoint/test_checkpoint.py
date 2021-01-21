@@ -27,6 +27,26 @@ yaml = YAML()
 logger = logging.getLogger(__name__)
 
 
+def test_checkpoint_raises_typeerror_on_incorrect_data_context():
+    with pytest.raises(TypeError):
+        Checkpoint(name="my_checkpoint", data_context="foo", config_version=1)
+
+
+def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context):
+    checkpoint = Checkpoint("foo", empty_data_context, config_version=None)
+    with pytest.raises(AttributeError):
+        checkpoint.action_list
+
+
+def test_checkpoint_with_config_version_has_action_list(empty_data_context):
+    checkpoint = Checkpoint(
+        "foo", empty_data_context, config_version=1, action_list=[{"foo": "bar"}]
+    )
+    obs = checkpoint.action_list
+    assert isinstance(obs, list)
+    assert obs == [{"foo": "bar"}]
+
+
 def test_basic_checkpoint_config_validation(
     empty_data_context,
     caplog,
@@ -39,7 +59,7 @@ def test_basic_checkpoint_config_validation(
 
     yaml_config_erroneous = f"""
     name: misconfigured_checkpoint
-    unexpected_property: UNKOWN_PROPERTY_VALUE
+    unexpected_property: UNKNOWN_PROPERTY_VALUE
     """
     config_erroneous = yaml.load(yaml_config_erroneous)
     with pytest.raises(TypeError):
@@ -145,10 +165,7 @@ def test_basic_checkpoint_config_validation(
     config: CommentedMap = yaml.load(yaml_config)
     checkpoint_config = CheckpointConfig(**config)
     checkpoint_config = checkpoint_config.to_json_dict()
-    checkpoint = Checkpoint(
-        data_context=empty_data_context,
-        **checkpoint_config,
-    )
+    checkpoint = Checkpoint(data_context=empty_data_context, **checkpoint_config)
     assert (
         filter_properties_dict(
             properties=checkpoint.self_check()["config"],
@@ -192,10 +209,11 @@ def test_basic_checkpoint_config_validation(
 
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    monkeypatch,
 ):
-    os.environ["VAR"] = "test"
-    os.environ["MY_PARAM"] = "1"
-    os.environ["OLD_PARAM"] = "2"
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
 
     checkpoint: Checkpoint
 
@@ -305,13 +323,18 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success
 
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
 
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    monkeypatch,
 ):
-    os.environ["VAR"] = "test"
-    os.environ["MY_PARAM"] = "1"
-    os.environ["OLD_PARAM"] = "2"
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
 
     checkpoint: Checkpoint
 
@@ -430,6 +453,10 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
 
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
 
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
@@ -530,8 +557,9 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    monkeypatch,
 ):
-    os.environ["GE_ENVIRONMENT"] = "my_ge_environment"
+    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
 
     checkpoint: Checkpoint
 
@@ -661,13 +689,16 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
 
+    monkeypatch.delenv("GE_ENVIRONMENT")
+
 
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    monkeypatch,
 ):
-    os.environ["VAR"] = "test"
-    os.environ["MY_PARAM"] = "1"
-    os.environ["OLD_PARAM"] = "2"
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
 
     checkpoint: Checkpoint
     yaml_config: str
@@ -856,13 +887,23 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 4
     assert result.success
 
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
 
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-    filesystem_csv_data_context,
+    filesystem_csv_data_context_with_validation_operators,
 ):
-    base_directory = filesystem_csv_data_context.list_datasources()[0][
-        "batch_kwargs_generators"
-    ]["subdir_reader"]["base_directory"]
+    rad_datasource = list(
+        filter(
+            lambda element: element["name"] == "rad_datasource",
+            filesystem_csv_data_context_with_validation_operators.list_datasources(),
+        )
+    )[0]
+    base_directory = rad_datasource["batch_kwargs_generators"]["subdir_reader"][
+        "base_directory"
+    ]
     batch_kwargs = {
         "path": base_directory + "/f1.csv",
         "datasource": "rad_datasource",
@@ -878,7 +919,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     }
 
     checkpoint = LegacyCheckpoint(
-        data_context=filesystem_csv_data_context,
+        data_context=filesystem_csv_data_context_with_validation_operators,
         **checkpoint_config_dict,
     )
 
@@ -887,14 +928,25 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     ):
         checkpoint.run()
 
-    assert len(filesystem_csv_data_context.validations_store.list_keys()) == 0
+    assert (
+        len(
+            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
+        )
+        == 0
+    )
 
-    filesystem_csv_data_context.create_expectation_suite("my_suite")
-    print(filesystem_csv_data_context.list_datasources())
+    filesystem_csv_data_context_with_validation_operators.create_expectation_suite(
+        "my_suite"
+    )
     # noinspection PyUnusedLocal
     results = checkpoint.run()
 
-    assert len(filesystem_csv_data_context.validations_store.list_keys()) == 1
+    assert (
+        len(
+            filesystem_csv_data_context_with_validation_operators.validations_store.list_keys()
+        )
+        == 1
+    )
 
 
 # TODO: add more test cases
@@ -904,8 +956,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
-        config_version=1,
         name="my_checkpoint",
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=[
@@ -952,7 +1004,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert len(context.validations_store.list_keys()) == 0
 
     context.create_expectation_suite("my_expectation_suite")
-    print(context.list_datasources())
     # noinspection PyUnusedLocal
     results = checkpoint.run()
 
@@ -961,12 +1012,18 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 def test_newstyle_checkpoint_config_substitution_simple(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    monkeypatch,
 ):
+    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     simplified_checkpoint_config = CheckpointConfig(
-        config_version=1,
         name="my_simplified_checkpoint",
+        config_version=1,
         template_name="my_simple_template_checkpoint",
         expectation_suite_name="users.delivery",
         validations=[
@@ -989,34 +1046,15 @@ def test_newstyle_checkpoint_config_substitution_simple(
         ],
     )
     simplified_checkpoint = Checkpoint(
-        data_context=context,
-        **simplified_checkpoint_config.to_json_dict(),
+        data_context=context, **simplified_checkpoint_config.to_json_dict()
     )
 
     # template only
     expected_substituted_checkpoint_config_template_only = CheckpointConfig(
-        config_version=1,
         name="my_simplified_checkpoint",
-        expectation_suite_name="users.delivery",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
-                }
-            },
-        ],
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template-test",
+        expectation_suite_name="users.delivery",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1049,6 +1087,24 @@ def test_newstyle_checkpoint_config_substitution_simple(
                 "partial_unexpected_count": 20,
             }
         },
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {"partition_index": -1},
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_other_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {"partition_index": -2},
+                }
+            },
+        ],
     )
 
     substituted_config_template_only = simplified_checkpoint.get_substituted_config()
@@ -1066,44 +1122,10 @@ def test_newstyle_checkpoint_config_substitution_simple(
     # template and runtime kwargs
     expected_substituted_checkpoint_config_template_and_runtime_kwargs = (
         CheckpointConfig(
-            config_version=1,
             name="my_simplified_checkpoint",
-            expectation_suite_name="runtime_suite_name",
-            validations=[
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_special_data_connector",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -1},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -2},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
-                    }
-                },
-            ],
+            config_version=1,
             run_name_template="runtime_run_template",
+            expectation_suite_name="runtime_suite_name",
             action_list=[
                 {
                     "name": "store_validation_result",
@@ -1138,6 +1160,40 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "new_runtime_config_key": "bleepy!",
                 }
             },
+            validations=[
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -1},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -2},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_2",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -3},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_3",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -4},
+                    }
+                },
+            ],
         )
     )
 
@@ -1210,15 +1266,26 @@ def test_newstyle_checkpoint_config_substitution_simple(
         == expected_substituted_checkpoint_config_template_and_runtime_kwargs.to_json_dict()
     )
 
+    monkeypatch.delenv("GE_ENVIRONMENT")
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
 
 def test_newstyle_checkpoint_config_substitution_nested(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    monkeypatch,
 ):
+    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 
     nested_checkpoint_config = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint",
+        config_version=1,
         template_name="my_nested_checkpoint_template_2",
         expectation_suite_name="users.delivery",
         validations=[
@@ -1241,42 +1308,15 @@ def test_newstyle_checkpoint_config_substitution_nested(
         ],
     )
     nested_checkpoint = Checkpoint(
-        data_context=context,
-        **nested_checkpoint_config.to_json_dict(),
+        data_context=context, **nested_checkpoint_config.to_json_dict()
     )
 
     # template only
     expected_nested_checkpoint_config_template_only = CheckpointConfig(
-        config_version=1,
         name="my_nested_checkpoint",
-        expectation_suite_name="users.delivery",
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource_template_1",
-                    "data_connector_name": "my_special_data_connector_template_1",
-                    "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
-                }
-            },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
-                }
-            },
-        ],
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template-test-template-2",
+        expectation_suite_name="users.delivery",
         action_list=[
             {
                 "name": "store_validation_result",
@@ -1313,6 +1353,32 @@ def test_newstyle_checkpoint_config_substitution_nested(
             "partial_unexpected_count": 20,
             "template_1_key": 123,
         },
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource_template_1",
+                    "data_connector_name": "my_special_data_connector_template_1",
+                    "data_asset_name": "users_from_template_1",
+                    "partition_request": {"partition_index": -999},
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {"partition_index": -1},
+                }
+            },
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_other_data_connector",
+                    "data_asset_name": "users",
+                    "partition_request": {"partition_index": -2},
+                }
+            },
+        ],
     )
 
     substituted_config_template_only = nested_checkpoint.get_substituted_config()
@@ -1330,52 +1396,10 @@ def test_newstyle_checkpoint_config_substitution_nested(
     # runtime kwargs with new checkpoint template name passed at runtime
     expected_nested_checkpoint_config_template_and_runtime_template_name = (
         CheckpointConfig(
-            config_version=1,
             name="my_nested_checkpoint",
-            expectation_suite_name="runtime_suite_name",
-            validations=[
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource_template_1",
-                        "data_connector_name": "my_special_data_connector_template_1",
-                        "data_asset_name": "users_from_template_1",
-                        "partition_request": {"partition_index": -999},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_special_data_connector",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -1},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -2},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_2_runtime",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
-                    }
-                },
-                {
-                    "batch_request": {
-                        "datasource_name": "my_datasource",
-                        "data_connector_name": "my_other_data_connector_3_runtime",
-                        "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
-                    }
-                },
-            ],
+            config_version=1,
             run_name_template="runtime_run_template",
+            expectation_suite_name="runtime_suite_name",
             action_list=[
                 {
                     "name": "store_validation_result",
@@ -1420,6 +1444,48 @@ def test_newstyle_checkpoint_config_substitution_nested(
                 "template_3_key": "bloopy!",
                 "new_runtime_config_key": "bleepy!",
             },
+            validations=[
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource_template_1",
+                        "data_connector_name": "my_special_data_connector_template_1",
+                        "data_asset_name": "users_from_template_1",
+                        "partition_request": {"partition_index": -999},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -1},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -2},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_2_runtime",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -3},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector_3_runtime",
+                        "data_asset_name": "users",
+                        "partition_request": {"partition_index": -4},
+                    }
+                },
+            ],
         )
     )
 
@@ -1488,3 +1554,8 @@ def test_newstyle_checkpoint_config_substitution_nested(
         substituted_config_template_and_runtime_kwargs.to_json_dict()
         == expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict()
     )
+
+    monkeypatch.delenv("GE_ENVIRONMENT")
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")

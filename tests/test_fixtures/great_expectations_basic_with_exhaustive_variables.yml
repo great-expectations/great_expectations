@@ -33,7 +33,6 @@ plugins_directory: ${l}
 evaluation_parameter_store_name: ${m}
 expectations_store_name: ${n}
 validations_store_name: ${o}
-checkpoint_store_name: ${cps}
 
 data_docs_sites:
   local_site:
@@ -58,12 +57,6 @@ stores:
 
   validations_store:
     class_name: ${z}
-
-  checkpoint_store:
-    class_name: ${cpu}
-    store_backend:
-      class_name: ${cpv}
-      base_directory: ${cpw}
 
 validation_operators:
   # Read about validation operators at: https://docs.greatexpectations.io/en/latest/guides/validation_operators.html

@@ -50,6 +50,7 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
     DataContextConfig,
+    DataContextConfigDefaults,
     DatasourceConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
@@ -66,6 +67,7 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
     load_class,
+    parse_substitution_variable,
     substitute_all_config_variables,
     substitute_config_variable,
 )
@@ -205,12 +207,11 @@ class BaseDataContext:
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
     UNCOMMITTED_DIRECTORIES = ["data_docs", "validations"]
     GE_UNCOMMITTED_DIR = "uncommitted"
-    CHECKPOINTS_DIR = "checkpoints"
     BASE_DIRECTORIES = [
-        CHECKPOINTS_DIR,
-        "expectations",
-        "notebooks",
-        "plugins",
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.NOTEBOOKS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
         GE_UNCOMMITTED_DIR,
     ]
     NOTEBOOK_SUBDIRECTORIES = ["pandas", "spark", "sql"]
@@ -275,7 +276,7 @@ class BaseDataContext:
 
         # Init stores
         self._stores = dict()
-        self._init_stores(self._project_config_with_variables_substituted.stores)
+        self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -291,19 +292,27 @@ class BaseDataContext:
         # Store cached datasources but don't init them
         self._cached_datasources = {}
 
+        # Build the datasources we know about and have access to
+        self._init_datasources(self.project_config_with_variables_substituted)
+
         # Init validation operators
         # NOTE - 20200522 - JPC - A consistent approach to lazy loading for plugins will be useful here, harmonizing
         # the way that execution environments (AKA datasources), validation operators, site builders and other
         # plugins are built.
         self.validation_operators = {}
-        for (
-            validation_operator_name,
-            validation_operator_config,
-        ) in self._project_config.validation_operators.items():
-            self.add_validation_operator(
+        # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
+        if (
+            "validation_operators" in self.get_config().commented_map
+            and self._project_config.validation_operators
+        ):
+            for (
                 validation_operator_name,
                 validation_operator_config,
-            )
+            ) in self._project_config.validation_operators.items():
+                self.add_validation_operator(
+                    validation_operator_name,
+                    validation_operator_config,
+                )
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
@@ -319,7 +328,7 @@ class BaseDataContext:
         ):
             store_config["store_backend"].update(
                 {
-                    "manually_initialize_store_backend_id": self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                    "manually_initialize_store_backend_id": self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
                 }
             )
 
@@ -350,9 +359,22 @@ class BaseDataContext:
 
         Note that stores do NOT manage plugins.
         """
-
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
+
+    def _init_datasources(self, config):
+        if not config.datasources:
+            return
+        for datasource in config.datasources:
+            try:
+                self._cached_datasources[datasource] = self.get_datasource(
+                    datasource_name=datasource
+                )
+            except ge_exceptions.DatasourceInitializationError:
+                # this error will happen if our configuration contains datasources that GE can no longer connect to.
+                # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
+                # caught at the context.get_batch() step. So we just pass here.
+                pass
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
@@ -467,7 +489,7 @@ class BaseDataContext:
 
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
-            self._project_config_with_variables_substituted.expectations_store_name
+            self.project_config_with_variables_substituted.expectations_store_name
         ]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation if there was an invalid store config
@@ -476,7 +498,7 @@ class BaseDataContext:
         # Otherwise choose the id stored in the project_config
         else:
             return (
-                self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+                self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
             )
 
     def _initialize_usage_statistics(
@@ -524,7 +546,7 @@ class BaseDataContext:
         self._project_config["validation_operators"][
             validation_operator_name
         ] = validation_operator_config
-        config = self._project_config_with_variables_substituted.validation_operators[
+        config = self.project_config_with_variables_substituted.validation_operators[
             validation_operator_name
         ]
         module_name = "great_expectations.validation_operators"
@@ -561,6 +583,12 @@ class BaseDataContext:
                 )
         return resource_store
 
+    def get_site_names(self) -> List[str]:
+        """Get a list of configured site names."""
+        return list(
+            self.project_config_with_variables_substituted.data_docs_sites.keys()
+        )
+
     def get_docs_sites_urls(
         self,
         resource_identifier=None,
@@ -589,7 +617,7 @@ class BaseDataContext:
                 data docs site
         """
         unfiltered_sites = (
-            self._project_config_with_variables_substituted.data_docs_sites
+            self.project_config_with_variables_substituted.data_docs_sites
         )
 
         # Filter out sites that are not in site_names
@@ -686,22 +714,20 @@ class BaseDataContext:
     def plugins_directory(self):
         """The directory in which custom plugin modules should be placed."""
         return self._normalize_absolute_or_relative_path(
-            self._project_config_with_variables_substituted.plugins_directory
+            self.project_config_with_variables_substituted.plugins_directory
         )
 
     @property
-    def _project_config_with_variables_substituted(self) -> DataContextConfig:
+    def project_config_with_variables_substituted(self) -> DataContextConfig:
         return self.get_config_with_variables_substituted()
 
     @property
     def anonymous_usage_statistics(self):
-        return (
-            self._project_config_with_variables_substituted.anonymous_usage_statistics
-        )
+        return self.project_config_with_variables_substituted.anonymous_usage_statistics
 
     @property
     def notebooks(self):
-        return self._project_config_with_variables_substituted.notebooks
+        return self.project_config_with_variables_substituted.notebooks
 
     @property
     def stores(self):
@@ -711,14 +737,11 @@ class BaseDataContext:
     @property
     def datasources(self) -> Dict[str, Union[LegacyDatasource, BaseDatasource]]:
         """A single holder for all Datasources in this context"""
-        return {
-            datasource: self.get_datasource(datasource_name=datasource)
-            for datasource in self._project_config_with_variables_substituted.datasources
-        }
+        return self._cached_datasources
 
     @property
     def checkpoint_store_name(self):
-        return self._project_config_with_variables_substituted.checkpoint_store_name
+        return self.project_config_with_variables_substituted.checkpoint_store_name
 
     @property
     def checkpoint_store(self):
@@ -726,7 +749,7 @@ class BaseDataContext:
 
     @property
     def expectations_store_name(self):
-        return self._project_config_with_variables_substituted.expectations_store_name
+        return self.project_config_with_variables_substituted.expectations_store_name
 
     @property
     def expectations_store(self):
@@ -735,7 +758,7 @@ class BaseDataContext:
     @property
     def data_context_id(self):
         return (
-            self._project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
+            self.project_config_with_variables_substituted.anonymous_usage_statistics.data_context_id
         )
 
     @property
@@ -812,6 +835,7 @@ class BaseDataContext:
         self,
         value: Union[str, dict, list],
         dollar_sign_escape_string: str = DOLLAR_SIGN_ESCAPE_STRING,
+        skip_if_substitution_variable: bool = True,
     ) -> Union[str, dict, list]:
         """
         Replace all `$` characters with the DOLLAR_SIGN_ESCAPE_STRING
@@ -819,6 +843,7 @@ class BaseDataContext:
         Args:
             value: config variable value
             dollar_sign_escape_string: replaces instances of `$`
+            skip_if_substitution_variable: skip if the value is of the form ${MYVAR} or $MYVAR
 
         Returns:
             input value with all `$` characters replaced with the escape string
@@ -826,29 +851,47 @@ class BaseDataContext:
 
         if isinstance(value, dict) or isinstance(value, OrderedDict):
             return {
-                k: self.escape_all_config_variables(v, dollar_sign_escape_string)
+                k: self.escape_all_config_variables(
+                    v, dollar_sign_escape_string, skip_if_substitution_variable
+                )
                 for k, v in value.items()
             }
 
         elif isinstance(value, list):
             return [
-                self.escape_all_config_variables(v, dollar_sign_escape_string)
+                self.escape_all_config_variables(
+                    v, dollar_sign_escape_string, skip_if_substitution_variable
+                )
                 for v in value
             ]
-        return value.replace("$", dollar_sign_escape_string)
+        if skip_if_substitution_variable:
+            if parse_substitution_variable(value) is None:
+                return value.replace("$", dollar_sign_escape_string)
+            else:
+                return value
+        else:
+            return value.replace("$", dollar_sign_escape_string)
 
-    def save_config_variable(self, config_variable_name, value):
-        """Save config variable value
+    def save_config_variable(
+        self, config_variable_name, value, skip_if_substitution_variable: bool = True
+    ):
+        r"""Save config variable value
+        Escapes $ unless they are used in substitution variables e.g. the $ characters in ${SOME_VAR} or $SOME_VAR are not escaped
 
         Args:
             config_variable_name: name of the property
             value: the value to save for the property
+            skip_if_substitution_variable: set to False to escape $ in values in substitution variable form e.g. ${SOME_VAR} -> r"\${SOME_VAR}" or $SOME_VAR -> r"\$SOME_VAR"
 
         Returns:
             None
         """
         config_variables = self._load_config_variables_file()
-        value = self.escape_all_config_variables(value, self.DOLLAR_SIGN_ESCAPE_STRING)
+        value = self.escape_all_config_variables(
+            value,
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+            skip_if_substitution_variable=skip_if_substitution_variable,
+        )
         config_variables[config_variable_name] = value
         config_variables_filepath = self.get_config().config_variables_file_path
         if not config_variables_filepath:
@@ -887,7 +930,7 @@ class BaseDataContext:
             datasource = self.get_datasource(datasource_name=datasource_name)
             if datasource:
                 # remove key until we have a delete method on project_config
-                # self._project_config_with_variables_substituted.datasources[
+                # self.project_config_with_variables_substituted.datasources[
                 # datasource_name].remove()
                 del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
@@ -1121,7 +1164,6 @@ class BaseDataContext:
         This method attempts to return exactly one batch.
         If 0 or more than 1 batches would be returned, it raises an error.
         """
-
         batch_list: List[Batch] = self.get_batch_list(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -1611,7 +1653,7 @@ class BaseDataContext:
             CommentedMap(**config)
         )
         self._project_config["datasources"][name] = datasource_config
-        datasource_config = self._project_config_with_variables_substituted.datasources[
+        datasource_config = self.project_config_with_variables_substituted.datasources[
             name
         ]
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
@@ -1635,7 +1677,8 @@ class BaseDataContext:
     ) -> Union[LegacyDatasource, BaseDatasource]:
         """Instantiate a new datasource to the data context, with configuration provided as kwargs.
         Args:
-            kwargs (keyword arguments): the configuration for the new datasource
+            name(str): name of datasource
+            config(dict): dictionary of configuration
 
         Returns:
             datasource (Datasource)
@@ -1643,6 +1686,7 @@ class BaseDataContext:
         # We perform variable substitution in the datasource's config here before using the config
         # to instantiate the datasource object. Variable substitution is a service that the data
         # context provides. Datasources should not see unsubstituted variables in their config.
+
         try:
             datasource: Union[
                 LegacyDatasource, BaseDatasource
@@ -1674,6 +1718,9 @@ class BaseDataContext:
             name=batch_kwargs_generator_name, class_name=class_name, **kwargs
         )
         return generator
+
+    def set_config(self, project_config: DataContextConfig):
+        self._project_config = project_config
 
     def get_config(
         self, mode="typed"
@@ -1737,10 +1784,10 @@ class BaseDataContext:
             return self._cached_datasources[datasource_name]
         if (
             datasource_name
-            in self._project_config_with_variables_substituted.datasources
+            in self.project_config_with_variables_substituted.datasources
         ):
             datasource_config: DatasourceConfig = copy.deepcopy(
-                self._project_config_with_variables_substituted.datasources[
+                self.project_config_with_variables_substituted.datasources[
                     datasource_name
                 ]
             )
@@ -1748,9 +1795,7 @@ class BaseDataContext:
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
             )
-
         config: dict = dict(datasourceConfigSchema.dump(datasource_config))
-
         datasource: Optional[
             Union[LegacyDatasource, BaseDatasource]
         ] = self._instantiate_datasource_from_config(
@@ -1779,7 +1824,7 @@ class BaseDataContext:
         for (
             key,
             value,
-        ) in self._project_config_with_variables_substituted.datasources.items():
+        ) in self.project_config_with_variables_substituted.datasources.items():
             value["name"] = key
 
             if "credentials" in value:
@@ -1802,7 +1847,7 @@ class BaseDataContext:
         for (
             name,
             value,
-        ) in self._project_config_with_variables_substituted.stores.items():
+        ) in self.project_config_with_variables_substituted.stores.items():
             value["name"] = name
             stores.append(value)
         return stores
@@ -1819,8 +1864,12 @@ class BaseDataContext:
             self.expectations_store_name,
             self.validations_store_name,
             self.evaluation_parameter_store_name,
-            self.checkpoint_store_name,
         ]
+        try:
+            active_store_names.append(self.checkpoint_store_name)
+        except AttributeError:
+            pass
+
         return [
             store for store in self.list_stores() if store["name"] in active_store_names
         ]
@@ -1833,7 +1882,7 @@ class BaseDataContext:
             name,
             value,
         ) in (
-            self._project_config_with_variables_substituted.validation_operators.items()
+            self.project_config_with_variables_substituted.validation_operators.items()
         ):
             value["name"] = name
             validation_operators.append(value)
@@ -2039,12 +2088,12 @@ class BaseDataContext:
     @property
     def evaluation_parameter_store_name(self):
         return (
-            self._project_config_with_variables_substituted.evaluation_parameter_store_name
+            self.project_config_with_variables_substituted.evaluation_parameter_store_name
         )
 
     @property
     def validations_store_name(self):
-        return self._project_config_with_variables_substituted.validations_store_name
+        return self.project_config_with_variables_substituted.validations_store_name
 
     @property
     def validations_store(self):
@@ -2188,7 +2237,7 @@ class BaseDataContext:
 
         index_page_locator_infos = {}
 
-        sites = self._project_config_with_variables_substituted.data_docs_sites
+        sites = self.project_config_with_variables_substituted.data_docs_sites
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -2234,7 +2283,7 @@ class BaseDataContext:
         return index_page_locator_infos
 
     def clean_data_docs(self, site_name=None):
-        sites123 = self._project_config_with_variables_substituted.data_docs_sites
+        sites123 = self.project_config_with_variables_substituted.data_docs_sites
         cleaned = False
         for sname, site_config in sites123.items():
             if site_name is None:
@@ -3001,10 +3050,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 checkpoint_config = checkpoint_config.to_json_dict()
                 checkpoint_config.update({"name": checkpoint_name})
 
-                instantiated_class = Checkpoint(
-                    data_context=self,
-                    **checkpoint_config,
-                )
+                instantiated_class = Checkpoint(data_context=self, **checkpoint_config)
 
                 checkpoint_config = CheckpointConfig.from_commented_map(
                     commented_map=instantiated_class.config.commented_map
@@ -3259,10 +3305,10 @@ class DataContext(BaseDataContext):
         self._context_root_directory = context_root_directory
 
         project_config = self._load_project_config()
-        project_config_dict = dataContextConfigSchema.dump(project_config)
         super().__init__(project_config, context_root_directory, runtime_environment)
 
         # save project config if data_context_id auto-generated or global config values applied
+        project_config_dict = dataContextConfigSchema.dump(project_config)
         if (
             project_config.anonymous_usage_statistics.explicit_id is False
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)
@@ -3272,7 +3318,7 @@ class DataContext(BaseDataContext):
     def _load_project_config(self):
         """
         Reads the project configuration from the project configuration file.
-        The file may contain ${SOME_VARIABLE} variables - see self._project_config_with_variables_substituted
+        The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
         :return: the configuration object read from the file
@@ -3399,7 +3445,7 @@ class DataContext(BaseDataContext):
 
         with open(yml_path) as f:
             config_commented_map_from_yaml = yaml.load(f)
-            config_commented_map_from_yaml["config_version"] = config_version
+            config_commented_map_from_yaml["config_version"] = float(config_version)
 
         with open(yml_path, "w") as f:
             yaml.dump(config_commented_map_from_yaml, f)

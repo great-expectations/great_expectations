@@ -33,9 +33,7 @@ Steps
         name: my_fancy_checkpoint
         config_version: 1
         class_name: Checkpoint
-        # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
-        # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
-        # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+        run_name_template: "%Y-%M-foo-bar-template-$VAR"
         validations:
           - batch_request:
               datasource_name: my_datasource
@@ -55,11 +53,8 @@ Steps
                   action:
                     class_name: UpdateDataDocsAction
             evaluation_parameters:
-              # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-              # param1: "$MY_PARAM"
-              # param2: 1 + "$OLD_PARAM"
-              param1: 1
-              param2: 2
+              param1: "$MY_PARAM"
+              param2: 1 + "$OLD_PARAM"
             runtime_configuration:
               result_format:
                 result_format: BASIC
@@ -125,13 +120,13 @@ Steps
 
     .. code-block:: python
 
-        validation_results: List[ValidationOperatorResult] = context.run_checkpoint(
+        checkpoint_run_result: CheckpointResult = context.run_checkpoint(
             checkpoint_name="my_fancy_checkpoint",
         )
 
    Before running a Checkpoint, make sure that all classes referred to in the configuration exist.  The same applies to the expectation suites.
 
-   When `run_checkpoint` returns, the elements of the `validation_results` list can then be checked for the value of the `success` field and other information associated with running the specified actions.
+   When `run_checkpoint` returns, the `checkpoint_run_result` CheckpointResult can then be checked for the value of the `success` field (all validations passed) and other information associated with running the specified actions.
 
 #. **Check your stored Checkpoint config.**
     If the Store Backend of your Checkpoint Store is on the local filesystem, you can navigate to the `base_directory` for (configured in `great_expectations.yml`) and find the configuration files corresponding to the Checkpoints you created.
@@ -146,9 +141,7 @@ Steps
         name: my_fancy_checkpoint
         config_version: 1
         class_name: Checkpoint
-        # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
-        # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
-        # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+        run_name_template: "%Y-%M-foo-bar-template-$VAR"
         validations:
           - batch_request:
               datasource_name: my_datasource
@@ -174,11 +167,8 @@ Steps
               action:
                 class_name: UpdateDataDocsAction
         evaluation_parameters:
-          # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-          # param1: "$MY_PARAM"
-          # param2: 1 + "$OLD_PARAM"
-          param1: 1
-          param2: 2
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
         runtime_configuration:
           result_format:
             result_format: BASIC
@@ -202,7 +192,7 @@ Steps
                 index: -1
         validations:
           - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
-          - expectation_suite_name: users.error  # runs the locally-specified_action_list (?UNION THE TOP LEVEL?) against the top-level batch_request
+          - expectation_suite_name: users.error  # runs the locally-specified action_list union with the top-level action-list against the top-level batch_request
             action_list:
             - name: quarantine_failed_data
               action:
@@ -238,9 +228,7 @@ Steps
         name: my_base_checkpoint
         config_version: 1
         class_name: Checkpoint
-        # TODO: <Alex>The EvaluationParameters substitution capability does not work for Checkpoints yet.</Alex>
-        # TODO: <Alex>The template substitution capability also does not work for Checkpoints yet.</Alex>
-        # run_name_template: %Y-%M-foo-bar-template-"$VAR"
+        run_name_template: "%Y-%M-foo-bar-template-$VAR"
         action_list:
         - name: store_validation_result
           action:
@@ -252,11 +240,8 @@ Steps
           action:
             class_name: UpdateDataDocsAction
         evaluation_parameters:
-          # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-          # param1: "$MY_PARAM"
-          # param2: 1 + "$OLD_PARAM"
-          param1: 1
-          param2: 2
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
         runtime_configuration:
             result_format:
               result_format: BASIC
@@ -265,9 +250,9 @@ Steps
 
    .. code-block:: python
 
-        validation_results: List[ValidationOperatorResult]
+        checkpoint_run_result: CheckpointResult
 
-        validation_results = data_context.run_checkpoint(
+        checkpoint_run_result = data_context.run_checkpoint(
             checkpoint_name="my_base_checkpoint",
             validations=[
                 {
@@ -324,11 +309,11 @@ Steps
 
     .. code-block:: python
 
-        validation_results = context.run_checkpoint(
+        checkpoint_run_result = context.run_checkpoint(
             checkpoint_name="my_fancy_checkpoint",
         )
 
-    The `validation_results` in both cases (the parameterized `run_checkpoint` method and the configuration that incorporates another configuration as a template) are the same.
+    The `checkpoint_run_result` in both cases (the parameterized `run_checkpoint` method and the configuration that incorporates another configuration as a template) are the same.
 
 
     The final example presents a Checkpoint configuration that is suitable for the use in a pipeline managed by Airflow.
@@ -362,7 +347,7 @@ Steps
 
    .. code-block:: python
 
-        validation_results: List[ValidationOperatorResult] = data_context.run_checkpoint(
+        checkpoint_run_result: CheckpointResult = data_context.run_checkpoint(
             checkpoint_name="airflow_checkpoint",
             batch_request={
                 "batch_data": my_data_frame,

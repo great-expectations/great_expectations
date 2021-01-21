@@ -11,11 +11,7 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.python_subprocess import (
     execute_shell_command_with_progress_polling,
 )
-from great_expectations.util import (
-    get_project_distribution,
-    import_library_module,
-    is_library_loadable,
-)
+from great_expectations.util import import_library_module, is_library_loadable
 
 try:
     from termcolor import colored
@@ -119,14 +115,6 @@ def cli_message_dict(
             new_first = first[:1] + bullet_char + first[2:]
             message_list[0] = new_first
         cli_message_list(message_list)
-
-
-def is_sane_slack_webhook(url):
-    """Really basic sanity checking."""
-    if url is None:
-        return False
-
-    return url.strip().startswith("https://hooks.slack.com/")
 
 
 CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
