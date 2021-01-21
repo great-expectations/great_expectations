@@ -5,6 +5,7 @@ import great_expectations as ge
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import PandasDataset
+from great_expectations.profile.base import profiler_semantic_types
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
@@ -209,8 +210,8 @@ def test__validate_semantic_types_dict(cardinality_dataset):
             cardinality_dataset, semantic_types_dict=bad_semantic_types_incorrect_type
         )
     assert e.value.args[0] == (
-        "incorrect_type is not a recognized semantic_type. Please only include one of "
-        "['DATETIME', 'NUMERIC', 'STRING', 'VALUE_SET', 'BOOLEAN', 'OTHER']"
+        f"incorrect_type is not a recognized semantic_type. Please only include one of "
+        f"{profiler_semantic_types}"
     )
 
 

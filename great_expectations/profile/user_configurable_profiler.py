@@ -1,26 +1,18 @@
 import datetime
-import decimal
-from typing import Iterable
 
 import numpy as np
 from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
-    ProfilerCardinality,
-    ProfilerDataType,
-    ProfilerDataTypesWithMapping,
-    ProfilerSemanticTypes,
     ProfilerTypeMapping,
+    profiler_data_types_with_mapping,
+    profiler_semantic_types,
 )
-from great_expectations.profile.basic_dataset_profiler import (
-    BasicDatasetProfilerBase,
-    logger,
-)
+from great_expectations.profile.basic_dataset_profiler import logger
 
 
 class UserConfigurableProfiler:
@@ -30,45 +22,24 @@ class UserConfigurableProfiler:
     The UserConfigurableProfiler is used to build an expectation suite from a dataset. The expectations built are
     strict - they can be used to determine whether two tables are the same.
 
-    The profiler may be instantiated with or without a config. The config may contain a semantic_types dict or not. Once
-    a profiler is instantiated, if config items change, a new profiler will be needed.
+    The profiler may be instantiated with or without a number of configuration arguments. Once a profiler is
+    instantiated, if these arguments change, a new profiler will be needed.
 
     A profiler is used to build a suite without a config as follows:
 
     profiler = UserConfigurableProfiler(dataset)
     suite = profiler.build_suite()
 
-    A profiler is used to build a suite with a config, but without a semantic_types dict, as follows:
 
-    example_config_without_semantic_types = {
-                    "ignored_columns": ignored_columns,
-                    "excluded_expectations":["expect_column_values_to_be_between"],
-                    "value_set_threshold": "unique"
-                    "primary_or_compound_key": ["user_id"],
-                    "table_expectations_only": False,
-                    "not_null_only": False,
-                }
+    A profiler is used to build a suite with a semantic_types dict, as follows:
 
-    profiler = UserConfigurableProfiler(dataset, config=example_config_without_semantic_types)
-    suite = profiler.build_suite()
-
-
-    A profiler is used to build a suite with a config and a semantic_types dict, as follows:
-
-    example_config_with_semantic_types = { "semantic_types":
-               {
+    semantic_types_dict = {
                 "numeric": ["c_acctbal"],
                 "string": ["c_address","c_custkey"],
                 "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone'],
-                },
-            "ignored_columns": ignored_columns,
-            "excluded_expectations":[],
-            "value_set_threshold": "unique"
-            "primary_or_compound_key": ["c_name", "c_custkey"],
-            "table_expectations_only": False
-    }
+            }
 
-    profiler = UserConfigurableProfiler(dataset, config=example_config_with_semantic_types)
+    profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
     suite = profiler.build_suite()
     """
 
@@ -90,41 +61,40 @@ class UserConfigurableProfiler:
 
         Args:
             dataset: A GE dataset object
-            config: A dictionary which can contain any or all of the following:
-                "excluded_expectations": A list of expectations to not include in the suite
-                "ignored_columns": A list of columns for which you would like to NOT create expectations
-                "not_null_only": Boolean, default False. By default, each column is evaluated for nullity. If the column
-                    values contain fewer than 50% null values, then the profiler will add
-                    `expect_column_values_to_not_be_null`; if greater than 50% it will add
-                    `expect_column_values_to_be_null`. If not_null_only is set to True, the profiler will add a
-                    not_null expectation irrespective of the percent nullity (and therefore will not add an
-                    `expect_column_values_to_be_null`
-                "primary_or_compound_key": A list containing one or more columns which are a dataset's primary or
-                    compound key. This will create an `expect_column_values_to_be_unique` or
-                    `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the
-                    primary_or_compound_key columns are specified in ignored_columns
-                "semantic_types": A dictionary where the keys are available semantic_types (see ProfilerSemanticTypes)
-                    and the values are lists of columns for which you would like to create semantic_type specific
-                    expectations e.g.:
-                    "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
-                "table_expectations_only": Boolean, default False. If True, this will only create the two table level expectations
-                    available to this profiler (`expect_table_columns_to_match_ordered_list` and
-                    `expect_table_row_count_to_be_between`). If a primary_or_compound key is specified, it will create
-                    a uniqueness expectation for that column as well
-                "value_set_threshold": Takes a string from the following ordered list - "none", "one", "two",
-                    "very_few", "few", "many", "very_many", "unique". When the profiler runs withou a semantic_types
-                    dict, each column is profiled for cardinality. This threshold determines the greatest cardinality
-                    for which to add `expect_column_values_to_be_in_set`. For example, if value_set_threshold is set to
-                    "unique", it will add a value_set expectation for every included column. If set to "few", it will
-                    add a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or
-                    "few". The default value is "many". For the purposes of comparing whether two tables are identical,
-                    it might make the most sense to set this to "unique"
+            excluded_expectations: A list of expectations to not include in the suite
+            ignored_columns: A list of columns for which you would like to NOT create expectations
+            not_null_only: Boolean, default False. By default, each column is evaluated for nullity. If the column
+                values contain fewer than 50% null values, then the profiler will add
+                `expect_column_values_to_not_be_null`; if greater than 50% it will add
+                `expect_column_values_to_be_null`. If not_null_only is set to True, the profiler will add a
+                not_null expectation irrespective of the percent nullity (and therefore will not add an
+                `expect_column_values_to_be_null`
+            primary_or_compound_key: A list containing one or more columns which are a dataset's primary or
+                compound key. This will create an `expect_column_values_to_be_unique` or
+                `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the
+                primary_or_compound_key columns are specified in ignored_columns
+            semantic_types_dict: A dictionary where the keys are available semantic_types (see ProfilerSemanticTypes)
+                and the values are lists of columns for which you would like to create semantic_type specific
+                expectations e.g.:
+                "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
+            table_expectations_only: Boolean, default False. If True, this will only create the two table level expectations
+                available to this profiler (`expect_table_columns_to_match_ordered_list` and
+                `expect_table_row_count_to_be_between`). If a primary_or_compound key is specified, it will create
+                a uniqueness expectation for that column as well
+            value_set_threshold: Takes a string from the following ordered list - "none", "one", "two",
+                "very_few", "few", "many", "very_many", "unique". When the profiler runs withou a semantic_types
+                dict, each column is profiled for cardinality. This threshold determines the greatest cardinality
+                for which to add `expect_column_values_to_be_in_set`. For example, if value_set_threshold is set to
+                "unique", it will add a value_set expectation for every included column. If set to "few", it will
+                add a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or
+                "few". The default value is "many". For the purposes of comparing whether two tables are identical,
+                it might make the most sense to set this to "unique"
         """
         self.dataset = dataset
         self.column_info = {}
 
-        self.semantic_type_dict = semantic_types_dict
-        assert isinstance(self.semantic_type_dict, (dict, type(None)))
+        self.semantic_types_dict = semantic_types_dict
+        assert isinstance(self.semantic_types_dict, (dict, type(None)))
 
         self.ignored_columns = ignored_columns or []
         assert isinstance(self.ignored_columns, list)
@@ -140,6 +110,12 @@ class UserConfigurableProfiler:
 
         self.table_expectations_only = table_expectations_only
         assert isinstance(self.table_expectations_only, bool)
+        if self.table_expectations_only is True:
+            logger.debug(
+                "table_expectations_only is set to True. When used to build a suite, this profiler will ignore all"
+                "columns and create expectations only at the table level. If you would also like to create expectations "
+                "at the column level, you can instantiate a new profiler with table_expectations_only set to False"
+            )
 
         self.primary_or_compound_key = primary_or_compound_key or []
         assert isinstance(self.primary_or_compound_key, list)
@@ -165,7 +141,7 @@ class UserConfigurableProfiler:
             self._add_column_cardinality_to_column_info(dataset, column_name)
             self._add_column_type_to_column_info(dataset, column_name)
 
-        if self.semantic_type_dict is not None:
+        if self.semantic_types_dict is not None:
             self._validate_semantic_types_dict(self.dataset)
             for column_name in included_columns:
                 self._add_semantic_types_by_column_from_config_to_column_info(
@@ -194,13 +170,7 @@ class UserConfigurableProfiler:
             suite_name = self.dataset._expectation_suite.expectation_suite_name
             self.dataset._expectation_suite = ExpectationSuite(suite_name)
 
-        if self.table_expectations_only is True:
-            logger.debug(
-                "table_expectations_only is set to True. Ignoring all columns and creating expectations only \
-                       at the table level"
-            )
-
-        if self.semantic_type_dict:
+        if self.semantic_types_dict:
             return self._build_expectation_suite_from_semantic_types_dict(
                 tolerance=tolerance
             )
@@ -216,7 +186,7 @@ class UserConfigurableProfiler:
         Returns:
             An expectation suite built from a semantic_types dict
         """
-        if not self.semantic_type_dict:
+        if not self.semantic_types_dict:
             raise ValueError(
                 "A config with a semantic_types dict must be included in order to use this profiler."
             )
@@ -314,25 +284,25 @@ class UserConfigurableProfiler:
             The validated semantic_types dictionary
 
         """
-        if not isinstance(self.semantic_type_dict, dict):
+        if not isinstance(self.semantic_types_dict, dict):
             raise ValueError(
                 f"The semantic_types dict in the config must be a dictionary, but is currently a "
-                f"{type(self.semantic_type_dict)}. Please reformat."
+                f"{type(self.semantic_types_dict)}. Please reformat."
             )
-        for k, v in self.semantic_type_dict.items():
+        for k, v in self.semantic_types_dict.items():
             assert isinstance(v, list), (
                 "Entries in semantic type dict must be lists of column names e.g. "
                 "{'semantic_types': {'numeric': ['number_of_transactions']}}"
             )
-            if k.upper() not in ProfilerSemanticTypes.__members__:
+            if k not in profiler_semantic_types:
                 raise ValueError(
                     f"{k} is not a recognized semantic_type. Please only include one of "
-                    f"{[i for i in ProfilerSemanticTypes.__members__]}"
+                    f"{profiler_semantic_types}"
                 )
 
         selected_columns = [
             column
-            for column_list in self.semantic_type_dict.values()
+            for column_list in self.semantic_types_dict.values()
             for column in column_list
         ]
         if selected_columns:
@@ -342,7 +312,7 @@ class UserConfigurableProfiler:
 
         dataset.set_default_expectation_argument("catch_exceptions", False)
 
-        for semantic_type, column_list in self.semantic_type_dict.items():
+        for semantic_type, column_list in self.semantic_types_dict.items():
             for column_name in column_list:
                 processed_column = self.column_info.get(column_name)
                 if semantic_type == "datetime":
@@ -369,7 +339,7 @@ class UserConfigurableProfiler:
                 #                     f"{semantic_type} expectation, but ensure that this is correctly configured.")
                 # else:
                 #     logger.debug(f"Semantic_type: {semantic_type} is unknown. Skipping")
-        return self.semantic_type_dict
+        return self.semantic_types_dict
 
     def _add_column_type_to_column_info(self, dataset, column_name):
         """
@@ -572,13 +542,13 @@ class UserConfigurableProfiler:
 
         if not semantic_types:
             assert isinstance(
-                self.semantic_type_dict, dict
-            ), f"The semantic_types dict in the config must be a dictionary, but is currently a {type(self.semantic_type_dict)}. Please reformat."
+                self.semantic_types_dict, dict
+            ), f"The semantic_types dict in the config must be a dictionary, but is currently a {type(self.semantic_types_dict)}. Please reformat."
             semantic_types = []
-            for semantic_type, column_list in self.semantic_type_dict.items():
+            for semantic_type, column_list in self.semantic_types_dict.items():
                 if (
                     column_name in column_list
-                    and semantic_type.upper() in ProfilerSemanticTypes.__members__
+                    and semantic_type in profiler_semantic_types
                 ):
                     semantic_types.append(semantic_type)
             column_info_entry["semantic_types"] = semantic_types
@@ -1074,7 +1044,7 @@ class UserConfigurableProfiler:
 
         if "expect_column_values_to_be_in_type_list" not in self.excluded_expectations:
             col_type = self.column_info.get(column).get("type")
-            type_list = ProfilerDataTypesWithMapping[col_type.upper()].value
+            type_list = profiler_data_types_with_mapping.get(col_type)
             dataset.expect_column_values_to_be_in_type_list(column, type_list=type_list)
 
     def _build_expectations_table(self, dataset, **kwargs):
