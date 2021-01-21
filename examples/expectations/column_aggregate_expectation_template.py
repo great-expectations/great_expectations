@@ -150,9 +150,8 @@ class ColumnCustomMedian(ColumnMetricProvider):
 
 
 class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
-    """TODO: add a docstring here
+    """TODO: add a docstring here"""
 
-    """
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     # examples = [
     #     {

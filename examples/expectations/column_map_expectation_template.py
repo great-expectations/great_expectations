@@ -58,9 +58,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: add a docstring here
-
-    """
+    """TODO: add a docstring here"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     # examples = [{
