@@ -7,7 +7,7 @@ import re
 import sre_constants
 import sre_parse
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
@@ -76,10 +76,10 @@ def batch_definition_matches_batch_request(
 def map_data_reference_string_to_batch_definition_list_using_regex(
     datasource_name: str,
     data_connector_name: str,
-    data_asset_name: Optional[str],
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
+    data_asset_name: Optional[str] = None,
 ) -> Optional[List[BatchDefinition]]:
     processed_data_reference: Optional[
         Tuple[str, PartitionDefinitionSubset]
@@ -132,7 +132,6 @@ def map_batch_definition_to_data_reference_string_using_regex(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
-
     if not isinstance(batch_definition, BatchDefinition):
         raise TypeError(
             "batch_definition is not of an instance of type BatchDefinition"
@@ -140,32 +139,36 @@ def map_batch_definition_to_data_reference_string_using_regex(
 
     data_asset_name: str = batch_definition.data_asset_name
     partition_definition: PartitionDefinition = batch_definition.partition_definition
-    partition_request: dict = partition_definition
-    batch_request: BatchRequest = BatchRequest(
-        data_asset_name=data_asset_name,
-        partition_request=partition_request,
-    )
-    data_reference: str = convert_batch_request_to_data_reference_string_using_regex(
-        batch_request=batch_request,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    data_reference: str = (
+        convert_partition_definition_to_data_reference_string_using_regex(
+            data_asset_name=data_asset_name,
+            partition_definition=partition_definition,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
     return data_reference
 
 
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
-def convert_batch_request_to_data_reference_string_using_regex(
-    batch_request: BatchRequest,
+def convert_partition_definition_to_data_reference_string_using_regex(
+    partition_definition: PartitionDefinition,
     regex_pattern: str,
     group_names: List[str],
+    data_asset_name: Optional[str] = None,
 ) -> str:
-    if not isinstance(batch_request, BatchRequest):
-        raise TypeError("batch_request is not of an instance of type BatchRequest")
+    if not isinstance(
+        partition_definition, (PartitionDefinitionSubset, PartitionDefinition)
+    ):
+        raise TypeError(
+            "partition_definition is not "
+            "an instance of type PartitionDefinitionSubset or PartitionDefinition"
+        )
 
-    template_arguments: dict = copy.deepcopy(batch_request.partition_request)
+    template_arguments: dict = copy.deepcopy(partition_definition)
     # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>
-    if batch_request.data_asset_name is not None:
-        template_arguments["data_asset_name"] = batch_request.data_asset_name
+    if data_asset_name is not None:
+        template_arguments["data_asset_name"] = data_asset_name
 
     filepath_template: str = _invert_regex_to_data_reference_template(
         regex_pattern=regex_pattern,

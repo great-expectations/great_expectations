@@ -5,7 +5,6 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     PartitionDefinition,
-    PartitionRequest,
 )
 
 # noinspection PyProtectedMember
@@ -13,8 +12,8 @@ from great_expectations.datasource.data_connector.util import (
     _invert_regex_to_data_reference_template,
     batch_definition_matches_batch_request,
     build_sorters_from_config,
-    convert_batch_request_to_data_reference_string_using_regex,
     convert_data_reference_string_to_partition_definition_using_regex,
+    convert_partition_definition_to_data_reference_string_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
@@ -284,21 +283,21 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
     assert my_data_reference == "eugene_20200809_1500.csv"
 
 
-def test_convert_batch_request_to_data_reference_string_using_regex():
+def test_convert_partition_definition_to_data_reference_string_using_regex():
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
-    batch_request = BatchRequest(
-        partition_request=PartitionRequest(
-            **{
-                "name": "alex",
-                "timestamp": "20200809",
-                "price": "1000",
-            }
-        )
+    partition_definition = PartitionDefinition(
+        **{
+            "name": "alex",
+            "timestamp": "20200809",
+            "price": "1000",
+        }
     )
     assert (
-        convert_batch_request_to_data_reference_string_using_regex(
-            batch_request=batch_request, regex_pattern=pattern, group_names=group_names
+        convert_partition_definition_to_data_reference_string_using_regex(
+            partition_definition=partition_definition,
+            regex_pattern=pattern,
+            group_names=group_names,
         )
         == "alex_20200809_1000.csv"
     )
@@ -306,18 +305,18 @@ def test_convert_batch_request_to_data_reference_string_using_regex():
     # Test an example with an uncaptured regex group (should return a WildcardDataReference)
     pattern = r"^(.+)_(\d+)_\d+\.csv$"
     group_names = ["name", "timestamp"]
-    batch_request = BatchRequest(
-        partition_request=PartitionRequest(
-            **{
-                "name": "alex",
-                "timestamp": "20200809",
-                "price": "1000",
-            }
-        )
+    partition_definition = PartitionDefinition(
+        **{
+            "name": "alex",
+            "timestamp": "20200809",
+            "price": "1000",
+        }
     )
     assert (
-        convert_batch_request_to_data_reference_string_using_regex(
-            batch_request=batch_request, regex_pattern=pattern, group_names=group_names
+        convert_partition_definition_to_data_reference_string_using_regex(
+            partition_definition=partition_definition,
+            regex_pattern=pattern,
+            group_names=group_names,
         )
         == "alex_20200809_*.csv"
     )
@@ -325,18 +324,18 @@ def test_convert_batch_request_to_data_reference_string_using_regex():
     # Test an example with an uncaptured regex group (should return a WildcardDataReference)
     pattern = r"^.+_(\d+)_(\d+)\.csv$"
     group_names = ["timestamp", "price"]
-    batch_request = BatchRequest(
-        partition_request=PartitionRequest(
-            **{
-                "name": "alex",
-                "timestamp": "20200809",
-                "price": "1000",
-            }
-        )
+    partition_definition = PartitionDefinition(
+        **{
+            "name": "alex",
+            "timestamp": "20200809",
+            "price": "1000",
+        }
     )
     assert (
-        convert_batch_request_to_data_reference_string_using_regex(
-            batch_request=batch_request, regex_pattern=pattern, group_names=group_names
+        convert_partition_definition_to_data_reference_string_using_regex(
+            partition_definition=partition_definition,
+            regex_pattern=pattern,
+            group_names=group_names,
         )
         == "*_20200809_1000.csv"
     )
