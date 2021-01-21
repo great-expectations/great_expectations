@@ -251,7 +251,7 @@ Steps
 
                     .. code-block:: python
 
-                        success_keys = ("mostly", "integer")
+                        success_keys = ("integer", "mostly")
 
                     Success keys are arguments that determine the values of the Expectation's metrics and when the Expectation will succeed.
 
@@ -263,8 +263,12 @@ Steps
 
                     Metric Provider parent class expects the value of this variable to contain all the additional arguments required to compute the Metric.
 
+                    ``value_keys`` work for Metrics like ``success_keys`` do for Expectations, but they are used to determine the value of the metric (hence the name!). If your metric needs additional user-supplied parameters, you add them to the value_keys.
 
-                    * Add named arguments to the methods that compute the Metric for eacj backend in your Metric Provider class:
+                    For a map Metric producing a yes/no question answer, you use ``condition_value_keys`` (because it's the condition part of the metric).
+
+
+                    * Add named arguments to the methods that compute the Metric for each backend in your Metric Provider class:
 
                     .. code-block:: python
 
