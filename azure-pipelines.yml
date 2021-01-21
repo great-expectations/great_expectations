@@ -53,7 +53,7 @@ stages:
                 docs/**
 
                 [GEChanged]
-                great_expectations/**/*
+                great_expectations/**/*.*
 
   - stage: lint
     dependsOn: scope_check
