@@ -647,7 +647,7 @@ class UserConfigurableProfiler:
                 print(expectation.expectation_type)
             print("\n")
 
-            return suite
+        return suite
 
     def _build_expectations_value_set(self, dataset, column, **kwargs):
         """
