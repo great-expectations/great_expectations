@@ -29,6 +29,7 @@ from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
+from great_expectations.expectations.registry import _registered_expectations
 
 try:
     # This library moved in python 3.8
@@ -886,3 +887,13 @@ def is_sane_slack_webhook(url: str) -> bool:
 
 def is_list_of_strings(_list) -> bool:
     return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
+
+def generate_library_json_from_registered_expectations():
+    """Generate the JSON object used to populate the public gallery"""
+    library_json = {}
+
+    for expectation_name, expectation in _registered_expectations.items():
+        report_object = expectation().run_diagnostics()
+        library_json[expectation_name] = report_object
+
+    return library_json
