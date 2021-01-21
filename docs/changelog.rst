@@ -4,9 +4,14 @@
 Changelog
 #########
 
-Develop
+0.13.6
 -----------------
-* [BUGFIX] Fix Local variable 'query_schema' might be referenced before assignment bug in sqlalchemy_dataset.py
+* [ENHANCEMENT] Skip checks when great_expectations package did not change #2287
+* [ENHANCEMENT] A how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. #2222
+* [BUGFIX] Fix Local variable 'query_schema' might be referenced before assignment bug in sqlalchemy_dataset.py #2286 (Thanks @alessandrolacorte!)
+* [BUGFIX] Use correct schema to fetch table and column metadata #2284 (Thanks @armaandhull!)
+* [BUGFIX] Updated sqlalchemy_dataset to convert numeric metrics to json_serializable up front, avoiding an issue where expectations on data immediately fail due to the conversion to/from json. #2207
+
 
 0.13.5
 -----------------
