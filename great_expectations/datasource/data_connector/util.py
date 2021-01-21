@@ -7,7 +7,7 @@ import re
 import sre_constants
 import sre_parse
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -76,39 +76,40 @@ def batch_definition_matches_batch_request(
 def map_data_reference_string_to_batch_definition_list_using_regex(
     datasource_name: str,
     data_connector_name: str,
-    data_asset_name: str,
+    data_asset_name: Optional[str],
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
 ) -> Optional[List[BatchDefinition]]:
-    batch_request: BatchRequest = (
-        convert_data_reference_string_to_batch_request_using_regex(
-            data_reference=data_reference,
-            regex_pattern=regex_pattern,
-            group_names=group_names,
-        )
+    processed_data_reference: Optional[
+        Tuple[str, PartitionDefinitionSubset]
+    ] = convert_data_reference_string_to_partition_definition_using_regex(
+        data_reference=data_reference,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
     )
-    if batch_request is None:
+    if processed_data_reference is None:
         return None
-
+    data_asset_name_from_partition_definition: str = processed_data_reference[0]
+    partition_definition: PartitionDefinitionSubset = processed_data_reference[1]
     if data_asset_name is None:
-        data_asset_name = batch_request.data_asset_name
+        data_asset_name = data_asset_name_from_partition_definition
 
     return [
         BatchDefinition(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_definition=PartitionDefinition(batch_request.partition_request),
+            partition_definition=PartitionDefinition(partition_definition),
         )
     ]
 
 
-def convert_data_reference_string_to_batch_request_using_regex(
+def convert_data_reference_string_to_partition_definition_using_regex(
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
-) -> Optional[BatchRequest]:
+) -> Optional[Tuple[str, PartitionDefinitionSubset]]:
     # noinspection PyUnresolvedReferences
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
     if matches is None:
@@ -119,15 +120,11 @@ def convert_data_reference_string_to_batch_request_using_regex(
     )
 
     # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
-    # TODO: <Alex>Update: Approach -- we can differentiate "convert_data_reference_string_to_batch_request_using_regex()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
+    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
-    batch_request: BatchRequest = BatchRequest(
-        data_asset_name=data_asset_name,
-        partition_request=partition_definition,
-    )
-    return batch_request
+    return data_asset_name, partition_definition
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
