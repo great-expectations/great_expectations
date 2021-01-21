@@ -2547,7 +2547,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     simple_checkpoint_config = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
-        config_version=1
+        config_version=1,
     )
     simple_checkpoint_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
@@ -2562,7 +2562,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
         name="my_simple_checkpoint_with_slack",
         class_name="SimpleCheckpoint",
         config_version=1,
-        slack_webhook="https://hooks.slack.com/foo/bar"
+        slack_webhook="https://hooks.slack.com/foo/bar",
     )
     simple_checkpoint_with_slack_webhook_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_config.name
@@ -2578,7 +2578,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
         class_name="SimpleCheckpoint",
         config_version=1,
         slack_webhook="https://hooks.slack.com/foo/bar",
-        notify_with="all"
+        notify_with="all",
     )
     simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
@@ -2593,7 +2593,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
         name="my_simple_checkpoint_with_site_names",
         class_name="SimpleCheckpoint",
         config_version=1,
-        site_names=["local_site"]
+        site_names=["local_site"],
     )
     simple_checkpoint_with_site_names_config_key = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_site_names_config.name
