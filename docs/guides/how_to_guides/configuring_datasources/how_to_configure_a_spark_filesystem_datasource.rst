@@ -186,7 +186,6 @@ Steps
 
                 Attempting to instantiate class from config...
                 Instantiating as a Datasource, since class_name is Datasource
-                Instantiating class from config without an explicit class_name is dangerous. Consider adding an explicit class_name for None
                     Successfully instantiated Datasource
 
                 Execution engine: SparkDFExecutionEngine

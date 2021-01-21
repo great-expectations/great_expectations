@@ -185,39 +185,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
         ]
 
-    def build_batch_spec(
-        self, batch_definition: BatchDefinition
-    ) -> SqlAlchemyDatasourceBatchSpec:
-        """
-        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
-
-        Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
-
-        Returns:
-            BatchSpec built from batch_definition
-        """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
-
-        data_asset_name: str = batch_definition.data_asset_name
-        if (
-            data_asset_name in self.data_assets
-            and self.data_assets[data_asset_name].get("batch_spec_passthrough")
-            and isinstance(
-                self.data_assets[data_asset_name].get("batch_spec_passthrough"), dict
-            )
-        ):
-            batch_spec.update(
-                self.data_assets[data_asset_name]["batch_spec_passthrough"]
-            )
-
-        return SqlAlchemyDatasourceBatchSpec(batch_spec)
-
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
-    ) -> dict:
+    ) -> Dict:
         """
         Build BatchSpec parameters from batch_definition with the following components:
             1. data_asset_name from batch_definition
@@ -243,8 +213,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self,
         table_name: str,
     ):
-        """
-        'Split' by returning the whole table
+        """'Split' by returning the whole table
 
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """

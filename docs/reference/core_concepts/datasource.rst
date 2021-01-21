@@ -41,7 +41,7 @@ The ``Datasource`` is responsible for orchestrating the building of a Batch, usi
 .. code-block:: python
 
     new_batch = Batch(
-        data = batch_data,
+        data=batch_data,
         batch_request=batch_request
         batch_definition=batch_definition,
         batch_spec=batch_spec,

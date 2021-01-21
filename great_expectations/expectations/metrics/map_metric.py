@@ -1,6 +1,7 @@
+import logging
 import uuid
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import numpy as np
 
@@ -33,6 +34,8 @@ from great_expectations.expectations.registry import (
     register_metric,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
+
+logger = logging.getLogger(__name__)
 
 
 def column_function_partial(
@@ -145,7 +148,7 @@ def column_function_partial(
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
                 column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect
+                dialect = execution_engine.dialect_module
                 column_function = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -343,7 +346,7 @@ def column_condition_partial(
                     metric_domain_kwargs, domain_type=domain_type
                 )
                 column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect
+                dialect = execution_engine.dialect_module
                 sqlalchemy_engine = execution_engine.engine
 
                 expected_condition = metric_fn(
@@ -755,9 +758,13 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         compute_domain_kwargs, domain_type="identity"
     )
     temp_table_name: str = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-    if execution_engine.engine.dialect.name.lower() == "mssql":
+    if execution_engine.dialect == "mssql":
         # mssql expects all temporary table names to have a prefix '#'
         temp_table_name = f"#{temp_table_name}"
+    else:
+        logger.warning(
+            "WINDOW_FN subquery for dialects other than mssql will create a table to execute"
+        )
 
     with execution_engine.engine.begin():
         metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
@@ -1066,6 +1073,7 @@ class MapMetricProvider(MetricProvider):
                 continue
             metric_fn_type = getattr(candidate_metric_fn, "metric_fn_type")
             engine = candidate_metric_fn.metric_engine
+            dialect = getattr(candidate_metric_fn, "dialect", None)
             if not issubclass(engine, ExecutionEngine):
                 raise ValueError(
                     "metric functions must be defined with an Execution Engine"
@@ -1101,6 +1109,7 @@ class MapMetricProvider(MetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=condition_provider,
                         metric_fn_type=metric_fn_type,
@@ -1110,6 +1119,7 @@ class MapMetricProvider(MetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=_pandas_map_condition_unexpected_count,
                         metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1119,6 +1129,7 @@ class MapMetricProvider(MetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=_pandas_map_condition_index,
                         metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1128,6 +1139,7 @@ class MapMetricProvider(MetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=_pandas_map_condition_rows,
                         metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1138,6 +1150,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=_pandas_column_map_condition_values,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1147,6 +1160,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=_pandas_column_map_condition_value_counts,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1158,6 +1172,7 @@ class MapMetricProvider(MetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=condition_provider,
                         metric_fn_type=metric_fn_type,
@@ -1168,6 +1183,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=_sqlalchemy_map_condition_unexpected_count_aggregate_fn,
                             metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
@@ -1177,6 +1193,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=None,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1189,6 +1206,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=_sqlalchemy_map_condition_unexpected_count_value,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1198,6 +1216,7 @@ class MapMetricProvider(MetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=_sqlalchemy_map_condition_rows,
                         metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1208,6 +1227,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=_sqlalchemy_column_map_condition_values,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1217,6 +1237,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=_sqlalchemy_column_map_condition_value_counts,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1227,6 +1248,7 @@ class MapMetricProvider(MetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=condition_provider,
                         metric_fn_type=metric_fn_type,
@@ -1237,6 +1259,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=_spark_map_condition_unexpected_count_aggregate_fn,
                             metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
@@ -1246,6 +1269,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=None,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1258,6 +1282,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=_spark_map_condition_unexpected_count_value,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1267,6 +1292,7 @@ class MapMetricProvider(MetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=_spark_map_condition_rows,
                         metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1277,6 +1303,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=spark_column_map_condition_values,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1286,6 +1313,7 @@ class MapMetricProvider(MetricProvider):
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
+                            dialect=dialect,
                             metric_class=cls,
                             metric_provider=_spark_column_map_condition_value_counts,
                             metric_fn_type=MetricFunctionTypes.VALUE,
@@ -1309,6 +1337,7 @@ class MapMetricProvider(MetricProvider):
                     metric_domain_keys=metric_domain_keys,
                     metric_value_keys=metric_value_keys,
                     execution_engine=engine,
+                    dialect=dialect,
                     metric_class=cls,
                     metric_provider=map_function_provider,
                     metric_fn_type=metric_fn_type,

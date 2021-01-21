@@ -265,10 +265,14 @@ def test_dataframe_property_given_loaded_batch():
 
 
 def test_get_batch_data(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+            )
         )
+        .dataframe
     )
     assert split_df.shape == (120, 10)
 
@@ -278,10 +282,14 @@ def test_get_batch_data(test_df):
 
 
 def test_get_batch_with_split_on_whole_table(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df, splitter_method="_split_on_whole_table"
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df, splitter_method="_split_on_whole_table"
+            )
         )
+        .dataframe
     )
     assert split_df.shape == (120, 10)
 
@@ -289,12 +297,16 @@ def test_get_batch_with_split_on_whole_table(test_df):
 def test_get_batch_with_split_on_whole_table_filesystem(
     test_folder_connection_path_csv,
 ):
-    test_df = PandasExecutionEngine().get_batch_data(
-        PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
-            reader_method="read_csv",
-            splitter_method="_split_on_whole_table",
+    test_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            PathBatchSpec(
+                path=os.path.join(test_folder_connection_path_csv, "test.csv"),
+                reader_method="read_csv",
+                splitter_method="_split_on_whole_table",
+            )
         )
+        .dataframe
     )
     assert test_df.shape == (5, 2)
 
@@ -339,6 +351,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             reader_method="read_csv",
             splitter_method="_split_on_whole_table",
         )
+        .dataframe
     )
     assert test_df.shape == (2, 2)
 
@@ -371,6 +384,7 @@ def test_get_batch_with_split_on_whole_table_s3():
             reader_method="read_csv",
             splitter_method="_split_on_whole_table",
         )
+        .dataframe
     )
     assert test_df.shape == (2, 2)
 
@@ -388,57 +402,73 @@ def test_get_batch_with_split_on_whole_table_s3():
 
 
 def test_get_batch_with_split_on_column_value(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_column_value",
-            splitter_kwargs={
-                "column_name": "batch_id",
-                "partition_definition": {"batch_id": 2},
-            },
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                splitter_method="_split_on_column_value",
+                splitter_kwargs={
+                    "column_name": "batch_id",
+                    "partition_definition": {"batch_id": 2},
+                },
+            )
         )
+        .dataframe
     )
     assert split_df.shape == (12, 10)
     assert (split_df.batch_id == 2).all()
 
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_column_value",
-            splitter_kwargs={
-                "column_name": "date",
-                "partition_definition": {"date": datetime.date(2020, 1, 30)},
-            },
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                splitter_method="_split_on_column_value",
+                splitter_kwargs={
+                    "column_name": "date",
+                    "partition_definition": {"date": datetime.date(2020, 1, 30)},
+                },
+            )
         )
+        .dataframe
     )
     assert (split_df).shape == (3, 10)
 
 
 def test_get_batch_with_split_on_converted_datetime(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_converted_datetime",
-            splitter_kwargs={
-                "column_name": "timestamp",
-                "partition_definition": {"timestamp": "2020-01-30"},
-            },
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                splitter_method="_split_on_converted_datetime",
+                splitter_kwargs={
+                    "column_name": "timestamp",
+                    "partition_definition": {"timestamp": "2020-01-30"},
+                },
+            )
         )
+        .dataframe
     )
     assert (split_df).shape == (3, 10)
 
 
 def test_get_batch_with_split_on_divided_integer(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_divided_integer",
-            splitter_kwargs={
-                "column_name": "id",
-                "divisor": 10,
-                "partition_definition": {"id": 5},
-            },
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                splitter_method="_split_on_divided_integer",
+                splitter_kwargs={
+                    "column_name": "id",
+                    "divisor": 10,
+                    "partition_definition": {"id": 5},
+                },
+            )
         )
+        .dataframe
     )
     assert split_df.shape == (10, 10)
     assert split_df.id.min() == 50
@@ -446,16 +476,20 @@ def test_get_batch_with_split_on_divided_integer(test_df):
 
 
 def test_get_batch_with_split_on_mod_integer(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_mod_integer",
-            splitter_kwargs={
-                "column_name": "id",
-                "mod": 10,
-                "partition_definition": {"id": 5},
-            },
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                splitter_method="_split_on_mod_integer",
+                splitter_kwargs={
+                    "column_name": "id",
+                    "mod": 10,
+                    "partition_definition": {"id": 5},
+                },
+            )
         )
+        .dataframe
     )
     assert split_df.shape == (12, 10)
     assert split_df.id.min() == 5
@@ -463,19 +497,23 @@ def test_get_batch_with_split_on_mod_integer(test_df):
 
 
 def test_get_batch_with_split_on_multi_column_values(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_multi_column_values",
-            splitter_kwargs={
-                "column_names": ["y", "m", "d"],
-                "partition_definition": {
-                    "y": 2020,
-                    "m": 1,
-                    "d": 5,
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                splitter_method="_split_on_multi_column_values",
+                splitter_kwargs={
+                    "column_names": ["y", "m", "d"],
+                    "partition_definition": {
+                        "y": 2020,
+                        "m": 1,
+                        "d": 5,
+                    },
                 },
-            },
+            )
         )
+        .dataframe
     )
     assert split_df.shape == (4, 10)
     assert (split_df.date == datetime.date(2020, 1, 5)).all()
@@ -499,7 +537,28 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
 
 def test_get_batch_with_split_on_hashed_column(test_df):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
-        split_df = PandasExecutionEngine().get_batch_data(
+        split_df = (
+            PandasExecutionEngine()
+            .get_batch_data(
+                RuntimeDataBatchSpec(
+                    batch_data=test_df,
+                    splitter_method="_split_on_hashed_column",
+                    splitter_kwargs={
+                        "column_name": "favorite_color",
+                        "hash_digits": 1,
+                        "partition_definition": {
+                            "hash_value": "a",
+                        },
+                        "hash_function_name": "I_am_not_valid",
+                    },
+                )
+            )
+            .dataframe
+        )
+
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
                 splitter_method="_split_on_hashed_column",
@@ -509,24 +568,11 @@ def test_get_batch_with_split_on_hashed_column(test_df):
                     "partition_definition": {
                         "hash_value": "a",
                     },
-                    "hash_function_name": "I_am_not_valid",
+                    "hash_function_name": "sha256",
                 },
             )
         )
-
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_hashed_column",
-            splitter_kwargs={
-                "column_name": "favorite_color",
-                "hash_digits": 1,
-                "partition_definition": {
-                    "hash_value": "a",
-                },
-                "hash_function_name": "sha256",
-            },
-        )
+        .dataframe
     )
     assert split_df.shape == (8, 10)
 
@@ -536,60 +582,82 @@ def test_get_batch_with_split_on_hashed_column(test_df):
 
 def test_sample_using_random(test_df):
     random.seed(1)
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(batch_data=test_df, sampling_method="_sample_using_random")
+    sampled_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df, sampling_method="_sample_using_random"
+            )
+        )
+        .dataframe
     )
     assert sampled_df.shape == (13, 10)
 
 
 def test_sample_using_mod(test_df):
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            sampling_method="_sample_using_mod",
-            sampling_kwargs={
-                "column_name": "id",
-                "mod": 5,
-                "value": 4,
-            },
+    sampled_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                sampling_method="_sample_using_mod",
+                sampling_kwargs={
+                    "column_name": "id",
+                    "mod": 5,
+                    "value": 4,
+                },
+            )
         )
+        .dataframe
     )
     assert sampled_df.shape == (24, 10)
 
 
 def test_sample_using_a_list(test_df):
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            sampling_method="_sample_using_a_list",
-            sampling_kwargs={
-                "column_name": "id",
-                "value_list": [3, 5, 7, 11],
-            },
+    sampled_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                sampling_method="_sample_using_a_list",
+                sampling_kwargs={
+                    "column_name": "id",
+                    "value_list": [3, 5, 7, 11],
+                },
+            )
         )
+        .dataframe
     )
     assert sampled_df.shape == (4, 10)
 
 
 def test_sample_using_md5(test_df):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
-        sampled_df = PandasExecutionEngine().get_batch_data(
+        _ = (
+            PandasExecutionEngine()
+            .get_batch_data(
+                RuntimeDataBatchSpec(
+                    batch_data=test_df,
+                    sampling_method="_sample_using_hash",
+                    sampling_kwargs={
+                        "column_name": "date",
+                        "hash_function_name": "I_am_not_valid",
+                    },
+                )
+            )
+            .dataframe
+        )
+
+    sampled_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
                 sampling_method="_sample_using_hash",
-                sampling_kwargs={
-                    "column_name": "date",
-                    "hash_function_name": "I_am_not_valid",
-                },
+                sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
             )
         )
-
-    sampled_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            sampling_method="_sample_using_hash",
-            sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
-        )
+        .dataframe
     )
     assert sampled_df.shape == (10, 10)
     assert sampled_df.date.isin(
@@ -602,22 +670,26 @@ def test_sample_using_md5(test_df):
 
 ### Splitting + Sampling methods ###
 def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
-    split_df = PandasExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_df,
-            splitter_method="_split_on_divided_integer",
-            splitter_kwargs={
-                "column_name": "id",
-                "divisor": 10,
-                "partition_definition": {"id": 5},
-            },
-            sampling_method="_sample_using_mod",
-            sampling_kwargs={
-                "column_name": "id",
-                "mod": 5,
-                "value": 4,
-            },
+    split_df = (
+        PandasExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_df,
+                splitter_method="_split_on_divided_integer",
+                splitter_kwargs={
+                    "column_name": "id",
+                    "divisor": 10,
+                    "partition_definition": {"id": 5},
+                },
+                sampling_method="_sample_using_mod",
+                sampling_kwargs={
+                    "column_name": "id",
+                    "mod": 5,
+                    "value": 4,
+                },
+            )
         )
+        .dataframe
     )
     assert split_df.shape == (2, 10)
     assert split_df.id.min() == 54

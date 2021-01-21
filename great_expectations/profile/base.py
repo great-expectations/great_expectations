@@ -7,6 +7,7 @@ from typing import Any
 
 from dateutil.parser import parse
 
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
@@ -242,7 +243,7 @@ class DataAssetProfiler:
 class DatasetProfiler(DataAssetProfiler):
     @classmethod
     def validate(cls, dataset):
-        return isinstance(dataset, (Dataset, Validator))
+        return isinstance(dataset, (Dataset, Validator, Batch))
 
     @classmethod
     def add_expectation_meta(cls, expectation):
@@ -311,21 +312,35 @@ class DatasetProfiler(DataAssetProfiler):
         if not cls.validate(data_asset):
             raise GreatExpectationsError("Invalid data_asset for profiler; aborting")
 
+        if isinstance(data_asset, Batch):
+            data_asset = Validator(
+                execution_engine=data_asset.data.execution_engine, batches=[data_asset]
+            )
+
         expectation_suite = cls._profile(
             data_asset, configuration=profiler_configuration
         )
 
-        batch_kwargs = data_asset.batch_kwargs
-        expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
-        validation_results = data_asset.validate(
-            expectation_suite, run_id=run_id, result_format="SUMMARY"
-        )
-        expectation_suite.add_citation(
-            comment=str(cls.__name__) + " added a citation based on the current batch.",
-            batch_kwargs=data_asset.batch_kwargs,
-            batch_markers=data_asset.batch_markers,
-            batch_parameters=data_asset.batch_parameters,
-        )
+        if isinstance(data_asset, Validator):
+            validation_results = data_asset.validate(
+                expectation_suite, run_id=run_id, result_format="SUMMARY"
+            )
+        else:
+            batch_kwargs = data_asset.batch_kwargs
+
+            expectation_suite = cls.add_meta(expectation_suite, batch_kwargs)
+
+            validation_results = data_asset.validate(
+                expectation_suite, run_id=run_id, result_format="SUMMARY"
+            )
+            expectation_suite.add_citation(
+                comment=str(cls.__name__)
+                + " added a citation based on the current batch.",
+                batch_kwargs=batch_kwargs,
+                batch_markers=data_asset.batch_markers,
+                batch_parameters=data_asset.batch_parameters,
+            )
+
         return expectation_suite, validation_results
 
     @classmethod

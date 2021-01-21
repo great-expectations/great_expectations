@@ -1,5 +1,6 @@
 import copy
 import logging
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any, Dict, Iterable, Tuple, Union
 
@@ -7,6 +8,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.exceptions.metric_exceptions import MetricResolutionError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import (
     filter_properties_dict,
@@ -26,8 +28,20 @@ class NoOpDict:
     def __setitem__(self, key, value):
         return None
 
+    def update(self, value):
+        return None
 
-class ExecutionEngine:
+
+class BatchData:
+    def __init__(self, execution_engine):
+        self._execution_engine = execution_engine
+
+    @property
+    def execution_engine(self):
+        return self._execution_engine
+
+
+class ExecutionEngine(ABC):
     recognized_batch_spec_defaults = set()
 
     def __init__(
@@ -117,6 +131,10 @@ class ExecutionEngine:
     def config(self) -> dict:
         return self._config
 
+    @property
+    def dialect(self):
+        return None
+
     def get_batch_data(
         self,
         batch_spec: BatchSpec,
@@ -133,11 +151,15 @@ class ExecutionEngine:
         batch_data, _ = self.get_batch_data_and_markers(batch_spec)
         return batch_data
 
+    @abstractmethod
+    def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
+        raise NotImplementedError
+
     def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
         """
         Loads the specified batch_data into the execution engine
         """
-        self._batch_data_dict[batch_id] = self._get_typed_batch_data(batch_data)
+        self._batch_data_dict[batch_id] = batch_data
         self._active_batch_data_id = batch_id
 
     def _load_batch_data_from_dict(self, batch_data_dict):
@@ -146,11 +168,6 @@ class ExecutionEngine:
         """
         for batch_id, batch_data in batch_data_dict.items():
             self.load_batch_data(batch_id, batch_data)
-
-    # Note: Abe 20201117 : This method should raise NotImplementedError, and the
-    # _get_typed_batch_data methods in child classes should actually do type checking and type conversion.
-    def _get_typed_batch_data(self, batch_data):
-        return batch_data
 
     def resolve_metrics(
         self,
@@ -171,6 +188,7 @@ class ExecutionEngine:
         """
         if metrics is None:
             metrics = dict()
+
         resolved_metrics = dict()
 
         metric_fn_bundle = []
@@ -178,13 +196,14 @@ class ExecutionEngine:
             metric_class, metric_fn = get_metric_provider(
                 metric_name=metric_to_resolve.metric_name, execution_engine=self
             )
-            try:
-                metric_dependencies = {
-                    k: metrics[v.id]
-                    for k, v in metric_to_resolve.metric_dependencies.items()
-                }
-            except KeyError as e:
-                raise GreatExpectationsError(f"Missing metric dependency: {str(e)}")
+            metric_dependencies = dict()
+            for k, v in metric_to_resolve.metric_dependencies.items():
+                if v.id in metrics:
+                    metric_dependencies[k] = metrics[v.id]
+                elif self._caching and v.id in self._metric_cache:
+                    metric_dependencies[k] = self._metric_cache[v.id]
+                else:
+                    raise GreatExpectationsError(f"Missing metric dependency: {str(k)}")
             metric_provider_kwargs = {
                 "cls": metric_class,
                 "execution_engine": self,
@@ -228,22 +247,37 @@ class ExecutionEngine:
             ]:
                 # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
                 # than data to optimize compute in the future
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
+                try:
+                    resolved_metrics[metric_to_resolve.id] = metric_fn(
+                        **metric_provider_kwargs
+                    )
+                except RuntimeError as e:
+                    raise MetricResolutionError(str(e), (metric_to_resolve,))
             elif metric_fn_type == MetricFunctionTypes.VALUE:
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
+                try:
+                    resolved_metrics[metric_to_resolve.id] = metric_fn(
+                        **metric_provider_kwargs
+                    )
+                except RuntimeError as e:
+                    raise MetricResolutionError(str(e), (metric_to_resolve))
             else:
                 logger.warning(
                     f"Unrecognized metric function type while trying to resolve {str(metric_to_resolve.id)}"
                 )
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
+                try:
+                    resolved_metrics[metric_to_resolve.id] = metric_fn(
+                        **metric_provider_kwargs
+                    )
+                except RuntimeError as e:
+                    raise MetricResolutionError(str(e), (metric_to_resolve))
         if len(metric_fn_bundle) > 0:
-            resolved_metrics.update(self.resolve_metric_bundle(metric_fn_bundle))
+            try:
+                new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
+                resolved_metrics.update(new_resolved)
+            except RuntimeError as e:
+                raise MetricResolutionError(str(e), [x[0] for x in metric_fn_bundle])
+        if self._caching:
+            self._metric_cache.update(resolved_metrics)
 
         return resolved_metrics
 

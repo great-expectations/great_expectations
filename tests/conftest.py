@@ -35,8 +35,11 @@ from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.util import import_library_module
-
-from .test_utils import expectationSuiteValidationResultSchema, get_dataset
+from tests.test_utils import (
+    create_files_in_directory,
+    expectationSuiteValidationResultSchema,
+    get_dataset,
+)
 
 yaml = YAML()
 ###
@@ -3789,7 +3792,7 @@ class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
-introspection:
+inferred_assets:
     whole_table: {}
 
     daily:
@@ -3817,6 +3820,62 @@ introspection:
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
+    return context
+
+
+@pytest.fixture
+def data_context_with_pandas_datasource_for_testing_get_batch(
+    empty_data_context_v3, tmp_path_factory
+):
+    context = empty_data_context_v3
+
+    base_directory: str = str(
+        tmp_path_factory.mktemp(
+            "data_context_with_pandas_datasource_for_testing_get_batch"
+        )
+    )
+
+    sample_file_names: List[str] = [
+        "test_dir_charlie/A/A-1.csv",
+        "test_dir_charlie/A/A-2.csv",
+        "test_dir_charlie/A/A-3.csv",
+        "test_dir_charlie/B/B-1.csv",
+        "test_dir_charlie/B/B-2.csv",
+        "test_dir_charlie/B/B-3.csv",
+        "test_dir_charlie/C/C-1.csv",
+        "test_dir_charlie/C/C-2.csv",
+        "test_dir_charlie/C/C-3.csv",
+        "test_dir_charlie/D/D-1.csv",
+        "test_dir_charlie/D/D-2.csv",
+        "test_dir_charlie/D/D-3.csv",
+    ]
+
+    create_files_in_directory(
+        directory=base_directory, file_name_list=sample_file_names
+    )
+
+    config = yaml.load(
+        f"""
+class_name: Datasource
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: {base_directory}/test_dir_charlie
+        glob_directive: "*/*.csv"
+
+        default_regex:
+            pattern: (.+)/(.+)-(\\d+)\\.csv
+            group_names:
+                - subdirectory
+                - data_asset_name
+                - number
+""",
+    )
+
+    context.add_datasource("my_pandas_datasource", **config)
     return context
 
 

@@ -42,8 +42,11 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.profile import ColumnsExistProfiler
@@ -849,10 +852,11 @@ def _build_sa_engine(df):
 
     eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    engine = SqlAlchemyExecutionEngine(engine=eng)
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name="test")
     batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
+    engine.load_batch_data(
+        batch_id=batch.batch_definition.to_id(), batch_data=batch_data
     )
     return engine
 
@@ -971,7 +975,10 @@ def _build_sa_validator_with_data(
 
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+    batch = Batch(data=batch_data)
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
@@ -1258,7 +1265,7 @@ def check_json_test_result(test, result, data_asset=None):
             elif key == "unexpected_index_list":
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
                     pass
-                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDataFrame)):
+                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
                     pass
                 else:
                     assert result["result"]["unexpected_index_list"] == value
@@ -1460,6 +1467,19 @@ def validate_uuid4(uuid_string: str) -> bool:
     # valid uuid4. This is bad for validation purposes.
 
     return val.hex == uuid_string.replace("-", "")
+
+
+def get_sqlite_temp_table_names(engine):
+    result = engine.execute(
+        """
+SELECT
+    name
+FROM
+    sqlite_temp_master
+"""
+    )
+    rows = result.fetchall()
+    return {row[0] for row in rows}
 
 
 def build_in_memory_store_backend(
