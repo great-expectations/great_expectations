@@ -18,7 +18,6 @@ from great_expectations.expectations.expectation import (
     Expectation,
     _format_map_output,
 )
-from great_expectations.expectations.registry import extract_metrics
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent

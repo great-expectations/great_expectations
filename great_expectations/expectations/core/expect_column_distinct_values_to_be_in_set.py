@@ -15,7 +15,6 @@ from ...render.util import (
 )
 from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
 from ..metrics.util import parse_value_set
-from ..registry import extract_metrics
 
 
 class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):

@@ -12,12 +12,7 @@ from great_expectations.expectations.util import render_evaluation_parameter_str
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing
-from ..expectation import (
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-)
-from ..registry import extract_metrics
+from ..expectation import InvalidExpectationConfigurationError, TableExpectation
 
 
 class ExpectTableColumnsToMatchOrderedList(TableExpectation):
