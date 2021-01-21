@@ -5,6 +5,7 @@ from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.dataset import PandasDataset
 from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
@@ -797,7 +798,11 @@ class UserConfigurableProfiler:
             "expect_column_quantile_values_to_be_between"
             not in self.excluded_expectations
         ):
-            allow_relative_error: bool = dataset.attempt_allowing_relative_error()
+            if isinstance(dataset, PandasDataset):
+                allow_relative_error = "lower"
+            else:
+                allow_relative_error = dataset.attempt_allowing_relative_error()
+
             quantile_result = dataset.expect_column_quantile_values_to_be_between(
                 column,
                 quantile_ranges={
