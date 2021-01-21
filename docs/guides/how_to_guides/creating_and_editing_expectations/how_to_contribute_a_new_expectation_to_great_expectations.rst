@@ -409,6 +409,14 @@ Steps
             "package": "experimental_expectations",
         }
 
+#. **Implement (some) renderers.**
+
+    Renderers are methods in the class that implements your Expectation that can display your Expectation and its Validation Result as HTML or other human-friendly format.
+
+    The template file that you used to start your development has some renderer implementations commented out. You can use them as a starting point.
+
+    For more comprehensive documentation consilt this :ref:`how-to guide <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`.
+
 #. **Submit your contribution**
 
     Follow :ref:`Contribution Checklist <contributing_contribution_checklist>` to submit your contribution.
