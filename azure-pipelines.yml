@@ -54,8 +54,8 @@ stages:
 
                 [GEChanged]
                 great_expectations/**
-                *.txt
-                *.yml
+                /*.txt
+                /*.yml
 
   - stage: lint
     dependsOn: scope_check
