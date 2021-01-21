@@ -19,6 +19,7 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_dump,
     post_load,
+    pre_load,
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
@@ -1466,6 +1467,14 @@ class CheckpointConfigSchema(Schema):
         )
         ordered = True
 
+    # if keys have None value, remove in post_dump
+    REMOVE_KEYS_IF_NONE = [
+        "site_names",
+        "slack_webhook",
+        "notify_on",
+        "notify_with",
+    ]
+
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
         validate=lambda x: (0 < x < 100) or x is None,
@@ -1504,10 +1513,10 @@ class CheckpointConfigSchema(Schema):
         allow_none=True,
     )
     # Next fields are used by configurators
-    site_names = fields.Raw(required=False, allow_none=True)
-    slack_webhook = fields.String(required=False, allow_none=True)
-    notify_on = fields.String(required=False, allow_none=True)
-    notify_with = fields.String(required=False, allow_none=True)
+    site_names = fields.Raw(required=False)
+    slack_webhook = fields.String(required=False)
+    notify_on = fields.String(required=False)
+    notify_with = fields.String(required=False)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -1527,6 +1536,14 @@ class CheckpointConfigSchema(Schema):
                     configuration to continue.
                     """
                 )
+
+    @post_dump
+    def remove_keys_if_none(self, data, **kwargs):
+        data = deepcopy(data)
+        for key in self.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
 
 class CheckpointConfig(BaseYamlConfig):
