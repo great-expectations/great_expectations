@@ -1,5 +1,4 @@
 # Set up version information immediately
-# comment test
 from ._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
