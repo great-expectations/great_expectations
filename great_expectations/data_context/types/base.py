@@ -1458,6 +1458,11 @@ class CheckpointConfigSchema(Schema):
             # Next two fields are for LegacyCheckpoint configuration
             "validation_operator_name",
             "batches",
+            # Next fields are used by configurators
+            "site_names",
+            "slack_webhook",
+            "notify_on",
+            "notify_with",
         )
         ordered = True
 
@@ -1498,6 +1503,11 @@ class CheckpointConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
+    # Next fields are used by configurators
+    site_names = fields.Raw(required=False, allow_none=True)
+    slack_webhook = fields.String(required=False, allow_none=True)
+    notify_on = fields.String(required=False, allow_none=True)
+    notify_with = fields.String(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -1541,6 +1551,11 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
+        # the following args are used by configurators
+        site_names: Optional[Union[list, str]] = None,
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = None,
+        notify_with: Optional[str] = None,
     ):
         self._name = name
         self._config_version = config_version
