@@ -17,7 +17,6 @@ from great_expectations.profile.basic_dataset_profiler import logger
 
 
 class UserConfigurableProfiler:
-    # TODO: Confirm tolerance for every expectation
 
     """
     The UserConfigurableProfiler is used to build an expectation suite from a dataset. The expectations built are
@@ -157,11 +156,10 @@ class UserConfigurableProfiler:
             "other": self._build_expectations_for_all_column_types,
         }
 
-    def build_suite(self, tolerance=0):
+    def build_suite(self):
         """
         User-facing expectation-suite building function. Works with an instantiated UserConfigurableProfiler object.
         Args:
-            tolerance: The tolerance to use when adding expectations
 
         Returns:
             An expectation suite built either with or without a semantic_types dict
@@ -172,17 +170,14 @@ class UserConfigurableProfiler:
             self.dataset._expectation_suite = ExpectationSuite(suite_name)
 
         if self.semantic_types_dict:
-            return self._build_expectation_suite_from_semantic_types_dict(
-                tolerance=tolerance
-            )
+            return self._build_expectation_suite_from_semantic_types_dict()
 
-        return self._profile_and_build_expectation_suite(tolerance=tolerance)
+        return self._profile_and_build_expectation_suite()
 
-    def _build_expectation_suite_from_semantic_types_dict(self, tolerance=0):
+    def _build_expectation_suite_from_semantic_types_dict(self):
         """
         Uses a semantic_type dict to determine which expectations to add to the suite, then builds the suite
         Args:
-            tolerance: The tolerance to use when adding expectations
 
         Returns:
             An expectation suite built from a semantic_types dict
@@ -210,9 +205,7 @@ class UserConfigurableProfiler:
             semantic_types = column_info.get("semantic_types")
             for semantic_type in semantic_types:
                 semantic_type_fn = self.semantic_type_functions.get(semantic_type)
-                semantic_type_fn(
-                    dataset=self.dataset, column=column_name, tolerance=tolerance
-                )
+                semantic_type_fn(dataset=self.dataset, column=column_name)
 
         for column_name in self.column_info.keys():
             self._build_expectations_for_all_column_types(self.dataset, column_name)
@@ -222,11 +215,10 @@ class UserConfigurableProfiler:
         self._display_suite_by_column(suite=expectation_suite)
         return expectation_suite
 
-    def _profile_and_build_expectation_suite(self, tolerance=0):
+    def _profile_and_build_expectation_suite(self):
         """
         Profiles the provided dataset to determine which expectations to add to the suite, then builds the suite
         Args:
-            tolerance: The tolerance to use when adding expectations
 
         Returns:
             An expectation suite built after profiling the dataset
@@ -235,7 +227,7 @@ class UserConfigurableProfiler:
             self._build_expectations_primary_or_compound_key(
                 dataset=self.dataset, column_list=self.primary_or_compound_key
             )
-        self._build_expectations_table(dataset=self.dataset, tolerance=tolerance)
+        self._build_expectations_table(dataset=self.dataset)
         for column_name, column_info in self.column_info.items():
             data_type = column_info.get("type")
             cardinality = column_info.get("cardinality")
@@ -244,14 +236,12 @@ class UserConfigurableProfiler:
                 self._build_expectations_numeric(
                     dataset=self.dataset,
                     column=column_name,
-                    tolerance=tolerance,
                 )
 
             if data_type == "DATETIME":
                 self._build_expectations_datetime(
                     dataset=self.dataset,
                     column=column_name,
-                    tolerance=tolerance,
                 )
 
             if (
@@ -687,7 +677,6 @@ class UserConfigurableProfiler:
         Returns:
             The GE Dataset
         """
-        tolerance = kwargs.get("tolerance") or 0
 
         # min
         if "expect_column_min_to_be_between" not in self.excluded_expectations:
@@ -695,13 +684,11 @@ class UserConfigurableProfiler:
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not self._is_nan(observed_min):
-                # places = len(str(observed_min)[str(observed_min).find('.') + 1:])
-                # tolerance = 10 ** int(-places)
-                # tolerance = float(decimal.Decimal.from_float(float(observed_min)) - decimal.Decimal(str(observed_min)))
+
                 dataset.expect_column_min_to_be_between(
                     column,
-                    min_value=observed_min - tolerance,
-                    max_value=observed_min + tolerance,
+                    min_value=observed_min,
+                    max_value=observed_min,
                 )
 
             else:
@@ -722,11 +709,10 @@ class UserConfigurableProfiler:
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not self._is_nan(observed_max):
-                # tolerance = float(decimal.Decimal.from_float(float(observed_max)) - decimal.Decimal(str(observed_max)))
                 dataset.expect_column_max_to_be_between(
                     column,
-                    min_value=observed_max - tolerance,
-                    max_value=observed_max + tolerance,
+                    min_value=observed_max,
+                    max_value=observed_max,
                 )
 
             else:
@@ -747,11 +733,10 @@ class UserConfigurableProfiler:
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not self._is_nan(observed_mean):
-                # tolerance = float(decimal.Decimal.from_float(float(observed_mean)) - decimal.Decimal(str(observed_mean)))
                 dataset.expect_column_mean_to_be_between(
                     column,
-                    min_value=observed_mean - tolerance,
-                    max_value=observed_mean + tolerance,
+                    min_value=observed_mean,
+                    max_value=observed_mean,
                 )
 
             else:
@@ -772,13 +757,11 @@ class UserConfigurableProfiler:
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not self._is_nan(observed_median):
-                # places = len(str(observed_median)[str(observed_median).find('.') + 1:])
-                # tolerance = 10 ** int(-places)
-                # tolerance = float(decimal.Decimal.from_float(float(observed_median)) - decimal.Decimal(str(observed_median)))
+
                 dataset.expect_column_median_to_be_between(
                     column,
-                    min_value=observed_median - tolerance,
-                    max_value=observed_median + tolerance,
+                    min_value=observed_median,
+                    max_value=observed_median,
                 )
 
             else:
@@ -842,7 +825,7 @@ class UserConfigurableProfiler:
                             "quantiles"
                         ],
                         "value_ranges": [
-                            [v - 1, v + 1]
+                            [v, v]
                             for v in quantile_result.result["observed_value"]["values"]
                         ],
                     },
@@ -914,7 +897,6 @@ class UserConfigurableProfiler:
         Returns:
             The GE Dataset
         """
-        tolerance = kwargs.get("tolerance") or 0
 
         if "expect_column_values_to_be_between" not in self.excluded_expectations:
             min_value = dataset.expect_column_min_to_be_between(
@@ -927,13 +909,11 @@ class UserConfigurableProfiler:
 
             if min_value is not None:
                 try:
-                    min_value = min_value + datetime.timedelta(days=-365 * tolerance)
+                    min_value = min_value + datetime.timedelta(days=-365)
                 except OverflowError:
                     min_value = datetime.datetime.min
                 except TypeError:
-                    min_value = parse(min_value) + datetime.timedelta(
-                        days=(-365 * tolerance)
-                    )
+                    min_value = parse(min_value) + datetime.timedelta(days=(-365))
 
             dataset.remove_expectation(
                 ExpectationConfiguration(
@@ -952,13 +932,11 @@ class UserConfigurableProfiler:
             ).result["observed_value"]
             if max_value is not None:
                 try:
-                    max_value = max_value + datetime.timedelta(days=(365 * tolerance))
+                    max_value = max_value + datetime.timedelta(days=365)
                 except OverflowError:
                     max_value = datetime.datetime.max
                 except TypeError:
-                    max_value = parse(max_value) + datetime.timedelta(
-                        days=(365 * tolerance)
-                    )
+                    max_value = parse(max_value) + datetime.timedelta(days=365)
 
             dataset.remove_expectation(
                 ExpectationConfiguration(
@@ -990,13 +968,12 @@ class UserConfigurableProfiler:
         Returns:
             The GE Dataset
         """
-        tolerance = kwargs.get("tolerance") or 0
         if "expect_column_values_to_not_be_null" not in self.excluded_expectations:
             not_null_result = dataset.expect_column_values_to_not_be_null(column)
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
                 if unexpected_percent >= 50 and not self.not_null_only:
-                    potential_mostly_value = (unexpected_percent + tolerance) / 100.0
+                    potential_mostly_value = (unexpected_percent) / 100.0
                     safe_mostly_value = round(potential_mostly_value, 3)
                     dataset.remove_expectation(
                         ExpectationConfiguration(
@@ -1013,9 +990,7 @@ class UserConfigurableProfiler:
                             column, mostly=safe_mostly_value
                         )
                 else:
-                    potential_mostly_value = (
-                        100.0 - unexpected_percent - tolerance
-                    ) / 100.0
+                    potential_mostly_value = (100.0 - unexpected_percent) / 100.0
                     safe_mostly_value = round(max(0.001, potential_mostly_value), 3)
                     dataset.expect_column_values_to_not_be_null(
                         column, mostly=safe_mostly_value
@@ -1062,7 +1037,6 @@ class UserConfigurableProfiler:
         Returns:
             The GE Dataset
         """
-        tolerance = kwargs.get("tolerance") or 0
 
         if (
             "expect_table_columns_to_match_ordered_list"
@@ -1075,8 +1049,8 @@ class UserConfigurableProfiler:
             row_count = dataset.expect_table_row_count_to_be_between(
                 min_value=0, max_value=None
             ).result["observed_value"]
-            min_value = max(0, int(row_count * (1 - tolerance)))
-            max_value = int(row_count * (1 + tolerance))
+            min_value = max(0, int(row_count))
+            max_value = int(row_count)
 
             dataset.expect_table_row_count_to_be_between(
                 min_value=min_value, max_value=max_value
