@@ -190,6 +190,7 @@ Steps
 
                     map_metric = "column_values.equal_three"
 
+
                 The parent class expects the variable ``map_metric`` to be set. Change the value of ``map_metric`` to something that fits your Metric. Follow these two naming conventions:
 
                 * the name should start with "column_values.", because it is a "column map" Metric
@@ -208,7 +209,8 @@ Steps
 
                     condition_metric_name = "column_values.equal_three"
 
-                 The parent class expects the variable ``condition_metric_name`` to be set. Change the value of ``condition_metric_name`` to the same name that you used for ``map_metric`` in your Expectation class.
+
+                The parent class expects the variable ``condition_metric_name`` to be set. Change the value of ``condition_metric_name`` to the same name that you used for ``map_metric`` in your Expectation class.
 
                 The Expectation declares that it needs a yes/no Metric "X" and the Metric Provider declares that it can compute this Metric. A match made in heaven.
 
@@ -298,17 +300,80 @@ Steps
         .. tab-container:: tab1
             :title: ColumnExpectation
 
-            TODO
+            Expectations that extend ColumnExpectation class are evaluated for a single column, but produce an aggregate metric, such as a mean, standard deviation, number of unique values, type, etc.
+
+            * Define ``success_keys`` of your Expectation
+
+                .. code-block:: python
+
+                    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+
+            Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as  histogram). You can read more about the relationship between Expectations and Metrics in our :ref:`Core Concepts: Expectations and Metrics <reference__core_concepts__expectations>`.
+
+            * ``ExpectColumnCustomMedianToBeBetween`` class that the template implements declares the list of Metrics it needs computes for producing its result:
+
+                .. code-block:: python
+
+                    metric_dependencies = ("column.custom.median",)
+
+                The parent class expects the variable ``metric_dependencies`` to be set. Change the value of ``metric_dependencies`` to something that fits your Metric. Follow these two naming conventions:
+
+                * the name should start with "column.", because it is a column Metric
+                * the second part of the name (after the ".") should be in snake_case format
+
+
+            * While many column metrics are already implemented within Great Expectations (e.g., ``column.max``, ``column.mean``, ``column.value_counts``, etc.), ``column.custom.median`` is not. You will define and implement this new Metric.
+
+                The convention is to implement a new Metric Provider (a class that can compute a metric) that your Expectation depends on in the same file as the Expectation itself.
+
+                Search for ``class ColumnCustomMedian`` and rename it to Column<CamelCase version of the second part of the metric name that you declared in the previous step>.
+
+                The Metric Provider class declares the metric that it can compute.
+
+                .. code-block:: python
+
+                    metric_name = "column.custom.median"
+
+
+                The parent class expects the variable ``metric_name`` to be set. Change the value of ``metric_name`` to the same name that you used for ``metric_dependencies`` in your Expectation class.
+
+                The Expectation declares that it needs a Metric "X" and the Metric Provider declares that it can compute this Metric.
+
+
+            * Implement the computation of the Metric in your new Metric Provider class for at least one of the three backends (Execution Engines) that Great Expectations supports: pandas, sqlalchemy, spark. Most contributors find starting with Pandas is the easiest and fastest way to build.
+
+                The parent class of your Metric Provider class is ``ColumnMetricProvider``. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
+
+                .. admonition:: Note:
+
+                    - If you have never used Python Decorators and don't know what they are and how they work, no worries - this should not stop you from successfully implementing your Expectation. Decorators allow the parent class to "wrap" your methods, which means to execute some code before and after your method runs. All you need to know is the name of the Decorator to add (with "@") above your method definition.
+
+                Find the following code snippet in your Metric Provider class:
+
+                .. code-block:: python
+
+                    @column_aggregate_value(engine=PandasExecutionEngine)
+                    def _pandas(cls, column, **kwargs):
+                        """Pandas Median Implementation"""
+                        return column.median()
+
+
+
+                This means that the method ``_pandas`` is a metric function that is decorated as a ``column_aggregate_value``. It will be called with the engine-specific column type (e.g., a Series in pandas case). It must return a value that is computed over this column.
+                The ``engine`` argument of ``column_condition_partial`` is set to ``PandasExecutionEngine`` to signal to the method in the parent that the method computes the Metric for pandas backend.
+                There is nothing special about the name of the method ``_pandas`` - it can be called anything else, but why make things more complicated than they must be?
+
+                Implement this method to compute your Metric.
 
         .. tab-container:: tab2
             :title: ColumnPairMapExpectation
 
-            TODO
+            Under construction...
 
         .. tab-container:: tab3
             :title: TableExpectation
 
-            TODO
+            Under construction...
 
 
 #. Fill in the ``library_metadata`` dictionary.
