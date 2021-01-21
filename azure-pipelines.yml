@@ -54,6 +54,8 @@ stages:
 
                 [GEChanged]
                 great_expectations/**
+
+                [GEChanged]
                 requirements*
 
   - stage: lint
