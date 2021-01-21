@@ -33,7 +33,31 @@ variables:
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
+  - stage: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: changes
+        steps:
+          - task: ChangedFiles@1
+            name: CheckChanges
+            inputs:
+              rules: |
+                [ContribChanged]
+                contrib/**
+
+                [ExperimentalChanged]
+                contrib/experimental/**
+
+                [DocsChanged]
+                docs/**
+
+                [GEChanged]
+                great_expectations/**
+
   - stage: lint
+    dependsOn: scope_check
+    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -55,10 +79,10 @@ stages:
               exit $EXIT_STATUS
 
   - stage: required
+    dependsOn: scope_check
+    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
     pool:
       vmImage: 'ubuntu-latest'
-
-    dependsOn: []
 
     jobs:
       - job: compatibility_matrix
@@ -182,10 +206,10 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
+    dependsOn: scope_check
+    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
     pool:
       vmImage: 'ubuntu-latest'
-
-    dependsOn: []
 
     jobs:
       - job: test_usage_stats_messages
@@ -217,7 +241,8 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: []
+    dependsOn: scope_check
+    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
 
     jobs:
       - job: mysql
