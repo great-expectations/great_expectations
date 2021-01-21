@@ -57,7 +57,7 @@ stages:
 
   - stage: lint
     dependsOn: scope_check
-    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
+    condition: or(eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -80,7 +80,7 @@ stages:
 
   - stage: required
     dependsOn: scope_check
-    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
+    condition: or(eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -207,7 +207,7 @@ stages:
 
   - stage: usage_stats_integration
     dependsOn: scope_check
-    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
+    condition: or(eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -242,7 +242,7 @@ stages:
       vmImage: 'ubuntu-latest'
 
     dependsOn: scope_check
-    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
+    condition: or(eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
 
     jobs:
       - job: mysql
