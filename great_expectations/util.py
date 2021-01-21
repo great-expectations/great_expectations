@@ -888,6 +888,7 @@ def is_sane_slack_webhook(url: str) -> bool:
 def is_list_of_strings(_list) -> bool:
     return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
 
+
 def generate_library_json_from_registered_expectations():
     """Generate the JSON object used to populate the public gallery"""
     library_json = {}
