@@ -13,7 +13,7 @@ This guide will help you add a new Expectation to Great Expectations’ shared l
 Steps
 -----
 
-#. Choose a parent class to help your implementation.
+#. **Choose a parent class to help your implementation.**
 
     There are four Expectation subclasses that make the development of particular types of Expectations significantly easier by handling boilerplate code and letting you focus on the business logic of your Expectation. Consider choosing one that suites your Expectation:
 
@@ -25,13 +25,13 @@ Steps
 
     Find the appropriate template file in ``great_expectations/examples/expectations/``. Starting your development with these templates is significantly easier than developing from scratch.
 
-#. Copy the template file into the appropriate ``contrib/`` directory (see below).
+#. **Copy the template file into the appropriate ``contrib/`` directory (see below).**
 
     Recently we introduced a fast-track release process for Expectations that a contributor places in one of the subdirectories of ``contrib``.
     They are released as PyPI packages separate from ``great-expectations``. When you create a new Expectation in ``contrib/experimental/great_expectations_experimental/expectations/``,
     once your PR is approved and merged, a new version of PyPI package ``great-expectations-experimental`` is automatically published.
 
-#. Pick a name for your Expectation, rename the file and the class within it.
+#. **Pick a name for your Expectation, rename the file and the class within it.**
 
     #. Pick a name for your Expectation
 
@@ -64,7 +64,7 @@ Steps
 
     For more style conventions that your code should follow consult our :ref:`Style Guide <contributing__style_guide>`
 
-#. Execute the template file.
+#. **Execute the template file.**
 
     The simplest way to do this is as a standalone script. Note: if you prefer, you can also execute within a notebook or IDE.
 
@@ -112,7 +112,7 @@ Steps
             diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
             print(json.dumps(diagnostics_report, indent=2))
 
-#. Add an example test.
+#. **Add an example test.**
 
     Search for ``examples = [`` in your file.
 
@@ -151,6 +151,7 @@ Steps
 
     * data: defines the input data of the example as a table/data frame. In this example the table has one column named "mostly_threes" with 10 rows.
     * tests: a list of test cases that use the data defined above as input to validate
+
         * ``title`` should be a descriptive name for the test case. Make sure to have no spaces.
         * ``in`` contains exactly the parameters that you want to pass in to the Expectation. ``"in": {"column": "mostly_threes", "mostly": 0.6}`` in the example above is equivalent to ``expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)``
         * ``out`` is based on the Validation Result returned when executing the Expectation.
@@ -176,7 +177,9 @@ Steps
 
 
 
-#. Implement the logic. The details of this step differ based on the type of Expectations you are implementing. Click on the appropriate tab below.
+#. **Implement the logic.**
+
+    The details of this step differ based on the type of Expectations you are implementing. Click on the appropriate tab below.
 
     .. content-tabs::
 
@@ -389,7 +392,7 @@ Steps
             Under construction...
 
 
-#. Fill in the ``library_metadata`` dictionary.
+#. **Fill in the ``library_metadata`` dictionary.**
 
     Find this code snippet in your file and edit tags and contributors:
 
@@ -406,7 +409,9 @@ Steps
             "package": "experimental_expectations",
         }
 
-#. Follow :ref:`Contribution Checklist <contributing_contribution_checklist>` to submit your contribution.
+#. **Submit your contribution**
+
+    Follow :ref:`Contribution Checklist <contributing_contribution_checklist>` to submit your contribution.
 
 
 Additional notes
