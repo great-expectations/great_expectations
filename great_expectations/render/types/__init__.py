@@ -1,4 +1,6 @@
+import json
 from copy import deepcopy
+from string import Template as pTemplate
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
 
@@ -281,6 +283,12 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         d = super().to_json_dict()
         d["string_template"] = self.string_template
         return d
+
+    def __str__(self):
+        string = pTemplate(self.string_template["template"]).safe_substitute(
+            self.string_template["params"]
+        )
+        return string
 
 
 class RenderedBulletListContent(RenderedComponentContent):
