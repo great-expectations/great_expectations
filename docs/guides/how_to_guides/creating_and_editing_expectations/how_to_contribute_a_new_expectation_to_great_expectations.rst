@@ -15,7 +15,7 @@ Steps
 
 #. Choose a Parent Class to Help your Implementation.
 
-    There are four Expectation classes that make the development of particular types of Expectations significantly easier by hiding the "crud" code and letting you focus on the business logic of your Expectation. Decide which one suites your Expectation:
+    There are four Expectation subclasses that make the development of particular types of Expectations significantly easier by handling boilerplate code and letting you focus on the business logic of your Expectation. Consider choosing one that suites your Expectation:
 
         - ``ColumnMapExpectation`` - Expectations of this type validate a single column of tabular data. First they ask a yes/no question from every row in that column. Then they ask what percentage of rows gave a positive answer to the first question. If the answer to the second question is above a specified threshold, the Expectation considers the data valid.
         - ``ColumnExpectation`` s are also evaluated for a single column, but produce an aggregate metric, such as a mean, standard deviation, number of unique values, type, etc.
