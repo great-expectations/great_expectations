@@ -55,6 +55,7 @@ stages:
                 [GEChanged]
                 great_expectations/**
                 requirements*.txt
+                *.yml
 
   - stage: lint
     dependsOn: scope_check
