@@ -13,7 +13,7 @@ This guide will help you add a new Expectation to Great Expectations’ shared l
 Steps
 -----
 
-#. Choose a Parent Class to Help your Implementation.
+#. Choose a parent class to help your implementation.
 
     There are four Expectation subclasses that make the development of particular types of Expectations significantly easier by handling boilerplate code and letting you focus on the business logic of your Expectation. Consider choosing one that suites your Expectation:
 
@@ -33,27 +33,36 @@ Steps
 
 #. Pick a name for your Expectation, rename the file and the class within it.
 
-    Great Expectations follows a naming convention. Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToBeThree``). The framework will
-    automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_be_three``.
-    The Python file that contains the class should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_be_three.py``).
+    #. Pick a name for your Expectation
 
-    Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
+        Expectations follow a naming convention.
 
-    * Column map Expectations: ``expect_column_values_...`` (e.g., ``expect_column_values_to_match_regex``)
-    * Column aggregate Expectations: ``expect_column_...`` (e.g., ``expect_column_mean_to_be_between``)
-    * Column pair map Expectations: ``expect_column_pair_values_...`` (e.g., ``expect_column_pair_values_to_be_in_set``)
-    * Tabe Expectatons: ``expect_table_...`` (e.g., ``expect_table_row_count_to_be_equal``)
+        Names of Expectations are snake_case (e.g., ``expect_column_values_to_be_three``).
 
-    For example, if you call your Expectation ``ExpectColumnValuesToEqualThree``, you will copy it to ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
+        Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
+
+        * Column map Expectations: ``expect_column_values_...`` (e.g., ``expect_column_values_to_match_regex``)
+        * Column aggregate Expectations: ``expect_column_...`` (e.g., ``expect_column_mean_to_be_between``)
+        * Column pair map Expectations: ``expect_column_pair_values_...`` (e.g., ``expect_column_pair_values_to_be_in_set``)
+        * Table Expectatons: ``expect_table_...`` (e.g., ``expect_table_row_count_to_be_equal``)
+
+    #. Name the file
+
+        The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_be_three.py``).
+
+        For example, if you call your Expectation ``expect_column_values_to_be_three``, the file with its implementation should be:   ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
+
+    #. Name the class
+
+        Within the file, update the name of the class that implements your Expectation.
+        Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToBeThree``). The framework will
+        automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_be_three``.
+        You will make this change in two places:
+
+        * Class declaration (search for ``class ExpectColumnValuesToEqualThree``)
+        * A call to ``run_diagnostic`` in the very end of the template (search for ``diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()``). Next section explains the role this code plays.
 
     For more style conventions that your code should follow consult our :ref:`Style Guide <contributing__style_guide>`
-
-#. Within the file, update the name of your Expectation.
-
-    You'll to do this in two places:
-
-    * Class declaration (search for ``class ExpectColumnValuesToEqualThree``)
-    * A call to ``run_diagnostic`` in the very end of the template (search for ``diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()``). Next section explains the role this code plays.
 
 #. Execute the template file.
 
