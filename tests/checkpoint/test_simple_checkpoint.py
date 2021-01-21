@@ -66,9 +66,12 @@ def context_with_data_source_and_empty_suite(
 
 @pytest.fixture
 def simple_checkpoint_defaults(context_with_data_source_and_empty_suite):
-    return Checkpoint(data_context=context_with_data_source_and_empty_suite,**SimpleCheckpointConfigurator(
-        "foo", context_with_data_source_and_empty_suite
-    ).build().to_json_dict())
+    return Checkpoint(
+        data_context=context_with_data_source_and_empty_suite,
+        **SimpleCheckpointConfigurator("foo", context_with_data_source_and_empty_suite)
+        .build()
+        .to_json_dict()
+    )
 
 
 @pytest.fixture

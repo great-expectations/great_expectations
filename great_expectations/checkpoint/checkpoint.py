@@ -4,7 +4,7 @@ import logging
 import os
 from copy import deepcopy
 from datetime import datetime
-from typing import Dict, List, Optional, Union, Any
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -49,7 +49,7 @@ class Checkpoint:
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        **kwargs
+        **kwargs,
     ):
         self._name = name
         # Note the gross typechecking to avoid a circular import
@@ -76,7 +76,7 @@ class Checkpoint:
                 # Next two fields are for LegacyCheckpoint configuration
                 validation_operator_name=validation_operator_name,
                 batches=batches,
-                **kwargs
+                **kwargs,
             )
             checkpoint_config: CheckpointConfig = configurator_obj.build()
         else:
