@@ -4,18 +4,21 @@ import logging
 import os
 from copy import deepcopy
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
+from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import (
     get_datetime_string_from_strftime_format,
     nested_update,
-    substitute_all_strftime_format_strings,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.data_context.util import substitute_all_config_variables
+from great_expectations.data_context.util import (
+    instantiate_class_from_config,
+    substitute_all_config_variables,
+)
 from great_expectations.exceptions import CheckpointError
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -35,6 +38,7 @@ class Checkpoint:
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
+        configurator: Optional[Any] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequest, dict]] = None,
@@ -43,39 +47,66 @@ class Checkpoint:
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
+        **kwargs,
     ):
         self._name = name
+        # Note the gross typechecking to avoid a circular import
+        if "DataContext" not in str(type(data_context)):
+            raise TypeError("A checkpoint requires a valid DataContext")
         self._data_context = data_context
 
-        checkpoint_config: CheckpointConfig = CheckpointConfig(
-            **{
-                "name": name,
-                "config_version": config_version,
-                "template_name": template_name,
-                "module_name": module_name,
-                "class_name": class_name,
-                "run_name_template": run_name_template,
-                "expectation_suite_name": expectation_suite_name,
-                "batch_request": batch_request,
-                "action_list": action_list,
-                "evaluation_parameters": evaluation_parameters,
-                "runtime_configuration": runtime_configuration,
-                "validations": validations,
-                "profilers": profilers,
+        if configurator:
+            configurator_obj = configurator(
+                name=name,
+                data_context=data_context,
+                config_version=config_version,
+                template_name=template_name,
+                class_name=class_name,
+                module_name=module_name,
+                run_name_template=run_name_template,
+                expectation_suite_name=expectation_suite_name,
+                batch_request=batch_request,
+                action_list=action_list,
+                evaluation_parameters=evaluation_parameters,
+                runtime_configuration=runtime_configuration,
+                validations=validations,
+                profilers=profilers,
                 # Next two fields are for LegacyCheckpoint configuration
-                "validation_operator_name": validation_operator_name,
-                "batches": batches,
-            }
-        )
+                validation_operator_name=validation_operator_name,
+                batches=batches,
+                **kwargs,
+            )
+            checkpoint_config: CheckpointConfig = configurator_obj.build()
+        else:
+            assert len(kwargs) == 0, f"Invalid arguments: {list(kwargs.keys())}"
+            checkpoint_config: CheckpointConfig = CheckpointConfig(
+                **{
+                    "name": name,
+                    "config_version": config_version,
+                    "template_name": template_name,
+                    "module_name": module_name,
+                    "class_name": class_name,
+                    "run_name_template": run_name_template,
+                    "expectation_suite_name": expectation_suite_name,
+                    "batch_request": batch_request,
+                    "action_list": action_list,
+                    "evaluation_parameters": evaluation_parameters,
+                    "runtime_configuration": runtime_configuration,
+                    "validations": validations,
+                    "profilers": profilers,
+                    # Next two fields are for LegacyCheckpoint configuration
+                    "validation_operator_name": validation_operator_name,
+                    "batches": batches,
+                }
+            )
         self._config = checkpoint_config
 
         self._substituted_config = None
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
@@ -83,8 +114,12 @@ class Checkpoint:
         return self._data_context
 
     @property
-    def config(self):
+    def config(self) -> CheckpointConfig:
         return self._config
+
+    @property
+    def action_list(self) -> List[Dict]:
+        return self._config.action_list
 
     # TODO: (Rob) should we type the big validation dicts for better validation/prevent duplication
     def get_substituted_config(
@@ -327,8 +362,6 @@ class Checkpoint:
                 raise CheckpointError(
                     f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}"
                 )
-            except Exception as e:
-                raise e
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
         )
@@ -461,3 +494,66 @@ class LegacyCheckpoint(Checkpoint):
                 batches_to_validate.append(batch)
 
         return batches_to_validate
+
+
+class SimpleCheckpoint(Checkpoint):
+    def __init__(
+        self,
+        name: str,
+        data_context,
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        configurator: Optional[dict] = SimpleCheckpointConfigurator,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        # the following are arguments used by SimpleCheckpointConfigurator
+        site_names: Optional[Union[str, List[str]]] = "all",
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = "all",
+        notify_with: Optional[Union[str, List[str]]] = "all",
+    ):
+        super().__init__(
+            name=name,
+            data_context=data_context,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            configurator=configurator,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            validation_operator_name=validation_operator_name,
+            batches=batches,
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+        )
+
+
+# TODO Options in no order:
+#  1. slim version of config must be a valid Checkpoint config perhaps by:
+#     templates? a folder of yml files?
+#  2. configuration builder as a parameter to Checkpoint()
+#  3. subclass with defaults
+#  - move parameter validation into base Checkpoint?
+#  - other ideas?
+# Key requirement: simpler appearing configuration
+# pattern in data context config with default enums
+#

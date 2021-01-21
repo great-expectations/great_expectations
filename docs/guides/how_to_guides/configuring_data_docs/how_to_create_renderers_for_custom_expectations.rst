@@ -3,6 +3,8 @@
 How to Create Renderers for Custom Expectations
 ================================================
 
+.. warning:: This guide only applies to Great Expectations versions 0.13 and above, which make use of the new modular Expectation architecture. If you have implemented a custom Expectation but have not yet migrated it using the new modular patterns, you can still use this guide to implement custom renderers for your Expectation.
+
 This guide will help you implement renderers for your custom Expectations, allowing you to control how your custom Expectations are displayed in Data Docs. Implementing renderers as part of your custom Expectations is not strictly required - if not provided, Great Expectations will render your Expectation using a basic default renderer:
 
 .. figure:: expectation_fallback.png

@@ -1,7 +1,10 @@
 import pytest
 
 import great_expectations.exceptions as gee
-from great_expectations.data_context.util import PasswordMasker
+from great_expectations.data_context.util import (
+    PasswordMasker,
+    parse_substitution_variable,
+)
 from great_expectations.util import load_class
 
 
@@ -13,6 +16,28 @@ def test_load_class_raises_error_when_module_not_found():
 def test_load_class_raises_error_when_class_not_found():
     with pytest.raises(gee.PluginClassNotFoundError):
         load_class("TotallyNotARealClass", "great_expectations.datasource")
+
+
+def test_load_class_raises_error_when_class_name_is_None():
+    with pytest.raises(TypeError):
+        load_class(None, "great_expectations.datasource")
+
+
+def test_load_class_raises_error_when_class_name_is_not_string():
+    for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
+        with pytest.raises(TypeError):
+            load_class(bad_input, "great_expectations.datasource")
+
+
+def test_load_class_raises_error_when_module_name_is_None():
+    with pytest.raises(TypeError):
+        load_class("foo", None)
+
+
+def test_load_class_raises_error_when_module_name_is_not_string():
+    for bad_input in [1, 1.3, ["a"], {"foo": "bar"}]:
+        with pytest.raises(TypeError):
+            load_class(bad_input, "great_expectations.datasource")
 
 
 def test_password_masker_mask_db_url():
@@ -227,3 +252,22 @@ def test_password_masker_mask_db_url():
     # in-memory
     assert PasswordMasker.mask_db_url("sqlite://") == "sqlite://"
     assert PasswordMasker.mask_db_url("sqlite://", use_urlparse=True) == "sqlite://"
+
+
+def test_parse_substitution_variable():
+    """
+    What does this test and why?
+    Ensure parse_substitution_variable works as expected.
+    Returns:
+
+    """
+    assert parse_substitution_variable("${SOME_VAR}") == "SOME_VAR"
+    assert parse_substitution_variable("$SOME_VAR") == "SOME_VAR"
+    assert parse_substitution_variable("SOME_STRING") is None
+    assert parse_substitution_variable("SOME_$TRING") is None
+    assert parse_substitution_variable("${some_var}") == "some_var"
+    assert parse_substitution_variable("$some_var") == "some_var"
+    assert parse_substitution_variable("some_string") is None
+    assert parse_substitution_variable("some_$tring") is None
+    assert parse_substitution_variable("${SOME_$TRING}") is None
+    assert parse_substitution_variable("$SOME_$TRING") == "SOME_"

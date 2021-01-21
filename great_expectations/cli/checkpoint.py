@@ -12,6 +12,7 @@ from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_list
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import lint_code
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -231,7 +232,7 @@ def _write_checkpoint_to_disk(
     # TODO this should be the responsibility of the DataContext
     checkpoint_dir = os.path.join(
         context.root_directory,
-        context.CHECKPOINTS_DIR,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
     )
     checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
     os.makedirs(checkpoint_dir, exist_ok=True)
