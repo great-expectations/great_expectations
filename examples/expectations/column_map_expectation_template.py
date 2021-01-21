@@ -58,9 +58,9 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
+    """TODO: add a docstring here"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # You can learn more in {some doc}
     # examples = [{
     #     "data": {
     #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
@@ -90,6 +90,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         ],
         "package": "experimental_expectations",
     }
+
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
     map_metric = "column_values.equal_three"
@@ -190,5 +191,5 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnValuesToEqualThree().self_check()
-    print(json.dumps(self_check_report, indent=2))
+    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    print(json.dumps(diagnostics_report, indent=2))

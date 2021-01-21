@@ -181,7 +181,7 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
 def test_expectation_self_check():
 
     my_expectation = ExpectColumnValuesToEqualThree()
-    report_object = my_expectation.self_check()
+    report_object = my_expectation.run_diagnostics()
     print(json.dumps(report_object, indent=2))
 
     assert report_object == {
@@ -207,7 +207,7 @@ def test_expectation_self_check():
 def test_include_in_gallery_flag():
 
     my_expectation = ExpectColumnValuesToEqualThree__SecondIteration()
-    report_object = my_expectation.self_check()
+    report_object = my_expectation.run_diagnostics()
     print(json.dumps(report_object["examples"], indent=2))
 
     assert len(report_object["examples"][0]["tests"]) == 1
@@ -228,7 +228,7 @@ def test_self_check_on_an_existing_expectation():
     expectation_name = "expect_column_values_to_match_regex"
     expectation = _registered_expectations[expectation_name]
 
-    report_object = expectation().self_check()
+    report_object = expectation().run_diagnostics()
     print(json.dumps(report_object, indent=2))
 
     report_object["description"].pop(
