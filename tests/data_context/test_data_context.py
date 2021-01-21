@@ -1421,6 +1421,16 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     assert not os.path.isfile(index_path)
 
 
+def test_get_site_names(
+    tmp_path_factory, empty_data_context, basic_data_context_config
+):
+    assert empty_data_context.get_site_names() == ["local_site"]
+    assert basic_data_context_config.data_docs_sites == {}
+    base_path = tmp_path_factory.mktemp("foo")
+    context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
+    assert context.get_site_names() == []
+
+
 def test_load_config_variables_file(
     basic_data_context_config, tmp_path_factory, monkeypatch
 ):
@@ -1612,6 +1622,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     config = obs.config
     assert isinstance(config.to_json_dict(), dict)
     assert config.to_json_dict() == {
+        "module_name": "great_expectations.checkpoint",
         "class_name": "LegacyCheckpoint",
         "config_version": None,
         "name": "my_checkpoint",
@@ -1654,6 +1665,7 @@ def test_get_checkpoint_default_validation_operator(empty_data_context):
     assert isinstance(obs, Checkpoint)
     assert isinstance(obs.config.to_json_dict(), dict)
     expected = {
+        "module_name": "great_expectations.checkpoint",
         "class_name": "LegacyCheckpoint",
         "config_version": None,
         "name": "foo",
@@ -1758,8 +1770,8 @@ def test_run_checkpoint_newstyle(
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
-        config_version=1,
         name="my_checkpoint",
+        config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=[

@@ -19,6 +19,7 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_dump,
     post_load,
+    pre_load,
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
@@ -1458,8 +1459,21 @@ class CheckpointConfigSchema(Schema):
             # Next two fields are for LegacyCheckpoint configuration
             "validation_operator_name",
             "batches",
+            # Next fields are used by configurators
+            "site_names",
+            "slack_webhook",
+            "notify_on",
+            "notify_with",
         )
         ordered = True
+
+    # if keys have None value, remove in post_dump
+    REMOVE_KEYS_IF_NONE = [
+        "site_names",
+        "slack_webhook",
+        "notify_on",
+        "notify_with",
+    ]
 
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
@@ -1498,6 +1512,11 @@ class CheckpointConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
+    # Next fields are used by configurators
+    site_names = fields.Raw(required=False)
+    slack_webhook = fields.String(required=False)
+    notify_on = fields.String(required=False)
+    notify_with = fields.String(required=False)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -1518,6 +1537,14 @@ class CheckpointConfigSchema(Schema):
                     """
                 )
 
+    @post_dump
+    def remove_keys_if_none(self, data, **kwargs):
+        data = deepcopy(data)
+        for key in self.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
+
 
 class CheckpointConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
@@ -1526,7 +1553,7 @@ class CheckpointConfig(BaseYamlConfig):
     def __init__(
         self,
         name: Optional[str] = None,
-        config_version: Optional[int] = None,
+        config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
@@ -1538,26 +1565,27 @@ class CheckpointConfig(BaseYamlConfig):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
+        # the following args are used by configurators
+        site_names: Optional[Union[list, str]] = None,
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = None,
+        notify_with: Optional[str] = None,
     ):
         self._name = name
         self._config_version = config_version
         if self.config_version is None:
-            if class_name is None:
-                class_name = "LegacyCheckpoint"
+            class_name = class_name or "LegacyCheckpoint"
             if validation_operator_name is None:
                 validation_operator_name = "action_list_operator"
             self.validation_operator_name = validation_operator_name
             if batches is not None and isinstance(batches, list):
                 self.batches = batches
         else:
-            if class_name is None:
-                class_name = "Checkpoint"
+            class_name = class_name or "Checkpoint"
             self._template_name = template_name
-            self._module_name = module_name or "great_expectations.checkpoint"
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
             self._batch_request = batch_request
@@ -1566,7 +1594,13 @@ class CheckpointConfig(BaseYamlConfig):
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
             self._profilers = profilers or []
+            # the following attributes are used by optional configurator
+            self._site_names = site_names
+            self._slack_webhook = slack_webhook
+            self._notify_on = notify_on
+            self._notify_with = notify_with
 
+        self._module_name = module_name or "great_expectations.checkpoint"
         self._class_name = class_name
 
         super().__init__(commented_map=commented_map)
@@ -1581,8 +1615,9 @@ class CheckpointConfig(BaseYamlConfig):
         )
 
         if other_config is not None:
-            self.name = other_config.name
             # replace
+            if other_config.name is not None:
+                self.name = other_config.name
             if other_config.module_name is not None:
                 self.module_name = other_config.module_name
             if other_config.class_name is not None:
@@ -1736,6 +1771,22 @@ class CheckpointConfig(BaseYamlConfig):
     @action_list.setter
     def action_list(self, value: List[dict]):
         self._action_list = value
+
+    @property
+    def site_names(self):
+        return self._site_names
+
+    @property
+    def slack_webhook(self):
+        return self._slack_webhook
+
+    @property
+    def notify_on(self):
+        return self._notify_on
+
+    @property
+    def notify_with(self):
+        return self._notify_with
 
     @classmethod
     def get_updated_action_list(
