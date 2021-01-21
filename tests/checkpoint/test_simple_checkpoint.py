@@ -94,12 +94,28 @@ def test_simple_checkpoint_default_properties_with_no_optional_arguments(
     store_validation_result_action,
     store_eval_parameter_action,
     update_data_docs_action,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 ):
     """This demonstrates the simplest possible usage."""
-    checkpoint_config = SimpleCheckpointConfigurator("foo", empty_data_context).build()
+    checkpoint_config = SimpleCheckpointConfigurator("my_minimal_simple_checkpoint", empty_data_context).build()
     assert isinstance(checkpoint_config, CheckpointConfig)
 
-    assert checkpoint_config.name == "foo"
+    assert checkpoint_config.name == "my_minimal_simple_checkpoint"
+    assert checkpoint_config.action_list == [
+        store_validation_result_action,
+        store_eval_parameter_action,
+        update_data_docs_action,
+    ]
+    assert checkpoint_config.config_version == 1.0
+    assert checkpoint_config.class_name == "Checkpoint"
+    assert checkpoint_config.evaluation_parameters == {}
+    assert checkpoint_config.runtime_configuration == {}
+    assert checkpoint_config.validations == []
+
+    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates\
+        .get_checkpoint("my_minimal_simple_checkpoint")
+    checkpoint_config = checkpoint_from_store.config
+    assert checkpoint_config.name == "my_minimal_simple_checkpoint"
     assert checkpoint_config.action_list == [
         store_validation_result_action,
         store_eval_parameter_action,
@@ -128,6 +144,7 @@ def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_
     update_data_docs_action,
     slack_notification_action,
     webhook,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 ):
     checkpoint_config = SimpleCheckpointConfigurator(
         "foo", empty_data_context, slack_webhook=webhook
@@ -138,33 +155,13 @@ def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_
         update_data_docs_action,
         slack_notification_action,
     ]
-    assert checkpoint_config.action_list == [
-        {
-            "action": {"class_name": "StoreValidationResultAction"},
-            "name": "store_validation_result",
-        },
-        {
-            "action": {"class_name": "StoreEvaluationParametersAction"},
-            "name": "store_evaluation_params",
-        },
-        {
-            "action": {"class_name": "UpdateDataDocsAction", "site_names": None},
-            "name": "update_data_docs",
-        },
-        {
-            "name": "send_slack_notification",
-            "action": {
-                "class_name": "SlackNotificationAction",
-                "notify_on": "all",
-                "notify_with": None,
-                "slack_webhook": "https://hooks.slack.com/foo/bar",
-                "renderer": {
-                    "module_name": "great_expectations.render.renderer.slack_renderer",
-                    "class_name": "SlackRenderer",
-                },
-            },
-        },
-    ]
+    assert checkpoint_config.action_list == expected
+
+    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates \
+        .get_checkpoint("my_simple_checkpoint_with_slack")
+    checkpoint_config = checkpoint_from_store.config
+    assert checkpoint_config.name == "my_simple_checkpoint_with_slack"
+    assert checkpoint_config.action_list == expected
 
 
 def test_simple_checkpoint_raises_error_on_invalid_notify_on(
@@ -207,7 +204,7 @@ def test_simple_checkpoint_raises_error_on_invalid_notify_with(
 
 
 def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specified(
-    empty_data_context, slack_notification_action, webhook
+    empty_data_context, slack_notification_action, webhook, titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 ):
     """
     The underlying SlackNotificationAction and SlackRenderer default to
@@ -221,6 +218,11 @@ def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specif
 
     # set the config to include all sites
     slack_notification_action["action"]["notify_with"] = None
+    assert slack_notification_action in checkpoint_config.action_list
+
+    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates \
+        .get_checkpoint("my_simple_checkpoint_with_slack_and_notify_with_all")
+    checkpoint_config = checkpoint_from_store.config
     assert slack_notification_action in checkpoint_config.action_list
 
 
@@ -310,6 +312,7 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_select
     store_validation_result_action,
     store_eval_parameter_action,
     update_data_docs_action,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
 ):
     # assert the fixture is adequate
     assert "local_site" in empty_data_context.get_site_names()
@@ -320,6 +323,18 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_select
     # This is confusing: the UpdateDataDocsAction default behavior is to update
     # all sites if site_names=None
     update_data_docs_action["action"]["site_names"] = ["local_site"]
+    assert checkpoint_config.action_list == [
+        store_validation_result_action,
+        store_eval_parameter_action,
+        update_data_docs_action,
+    ]
+
+    # assert the fixture is adequate
+    assert "local_site" in titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates.get_site_names()
+
+    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates \
+        .get_checkpoint("my_simple_checkpoint_with_site_names")
+    checkpoint_config = checkpoint_from_store.config
     assert checkpoint_config.action_list == [
         store_validation_result_action,
         store_eval_parameter_action,
