@@ -1215,7 +1215,12 @@ def check_json_test_result(test, result, data_asset=None):
                             rtol=test["tolerance"],
                         )
                 else:
-                    assert result["result"]["observed_value"] == value
+                    assert result["result"]["observed_value"] == value, (
+                        "observed_value expected "
+                        + str(value)
+                        + " but got "
+                        + str(result["result"]["observed_value"])
+                    )
 
             # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
             # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
@@ -1228,7 +1233,12 @@ def check_json_test_result(test, result, data_asset=None):
                 elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDataFrame)):
                     pass
                 else:
-                    assert result["result"]["unexpected_index_list"] == value
+                    assert result["result"]["unexpected_index_list"] == value, (
+                        "unexpected_index_list expected "
+                        + str(value)
+                        + " but got "
+                        + str(result["result"]["unexpected_index_list"])
+                    )
 
             elif key == "unexpected_list":
                 # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
@@ -1240,7 +1250,7 @@ def check_json_test_result(test, result, data_asset=None):
                         ].sort()
 
                 assert result["result"]["unexpected_list"] == value, (
-                    "expected "
+                    "unexpected_list expected "
                     + str(value)
                     + " but got "
                     + str(result["result"]["unexpected_list"])
