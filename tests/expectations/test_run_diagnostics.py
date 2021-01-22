@@ -1,5 +1,6 @@
 import json
 
+from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -201,6 +202,7 @@ def test_expectation_self_check():
             "tags": [],
             "contributors": [],
         },
+        "test_report": [],
     }
 
 
@@ -346,14 +348,16 @@ def test_expectation__get_renderers():
     supported_renderers = my_expectation._get_supported_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    (
-        my_batch,
-        my_expectation_config,
-        my_validation_results,
-    ) = my_expectation._instantiate_example_objects(
-        expectation_name,
-        example_data,
-        example_test,
+
+    my_batch = Batch(data=example_data)
+
+    my_expectation_config = ExpectationConfiguration(
+        **{"expectation_type": expectation_name, "kwargs": example_test}
+    )
+
+    my_validation_results = my_expectation._instantiate_example_validation_results(
+        test_batch=my_batch,
+        expectation_config=my_expectation_config,
     )
     my_validation_result = my_validation_results[0]
 
@@ -386,14 +390,16 @@ def test_expectation__get_renderers():
     supported_renderers = my_expectation._get_supported_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    (
-        my_batch,
-        my_expectation_config,
-        my_validation_results,
-    ) = my_expectation._instantiate_example_objects(
-        expectation_name,
-        example_data,
-        example_test,
+
+    my_batch = Batch(data=example_data)
+
+    my_expectation_config = ExpectationConfiguration(
+        **{"expectation_type": expectation_name, "kwargs": example_test}
+    )
+
+    my_validation_results = my_expectation._instantiate_example_validation_results(
+        test_batch=my_batch,
+        expectation_config=my_expectation_config,
     )
     my_validation_result = my_validation_results[0]
 
@@ -426,14 +432,15 @@ def test_expectation__get_renderers():
     supported_renderers = my_expectation._get_supported_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    (
-        my_batch,
-        my_expectation_config,
-        my_validation_results,
-    ) = my_expectation._instantiate_example_objects(
-        expectation_name,
-        example_data,
-        example_test,
+    my_batch = Batch(data=example_data)
+
+    my_expectation_config = ExpectationConfiguration(
+        **{"expectation_type": expectation_name, "kwargs": example_test}
+    )
+
+    my_validation_results = my_expectation._instantiate_example_validation_results(
+        test_batch=my_batch,
+        expectation_config=my_expectation_config,
     )
     my_validation_result = my_validation_results[0]
 
@@ -467,14 +474,16 @@ def test_expectation__get_execution_engine_dict(
 
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    (
-        my_batch,
-        my_expectation_config,
-        my_validation_results,
-    ) = my_expectation._instantiate_example_objects(
-        expectation_name,
-        example_data,
-        example_test,
+
+    my_batch = Batch(data=example_data)
+
+    my_expectation_config = ExpectationConfiguration(
+        **{"expectation_type": expectation_name, "kwargs": example_test}
+    )
+
+    my_validation_results = my_expectation._instantiate_example_validation_results(
+        test_batch=my_batch,
+        expectation_config=my_expectation_config,
     )
     upstream_metrics = my_expectation._get_upstream_metrics(
         expectation_config=my_expectation_config
