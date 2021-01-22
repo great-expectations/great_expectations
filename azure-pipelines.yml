@@ -54,7 +54,7 @@ stages:
                 docs/**
 
                 [GEChanged]
-                great_expectations/**/*.*
+                great_expectations/**
 
       - job: lint
         dependsOn: changes
