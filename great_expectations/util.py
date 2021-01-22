@@ -20,7 +20,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional
 
 from pkg_resources import Distribution
 
@@ -61,7 +61,7 @@ def measure_execution_time(func: Callable = None) -> Callable:
 
 
 # noinspection SpellCheckingInspection
-def get_project_distribution() -> Union[Distribution, None]:
+def get_project_distribution() -> Optional[Distribution]:
     ditr: Distribution
     for distr in importlib_metadata.distributions():
         relative_path: Path
@@ -162,12 +162,12 @@ templates, and assets is supported in your execution environment.  This error is
         raise FileNotFoundError(message)
 
 
-def import_library_module(module_name: str) -> Union[ModuleType, None]:
+def import_library_module(module_name: str) -> Optional[ModuleType]:
     """
     :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
     :return: raw source code of the module (if can be retrieved)
     """
-    module_obj: Union[ModuleType, None]
+    module_obj: Optional[ModuleType]
 
     try:
         module_obj = importlib.import_module(module_name)
@@ -178,9 +178,7 @@ def import_library_module(module_name: str) -> Union[ModuleType, None]:
 
 
 def is_library_loadable(library_name: str) -> bool:
-    module_obj: Union[ModuleType, None] = import_library_module(
-        module_name=library_name
-    )
+    module_obj: Optional[ModuleType] = import_library_module(module_name=library_name)
     return module_obj is not None
 
 
@@ -198,7 +196,7 @@ def load_class(class_name: str, module_name: str):
     except FileNotFoundError:
         raise PluginModuleNotFoundError(module_name)
 
-    module_obj: Union[ModuleType, None] = import_library_module(module_name=module_name)
+    module_obj: Optional[ModuleType] = import_library_module(module_name=module_name)
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)

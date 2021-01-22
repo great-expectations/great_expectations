@@ -13,7 +13,7 @@ import threading
 import uuid
 from functools import wraps
 from types import ModuleType
-from typing import List, Union
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -1654,7 +1654,7 @@ def build_test_backends_list():
     if not no_sqlalchemy:
         test_backends += ["sqlite"]
 
-        sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
+        sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
 
         no_postgresql = True
         if not (sa is None or no_postgresql):

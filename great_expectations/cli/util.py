@@ -2,7 +2,7 @@ import importlib
 import re
 import sys
 from types import ModuleType
-from typing import Union
+from typing import Optional
 
 import pkg_resources
 from pkg_resources import Distribution, WorkingSet
@@ -129,7 +129,7 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
 def verify_library_dependent_modules(
     python_import_name: str, pip_library_name: str, module_names_to_reload: list = None
 ) -> bool:
-    library_status_code: Union[int, None]
+    library_status_code: Optional[int]
 
     library_status_code = library_install_load_check(
         python_import_name=python_import_name, pip_library_name=pip_library_name
@@ -155,7 +155,7 @@ def verify_library_dependent_modules(
 
 def library_install_load_check(
     python_import_name: str, pip_library_name: str
-) -> Union[int, None]:
+) -> Optional[int]:
     """
     Dynamically load a module from strings, attempt a pip install or raise a helpful error.
 
@@ -218,7 +218,7 @@ but the package `{pip_library_name}` containing this library is not installed.
 def reload_modules(module_names: list) -> None:
     module_name: str
     for module_name in module_names:
-        module_obj: Union[ModuleType, None] = import_library_module(
+        module_obj: Optional[ModuleType] = import_library_module(
             module_name=module_name
         )
         if module_obj is not None:

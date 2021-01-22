@@ -1,6 +1,6 @@
 import itertools
 import logging
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Callable, Dict, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import PartitionDefinitionSubset
@@ -10,21 +10,21 @@ logger = logging.getLogger(__name__)
 
 
 def build_partition_query(
-    partition_request_dict: Union[
+    partition_request_dict: Optional[
         Dict[
             str,
-            Union[
-                int,
-                list,
-                tuple,
-                slice,
-                str,
-                Union[Dict, PartitionDefinitionSubset],
-                Callable,
-                None,
+            Optional[
+                Union[
+                    int,
+                    list,
+                    tuple,
+                    slice,
+                    str,
+                    Union[Dict, PartitionDefinitionSubset],
+                    Callable,
+                ]
             ],
-        ],
-        None,
+        ]
     ] = None
 ):
     if not partition_request_dict:
@@ -50,7 +50,7 @@ def build_partition_query(
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
-    partition_identifiers: Union[dict, None] = partition_request_dict.get(
+    partition_identifiers: Optional[dict] = partition_request_dict.get(
         "partition_identifiers"
     )
     if partition_identifiers:
@@ -68,10 +68,10 @@ def build_partition_query(
         partition_identifiers: PartitionDefinitionSubset = PartitionDefinitionSubset(
             partition_identifiers
         )
-    index: Union[int, list, tuple, slice, str, None] = partition_request_dict.get(
+    index: Optional[Union[int, list, tuple, slice, str]] = partition_request_dict.get(
         "index"
     )
-    limit: Union[int, None] = partition_request_dict.get("limit")
+    limit: Optional[int] = partition_request_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.PartitionQueryError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
@@ -92,8 +92,8 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
 
 
 def _parse_index(
-    index: Union[int, list, tuple, slice, str, None] = None
-) -> Union[int, slice, None]:
+    index: Optional[Union[int, list, tuple, slice, str]] = None
+) -> Optional[Union[int, slice]]:
     if index is None:
         return None
     elif isinstance(index, (int, slice)):
@@ -149,11 +149,11 @@ class PartitionQuery:
         return self._custom_filter_function
 
     @property
-    def partition_identifiers(self) -> Union[PartitionDefinitionSubset, None]:
+    def partition_identifiers(self) -> Optional[PartitionDefinitionSubset]:
         return self._partition_identifiers
 
     @property
-    def index(self) -> Union[int, slice, None]:
+    def index(self) -> Optional[Union[int, slice]]:
         return self._index
 
     @property
