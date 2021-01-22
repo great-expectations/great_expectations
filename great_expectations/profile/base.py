@@ -71,27 +71,6 @@ class OrderedProfilerCardinality(OrderedEnum):
 
         return cardinality
 
-    # def __init__(self, config=None, config_parser=None):
-    #     if not config:
-    #         cardinality_enumeration = {
-    #             "none": 0,
-    #             "one": 1,
-    #             "two": 2,
-    #             "very_few": 3,
-    #             "few": 4,
-    #             "many": 5,
-    #             "very_many": 6,
-    #             "unique": 7,
-    #         }
-    #         return cardinality_enumeration
-    #
-    #     else:
-    #           return parse_config(config)
-    #
-    # def parse_config(self, config):
-    #     ...
-    #
-
 
 class ProfilerDataType(Enum):
     """Useful data types for building profilers."""

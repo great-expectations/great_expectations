@@ -2,7 +2,6 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import PandasDataset
 from great_expectations.profile.base import profiler_semantic_types
@@ -235,13 +234,6 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     What does this test do and why?
     Tests that the build_suite function works as expected with a config and without a semantic_types dict
     """
-    config = {
-        "ignored_columns": ["Survived", "Unnamed: 0"],
-        "excluded_expectations": ["expect_column_mean_to_be_between"],
-        "primary_or_compound_key": ["Name"],
-        "table_expectations_only": False,
-        "value_set_threshold": "very_few",
-    }
     profiler = UserConfigurableProfiler(
         titanic_dataset,
         ignored_columns=["Survived", "Unnamed: 0"],
@@ -343,9 +335,6 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
     assert working_profiler.primary_or_compound_key == ["col_unique"]
 
     # key includes a non-existent column, should fail
-    bad_key_config = {
-        "primary_or_compound_key": ["col_unique", "col_that_does_not_exist"]
-    }
     with pytest.raises(ValueError) as e:
         bad_key_profiler = UserConfigurableProfiler(
             cardinality_dataset,
@@ -357,10 +346,6 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
     )
 
     # key includes a column that exists, but is in ignored_columns, should pass
-    ignored_column_config = {
-        "primary_or_compound_key": ["col_unique", "col_one"],
-        "ignored_columns": ["col_none", "col_one"],
-    }
     ignored_column_profiler = UserConfigurableProfiler(
         cardinality_dataset,
         primary_or_compound_key=["col_unique", "col_one"],
@@ -425,7 +410,7 @@ def test_profiled_dataset_passes_own_validation(
     )
     suite = profiler.build_suite()
 
-    context.save_expectation_suite(cardinality_dataset.get_expectation_suite())
+    context.save_expectation_suite(suite)
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[cardinality_dataset]
     )

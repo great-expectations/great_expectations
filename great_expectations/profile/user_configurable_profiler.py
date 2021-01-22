@@ -102,7 +102,7 @@ class UserConfigurableProfiler:
         self.excluded_expectations = excluded_expectations or []
         assert isinstance(self.excluded_expectations, list)
 
-        self.value_set_threshold = value_set_threshold
+        self.value_set_threshold = value_set_threshold.upper()
         assert isinstance(self.value_set_threshold, str)
 
         self.not_null_only = not_null_only
@@ -211,7 +211,6 @@ class UserConfigurableProfiler:
             self._build_expectations_for_all_column_types(self.dataset, column_name)
 
         expectation_suite = self._build_column_description_metadata(self.dataset)
-        logger.debug("")
         self._display_suite_by_column(suite=expectation_suite)
         return expectation_suite
 
@@ -245,8 +244,8 @@ class UserConfigurableProfiler:
                 )
 
             if (
-                OrderedProfilerCardinality[self.value_set_threshold.upper()]
-                >= OrderedProfilerCardinality[cardinality.upper()]
+                OrderedProfilerCardinality[self.value_set_threshold]
+                >= OrderedProfilerCardinality[cardinality]
             ):
                 self._build_expectations_value_set(
                     dataset=self.dataset, column=column_name
@@ -637,7 +636,7 @@ class UserConfigurableProfiler:
                 print(expectation.expectation_type)
             print("\n")
 
-        return suite
+        return True
 
     def _build_expectations_value_set(self, dataset, column, **kwargs):
         """
@@ -1058,7 +1057,8 @@ class UserConfigurableProfiler:
 
     def _is_nan(self, value):
         """
-        Test element-wise for NaN and return result as a boolean array.
+        If value is an array, test element-wise for NaN and return result as a boolean array.
+        If value is a scalar, return boolean.
         Args:
             value: The value to test
 
@@ -1068,4 +1068,4 @@ class UserConfigurableProfiler:
         try:
             return np.isnan(value)
         except TypeError:
-            return False
+            return True
