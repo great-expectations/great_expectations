@@ -591,7 +591,7 @@ def confirm_proceed_or_exit(
     continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
     exit_on_no: bool = True,
     exit_code: int = 0,
-) -> Union[None, bool]:
+) -> Optional[bool]:
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
     or modifies some resources (e.g., edits the config file, adds objects

@@ -90,7 +90,7 @@ class ValidationOperatorResult(DictDot):
         return self._run_id
 
     @property
-    def evaluation_parameters(self) -> Union[dict, None]:
+    def evaluation_parameters(self) -> Optional[dict]:
         return self._evaluation_parameters
 
     @property
