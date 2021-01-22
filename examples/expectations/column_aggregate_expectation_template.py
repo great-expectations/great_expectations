@@ -168,12 +168,14 @@ class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
     #             },
     #             {
     #                 "title": "positive_test_null_min",
+    #                 "include_in_gallery": True,
     #                 "exact_match_out": False,
     #                 "in": {"column": "a", "min_value": None, "max_value": 3},
     #                 "out": {"success": True, "observed_value": 2.5},
     #             },
     #             {
     #                 "title": "negative_test_missing_value_in_column_complete_result_format",
+    #                 "include_in_gallery": True,
     #                 "exact_match_out": True,
     #                 "in": {
     #                     "column": "c",
@@ -199,6 +201,7 @@ class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
     #         "tests": [
     #             {
     #                 "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
+    #                 "include_in_gallery": True,
     #                 "exact_match_out": False,
     #                 "in": {
     #                     "column": "empty_column",

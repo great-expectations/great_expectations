@@ -140,6 +140,7 @@ Steps
             "tests": [
                 {
                     "title": "positive_test_with_mostly",
+                    "include_in_gallery": True,
                     "exact_match_out": False,
                     "in": {"column": "mostly_threes", "mostly": 0.6},
                     "out": {
@@ -161,6 +162,7 @@ Steps
     * ``tests``: a list of test cases that use the data defined above as input to validate
 
         * ``title`` should be a descriptive name for the test case. Make sure to have no spaces.
+        * ``include_in_gallery``: set it to True if you want this test case to be visible in the gallery as an example (true for most test cases).
         * ``in`` contains exactly the parameters that you want to pass in to the Expectation. ``"in": {"column": "mostly_threes", "mostly": 0.6}`` in the example above is equivalent to ``expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)``
         * ``out`` is based on the Validation Result returned when executing the Expectation.
         * ``exact_match_out``: if you set ``exact_match_out=False``, then you don’t need to include all the elements of the result object - only the ones that are important to test.
