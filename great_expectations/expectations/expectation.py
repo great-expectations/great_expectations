@@ -752,6 +752,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
             "metrics": [],
             "execution_engines": {},
             "test_report": [],
+            "diagnostics_report": [],
         }
 
         # Generate artifacts from an example case
@@ -818,10 +819,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
     def _add_error_to_diagnostics_report(
         self, report_obj: Dict, error: Exception, stack_trace: str
     ) -> Dict:
-        error_entries = report_obj.get("errors")
+        error_entries = report_obj.get("diagnostics_report")
         if error_entries is None:
             error_entries = []
-            report_obj["errors"] = error_entries
+            report_obj["diagnostics_report"] = error_entries
 
         error_entries.append(
             {

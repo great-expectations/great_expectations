@@ -203,6 +203,7 @@ def test_expectation_self_check():
             "contributors": [],
         },
         "test_report": [],
+        "diagnostics_report": [],
     }
 
 
@@ -241,6 +242,7 @@ def test_self_check_on_an_existing_expectation():
     # and the number of items depends on the flags
     # we will not verify the content of test_report
     test_report = report_object.pop("test_report")
+    report_object.pop("diagnostics_report")
 
     assert report_object == {
         "description": {
