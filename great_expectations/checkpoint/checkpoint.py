@@ -490,7 +490,7 @@ class SimpleCheckpoint(Checkpoint):
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        # the following are arguments used by SimpleCheckpointConfigurator
+        # the following four arguments are used by SimpleCheckpointConfigurator
         site_names: Optional[Union[str, List[str]]] = "all",
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = "all",
