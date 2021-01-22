@@ -72,9 +72,9 @@ Steps
 
     For more style conventions that your code should follow consult our :ref:`Style Guide <contributing__style_guide>`
 
-#. **Execute the template file.**
+#. **Run diagnostics on your Expectation.**
 
-    The simplest way to do this is as a standalone script. Note: if you prefer, you can also execute within a notebook or IDE.
+    Expectations contain a self diagnostic tool that will help you during development. The simplest way to run it is to execute the file as a standalone script. Note: if you prefer, you can also run it within a notebook or IDE.
 
     .. code-block:: yaml
 
@@ -101,6 +101,8 @@ Steps
           "examples": [],
           "metrics": [],
           "execution_engines": {}
+          "test_report": [],
+          "diagnostics_report": []
         }
 
     This output is a report on the completeness of your Expectation.
