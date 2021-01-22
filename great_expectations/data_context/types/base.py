@@ -1626,6 +1626,14 @@ class CheckpointConfig(BaseYamlConfig):
                 self.run_name_template = other_config.run_name_template
             if other_config.expectation_suite_name is not None:
                 self.expectation_suite_name = other_config.expectation_suite_name
+            if other_config.site_names is not None:
+                self.site_names = other_config.site_names
+            if other_config.slack_webhook is not None:
+                self.slack_webhook = other_config.slack_webhook
+            if other_config.notify_on is not None:
+                self.notify_on = other_config.notify_on
+            if other_config.notify_with is not None:
+                self.notify_with = other_config.notify_with
             # update
             if other_config.batch_request is not None:
                 if self.batch_request is None:
@@ -1776,17 +1784,33 @@ class CheckpointConfig(BaseYamlConfig):
     def site_names(self):
         return self._site_names
 
+    @site_names.setter
+    def site_names(self, value: Union[list, str]):
+        self._site_names = value
+
     @property
     def slack_webhook(self):
         return self._slack_webhook
+
+    @slack_webhook.setter
+    def slack_webhook(self, value: str):
+        self._slack_webhook = value
 
     @property
     def notify_on(self):
         return self._notify_on
 
+    @notify_on.setter
+    def notify_on(self, value: str):
+        self._notify_on = value
+
     @property
     def notify_with(self):
         return self._notify_with
+
+    @notify_with.setter
+    def notify_with(self, value: str):
+        self._notify_with = value
 
     @classmethod
     def get_updated_action_list(
