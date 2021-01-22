@@ -58,7 +58,7 @@ stages:
 
       - job: lint
         dependsOn: changes
-        condition: or(eq(dependencies.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(eq(dependencies.changes.outputs['CheckChanges.GEChanged'], false), eq(variables.isMain, true))
         pool:
           vmImage: 'ubuntu-latest'
         steps:
