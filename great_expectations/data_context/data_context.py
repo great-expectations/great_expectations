@@ -2764,7 +2764,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         # Next two fields are for LegacyCheckpoint configuration
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        # the following are arguments used by SimpleCheckpoint
+        # the following four arguments are used by SimpleCheckpoint
         site_names: Optional[Union[str, List[str]]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
@@ -2788,7 +2788,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             # Next two fields are for LegacyCheckpoint configuration
             "validation_operator_name": validation_operator_name,
             "batches": batches,
-            # the following are arguments used by SimpleCheckpoint
+            # the following four keys are used by SimpleCheckpoint
             "site_names": site_names,
             "slack_webhook": slack_webhook,
             "notify_on": notify_on,
