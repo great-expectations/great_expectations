@@ -720,6 +720,14 @@ class Expectation(ABC, metaclass=MetaExpectation):
         * the tests are executed against the execution engines for which the expectation
         is implemented and the output of the test runs is included in the report.
 
+        At least one test case with include_in_gallery=True must be present in the examples to
+        produce the metrics, renderers and execution engines parts of the report. This is due to
+        a get_validation_dependencies requiring expectation_config as an argument.
+
+        If errors are encountered in the process of running the diagnostics, they are assumed to be due to
+        incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
+        that do not exist). These errors are added under "errors" key in the report.
+
         :param pretty_print: TODO: this argument is not currently used. The intent is to return
         a well formatted and easily readable text instead of the dictionary when the argument is set
         to True
@@ -743,55 +751,94 @@ class Expectation(ABC, metaclass=MetaExpectation):
             "examples": [],
             "metrics": [],
             "execution_engines": {},
+            "test_report": [],
+            "diagnostics_report": [],
         }
 
         # Generate artifacts from an example case
-        examples = self._get_examples()
-        report_obj.update({"examples": examples})
+        gallery_examples = self._get_examples()
+        report_obj.update({"examples": gallery_examples})
 
-        if examples != []:
-            example_data, example_test = self._choose_example(examples)
+        if gallery_examples != []:
+            example_data, example_test = self._choose_example(gallery_examples)
 
-            (
-                test_batch,
-                expectation_config,
-                validation_results,
-            ) = self._instantiate_example_objects(
-                expectation_type=snake_name,
-                example_data=example_data,
-                example_test=example_test,
+            test_batch = Batch(data=example_data)
+
+            expectation_config = ExpectationConfiguration(
+                **{"expectation_type": snake_name, "kwargs": example_test}
             )
-            validation_result = validation_results[0]
 
-            upstream_metrics = self._get_upstream_metrics(expectation_config)
-            report_obj.update({"metrics": upstream_metrics})
+            validation_result = None
+            try:
+                validation_results = self._instantiate_example_validation_results(
+                    test_batch=test_batch,
+                    expectation_config=expectation_config,
+                )
+                validation_result = validation_results[0]
+            except GreatExpectationsError as e:
+                report_obj = self._add_error_to_diagnostics_report(
+                    report_obj, e, traceback.format_exc()
+                )
 
-            renderers = self._get_renderer_dict(
-                expectation_name=snake_name,
-                expectation_config=expectation_config,
-                validation_result=validation_result,
-            )
-            report_obj.update({"renderers": renderers})
+            if validation_result is not None:
+                renderers = self._get_renderer_dict(
+                    expectation_name=snake_name,
+                    expectation_config=expectation_config,
+                    validation_result=validation_result,
+                )
+                report_obj.update({"renderers": renderers})
 
-            execution_engines = self._get_execution_engine_dict(
-                upstream_metrics=upstream_metrics,
-            )
-            report_obj.update({"execution_engines": execution_engines})
+            upstream_metrics = None
+            try:
+                upstream_metrics = self._get_upstream_metrics(expectation_config)
+                report_obj.update({"metrics": upstream_metrics})
+            except GreatExpectationsError as e:
+                report_obj = self._add_error_to_diagnostics_report(
+                    report_obj, e, traceback.format_exc()
+                )
 
-            test_results = self._get_test_results(
-                snake_name,
-                examples,
-                execution_engines,
-            )
-            report_obj.update({"test_report": test_results})
+            execution_engines = None
+            if upstream_metrics is not None:
+                execution_engines = self._get_execution_engine_dict(
+                    upstream_metrics=upstream_metrics,
+                )
+                report_obj.update({"execution_engines": execution_engines})
+
+            tests = self._get_examples(return_only_gallery_examples=False)
+            if len(tests) > 0:
+                if execution_engines is not None:
+                    test_results = self._get_test_results(
+                        snake_name,
+                        tests,
+                        execution_engines,
+                    )
+                    report_obj.update({"test_report": test_results})
 
         return report_obj
 
-    def _get_examples(self) -> List[Dict]:
-        """Get a list of examples from class metadata.
+    def _add_error_to_diagnostics_report(
+        self, report_obj: Dict, error: Exception, stack_trace: str
+    ) -> Dict:
+        error_entries = report_obj.get("diagnostics_report")
+        if error_entries is None:
+            error_entries = []
+            report_obj["diagnostics_report"] = error_entries
 
-        Only include test examples where `include_in_gallery` is true.
-        If no examples exist, then return []
+        error_entries.append(
+            {
+                "error_message": str(error),
+                "stack_trace": stack_trace,
+            }
+        )
+
+        return report_obj
+
+    def _get_examples(self, return_only_gallery_examples=True) -> List[Dict]:
+        """
+        Get a list of examples from the object's `examples` member variable.
+
+        :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
+        :return: list of examples or [], if no examples exist
         """
         try:
             all_examples = self.examples
@@ -804,8 +851,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
             included_tests = []
             for test in example["tests"]:
-                if ("include_in_gallery" in test) and (
-                    test["include_in_gallery"] == True
+                if (
+                    test.get("include_in_gallery") == True
+                    or return_only_gallery_examples == False
                 ):
                     included_tests.append(test)
 
@@ -834,23 +882,17 @@ class Expectation(ABC, metaclass=MetaExpectation):
 
         return example_data, example_test
 
-    def _instantiate_example_objects(
+    def _instantiate_example_validation_results(
         self,
-        expectation_type: str,
-        example_data: dict,
-        example_test: dict,
-    ) -> Tuple[Batch, ExpectationConfiguration, List[ExpectationValidationResult]]:
-        test_batch = Batch(data=example_data)
-
-        expectation_config = ExpectationConfiguration(
-            **{"expectation_type": expectation_type, "kwargs": example_test}
-        )
+        test_batch: Batch,
+        expectation_config: ExpectationConfiguration,
+    ) -> List[ExpectationValidationResult]:
 
         validation_results = Validator(
             execution_engine=PandasExecutionEngine(), batches=[test_batch]
         ).graph_validate(configurations=[expectation_config])
 
-        return test_batch, expectation_config, validation_results
+        return validation_results
 
     def _get_supported_renderers(self, snake_name: str) -> List[str]:
         supported_renderers = list(_registered_renderers[snake_name].keys())
