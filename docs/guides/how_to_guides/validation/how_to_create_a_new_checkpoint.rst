@@ -5,28 +5,147 @@ How to create a new Checkpoint
 
 This guide will help you create a new Checkpoint, which allows you to couple an Expectation Suite with a data set and quickly run a validation.
 
-.. admonition:: Prerequisites: This how-to guide assumes you have already:
-
-  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  - :ref:`Created an Expectation Suite <how_to_guides__creating_and_editing_expectations>`
-
 Steps
 -----
 
-1. First, run the CLI command below.
+.. content-tabs::
 
-.. code-block:: bash
+    .. tab-container:: tab0
+        :title: Show Docs for Stable API (up to 0.12.x)
 
-    great_expectations checkpoint new my_checkpoint my_suite
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-2. Next, you will be prompted to select a data asset you want to couple with the Expectation Suite.
-3. You will then see a message that indicates the checkpoint has been added to your project.
+          - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+          - :ref:`Configured a Datasource using the *stable* API <how_to_guides__configuring_datasources>`
+          - :ref:`Created an Expectation Suite <how_to_guides__creating_and_editing_expectations>`
 
-.. code-block:: bash
 
-    A checkpoint named `my_checkpoint` was added to your project!
-    - To edit this checkpoint edit the checkpoint file: /home/ubuntu/my_project/great_expectations/checkpoints/my_checkpoint.yml
-    - To run this checkpoint run `great_expectations checkpoint run my_checkpoint`
+        1. First, run the CLI command below.
+
+        .. code-block:: bash
+
+            great_expectations checkpoint new my_checkpoint my_suite
+
+        2. Next, you will be prompted to select a data asset you want to couple with the Expectation Suite. **Note**: The CLI currently only supports Datasources that are configured using the *stable* API. If you have set up a Datasource using the *experimental* API, please see the docs in the respective tab.
+        3. You will then see a message that indicates the Checkpoint has been added to your project.
+
+        .. code-block:: bash
+
+            A checkpoint named `my_checkpoint` was added to your project!
+            - To edit this checkpoint edit the checkpoint file: /home/ubuntu/my_project/great_expectations/checkpoints/my_checkpoint.yml
+            - To run this checkpoint run `great_expectations checkpoint run my_checkpoint`
+
+
+    .. tab-container:: tab1
+        :title: Show Docs for Experimental API (0.13)
+
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+          - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+          - :ref:`Configured a Datasource using the *experimental* API <how_to_guides__configuring_datasources>`
+          - :ref:`Created an Expectation Suite <how_to_guides__creating_and_editing_expectations>`
+
+        1. **Instantiate a DataContext**
+
+        Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+
+        .. code-block:: python
+
+            import great_expectations as ge
+            context = ge.get_context()
+
+        2. **Create or copy a yaml config**
+
+        You can create your own, or copy an example. For this example, we'll demonstrate using a basic Checkpoint configuration. Replace all names such as ``my_datasource`` with the respective DataSource, DataConnector, DataAsset, and Expectation Suite names you have configured in your ``great_expectations.yml``.
+
+        .. code-block:: python
+
+            config = """
+            name: my_checkpoint
+            config_version: 1
+            class_name: Checkpoint
+            run_name_template: "%Y-%M-my-run-template"
+            validations:
+              - batch_request:
+                  datasource_name: my_datasource
+                  data_connector_name: my_data_connector
+                  data_asset_name: MyDataAsset
+                  partition_request:
+                    index: -1
+                expectation_suite_name: my_suite
+                action_list:
+                    - name: store_validation_result
+                      action:
+                        class_name: StoreValidationResultAction
+                    - name: store_evaluation_params
+                      action:
+                        class_name: StoreEvaluationParametersAction
+                    - name: update_data_docs
+                      action:
+                        class_name: UpdateDataDocsAction
+                runtime_configuration:
+                  result_format:
+                    result_format: BASIC
+                    partial_unexpected_count: 20
+            """
+
+        3. **Run context.test_yaml_config.**
+
+        .. code-block:: python
+
+            context.test_yaml_config(
+                name="my_checkpoint",
+                yaml_config=config,
+            )
+
+        When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
+
+        In the case of a Checkpoint, this means
+
+            1. validating the `yaml` configuration,
+            2. verifying that the Checkpoint class with the given configuration, if valid, can be instantiated, and
+            3. printing warnings in case certain parts of the configuration, while valid, may be incomplete and need to be better specified for a successful Checkpoint operation.
+
+        The output will look something like this:
+
+        .. code-block:: bash
+
+            Attempting to instantiate class from config...
+            Instantiating as a Checkpoint, since class_name is Checkpoint
+
+            Successfully instantiated Checkpoint
+
+            Checkpoint class name: Checkpoint
+
+        If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
+
+        4. **Iterate as necessary.**
+
+        From here, iterate by editing your config and re-running ``test_yaml_config``, adding config blocks for additional validations, action_list constituent actions, batch_request variations, etc.
+
+        5. **Check your stored Checkpoint config.**
+
+        If the Store Backend of your Checkpoint Store is on the local filesystem, you can navigate to the ``base_directory`` for (configured in ``great_expectations.yml``) and find the configuration files corresponding to the Checkpoints you created.
+
+        6. **(Optional:) Test running the new Checkpoint.**
+
+        Note that when ``test_yaml_config`` runs successfully, it saves the specified Checkpoint configuration to the Store Backend configured for the Checkpoint Configuration store of your DataContext. This means that you can also test ``context.run_checkpoint``, right within your notebook:
+
+        .. code-block:: python
+
+            checkpoint_run_result = context.run_checkpoint(
+                checkpoint_name="my_checkpoint",
+            )
+
+
+        Before running a Checkpoint, make sure that all classes and Expectation Suites referred to in the configuration exist.
+
+        When ``run_checkpoint`` returns, the ``checkpoint_run_result`` can then be checked for the value of the ``success`` field (all validations passed) and other information associated with running the specified actions.
+
+
+
+
+
 
 Additional Resources
 --------------------
