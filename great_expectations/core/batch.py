@@ -63,7 +63,7 @@ class BatchDefinition(SerializableDictDot):
         data_connector_name: str,
         data_asset_name: str,
         partition_definition: PartitionDefinition,
-        # limit: Union[int, None] = None,
+        # limit: Optional[int] = None,
     ):
         if datasource_name is None:
             raise ValueError("A valid datasource must be specified.")
@@ -177,7 +177,7 @@ class BatchRequest(DictDot):
         data_asset_name: str = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
         batch_data: Any = None,
-        limit: Union[int, None] = None,
+        limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_request(
@@ -230,7 +230,7 @@ class BatchRequest(DictDot):
         data_connector_name: str,
         data_asset_name: str,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        limit: Union[int, None] = None,
+        limit: Optional[int] = None,
     ):
         # TODO test and check all logic in this validator!
         if datasource_name and not isinstance(datasource_name, str):
