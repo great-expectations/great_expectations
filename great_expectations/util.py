@@ -873,7 +873,7 @@ def generate_library_json_from_registered_expectations():
     library_json = {}
 
     for expectation_name, expectation in _registered_expectations.items():
-        report_object = expectation().self_check()
+        report_object = expectation().run_diagnostics()
         library_json[expectation_name] = report_object
 
     return library_json

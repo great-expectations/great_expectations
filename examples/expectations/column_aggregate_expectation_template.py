@@ -41,66 +41,6 @@ from great_expectations.render.util import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
-examples = [
-    {
-        "data": {"a": [1, 2, 3, 4], "b": [1, 2, 2, 3], "c": [5, 7, 6, None]},
-        "schemas": {
-            "spark": {"a": "IntegerType", "b": "IntegerType", "c": "IntegerType"}
-        },
-        "tests": [
-            {
-                "title": "positive_test_min_equal_max",
-                "exact_match_out": False,
-                "in": {"column": "a", "min_value": 2.5, "max_value": 2.5},
-                "out": {"success": True, "observed_value": 2.5},
-            },
-            {
-                "title": "positive_test_null_min",
-                "exact_match_out": False,
-                "in": {"column": "a", "min_value": None, "max_value": 3},
-                "out": {"success": True, "observed_value": 2.5},
-            },
-            {
-                "title": "negative_test_missing_value_in_column_complete_result_format",
-                "exact_match_out": True,
-                "in": {
-                    "column": "c",
-                    "min_value": 7,
-                    "max_value": 7,
-                    "result_format": "COMPLETE",
-                },
-                "out": {
-                    "success": False,
-                    "result": {
-                        "observed_value": 6.0,
-                        "element_count": 4,
-                        "missing_count": 1,
-                        "missing_percent": 25.0,
-                    },
-                },
-            },
-        ],
-    },
-    {
-        "data": {"empty_column": []},
-        "schemas": {"spark": {"empty_column": "IntegerType"}},
-        "tests": [
-            {
-                "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
-                "exact_match_out": False,
-                "in": {
-                    "column": "empty_column",
-                    "min_value": 0,
-                    "max_value": 0,
-                    "catch_exceptions": False,
-                },
-                "out": {"success": False, "observed_value": None},
-            }
-        ],
-    },
-]
-
-
 class ColumnCustomMedian(ColumnMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
@@ -209,64 +149,82 @@ class ColumnCustomMedian(ColumnMetricProvider):
 
 
 class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
-    """Expect the column median to be between a minimum value and a maximum value.
+    """TODO: add a docstring here"""
 
-            expect_column_median_to_be_between is a \
-            :func:`column_aggregate_expectation \
-            <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
+    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
+    # examples = [
+    #     {
+    #         "data": {"a": [1, 2, 3, 4], "b": [1, 2, 2, 3], "c": [5, 7, 6, None]},
+    #         "schemas": {
+    #             "spark": {"a": "IntegerType", "b": "IntegerType", "c": "IntegerType"}
+    #         },
+    #         "tests": [
+    #             {
+    #                 "title": "positive_test_min_equal_max",
+    #                 "exact_match_out": False,
+    #                 "in": {"column": "a", "min_value": 2.5, "max_value": 2.5},
+    #                 "out": {"success": True, "observed_value": 2.5},
+    #             },
+    #             {
+    #                 "title": "positive_test_null_min",
+    #                 "include_in_gallery": True,
+    #                 "exact_match_out": False,
+    #                 "in": {"column": "a", "min_value": None, "max_value": 3},
+    #                 "out": {"success": True, "observed_value": 2.5},
+    #             },
+    #             {
+    #                 "title": "negative_test_missing_value_in_column_complete_result_format",
+    #                 "include_in_gallery": True,
+    #                 "exact_match_out": True,
+    #                 "in": {
+    #                     "column": "c",
+    #                     "min_value": 7,
+    #                     "max_value": 7,
+    #                     "result_format": "COMPLETE",
+    #                 },
+    #                 "out": {
+    #                     "success": False,
+    #                     "result": {
+    #                         "observed_value": 6.0,
+    #                         "element_count": 4,
+    #                         "missing_count": 1,
+    #                         "missing_percent": 25.0,
+    #                     },
+    #                 },
+    #             },
+    #         ],
+    #     },
+    #     {
+    #         "data": {"empty_column": []},
+    #         "schemas": {"spark": {"empty_column": "IntegerType"}},
+    #         "tests": [
+    #             {
+    #                 "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
+    #                 "include_in_gallery": True,
+    #                 "exact_match_out": False,
+    #                 "in": {
+    #                     "column": "empty_column",
+    #                     "min_value": 0,
+    #                     "max_value": 0,
+    #                     "catch_exceptions": False,
+    #                 },
+    #                 "out": {"success": False, "observed_value": None},
+    #             }
+    #         ],
+    #     },
+    # ]
 
-            Args:
-                column (str): \
-                    The column name.
-                min_value (int or None): \
-                    The minimum value for the column median.
-                max_value (int or None): \
-                    The maximum value for the column median.
-                strict_min (boolean):
-                    If True, the column median must be strictly larger than min_value, default=False
-                strict_max (boolean):
-                    If True, the column median must be strictly smaller than max_value, default=False
-
-            Other Parameters:
-                result_format (str or None): \
-                    Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-                    For more detail, see :ref:`result_format <result_format>`.
-                include_config (boolean): \
-                    If True, then include the expectation config as part of the result object. \
-                    For more detail, see :ref:`include_config`.
-                catch_exceptions (boolean or None): \
-                    If True, then catch exceptions and include them as part of the result object. \
-                    For more detail, see :ref:`catch_exceptions`.
-                meta (dict or None): \
-                    A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-                    modification. For more detail, see :ref:`meta`.
-
-            Returns:
-                An ExpectationSuiteValidationResult
-
-                Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-            Notes:
-                These fields in the result object are customized for this expectation:
-                ::
-
-                    {
-                        "observed_value": (float) The true median for the column
-                    }
-
-                * min_value and max_value are both inclusive unless strict_min or strict_max are set to True.
-                * If min_value is None, then max_value is treated as an upper bound
-                * If max_value is None, then min_value is treated as a lower bound
-
-            See Also:
-                :func:`expect_column_mean_to_be_between \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_mean_to_be_between>`
-
-                :func:`expect_column_stdev_to_be_between \
-                <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_stdev_to_be_between>`
-
-            """
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "tags": [  # Tags for this Expectation in the gallery
+            #         "experimental"
+        ],
+        "contributors": [  # Github handles for all contributors to this Expectation.
+            #         "@your_name_here", # Don't forget to add your github handle here!
+        ],
+        "package": "experimental_expectations",
+    }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.median",)
@@ -379,5 +337,5 @@ class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnCustomMedianToBeBetween().self_check()
+    self_check_report = ExpectColumnCustomMedianToBeBetween().run_diagnostics()
     print(json.dumps(self_check_report, indent=2))

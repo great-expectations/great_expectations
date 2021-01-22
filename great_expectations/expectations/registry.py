@@ -239,25 +239,6 @@ def get_metric_kwargs(
         raise MetricProviderError(f"Incomplete definition found for {metric_name}")
 
 
-def extract_metrics(
-    metric_names: Iterable[str],
-    metrics: Dict[Tuple, Any],
-    configuration: "ExpectationConfiguration",
-    runtime_configuration: Optional[dict] = None,
-) -> dict:
-    res = dict()
-    for metric_name in metric_names:
-        kwargs = get_metric_kwargs(metric_name, configuration, runtime_configuration)
-        res[metric_name] = metrics[
-            MetricConfiguration(
-                metric_name,
-                kwargs["metric_domain_kwargs"],
-                kwargs["metric_value_kwargs"],
-            ).id
-        ]
-    return res
-
-
 def get_domain_metrics_dict_by_name(
     metrics: Dict[Tuple, Any], metric_domain_kwargs: IDDict
 ):
