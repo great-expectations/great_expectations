@@ -1,0 +1,15 @@
+# The pip resolver became more strict starting with version 20.3
+# This constraints file is "a way to specify global (version) limits for packages"
+# without specifying the install of these packages.
+# See also: https://pip.pypa.io/en/stable/user_guide/#constraints-files
+# We use it to place limits on certain packages to help the resolver come to a compatible configuration more quickly
+# To install dev dependencies using the new pip resolver (recommended) please use the following syntax:
+# `python -m pip install -r requirements-dev.txt -c constraints-dev.txt`
+
+# NOTE - 20210114
+# aiobotocore is a dependency of the s3fs package
+# The latest version of aiobotocore (v1.2.0) is only compatible with botocore up to 1.19.52
+# botocore==1.19.52 is compatible with boto3==1.16.52
+botocore==1.19.52  # From aiobotocore v1.2.0 dependencies https://pypi.org/project/aiobotocore/
+boto3==1.16.52  # from botocore==1.19.52 dependency
+# END NOTE
