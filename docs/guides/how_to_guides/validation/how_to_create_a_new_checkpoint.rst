@@ -49,6 +49,8 @@ Steps
 
         1. **Instantiate a DataContext**
 
+        The current version of class-based Checkpoints is not yet supported by the CLI. In order to configure and run Checkpoints, you will need to write some Python code. We suggest using a Jupyter notebook for convenience.
+
         Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
 
         .. code-block:: python
@@ -58,15 +60,14 @@ Steps
 
         2. **Create or copy a yaml config**
 
-        You can create your own, or copy an example. For this example, we'll demonstrate using a basic Checkpoint configuration. Replace all names such as ``my_datasource`` with the respective DataSource, DataConnector, DataAsset, and Expectation Suite names you have configured in your ``great_expectations.yml``.
+        You can create your own, or copy an example. For this example, we'll demonstrate using a basic Checkpoint configuration with the ``SimpleCheckpoint`` class, which takes care of some defaults. Replace all names such as ``my_datasource`` with the respective DataSource, DataConnector, DataAsset, and Expectation Suite names you have configured in your ``great_expectations.yml``.
 
         .. code-block:: python
 
             config = """
             name: my_checkpoint
             config_version: 1
-            class_name: Checkpoint
-            run_name_template: "%Y-%M-my-run-template"
+            class_name: SimpleCheckpoint
             validations:
               - batch_request:
                   datasource_name: my_datasource
@@ -75,21 +76,9 @@ Steps
                   partition_request:
                     index: -1
                 expectation_suite_name: my_suite
-                action_list:
-                    - name: store_validation_result
-                      action:
-                        class_name: StoreValidationResultAction
-                    - name: store_evaluation_params
-                      action:
-                        class_name: StoreEvaluationParametersAction
-                    - name: update_data_docs
-                      action:
-                        class_name: UpdateDataDocsAction
-                runtime_configuration:
-                  result_format:
-                    result_format: BASIC
-                    partial_unexpected_count: 20
             """
+
+        This is the minimum required to configure a Checkpoint that will run the Expectation Suite ``my_suite`` against the data asset ``MyDataAsset``. See :ref:`how_to_guides_how_to_configure_a_new_checkpoint_using_test_yaml_config` for advanced configuration options.
 
         3. **Run context.test_yaml_config.**
 
@@ -113,25 +102,21 @@ Steps
         .. code-block:: bash
 
             Attempting to instantiate class from config...
-            Instantiating as a Checkpoint, since class_name is Checkpoint
+            Instantiating as a SimpleCheckpoint, since class_name is SimpleCheckpoint
+            Successfully instantiated SimpleCheckpoint
 
-            Successfully instantiated Checkpoint
 
-            Checkpoint class name: Checkpoint
+            Checkpoint class name: SimpleCheckpoint
 
         If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
-        4. **Iterate as necessary.**
+        4. **Check your stored Checkpoint config.**
 
-        From here, iterate by editing your config and re-running ``test_yaml_config``, adding config blocks for additional validations, action_list constituent actions, batch_request variations, etc.
+        If the Store Backend of your Checkpoint Store is on the local filesystem, you can navigate to the ``checkpoints`` store directory that is configured in ``great_expectations.yml`` and find the configuration files corresponding to the Checkpoints you created.
 
-        5. **Check your stored Checkpoint config.**
+        5. **(Optional:) Test running the new Checkpoint.**
 
-        If the Store Backend of your Checkpoint Store is on the local filesystem, you can navigate to the ``base_directory`` for (configured in ``great_expectations.yml``) and find the configuration files corresponding to the Checkpoints you created.
-
-        6. **(Optional:) Test running the new Checkpoint.**
-
-        Note that when ``test_yaml_config`` runs successfully, it saves the specified Checkpoint configuration to the Store Backend configured for the Checkpoint Configuration store of your DataContext. This means that you can also test ``context.run_checkpoint``, right within your notebook:
+        Note that when ``test_yaml_config`` runs successfully, it saves the specified Checkpoint configuration to the Store backend configured for the Checkpoint Configuration store of your Data Context. This means that you can also test ``context.run_checkpoint``, right within your notebook:
 
         .. code-block:: python
 

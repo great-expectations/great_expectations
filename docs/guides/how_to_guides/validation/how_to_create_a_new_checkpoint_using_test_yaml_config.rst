@@ -28,7 +28,31 @@ Steps
     .. tab-container:: tab1
         :title: Docs for Class-Based Checkpoints (>=0.13.8)
 
+        #. **Additional SimpleCheckpoint configuration examples.**
+            The ``SimpleCheckpoint`` class takes care of some defaults which you will need to set manually in the ``Checkpoints`` class. The following example shows all possible configuration options for ``SimpleCheckpoint``:
+
+            .. code-block:: python
+
+                config = """
+                name: my_simple_checkpoint
+                config_version: 1.0
+                class_name: SimpleCheckpoint
+                validations:
+                  - batch_request:
+                      datasource_name: data__dir
+                      data_connector_name: my_data_connector
+                      data_asset_name: TestAsset
+                      partition_request:
+                        index: 0
+                    expectation_suite_name: yellow_tripdata_sample_2019-01.warning
+                site_names: my_local_site
+                slack_webhook: my_slack_webhook_url
+                notify_on: all # possible values: "all", "failure", "success"
+                notify_with: # optional list of DataDocs site names to display in Slack message
+                """
+
         #. **Additional Checkpoint configuration examples.**
+            If you require more fine-grained configuration options, you can use the ``Checkpoint`` base class instead of ``SimpleCheckpoint``.
 
             In this example, the Checkpoint configuration uses the nesting of `batch_request` sections inside the `validations` block so as to use the defaults defined at the top level.
 
