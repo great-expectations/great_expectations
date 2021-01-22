@@ -3,7 +3,9 @@
 How to create a new Checkpoint
 ==============================
 
-This guide will help you create a new Checkpoint, which allows you to couple an Expectation Suite with a data set and quickly run a validation.
+This guide will help you create a new Checkpoint, which allows you to couple an Expectation Suite with a data set to validate.
+
+**Note:** As of Great Expectations version 0.13.7, we refer to "class-based Checkpoints" as these are now fully implemented as their own Python class. This is mainly a change "behind the scenes". You can continue to use your existing legacy Checkpoint worfklows if you're working with concepts from the *stable* API (e.g. Datasources). If you're using concepts from the *experimental* API, please refer to the guides for class-based Checkpoints.
 
 Steps
 -----
@@ -11,7 +13,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Docs for Legacy Checkpoints (<=0.13.6)
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -37,7 +39,7 @@ Steps
 
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Docs for Class-Based Checkpoints (>=0.13.7)
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -144,7 +146,7 @@ Steps
 
 
 
-
+        **For more advanced configurations of Checkpoints, please see** :ref:`how_to_guides_how_to_configure_a_new_checkpoint_using_test_yaml_config`.
 
 
 Additional Resources

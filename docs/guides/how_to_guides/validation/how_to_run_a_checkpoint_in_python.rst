@@ -17,7 +17,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Experimental Checkpoints (up to 0.12.x)
+        :title: Docs for Legacy Checkpoints (<=0.13.6)
 
         1. First, generate the python with the command:
 
@@ -100,7 +100,7 @@ Steps
         or the python code can be embedded in your pipeline.
 
     .. tab-container:: tab1
-        :title: Checkpoints (0.13 -- with CheckpointStore)
+        :title: Docs for Class-Based Checkpoints (>=0.13.7)
 
         #. **Instantiate a DataContext**
 
