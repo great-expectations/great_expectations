@@ -493,7 +493,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if self.engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
-            query_schema = None
+            temp_table_schema_name = None
         else:
             try:
                 # use the schema name configured for the datasource

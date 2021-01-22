@@ -7,7 +7,7 @@ Changelog
 
 Develop
 -----------------
-
+* [BUGFIX] Fix Local variable 'temp_table_schema_name' might be referenced before assignment bug in sqlalchemy_dataset.py
 
 0.13.6
 -----------------
