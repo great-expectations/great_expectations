@@ -16,7 +16,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Docs for Legacy Checkpoints (<=0.13.6)
+        :title: Docs for Legacy Checkpoints (<=0.13.7)
 
         1. Checkpoints can be run like applications from the command line by running:
 
@@ -41,7 +41,7 @@ Steps
         +-------------------------------+-----------------+-----------------------+
 
     .. tab-container:: tab1
-        :title: Docs for Class-Based Checkpoints (>=0.13.7)
+        :title: Docs for Class-Based Checkpoints (>=0.13.8)
 
         The CLI does not yet support the new-style Checkpoints. Please refer to :ref:`how_to_guides__validation__how_to_run_a_checkpoint_in_python` for a how-to guide on running a Checkpoint.
 

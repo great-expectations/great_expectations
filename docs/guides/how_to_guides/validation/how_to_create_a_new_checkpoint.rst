@@ -13,7 +13,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Docs for Legacy Checkpoints (<=0.13.6)
+        :title: Docs for Legacy Checkpoints (<=0.13.7)
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -39,7 +39,7 @@ Steps
 
 
     .. tab-container:: tab1
-        :title: Docs for Class-Based Checkpoints (>=0.13.7)
+        :title: Docs for Class-Based Checkpoints (>=0.13.8)
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 

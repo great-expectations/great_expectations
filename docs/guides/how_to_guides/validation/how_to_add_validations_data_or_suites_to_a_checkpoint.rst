@@ -18,7 +18,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Docs for Legacy Checkpoints (<=0.13.6)
+        :title: Docs for Legacy Checkpoints (<=0.13.7)
 
         1. First, open your existing Checkpoint in a text editor.
         It will look similar to this:
@@ -68,7 +68,7 @@ Steps
                   - npi.warning
 
     .. tab-container:: tab1
-        :title: Docs for Class-Based Checkpoints (>=0.13.7)
+        :title: Docs for Class-Based Checkpoints (>=0.13.8)
 
         1. First, open your existing Checkpoint in a text editor.
         It will look similar to this:
