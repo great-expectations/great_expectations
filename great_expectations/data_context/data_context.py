@@ -22,7 +22,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
@@ -3061,6 +3061,32 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 checkpoint_config.update({"name": checkpoint_name})
 
                 instantiated_class = Checkpoint(data_context=self, **checkpoint_config)
+
+                checkpoint_config = CheckpointConfig.from_commented_map(
+                    commented_map=instantiated_class.config.commented_map
+                )
+                checkpoint_config = checkpoint_config.to_json_dict()
+
+                # noinspection PyUnusedLocal
+                checkpoint: Checkpoint = self.add_checkpoint(
+                    **checkpoint_config,
+                )
+            elif class_name == "SimpleCheckpoint":
+                print(
+                    f"\tInstantiating as a SimpleCheckpoint, since class_name is {class_name}"
+                )
+
+                checkpoint_name: str = name or "my_temp_checkpoint"
+
+                checkpoint_config: Union[CheckpointConfig, dict]
+
+                checkpoint_config = CheckpointConfig.from_commented_map(
+                    commented_map=config
+                )
+                checkpoint_config = checkpoint_config.to_json_dict()
+                checkpoint_config.update({"name": checkpoint_name})
+
+                instantiated_class = SimpleCheckpoint(data_context=self, **checkpoint_config)
 
                 checkpoint_config = CheckpointConfig.from_commented_map(
                     commented_map=instantiated_class.config.commented_map
