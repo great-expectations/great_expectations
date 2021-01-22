@@ -42,6 +42,7 @@ stages:
           - task: ChangedFiles@1
             name: CheckChanges
             inputs:
+              verbose: true
               rules: |
                 [ContribChanged]
                 contrib/**
@@ -57,12 +58,12 @@ stages:
 
   - stage: lint
     dependsOn: scope_check
-    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
       - job: lint
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -80,12 +81,12 @@ stages:
 
   - stage: required
     dependsOn: scope_check
-    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
       - job: compatibility_matrix
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
@@ -144,6 +145,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         services:
           postgres: postgres
 
@@ -207,13 +209,12 @@ stages:
 
   - stage: usage_stats_integration
     dependsOn: scope_check
-    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
       - job: test_usage_stats_messages
-
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         variables:
           python.version: '3.8'
 
@@ -242,10 +243,10 @@ stages:
       vmImage: 'ubuntu-latest'
 
     dependsOn: scope_check
-    condition: eq(dependencies.scope_check.outputs['CheckChanges.GEChanged'], true)
 
     jobs:
       - job: mysql
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         services:
           mysql: mysql
 
@@ -287,6 +288,7 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         services:
           mssql: mssql
 
@@ -318,10 +320,8 @@ stages:
 
   - stage: deploy
     condition: and(succeeded(), eq(variables.isMain, true))
-
     pool:
       vmImage: 'ubuntu-latest'
-
     dependsOn: [required, lint, db_integration, usage_stats_integration]
 
     jobs:
