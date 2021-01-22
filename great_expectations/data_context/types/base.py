@@ -1513,10 +1513,10 @@ class CheckpointConfigSchema(Schema):
         allow_none=True,
     )
     # Next fields are used by configurators
-    site_names = fields.Raw(required=False)
-    slack_webhook = fields.String(required=False)
-    notify_on = fields.String(required=False)
-    notify_with = fields.String(required=False)
+    site_names = fields.Raw(required=False, allow_none=True)
+    slack_webhook = fields.String(required=False, allow_none=True)
+    notify_on = fields.String(required=False, allow_none=True)
+    notify_with = fields.String(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):

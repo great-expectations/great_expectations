@@ -38,7 +38,6 @@ class Checkpoint:
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
-        configurator: Optional[Any] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequest, dict]] = None,
@@ -49,7 +48,6 @@ class Checkpoint:
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        **kwargs,
     ):
         self._name = name
         # Note the gross typechecking to avoid a circular import
@@ -57,52 +55,27 @@ class Checkpoint:
             raise TypeError("A checkpoint requires a valid DataContext")
         self._data_context = data_context
 
-        if configurator:
-            configurator_obj = configurator(
-                name=name,
-                data_context=data_context,
-                config_version=config_version,
-                template_name=template_name,
-                class_name=class_name,
-                module_name=module_name,
-                run_name_template=run_name_template,
-                expectation_suite_name=expectation_suite_name,
-                batch_request=batch_request,
-                action_list=action_list,
-                evaluation_parameters=evaluation_parameters,
-                runtime_configuration=runtime_configuration,
-                validations=validations,
-                profilers=profilers,
+        checkpoint_config: CheckpointConfig = CheckpointConfig(
+            **{
+                "name": name,
+                "config_version": config_version,
+                "template_name": template_name,
+                "module_name": module_name,
+                "class_name": class_name,
+                "run_name_template": run_name_template,
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request,
+                "action_list": action_list,
+                "evaluation_parameters": evaluation_parameters,
+                "runtime_configuration": runtime_configuration,
+                "validations": validations,
+                "profilers": profilers,
                 # Next two fields are for LegacyCheckpoint configuration
-                validation_operator_name=validation_operator_name,
-                batches=batches,
-                **kwargs,
-            )
-            checkpoint_config: CheckpointConfig = configurator_obj.build()
-        else:
-            assert len(kwargs) == 0, f"Invalid arguments: {list(kwargs.keys())}"
-            checkpoint_config: CheckpointConfig = CheckpointConfig(
-                **{
-                    "name": name,
-                    "config_version": config_version,
-                    "template_name": template_name,
-                    "module_name": module_name,
-                    "class_name": class_name,
-                    "run_name_template": run_name_template,
-                    "expectation_suite_name": expectation_suite_name,
-                    "batch_request": batch_request,
-                    "action_list": action_list,
-                    "evaluation_parameters": evaluation_parameters,
-                    "runtime_configuration": runtime_configuration,
-                    "validations": validations,
-                    "profilers": profilers,
-                    # Next two fields are for LegacyCheckpoint configuration
-                    "validation_operator_name": validation_operator_name,
-                    "batches": batches,
-                }
-            )
+                "validation_operator_name": validation_operator_name,
+                "batches": batches,
+            }
+        )
         self._config = checkpoint_config
-
         self._substituted_config = None
 
     @property
@@ -497,6 +470,8 @@ class LegacyCheckpoint(Checkpoint):
 
 
 class SimpleCheckpoint(Checkpoint):
+    _configurator_class = SimpleCheckpointConfigurator
+
     def __init__(
         self,
         name: str,
@@ -505,7 +480,6 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
         class_name: Optional[str] = None,
-        configurator: Optional[dict] = SimpleCheckpointConfigurator,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequest, dict]] = None,
@@ -521,15 +495,15 @@ class SimpleCheckpoint(Checkpoint):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = "all",
         notify_with: Optional[Union[str, List[str]]] = "all",
+        **kwargs,
     ):
-        super().__init__(
+        checkpoint_config: CheckpointConfig = self._configurator_class(
             name=name,
             data_context=data_context,
             config_version=config_version,
             template_name=template_name,
-            module_name=module_name,
             class_name=class_name,
-            configurator=configurator,
+            module_name=module_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
@@ -538,22 +512,25 @@ class SimpleCheckpoint(Checkpoint):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            validation_operator_name=validation_operator_name,
-            batches=batches,
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
+        ).build()
+
+        super().__init__(
+            name=checkpoint_config.name,
+            data_context=data_context,
+            config_version=checkpoint_config.config_version,
+            template_name=checkpoint_config.template_name,
+            module_name=checkpoint_config.module_name,
+            class_name=checkpoint_config.class_name,
+            run_name_template=checkpoint_config.run_name_template,
+            expectation_suite_name=checkpoint_config.expectation_suite_name,
+            batch_request=checkpoint_config.batch_request,
+            action_list=checkpoint_config.action_list,
+            evaluation_parameters=checkpoint_config.evaluation_parameters,
+            runtime_configuration=checkpoint_config.runtime_configuration,
+            validations=checkpoint_config.validations,
+            profilers=checkpoint_config.profilers,
         )
-
-
-# TODO Options in no order:
-#  1. slim version of config must be a valid Checkpoint config perhaps by:
-#     templates? a folder of yml files?
-#  2. configuration builder as a parameter to Checkpoint()
-#  3. subclass with defaults
-#  - move parameter validation into base Checkpoint?
-#  - other ideas?
-# Key requirement: simpler appearing configuration
-# pattern in data context config with default enums
-#
