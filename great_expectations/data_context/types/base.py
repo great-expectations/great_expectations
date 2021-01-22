@@ -1568,7 +1568,7 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
-        # the following args are used by configurators
+        # the following fous args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
@@ -1594,7 +1594,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._runtime_configuration = runtime_configuration or {}
             self._validations = validations or []
             self._profilers = profilers or []
-            # the following attributes are used by optional configurator
+            # the following attributes are used by SimpleCheckpoint
             self._site_names = site_names
             self._slack_webhook = slack_webhook
             self._notify_on = notify_on
