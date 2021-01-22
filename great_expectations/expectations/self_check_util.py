@@ -1228,7 +1228,11 @@ def check_json_test_result(test, result, data_asset=None):
                 elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDataFrame)):
                     pass
                 else:
-                    assert result["result"]["unexpected_index_list"] == value
+                    assert result["result"]["unexpected_index_list"] == value, (
+                    "unexpected_index_list expected "
+                    + str(value)
+                    + " but got "
+                    + str(result["result"]["unexpected_index_list"])
 
             elif key == "unexpected_list":
                 # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
@@ -1240,7 +1244,7 @@ def check_json_test_result(test, result, data_asset=None):
                         ].sort()
 
                 assert result["result"]["unexpected_list"] == value, (
-                    "expected "
+                    "unexpected_list expected "
                     + str(value)
                     + " but got "
                     + str(result["result"]["unexpected_list"])
