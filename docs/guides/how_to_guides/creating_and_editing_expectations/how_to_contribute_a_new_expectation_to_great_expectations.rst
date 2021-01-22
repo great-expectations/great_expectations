@@ -23,13 +23,21 @@ Steps
         - ``TableExpectation`` s are a generic catchall for other types of Expectations applied to tabular data.
 
 
-    Find the appropriate template file in ``great_expectations/examples/expectations/``. Starting your development with these templates is significantly easier than developing from scratch.
+    Choose the template that fits your Expectation. Starting your development with these templates is significantly easier than developing from scratch:
 
-#. **Copy the template file into the appropriate ``contrib/`` directory (see below).**
+    * ``ColumnMapExpectation``: ``examples/expectations/column_map_expectation_template.py``
+    * ``ColumnExpectation``: ``examples/expectations/column_aggregate_expectation_template.py``
+    * ``ColumnPairMapExpectation``: coming soon...
+    * ``TableExpectation``: coming soon...
 
-    Recently we introduced a fast-track release process for Expectations that a contributor places in one of the subdirectories of ``contrib``.
-    They are released as PyPI packages separate from ``great-expectations``. When you create a new Expectation in ``contrib/experimental/great_expectations_experimental/expectations/``,
-    once your PR is approved and merged, a new version of PyPI package ``great-expectations-experimental`` is automatically published.
+
+#. **Copy the template file**
+
+    Copy the template file into ``contrib/experimental/great_expectations_experimental/expectations/`` directory.
+
+    Recently we introduced a fast-track release process for community contributed Expectations.
+    You will commit the file with your Expectation's implementation into ``great_expectations`` repo.
+    Once your PR is approved and merged, your Expectation will be automatically published in the PyPI package ``great-expectations-experimental``. This package contains community contributed Expectations and is separate from ``great-expectations``.
 
 #. **Pick a name for your Expectation, rename the file and the class within it.**
 
@@ -59,8 +67,8 @@ Steps
         automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_be_three``.
         You will make this change in two places:
 
-        * Class declaration (search for ``class ExpectColumnValuesToEqualThree``)
-        * A call to ``run_diagnostic`` in the very end of the template (search for ``diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()``). Next section explains the role this code plays.
+        * Class declaration (search for ``class Expect``)
+        * A call to ``run_diagnostic`` in the very end of the template (search for ``diagnostics_report = ``). Next section explains the role this code plays.
 
     For more style conventions that your code should follow consult our :ref:`Style Guide <contributing__style_guide>`
 
@@ -100,7 +108,7 @@ Steps
     You will repeat this step many times during developing your Expectation. ``run_diagnostics`` creates an easy and fast "dev loop" for you -
     make a small change in the code, run ``run_diagnostics``, examine its output for failures and next steps.
 
-    From this point on, we'll start filling in the pieces of your Expectation. You can stop this at any point.
+    From this point on, we will start filling in the pieces of your Expectation. You don't have to fill in all the pieces to submit your Expectation. For example, you may choose to provide only Pandas implementation. Another contributor may add a Spark implementation in a separate PR later. Expectation development can be done in bite-size pieces.
 
     .. admonition:: Note:
 
@@ -121,7 +129,7 @@ Steps
         * help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. When your Expectation is released, its entry in the Expectations Gallery site will render these examples.
         * provide test cases that the Great Expectations testing framework can execute automatically
 
-    We will explain the structure of these tests using the example provided in one of the templates that implements ``expect_column_values_to_equal_three``.
+    We will explain the structure of these tests using the example provided in one of the templates that implements ``expect_column_values_to_equal_three``:
 
     .. code-block:: python
 
@@ -149,8 +157,8 @@ Steps
 
     Each example is a dictionary with two keys:
 
-    * data: defines the input data of the example as a table/data frame. In this example the table has one column named "mostly_threes" with 10 rows.
-    * tests: a list of test cases that use the data defined above as input to validate
+    * ``data``: defines the input data of the example as a table/data frame. In this example the table has one column named "mostly_threes" with 10 rows.
+    * ``tests``: a list of test cases that use the data defined above as input to validate
 
         * ``title`` should be a descriptive name for the test case. Make sure to have no spaces.
         * ``in`` contains exactly the parameters that you want to pass in to the Expectation. ``"in": {"column": "mostly_threes", "mostly": 0.6}`` in the example above is equivalent to ``expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)``
@@ -163,7 +171,7 @@ Steps
 
     .. admonition:: Note:
 
-        - When you define data in your examples, we will mostly guess the type of the columns. Sometimes you need to specify the precise type of the columns for each backend. Then you use ``schema`` atribute in an example to achieve this:
+        - When you define data in your examples, we will mostly guess the type of the columns. Sometimes you need to specify the precise type of the columns for each backend. Then you use ``schema`` attribute (on the same level as ``data`` and ``tests`` in the dictionary):
 
         .. code-block:: json
 
@@ -184,7 +192,7 @@ Steps
     .. content-tabs::
 
         .. tab-container:: tab0
-            :title: ColumnMapExpectations
+            :title: ColumnMapExpectation
 
 
             Expectations that extend ColumnMapExpectation class work as follows:
