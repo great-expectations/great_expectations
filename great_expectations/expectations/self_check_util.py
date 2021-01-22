@@ -1220,7 +1220,7 @@ def check_json_test_result(test, result, data_asset=None):
                         + str(value)
                         + " but got "
                         + str(result["result"]["observed_value"])
-                )
+                    )
 
             # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
             # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
@@ -1238,7 +1238,7 @@ def check_json_test_result(test, result, data_asset=None):
                         + str(value)
                         + " but got "
                         + str(result["result"]["unexpected_index_list"])
-                )
+                    )
 
             elif key == "unexpected_list":
                 # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
