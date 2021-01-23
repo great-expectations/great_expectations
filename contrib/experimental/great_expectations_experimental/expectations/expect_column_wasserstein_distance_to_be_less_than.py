@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-
 from scipy import stats as stats
 
 from great_expectations.core import ExpectationConfiguration
@@ -165,7 +164,14 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
 class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.wasserstein",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max", "raw_values", "partition")
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+        "raw_values",
+        "partition",
+    )
 
     library_metadata = {
         "maturity": "experimental",
@@ -175,8 +181,8 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
             "rexboyce",
             "abegong",
             "lodeous",
-        ]
-    }   
+        ],
+    }
 
     # Default values
     default_kwarg_values = {
@@ -205,7 +211,12 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
                 {
                     "title": "test_raw_values_strict",
                     "exact_match_out": False,
-                    "in": {"column": "a", "raw_values": [5, 6, 8], "max_value": 5, "strict_max": True},
+                    "in": {
+                        "column": "a",
+                        "raw_values": [5, 6, 8],
+                        "max_value": 5,
+                        "strict_max": True,
+                    },
                     "out": {"success": False, "observed_value": 5},
                     "include_in_gallery": True,
                 },
@@ -213,10 +224,10 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
                     "title": "test_partition",
                     "exact_match_out": False,
                     "in": {
-                        "column": "b", 
+                        "column": "b",
                         "partition": {
                             "values": [1, 2, 4],
-                            "weights": [0.5, 0.25, 0.25]
+                            "weights": [0.5, 0.25, 0.25],
                         },
                         "max_value": 5,
                         "strict_max": True,
