@@ -7,7 +7,16 @@ Changelog
 
 Develop
 -----------------
-* [BUGFIX] Fix Local variable 'temp_table_schema_name' might be referenced before assignment bug in sqlalchemy_dataset.py
+
+
+0.13.7
+-----------------
+* [BUGFIX] Fix Local variable 'temp_table_schema_name' might be referenced before assignment bug in sqlalchemy_dataset.py #2302
+* [MAINTENANCE] Ensure compatibility with new pip resolver v20.3+ #2256
+* [ENHANCEMENT] Improvements in the how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. #2296
+* [ENHANCEMENT] Improvements in the output of Expectations tests to make it more legible. #2296
+* [DOCS] Clarification of the instructions for using conda in the "Setting Up Your Dev Environment" doc. #2306
+
 
 0.13.6
 -----------------

@@ -23,6 +23,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
@@ -1111,22 +1112,22 @@ class BaseDataContext:
 
     def _get_batch_v3(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
+        datasource_name: Optional[str] = None,
+        data_connector_name: Optional[str] = None,
+        data_asset_name: Optional[str] = None,
         *,
-        batch_request: BatchRequest = None,
-        batch_data: Any = None,
-        partition_request: Union[PartitionRequest, dict] = None,
-        partition_identifiers: dict = None,
-        limit: int = None,
-        index=None,
-        custom_filter_function: Callable = None,
+        batch_request: Optional[BatchRequest] = None,
+        batch_data: Optional[Any] = None,
+        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        partition_identifiers: Optional[dict] = None,
+        limit: Optional[int] = None,
+        index: Optional[Union[int, list, tuple, slice, str]] = None,
+        custom_filter_function: Optional[Callable] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        sampling_method: str = None,
-        sampling_kwargs: dict = None,
-        splitter_method: str = None,
-        splitter_kwargs: dict = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[dict] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[dict] = None,
         **kwargs,
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -1388,22 +1389,22 @@ class BaseDataContext:
 
     def get_batch_list(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
+        datasource_name: Optional[str] = None,
+        data_connector_name: Optional[str] = None,
+        data_asset_name: Optional[str] = None,
         *,
-        batch_request: BatchRequest = None,
-        batch_data: Any = None,
-        partition_request: Union[PartitionRequest, dict] = None,
-        partition_identifiers: dict = None,
-        limit: int = None,
-        index=None,
-        custom_filter_function: Callable = None,
+        batch_request: Optional[BatchRequest] = None,
+        batch_data: Optional[Any] = None,
+        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        partition_identifiers: Optional[dict] = None,
+        limit: Optional[int] = None,
+        index: Optional[Union[int, list, tuple, slice, str]] = None,
+        custom_filter_function: Optional[Callable] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        sampling_method: str = None,
-        sampling_kwargs: dict = None,
-        splitter_method: str = None,
-        splitter_kwargs: dict = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[dict] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[dict] = None,
         **kwargs,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -1518,25 +1519,25 @@ class BaseDataContext:
 
     def get_validator(
         self,
-        datasource_name: str = None,
-        data_connector_name: str = None,
-        data_asset_name: str = None,
+        datasource_name: Optional[str] = None,
+        data_connector_name: Optional[str] = None,
+        data_asset_name: Optional[str] = None,
         *,
-        batch_request: BatchRequest = None,
-        batch_data: Any = None,
-        partition_request: Union[PartitionRequest, dict] = None,
-        partition_identifiers: dict = None,
-        limit: int = None,
-        index=None,
-        custom_filter_function: Callable = None,
-        expectation_suite_name: str = None,
-        expectation_suite: ExpectationSuite = None,
-        create_expectation_suite_with_name: str = None,
+        batch_request: Optional[BatchRequest] = None,
+        batch_data: Optional[Any] = None,
+        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        partition_identifiers: Optional[dict] = None,
+        limit: Optional[int] = None,
+        index: Optional[Union[int, list, tuple, slice, str]] = None,
+        custom_filter_function: Optional[Callable] = None,
+        expectation_suite_name: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        create_expectation_suite_with_name: Optional[str] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        sampling_method: str = None,
-        sampling_kwargs: dict = None,
-        splitter_method: str = None,
-        splitter_kwargs: dict = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[dict] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[dict] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -2883,12 +2884,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        run_id=None,
-        run_name=None,
-        run_time=None,
-        result_format=None,
+        run_id: Optional[Union[str, int, float]] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[datetime.datetime] = None,
+        result_format: Optional[str] = None,
         **kwargs,
-    ):
+    ) -> CheckpointResult:
         """
         Validate against a pre-defined checkpoint. (Experimental)
         Args:
@@ -2897,7 +2898,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
-            ValidationOperatorResult
+            CheckpointResult
         """
         # TODO mark experimental
 

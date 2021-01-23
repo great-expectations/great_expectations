@@ -98,7 +98,7 @@ def register_metric(
     metric_value_keys: Tuple[str, ...],
     execution_engine: Type["ExecutionEngine"],
     metric_class: Type["MetricProvider"],
-    metric_provider: Union[Callable, None],
+    metric_provider: Optional[Callable],
     metric_fn_type: Optional[
         Union["MetricFunctionTypes", "MetricPartialFunctionTypes"]
     ] = None,
@@ -180,7 +180,7 @@ def get_metric_provider(
 
 def get_metric_function_type(
     metric_name: str, execution_engine: "ExecutionEngine"
-) -> Union[None, "MetricPartialFunctionTypes", "MetricFunctionTypes"]:
+) -> Optional[Union["MetricPartialFunctionTypes", "MetricFunctionTypes"]]:
     try:
         metric_definition = _registered_metrics[metric_name]
         provider_fn, provider_class = metric_definition["providers"][

@@ -18,7 +18,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Experimental Checkpoints (up to 0.12.x)
+        :title: Docs for Legacy Checkpoints (<=0.13.7)
 
         1. First, open your existing Checkpoint in a text editor.
         It will look similar to this:
@@ -68,7 +68,7 @@ Steps
                   - npi.warning
 
     .. tab-container:: tab1
-        :title: Checkpoints (0.13 -- with CheckpointStore)
+        :title: Docs for Class-Based Checkpoints (>=0.13.8)
 
         1. First, open your existing Checkpoint in a text editor.
         It will look similar to this:
@@ -105,7 +105,7 @@ Steps
                     result_format: BASIC
                     partial_unexpected_count: 20
 
-        2. To add a second expectation suite (in this example we add ``users.error``) to your Checkpoint configuration, modify the file to look like this:
+        2. To add a second Expectation Suite (in this example we add ``users.error``) to your Checkpoint configuration, modify the file to look like this:
 
         .. code-block:: yaml
 
@@ -163,7 +163,7 @@ Steps
                     result_format: BASIC
                     partial_unexpected_count: 20
 
-        3. The flexibility of easily adding multiple validations of batches of data with different expectation suites and specific actions can be demonstrated using the following example of a Checkpoint configuration file:
+        3. The flexibility of easily adding multiple validations of batches of data with different Expectation Suites and specific actions can be demonstrated using the following example of a Checkpoint configuration file:
 
         .. code-block:: yaml
 
@@ -219,11 +219,11 @@ Steps
                 result_format: BASIC
                 partial_unexpected_count: 20
 
-        According to this configuration, the locally-specified expectation suite ``users.warning`` is run against the ``batch_request`` that employs ``my_data_connector`` with the results processed by the actions specified in the top-level ``action_list``.
-        Similarly, the locally-specified expectation suite ``users.error`` is run against the ``batch_request`` that employs ``my_special_data_connector`` with the results also processed by the actions specified in the top-level ``action_list``.
-        In addition, the top-level expectation suite ``users.delivery`` is run against the ``batch_request`` that employs ``my_other_data_connector`` with the results processed by the union of actions in the locally-specified ``action_list`` and in the top-level ``action_list``.
+        According to this configuration, the locally-specified Expectation Suite ``users.warning`` is run against the ``batch_request`` that employs ``my_data_connector`` with the results processed by the actions specified in the top-level ``action_list``.
+        Similarly, the locally-specified Expectation Suite ``users.error`` is run against the ``batch_request`` that employs ``my_special_data_connector`` with the results also processed by the actions specified in the top-level ``action_list``.
+        In addition, the top-level Expectation Suite ``users.delivery`` is run against the ``batch_request`` that employs ``my_other_data_connector`` with the results processed by the union of actions in the locally-specified ``action_list`` and in the top-level ``action_list``.
 
-        Please see :ref:`How to configure a New Checkpoint using "test_yaml_config" <how_to_guides_how_to_configure_a_new_checkpoint_using_test_yaml_config>` for additional Checkpoint configuration examples (including the convenient templating mechanism).
+        Please see :ref:`How to configure a new Checkpoint using "test_yaml_config" <how_to_guides_how_to_configure_a_new_checkpoint_using_test_yaml_config>` for additional Checkpoint configuration examples (including the convenient templating mechanism).
 
 
 Additional notes
