@@ -41,6 +41,7 @@ from great_expectations.render.util import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
+
 class ColumnCustomMedian(ColumnMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
