@@ -1,7 +1,8 @@
 import json
+import re
 
 #!!! This giant block of imports should be something simpler, such as:
-# from great_exepectations.helpers.expectation_creation import *
+# from great_expectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -26,13 +27,14 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validator import Validator
-from great_expectations.expectations.metrics.column_map_metrics import columns_value_match_regex
+from great_expectations.expectations.metrics.column_map_metrics.column_values_match_regex import ColumnValuesMatchRegex
 from great_expectations.expectations.core import expect_column_values_to_match_regex 
+
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
-class ColumnValuesEmails(ColumnMapMetricProvider):
+class ColumnValuesEmails(ColumnValuesMatchRegex):
 
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
@@ -41,25 +43,25 @@ class ColumnValuesEmails(ColumnMapMetricProvider):
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        email = "\S*(\S\@w*(\.\w*))"
-        return expect_column_values_to_match_regex(column,email)
+        email = "\S*(\S\@\w*(\.\w*))"
+        return super()._pandas(column, email, **kwargs)
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _dialect, **kwargs):
-        email = "\S*(\S\@w*(\.\w*))"
-        return expect_column_values_to_match_regex(column,email)
+        email = "\S*(\S\@\w*(\.\w*))"
+        return super()._sqlalchemy(column, email, **kwargs)
 
 # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
-        email = "\S*(\S\@w*(\.\w*))"
-        return expect_column_values_to_match_regex(column,email)
+        email = "\S*(\S\@\w*(\.\w*))"
+        return super()._spark(column, email, **kwargs)
 
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToHaveValidEmails(ColumnMapExpectation):
+class ExpectColumnValuesToBeValidEmails(ColumnMapExpectation):
     """TODO: add a docstring here"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -72,7 +74,7 @@ class ExpectColumnValuesToHaveValidEmails(ColumnMapExpectation):
                 "title": "valid_emails",
                 "exact_match_out": True,
                 "include_in_gallery": True,
-                "in": {"column": "all_emails"}, #, "mostly": 0.6},
+                "in": {"column": "emails"}, #, "mostly": 0.6},
                 "out": {
                     "success": True,
                     #"unexpected_index_list": [6, 7],
@@ -194,5 +196,5 @@ class ExpectColumnValuesToHaveValidEmails(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    diagnostics_report = ExpectColumnValuesToBeValidEmails().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
