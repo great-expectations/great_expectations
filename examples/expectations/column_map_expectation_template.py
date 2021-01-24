@@ -61,24 +61,24 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     """TODO: add a docstring here"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # examples = [{
-    #     "data": {
-    #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-    #     },
-    #     "tests": [
-    #         {
-    #             "title": "positive_test_with_mostly",
-    #             "exact_match_out": False,
-    #             "include_in_gallery": True,
-    #             "in": {"column": "mostly_threes", "mostly": 0.6},
-    #             "out": {
-    #                 "success": True,
-    #                 "unexpected_index_list": [6, 7],
-    #                 "unexpected_list": [2, -1],
-    #             },
-    #         }
-    #     ],
-    # }]
+    examples = [{
+        "data": {
+            "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
+        },
+        "tests": [
+            {
+                "title": "positive_test_with_mostly",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {"column": "mostly_threes", "mostly": 0.6},
+                "out": {
+                    "success": True,
+                    "unexpected_index_list": [6, 7],
+                    "unexpected_list": [2, -1],
+                },
+            }
+        ],
+    }]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
