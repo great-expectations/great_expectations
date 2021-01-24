@@ -50,7 +50,8 @@ class ColumnNormallyDistributed(ColumnMetricProvider):
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return stats.normaltest(column, nan_policy='omit')[1] # Should we omit nan?
+        return stats.normaltest(column, nan_policy="omit")[1]  # Should we omit nan?
+
     #
     # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     # def _sqlalchemy(
@@ -147,106 +148,98 @@ class ColumnNormallyDistributed(ColumnMetricProvider):
 
 
 class ExpectColumnToBeNormallyDistributed(ColumnExpectation):
-        # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-        metric_dependencies = ("column.custom.normally_distributed",)
-        success_keys = ("alpha")
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    metric_dependencies = ("column.custom.normally_distributed",)
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+    )
 
-        library_metadata = {
-            "maturity": "experimental",
-            "package": "great_expectations_experimental",
-            "tags": [],
-            "contributors": [
-                "ljohnston931",
-                "rexboyce",
-                "lodeous",
-                "sophiarawlings",
-                "vtdangg"
-            ],
-        }
-
-        # Default values
-        default_kwarg_values = {
-            "alpha": None,
-            "result_format": "BASIC",
-            "include_config": True,
-            "catch_exceptions": False,
-        }
-
-    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # examples = [
-    #     {
-    #         "data": {"a": [1, 2, 3, 4], "b": [1, 2, 2, 3], "c": [5, 7, 6, None]},
-    #         "schemas": {
-    #             "spark": {"a": "IntegerType", "b": "IntegerType", "c": "IntegerType"}
-    #         },
-    #         "tests": [
-    #             {
-    #                 "title": "positive_test_min_equal_max",
-    #                 "exact_match_out": False,
-    #                 "in": {"column": "a", "min_value": 2.5, "max_value": 2.5},
-    #                 "out": {"success": True, "observed_value": 2.5},
-    #             },
-    #             {
-    #                 "title": "positive_test_null_min",
-    #                 "include_in_gallery": True,
-    #                 "exact_match_out": False,
-    #                 "in": {"column": "a", "min_value": None, "max_value": 3},
-    #                 "out": {"success": True, "observed_value": 2.5},
-    #             },
-    #             {
-    #                 "title": "negative_test_missing_value_in_column_complete_result_format",
-    #                 "include_in_gallery": True,
-    #                 "exact_match_out": True,
-    #                 "in": {
-    #                     "column": "c",
-    #                     "min_value": 7,
-    #                     "max_value": 7,
-    #                     "result_format": "COMPLETE",
-    #                 },
-    #                 "out": {
-    #                     "success": False,
-    #                     "result": {
-    #                         "observed_value": 6.0,
-    #                         "element_count": 4,
-    #                         "missing_count": 1,
-    #                         "missing_percent": 25.0,
-    #                     },
-    #                 },
-    #             },
-    #         ],
-    #     },
-    #     {
-    #         "data": {"empty_column": []},
-    #         "schemas": {"spark": {"empty_column": "IntegerType"}},
-    #         "tests": [
-    #             {
-    #                 "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
-    #                 "include_in_gallery": True,
-    #                 "exact_match_out": False,
-    #                 "in": {
-    #                     "column": "empty_column",
-    #                     "min_value": 0,
-    #                     "max_value": 0,
-    #                     "catch_exceptions": False,
-    #                 },
-    #                 "out": {"success": False, "observed_value": None},
-    #             }
-    #         ],
-    #     },
-    # ]
-
-    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
+        "maturity": "experimental",
+        "package": "great_expectations_experimental",
+        "tags": [],
+        "contributors": [
+            "ljohnston931",
+            "rexboyce",
+            "lodeous",
+            "sophiarawlings",
+            "vtdangg",
         ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
-        ],
-        "package": "experimental_expectations",
     }
 
+    # Default values
+    default_kwarg_values = {
+        "min_value": 0.01,
+        "max_value": None,
+        "strict_min": None,
+        "strict_max": None,
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": False,
+    }
+
+    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
+    examples = [
+        {
+            "data": {
+                "a": [  # this was drawn from the normal distribution
+                    -0.42559356,
+                    1.71053911,
+                    -0.33074949,
+                    -0.51614177,
+                    -0.61934564,
+                    1.1351354,
+                    1.39973079,
+                    -0.02995425,
+                    0.84342204,
+                    2.11280806,
+                ],
+                "b": [  # this was drawn from the gamma distribution
+                    1.43829829,
+                    5.73385056,
+                    1.77222341,
+                    0.50729875,
+                    0.34536101,
+                    1.54515905,
+                    1.11811223,
+                    0.8430591,
+                    0.80270869,
+                    1.02455144,
+                ],
+            },
+            "tests": [
+                {
+                    "title": "passes",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "a", "min_value": 0.01},
+                    "out": {"success": True, "observed_value": 0.20745969675492978},
+                },
+                {
+                    "title": "fails",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "b", "min_value": 0.01},
+                    "out": {"success": False, "observed_value": 1.369758134334228e-05},
+                },
+            ],
+        },
+    ]
+
+    # This dictionary contains metadata for display in the public gallery
+    # library_metadata = {
+    #     "maturity": "experimental",  # "experimental", "beta", or "production"
+    #     "tags": [  # Tags for this Expectation in the gallery
+    #         #         "experimental"
+    #     ],
+    #     "contributors": [  # Github handles for all contributors to this Expectation.
+    #         #         "@your_name_here", # Don't forget to add your github handle here!
+    #     ],
+    #     "package": "experimental_expectations",
+    # }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -334,7 +327,7 @@ class ExpectColumnToBeNormallyDistributed(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        # How do we know this is comparing the metric to the val stored in alpha?
+
         return self._validate_metric_value_between(
             metric_name="column.custom.normally_distributed",
             configuration=configuration,
@@ -345,5 +338,5 @@ class ExpectColumnToBeNormallyDistributed(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnCustomMedianToBeBetween().run_diagnostics()
+    self_check_report = ExpectColumnToBeNormallyDistributed().run_diagnostics()
     print(json.dumps(self_check_report, indent=2))
