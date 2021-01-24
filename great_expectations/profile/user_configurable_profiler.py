@@ -153,7 +153,6 @@ class UserConfigurableProfiler:
             "string": self._build_expectations_string,
             "value_set": self._build_expectations_value_set,
             "boolean": self._build_expectations_value_set,
-            "other": self._build_expectations_for_all_column_types,
         }
 
     def build_suite(self):
@@ -196,7 +195,7 @@ class UserConfigurableProfiler:
                 "remove the semantic_types dict from the config."
             )
 
-        if self.primary_or_compound_key is not None:
+        if self.primary_or_compound_key:
             self._build_expectations_primary_or_compound_key(
                 self.dataset, self.primary_or_compound_key
             )
@@ -300,8 +299,6 @@ class UserConfigurableProfiler:
                 if column not in dataset.get_table_columns():
                     raise ProfilerError(f"Column {column} does not exist.")
 
-        dataset.set_default_expectation_argument("catch_exceptions", False)
-
         for semantic_type, column_list in self.semantic_types_dict.items():
             for column_name in column_list:
                 processed_column = self.column_info.get(column_name)
@@ -356,8 +353,6 @@ class UserConfigurableProfiler:
             column_type = self._get_column_type(dataset, column_name)
             column_info_entry["type"] = column_type
 
-            dataset.set_config_value("interactive_evaluation", True)
-
         return column_type
 
     def _get_column_type(self, dataset, column):
@@ -379,7 +374,6 @@ class UserConfigurableProfiler:
         """
         # list of types is used to support pandas and sqlalchemy
         type_ = None
-        dataset.set_config_value("interactive_evaluation", True)
         try:
 
             if (
@@ -418,7 +412,6 @@ class UserConfigurableProfiler:
                 type_ = "DATETIME"
 
             else:
-                dataset.expect_column_values_to_be_in_type_list(column, type_list=None)
                 type_ = "UNKNOWN"
         except NotImplementedError:
             type_ = "unknown"
@@ -430,7 +423,6 @@ class UserConfigurableProfiler:
                 + sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)),
             )
 
-        dataset.set_config_value("interactive_evaluation", False)
         dataset.remove_expectation(
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
@@ -470,7 +462,6 @@ class UserConfigurableProfiler:
                     kwargs={"column": column_name},
                 )
             )
-            dataset.set_config_value("interactive_evaluation", True)
 
         return column_cardinality
 
@@ -487,7 +478,6 @@ class UserConfigurableProfiler:
         """
         num_unique = None
         pct_unique = None
-        dataset.set_config_value("interactive_evaluation", True)
 
         try:
             num_unique = dataset.expect_column_unique_value_count_to_be_between(
@@ -509,8 +499,6 @@ class UserConfigurableProfiler:
         cardinality = OrderedProfilerCardinality.get_basic_column_cardinality(
             num_unique, pct_unique
         )
-
-        dataset.set_config_value("interactive_evaluation", False)
 
         return cardinality
 
@@ -536,12 +524,11 @@ class UserConfigurableProfiler:
             ), f"The semantic_types dict in the config must be a dictionary, but is currently a {type(self.semantic_types_dict)}. Please reformat."
             semantic_types = []
             for semantic_type, column_list in self.semantic_types_dict.items():
-                if (
-                    column_name in column_list
-                    and semantic_type in profiler_semantic_types
-                ):
+                if column_name in column_list:
                     semantic_types.append(semantic_type)
             column_info_entry["semantic_types"] = semantic_types
+
+        self.column_info[column_name] = column_info_entry
 
         return semantic_types
 
@@ -606,14 +593,17 @@ class UserConfigurableProfiler:
         if expectations_by_column:
             print("\nExpectations by Column")
 
+        contains_semantic_types = [
+            v for v in self.column_info.values() if v.get("semantic_types")
+        ]
         for column in sorted(expectations_by_column):
             info_column = self.column_info.get(column) or {}
 
-            semantic_types = info_column.get("semantic_types")
+            semantic_types = info_column.get("semantic_types") or "not_specified"
             type_ = info_column.get("type")
             cardinality = info_column.get("cardinality")
 
-            if semantic_types:
+            if len(contains_semantic_types) > 0:
                 type_string = f" | Semantic Type: {semantic_types[0] if len(semantic_types)==1 else semantic_types}"
             elif type_:
                 type_string = f" | Column Data Type: {type_}"
@@ -799,7 +789,6 @@ class UserConfigurableProfiler:
                 },
                 allow_relative_error=allow_relative_error,
                 result_format="SUMMARY",
-                catch_exceptions=True,
             )
             if quantile_result.exception_info and (
                 quantile_result.exception_info["exception_traceback"]
@@ -815,7 +804,6 @@ class UserConfigurableProfiler:
                 logger.debug(quantile_result.exception_info["exception_traceback"])
                 logger.debug(quantile_result.exception_info["exception_message"])
             else:
-                dataset.set_config_value("interactive_evaluation", False)
 
                 dataset.expect_column_quantile_values_to_be_between(
                     column,
@@ -829,9 +817,7 @@ class UserConfigurableProfiler:
                         ],
                     },
                     allow_relative_error=allow_relative_error,
-                    catch_exceptions=True,
                 )
-                dataset.set_config_value("interactive_evaluation", True)
         return dataset
 
     def _build_expectations_primary_or_compound_key(
@@ -908,11 +894,11 @@ class UserConfigurableProfiler:
 
             if min_value is not None:
                 try:
-                    min_value = min_value + datetime.timedelta(days=-365)
+                    min_value = min_value
                 except OverflowError:
                     min_value = datetime.datetime.min
                 except TypeError:
-                    min_value = parse(min_value) + datetime.timedelta(days=(-365))
+                    min_value = parse(min_value)
 
             dataset.remove_expectation(
                 ExpectationConfiguration(
@@ -931,11 +917,11 @@ class UserConfigurableProfiler:
             ).result["observed_value"]
             if max_value is not None:
                 try:
-                    max_value = max_value + datetime.timedelta(days=365)
+                    max_value = max_value
                 except OverflowError:
                     max_value = datetime.datetime.max
                 except TypeError:
-                    max_value = parse(max_value) + datetime.timedelta(days=365)
+                    max_value = parse(max_value)
 
             dataset.remove_expectation(
                 ExpectationConfiguration(
@@ -972,8 +958,7 @@ class UserConfigurableProfiler:
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
                 if unexpected_percent >= 50 and not self.not_null_only:
-                    potential_mostly_value = (unexpected_percent) / 100.0
-                    safe_mostly_value = round(potential_mostly_value, 3)
+                    potential_mostly_value = unexpected_percent / 100.0
                     dataset.remove_expectation(
                         ExpectationConfiguration(
                             expectation_type="expect_column_values_to_not_be_null",
@@ -986,7 +971,7 @@ class UserConfigurableProfiler:
                         not in self.excluded_expectations
                     ):
                         dataset.expect_column_values_to_be_null(
-                            column, mostly=safe_mostly_value
+                            column, mostly=potential_mostly_value
                         )
                 else:
                     potential_mostly_value = (100.0 - unexpected_percent) / 100.0
@@ -1023,8 +1008,16 @@ class UserConfigurableProfiler:
 
         if "expect_column_values_to_be_in_type_list" not in self.excluded_expectations:
             col_type = self.column_info.get(column).get("type")
-            type_list = profiler_data_types_with_mapping.get(col_type)
-            dataset.expect_column_values_to_be_in_type_list(column, type_list=type_list)
+            if col_type != "UNKNOWN":
+                type_list = profiler_data_types_with_mapping.get(col_type)
+                dataset.expect_column_values_to_be_in_type_list(
+                    column, type_list=type_list
+                )
+            else:
+                logger.log(
+                    f"Column type for column {column} is unknown. "
+                    f"Skipping expect_column_values_to_be_in_type_list for this column."
+                )
 
     def _build_expectations_table(self, dataset, **kwargs):
         """

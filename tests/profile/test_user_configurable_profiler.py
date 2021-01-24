@@ -287,7 +287,7 @@ def test_build_suite_with_semantic_types_dict(
     assert "column_one" not in columns_with_expectations
     assert "expect_column_values_to_not_be_null" not in expectations_from_suite
     assert expectations_from_suite.issubset(possible_expectations_set)
-    assert len(suite.expectations) == 34
+    assert len(suite.expectations) == 33
 
     value_set_expectations = [
         i
@@ -415,4 +415,29 @@ def test_profiled_dataset_passes_own_validation(
         "action_list_operator", assets_to_validate=[cardinality_dataset]
     )
 
+    assert results["success"]
+
+
+def test_profiler_all_expectation_types(titanic_data_context):
+    """
+    What does this test do and why?
+    ...
+    """
+    context = titanic_data_context
+    df = pd.read_csv("../test_sets/yellow_tripdata_sample_2019-01.csv")
+    batch_df = ge.dataset.PandasDataset(df)
+
+    semantic_types = {"datetime": ["pickup_datetime", "dropoff_datetime"]}
+
+    profiler = UserConfigurableProfiler(batch_df, semantic_types_dict=semantic_types)
+    suite = profiler.build_suite()
+
+    context.save_expectation_suite(suite)
+    results = context.run_validation_operator(
+        "action_list_operator", assets_to_validate=[batch_df]
+    )
+    # validation_result_identifier = results.list_validation_result_identifiers()[0]
+
+    # context.build_data_docs()
+    # context.open_data_docs(validation_result_identifier)
     assert results["success"]
