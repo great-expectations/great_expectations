@@ -35,7 +35,6 @@ class Checkpoint:
 
         id: checkpoint
         title: Newstyle Class-based Checkpoints
-        icon:
         short_description: Run a configured checkpoint from a notebook.
         description: Run a configured checkpoint from a notebook.
         how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
