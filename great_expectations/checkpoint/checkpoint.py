@@ -30,6 +30,27 @@ logger = logging.getLogger(__name__)
 
 
 class Checkpoint:
+    """
+    --ge-feature-maturity-info--
+
+        id: checkpoint
+        title: Newstyle Class-based Checkpoints
+        icon:
+        short_description: Run a configured checkpoint from a notebook.
+        description: Run a configured checkpoint from a notebook.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Mostly stable (transitioning ValidationOperators to Checkpoints)
+            implementation_completeness: Complete
+            unit_test_coverage: Partial ("golden path"-focused tests; error checking tests need to be improved)
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness: Complete
+            bug_risk: Medium
+
+    --ge-feature-maturity-info--
+    """
+
     def __init__(
         self,
         name: str,
@@ -392,6 +413,117 @@ is run), with each validation having its own defined "action_list" attribute.
 
 
 class LegacyCheckpoint(Checkpoint):
+    """
+    --ge-feature-maturity-info--
+
+        id: checkpoint_notebook
+        title: LegacyCheckpoint - Notebook
+        icon:
+        short_description: Run a configured checkpoint from a notebook.
+        description: Run a configured checkpoint from a notebook.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html
+        maturity: Experimental (to-be-deprecated in favor of Checkpoint)
+        maturity_details:
+            api_stability: to-be-deprecated in favor of Checkpoint
+            implementation_completeness: Complete
+            unit_test_coverage: Partial ("golden path"-focused tests; error checking tests need to be improved)
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness: Complete
+            bug_risk: Low
+
+        id: checkpoint_command_line
+        title: LegacyCheckpoint - Command Line
+        icon:
+        short_description: Run a configured checkpoint from a command line.
+        description: Run a configured checkpoint from a command line in a Terminal shell.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
+        maturity: Experimental (to-be-deprecated in favor of Checkpoint)
+        maturity_details:
+            api_stability: to-be-deprecated in favor of Checkpoint
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness: Complete
+            bug_risk: Low
+
+        id: checkpoint_cron_job
+        title: LegacyCheckpoint - Cron
+        icon:
+        short_description: Deploy a configured checkpoint as a scheduled task with cron.
+        description: Use the Unix crontab command to edit the cron file and add a line that will run checkpoint as a scheduled task.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html
+        maturity: Experimental (to-be-deprecated in favor of Checkpoint)
+        maturity_details:
+            api_stability: to-be-deprecated in favor of Checkpoint
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness: Complete
+            bug_risk: Low
+
+        id: checkpoint_airflow_dag
+        title: LegacyCheckpoint - Airflow DAG
+        icon:
+        short_description: Run a configured checkpoint in Apache Airflow
+        description: Running a configured checkpoint in Apache Airflow enables the triggering of data validation using an Expectation Suite directly within an Airflow DAG.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html
+        maturity: Beta (to-be-deprecated in favor of Checkpoint)
+        maturity_details:
+            api_stability: to-be-deprecated in favor of Checkpoint
+            implementation_completeness: Partial (no operator, but probably don't need one)
+            unit_test_coverage: N/A
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Complete (pending how-to)
+            bug_risk: Low
+
+        id: checkpoint_kedro
+        title: LegacyCheckpoint - Kedro
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Experimental (to-be-deprecated in favor of Checkpoint)
+        maturity_details:
+            api_stability: to-be-deprecated in favor of Checkpoint
+            implementation_completeness: Unknown
+            unit_test_coverage: Unknown
+            integration_infrastructure_test_coverage: Unknown
+            documentation_completeness:  Minimal (none)
+            bug_risk: Unknown
+
+        id: checkpoint_prefect
+        title: LegacyCheckpoint - Prefect
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Experimental (to-be-deprecated in favor of Checkpoint)
+        maturity_details:
+            api_stability: to-be-deprecated in favor of Checkpoint
+            implementation_completeness: Unknown
+            unit_test_coverage: Unknown
+            integration_infrastructure_test_coverage: Unknown
+            documentation_completeness: Minimal (none)
+            bug_risk: Unknown
+
+        id: checkpoint_dbt
+        title: LegacyCheckpoint - DBT
+        icon:
+        short_description:
+        description:
+        how_to_guide_url:
+        maturity: Beta (to-be-deprecated in favor of Checkpoint)
+        maturity_details:
+            api_stability: to-be-deprecated in favor of Checkpoint
+            implementation_completeness: Minimal
+            unit_test_coverage: Minimal (none)
+            integration_infrastructure_test_coverage: Minimal (none)
+            documentation_completeness: Minimal (none)
+            bug_risk: Low
+
+    --ge-feature-maturity-info--
+    """
+
     def __init__(
         self,
         name: str,
