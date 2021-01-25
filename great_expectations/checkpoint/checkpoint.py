@@ -166,7 +166,10 @@ class Checkpoint:
             )
         )
 
-    # TODO: Add eval param processing using updated EvaluationParameterParser and parse_evaluation_parameters function
+    # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
+    #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
+    #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
+    # while run_name_template also undergoes strftime datetime substitution
     def run(
         self,
         template_name: Optional[str] = None,
