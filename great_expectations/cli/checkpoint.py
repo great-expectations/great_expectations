@@ -40,7 +40,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
     id: checkpoint_command_line
     title: LegacyCheckpoint - Command Line
     icon:
-    short_description: Run a configured checkpoint from a command line.
+    short_description: Run a configured legacy checkpoint from a command line.
     description: Run a configured legacy checkpoint from a command line in a Terminal shell.
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
