@@ -145,7 +145,7 @@ Steps
 
                 **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences.  More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
-                **Note**: The ``base_directory`` path needs to be specified *relative* to the ``great_expectations/`` directory.
+                **Note**: The ``base_directory`` path needs to be specified either as an absolute path or relative to the ``great_expectations/`` directory.
 
                 .. code-block:: python
 
