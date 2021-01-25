@@ -86,7 +86,7 @@ A **Batch** is reference to a set of data, with metadata about it. *The Batch is
 Validation
 ===================
 
-A **Validator** uses an Execution Engine and Expectation Suite to validate whether data meets expectations. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis to build or edit an Expectations.
+A **Validator** uses an Execution Engine and Expectation Suite to validate whether data meets expectations. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis to build or edit Expectations.
 
 An **Expectation Validation Result** captures the output of checking an expectation against data. It describes whether the data met the expectation, and will usually include Metrics from the data that were used to evaluate the Expectation, such as the percentage of unique values or observed mean.
 
@@ -120,7 +120,7 @@ A **Store** provides a consistent API to manage access to Expectations, Expectat
 
 .. _reference__core_concepts__data_context__stores:
 
-A **Plugin** customizes Great Expectations by making a new python package or module available at runtime. 
+A **Plugin** customizes Great Expectations by making a new python package or module available at runtime.
 
 .. toctree::
    :maxdepth: 2
