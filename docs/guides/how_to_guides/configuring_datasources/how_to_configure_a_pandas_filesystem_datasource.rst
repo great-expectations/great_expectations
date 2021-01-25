@@ -234,7 +234,7 @@ Additional Notes
 ----------------
 
 #.
-    For the Stable API (up to 0.12.x), relative path locations (e.g. for the ``base_directory``) should be specified from the perspective of the ``great_expectations/`` directory.
+    For the Stable API (up to 0.12.x), relative path locations (e.g. for the ``base_directory``) should be specified from the perspective of the directory, in which the
 
     .. code-block:: bash
 
