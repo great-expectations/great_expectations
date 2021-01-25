@@ -245,9 +245,6 @@ class BatchRequest(DictDot):
 "{str(type(data_connector_name))}", which is illegal.
                 """
             )
-        # TODO Alex to update data connector which will allow for more strict and helpful validation
-        # if not data_asset_name:
-        #     raise TypeError("asdfasdfasdsdfaasdffasdasdfasdf")
         if data_asset_name and not isinstance(data_asset_name, str):
             raise TypeError(
                 f"""The type of a data_asset name must be a string (Python "str").  The type given is
