@@ -1098,6 +1098,7 @@ def evaluate_json_test(data_asset, expectation_type, test):
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :return: None. asserts correctness of results.
     """
+    print('^^^ this was test')
 
     data_asset.set_default_expectation_argument("result_format", "COMPLETE")
     data_asset.set_default_expectation_argument("include_config", False)
@@ -1115,13 +1116,18 @@ def evaluate_json_test(data_asset, expectation_type, test):
 
     if "out" not in test:
         raise ValueError("Invalid test configuration detected: 'out' is required.")
-
+    print(test)
+    print('^^^ this was test')
+    print(data_asset)
+    print(expectation_type)
     # Support tests with positional arguments
     if isinstance(test["in"], list):
         result = getattr(data_asset, expectation_type)(*test["in"])
     # As well as keyword arguments
     else:
         result = getattr(data_asset, expectation_type)(**test["in"])
+        print(result)
+        print("^^ result")
 
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 

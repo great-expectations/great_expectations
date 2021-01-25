@@ -1796,13 +1796,16 @@ WHERE
         # which means the .select_from(self._table) in dup_query will cause an error
         # in the case of mysql, execute the query and pass in the entire list
         # <WILL> Commenting out to confirm that the test is failing on Azure
-        if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
-            rows = self.engine.execute(dup_query).fetchall()
-            dup_query = []
-            for row in rows:
-                row_as_dict = dict(row)
-                dup_query.append(row_as_dict[column])
+        print("this is where I should stop")
+        # if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
+        #     rows = self.engine.execute(dup_query).fetchall()
+        #     dup_query = []
+        #     for row in rows:
+        #         row_as_dict = dict(row)
+        #         dup_query.append(row_as_dict[column])
 
+        print('dup_query')
+        print(dup_query)
         return sa.column(column).notin_(dup_query)
 
     def _get_dialect_regex_expression(self, column, regex, positive=True):

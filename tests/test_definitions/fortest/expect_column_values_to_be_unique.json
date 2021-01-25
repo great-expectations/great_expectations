@@ -9,7 +9,7 @@
       "n" : [null, null, 2, null],
       "unique" : [1, 2, 3, null],
       "null": [null, null, null, null],
-      "mult_dup": ["1", "1", "2", "2"]
+      "mult_dup": ["Will", "Will", "Alex", "Abe"]
     },
     "schemas": {
       "spark": {
@@ -131,8 +131,8 @@
         },
         "out": {
           "success": false,
-          "unexpected_list": ["1", "1", "2", "2"],
-          "unexpected_index_list": [0, 1, 2, 3]
+          "unexpected_list": ["Will", "Will"],
+          "unexpected_index_list": [0, 1]
         }
       }
     ]
