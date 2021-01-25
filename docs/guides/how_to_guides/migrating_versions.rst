@@ -41,7 +41,7 @@ in your source control system already, right? ;-)
 Upgrading to 0.13.x
 *************************
 
-The 0.13.0 release introduces a formal `CheckpointStore`, which is a type of a `ConfigurationStore` that allows flexible `StoreBackend` to be specified for the various configurable components of Great Expectations.  With `CheckpointStore`, developers can save their `Checkpoint` configuration on the local filesystem or in various cloud storage services.
+The 0.13.0 release introduces a formal `CheckpointStore`, which is a type of a `ConfigurationStore` that allows any of the supported `StoreBackend` alternatives to be specified for the various configurable components of Great Expectations.  With `CheckpointStore`, developers can save their `Checkpoint` configuration on the local filesystem or in various cloud storage services.
 
 The migration to 0.13.0 is seamless.  Simply execute
 
