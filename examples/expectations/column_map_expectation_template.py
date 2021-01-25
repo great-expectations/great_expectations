@@ -69,6 +69,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     #         {
     #             "title": "positive_test_with_mostly",
     #             "exact_match_out": False,
+    #             "include_in_gallery": True,
     #             "in": {"column": "mostly_threes", "mostly": 0.6},
     #             "out": {
     #                 "success": True,
