@@ -428,7 +428,7 @@ class UserConfigurableProfiler:
                 + sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)),
             )
 
-        dataset.remove_expectation(
+        dataset._expectation_suite.remove_expectation(
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs={"column": column},
@@ -455,13 +455,13 @@ class UserConfigurableProfiler:
             column_cardinality = self._get_column_cardinality(dataset, column_name)
             column_info_entry["cardinality"] = column_cardinality
             # remove the expectations
-            dataset.remove_expectation(
+            dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_unique_value_count_to_be_between",
                     kwargs={"column": column_name},
                 )
             )
-            dataset.remove_expectation(
+            dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_proportion_of_unique_values_to_be_between",
                     kwargs={"column": column_name},
@@ -536,7 +536,7 @@ class UserConfigurableProfiler:
                 i in column_info_entry.get("semantic_types")
                 for i in ["BOOLEAN", "VALUE_SET"]
             ):
-                logger.warn(
+                logger.debug(
                     f"Column {column_name} has both 'BOOLEAN' and 'VALUE_SET' specified as semantic_types."
                     f"As these are currently the same in function, the 'VALUE_SET' type will be removed."
                 )
@@ -658,7 +658,7 @@ class UserConfigurableProfiler:
                 column, value_set=None, result_format="SUMMARY"
             ).result["observed_value"]
 
-            dataset.remove_expectation(
+            dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_distinct_values_to_be_in_set",
                     kwargs={"column": column},
@@ -695,7 +695,7 @@ class UserConfigurableProfiler:
                 )
 
             else:
-                dataset.remove_expectation(
+                dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_min_to_be_between",
                         kwargs={"column": column},
@@ -719,7 +719,7 @@ class UserConfigurableProfiler:
                 )
 
             else:
-                dataset.remove_expectation(
+                dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_max_to_be_between",
                         kwargs={"column": column},
@@ -743,7 +743,7 @@ class UserConfigurableProfiler:
                 )
 
             else:
-                dataset.remove_expectation(
+                dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_mean_to_be_between",
                         kwargs={"column": column},
@@ -768,7 +768,7 @@ class UserConfigurableProfiler:
                 )
 
             else:
-                dataset.remove_expectation(
+                dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_median_to_be_between",
                         kwargs={"column": column},
@@ -808,7 +808,7 @@ class UserConfigurableProfiler:
                 quantile_result.exception_info["exception_traceback"]
                 or quantile_result.exception_info["exception_message"]
             ):
-                dataset.remove_expectation(
+                dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_quantile_values_to_be_between",
                         kwargs={"column": column},
@@ -914,7 +914,7 @@ class UserConfigurableProfiler:
                 except TypeError:
                     min_value = parse(min_value)
 
-            dataset.remove_expectation(
+            dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_min_to_be_between",
                     kwargs={"column": column},
@@ -937,7 +937,7 @@ class UserConfigurableProfiler:
                 except TypeError:
                     max_value = parse(max_value)
 
-            dataset.remove_expectation(
+            dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_max_to_be_between",
                     kwargs={"column": column},
@@ -973,7 +973,7 @@ class UserConfigurableProfiler:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
                 if unexpected_percent >= 50 and not self.not_null_only:
                     potential_mostly_value = unexpected_percent / 100.0
-                    dataset.remove_expectation(
+                    dataset._expectation_suite.remove_expectation(
                         ExpectationConfiguration(
                             expectation_type="expect_column_values_to_not_be_null",
                             kwargs={"column": column},
@@ -1008,7 +1008,7 @@ class UserConfigurableProfiler:
                     column, min_value=pct_unique, max_value=pct_unique
                 )
             else:
-                dataset.remove_expectation(
+                dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_proportion_of_unique_values_to_be_between",
                         kwargs={"column": column},

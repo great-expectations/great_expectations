@@ -122,7 +122,7 @@ def test_init_with_semantic_types(cardinality_dataset):
 
     semantic_types = {
         "numeric": ["col_few", "col_many", "col_very_many"],
-        "value_set": ["col_one", "col_two", "col_very_few"],
+        "value_set": ["col_two", "col_very_few"],
     }
     profiler = UserConfigurableProfiler(
         cardinality_dataset,
@@ -280,7 +280,7 @@ def test_build_suite_with_semantic_types_dict(
 
     semantic_types = {
         "numeric": ["col_few", "col_many", "col_very_many"],
-        "value_set": ["col_one", "col_two", "col_very_few"],
+        "value_set": ["col_two", "col_very_few"],
     }
 
     profiler = UserConfigurableProfiler(
@@ -501,12 +501,8 @@ def test_profiler_all_expectation_types(
     ]
     assert len(ignored_included_columns_overlap) == 0
 
-    # context.save_expectation_suite(suite)
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[batch_df]
     )
-    validation_result_identifier = results.list_validation_result_identifiers()[0]
 
-    context.build_data_docs()
-    context.open_data_docs(validation_result_identifier)
     assert results["success"]
