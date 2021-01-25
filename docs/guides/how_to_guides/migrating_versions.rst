@@ -41,11 +41,12 @@ in your source control system already, right? ;-)
 Upgrading to 0.13.x
 *************************
 
-The 0.13.0 release introduces a formal `CheckpointStore`, which is a type of a `ConfigurationStore` that allows any of the supported `StoreBackend` alternatives to be specified for the various configurable components of Great Expectations.  With `CheckpointStore`, developers can save their `Checkpoint` configuration on the local filesystem or in various cloud storage services.
+The 0.13.8 release introduces a formal `CheckpointStore`, which is a type of a `ConfigurationStore` that allows any of the supported `StoreBackend` alternatives to be specified for the various configurable components of Great Expectations.  With `CheckpointStore`, developers can save their `Checkpoint` configuration on the local filesystem or in various cloud storage services.
 
-The migration to 0.13.0 is seamless.  Simply execute
+The migration of Great Expectations from 0.12.x to 0.13.8 is seamless.  Simply execute:
 
 .. code-block:: bash
+
     great_expectations project upgrade
 
 on the command line, and if you created any checkpoints in the previous versions, they will become managed under the auspices of the `CheckpointStore` with its `StoreBackend` pointing to the same `checkpoints` directory in your Great Expectations installation directory as you had previously.
