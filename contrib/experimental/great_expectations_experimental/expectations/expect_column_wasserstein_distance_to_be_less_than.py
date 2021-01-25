@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from scipy import stats as stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -42,19 +43,30 @@ from great_expectations.render.util import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnCustomMedian(ColumnMetricProvider):
-    """MetricProvider Class for Aggregate Mean MetricProvider"""
+class ColumnWassersteinDistance(ColumnMetricProvider):
+    """MetricProvider Class for Wasserstein Distance MetricProvider"""
 
-    metric_name = "column.custom.median"
+    metric_name = "column.custom.wasserstein"
+    value_keys = ("raw_values", "partition")
 
-    # @column_aggregate_value(engine=PandasExecutionEngine)
-    # def _pandas(cls, column, **kwargs):
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
+    @column_aggregate_value(engine=PandasExecutionEngine)
+    def _pandas(cls, column, raw_values=None, partition=None, **kwargs):
+        if raw_values is not None:
+            w_value = stats.wasserstein_distance(
+                raw_values,
+                column,
+            )
+        elif partition is not None:
+            w_value = stats.wasserstein_distance(
+                partition["values"],
+                column,
+                partition["weights"],
+            )
+        else:
+            raise ValueError("raw_values and partition object cannot both be None!")
+
+        return w_value
+
     # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     # def _sqlalchemy(
     #     cls,
@@ -149,87 +161,28 @@ class ColumnCustomMedian(ColumnMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
-    """TODO: add a docstring here"""
-
-    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # examples = [
-    #     {
-    #         "data": {"a": [1, 2, 3, 4], "b": [1, 2, 2, 3], "c": [5, 7, 6, None]},
-    #         "schemas": {
-    #             "spark": {"a": "IntegerType", "b": "IntegerType", "c": "IntegerType"}
-    #         },
-    #         "tests": [
-    #             {
-    #                 "title": "positive_test_min_equal_max",
-    #                 "exact_match_out": False,
-    #                 "in": {"column": "a", "min_value": 2.5, "max_value": 2.5},
-    #                 "out": {"success": True, "observed_value": 2.5},
-    #             },
-    #             {
-    #                 "title": "positive_test_null_min",
-    #                 "include_in_gallery": True,
-    #                 "exact_match_out": False,
-    #                 "in": {"column": "a", "min_value": None, "max_value": 3},
-    #                 "out": {"success": True, "observed_value": 2.5},
-    #             },
-    #             {
-    #                 "title": "negative_test_missing_value_in_column_complete_result_format",
-    #                 "include_in_gallery": True,
-    #                 "exact_match_out": True,
-    #                 "in": {
-    #                     "column": "c",
-    #                     "min_value": 7,
-    #                     "max_value": 7,
-    #                     "result_format": "COMPLETE",
-    #                 },
-    #                 "out": {
-    #                     "success": False,
-    #                     "result": {
-    #                         "observed_value": 6.0,
-    #                         "element_count": 4,
-    #                         "missing_count": 1,
-    #                         "missing_percent": 25.0,
-    #                     },
-    #                 },
-    #             },
-    #         ],
-    #     },
-    #     {
-    #         "data": {"empty_column": []},
-    #         "schemas": {"spark": {"empty_column": "IntegerType"}},
-    #         "tests": [
-    #             {
-    #                 "title": "test_empty_column_should_be_false_no_observed_value_with_which_to_compare",
-    #                 "include_in_gallery": True,
-    #                 "exact_match_out": False,
-    #                 "in": {
-    #                     "column": "empty_column",
-    #                     "min_value": 0,
-    #                     "max_value": 0,
-    #                     "catch_exceptions": False,
-    #                 },
-    #                 "out": {"success": False, "observed_value": None},
-    #             }
-    #         ],
-    #     },
-    # ]
-
-    # This dictionary contains metadata for display in the public gallery
-    library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
-        ],
-        "package": "experimental_expectations",
-    }
-
+class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.custom.median",)
-    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
+    metric_dependencies = ("column.custom.wasserstein",)
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+        "raw_values",
+        "partition",
+    )
+
+    library_metadata = {
+        "maturity": "experimental",
+        "package": "great_expectations_experimental",
+        "tags": [],
+        "contributors": [
+            "rexboyce",
+            "abegong",
+            "lodeous",
+        ],
+    }
 
     # Default values
     default_kwarg_values = {
@@ -237,24 +190,68 @@ class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
         "max_value": None,
         "strict_min": None,
         "strict_max": None,
+        "raw_values": None,
+        "partition": None,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
     }
 
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-    #     """
-    #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-    #     neccessary configuration arguments have been provided for the validation of the expectation.
-    #
-    #     Args:
-    #         configuration (OPTIONAL[ExpectationConfiguration]): \
-    #             An optional Expectation Configuration entry that will be used to configure the expectation
-    #     Returns:
-    #         True if the configuration has been validated successfully. Otherwise, raises an exception
-    #     """
-    #     super().validate_configuration(configuration)
-    #     self.validate_metric_value_between_configuration(configuration=configuration)
+    examples = [
+        {
+            "data": {"a": [0, 1, 3], "b": [3, 4, 5]},
+            "tests": [
+                {
+                    "title": "test_raw_values",
+                    "exact_match_out": False,
+                    "in": {"column": "a", "raw_values": [5, 6, 8], "max_value": 6},
+                    "out": {"success": True, "observed_value": 5},
+                    "include_in_gallery": True,
+                },
+                {
+                    "title": "test_raw_values_strict",
+                    "exact_match_out": False,
+                    "in": {
+                        "column": "a",
+                        "raw_values": [5, 6, 8],
+                        "max_value": 5,
+                        "strict_max": True,
+                    },
+                    "out": {"success": False, "observed_value": 5},
+                    "include_in_gallery": True,
+                },
+                {
+                    "title": "test_partition",
+                    "exact_match_out": False,
+                    "in": {
+                        "column": "b",
+                        "partition": {
+                            "values": [1, 2, 4],
+                            "weights": [0.5, 0.25, 0.25],
+                        },
+                        "max_value": 5,
+                        "strict_max": True,
+                    },
+                    "out": {"success": True, "observed_value": 2},
+                    "include_in_gallery": True,
+                },
+            ],
+        },
+    ]
+
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        neccessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            True if the configuration has been validated successfully. Otherwise, raises an exception
+        """
+        super().validate_configuration(configuration)
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")
@@ -321,22 +318,22 @@ class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
     #         )
     #     ]
 
-    # def _validate(
-    #     self,
-    #     configuration: ExpectationConfiguration,
-    #     metrics: Dict,
-    #     runtime_configuration: dict = None,
-    #     execution_engine: ExecutionEngine = None,
-    # ):
-    #     return self._validate_metric_value_between(
-    #         metric_name="column.custom.median",
-    #         configuration=configuration,
-    #         metrics=metrics,
-    #         runtime_configuration=runtime_configuration,
-    #         execution_engine=execution_engine,
-    #     )
+    def _validate(
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
+    ):
+        return self._validate_metric_value_between(
+            metric_name="column.custom.wasserstein",
+            configuration=configuration,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine,
+        )
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnCustomMedianToBeBetween().run_diagnostics()
+    self_check_report = ExpectColumnWassersteinDistanceToBeLessThan().self_check()
     print(json.dumps(self_check_report, indent=2))
