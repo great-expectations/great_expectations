@@ -73,7 +73,7 @@ class UserConfigurableProfiler:
                 compound key. This will create an `expect_column_values_to_be_unique` or
                 `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the
                 primary_or_compound_key columns are specified in ignored_columns
-            semantic_types_dict: A dictionary where the keys are available semantic_types (see ProfilerSemanticTypes)
+            semantic_types_dict: A dictionary where the keys are available semantic_types (see profiler.base.profiler_semantic_types)
                 and the values are lists of columns for which you would like to create semantic_type specific
                 expectations e.g.:
                 "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
@@ -148,11 +148,11 @@ class UserConfigurableProfiler:
                     column_name
                 )
         self.semantic_type_functions = {
-            "datetime": self._build_expectations_datetime,
-            "numeric": self._build_expectations_numeric,
-            "string": self._build_expectations_string,
-            "value_set": self._build_expectations_value_set,
-            "boolean": self._build_expectations_value_set,
+            "DATETIME": self._build_expectations_datetime,
+            "NUMERIC": self._build_expectations_numeric,
+            "STRING": self._build_expectations_string,
+            "VALUE_SET": self._build_expectations_value_set,
+            "BOOLEAN": self._build_expectations_value_set,
         }
 
     def build_suite(self):
@@ -283,7 +283,7 @@ class UserConfigurableProfiler:
                 "Entries in semantic type dict must be lists of column names e.g. "
                 "{'semantic_types': {'numeric': ['number_of_transactions']}}"
             )
-            if k not in profiler_semantic_types:
+            if k.upper() not in profiler_semantic_types:
                 raise ValueError(
                     f"{k} is not a recognized semantic_type. Please only include one of "
                     f"{profiler_semantic_types}"
@@ -298,6 +298,11 @@ class UserConfigurableProfiler:
             for column in selected_columns:
                 if column not in dataset.get_table_columns():
                     raise ProfilerError(f"Column {column} does not exist.")
+                elif column in self.ignored_columns:
+                    raise ValueError(
+                        f"Column {column} is specified in both the semantic_types_dict and the list of "
+                        f"ignored columns. Please remove one of these entries to proceed."
+                    )
 
         for semantic_type, column_list in self.semantic_types_dict.items():
             for column_name in column_list:
@@ -416,7 +421,7 @@ class UserConfigurableProfiler:
         except NotImplementedError:
             type_ = "unknown"
 
-        if type_ == "numeric":
+        if type_ == "NUMERIC":
             dataset.expect_column_values_to_be_in_type_list(
                 column,
                 type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
@@ -525,8 +530,17 @@ class UserConfigurableProfiler:
             semantic_types = []
             for semantic_type, column_list in self.semantic_types_dict.items():
                 if column_name in column_list:
-                    semantic_types.append(semantic_type)
+                    semantic_types.append(semantic_type.upper())
             column_info_entry["semantic_types"] = semantic_types
+            if all(
+                i in column_info_entry.get("semantic_types")
+                for i in ["BOOLEAN", "VALUE_SET"]
+            ):
+                logger.warn(
+                    f"Column {column_name} has both 'BOOLEAN' and 'VALUE_SET' specified as semantic_types."
+                    f"As these are currently the same in function, the 'VALUE_SET' type will be removed."
+                )
+                column_info_entry["semantic_types"].remove("VALUE_SET")
 
         self.column_info[column_name] = column_info_entry
 

@@ -54,6 +54,7 @@ def possible_expectations_set():
         "expect_column_values_to_be_in_set",
         "expect_column_values_to_be_between",
         "expect_column_values_to_be_unique",
+        "expect_compound_columns_to_be_unique",
     }
 
 
@@ -143,27 +144,27 @@ def test_init_with_semantic_types(cardinality_dataset):
     assert profiler.column_info.get("col_two") == {
         "cardinality": "TWO",
         "type": "INT",
-        "semantic_types": ["value_set"],
+        "semantic_types": ["VALUE_SET"],
     }
     assert profiler.column_info.get("col_very_few") == {
         "cardinality": "VERY_FEW",
         "type": "INT",
-        "semantic_types": ["value_set"],
+        "semantic_types": ["VALUE_SET"],
     }
     assert profiler.column_info.get("col_few") == {
         "cardinality": "FEW",
         "type": "INT",
-        "semantic_types": ["numeric"],
+        "semantic_types": ["NUMERIC"],
     }
     assert profiler.column_info.get("col_many") == {
         "cardinality": "MANY",
         "type": "INT",
-        "semantic_types": ["numeric"],
+        "semantic_types": ["NUMERIC"],
     }
     assert profiler.column_info.get("col_very_many") == {
         "cardinality": "VERY_MANY",
         "type": "INT",
-        "semantic_types": ["numeric"],
+        "semantic_types": ["NUMERIC"],
     }
     assert profiler.column_info.get("col_unique") == {
         "cardinality": "UNIQUE",
@@ -211,6 +212,19 @@ def test__validate_semantic_types_dict(cardinality_dataset):
     assert e.value.args[0] == (
         f"incorrect_type is not a recognized semantic_type. Please only include one of "
         f"{profiler_semantic_types}"
+    )
+
+    # Error if column is specified for both semantic_types and ignored
+    working_semantic_type = {"numeric": ["col_few"]}
+    with pytest.raises(ValueError) as e:
+        UserConfigurableProfiler(
+            cardinality_dataset,
+            semantic_types_dict=working_semantic_type,
+            ignored_columns=["col_few"],
+        )
+    assert e.value.args[0] == (
+        f"Column col_few is specified in both the semantic_types_dict and the list of ignored columns. Please remove "
+        f"one of these entries to proceed."
     )
 
 
@@ -418,7 +432,9 @@ def test_profiled_dataset_passes_own_validation(
     assert results["success"]
 
 
-def test_profiler_all_expectation_types(titanic_data_context):
+def test_profiler_all_expectation_types(
+    titanic_data_context, possible_expectations_set
+):
     """
     What does this test do and why?
     ...
@@ -427,17 +443,70 @@ def test_profiler_all_expectation_types(titanic_data_context):
     df = pd.read_csv("../test_sets/yellow_tripdata_sample_2019-01.csv")
     batch_df = ge.dataset.PandasDataset(df)
 
-    semantic_types = {"datetime": ["pickup_datetime", "dropoff_datetime"]}
+    ignored_columns = [
+        "pickup_location_id",
+        "dropoff_location_id",
+        "fare_amount",
+        "extra",
+        "mta_tax",
+        "tip_amount",
+        "tolls_amount",
+        "improvement_surcharge",
+        "congestion_surcharge",
+    ]
+    semantic_types = {
+        "datetime": ["pickup_datetime", "dropoff_datetime"],
+        "numeric": ["total_amount", "passenger_count"],
+        "value_set": [
+            "payment_type",
+            "rate_code_id",
+            "store_and_fwd_flag",
+            "passenger_count",
+        ],
+        "boolean": ["store_and_fwd_flag"],
+    }
 
-    profiler = UserConfigurableProfiler(batch_df, semantic_types_dict=semantic_types)
+    profiler = UserConfigurableProfiler(
+        batch_df,
+        semantic_types_dict=semantic_types,
+        ignored_columns=ignored_columns,
+        primary_or_compound_key=[
+            "vendor_id",
+            "pickup_datetime",
+            "dropoff_datetime",
+            "trip_distance",
+            "pickup_location_id",
+            "dropoff_location_id",
+        ],
+    )
+
+    assert profiler.column_info.get("rate_code_id")
     suite = profiler.build_suite()
+    assert len(suite.expectations) == 46
+    (
+        columns_with_expectations,
+        expectations_from_suite,
+    ) = get_set_of_columns_and_expectations_from_suite(suite)
 
-    context.save_expectation_suite(suite)
+    unexpected_expectations = {
+        "expect_column_values_to_be_unique",
+        "expect_column_values_to_be_null",
+    }
+    assert expectations_from_suite == {
+        i for i in possible_expectations_set if i not in unexpected_expectations
+    }
+
+    ignored_included_columns_overlap = [
+        i for i in columns_with_expectations if i in ignored_columns
+    ]
+    assert len(ignored_included_columns_overlap) == 0
+
+    # context.save_expectation_suite(suite)
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[batch_df]
     )
-    # validation_result_identifier = results.list_validation_result_identifiers()[0]
+    validation_result_identifier = results.list_validation_result_identifiers()[0]
 
-    # context.build_data_docs()
-    # context.open_data_docs(validation_result_identifier)
+    context.build_data_docs()
+    context.open_data_docs(validation_result_identifier)
     assert results["success"]

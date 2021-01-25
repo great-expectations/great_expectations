@@ -172,36 +172,26 @@ class ProfilerTypeMapping:
 
 
 profiler_data_types_with_mapping = {
-    "int": list(ProfilerTypeMapping.INT_TYPE_NAMES),
-    "float": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
-    "numeric": (
+    "INT": list(ProfilerTypeMapping.INT_TYPE_NAMES),
+    "FLOAT": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
+    "NUMERIC": (
         list(ProfilerTypeMapping.INT_TYPE_NAMES)
         + list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)
     ),
-    "string": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
-    "boolean": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
-    "datetime": list(ProfilerTypeMapping.DATETIME_TYPE_NAMES),
-    "unknown": ["unknown"],
+    "STRING": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
+    "BOOLEAN": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
+    "DATETIME": list(ProfilerTypeMapping.DATETIME_TYPE_NAMES),
+    "UNKNOWN": ["unknown"],
 }
-
 
 profiler_semantic_types = {
-    "datetime",
-    "numeric",
-    "string",
-    "value_set",
-    "boolean",
-    "other",
+    "DATETIME",
+    "NUMERIC",
+    "STRING",
+    "VALUE_SET",
+    "BOOLEAN",
+    "OTHER",
 }
-
-
-class ProfilerSemanticTypes(Enum):
-    DATETIME = 0
-    NUMERIC = 1
-    STRING = 2
-    VALUE_SET = 3
-    BOOLEAN = 4
-    OTHER = 5
 
 
 class Profiler(metaclass=abc.ABCMeta):
