@@ -253,16 +253,24 @@ def test_case_runner(test_case):
     # Note: this should never be done in practice, but we are wiping expectations to reuse datasets during testing.
     test_case["dataset"]._initialize_expectations()
 
-    if test_case["test"]["title"] == "negative_multiple_duplicate_values_with_names_tested":
+    if (
+        test_case["test"]["title"]
+        == "negative_multiple_duplicate_values_with_names_tested"
+    ):
         print("HELLO")
         if isinstance(test_case["dataset"], SqlAlchemyDataset):
-           if test_case["dataset"].sql_engine_dialect.dialect_description != "sqlite+pysqlite":
-            evaluate_json_test(
-                   test_case["dataset"], test_case["expectation_type"], test_case["test"]
-               )
+            if (
+                test_case["dataset"].sql_engine_dialect.dialect_description
+                != "sqlite+pysqlite"
+            ):
+                evaluate_json_test(
+                    test_case["dataset"],
+                    test_case["expectation_type"],
+                    test_case["test"],
+                )
         #        print("stop")
         #        print(test_case)
-                # GREAT SO THIS TEST WORKS
+        # GREAT SO THIS TEST WORKS
         #    print("HELLO")
         #
 

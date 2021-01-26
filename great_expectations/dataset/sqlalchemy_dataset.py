@@ -1798,7 +1798,7 @@ WHERE
         )
         print("I should run")
 
-        #< WILL>
+        # < WILL>
         if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
             rows = self.engine.execute(dup_query).fetchall()
             dup_query = []
