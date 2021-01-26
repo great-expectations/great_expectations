@@ -235,18 +235,7 @@ class MetaSqlAlchemyDataset(Dataset):
                     ignore_values_condition=ignore_values_condition,
                 )
 
-            # I thought this was where the query was supposed to blow up
-            # <WILL> I feel close
-            print(count_query)
-            print("--- this is where the decorator actually runs the thing --- ")
-            print(self.engine)
-            print("--- this is where the decorator actually runs the thing --- ")
             count_results: dict = dict(self.engine.execute(count_query).fetchone())
-
-            print("--- this is where the decorator actually runs the thing --- ")
-            print("--- this is where the decorator actually runs the thing --- ")
-            print("--- this is where the decorator actually runs the thing --- ")
-
             # Handle case of empty table gracefully:
             if (
                 "element_count" not in count_results
@@ -478,9 +467,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # was used for a temp table and raising an error
             schema = None
             table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-            print("I made table name")
-            print(custom_sql)
-            print(table_name)
             # mssql expects all temporary table names to have a prefix '#'
             if engine.dialect.name.lower() == "mssql":
                 table_name = f"#{table_name}"
@@ -1796,9 +1782,8 @@ WHERE
             .group_by(sa.column(column))
             .having(sa.func.count(sa.column(column)) > 1)
         )
-        print("I should run")
-
-        # < WILL>
+        # handle mysql case, which does not allow the temp_table to be referred to more than once.
+        # https://github.com/great-expectations/great_expectations/pull/2325
         if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
             rows = self.engine.execute(dup_query).fetchall()
             dup_query = []

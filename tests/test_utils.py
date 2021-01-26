@@ -391,7 +391,6 @@ def get_dataset(
     elif dataset_type == "mysql":
         if not create_engine:
             return None
-        print("get_dataset()")
         engine = create_engine("mysql+pymysql://root@localhost/test_ci")
 
         sql_dtypes = {}
@@ -874,7 +873,6 @@ def _build_sa_validator_with_data(
             "postgresql://postgres@localhost/test_ci"
         )
     elif sa_engine_name == "mysql":
-        print("_build_sa_validator_with_data")
         engine = create_engine("mysql+pymysql://root@localhost/test_ci")
     elif sa_engine_name == "mssql":
         engine = create_engine(

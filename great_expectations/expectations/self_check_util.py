@@ -870,7 +870,6 @@ def _build_sa_validator_with_data(
             "postgresql://postgres@localhost/test_ci"
         )
     elif sa_engine_name == "mysql":
-        print("sa_validator_with_data")
         engine = create_engine("mysql+pymysql://root@localhost/test_ci")
     elif sa_engine_name == "mssql":
         engine = create_engine(
@@ -1689,7 +1688,6 @@ def build_test_backends_list():
         mysql = False
         if sa and mysql:
             try:
-                print("this is build_test_backends_list")
                 engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
                 conn = engine.connect()
                 conn.close()
