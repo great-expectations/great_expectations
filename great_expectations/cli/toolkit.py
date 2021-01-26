@@ -431,6 +431,7 @@ def load_data_context_with_error_handling(
                 context = DataContext(context_root_dir=directory)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
+        directory = directory or DataContext.find_context_root_dir()
         ge_config_version = DataContext.get_ge_config_version(
             context_root_dir=directory
         )
