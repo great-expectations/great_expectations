@@ -111,7 +111,7 @@ class UserConfigurableProfiler:
         self.table_expectations_only = table_expectations_only
         assert isinstance(self.table_expectations_only, bool)
         if self.table_expectations_only is True:
-            logger.debug(
+            logger.info(
                 "table_expectations_only is set to True. When used to build a suite, this profiler will ignore all"
                 "columns and create expectations only at the table level. If you would also like to create expectations "
                 "at the column level, you can instantiate a new profiler with table_expectations_only set to False"
@@ -188,7 +188,7 @@ class UserConfigurableProfiler:
         self._build_expectations_table(self.dataset)
 
         if self.value_set_threshold:
-            logger.debug(
+            logger.info(
                 "Using this profiler with a semantic_types dict will ignore the value_set_threshold parameter. If "
                 "you would like to include value_set expectations, you can include a 'value_set' entry in your "
                 "semantic_types dict with any columns for which you would like a value_set expectation, or you can "
@@ -255,7 +255,6 @@ class UserConfigurableProfiler:
             )
 
         expectation_suite = self._build_column_description_metadata(self.dataset)
-        logger.debug("")
         self._display_suite_by_column(
             suite=expectation_suite
         )  # include in the actual profiler
@@ -308,10 +307,7 @@ class UserConfigurableProfiler:
             for column_name in column_list:
                 processed_column = self.column_info.get(column_name)
                 if semantic_type == "datetime":
-                    assert processed_column.get("type") in (
-                        "DATETIME",
-                        "STRING",
-                    ), (  # TODO: Should we allow strings here?
+                    assert processed_column.get("type") in ("DATETIME", "STRING",), (
                         f"Column {column_name} must be a datetime column or a string but appears to be "
                         f"{processed_column.get('type')}"
                     )
@@ -323,14 +319,6 @@ class UserConfigurableProfiler:
                     ), f"Column {column_name} must be an int or a float but appears to be {processed_column.get('type')}"
                 elif semantic_type in ("STRING", "VALUE_SET"):
                     pass
-                # Should we validate value_set expectations if the cardinality is unexpected? This behavior conflicts
-                #  with the compare two tables functionality, which is why I am not including it for now.
-                # elif semantic_type in ("boolean", "value_set"):
-                #     if column_info["cardinality"] in ("many", "very many", "unique"):
-                #         logger.debug(f"Column {column_name} appears to have high cardinality. Creating a "
-                #                     f"{semantic_type} expectation, but ensure that this is correctly configured.")
-                # else:
-                #     logger.debug(f"Semantic_type: {semantic_type} is unknown. Skipping")
         return self.semantic_types_dict
 
     def _add_column_type_to_column_info(self, dataset, column_name):
@@ -344,7 +332,7 @@ class UserConfigurableProfiler:
             The type of the column
         """
         if "expect_column_values_to_be_in_type_list" in self.excluded_expectations:
-            logger.debug(
+            logger.info(
                 "expect_column_values_to_be_in_type_list is in the excluded_expectations list. This"
                 "expectation is required to establish column data, so it will be run and then removed from the"
                 "expectation suite."
@@ -505,7 +493,7 @@ class UserConfigurableProfiler:
             num_unique, pct_unique
         )
 
-        return cardinality
+        return cardinality.name
 
     def _add_semantic_types_by_column_from_config_to_column_info(self, column_name):
         """
@@ -536,7 +524,7 @@ class UserConfigurableProfiler:
                 i in column_info_entry.get("semantic_types")
                 for i in ["BOOLEAN", "VALUE_SET"]
             ):
-                logger.debug(
+                logger.info(
                     f"Column {column_name} has both 'BOOLEAN' and 'VALUE_SET' specified as semantic_types."
                     f"As these are currently the same in function, the 'VALUE_SET' type will be removed."
                 )
@@ -1028,7 +1016,7 @@ class UserConfigurableProfiler:
                     column, type_list=type_list
                 )
             else:
-                logger.log(
+                logger.info(
                     f"Column type for column {column} is unknown. "
                     f"Skipping expect_column_values_to_be_in_type_list for this column."
                 )

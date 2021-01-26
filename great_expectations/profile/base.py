@@ -50,25 +50,35 @@ class OrderedProfilerCardinality(OrderedEnum):
     VERY_MANY = 6
     UNIQUE = 7
 
-    @staticmethod
-    def get_basic_column_cardinality(num_unique=None, pct_unique=None):
-        if num_unique is None or num_unique == 0 or pct_unique is None:
-            cardinality = "NONE"
-        elif pct_unique == 1.0:
-            cardinality = "UNIQUE"
-        elif num_unique == 1:
-            cardinality = "ONE"
-        elif num_unique == 2:
-            cardinality = "TWO"
-        elif num_unique < 20:
-            cardinality = "VERY_FEW"
-        elif num_unique < 60:
-            cardinality = "FEW"
-        elif pct_unique > 0.1:
-            cardinality = "VERY_MANY"
-        else:
-            cardinality = "MANY"
+    @classmethod
+    def get_basic_column_cardinality(cls, num_unique=0, pct_unique=0):
+        """
+        Takes the number and percentage of unique values in a column and returns the column cardinality.
+        If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
+        num_unique and pct_unique.
+        Args:
+            num_unique: The number of unique values in a column
+            pct_unique: The percentage of unique values in a column
 
+        Returns:
+            The column cardinality
+        """
+        if pct_unique == 1.0:
+            cardinality = cls.UNIQUE
+        elif num_unique == 1:
+            cardinality = cls.ONE
+        elif num_unique == 2:
+            cardinality = cls.TWO
+        elif 0 < num_unique < 20:
+            cardinality = cls.VERY_FEW
+        elif 0 < num_unique < 60:
+            cardinality = cls.FEW
+        elif num_unique is None or num_unique == 0 or pct_unique is None:
+            cardinality = cls.NONE
+        elif pct_unique > 0.1:
+            cardinality = cls.VERY_MANY
+        else:
+            cardinality = cls.MANY
         return cardinality
 
 

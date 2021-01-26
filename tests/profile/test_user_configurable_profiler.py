@@ -4,7 +4,10 @@ import pytest
 import great_expectations as ge
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import PandasDataset
-from great_expectations.profile.base import profiler_semantic_types
+from great_expectations.profile.base import (
+    OrderedProfilerCardinality,
+    profiler_semantic_types,
+)
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
@@ -437,7 +440,7 @@ def test_profiler_all_expectation_types(
 ):
     """
     What does this test do and why?
-    ...
+    Ensures all available expectation types work as expected
     """
     context = titanic_data_context
     df = pd.read_csv("../test_sets/yellow_tripdata_sample_2019-01.csv")
@@ -506,3 +509,34 @@ def test_profiler_all_expectation_types(
     )
 
     assert results["success"]
+
+
+def test_column_cardinality_functions(cardinality_dataset):
+    profiler = UserConfigurableProfiler(cardinality_dataset)
+    assert profiler.column_info.get("col_none").get("cardinality") == "NONE"
+    assert profiler.column_info.get("col_one").get("cardinality") == "ONE"
+    assert profiler.column_info.get("col_two").get("cardinality") == "TWO"
+    assert profiler.column_info.get("col_very_few").get("cardinality") == "VERY_FEW"
+    assert profiler.column_info.get("col_few").get("cardinality") == "FEW"
+    assert profiler.column_info.get("col_many").get("cardinality") == "MANY"
+    assert profiler.column_info.get("col_very_many").get("cardinality") == "VERY_MANY"
+
+    cardinality_with_ten_num_and_no_pct = (
+        OrderedProfilerCardinality.get_basic_column_cardinality(num_unique=10)
+    )
+    assert cardinality_with_ten_num_and_no_pct.name == "VERY_FEW"
+
+    cardinality_with_unique_pct_and_no_num = (
+        OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=1.0)
+    )
+    assert cardinality_with_unique_pct_and_no_num.name == "UNIQUE"
+
+    cardinality_with_no_pct_and_no_num = (
+        OrderedProfilerCardinality.get_basic_column_cardinality()
+    )
+    assert cardinality_with_no_pct_and_no_num.name == "NONE"
+
+    cardinality_with_large_pct_and_no_num = (
+        OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=0.5)
+    )
+    assert cardinality_with_large_pct_and_no_num.name == "NONE"
