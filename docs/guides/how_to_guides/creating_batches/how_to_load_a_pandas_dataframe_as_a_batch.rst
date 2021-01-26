@@ -13,7 +13,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-            - Configured a :ref:`Pandas/filesystem Datasource <_how_to_guides__configuring_datasources>`
+            - Configured a :ref:`Pandas/filesystem Datasource <how_to_guides__configuring_datasources>`
             - Identified a pandas DataFrame that you would like to use as the data to validate.
 
         Steps
@@ -21,36 +21,36 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         1. Construct batch_kwargs
 
-            batch_kwargs describe the data you plan to validate. Here we are using a datasource you have configured to pass in a DataFrame under the "dataset" key.
+            batch_kwargs describe the data you plan to validate. Here we are using a datasource you have configured and passing in a DataFrame under the ``"dataset"`` key.
 
-        .. code-block:: python
+            .. code-block:: python
 
-            batch_kwargs = {
-                "datasource": "insert_your_datasource_name_here",
-                "dataset": insert_your_dataframe_here
-                "data_asset_name": "optionally_insert_your_data_asset_name_here",
-            }
+                batch_kwargs = {
+                    "datasource": "insert_your_datasource_name_here",
+                    "dataset": insert_your_dataframe_here
+                    "data_asset_name": "optionally_insert_your_data_asset_name_here",
+                }
 
         2. Obtain an Expectation Suite to use to validate your batch
 
-        .. code-block:: python
+            .. code-block:: python
 
-            suite = context.get_expectation_suite(insert_your_expectation_suite_name_here)
+                suite = context.get_expectation_suite(insert_your_expectation_suite_name_here)
 
-        If you have not already created a suite, you can do so now.
+            If you have not already created a suite, you can do so now.
 
-        .. code-block:: python
+            .. code-block:: python
 
-            suite = context.create_expectation_suite(insert_your_expectation_suite_name_here)
+                suite = context.create_expectation_suite(insert_your_expectation_suite_name_here)
 
         3. Get the batch to validate
 
-        .. code-block:: python
+            .. code-block:: python
 
-            batch = context.get_batch(
-                batch_kwargs=batch_kwargs,
-                expectation_suite_name=expectation_suite_name
-            )
+                batch = context.get_batch(
+                    batch_kwargs=batch_kwargs,
+                    expectation_suite_name=expectation_suite_name
+                )
 
 
         Now that you have a Batch, you can use it to create Expectations or validate the data.
@@ -58,6 +58,11 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
     .. tab-container:: tab1
         :title: Show Docs for Experimental API (0.13)
+
+
+        What used to be called a “batch” in the old API was replaced with Validator. A Validator knows how to validate particular batch of data on a particular Execution Engine against a particular Expectation Suite. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
+
+        You can read more about the core classes that make GE run in our :ref:`Core Concepts reference guide <reference__core_concepts>`.
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -69,7 +74,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         1. Configure a Datasource
 
-            Configure a Datasource using the RuntimeDataConnector to connect to your DataFrame. Since we are reading a pandas DataFrame, we use the PandasExeecutionEngine. You can use runtime_keys to define what data you can attach as additional metadata to your DataFrame.
+            Configure a Datasource using the RuntimeDataConnector to connect to your DataFrame. Since we are reading a pandas DataFrame, we use the PandasExecutionEngine. You can use ``runtime_keys`` to define what data you can attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
 
             .. code-block:: yaml
 
@@ -88,36 +93,40 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         2. Obtain an Expectation Suite to use to validate your batch
 
-        .. code-block:: python
+            .. code-block:: python
 
-            suite = context.get_expectation_suite(insert_your_expectation_suite_name_here)
+                suite = context.get_expectation_suite(insert_your_expectation_suite_name_here)
 
-        If you have not already created a suite, you can do so now.
+            If you have not already created a suite, you can do so now.
 
-        .. code-block:: python
+            .. code-block:: python
 
-            suite = context.create_expectation_suite(insert_your_expectation_suite_name_here)
+                suite = context.create_expectation_suite(insert_your_expectation_suite_name_here)
 
         3. Construct a BatchRequest
 
-            First we will create a BatchRequest and pass it our DataFrame via the ``batch_data`` argument. NOTE: data_asset_name can be set only to this predefined string: “IN_MEMORY_DATA_ASSET” for now. We will fix it very soon and will allow you to specify your own name.
+            We will create a BatchRequest and pass it our DataFrame via the ``batch_data`` argument.
 
-        .. code-block:: python
+            Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``runtime_keys`` to define which keys are allowed.
 
-            from great_expectations.core.batch import BatchRequest
+            NOTE: data_asset_name can be set only to this predefined string: ``“IN_MEMORY_DATA_ASSET”`` for now. We will fix it very soon and will allow you to specify your own name.
 
-            batch_request = BatchRequest(
-                datasource_name="insert_your_pandas_datasource_name_here",
-                data_connector_name="insert_your_runtime_data_connector_name_here",
-                batch_data=insert_your_dataframe_here,
-                data_asset_name="IN_MEMORY_DATA_ASSET",
-                partition_request={
-                    "partition_identifiers": {
-                        "some_key_maybe_pipeline_stage": "ingestion step 1",
-                        "some_other_key_maybe_run_id": "run 18"
+            .. code-block:: python
+
+                from great_expectations.core.batch import BatchRequest
+
+                batch_request = BatchRequest(
+                    datasource_name="insert_your_pandas_datasource_name_here",
+                    data_connector_name="insert_your_runtime_data_connector_name_here",
+                    batch_data=insert_your_dataframe_here,
+                    data_asset_name="IN_MEMORY_DATA_ASSET",
+                    partition_request={
+                        "partition_identifiers": {
+                            "some_key_maybe_pipeline_stage": "ingestion step 1",
+                            "some_other_key_maybe_run_id": "run 18"
+                        }
                     }
-                }
-            )
+                )
 
 
         4. Construct a Validator
