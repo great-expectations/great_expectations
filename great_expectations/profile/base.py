@@ -7,13 +7,12 @@ from typing import Any
 
 from dateutil.parser import parse
 
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_asset import DataAsset
+from great_expectations.dataset import Dataset
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.validator.validator import Validator
-
-from ..core.expectation_suite import ExpectationSuite
-from ..core.run_identifier import RunIdentifier
-from ..data_asset import DataAsset
-from ..dataset import Dataset
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 import numpy as np
 from dateutil.parser import parse
@@ -13,7 +14,8 @@ from great_expectations.profile.base import (
     profiler_data_types_with_mapping,
     profiler_semantic_types,
 )
-from great_expectations.profile.basic_dataset_profiler import logger
+
+logger = logging.getLogger(__name__)
 
 
 class UserConfigurableProfiler:
