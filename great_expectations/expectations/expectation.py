@@ -929,7 +929,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
                     {
                         "test title": exp_test["test"]["title"],
                         "backend": exp_test["backend"],
-                        "success": "true",
+                        "test_passed": "true",
                     }
                 )
             except Exception as e:
@@ -937,7 +937,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
                     {
                         "test title": exp_test["test"]["title"],
                         "backend": exp_test["backend"],
-                        "success": "false",
+                        "test_passed": "false",
                         "error_message": str(e),
                         "stack_trace": traceback.format_exc(),
                     }
