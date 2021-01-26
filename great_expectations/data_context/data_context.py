@@ -746,9 +746,7 @@ class BaseDataContext:
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
         except AttributeError:
-            return DataContextConfigDefaults.DEFAULT_STORES.value[
-                DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-            ]
+            return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
 
     @property
     def checkpoint_store(self):
@@ -756,7 +754,10 @@ class BaseDataContext:
         try:
             return self.stores[checkpoint_store_name]
         except KeyError:
-            return DataContextConfigDefaults.DEFAULT_STORES.value[checkpoint_store_name]
+            return self._build_store_from_config(
+                checkpoint_store_name,
+                DataContextConfigDefaults.DEFAULT_STORES.value[checkpoint_store_name],
+            )
 
     @property
     def expectations_store_name(self):
@@ -1875,12 +1876,8 @@ class BaseDataContext:
             self.expectations_store_name,
             self.validations_store_name,
             self.evaluation_parameter_store_name,
+            self.checkpoint_store_name,
         ]
-        try:
-            active_store_names.append(self.checkpoint_store_name)
-        except AttributeError:
-            pass
-
         return [
             store for store in self.list_stores() if store["name"] in active_store_names
         ]
