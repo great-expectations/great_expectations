@@ -82,7 +82,7 @@ class UserConfigurableProfiler:
                 `expect_table_row_count_to_be_between`). If a primary_or_compound key is specified, it will create
                 a uniqueness expectation for that column as well
             value_set_threshold: Takes a string from the following ordered list - "none", "one", "two",
-                "very_few", "few", "many", "very_many", "unique". When the profiler runs withou a semantic_types
+                "very_few", "few", "many", "very_many", "unique". When the profiler runs without a semantic_types
                 dict, each column is profiled for cardinality. This threshold determines the greatest cardinality
                 for which to add `expect_column_values_to_be_in_set`. For example, if value_set_threshold is set to
                 "unique", it will add a value_set expectation for every included column. If set to "few", it will
