@@ -443,7 +443,9 @@ def test_profiler_all_expectation_types(
     Ensures all available expectation types work as expected
     """
     context = titanic_data_context
-    df = pd.read_csv("../test_sets/yellow_tripdata_sample_2019-01.csv")
+    df = ge.read_csv(
+        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv")
+    )
     batch_df = ge.dataset.PandasDataset(df)
 
     ignored_columns = [
