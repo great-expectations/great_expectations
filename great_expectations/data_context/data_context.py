@@ -745,19 +745,25 @@ class BaseDataContext:
     def checkpoint_store_name(self):
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
-        except AttributeError:
-            return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+        except AttributeError as e:
+            if not default_checkpoints_exist(directory_path=self.root_directory):
+                return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+            raise e
 
     @property
     def checkpoint_store(self):
         checkpoint_store_name: str = self.checkpoint_store_name
         try:
             return self.stores[checkpoint_store_name]
-        except KeyError:
-            return self._build_store_from_config(
-                checkpoint_store_name,
-                DataContextConfigDefaults.DEFAULT_STORES.value[checkpoint_store_name],
-            )
+        except KeyError as e:
+            if not default_checkpoints_exist(directory_path=self.root_directory):
+                return self._build_store_from_config(
+                    checkpoint_store_name,
+                    DataContextConfigDefaults.DEFAULT_STORES.value[
+                        checkpoint_store_name
+                    ],
+                )
+            raise e
 
     @property
     def expectations_store_name(self):
