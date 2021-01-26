@@ -65,6 +65,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
+    default_checkpoints_exist,
     file_relative_path,
     instantiate_class_from_config,
     load_class,
@@ -742,11 +743,20 @@ class BaseDataContext:
 
     @property
     def checkpoint_store_name(self):
-        return self.project_config_with_variables_substituted.checkpoint_store_name
+        try:
+            return self.project_config_with_variables_substituted.checkpoint_store_name
+        except AttributeError:
+            return DataContextConfigDefaults.DEFAULT_STORES.value[
+                DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
+            ]
 
     @property
     def checkpoint_store(self):
-        return self.stores[self.checkpoint_store_name]
+        checkpoint_store_name: str = self.checkpoint_store_name
+        try:
+            return self.stores[checkpoint_store_name]
+        except KeyError:
+            return DataContextConfigDefaults.DEFAULT_STORES.value[checkpoint_store_name]
 
     @property
     def expectations_store_name(self):
