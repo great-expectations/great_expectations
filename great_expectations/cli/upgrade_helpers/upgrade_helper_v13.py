@@ -188,7 +188,7 @@ Please consult the 0.13.x migration guide to learn more about the automated upgr
 
 Would you like to proceed with the project upgrade?\
 """
-        return upgrade_overview, True
+        return upgrade_overview, False
 
     def _save_upgrade_log(self):
         current_time = datetime.datetime.now(datetime.timezone.utc).strftime(
