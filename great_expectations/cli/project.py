@@ -54,7 +54,9 @@ def project_upgrade(directory):
     if load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=True
     ):
-        up_to_date_message = "Your project is up-to-date - no upgrade is necessary.\n"
+        up_to_date_message = (
+            "Your project is up-to-date - no further upgrade is necessary.\n"
+        )
         cli_message(f"<green>{up_to_date_message}</green>")
         sys.exit(0)
 
