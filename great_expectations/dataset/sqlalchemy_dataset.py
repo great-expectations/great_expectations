@@ -1799,19 +1799,13 @@ WHERE
         print("I should run")
 
         #< WILL>
-        # if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
-        #     print("am i goign to run")
-        #
-        #     rows = self.engine.execute(dup_query).fetchall()
-        #     print("this is rows")
-        #     print(rows)
-        #     dup_query = []
-        #     for row in rows:
-        #         row_as_dict = dict(row)
-        #         dup_query.append(row_as_dict[column])
-        res = sa.column(column).notin_(dup_query)
-        print("holder")
-        return res
+        if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
+            rows = self.engine.execute(dup_query).fetchall()
+            dup_query = []
+            for row in rows:
+                row_as_dict = dict(row)
+                dup_query.append(row_as_dict[column])
+        return sa.column(column).notin_(dup_query)
 
     def _get_dialect_regex_expression(self, column, regex, positive=True):
         try:
