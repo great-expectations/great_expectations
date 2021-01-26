@@ -67,11 +67,6 @@ def test_cli_init_on_new_project(
         catch_exceptions=False,
     )
     stdout = result.output
-
-    print("===============")
-    print(stdout)
-    print("===============")
-
     assert len(stdout) < 6000, "CLI output is unreasonably long."
 
     assert "Always know what to expect from your data" in stdout
