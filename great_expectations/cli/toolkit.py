@@ -500,7 +500,7 @@ def upgrade_project(
             context_root_dir=context_root_dir,
             ge_config_version=ge_config_version,
             continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
-            from_cli_upgrade_command=False,
+            from_cli_upgrade_command=from_cli_upgrade_command,
         )
         if exception_occurred or not increment_version:
             break
