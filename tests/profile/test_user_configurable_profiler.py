@@ -440,7 +440,7 @@ def test_profiler_all_expectation_types(
 ):
     """
     What does this test do and why?
-    Ensures all available expectation types work as expected
+    Ensures that all available expectation types work as expected
     """
     context = titanic_data_context
     df = ge.read_csv(
