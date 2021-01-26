@@ -392,7 +392,7 @@ def get_dataset(
         if not create_engine:
             return None
         print("get_dataset()")
-        engine = create_engine("mysql+pymysql://root:@localhost:3306/test_ci")
+        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
 
         sql_dtypes = {}
         if (
@@ -875,7 +875,7 @@ def _build_sa_validator_with_data(
         )
     elif sa_engine_name == "mysql":
         print("_build_sa_validator_with_data")
-        engine = create_engine("mysql+pymysql://root:@localhost:3306/test_ci")
+        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
     elif sa_engine_name == "mssql":
         engine = create_engine(
             "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",

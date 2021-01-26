@@ -31,6 +31,16 @@
         "unique": "INTEGER",
         "null": "NVARCHAR",
         "mult_dup": "VARCHAR"
+      },
+      "mysql": {
+        "a": "CHAR",
+        "b": "CHAR",
+        "c": "INTEGER",
+        "d": "CHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "CHAR",
+        "mult_dup": "CHAR"
       }
     },
     "tests" : [
@@ -138,9 +148,7 @@
           "success": false,
           "unexpected_list": ["1", "1", "2", "2"],
           "unexpected_index_list": [0, 1, 2, 3]
-        },
-        "only_for": ["mysql"]
-
+        }
       }
     ]
   }]
