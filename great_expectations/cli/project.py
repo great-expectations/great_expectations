@@ -6,9 +6,9 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.toolkit import load_data_context_with_error_handling
-from great_expectations.cli.upgrade_helpers import UpgradeHelperV11
 from great_expectations.cli.util import cli_message
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
 
 @click.group()
@@ -61,7 +61,18 @@ def project_upgrade(directory):
 
 def do_config_check(target_directory):
     try:
-        context = DataContext(context_root_dir=target_directory)
+        context: DataContext = DataContext(context_root_dir=target_directory)
+        ge_config_version: int = context.get_config().config_version
+        if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+            upgrade_message: str = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
+Please consult the 0.13.x migration guide ttps://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
+upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
+            """
+            return (
+                False,
+                upgrade_message,
+                None,
+            )
         return True, None, context
     except (
         ge_exceptions.InvalidConfigurationYamlError,

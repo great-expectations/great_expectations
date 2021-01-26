@@ -415,9 +415,10 @@ def load_data_context_with_error_handling(
 ) -> DataContext:
     """Return a DataContext with good error handling and exit codes."""
     try:
-        context: Optional[DataContext] = DataContext(directory)
+        context: DataContext = DataContext(context_root_dir=directory)
         ge_config_version: int = context.get_config().config_version
         if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+            directory = directory or context.root_directory
             (
                 increment_version,
                 exception_occurred,
@@ -427,7 +428,7 @@ def load_data_context_with_error_handling(
                 continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
             )
             if not exception_occurred and increment_version:
-                context = DataContext(directory)
+                context = DataContext(context_root_dir=directory)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or DataContext.find_context_root_dir()
