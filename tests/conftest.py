@@ -154,7 +154,9 @@ def build_test_backends_list(metafunc):
         mysql = metafunc.config.getoption("--mysql")
         if sa and mysql:
             try:
-                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                print("build_test_backends_list()")
+                engine = sa.create_engine("mysql+pymysql://root:@localhost:3306/test_ci")
+                print("creating engine")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
@@ -219,7 +221,8 @@ def build_test_backends_list_cfe(metafunc):
         mysql = metafunc.config.getoption("--mysql")
         if sa and mysql:
             try:
-                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                print("this is build_test_backends_list_cfe")
+                engine = sa.create_engine("mysql+pymysql://root:@localhost:3306/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):

@@ -388,7 +388,7 @@ def get_dataset(
         if not create_engine:
             return None
 
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        engine = create_engine("mysql+pymysql://root:@localhost:3306/test_ci")
 
         sql_dtypes = {}
         if (
@@ -870,7 +870,8 @@ def _build_sa_validator_with_data(
             "postgresql://postgres@localhost/test_ci"
         )
     elif sa_engine_name == "mysql":
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        print("sa_validator_with_data")
+        engine = create_engine("mysql+pymysql://root:@localhost:3306/test_ci")
     elif sa_engine_name == "mssql":
         engine = create_engine(
             "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
@@ -1688,13 +1689,14 @@ def build_test_backends_list():
         mysql = False
         if sa and mysql:
             try:
-                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                print("this is build_test_backends_list")
+                engine = sa.create_engine("mysql+pymysql://root:@localhost:3306/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "mysql tests are requested, but unable to connect to the mysql database at "
-                    "'mysql+pymysql://root@localhost/test_ci'"
+                    "'mysql+pymysql://root:@localhost:3306/test_ci'"
                 )
             test_backends += ["mysql"]
         mssql = False

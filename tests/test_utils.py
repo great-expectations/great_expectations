@@ -391,8 +391,8 @@ def get_dataset(
     elif dataset_type == "mysql":
         if not create_engine:
             return None
-
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        print("get_dataset()")
+        engine = create_engine("mysql+pymysql://root:@localhost:3306/test_ci")
 
         sql_dtypes = {}
         if (
@@ -440,10 +440,10 @@ def get_dataset(
             dtype=sql_dtypes,
             if_exists="replace",
         )
-
-        # Build a SqlAlchemyDataset using that database
+        # this is to more closely mimic batch_kwargs
+        custom_sql = "SELECT * FROM " + table_name + ";"
         return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
+            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mssql":
@@ -874,7 +874,8 @@ def _build_sa_validator_with_data(
             "postgresql://postgres@localhost/test_ci"
         )
     elif sa_engine_name == "mysql":
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        print("_build_sa_validator_with_data")
+        engine = create_engine("mysql+pymysql://root:@localhost:3306/test_ci")
     elif sa_engine_name == "mssql":
         engine = create_engine(
             "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
