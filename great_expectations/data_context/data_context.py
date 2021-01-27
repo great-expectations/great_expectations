@@ -746,7 +746,7 @@ class BaseDataContext:
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
         except AttributeError as e:
-            if not default_checkpoints_exist(directory_path=self.root_directory):
+            if default_checkpoints_exist(directory_path=self.root_directory):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             raise e
 
@@ -756,7 +756,7 @@ class BaseDataContext:
         try:
             return self.stores[checkpoint_store_name]
         except KeyError as e:
-            if not default_checkpoints_exist(directory_path=self.root_directory):
+            if default_checkpoints_exist(directory_path=self.root_directory):
                 return self._build_store_from_config(
                     checkpoint_store_name,
                     DataContextConfigDefaults.DEFAULT_STORES.value[

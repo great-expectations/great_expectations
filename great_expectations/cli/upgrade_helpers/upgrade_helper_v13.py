@@ -11,6 +11,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
 )
+from great_expectations.data_context.util import default_checkpoints_exist
 
 
 class UpgradeHelperV13(BaseUpgradeHelper):
@@ -41,17 +42,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
             self.data_context.root_directory,
             DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
         )
-        if (
-            os.path.isdir(checkpoints_directory_path)
-            and len(
-                [
-                    os.path.join(checkpoints_directory_path, filename)
-                    for filename in os.listdir(checkpoints_directory_path)
-                    if filename.endswith(r".yml")
-                ]
-            )
-            > 0
-        ):
+        if default_checkpoints_exist(directory_path=checkpoints_directory_path):
             self._process_checkpoint_store_for_checklist()
         else:
             self.upgrade_log["skipped_upgrade"] = True
