@@ -356,7 +356,7 @@ def load_checkpoint(
     """Load a checkpoint or raise helpful errors."""
     try:
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-            checkpoint_name
+            name=checkpoint_name
         )
         return checkpoint
     except (
