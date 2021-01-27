@@ -749,7 +749,9 @@ class BaseDataContext:
             config_version: float = (
                 self.project_config_with_variables_substituted.config_version
             )
-            if default_checkpoints_exist(directory_path=self.root_directory):
+            if self.root_directory and default_checkpoints_exist(
+                directory_path=self.root_directory
+            ):
                 logger.warning(
                     f'Detected legacy config version ({config_version}) so will try to use default checkpoint store name.\n  Please update your configuration to the new version number {CURRENT_GE_CONFIG_VERSION} in order to use the new "Checkpoint Store" feature.  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>'
                 )
@@ -767,7 +769,9 @@ class BaseDataContext:
             config_version: float = (
                 self.project_config_with_variables_substituted.config_version
             )
-            if default_checkpoints_exist(directory_path=self.root_directory):
+            if self.root_directory and default_checkpoints_exist(
+                directory_path=self.root_directory
+            ):
                 logger.warning(
                     f'Detected legacy config version ({config_version}) so will try to use default checkpoint store.\n  Please update your configuration to the new version number {CURRENT_GE_CONFIG_VERSION} in order to use the new "Checkpoint Store" feature.\n  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>'
                 )
