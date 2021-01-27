@@ -18,7 +18,7 @@ Both contributors and reviewers should follow this checklist:
     * The modules are placed in a subdirectory of `/contrib/experimental/expectations` that makes sense for the new Expectation
     * The new Expectation classes follow CamelCase convention. Module names are snake_case versions of the Expectation class names.
     * Metric classes that implement the new Metrics the Expectation depends on are implemented in the same module.
-    * Expectation class names summarize the nature of the expectation - this is a judgement call.
+    * Expectation class names summarize the nature of the expectation.
     * New Expectation and Metric classes extend the appropriate core classes (e.g., new column map expectations extend ColumnMapExpectation)
 
 * Docstring
