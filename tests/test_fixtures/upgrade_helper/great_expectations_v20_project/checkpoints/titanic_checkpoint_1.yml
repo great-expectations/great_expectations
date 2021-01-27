@@ -1,0 +1,93 @@
+# Below is current format.
+#
+#
+# This checkpoint was created by the command `great_expectations checkpoint new`.
+#
+# A checkpoint is a list of one or more batches paired with one or more
+# Expectation Suites and a configurable Validation Operator.
+#
+# It can be run with the `great_expectations checkpoint run` command.
+# You can edit this file to add batches of data and expectation suites.
+#
+# For more details please see
+# https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
+validation_operator_name: action_list_operator
+# Batches are a list of batch_kwargs paired with a list of one or more suite
+# names. A checkpoint can have one or more batches. This makes deploying
+# Great Expectations in your pipelines easy!
+batches:
+  - batch_kwargs:
+      path: /Users/alexsherstinsky/Downloads/Titanic.csv
+      datasource: Downloads__dir
+      data_asset_name: Titanic
+    expectation_suite_names: # one or more suites may validate against a single batch
+      - Titanic.warning
+  - batch_kwargs:
+      path: /Users/alexsherstinsky/Downloads/Titanic_copy_0.csv
+      datasource: Downloads__dir
+      data_asset_name: Titanic_copy_0
+    expectation_suite_names: # one or more suites may validate against a single batch
+      - Titanic.warning
+#
+#
+# Above is current format.
+#
+#
+#
+# Below is proposed new format.
+#
+#
+#validators:
+#  - batch_definition:
+#      execution_environment: Titanic_Env_0
+#      data_connector: subdir_reader_on_filesystem_data_connector_alex_0
+#      data_asset_name: Titanic_CSV_File_Whose_Contents_Are_Updated_Hourly
+#      partition_definition: latest  # TODO: Richer specifications are TBD.
+#    expectation_suite_names: # one or more suites may validate against a single batch
+#      - Titanic.warning
+#
+#
+# Description:
+#A Checkpoint can apply one or more Validators to data accessible by GreatExpectations.
+#
+#A Validator specifies the BatchDefinition attributes (which provide directives for, among other purposes, efficiently accessing the particular data of insterest) as well as the ExpecationSuites against which this data is to be validated.  (The ValidationOperator is assumed to be the "action_list_operator", which, due to its generality, fulfills the needs of a broad list of data validation scenarios.  This standard choice can be overrridden, if desired, by setting "validation_operator_name" to a value other than "action_list_operator".)
+#
+#One or more ExpectationSuites can be used for data validation in a Validator (as captured within the "expectation_suite_names" section).
+#
+#To reiterate, the specification of the attributes for efficiently accessing the particular data of insterest (and for other purposes) is accomplished through the "batch_definition" (BatchDefinition) section of a Validator configuration.
+#   The "execution_environment" field of the "batch_definition" section must match the name of an existing section in the "execution_environments" part of the overall GreatExpectations project configuration (e.g., in "great_expectations.yml").
+#   An ExecutionEnvironment can have one or more DataConnector subsections in its "data_connectors" section.  Hence, the "data_connector" field of the "batch_definition" section of the Validator configuration must match the name of one of the DataConnector subsection entry headings in the given ExecutionEnvironment section.
+#   The "data_asset_name" and the "partition_id" fields of the "batch_definition" section of the Validator configuration are used together with with DataConnector by the ExecutionEngine to retrieve a Dataset of the corresponding DataAsset for validation with one or more ExpecationSuites specified.
+#
+#
+#Example:
+#A Validator, configured in CheckPoint "titanic_checkpoint_1.yml", is asking the ExecutionEngine "PandasExecutionEngine" to use the DataConnector "subdir_reader_on_filesystem_data_connector_alex_0" (both defined in ExecutionEnvironment "Titanic_Env_0") to fetch the latest partion of the DataAsset "Titanic_CSV_File_Whose_Contents_Are_Updated_Hourly" and validate it against the expectations suite "Titanic.warning".
+#
+#
+#
+# Reference: New in "great_expectations.yml" will be:
+#
+#execution_environments:
+#  movie_csv:
+#    execution_engine:
+#      class_name: PandasExecutionEngine
+#      module_name: great_expectations.execution_engine
+#    data_connectors:
+#      subdir_reader:
+#        class_name: SubdirReaderDataConnector
+#        base_directory: ../the-movies-dataset
+#  Titanic_Env_0:
+#    execution_engine:
+#      class_name: PandasExecutionEngine
+#      module_name: great_expectations.execution_engine
+#    data_connectors:
+#      subdir_reader:
+#        class_name: SubdirReaderDataConnector
+#        base_directory: ../the-movies-dataset
+#      subdir_reader_on_filesystem_data_connector_alex_0:
+#        class_name: SubdirReaderDataConnector
+#        base_directory: /Users/alexsherstinsky/Downloads
+#
+#
+#
+#

@@ -9,5 +9,13 @@ class BaseUpgradeHelper(ABC):
         pass
 
     @abstractmethod
+    def _save_upgrade_log(self):
+        pass
+
+    @abstractmethod
+    def _generate_upgrade_report(self):
+        pass
+
+    @abstractmethod
     def upgrade_project(self):
         pass

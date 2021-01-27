@@ -63,7 +63,7 @@ class BatchDefinition(SerializableDictDot):
         data_connector_name: str,
         data_asset_name: str,
         partition_definition: PartitionDefinition,
-        # limit: Union[int, None] = None,
+        # limit: Optional[int] = None,
     ):
         if datasource_name is None:
             raise ValueError("A valid datasource must be specified.")
@@ -177,7 +177,7 @@ class BatchRequest(DictDot):
         data_asset_name: str = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
         batch_data: Any = None,
-        limit: Union[int, None] = None,
+        limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_request(
@@ -230,8 +230,9 @@ class BatchRequest(DictDot):
         data_connector_name: str,
         data_asset_name: str,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        limit: Union[int, None] = None,
+        limit: Optional[int] = None,
     ):
+        # TODO test and check all logic in this validator!
         if datasource_name and not isinstance(datasource_name, str):
             raise TypeError(
                 f"""The type of an datasource name must be a string (Python "str").  The type given is
@@ -272,12 +273,18 @@ is illegal.
                 partition_request["custom_filter_function"] = partition_request[
                     "custom_filter_function"
                 ].__name__
-        return {
+        json_dict = {
             "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
             "partition_request": partition_request,
         }
+        if self.batch_spec_passthrough is not None:
+            json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
+        if self.limit is not None:
+            json_dict["limit"] = self.limit
+
+        return json_dict
 
     def __str__(self):
         return json.dumps(self.get_json_dict(), indent=2)

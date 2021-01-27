@@ -13,7 +13,7 @@ import threading
 import uuid
 from functools import wraps
 from types import ModuleType
-from typing import List, Union
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -1673,7 +1673,7 @@ def build_test_backends_list(
 
     if include_sqlalchemy:
 
-        sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
+        sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
         if sa is None:
             raise ImportError(
                 "sqlalchemy tests are requested, but sqlalchemy in not installed"
