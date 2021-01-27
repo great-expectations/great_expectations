@@ -942,8 +942,12 @@ def _build_sa_validator_with_data(
         dtype=sql_dtypes,
         if_exists="replace",
     )
-
-    batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+    if sa_engine_name == "mysql":
+        query = "SELECT * FROM " + table_name
+        batch_data = SqlAlchemyBatchData(engine=engine, query=query)
+    else:
+        batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+        
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 

@@ -57,6 +57,17 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
             .having(sa.func.count(column) > 1)
         )
 
+        # <WILL> this is for mysql error
+        dialect = kwargs.get("_dialect", None)
+        sql_engine = kwargs.get("_sqlalchemy_engine", None)
+        if dialect and dialect.dialect.name == "mysql":
+            if sql_engine:
+                rows = sql_engine.execute(dup_query).fetchall()
+                dup_query = []
+                for row in rows:
+                    row_as_dict = dict(row)
+                    # this can be made more efficient
+                    dup_query.append(list(row_as_dict.values())[0])
         return column.notin_(dup_query)
 
     @column_condition_partial(
