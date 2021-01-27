@@ -9,7 +9,7 @@ Checkpoints and Actions Introduction
   As part of the new modular expectations API in Great Expectations, Validation Operators are evolving into Checkpoints.
   At some point in the future Validation Operators will be fully deprecated.
 
-The `validate` method evaluates one Batch of data against one Expectation Suite and returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
+The ``batch.validate()`` method evaluates one Batch of data against one Expectation Suite and returns a dictionary of validation results. This is sufficient when you explore your data and get to know Great Expectations.
 When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
 
 * Validating a group of Batches that are logically related (for example, a Checkpoint for all staging tables).
@@ -25,7 +25,7 @@ The classes that implement Checkpoints are in the :py:mod:`great_expectations.ch
 Validation Actions
 ***************************************************
 
-Actions are Python classes with a `run` method that takes a result of validating a Batch against an Expectation Suite and does something with it (e.g., save validation results to the disk or send a Slack notification).
+Actions are Python classes with a `run` method that takes the result of validating a Batch against an Expectation Suite and does something with it (e.g., save validation results to disk, or send a Slack notification).
 Classes that implement this API can be configured to be added to the list of actions used by a particular Checkpoint.
 
 Classes that implement Actions can be found in the :py:mod:`great_expectations.checkpoint.actions` module.
@@ -59,7 +59,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
 
 **Configuration Defaults and Parameter Override Behavior**
 
-Checkpoint configurations follow a nested pattern, where more general keys provide defaults for more specific ones. For instance, any required validation dictionary keys (e.g. ``expectation_suite_name``) can be specified at the top-level (i.e. peers with the validations list), serving as runtime defaults. Starting at the earliest reference template, if a configuration key is re-specified, its value can be appended, updated, replaced, or cause an error when redefined.
+Checkpoint configurations follow a nested pattern, where more general keys provide defaults for more specific ones. For instance, any required validation dictionary keys (e.g. ``expectation_suite_name``) can be specified at the top-level (i.e. at the same level as the validations list), serving as runtime defaults. Starting at the earliest reference template, if a configuration key is re-specified, its value can be appended, updated, replaced, or cause an error when redefined.
 
   *Replaced*
     * ``name``
@@ -95,9 +95,9 @@ Configurations using the SimpleCheckpoint class can optionally specify four addi
 CheckpointResult
 *************************
 
-The return object of a Checkpoint run is a CheckpointResult object. The ``run_results`` attribute forms the backbone of this type and defines the basic contract for what a Checkpoint's ``run`` method returns. It is a dictionary where the top-level keys are the ValidationResultIdentifiers of the validation results generated in the run. Each value is a dictionary having at minimum, a ``validation_result`` key containing an ExpectationSuiteValidationResult and an ``actions_results`` key containing a dictionary where the top-level keys are names of actions performed after that particular validation, with values containing any relevant outputs of that action (at minimum and in many cases, this would just be a dictionary with the action's class_name).
+The return object of a Checkpoint run is a CheckpointResult object. The ``run_results`` attribute forms the backbone of this type and defines the basic contract for what a Checkpoint's ``run`` method returns. It is a dictionary where the top-level keys are the ValidationResultIdentifiers of the validation results generated in the run. Each value is a dictionary having at minimum, a ``validation_result`` key containing an ExpectationSuiteValidationResult and an ``actions_results`` key containing a dictionary where the top-level keys are names of actions performed after that particular validation, with values containing any relevant outputs of that action (at minimum and in many cases, this would just be a dictionary with the action's ``class_name``).
 
-The run_results dictionary can contain other keys that are relevant for a specific checkpoint implementation. For example, the run_results dictionary from a WarningAndFailureExpectationSuiteCheckpoint might have an extra key named "expectation_suite_severity_level" to indicate if the suite is at either a "warning" or "failure" level.
+The ``run_results`` dictionary can contain other keys that are relevant for a specific checkpoint implementation. For example, the ``run_results`` dictionary from a WarningAndFailureExpectationSuiteCheckpoint might have an extra key named "expectation_suite_severity_level" to indicate if the suite is at either a "warning" or "failure" level.
 
 CheckpointResult objects include many convenience methods (e.g. ``list_data_asset_names``) that make working with Checkpoint results easier. You can learn more about these methods in the documentation for :py:class:`~great_expectations.checkpoint.types.checkpoint_result.CheckpointResult`.
 
@@ -122,7 +122,7 @@ Example CheckpointResult:
     }
 
 **************************************
-Checkpoint Configuration Examples
+Configuration Configuration Examples
 **************************************
 
 .. content-tabs::
@@ -349,7 +349,7 @@ Checkpoint Configuration Examples
       notify_with:
         - my_diagnostic_data_docs_site
 
-    **equivalent yaml, using Checkpoint**:
+    **Equivalent yaml, using Checkpoint**:
 
     .. code-block:: yaml
 
