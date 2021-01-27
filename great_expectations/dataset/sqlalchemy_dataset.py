@@ -236,6 +236,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 )
 
             count_results: dict = dict(self.engine.execute(count_query).fetchone())
+
             # Handle case of empty table gracefully:
             if (
                 "element_count" not in count_results
@@ -1782,9 +1783,12 @@ WHERE
             .group_by(sa.column(column))
             .having(sa.func.count(sa.column(column)) > 1)
         )
-        # handle mysql case, which does not allow the temp_table to be referred to more than once.
-        # https://github.com/great-expectations/great_expectations/pull/2325
-        if isinstance(self.sql_engine_dialect, sa.dialects.mysql.dialect):
+
+        # Will - 20210126
+        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
+        # more than once in the same query. So the dup_query is executed, and the notin_() calculation is done against
+        # a list instead.
+        if self.sql_engine_dialect.name.lower() == "mysql":
             rows = self.engine.execute(dup_query).fetchall()
             dup_query = []
             for row in rows:
