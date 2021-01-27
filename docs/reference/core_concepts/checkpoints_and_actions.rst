@@ -122,7 +122,7 @@ Example CheckpointResult:
     }
 
 **************************************
-Configuration Configuration Examples
+Checkpoint Configuration Examples
 **************************************
 
 .. content-tabs::
