@@ -54,7 +54,7 @@ Both contributors and reviewers should follow this checklist:
             },
             "tests": [
                 {
-                    "title": "maintest",
+                    "title": "basic_positive_test",
                     "exact_match_out": False,
                     "in": {"column": "myvalues", "letter": "a", "mostly": 0.4},
                     "out": {
@@ -62,6 +62,18 @@ Both contributors and reviewers should follow this checklist:
                         "unexpected_index_list": [1, 4],
                         "unexpected_list": ["pear", "mouse"]
                     },
+                    "gallery_example": True
+                },
+                {
+                    "title": "basic_negative_test",
+                    "exact_match_out": False,
+                    "in": {"column": "myvalues", "letter": "p", "mostly": 0.4},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [0, 2, 3, 4, 5],
+                        "unexpected_list": ["apple", "acyclical graph", "aardvardk", "mouse", "angular"],
+                    },
+                    "gallery_example": True
                 }
             ],
         }]
