@@ -14,7 +14,7 @@ Both contributors and reviewers should follow this checklist:
     * If the PR modifies existing Expectations and/or Metrics, check that the changes are an improvement and are not destructive. The contributor should not remove someone else' prior work without a clear reason.
 
 * Basic class/module structure and naming of new Expectation and Metric classes
-    * One new Expectation class per module.
+    * One new Expectation class per module (file).
     * The modules are placed in a subdirectory of `/contrib/experimental/expectations` that makes sense for the new Expectation
     * The new Expectation classes follow CamelCase convention. Module names are snake_case versions of the Expectation class names.
     * Metric classes that implement the new Metrics the Expectation depends on are implemented in the same module.
