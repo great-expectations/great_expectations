@@ -7,6 +7,7 @@ Changelog
 
 Develop
 -----------------
+[BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
 
 0.13.7

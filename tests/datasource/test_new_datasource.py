@@ -714,7 +714,7 @@ def test_get_available_data_asset_names_with_caching():
 
 def test__data_source_batch_spec_passthrough(tmp_path_factory):
     base_directory = str(
-        tmp_path_factory.mktemp("data_connector_batch_spec_passthrough")
+        tmp_path_factory.mktemp("test__data_source_batch_spec_passthrough")
     )
     with open(
         os.path.join(base_directory, "csv_with_extra_header_rows.csv"), "w"

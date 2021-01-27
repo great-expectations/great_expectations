@@ -1,15 +1,16 @@
 import json
 import os
 import shutil
-from typing import List
 
 import pandas as pd
 import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -18,22 +19,24 @@ from great_expectations.data_context import (
     ExplorerDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    DataContextConfig,
+    DataContextConfigDefaults,
+)
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.exceptions import (
-    BatchKwargsError,
-    CheckpointError,
-    CheckpointNotFoundError,
-    ConfigNotFoundError,
-    DataContextError,
-)
 from great_expectations.util import gen_directory_tree_str
+from great_expectations.validation_operators.types.validation_operator_result import (
+    ValidationOperatorResult,
+)
+from tests.datasource.conftest import postgresql_sqlalchemy_datasource
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -65,7 +68,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     # attempt to create expectation suite with name that already exists on data asset
-    with pytest.raises(DataContextError):
+    with pytest.raises(ge_exceptions.DataContextError):
         titanic_data_context.create_expectation_suite(
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
@@ -531,6 +534,7 @@ project_path/
         .gitignore
         great_expectations.yml
         checkpoints/
+            .ge_store_backend_id
         expectations/
             .ge_store_backend_id
             titanic/
@@ -777,16 +781,16 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
-def test_load_data_context_from_environment_variables(tmp_path_factory):
+def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypatch):
     curdir = os.path.abspath(os.getcwd())
     try:
         project_path = str(tmp_path_factory.mktemp("data_context"))
         context_path = os.path.join(project_path, "great_expectations")
         os.makedirs(context_path, exist_ok=True)
         os.chdir(context_path)
-        with pytest.raises(DataContextError) as err:
+        with pytest.raises(ge_exceptions.DataContextError) as err:
             DataContext.find_context_root_dir()
-        assert isinstance(err.value, ConfigNotFoundError)
+        assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
 
         shutil.copy(
             file_relative_path(
@@ -794,14 +798,14 @@ def test_load_data_context_from_environment_variables(tmp_path_factory):
             ),
             str(os.path.join(context_path, "great_expectations.yml")),
         )
-        os.environ["GE_HOME"] = context_path
+        monkeypatch.setenv("GE_HOME", context_path)
         assert DataContext.find_context_root_dir() == context_path
     except Exception:
         raise
     finally:
         # Make sure we unset the environment variable we're using
-        if "GE_HOME" in os.environ:
-            del os.environ["GE_HOME"]
+        if os.getenv("GE_HOME"):
+            monkeypatch.delenv("GE_HOME")
         os.chdir(curdir)
 
 
@@ -1090,6 +1094,7 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
+        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
     notebooks/
@@ -1122,6 +1127,7 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
+        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
     notebooks/
@@ -1415,7 +1421,19 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     assert not os.path.isfile(index_path)
 
 
-def test_load_config_variables_file(basic_data_context_config, tmp_path_factory):
+def test_get_site_names(
+    tmp_path_factory, empty_data_context, basic_data_context_config
+):
+    assert empty_data_context.get_site_names() == ["local_site"]
+    assert basic_data_context_config.data_docs_sites == {}
+    base_path = tmp_path_factory.mktemp("foo")
+    context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
+    assert context.get_site_names() == []
+
+
+def test_load_config_variables_file(
+    basic_data_context_config, tmp_path_factory, monkeypatch
+):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
     os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
@@ -1433,11 +1451,11 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
 
     try:
         # We should be able to load different files based on an environment variable
-        os.environ["TEST_CONFIG_FILE_ENV"] = "dev"
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars["env"] == "dev"
-        os.environ["TEST_CONFIG_FILE_ENV"] = "prod"
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
         context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
         config_vars = context._load_config_variables_file()
         assert config_vars["env"] == "prod"
@@ -1445,7 +1463,7 @@ def test_load_config_variables_file(basic_data_context_config, tmp_path_factory)
         raise
     finally:
         # Make sure we unset the environment variable we're using
-        del os.environ["TEST_CONFIG_FILE_ENV"]
+        monkeypatch.delenv("TEST_CONFIG_FILE_ENV")
 
 
 def test_list_expectation_suite_with_no_suites(titanic_data_context):
@@ -1475,14 +1493,14 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(DataContextError):
+    with pytest.raises(ge_exceptions.DataContextError):
         titanic_data_context.get_batch({}, 99)
 
 
 def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(BatchKwargsError):
+    with pytest.raises(ge_exceptions.BatchKwargsError):
         titanic_data_context.get_batch(99, "foo")
 
 
@@ -1543,7 +1561,9 @@ def test_list_checkpoints_on_context_with_twwo_checkpoints(
 ):
     context = empty_context_with_checkpoint
     checkpoints_file = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_checkpoint.yml",
     )
     shutil.copy(
         checkpoints_file, os.path.join(os.path.dirname(checkpoints_file), "another.yml")
@@ -1558,7 +1578,9 @@ def test_list_checkpoints_on_context_with_checkpoint_and_other_files_in_checkpoi
 
     for extension in [".json", ".txt", "", ".py"]:
         path = os.path.join(
-            context.root_directory, context.CHECKPOINTS_DIR, f"foo{extension}"
+            context.root_directory,
+            DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+            f"foo{extension}",
         )
         with open(path, "w") as f:
             f.write("foo: bar")
@@ -1571,7 +1593,7 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    with pytest.raises(CheckpointNotFoundError):
+    with pytest.raises(ge_exceptions.CheckpointNotFoundError):
         context.get_checkpoint("not_a_checkpoint")
 
 
@@ -1580,40 +1602,48 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
 ):
     context = empty_context_with_checkpoint
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_checkpoint.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         f.write("# Not a checkpoint file")
     assert os.path.isfile(checkpoint_file_path)
     assert context.list_checkpoints() == ["my_checkpoint"]
 
-    with pytest.raises(CheckpointError):
+    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError):
         context.get_checkpoint("my_checkpoint")
 
 
 def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     obs = context.get_checkpoint("my_checkpoint")
-    assert isinstance(obs, dict)
-    assert {
-        "validation_operator_name": "action_list_operator",
+    assert isinstance(obs, Checkpoint)
+    config = obs.config
+    assert isinstance(config.to_json_dict(), dict)
+    assert config.to_json_dict() == {
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "LegacyCheckpoint",
+        "config_version": None,
+        "name": "my_checkpoint",
         "batches": [
             {
                 "batch_kwargs": {
-                    "path": "/Users/me/projects/my_project/data/data.csv",
                     "datasource": "my_filesystem_datasource",
+                    "path": "/Users/me/projects/my_project/data/data.csv",
                     "reader_method": "read_csv",
                 },
                 "expectation_suite_names": ["suite_one", "suite_two"],
             },
             {
                 "batch_kwargs": {
-                    "query": "SELECT * FROM users WHERE status = 1",
                     "datasource": "my_redshift_datasource",
+                    "query": "SELECT * FROM users WHERE status = 1",
                 },
                 "expectation_suite_names": ["suite_three"],
             },
         ],
+        "validation_operator_name": "action_list_operator",
     }
 
 
@@ -1623,19 +1653,25 @@ def test_get_checkpoint_default_validation_operator(empty_data_context):
 
     checkpoint = {"batches": []}
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
     obs = context.get_checkpoint("foo")
-    assert isinstance(obs, dict)
+    assert isinstance(obs, Checkpoint)
+    assert isinstance(obs.config.to_json_dict(), dict)
     expected = {
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "LegacyCheckpoint",
+        "config_version": None,
+        "name": "foo",
         "validation_operator_name": "action_list_operator",
-        "batches": [],
     }
-    assert expected == obs
+    assert obs.config.to_json_dict() == expected
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
@@ -1646,13 +1682,15 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
         "validation_operator_name": "action_list_operator",
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1665,13 +1703,15 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         "batches": {"stuff": 33},
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1690,13 +1730,15 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
         ],
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1709,14 +1751,87 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         "batches": [{"expectation_suite_names": ["foo"]}],
     }
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "foo.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
         yaml.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(CheckpointError) as e:
+    with pytest.raises(ge_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
+
+
+# TODO: add more test cases
+def test_run_checkpoint_newstyle(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    # add checkpoint config
+    checkpoint_config = CheckpointConfig(
+        name="my_checkpoint",
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_basic_data_connector",
+                    "data_asset_name": "Titanic_1911",
+                }
+            }
+        ],
+    )
+    checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=checkpoint_config.name
+    )
+    context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
+
+    with pytest.raises(
+        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+    ):
+        context.run_checkpoint(checkpoint_name=checkpoint_config.name)
+
+    assert len(context.validations_store.list_keys()) == 0
+
+    # print(context.list_datasources())
+
+    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(result.list_validation_results()) == 1
+    assert result.success
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name=checkpoint_config.name
+    )
+    assert len(result.list_validation_results()) == 1
+    assert len(context.validations_store.list_keys()) == 2
+    assert result.success
 
 
 def test_get_validator_with_instantiated_expectation_suite(
@@ -1823,3 +1938,34 @@ data_connectors:
         create_expectation_suite_with_name="A_expectation_suite",
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
+
+
+def test_get_batch_multiple_datasources_do_not_scan_all(
+    data_context_with_bad_datasource,
+):
+    """
+    What does this test and why?
+
+    A DataContext can have "stale" datasources in its configuration (ie. connections to DBs that are now offline).
+    If we configure a new datasource and are only using it (like the PandasDatasource below), then we don't
+    want to be dependant on all the "stale" datasources working too.
+
+    data_context_with_bad_datasource is a fixture that contains a configuration for an invalid datasource
+    (with "fake_port" and "fake_host")
+
+    In the test we configure a new expectation_suite, a local pandas_datasource and retrieve a single batch.
+
+    This tests a fix for the following issue:
+    https://github.com/great-expectations/great_expectations/issues/2241
+    """
+
+    context = data_context_with_bad_datasource
+    context.create_expectation_suite(expectation_suite_name="local_test.default")
+    expectation_suite = context.get_expectation_suite("local_test.default")
+    context.add_datasource("pandas_datasource", class_name="PandasDatasource")
+    df = pd.DataFrame({"a": [1, 2, 3]})
+    batch = context.get_batch(
+        batch_kwargs={"datasource": "pandas_datasource", "dataset": df},
+        expectation_suite_name=expectation_suite,
+    )
+    assert len(batch) == 3

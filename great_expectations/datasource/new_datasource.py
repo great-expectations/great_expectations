@@ -145,7 +145,7 @@ class BaseDatasource:
             return batches
 
         else:
-            # This is a runtime batchrequest
+            # This is a runtime batch_request
 
             if len(batch_definition_list) != 1:
                 raise ValueError(
@@ -255,13 +255,15 @@ class BaseDatasource:
 
     def self_check(self, pretty_print=True, max_examples=3):
         # Provide visibility into parameters that ExecutionEngine was instantiated with.
-        report_object = {"execution_engine": self.execution_engine.config}
+        report_object: dict = {"execution_engine": self.execution_engine.config}
 
         if pretty_print:
-            print(f"Execution engine: {self.execution_engine.__class__.__name__}")
+            print(
+                f"\nExecutionEngine class name: {self.execution_engine.__class__.__name__}"
+            )
 
         if pretty_print:
-            print(f"Data connectors:")
+            print(f"Data Connectors:")
 
         data_connector_list = list(self.data_connectors.keys())
         data_connector_list.sort()

@@ -1,11 +1,160 @@
 import datetime
+import os
+import re
 
 import pytest
+from ruamel.yaml import YAML
 
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.validator.validator import Validator
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 from tests.test_utils import create_files_in_directory
+
+yaml = YAML()
+
+
+@pytest.fixture
+def basic_data_context_v013_config():
+    return DataContextConfig(
+        **{
+            "commented_map": {},
+            "config_version": 3,
+            "plugins_directory": "plugins/",
+            "evaluation_parameter_store_name": "evaluation_parameter_store",
+            "validations_store_name": "does_not_have_to_be_real",
+            "expectations_store_name": "expectations_store",
+            "checkpoint_store_name": "checkpoint_store",
+            "config_variables_file_path": "uncommitted/config_variables.yml",
+            "datasources": {},
+            "stores": {
+                "expectations_store": {
+                    "class_name": "ExpectationsStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "expectations/",
+                    },
+                },
+                "evaluation_parameter_store": {
+                    "module_name": "great_expectations.data_context.store",
+                    "class_name": "EvaluationParameterStore",
+                },
+                "checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "checkpoints/",
+                    },
+                },
+            },
+            "data_docs_sites": {},
+            "anonymous_usage_statistics": {
+                "enabled": True,
+                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
+                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
+            },
+        }
+    )
+
+
+def test_ConfigOnlyDataContext_v013__initialization(
+    tmp_path_factory, basic_data_context_v013_config
+):
+    config_path = str(
+        tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
+    )
+    context = BaseDataContext(
+        basic_data_context_v013_config,
+        config_path,
+    )
+
+    assert len(context.plugins_directory.split("/")[-3:]) == 3
+    assert "" in context.plugins_directory.split("/")[-3:]
+
+    pattern = re.compile(r"test_ConfigOnlyDataContext__initialization__dir\d*")
+    assert (
+        len(
+            list(
+                filter(
+                    lambda element: element,
+                    sorted(
+                        [
+                            pattern.match(element) is not None
+                            for element in context.plugins_directory.split("/")[-3:]
+                        ]
+                    ),
+                )
+            )
+        )
+        == 1
+    )
+
+
+def test__normalize_absolute_or_relative_path(
+    tmp_path_factory, basic_data_context_v013_config
+):
+    config_path = str(
+        tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
+    )
+    context = BaseDataContext(
+        basic_data_context_v013_config,
+        config_path,
+    )
+
+    pattern_string = os.path.join(
+        "^.*test__normalize_absolute_or_relative_path__dir\\d*", "yikes$"
+    )
+    pattern = re.compile(pattern_string)
+    assert (
+        pattern.match(context._normalize_absolute_or_relative_path("yikes")) is not None
+    )
+
+    assert (
+        "test__normalize_absolute_or_relative_path__dir"
+        not in context._normalize_absolute_or_relative_path("/yikes")
+    )
+    assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
+
+
+def test_load_config_variables_file(
+    basic_data_context_v013_config, tmp_path_factory, monkeypatch
+):
+    # Setup:
+    base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
+    os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
+    with open(
+        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"
+    ) as outfile:
+        yaml.dump({"env": "dev"}, outfile)
+    with open(
+        os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w"
+    ) as outfile:
+        yaml.dump({"env": "prod"}, outfile)
+    basic_data_context_v013_config[
+        "config_variables_file_path"
+    ] = "uncommitted/${TEST_CONFIG_FILE_ENV}_variables.yml"
+
+    try:
+        # We should be able to load different files based on an environment variable
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
+        context = BaseDataContext(
+            basic_data_context_v013_config, context_root_dir=base_path
+        )
+        config_vars = context._load_config_variables_file()
+        assert config_vars["env"] == "dev"
+        monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
+        context = BaseDataContext(
+            basic_data_context_v013_config, context_root_dir=base_path
+        )
+        config_vars = context._load_config_variables_file()
+        assert config_vars["env"] == "prod"
+    except Exception:
+        raise
+    finally:
+        # Make sure we unset the environment variable we're using
+        monkeypatch.delenv("TEST_CONFIG_FILE_ENV")
 
 
 def test_get_config(empty_data_context):
@@ -27,11 +176,11 @@ def test_get_config(empty_data_context):
         "datasources",
         "config_variables_file_path",
         "plugins_directory",
-        "validation_operators",
         "stores",
         "expectations_store_name",
         "validations_store_name",
         "evaluation_parameter_store_name",
+        "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
         "notebooks",
@@ -302,9 +451,9 @@ data_connectors:
 
 
 def test_in_memory_data_context_configuration(
-    titanic_pandas_multibatch_data_context_v3,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
-    project_config_dict: dict = titanic_pandas_multibatch_data_context_v3.get_config(
+    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.get_config(
         mode="dict"
     )
     project_config_dict["plugins_directory"] = None
@@ -330,12 +479,12 @@ def test_in_memory_data_context_configuration(
     project_config: DataContextConfig = DataContextConfig(**project_config_dict)
     data_context = BaseDataContext(
         project_config=project_config,
-        context_root_dir=titanic_pandas_multibatch_data_context_v3.root_directory,
+        context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.root_directory,
     )
 
     my_validator: Validator = data_context.get_validator(
-        datasource_name="titanic_multi_batch",
-        data_connector_name="my_data_connector",
+        datasource_name="my_datasource",
+        data_connector_name="my_basic_data_connector",
         data_asset_name="Titanic_1912",
         create_expectation_suite_with_name="my_test_titanic_expectation_suite",
     )

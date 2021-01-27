@@ -499,3 +499,9 @@ def test_expectation__get_execution_engine_dict(
         "SparkDFExecutionEngine": False,
         "SqlAlchemyExecutionEngine": False,
     }
+
+
+def test_expectation_is_abstract():
+    # is_abstract determines whether the expectation should be added to the registry (i.e. is fully implemented)
+    assert ColumnMapExpectation.is_abstract()
+    assert not ExpectColumnValuesToEqualThree.is_abstract()
