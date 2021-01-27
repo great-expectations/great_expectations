@@ -62,7 +62,7 @@ Both contributors and reviewers should follow this checklist:
                         "unexpected_index_list": [1, 4],
                         "unexpected_list": ["pear", "mouse"]
                     },
-                    "gallery_example": True
+                    "include_in_gallery": True
                 },
                 {
                     "title": "basic_negative_test",
@@ -73,14 +73,14 @@ Both contributors and reviewers should follow this checklist:
                         "unexpected_index_list": [0, 2, 3, 4, 5],
                         "unexpected_list": ["apple", "acyclical graph", "aardvardk", "mouse", "angular"],
                     },
-                    "gallery_example": True
+                    "include_in_gallery": True
                 }
             ],
         }]
 
     * Test titles must contain no spaces so that they can be individually selected by pytest.
 
-    * If a test should be rendered as an example, it should be marked up with ``gallery_example: True``
+    * If a test should be rendered as an example, it should be marked up with ``include_in_gallery: True``
 
     * The tests included in the module must pass for the PR to be approved.
 
