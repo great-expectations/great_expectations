@@ -120,7 +120,9 @@ class ConfigurationStore(Store):
         if pretty_print:
             print("Checking for existing keys...")
 
-        report_object["keys"] = [key.configuration_key for key in self.list_keys()]
+        report_object["keys"] = sorted(
+            [key.configuration_key for key in self.list_keys()]
+        )
 
         report_object["len_keys"] = len(report_object["keys"])
         len_keys: int = report_object["len_keys"]
