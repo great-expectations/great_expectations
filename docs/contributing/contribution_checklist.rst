@@ -24,6 +24,7 @@ Once your code is ready, please go through the following checklist before submit
 
     * The :ref:`contributing__style_guide` is here.
     * Thanks for helping us keep the codebase and documentation clean and consistent, so that it's easier to maintain it as a community!
+    * If your PR contains **only** changes to ``contrib`` directory (community contributed Expectations), review your PR against this :ref:`Acceptance Checklist <contrib_pull_request_acceptance_checklist>`
 
 **3. Is your branch up to date with upstream/develop?**
 

@@ -3,7 +3,10 @@ import os
 from click.testing import CliRunner
 
 from great_expectations.cli import cli
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import (
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    assert_no_logging_messages_or_tracebacks,
+)
 
 
 def test_project_check_on_missing_ge_dir_guides_user_to_fix(caplog, tmp_path_factory):
@@ -29,7 +32,11 @@ def test_project_check_on_valid_project_says_so(caplog, titanic_data_context):
     assert "Checking your config files for validity" in result.output
     assert "Your config file appears valid" in result.output
     assert result.exit_code == 0
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 def test_project_check_on_project_with_missing_config_file_guides_user(
