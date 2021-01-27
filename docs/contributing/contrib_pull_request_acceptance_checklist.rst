@@ -43,7 +43,7 @@ Both contributors and reviewers should follow this checklist:
 
 
 * Examples/tests
-    * The module that contains a wew Expectations must have ``examples`` variable defined. The variable's value is a structure that defines inputs and outputs that serve both as examples and as tests. At least one positive and at least one negative example must be present. Below is an example of this structure for an imaginary expectation ``expect_column_values_to_begin_with_specific_letter``:
+    * Any module that contains a new Expectation must have ``examples`` defined. The examples variable defines data, inputs, and outputs that serve both as examples and as tests. At least one positive and at least one negative example must be present. Below is an example of this structure for an imaginary expectation ``expect_column_values_to_begin_with_specific_letter``:
 
     .. code-block:: python
 
