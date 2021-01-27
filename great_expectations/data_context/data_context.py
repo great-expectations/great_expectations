@@ -753,11 +753,11 @@ class BaseDataContext:
                 directory_path=self.root_directory
             ):
                 logger.warning(
-                    f'Detected legacy config version ({config_version}) so will try to use default checkpoint store name.\n  Please update your configuration to the new version number {CURRENT_GE_CONFIG_VERSION} in order to use the new "Checkpoint Store" feature.  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>'
+                    f'Detected legacy config version ({config_version}) so will try to use default checkpoint store name.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
                 )
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             raise ge_exceptions.InvalidTopLevelConfigKeyError(
-                f'Attempted to access the "checkpoint_store_name" field with an invalid config version ({config_version}).\n  Please update your configuration to the new version number {CURRENT_GE_CONFIG_VERSION} in order to use the new "Checkpoint Store" feature.\n  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>'
+                f'Attempted to access the "checkpoint_store_name" field with an invalid config version ({config_version}).\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
             )
 
     @property
@@ -773,7 +773,7 @@ class BaseDataContext:
                 directory_path=self.root_directory
             ):
                 logger.warning(
-                    f'Detected legacy config version ({config_version}) so will try to use default checkpoint store.\n  Please update your configuration to the new version number {CURRENT_GE_CONFIG_VERSION} in order to use the new "Checkpoint Store" feature.\n  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>'
+                    f'Detected legacy config version ({config_version}) so will try to use default checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
                 )
                 return self._build_store_from_config(
                     checkpoint_store_name,

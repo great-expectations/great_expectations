@@ -4,21 +4,16 @@ import logging
 import os
 from copy import deepcopy
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import BatchRequest
-from great_expectations.core.util import (
-    get_datetime_string_from_strftime_format,
-    nested_update,
-)
+from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    substitute_all_config_variables,
-)
+from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions import CheckpointError
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -191,72 +186,6 @@ class Checkpoint:
             )
         )
 
-    # TODO: <Alex>ALEX/Rob -- since this method is static, should we move it to a "util" type of a module?</Alex>
-    @staticmethod
-    def _get_runtime_batch_request(
-        substituted_runtime_config: CheckpointConfig,
-        validation_batch_request: Optional[dict] = None,
-    ) -> BatchRequest:
-        if substituted_runtime_config.batch_request is None:
-            return (
-                validation_batch_request
-                if validation_batch_request is None
-                else BatchRequest(**validation_batch_request)
-            )
-
-        if validation_batch_request is None:
-            return BatchRequest(**substituted_runtime_config.batch_request)
-
-        runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
-        for key, val in runtime_batch_request_dict.items():
-            if (
-                val is not None
-                and substituted_runtime_config.batch_request.get(key) is not None
-            ):
-                raise CheckpointError(
-                    f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
-                )
-        runtime_batch_request_dict.update(substituted_runtime_config.batch_request)
-        return BatchRequest(**runtime_batch_request_dict)
-
-    # TODO: <Alex>ALEX/Rob -- since this method is static, should we move it to a "util" type of a module?</Alex>
-    @staticmethod
-    def _validate_validation_dict(validation_dict):
-        if validation_dict.get("batch_request") is None:
-            raise CheckpointError("validation batch_request cannot be None")
-        if not validation_dict.get("expectation_suite_name"):
-            raise CheckpointError("validation expectation_suite_name must be specified")
-        if not validation_dict.get("action_list"):
-            raise CheckpointError("validation action_list cannot be empty")
-
-    def _get_substituted_validation_dict(
-        self, substituted_runtime_config: CheckpointConfig, validation_dict: dict
-    ) -> dict:
-        substituted_validation_dict = {
-            "batch_request": self._get_runtime_batch_request(
-                substituted_runtime_config=substituted_runtime_config,
-                validation_batch_request=validation_dict.get("batch_request"),
-            ),
-            "expectation_suite_name": validation_dict.get("expectation_suite_name")
-            or substituted_runtime_config.expectation_suite_name,
-            "action_list": CheckpointConfig.get_updated_action_list(
-                base_action_list=substituted_runtime_config.action_list,
-                other_action_list=validation_dict.get("action_list", {}),
-            ),
-            "evaluation_parameters": nested_update(
-                substituted_runtime_config.evaluation_parameters,
-                validation_dict.get("evaluation_parameters", {}),
-            ),
-            "runtime_configuration": nested_update(
-                substituted_runtime_config.runtime_configuration,
-                validation_dict.get("runtime_configuration", {}),
-            ),
-        }
-        if validation_dict.get("name") is not None:
-            substituted_validation_dict["name"] = validation_dict["name"]
-        self._validate_validation_dict(substituted_validation_dict)
-        return substituted_validation_dict
-
     # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
@@ -317,11 +246,9 @@ class Checkpoint:
 
         for idx, validation_dict in enumerate(validations):
             try:
-                substituted_validation_dict: dict = (
-                    self._get_substituted_validation_dict(
-                        substituted_runtime_config=substituted_runtime_config,
-                        validation_dict=validation_dict,
-                    )
+                substituted_validation_dict: dict = get_substituted_validation_dict(
+                    substituted_runtime_config=substituted_runtime_config,
+                    validation_dict=validation_dict,
                 )
                 batch_request: BatchRequest = substituted_validation_dict.get(
                     "batch_request"
