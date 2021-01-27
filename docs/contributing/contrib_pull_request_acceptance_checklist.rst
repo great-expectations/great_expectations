@@ -25,7 +25,7 @@ Both contributors and reviewers should follow this checklist:
     * Docstring must contain a legible description of the functionality of the new Expectations.
 
 * Library metatada
-    * this is the information required to add an Expectation to the Public Expectation Gallery. We expect the contributor to fill out this section, but we will "pick up the slack" if needed. The module containing a new Expectation must have a comment that looks as follows:
+    * The `library_metadata` is the information required to add an Expectation to the Public Expectation Gallery. Contributors, please complete as much of the section as possible. Reviewers, please complete any remaining fields to avoid extra asks to contributors. Adapt the metadata example below as appropriate for the new contribution.
 
     .. code-block:: python
 
