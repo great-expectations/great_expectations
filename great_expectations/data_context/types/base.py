@@ -941,11 +941,11 @@ class DataContextConfigSchema(Schema):
             )
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
-                "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to use the new version number {} before adding a checkpoint store.".format(
+                "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to use the new version number {} before adding a checkpoint store.\n  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>".format(
                     data["config_version"], CURRENT_GE_CONFIG_VERSION
                 ),
                 validation_error=ValidationError(
-                    message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to use the new version number {} before adding a checkpoint store.".format(
+                    message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to use the new version number {} before adding a checkpoint store.\n  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>".format(
                         data["config_version"], CURRENT_GE_CONFIG_VERSION
                     )
                 ),

@@ -745,10 +745,18 @@ class BaseDataContext:
     def checkpoint_store_name(self):
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
-        except AttributeError as e:
+        except AttributeError:
+            config_version: float = (
+                self.project_config_with_variables_substituted.config_version
+            )
             if default_checkpoints_exist(directory_path=self.root_directory):
+                logger.warning(
+                    f'Detected legacy config version ({config_version}) so will try to use default checkpoint store name.\n  Please update your configuration to the new version number {CURRENT_GE_CONFIG_VERSION} in order to use the new "Checkpoint Store" feature.  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>'
+                )
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-            raise e
+            raise ge_exceptions.InvalidTopLevelConfigKeyError(
+                f'Attempted to access the "checkpoint_store_name" field with an invalid config version ({config_version}).\n  Please update your configuration to the new version number {CURRENT_GE_CONFIG_VERSION} in order to use the new "Checkpoint Store" feature.\n  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>'
+            )
 
     @property
     def checkpoint_store(self):
@@ -756,14 +764,22 @@ class BaseDataContext:
         try:
             return self.stores[checkpoint_store_name]
         except KeyError as e:
+            config_version: float = (
+                self.project_config_with_variables_substituted.config_version
+            )
             if default_checkpoints_exist(directory_path=self.root_directory):
+                logger.warning(
+                    f'Detected legacy config version ({config_version}) so will try to use default checkpoint store.\n  Please update your configuration to the new version number {CURRENT_GE_CONFIG_VERSION} in order to use the new "Checkpoint Store" feature.\n  To learn more about the upgrade process, visit <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>'
+                )
                 return self._build_store_from_config(
                     checkpoint_store_name,
                     DataContextConfigDefaults.DEFAULT_STORES.value[
                         checkpoint_store_name
                     ],
                 )
-            raise e
+            raise ge_exceptions.StoreConfigurationError(
+                f'Attempted to access the checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
+            )
 
     @property
     def expectations_store_name(self):
@@ -1878,12 +1894,16 @@ class BaseDataContext:
             evaluation_parameter_store_name,
             checkpoint_store_name
         """
-        active_store_names = [
+        active_store_names: List[str] = [
             self.expectations_store_name,
             self.validations_store_name,
             self.evaluation_parameter_store_name,
-            self.checkpoint_store_name,
         ]
+        try:
+            active_store_names.append(self.checkpoint_store_name)
+        except AttributeError:
+            pass
+
         return [
             store for store in self.list_stores() if store["name"] in active_store_names
         ]
