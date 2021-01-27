@@ -57,7 +57,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         2(b). Construct batch_kwargs and get a Batch
 
-            ``batch_kwargs`` describe the data you plan to validate. Here we are using a datasource you have configured and are passing in a DataFrame under the ``"dataset"`` key.
+            ``batch_kwargs`` describe the data you plan to validate. Here we are using a Datasource you have configured and are passing in a DataFrame under the ``"dataset"`` key.
 
             .. code-block:: python
 
