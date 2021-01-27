@@ -70,7 +70,7 @@ Both contributors and reviewers should follow this checklist:
 
     * If a test should be rendered as an example, it should be marked up with ``gallery_example: True``
 
-    * If new Expectation class in the PR goes beyond "RFE" (it does not just define the name and the Docstring of the new Expectation, but has elements of implementation), the tests included in the module must pass for the PR to be approved.
+    * The tests included in the module must pass for the PR to be approved.
 
  * Verify that changes to existing renderers (or new renderers) make sense--the language needs to accurately describe the semantics and behavior of the Expectation. 
 
