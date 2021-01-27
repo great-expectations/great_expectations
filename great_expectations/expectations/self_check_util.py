@@ -1650,24 +1650,38 @@ class LockingConnectionCheck:
             return self._is_valid
 
 
-def build_test_backends_list():
-    test_backends = ["pandas"]
-    no_spark = True
-    if not no_spark:
+def build_test_backends_list(
+    include_pandas=True,
+    include_spark=True,
+    include_sqlalchemy=True,
+    include_postgresql=False,
+    include_mysql=False,
+    include_mssql=False,
+):
+    test_backends = []
+
+    if include_pandas:
+        test_backends += ["pandas"]
+
+    if include_spark:
         try:
             import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
             raise ValueError("spark tests are requested, but pyspark is not installed")
         test_backends += ["spark"]
-    no_sqlalchemy = False
-    if not no_sqlalchemy:
-        test_backends += ["sqlite"]
+
+    if include_sqlalchemy:
 
         sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
+        if sa is None:
+            raise ImportError(
+                "sqlalchemy tests are requested, but sqlalchemy in not installed"
+            )
 
-        no_postgresql = True
-        if not (sa is None or no_postgresql):
+        test_backends += ["sqlite"]
+
+        if include_postgresql:
             ###
             # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
             # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
@@ -1685,8 +1699,8 @@ def build_test_backends_list():
                     f"backend-specific tests are requested, but unable to connect to the database at "
                     f"{connection_string}"
                 )
-        mysql = False
-        if sa and mysql:
+
+        if include_mysql:
             try:
                 engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
                 conn = engine.connect()
@@ -1697,8 +1711,8 @@ def build_test_backends_list():
                     "'mysql+pymysql://root@localhost/test_ci'"
                 )
             test_backends += ["mysql"]
-        mssql = False
-        if sa and mssql:
+
+        if include_mssql:
             try:
                 engine = sa.create_engine(
                     "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
@@ -1712,6 +1726,7 @@ def build_test_backends_list():
                     "'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                 )
             test_backends += ["mssql"]
+
     return test_backends
 
 
@@ -1733,7 +1748,25 @@ def generate_expectation_tests(
     :return:
     """
     parametrized_tests = []
-    backends = build_test_backends_list()
+
+    # use the expectation_execution_engines_dict (if provided) to request only the appropriate backends
+    if expectation_execution_engines_dict is not None:
+        backends = build_test_backends_list(
+            include_pandas=expectation_execution_engines_dict.get(
+                "PandasExecutionEngine"
+            )
+            == True,
+            include_sqlalchemy=expectation_execution_engines_dict.get(
+                "SqlAlchemyExecutionEngine"
+            )
+            == True,
+            include_spark=expectation_execution_engines_dict.get(
+                "SparkDFExecutionEngine"
+            )
+            == True,
+        )
+    else:
+        backends = build_test_backends_list()
 
     for c in backends:
         for d in examples_config:

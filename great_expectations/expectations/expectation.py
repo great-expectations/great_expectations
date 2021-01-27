@@ -789,15 +789,20 @@ class Expectation(metaclass=MetaExpectation):
                 )
                 report_obj.update({"execution_engines": execution_engines})
 
-            tests = self._get_examples(return_only_gallery_examples=False)
-            if len(tests) > 0:
-                if execution_engines is not None:
-                    test_results = self._get_test_results(
-                        snake_name,
-                        tests,
-                        execution_engines,
-                    )
-                    report_obj.update({"test_report": test_results})
+            try:
+                tests = self._get_examples(return_only_gallery_examples=False)
+                if len(tests) > 0:
+                    if execution_engines is not None:
+                        test_results = self._get_test_results(
+                            snake_name,
+                            tests,
+                            execution_engines,
+                        )
+                        report_obj.update({"test_report": test_results})
+            except Exception as e:
+                report_obj = self._add_error_to_diagnostics_report(
+                    report_obj, e, traceback.format_exc()
+                )
 
         return report_obj
 
@@ -909,7 +914,7 @@ class Expectation(metaclass=MetaExpectation):
                     {
                         "test title": exp_test["test"]["title"],
                         "backend": exp_test["backend"],
-                        "success": "true",
+                        "test_passed": "true",
                     }
                 )
             except Exception as e:
@@ -917,7 +922,7 @@ class Expectation(metaclass=MetaExpectation):
                     {
                         "test title": exp_test["test"]["title"],
                         "backend": exp_test["backend"],
-                        "success": "false",
+                        "test_passed": "false",
                         "error_message": str(e),
                         "stack_trace": traceback.format_exc(),
                     }
