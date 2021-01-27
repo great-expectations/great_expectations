@@ -417,7 +417,10 @@ def load_data_context_with_error_handling(
     try:
         context: DataContext = DataContext(context_root_dir=directory)
         ge_config_version: int = context.get_config().config_version
-        if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+        if (
+            from_cli_upgrade_command
+            and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION
+        ):
             directory = directory or context.root_directory
             (
                 increment_version,
