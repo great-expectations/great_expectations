@@ -46,9 +46,9 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
                 suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
 
-        There are two paths you can follow for step 2. If you are reading a csv from disk, follow the first 2(a). If you already have a DataFrame, follow the second 2(b).
+        There are two paths you can follow for step 2 to create a Batch. If you want to create a Pandas DataFrame by reading a CSV from disk, follow the instructions under 2(a). If you already have a Pandas DataFrame that you have previously created, follow the steps under 2(b).
 
-        2(a). Construct a Batch
+        2(a). Construct a Batch from a CSV
 
             .. code-block:: python
 
