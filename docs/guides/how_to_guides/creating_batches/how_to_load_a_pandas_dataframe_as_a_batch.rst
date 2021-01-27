@@ -3,7 +3,7 @@
 How to load a Pandas DataFrame as a Batch
 =========================================
 
-This guide will help you load a Pandas DataFrame as a Batch for use in creating expectations.
+This guide will help you load a Pandas DataFrame as a Batch for use in creating Expectations.
 
 .. content-tabs::
 
@@ -15,7 +15,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Configured and loaded a DataContext <how_to_guides__configuring_data_contexts>`
             - Configured a :ref:`Pandas/filesystem Datasource <how_to_guides__configuring_datasources>`
-            - Identified a pandas DataFrame that you would like to use as the data to validate.
+            - Identified a Pandas DataFrame that you would like to use as the data to validate.
 
         Steps
         -----
@@ -50,13 +50,13 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             .. code-block:: python
 
-                suite = context.get_expectation_suite(insert_your_expectation_suite_name_here)
+                suite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
 
             Alternatively, if you have not already created a suite, you can do so now.
 
             .. code-block:: python
 
-                suite = context.create_expectation_suite(insert_your_expectation_suite_name_here)
+                suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
 
         3. Get the Batch to validate
 
@@ -86,13 +86,13 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         What used to be called a “batch” in the old API was replaced with :ref:`Validator <reference__core_concepts__validation>`. A Validator knows how to validate a particular batch of data on a particular :ref:`Execution Engine <reference__core_concepts>` against a particular :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
 
-        You can read more about the core classes that make GE run in our :ref:`Core Concepts reference guide <reference__core_concepts>`.
+        You can read more about the core classes that make Great Expectations run in our :ref:`Core Concepts reference guide <reference__core_concepts>`.
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Configured and loaded a DataContext <how_to_guides__configuring_data_contexts>`
-            - Identified a pandas DataFrame that you would like to use as the data to validate.
+            - Identified a Pandas DataFrame that you would like to use as the data to validate.
 
         Steps
         -----
@@ -113,7 +113,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         1. Configure a Datasource
 
-            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a pandas DataFrame, we use the PandasExecutionEngine. You can use ``runtime_keys`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
+            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Pandas DataFrame, we use the PandasExecutionEngine. You can use ``runtime_keys`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
 
             .. code-block:: yaml
 
@@ -134,13 +134,13 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             .. code-block:: python
 
-                suite = context.get_expectation_suite(insert_your_expectation_suite_name_here)
+                suite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
 
             Alternatively, if you have not already created a suite, you can do so now.
 
             .. code-block:: python
 
-                suite = context.create_expectation_suite(insert_your_expectation_suite_name_here)
+                suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
 
         3. Construct a BatchRequest
 
@@ -148,7 +148,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``runtime_keys`` to define which keys are allowed.
 
-            NOTE: for now, data_asset_name can only be set to this predefined string: ``“IN_MEMORY_DATA_ASSET”``. We will fix it very soon and will allow you to specify your own name.
+            NOTE: for now, ``data_asset_name`` can only be set to this predefined string: ``“IN_MEMORY_DATA_ASSET”``. We will fix it very soon and will allow you to specify your own name.
 
             .. code-block:: python
 
