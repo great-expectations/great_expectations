@@ -68,6 +68,15 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                 )
 
 
+        4. Check your data
+
+            You can check that the first few lines of your batch are what you expect by running:
+
+            .. code-block:: python
+
+                batch.head()
+
+
         Now that you have a :ref:`Batch <reference__core_concepts__datasources>`, you can use it to create :ref:`Expectations <expectations>` or validate the data.
 
 
@@ -167,6 +176,15 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                     batch_request=batch_request,
                     expectation_suite=suite
                 )
+
+
+        5. Check your data
+
+            You can check that the first few lines of your batch are what you expect by running:
+
+            .. code-block:: python
+
+                my_validator.active_batch.head()
 
         Now that you have a Validator, you can use it to create Expectations or validate the data.
 
