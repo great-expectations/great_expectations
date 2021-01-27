@@ -38,11 +38,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         self._generate_upgrade_checklist()
 
     def _generate_upgrade_checklist(self):
-        checkpoints_directory_path: str = os.path.join(
-            self.data_context.root_directory,
-            DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-        )
-        if default_checkpoints_exist(directory_path=checkpoints_directory_path):
+        if default_checkpoints_exist(directory_path=self.data_context.root_directory):
             self._process_checkpoint_store_for_checklist()
         else:
             self.upgrade_log["skipped_upgrade"] = True
