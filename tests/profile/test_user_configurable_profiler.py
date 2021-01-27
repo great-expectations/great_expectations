@@ -194,7 +194,7 @@ def test__validate_config(cardinality_dataset):
 def test__validate_semantic_types_dict(cardinality_dataset):
     """
     What does this test do and why?
-    Tests that validate semantic_types function errors when not formatted correctly
+    Tests that _validate_semantic_types_dict function errors when not formatted correctly
     """
 
     bad_semantic_types_dict_type = {"value_set": "col_few"}
