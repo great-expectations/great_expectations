@@ -1,6 +1,6 @@
 .. _which_data_connector_to_use:
 
-How to choose which ``DataConnector`` to use:
+How to choose which ``DataConnector`` to use
 ==============================================
 
 Great Expectations provides two types of ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk, but also S3 object stores, etc:

@@ -4,7 +4,10 @@ from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import (
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    assert_no_logging_messages_or_tracebacks,
+)
 
 try:
     from unittest import mock
@@ -22,9 +25,13 @@ def test_docs_help_output(caplog):
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_view(
-    mock_webbrowser, caplog, site_builder_data_context_with_html_store_titanic_random
+    mock_webbrowser,
+    caplog,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -52,14 +59,22 @@ def test_docs_build_view(
     assert os.path.isfile(os.path.join(local_site_dir, "index.html"))
     assert os.path.isdir(os.path.join(local_site_dir, "expectations"))
     assert os.path.isdir(os.path.join(local_site_dir, "validations"))
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_no_view(
-    mock_webbrowser, caplog, site_builder_data_context_with_html_store_titanic_random
+    mock_webbrowser,
+    caplog,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -90,13 +105,19 @@ def test_docs_build_no_view(
     assert os.path.isfile(os.path.join(local_site_dir, "index.html"))
     assert os.path.isdir(os.path.join(local_site_dir, "expectations"))
     assert os.path.isdir(os.path.join(local_site_dir, "validations"))
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 def test_docs_build_assume_yes(
-    caplog, site_builder_data_context_with_html_store_titanic_random
+    caplog, site_builder_data_context_v013_with_html_store_titanic_random
 ):
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -108,4 +129,8 @@ def test_docs_build_assume_yes(
 
     assert result.exit_code == 0
     assert "Would you like to proceed? [Y/n]:" not in stdout
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )

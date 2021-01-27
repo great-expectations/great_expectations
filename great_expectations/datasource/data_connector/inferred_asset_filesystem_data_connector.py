@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector import (
     InferredAssetFilePathDataConnector,
 )
