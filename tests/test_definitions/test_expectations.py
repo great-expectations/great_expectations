@@ -54,7 +54,7 @@ def pytest_generate_tests(metafunc):
     ids = []
 
     for expectation_category in expectation_dirs:
-        
+
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )

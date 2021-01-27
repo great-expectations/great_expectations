@@ -444,7 +444,7 @@ def get_dataset(
         # For mysql we want our tests to know when a temp_table is referred to more than once in the
         # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
         # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
-        # rather than referring the table by name. 
+        # rather than referring the table by name.
         custom_sql = "SELECT * FROM " + table_name
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
