@@ -5,7 +5,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Dict, List, Optional, Tuple
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -36,7 +36,6 @@ from great_expectations.expectations.util import legacy_method_parameters
 from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update
-from ..data_asset.util import recursively_convert_to_json_serializable
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..render.renderer.renderer import renderer
 from ..render.types import (
@@ -68,7 +67,7 @@ class MetaExpectation(ABCMeta):
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
-        if not isabstract(newclass):
+        if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
         newclass._register_renderer_functions()
@@ -83,7 +82,7 @@ class MetaExpectation(ABCMeta):
         return newclass
 
 
-class Expectation(ABC, metaclass=MetaExpectation):
+class Expectation(metaclass=MetaExpectation):
     """Base class for all Expectations.
 
     Expectation classes *must* have the following attributes set:
@@ -138,6 +137,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
         self._configuration = configuration
 
     @classmethod
+    def is_abstract(cls):
+        return isabstract(cls)
+
+    @classmethod
     def _register_renderer_functions(cls):
         expectation_type = camel_to_snake(cls.__name__)
 
@@ -148,15 +151,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
             register_renderer(
                 object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj
             )
-
-    @abstractmethod
-    def get_validation_dependencies(
-        self,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
-    ):
-        raise NotImplementedError
 
     @abstractmethod
     def _validate(
@@ -496,15 +490,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
     @classmethod
     def get_allowed_config_keys(cls):
         return cls.domain_keys + cls.success_keys + cls.runtime_keys
-
-    def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict[str, Any],
-        runtime_configuration: Dict,
-        execution_engine: ExecutionEngine,
-    ):
-        raise NotImplementedError
 
     def metrics_validate(
         self,
@@ -1186,6 +1171,10 @@ class ColumnMapExpectation(TableExpectation, ABC):
         "catch_exceptions": True,
     }
 
+    @classmethod
+    def is_abstract(cls):
+        return cls.map_metric is None or super().is_abstract()
+
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if not super().validate_configuration(configuration):
             return False
@@ -1378,6 +1367,10 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "include_config": True,
         "catch_exceptions": True,
     }
+
+    @classmethod
+    def is_abstract(cls):
+        return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if not super().validate_configuration(configuration):
