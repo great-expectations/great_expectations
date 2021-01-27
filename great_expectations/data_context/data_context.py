@@ -1901,7 +1901,7 @@ class BaseDataContext:
         ]
         try:
             active_store_names.append(self.checkpoint_store_name)
-        except AttributeError:
+        except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             pass
 
         return [
