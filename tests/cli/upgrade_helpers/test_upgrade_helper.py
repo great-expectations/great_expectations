@@ -43,7 +43,7 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     stdout = result.stdout
 
     assert "Checking project..." in stdout
-    assert "Your project is up-to-date - no upgrade is necessary." in stdout
+    assert "Your project is up-to-date - no further upgrade is necessary." in stdout
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,

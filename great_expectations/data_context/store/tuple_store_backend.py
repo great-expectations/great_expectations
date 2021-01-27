@@ -289,13 +289,12 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         filter_properties_dict(properties=self._config, inplace=True)
 
     def _get(self, key):
-        contents = ""
-        filepath = os.path.join(
+        filepath: str = os.path.join(
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
         try:
             with open(filepath) as infile:
-                contents = infile.read()
+                contents: str = infile.read()
         except FileNotFoundError:
             raise InvalidKeyError(
                 f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {str(filepath)}"

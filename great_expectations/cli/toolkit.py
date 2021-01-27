@@ -356,7 +356,7 @@ def load_checkpoint(
     """Load a checkpoint or raise helpful errors."""
     try:
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-            checkpoint_name
+            name=checkpoint_name
         )
         return checkpoint
     except (
@@ -415,9 +415,13 @@ def load_data_context_with_error_handling(
 ) -> DataContext:
     """Return a DataContext with good error handling and exit codes."""
     try:
-        context: Optional[DataContext] = DataContext(directory)
+        context: DataContext = DataContext(context_root_dir=directory)
         ge_config_version: int = context.get_config().config_version
-        if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
+        if (
+            from_cli_upgrade_command
+            and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION
+        ):
+            directory = directory or context.root_directory
             (
                 increment_version,
                 exception_occurred,
@@ -425,9 +429,10 @@ def load_data_context_with_error_handling(
                 context_root_dir=directory,
                 ge_config_version=ge_config_version,
                 continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+                from_cli_upgrade_command=from_cli_upgrade_command,
             )
             if not exception_occurred and increment_version:
-                context = DataContext(directory)
+                context = DataContext(context_root_dir=directory)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or DataContext.find_context_root_dir()
@@ -498,6 +503,7 @@ def upgrade_project(
             context_root_dir=context_root_dir,
             ge_config_version=ge_config_version,
             continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+            from_cli_upgrade_command=from_cli_upgrade_command,
         )
         if exception_occurred or not increment_version:
             break
@@ -523,7 +529,10 @@ To learn more about the upgrade process, visit \
 
 
 def upgrade_project_one_version_increment(
-    context_root_dir, ge_config_version, continuation_message
+    context_root_dir: str,
+    ge_config_version: float,
+    continuation_message: str,
+    from_cli_upgrade_command: bool = False,
 ) -> [bool, bool]:  # Returns increment_version, exception_occurred
     upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
     if not upgrade_helper_class:
@@ -537,7 +546,7 @@ def upgrade_project_one_version_increment(
     upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)
     upgrade_overview, confirmation_required = upgrade_helper.get_upgrade_overview()
 
-    if confirmation_required:
+    if confirmation_required or from_cli_upgrade_command:
         upgrade_confirmed = confirm_proceed_or_exit(
             confirm_prompt=upgrade_overview,
             continuation_message=continuation_message,

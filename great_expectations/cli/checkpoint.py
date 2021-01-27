@@ -200,7 +200,9 @@ def checkpoint_list(directory):
 @mark.cli_as_experimental
 def checkpoint_run(checkpoint, directory):
     """Run a checkpoint. (Experimental)"""
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = toolkit.load_data_context_with_error_handling(
+        directory=directory, from_cli_upgrade_command=False
+    )
     usage_event = "cli.checkpoint.run"
 
     checkpoint: Checkpoint = toolkit.load_checkpoint(
