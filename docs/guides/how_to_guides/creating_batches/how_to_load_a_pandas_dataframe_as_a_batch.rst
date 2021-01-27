@@ -49,7 +49,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
                 batch = context.get_batch(
                     batch_kwargs=batch_kwargs,
-                    expectation_suite_name=expectation_suite_name
+                    expectation_suite_name=suite
                 )
 
 
@@ -60,7 +60,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
         :title: Show Docs for Experimental API (0.13)
 
 
-        What used to be called a “batch” in the old API was replaced with :ref:`Validator <reference__core_concepts__validation>`. A Validator knows how to validate particular batch of data on a particular :ref:`Execution Engine <reference__core_concepts>` against a particular :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
+        What used to be called a “batch” in the old API was replaced with :ref:`Validator <reference__core_concepts__validation>`. A Validator knows how to validate a particular batch of data on a particular :ref:`Execution Engine <reference__core_concepts>` against a particular :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
 
         You can read more about the core classes that make GE run in our :ref:`Core Concepts reference guide <reference__core_concepts>`.
 
@@ -74,7 +74,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         1. Configure a Datasource
 
-            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a pandas DataFrame, we use the PandasExecutionEngine. You can use ``runtime_keys`` to define what data you can attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
+            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a pandas DataFrame, we use the PandasExecutionEngine. You can use ``runtime_keys`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
 
             .. code-block:: yaml
 
@@ -109,7 +109,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``runtime_keys`` to define which keys are allowed.
 
-            NOTE: data_asset_name can be set only to this predefined string: ``“IN_MEMORY_DATA_ASSET”`` for now. We will fix it very soon and will allow you to specify your own name.
+            NOTE: for now, data_asset_name can only be set to this predefined string: ``“IN_MEMORY_DATA_ASSET”``. We will fix it very soon and will allow you to specify your own name.
 
             .. code-block:: python
 
