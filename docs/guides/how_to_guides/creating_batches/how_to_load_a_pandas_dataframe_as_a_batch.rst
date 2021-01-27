@@ -24,7 +24,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             The ``context`` referenced below can be loaded from disk or configured in code.
 
-            Load an on-disk DataContext via:
+            Load an on-disk Data Context via:
 
             .. code-block:: python
 
@@ -46,18 +46,18 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
                 suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
 
-        There are two paths you can follow from here on out. If you are reading a csv from disk, follow the first (a). If you already have a dataframe, follow the second (b).
+        There are two paths you can follow for step 2. If you are reading a csv from disk, follow the first 2(a). If you already have a DataFrame, follow the second 2(b).
 
-        2(a). Construct a batch
+        2(a). Construct a Batch
 
             .. code-block:: python
 
                 batch = ge.read_csv("insert_path_to_your_csv_here", expectation_suite=suite)
 
 
-        2(b). Construct batch_kwargs and get a batch
+        2(b). Construct batch_kwargs and get a Batch
 
-            batch_kwargs describe the data you plan to validate. Here we are using a datasource you have configured and passing in a DataFrame under the ``"dataset"`` key.
+            ``batch_kwargs`` describe the data you plan to validate. Here we are using a datasource you have configured and are passing in a DataFrame under the ``"dataset"`` key.
 
             .. code-block:: python
 
@@ -67,7 +67,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                     "data_asset_name": "optionally_insert_your_data_asset_name_here",
                 }
 
-            Then we get the batch via:
+            Then we get the Batch via:
 
             .. code-block:: python
 
@@ -77,9 +77,9 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                 )
 
 
-        4. Check your data
+        3. Check your data
 
-            You can check that the first few lines of your batch are what you expect by running:
+            You can check that the first few lines of your Batch are what you expect by running:
 
             .. code-block:: python
 
@@ -110,7 +110,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             The ``context`` referenced below can be loaded from disk or configured in code.
 
-            Load an on-disk DataContext via:
+            Load an on-disk Data Context via:
 
             .. code-block:: python
 
@@ -122,7 +122,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         1. Configure a Datasource
 
-            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Pandas DataFrame, we use the PandasExecutionEngine. You can use ``runtime_keys`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
+            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Pandas DataFrame, we use the ``PandasExecutionEngine``. You can use ``runtime_keys`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
 
             .. code-block:: yaml
 
@@ -153,7 +153,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         3. Construct a BatchRequest
 
-            We will create a BatchRequest and pass it our DataFrame via the ``batch_data`` argument.
+            We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument.
 
             Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``runtime_keys`` to define which keys are allowed.
 
@@ -185,13 +185,11 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                     batch_request=batch_request,
                     expectation_suite=suite
                 )
-                batch.head()
 
 
         5. Check your data
-        Now that you have a :ref:`Batch <reference__core_concepts__datasources>`, you can use it to create :ref:`Expectations <expectations>` or validate the data.
 
-            You can check that the first few lines of your batch are what you expect by running:
+            You can check that the first few lines of your Batch are what you expect by running:
 
             .. code-block:: python
 
