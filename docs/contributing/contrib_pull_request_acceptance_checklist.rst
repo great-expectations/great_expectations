@@ -11,7 +11,7 @@ Both contributors and reviewers should follow this checklist:
 
 * Scope of the PR.
     * A PR may introduce a new Expectation. The minimal acceptable version of a new Expectation is a module that contains a new class with the name of the Expectation, a Docstring describing the behavior, and examples/tests. The class may leave all methods unimplemented. Metric classes required by the new Expectation may be left undefined/unimplemented. This minimal contribution can be viewed as a "RFE" - Request for Expectation.
-    * If the PR modifies existing Expectations and/or Metrics, check that the changes are an improvement and are not destructive. The contributor should not remove someone else' prior work without a clear reason.
+    * If the PR modifies existing Expectations and/or Metrics, check that the changes are an improvement and are not destructive. The contributor should not remove someone else's prior work without a clear reason.
 
 * Basic class/module structure and naming of new Expectation and Metric classes
     * One new Expectation class per module (file).
