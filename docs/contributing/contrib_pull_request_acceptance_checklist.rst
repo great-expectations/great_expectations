@@ -72,7 +72,7 @@ Both contributors and reviewers should follow this checklist:
 
     * If new Expectation class in the PR goes beyond "RFE" (it does not just define the name and the Docstring of the new Expectation, but has elements of implementation), the tests included in the module must pass for the PR to be approved.
 
- * If the PR contains changes to existing renderers (or new renderers), the wording must "make sense" - this is a judgement call.
+ * Verify that changes to existing renderers (or new renderers) make sense--the language needs to accurately describe the semantics and behavior of the Expectation. 
 
 * And finally, "Does it run?"
     * Check out the PR branch and run the ``run_diagnostics`` method of the Expectation. This :ref:`how-to guide <how_to_guides__creating_and_editing_expectations__how_to_template>` shows how to do it. Check the output and make sure everything ran without errors.
