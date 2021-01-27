@@ -7,7 +7,7 @@ Changelog
 
 Develop
 -----------------
-
+[BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract
 
 0.13.7
 -----------------
