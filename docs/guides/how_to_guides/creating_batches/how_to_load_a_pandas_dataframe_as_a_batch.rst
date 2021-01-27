@@ -13,11 +13,26 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+            - :ref:`Configured and loaded a DataContext <how_to_guides__configuring_data_contexts>`
             - Configured a :ref:`Pandas/filesystem Datasource <how_to_guides__configuring_datasources>`
             - Identified a pandas DataFrame that you would like to use as the data to validate.
 
         Steps
         -----
+
+        0. Load or create a Data Context
+
+            The ``context`` referenced below can be loaded from disk or configured in code.
+
+            Load an on-disk DataContext via:
+
+            .. code-block:: python
+
+                import great_expectations as ge
+                context = ge.get_context()
+
+            Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
+
 
         1. Construct batch_kwargs
 
@@ -67,10 +82,25 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+            - :ref:`Configured and loaded a DataContext <how_to_guides__configuring_data_contexts>`
             - Identified a pandas DataFrame that you would like to use as the data to validate.
 
         Steps
         -----
+
+        0. Load or create a Data Context
+
+            The ``context`` referenced below can be loaded from disk or configured in code.
+
+            Load an on-disk DataContext via:
+
+            .. code-block:: python
+
+                import great_expectations as ge
+                context = ge.get_context()
+
+            Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
+
 
         1. Configure a Datasource
 
