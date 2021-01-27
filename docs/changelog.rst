@@ -7,7 +7,7 @@ Changelog
 
 Develop
 -----------------
-
+* [DOCS] How to load a Pandas DataFrame as a Batch #2327
 
 0.13.7
 -----------------
