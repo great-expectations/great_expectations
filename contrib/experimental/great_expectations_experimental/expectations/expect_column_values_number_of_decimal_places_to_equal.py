@@ -35,9 +35,10 @@ class ColumnValuesDecimalPlacesEquals(ColumnMapMetricProvider):
     """
     Computes number of decimal places of values in column through string conversion.
     """
+
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.decimal_places.equals"
+    condition_metric_name = "column_values.decimal_places_equal"
     condition_value_keys = ("decimal_places",)
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
@@ -53,6 +54,7 @@ class ColumnValuesDecimalPlacesEquals(ColumnMapMetricProvider):
 
         column_decimal_places = column.apply(decimal_func)
         return column_decimal_places == decimal_places
+
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -73,12 +75,16 @@ class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
     inputted number of decimal places. In the case where the decimal places are all 0s (an integer),
     the value automatically passes. Currently have not figured out how to preserve 0s in decimal to string conversion.
     """
+
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
-            "data": {"a": [2.15, 17.57, 34.21, 1.00], "b": [1.17, 4.3, 6.433, 2.14]},
-            "schemas": {
+            "data": {
+                "a": [2.15, 17.57, 34.21, 1.00],
+                "b": [1.17, 4.3, 6.433, 2.14],
+                "c": [1, 4.00, 6.43, 2.14],
             },
+            "schemas": {},
             "tests": [
                 {
                     "title": "positive_test",
@@ -93,6 +99,13 @@ class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
                     "in": {"column": "b", "decimal_places": 2},
                     "out": {"success": False},
                 },
+                {
+                    "title": "positive_test_whole_numbers",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "c", "decimal_places": 2},
+                    "out": {"success": True},
+                },
             ],
         },
     ]
@@ -100,14 +113,26 @@ class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["experimental", "precision", "formatting", "floating_point"],
-        "contributors": ["@samsonq", "@spbail", "@Lord-of-Bugs", "@BladderBoy", "@Rim921"],
+        "tags": [
+            "experimental",
+            "precision",
+            "formatting",
+            "floating_point",
+            "hackathon-20200123",
+        ],
+        "contributors": [
+            "@samsonq",
+            "@spbail",
+            "@Lord-of-Bugs",
+            "@BladderBoy",
+            "@Rim921",
+        ],
         "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.decimal_places.equals"
+    map_metric = "column_values.decimal_places_equal"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
@@ -205,5 +230,7 @@ class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesNumberOfDecimalPlacesToEqual().run_diagnostics()
+    diagnostics_report = (
+        ExpectColumnValuesNumberOfDecimalPlacesToEqual().run_diagnostics()
+    )
     print(json.dumps(diagnostics_report, indent=2))
