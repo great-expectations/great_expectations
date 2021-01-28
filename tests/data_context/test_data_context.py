@@ -33,10 +33,6 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
-)
-from tests.datasource.conftest import postgresql_sqlalchemy_datasource
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -1764,7 +1760,7 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
 
 
 # TODO: add more test cases
-def test_run_checkpoint_newstyle(
+def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
