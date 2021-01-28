@@ -57,17 +57,18 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
             .having(sa.func.count(column) > 1)
         )
 
-        # <WILL> this is for mysql error
+        # Will - 20210126
+        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
+        # more than once in the same query. So instead of passing dup_query as-is, the query is executed, and
+        # the notin_() calculation is done against the resulting list instead.
         dialect = kwargs.get("_dialect", None)
         sql_engine = kwargs.get("_sqlalchemy_engine", None)
-        if dialect and dialect.dialect.name == "mysql":
-            if sql_engine:
-                rows = sql_engine.execute(dup_query).fetchall()
-                dup_query = []
-                for row in rows:
-                    row_as_dict = dict(row)
-                    # this can be made more efficient
-                    dup_query.append(list(row_as_dict.values())[0])
+        if sql_engine and dialect and dialect.dialect.name == "mysql":
+            rows = sql_engine.execute(dup_query).fetchall()
+            dup_query = []
+            for row in rows:
+                row_as_dict = dict(row)
+                dup_query.append(row_as_dict[column.name])
         return column.notin_(dup_query)
 
     @column_condition_partial(

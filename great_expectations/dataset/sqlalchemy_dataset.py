@@ -1786,8 +1786,8 @@ WHERE
 
         # Will - 20210126
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
-        # more than once in the same query. So the dup_query is executed, and the notin_() calculation is done against
-        # a list instead.
+        # more than once in the same query. So instead of passing dup_query as-is, the query is executed, and
+        # the notin_() calculation is done against the resulting list instead.
         if self.sql_engine_dialect.name.lower() == "mysql":
             rows = self.engine.execute(dup_query).fetchall()
             dup_query = []

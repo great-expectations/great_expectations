@@ -957,6 +957,11 @@ def _build_sa_validator_with_data(
         dtype=sql_dtypes,
         if_exists="replace",
     )
+
+    # Will - 20210126
+    # For mysql we want our tests to know when a temp_table is referred to more than once in the
+    # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
+    # Here we instantiate a SqlAlchemyBatchData with a query, which causes a temp_table to be created.
     if sa_engine_name == "mysql":
         query = "SELECT * FROM " + table_name
         batch_data = SqlAlchemyBatchData(engine=engine, query=query)
