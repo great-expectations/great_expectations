@@ -24,7 +24,7 @@ It all starts with ``Expectations``. An Expectation is how we communicate the wa
 
 When you're deploying Great Expectations, you'll use a ``Checkpoint`` to run a validation, testing wheher data meets expecations, and potentially performing other actions like building and saving a Data Docs site, sending a notification, or signaling a pipeline runner.
 
-Great Expectations makes it possible to maintain state about data pipelines using ``Stores``. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, or even Data Docs sites. Stores, and other configuration, is managed using a ``Data Context``. The Data Context configuration is usually stored as a yaml file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
+Great Expectations makes it possible to maintain state about data pipelines using ``Stores``. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, Checkpoints, or even Data Docs sites. Stores, and other configuration, is managed using a ``Data Context``. The Data Context configuration is usually stored as a yaml file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
 
 
 ************************************************
@@ -86,23 +86,24 @@ A **Batch** is reference to a set of data, with metadata about it. *The Batch is
 Validation
 ===================
 
-A **Validator** uses an Execution Engine and Expectation Suite to validate whether data meets expectations. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis to build or edit an Expectations.
+A **Validator** uses an Execution Engine and Expectation Suite to validate whether data meets expectations. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis to build or edit Expectations.
 
 An **Expectation Validation Result** captures the output of checking an expectation against data. It describes whether the data met the expectation, and will usually include Metrics from the data that were used to evaluate the Expectation, such as the percentage of unique values or observed mean.
 
 An **Expectation Suite Validation Result** combines multiple Expectation Validation Results and metadata about the validation into a single report.
 
-A **Checkpoint** faciliates running a validation as well as configurable **Actions** such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket. The Checkpoint makes it easy to add Great Expectations to your project by tracking configuration about what data, Expectation Suite, and Actions should be run when.
+A **Checkpoint** facilitates running a validation as well as configurable **Actions** such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket. The Checkpoint makes it easy to add Great Expectations to your project by tracking configuration about what data, Expectation Suite, and Actions should be run when.
 
 .. attention::
 
-  The Checkpoint feature is continuing to evolve as we standardize on that name instead of "Validation Operator" but the behavior is very similar.
+  Checkpoints are an evolution of the soon-to-be-deprecated Validation Operators.
+
 
 .. toctree::
    :maxdepth: 2
 
    /reference/core_concepts/validation.rst
-   /reference/core_concepts/validation_operators_and_actions.rst
+   /reference/core_concepts/checkpoints_and_actions.rst
 
 .. _reference__core_concepts__data_contexts:
 
@@ -119,7 +120,7 @@ A **Store** provides a consistent API to manage access to Expectations, Expectat
 
 .. _reference__core_concepts__data_context__stores:
 
-A **Plugin** customizes Great Expectations by making a new python package or module available at runtime. 
+A **Plugin** customizes Great Expectations by making a new python package or module available at runtime.
 
 .. toctree::
    :maxdepth: 2

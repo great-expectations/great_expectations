@@ -22,7 +22,7 @@ yaml = YAML()
 
 
 def test_basic_instantiation(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
+    base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -85,7 +85,7 @@ def test_basic_instantiation(tmp_path_factory):
 def test_instantiation_from_a_config(empty_data_context, tmp_path_factory):
     context = empty_data_context
 
-    base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
+    base_directory = str(tmp_path_factory.mktemp("test_instantiation_from_a_config"))
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
@@ -143,7 +143,11 @@ def test_instantiation_from_a_config_regex_does_not_match_paths(
 ):
     context = empty_data_context
 
-    base_directory = str(tmp_path_factory.mktemp("test_test_yaml_config"))
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_instantiation_from_a_config_regex_does_not_match_paths"
+        )
+    )
     create_files_in_directory(
         directory=base_directory,
         file_name_list=[
