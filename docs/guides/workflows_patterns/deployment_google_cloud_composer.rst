@@ -76,6 +76,17 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
 
         context = BaseDataContext(project_config=project_config)
 
+  **Note:** If you're using a default Composer setup, you will likely be using a specific storage location, e.g. ``my_composer_bucket/dags`` or ``my_composer_bucket/data``. You will need to specify those prefixes in the ``store_backend_defaults``, for example:
+  
+  .. code-block: python
+      store_backend_defaults=GCSStoreBackendDefaults(
+          default_bucket_name="my_composer_bucket",
+          default_project_name="my_project",
+          expectations_store_prefix="dags/expectations",
+          validations_store_prefix = "dags/validations",
+          data_docs_prefix = "dags/data_docs"
+      )
+  
 
 4. Create a DAG with Validations
 
