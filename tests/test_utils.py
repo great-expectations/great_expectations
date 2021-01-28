@@ -967,7 +967,7 @@ def _build_sa_validator_with_data(
         batch_data = SqlAlchemyBatchData(engine=engine, query=query)
     else:
         batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
-        
+
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
