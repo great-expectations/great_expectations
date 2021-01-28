@@ -75,7 +75,7 @@ Additional resources
 --------------------
 
 - :ref:`how_to_guides__validation__how_to_store_validation_results_as_a_validation_action`
-- :ref:`validation_operators_and_actions`
+- :ref:`checkpoints_and_actions`
 
 Comments
 --------
