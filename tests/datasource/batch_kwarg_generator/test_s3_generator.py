@@ -72,8 +72,14 @@ def s3_generator(mock_s3_bucket, basic_sparkdf_datasource):
                 "reader_options": {"sep": "\t"},
                 "max_keys": 1,
             },
-            "dir": {"prefix": "data/", "directory_assets": True,},
-            "dir_misconfigured": {"prefix": "data/", "directory_assets": False,},
+            "dir": {
+                "prefix": "data/",
+                "directory_assets": True,
+            },
+            "dir_misconfigured": {
+                "prefix": "data/",
+                "directory_assets": False,
+            },
         },
     )
     yield generator

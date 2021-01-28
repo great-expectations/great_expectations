@@ -72,7 +72,9 @@ def test_snowflake_sso_credentials(mock_prompt):
         "drivername": "snowflake",
         "database": "default_db",
         "host": "ABCD.us-east-1",
-        "connect_args": {"authenticator": "externalbrowser",},
+        "connect_args": {
+            "authenticator": "externalbrowser",
+        },
         "query": {"role": "public", "schema": "default_schema", "warehouse": "xsmall"},
         "username": "user",
     }

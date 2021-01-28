@@ -1,16 +1,17 @@
-from great_expectations.util import verify_dynamic_loading_support
-
-from .actions import (
+from great_expectations.checkpoint.actions import (
+    MicrosoftTeamsNotificationAction,
     NoOpAction,
-    SlackNotificationAction,
+    OpsgenieAlertAction,
     PagerdutyAlertAction,
+    SlackNotificationAction,
     StoreEvaluationParametersAction,
     StoreMetricsAction,
     StoreValidationResultAction,
     UpdateDataDocsAction,
     ValidationAction,
 )
-from .util import *
+from great_expectations.util import verify_dynamic_loading_support
+
 from .validation_operators import (
     ActionListValidationOperator,
     ValidationOperator,
@@ -18,8 +19,6 @@ from .validation_operators import (
 )
 
 for module_name, package_name in [
-    (".actions", "great_expectations.validation_operators"),
     (".validation_operators", "great_expectations.validation_operators"),
-    (".util", "great_expectations.validation_operators"),
 ]:
     verify_dynamic_loading_support(module_name=module_name, package_name=package_name)

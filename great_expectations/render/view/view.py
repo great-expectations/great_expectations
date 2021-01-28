@@ -57,6 +57,41 @@ class DefaultJinjaView:
         self.custom_styles_directory = custom_styles_directory
         self.custom_views_directory = custom_views_directory
 
+        templates_loader = PackageLoader("great_expectations", "render/view/templates")
+        styles_loader = PackageLoader("great_expectations", "render/view/static/styles")
+
+        loaders = [templates_loader, styles_loader]
+        if self.custom_styles_directory:
+            loaders.append(FileSystemLoader(self.custom_styles_directory))
+        if self.custom_views_directory:
+            loaders.append(FileSystemLoader(self.custom_views_directory))
+
+        self.env = Environment(
+            loader=ChoiceLoader(loaders),
+            autoescape=select_autoescape(["html", "xml"]),
+            extensions=["jinja2.ext.do"],
+        )
+
+        self.env.filters["render_string_template"] = self.render_string_template
+        self.env.filters[
+            "render_styling_from_string_template"
+        ] = self.render_styling_from_string_template
+        self.env.filters["render_styling"] = self.render_styling
+        self.env.filters["render_content_block"] = self.render_content_block
+        self.env.filters["render_markdown"] = self.render_markdown
+        self.env.filters[
+            "get_html_escaped_json_string_from_dict"
+        ] = self.get_html_escaped_json_string_from_dict
+        self.env.filters["generate_html_element_uuid"] = self.generate_html_element_uuid
+        self.env.filters[
+            "attributes_dict_to_html_string"
+        ] = self.attributes_dict_to_html_string
+        self.env.filters[
+            "render_bootstrap_table_data"
+        ] = self.render_bootstrap_table_data
+        self.env.globals["ge_version"] = ge_version
+        self.env.filters["add_data_context_id_to_url"] = self.add_data_context_id_to_url
+
     def render(self, document, template=None, **kwargs):
         self._validate_document(document)
 
@@ -72,40 +107,7 @@ class DefaultJinjaView:
         if template is None:
             return NoOpTemplate
 
-        templates_loader = PackageLoader("great_expectations", "render/view/templates")
-        styles_loader = PackageLoader("great_expectations", "render/view/static/styles")
-
-        loaders = [templates_loader, styles_loader]
-
-        if self.custom_styles_directory:
-            loaders.append(FileSystemLoader(self.custom_styles_directory))
-        if self.custom_views_directory:
-            loaders.append(FileSystemLoader(self.custom_views_directory))
-
-        env = Environment(
-            loader=ChoiceLoader(loaders),
-            autoescape=select_autoescape(["html", "xml"]),
-            extensions=["jinja2.ext.do"],
-        )
-        env.filters["render_string_template"] = self.render_string_template
-        env.filters[
-            "render_styling_from_string_template"
-        ] = self.render_styling_from_string_template
-        env.filters["render_styling"] = self.render_styling
-        env.filters["render_content_block"] = self.render_content_block
-        env.filters["render_markdown"] = self.render_markdown
-        env.filters[
-            "get_html_escaped_json_string_from_dict"
-        ] = self.get_html_escaped_json_string_from_dict
-        env.filters["generate_html_element_uuid"] = self.generate_html_element_uuid
-        env.filters[
-            "attributes_dict_to_html_string"
-        ] = self.attributes_dict_to_html_string
-        env.filters["render_bootstrap_table_data"] = self.render_bootstrap_table_data
-        env.globals["ge_version"] = ge_version
-        env.filters["add_data_context_id_to_url"] = self.add_data_context_id_to_url
-
-        template = env.get_template(template)
+        template = self.env.get_template(template)
         template.globals["now"] = lambda: datetime.datetime.now(datetime.timezone.utc)
 
         return template
@@ -271,15 +273,18 @@ class DefaultJinjaView:
             style_str += '" '
 
         styling_string = pTemplate("$classes$attributes$style").substitute(
-            {"classes": class_str, "attributes": attribute_str, "style": style_str,}
+            {
+                "classes": class_str,
+                "attributes": attribute_str,
+                "style": style_str,
+            }
         )
 
         return styling_string
 
     def render_styling_from_string_template(self, template):
         # NOTE: We should add some kind of type-checking to template
-        """This method is a thin wrapper use to call `render_styling` from within jinja templates.
-        """
+        """This method is a thin wrapper use to call `render_styling` from within jinja templates."""
         if not isinstance(template, (dict, OrderedDict)):
             return template
 
@@ -360,8 +365,10 @@ class DefaultJinjaView:
             if "default" in template["styling"]:
                 default_parameter_styling = template["styling"]["default"]
                 default_param_tag = default_parameter_styling.get("tag", "span")
-                base_param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
-                    param_tag=default_param_tag
+                base_param_template_string = (
+                    "<{param_tag} $styling>$content</{param_tag}>".format(
+                        param_tag=default_param_tag
+                    )
                 )
 
                 for parameter in template["params"].keys():
@@ -389,8 +396,10 @@ class DefaultJinjaView:
                     if parameter not in params:
                         continue
                     param_tag = parameter_styling.get("tag", "span")
-                    param_template_string = "<{param_tag} $styling>$content</{param_tag}>".format(
-                        param_tag=param_tag
+                    param_template_string = (
+                        "<{param_tag} $styling>$content</{param_tag}>".format(
+                            param_tag=param_tag
+                        )
                     )
                     params[parameter] = pTemplate(
                         param_template_string
@@ -479,9 +488,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
             ]
 
         else:
-            return super(DefaultMarkdownPageView, self).render(
-                document=document, template=template, **kwargs
-            )
+            return super().render(document=document, template=template, **kwargs)
 
     def render_string_template(self, template: pTemplate) -> pTemplate:
         """
@@ -520,7 +527,11 @@ class DefaultMarkdownPageView(DefaultJinjaView):
 
             template["params"][parameter] = pTemplate(
                 base_param_template_string
-            ).safe_substitute({"content": template["params"][parameter],})
+            ).safe_substitute(
+                {
+                    "content": template["params"][parameter],
+                }
+            )
 
         template["template"] = template.get("template", "").replace(
             "$PARAMETER", "$$PARAMETER"

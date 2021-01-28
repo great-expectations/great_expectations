@@ -3,6 +3,7 @@ import logging
 import math
 import operator
 import traceback
+from collections import namedtuple
 
 from pyparsing import (
     CaselessKeyword,
@@ -193,8 +194,9 @@ def build_evaluation_parameters(
             # If not, try to parse the evaluation parameter and substitute, which will raise
             # an exception if we do not have a value
             else:
+                raw_value = value["$PARAMETER"]
                 parameter_value = parse_evaluation_parameter(
-                    value["$PARAMETER"],
+                    raw_value,
                     evaluation_parameters=evaluation_parameters,
                     data_context=data_context,
                 )
@@ -326,6 +328,8 @@ def parse_evaluation_parameter(
     elif len(L) == 1:
         # In this case, we *do* have a substitution for a single type. We treat this specially because in this
         # case, we allow complex type substitutions (i.e. do not coerce to string as part of parsing)
+        # NOTE: 20201023 - JPC - to support MetricDefinition as an evaluation parameter type, we need to handle that
+        # case here; is the evaluation parameter provided here in fact a metric definition?
         return evaluation_parameters[L[0]]
 
     elif len(L) == 0 or L[0] != "Parse Failure":
@@ -352,3 +356,39 @@ def parse_evaluation_parameter(
         )
 
     return result
+
+
+def _deduplicate_evaluation_parameter_dependencies(dependencies):
+    deduplicated = dict()
+    for suite_name, required_metrics in dependencies.items():
+        deduplicated[suite_name] = []
+        metrics = set()
+        metric_kwargs = dict()
+        for metric in required_metrics:
+            if isinstance(metric, str):
+                metrics.add(metric)
+            elif isinstance(metric, dict):
+                # There is a single metric_kwargs_id object in this construction
+                for kwargs_id, metric_list in metric["metric_kwargs_id"].items():
+                    if kwargs_id not in metric_kwargs:
+                        metric_kwargs[kwargs_id] = set()
+                    for metric_name in metric_list:
+                        metric_kwargs[kwargs_id].add(metric_name)
+        deduplicated[suite_name] = list(metrics)
+        if len(metric_kwargs) > 0:
+            deduplicated[suite_name] = deduplicated[suite_name] + [
+                {
+                    "metric_kwargs_id": {
+                        metric_kwargs: list(metrics_set)
+                        for (metric_kwargs, metrics_set) in metric_kwargs.items()
+                    }
+                }
+            ]
+
+    return deduplicated
+
+
+EvaluationParameterIdentifier = namedtuple(
+    "EvaluationParameterIdentifier",
+    ["expectation_suite_name", "metric_name", "metric_kwargs_id"],
+)

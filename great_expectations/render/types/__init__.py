@@ -1,4 +1,6 @@
+import json
 from copy import deepcopy
+from string import Template as pTemplate
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
 
@@ -282,6 +284,12 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         d["string_template"] = self.string_template
         return d
 
+    def __str__(self):
+        string = pTemplate(self.string_template["template"]).safe_substitute(
+            self.string_template["params"]
+        )
+        return string
+
 
 class RenderedBulletListContent(RenderedComponentContent):
     def __init__(
@@ -425,6 +433,7 @@ class RenderedDocumentContent(RenderedContent):
         cta_footer=None,
         expectation_suite_name=None,
         batch_kwargs=None,
+        batch_spec=None,
     ):
         if not isinstance(sections, list) and all(
             [isinstance(section, RenderedSectionContent) for section in sections]
@@ -442,6 +451,7 @@ class RenderedDocumentContent(RenderedContent):
         self.cta_footer = cta_footer
         self.expectation_suite_name = expectation_suite_name
         self.batch_kwargs = batch_kwargs
+        self.batch_spec = batch_spec
 
     def to_json_dict(self):
         d = super().to_json_dict()
@@ -454,6 +464,7 @@ class RenderedDocumentContent(RenderedContent):
         d["cta_footer"] = self.cta_footer
         d["expectation_suite_name"] = self.expectation_suite_name
         d["batch_kwargs"] = self.batch_kwargs
+        d["batch_spec"] = self.batch_spec
         return d
 
 

@@ -1,5 +1,6 @@
 import json
 import os
+from unittest import mock
 
 import nbformat
 import pytest
@@ -7,7 +8,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
 from great_expectations.cli.suite import _suite_edit
-from great_expectations.core import ExpectationSuiteSchema
+from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
@@ -104,17 +105,28 @@ def suite_with_multiple_citations():
             "citations": [
                 {
                     "citation_date": "2001-01-01T00:00:01.000001",
-                    "batch_kwargs": {"path": "3.csv", "datasource": "3",},
+                    "batch_kwargs": {
+                        "path": "3.csv",
+                        "datasource": "3",
+                    },
                 },
                 {
                     "citation_date": "2000-01-01T00:00:01.000001",
-                    "batch_kwargs": {"path": "2.csv", "datasource": "2",},
+                    "batch_kwargs": {
+                        "path": "2.csv",
+                        "datasource": "2",
+                    },
                 },
                 # This citation is the most recent and has no batch_kwargs
-                {"citation_date": "2020-01-01T00:00:01.000001",},
+                {
+                    "citation_date": "2020-01-01T00:00:01.000001",
+                },
                 {
                     "citation_date": "1999-01-01T00:00:01.000001",
-                    "batch_kwargs": {"path": "1.csv", "datasource": "1",},
+                    "batch_kwargs": {
+                        "path": "1.csv",
+                        "datasource": "1",
+                    },
                 },
             ],
         },
@@ -453,6 +465,7 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -522,6 +535,7 @@ def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_c
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -605,6 +619,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -689,6 +704,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -772,6 +788,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -854,6 +871,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -956,6 +974,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -1291,11 +1310,12 @@ def test_complex_suite(warning_suite, empty_data_context):
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
 
-def test_notebook_execution_with_pandas_backend(titanic_data_context):
+def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_docs):
     """
     To set this test up we:
 
@@ -1311,7 +1331,10 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    context = titanic_data_context
+    # Since we'll run the notebook, we use a context with no data docs to avoid
+    # the renderer's default behavior of building and opening docs, which is not
+    # part of this test.
+    context = titanic_data_context_no_data_docs
     root_dir = context.root_directory
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "warning"
@@ -1368,10 +1391,6 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     # Run notebook
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
-
-    # Useful to inspect executed notebook
-    with open(os.path.join(uncommitted_dir, "output.ipynb"), "w") as f:
-        nbformat.write(nb, f)
 
     # Assertions about output
     context = DataContext(root_dir)
@@ -1480,5 +1499,6 @@ def test_notebook_execution_with_custom_notebooks(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected

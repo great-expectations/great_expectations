@@ -4,6 +4,10 @@ from string import Template
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 try:
     import sqlalchemy
@@ -35,7 +39,12 @@ class SqlAlchemyQueryStore(Store):
     _key_class = StringKey
 
     def __init__(
-        self, credentials, queries=None, store_backend=None, runtime_environment=None
+        self,
+        credentials,
+        queries=None,
+        store_backend=None,
+        runtime_environment=None,
+        store_name=None,
     ):
         if not sqlalchemy:
             raise ge_exceptions.DataContextError(
@@ -43,7 +52,9 @@ class SqlAlchemyQueryStore(Store):
                 "SqlAlchemyQueryStore"
             )
         super().__init__(
-            store_backend=store_backend, runtime_environment=runtime_environment
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            store_name=store_name,
         )
         if queries:
             # If queries are defined in configuration, then we load them into an InMemoryStoreBackend
@@ -73,6 +84,16 @@ class SqlAlchemyQueryStore(Store):
             options = URL(drivername, **credentials)
             self.engine = create_engine(options)
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True,
+            **{
+                "class_name": self.__class__.__name__,
+            }
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def _convert_key(self, key):
         if isinstance(key, str):
             return StringKey(key)
@@ -87,10 +108,30 @@ class SqlAlchemyQueryStore(Store):
     def get_query_result(self, key, query_parameters=None):
         if query_parameters is None:
             query_parameters = {}
-        query = self._store_backend.get(self._convert_key(key).to_tuple())
+        result = self._store_backend.get(self._convert_key(key).to_tuple())
+        if isinstance(result, dict):
+            query = result.get("query")
+            return_type = result.get("return_type", "list")
+            if return_type not in ["list", "scalar"]:
+                raise ValueError(
+                    "The return_type of a SqlAlchemyQueryStore query must be one of either 'list' "
+                    "or 'scalar'"
+                )
+        else:
+            query = result
+            return_type = None
+
+        assert query, "Query must be specified to use SqlAlchemyQueryStore"
+
         query = Template(query).safe_substitute(query_parameters)
         res = self.engine.execute(query).fetchall()
         # NOTE: 20200617 - JPC: this approach is probably overly opinionated, but we can
         # adjust based on specific user requests
         res = [val for row in res for val in row]
+        if return_type == "scalar":
+            [res] = res
         return res
+
+    @property
+    def config(self) -> dict:
+        return self._config

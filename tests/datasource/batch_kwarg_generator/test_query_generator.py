@@ -1,10 +1,8 @@
 import os
 import shutil
 
-import pytest
-
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.batch_kwargs_generator import (
     QueryBatchKwargsGenerator,
 )
@@ -53,7 +51,9 @@ def test_add_query(basic_sqlalchemy_datasource):
 def test_partition_id(basic_sqlalchemy_datasource):
     generator = QueryBatchKwargsGenerator(
         datasource=basic_sqlalchemy_datasource,
-        queries={"my_asset": "SELECT * FROM my_table WHERE value = $partition_id",},
+        queries={
+            "my_asset": "SELECT * FROM my_table WHERE value = $partition_id",
+        },
     )
 
     batch_kwargs = generator.build_batch_kwargs(
@@ -75,7 +75,7 @@ def test_get_available_data_asset_names_for_query_path(empty_data_context):
         file_relative_path(__file__, "../../test_fixtures/dummy.sql"), query_path
     )
 
-    data_source = Datasource(name="mydatasource", data_context=empty_data_context)
+    data_source = LegacyDatasource(name="mydatasource", data_context=empty_data_context)
     generator = QueryBatchKwargsGenerator(name="mygenerator", datasource=data_source)
     sql_list = generator.get_available_data_asset_names()
     assert ("dummy", "query") in sql_list["names"]

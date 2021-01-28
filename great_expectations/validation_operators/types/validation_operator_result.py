@@ -1,14 +1,13 @@
 import json
 from copy import deepcopy
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
-from great_expectations.core import (
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
-    RunIdentifier,
-    RunIdentifierSchema,
-    convert_to_json_serializable,
 )
 from great_expectations.core.id_dict import BatchKwargs
+from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -42,20 +41,23 @@ class ValidationOperatorResult(DictDot):
             ValidationResultIdentifier,
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
-        validation_operator_config,
+        validation_operator_config: dict,
         evaluation_parameters: dict = None,
-        success: bool = None,
+        success: Optional[bool] = None,
     ) -> None:
         self._run_id = run_id
         self._run_results = run_results
         self._evaluation_parameters = evaluation_parameters
         self._validation_operator_config = validation_operator_config
-        self._success = success or all(
-            [
-                run_result["validation_result"].success
-                for run_result in run_results.values()
-            ]
-        )
+        if success is None:
+            self._success = all(
+                [
+                    run_result["validation_result"].success
+                    for run_result in run_results.values()
+                ]
+            )
+        else:
+            self._success = success
 
         self._validation_results = None
         self._data_assets_validated = None
@@ -88,7 +90,7 @@ class ValidationOperatorResult(DictDot):
         return self._run_id
 
     @property
-    def evaluation_parameters(self) -> Union[dict, None]:
+    def evaluation_parameters(self) -> Optional[dict]:
         return self._evaluation_parameters
 
     @property
@@ -289,7 +291,7 @@ class ValidationOperatorResultSchema(Schema):
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_expectation_suite_validation_result(self, data, **kwargs):
+    def make_validation_operator_result(self, data, **kwargs):
         return ValidationOperatorResult(**data)
 
 

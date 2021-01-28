@@ -7,13 +7,78 @@ from typing import Any
 
 from dateutil.parser import parse
 
-from great_expectations.core import ExpectationSuite, RunIdentifier
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_asset import DataAsset
+from great_expectations.dataset import Dataset
 from great_expectations.exceptions import GreatExpectationsError
-
-from ..data_asset import DataAsset
-from ..dataset import Dataset
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
+
+
+class OrderedEnum(Enum):
+    def __ge__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value >= other.value
+        return NotImplemented
+
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value > other.value
+        return NotImplemented
+
+    def __le__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value <= other.value
+        return NotImplemented
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
+
+
+class OrderedProfilerCardinality(OrderedEnum):
+    NONE = 0
+    ONE = 1
+    TWO = 2
+    VERY_FEW = 3
+    FEW = 4
+    MANY = 5
+    VERY_MANY = 6
+    UNIQUE = 7
+
+    @classmethod
+    def get_basic_column_cardinality(cls, num_unique=0, pct_unique=0):
+        """
+        Takes the number and percentage of unique values in a column and returns the column cardinality.
+        If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
+        num_unique and pct_unique.
+        Args:
+            num_unique: The number of unique values in a column
+            pct_unique: The percentage of unique values in a column
+
+        Returns:
+            The column cardinality
+        """
+        if pct_unique == 1.0:
+            cardinality = cls.UNIQUE
+        elif num_unique == 1:
+            cardinality = cls.ONE
+        elif num_unique == 2:
+            cardinality = cls.TWO
+        elif 0 < num_unique < 20:
+            cardinality = cls.VERY_FEW
+        elif 0 < num_unique < 60:
+            cardinality = cls.FEW
+        elif num_unique is None or num_unique == 0 or pct_unique is None:
+            cardinality = cls.NONE
+        elif pct_unique > 0.1:
+            cardinality = cls.VERY_MANY
+        else:
+            cardinality = cls.MANY
+        return cardinality
 
 
 class ProfilerDataType(Enum):
@@ -21,6 +86,7 @@ class ProfilerDataType(Enum):
 
     INT = "int"
     FLOAT = "float"
+    NUMERIC = "numeric"
     STRING = "string"
     BOOLEAN = "boolean"
     DATETIME = "datetime"
@@ -81,6 +147,7 @@ class ProfilerTypeMapping:
         "float32",
         "float64",
         "number",
+        "DECIMAL",
     ]
     STRING_TYPE_NAMES = [
         "CHAR",
@@ -111,6 +178,29 @@ class ProfilerTypeMapping:
         "datetime64",
         "Timestamp",
     ]
+
+
+profiler_data_types_with_mapping = {
+    "INT": list(ProfilerTypeMapping.INT_TYPE_NAMES),
+    "FLOAT": list(ProfilerTypeMapping.FLOAT_TYPE_NAMES),
+    "NUMERIC": (
+        list(ProfilerTypeMapping.INT_TYPE_NAMES)
+        + list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)
+    ),
+    "STRING": list(ProfilerTypeMapping.STRING_TYPE_NAMES),
+    "BOOLEAN": list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES),
+    "DATETIME": list(ProfilerTypeMapping.DATETIME_TYPE_NAMES),
+    "UNKNOWN": ["unknown"],
+}
+
+profiler_semantic_types = {
+    "DATETIME",
+    "NUMERIC",
+    "STRING",
+    "VALUE_SET",
+    "BOOLEAN",
+    "OTHER",
+}
 
 
 class Profiler(metaclass=abc.ABCMeta):
@@ -152,7 +242,7 @@ class DataAssetProfiler:
 class DatasetProfiler(DataAssetProfiler):
     @classmethod
     def validate(cls, dataset):
-        return isinstance(dataset, Dataset)
+        return isinstance(dataset, (Dataset, Validator))
 
     @classmethod
     def add_expectation_meta(cls, expectation):

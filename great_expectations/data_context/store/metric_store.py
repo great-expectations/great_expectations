@@ -1,12 +1,17 @@
 import json
 
-from great_expectations.core import ensure_json_serializable
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.util import ensure_json_serializable
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
-from great_expectations.util import load_class, verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    load_class,
+    verify_dynamic_loading_support,
+)
 
 
 class MetricStore(Store):
@@ -16,7 +21,7 @@ class MetricStore(Store):
 
     _key_class = ValidationMetricIdentifier
 
-    def __init__(self, store_backend=None):
+    def __init__(self, store_backend=None, store_name=None):
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -48,7 +53,7 @@ class MetricStore(Store):
                         ],
                     )
 
-        super().__init__(store_backend=store_backend)
+        super().__init__(store_backend=store_backend, store_name=store_name)
 
     # noinspection PyMethodMayBeStatic
     def _validate_value(self, value):
@@ -64,7 +69,7 @@ class MetricStore(Store):
 
 
 class EvaluationParameterStore(MetricStore):
-    def __init__(self, store_backend=None):
+    def __init__(self, store_backend=None, store_name=None):
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -83,7 +88,17 @@ class EvaluationParameterStore(MetricStore):
                 store_backend["table_name"] = store_backend.get(
                     "table_name", "ge_evaluation_parameters"
                 )
-        super().__init__(store_backend=store_backend)
+        super().__init__(store_backend=store_backend, store_name=store_name)
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True,
+            **{
+                "class_name": self.__class__.__name__,
+            }
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def get_bind_params(self, run_id):
         params = {}
@@ -91,3 +106,7 @@ class EvaluationParameterStore(MetricStore):
             key = self.tuple_to_key(k)
             params[key.to_evaluation_parameter_urn()] = self.get(key)
         return params
+
+    @property
+    def config(self) -> dict:
+        return self._config

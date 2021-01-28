@@ -45,7 +45,7 @@ def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
 @pytest.fixture
 def context_with_multiple_sites(empty_data_context):
     context = empty_data_context
-    config = context._project_config_with_variables_substituted
+    config = context.project_config_with_variables_substituted
     multi_sites = {
         "local_site": {
             "class_name": "SiteBuilder",
@@ -84,7 +84,7 @@ def context_with_multiple_sites(empty_data_context):
 @pytest.fixture
 def context_with_multiple_local_sites_and_s3_site(empty_data_context):
     context = empty_data_context
-    config = context._project_config_with_variables_substituted
+    config = context.project_config_with_variables_substituted
     multi_sites = {
         "local_site": {
             "class_name": "SiteBuilder",
@@ -104,7 +104,10 @@ def context_with_multiple_local_sites_and_s3_site(empty_data_context):
         },
         "s3_site": {
             "class_name": "SiteBuilder",
-            "store_backend": {"class_name": "TupleS3StoreBackend", "bucket": "foo",},
+            "store_backend": {
+                "class_name": "TupleS3StoreBackend",
+                "bucket": "foo",
+            },
             "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
         },
     }
