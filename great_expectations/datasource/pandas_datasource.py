@@ -248,7 +248,7 @@ class PandasDatasource(LegacyDatasource):
 
         else:
             raise BatchKwargsError(
-                "Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
+                "Invalid batch_kwargs: path, s3, or dataset is required for a PandasDatasource",
                 batch_kwargs,
             )
 

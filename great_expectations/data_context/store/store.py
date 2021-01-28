@@ -1,5 +1,4 @@
 import logging
-import random
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -154,3 +153,7 @@ class Store:
         NotImplementedError(
             f"The test method is not implemented for Store class {self.__class__.__name__}."
         )
+
+    @property
+    def config(self) -> dict:
+        raise NotImplementedError
