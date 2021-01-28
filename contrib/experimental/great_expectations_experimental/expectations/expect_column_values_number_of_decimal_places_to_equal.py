@@ -33,7 +33,8 @@ from great_expectations.validator.validator import Validator
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesDecimalPlacesEquals(ColumnMapMetricProvider):
     """
-    Computes number of decimal places of values in column through string conversion.
+    Computes number of decimal places of values in column through string conversion. In the case of an integer, the
+    value automatically passes.
     """
 
     # This is the id string that will be used to reference your metric.
