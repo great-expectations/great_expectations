@@ -70,7 +70,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
                 @MetaPandasDataset.column_aggregate_expectation
                 def expect_column_mode_to_equal_0(self, column):
-                    mode = column.mode[0]
+                    mode = self[column].mode[0]
                     return {
                         "success" : mode == 0,
                         "result": {
