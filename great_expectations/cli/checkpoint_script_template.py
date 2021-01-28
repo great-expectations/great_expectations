@@ -33,7 +33,7 @@ checkpoint = context.get_checkpoint("{0}")
 
 # load batches of data
 batches_to_validate = []
-for batch in checkpoint["batches"]:
+for batch in checkpoint.batches:
     batch_kwargs = batch["batch_kwargs"]
     for suite_name in batch["expectation_suite_names"]:
         suite = context.get_expectation_suite(suite_name)
@@ -42,10 +42,8 @@ for batch in checkpoint["batches"]:
 
 # run the validation operator
 results = context.run_validation_operator(
-    checkpoint["validation_operator_name"],
+    checkpoint.validation_operator_name,
     assets_to_validate=batches_to_validate,
-    # TODO prepare for new RunID - checkpoint name and timestamp
-    # run_id=RunID(checkpoint)
 )
 
 # take action based on results

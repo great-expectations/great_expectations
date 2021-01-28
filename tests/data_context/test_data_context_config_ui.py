@@ -16,6 +16,7 @@ from great_expectations.data_context.types.base import (
     GCSStoreBackendDefaults,
     S3StoreBackendDefaults,
 )
+from great_expectations.util import filter_properties_dict
 
 """
 What does this test and why?
@@ -41,6 +42,7 @@ def construct_data_context_config():
         expectations_store_name: str = DataContextConfigDefaults.DEFAULT_EXPECTATIONS_STORE_NAME.value,
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
         validation_operators: Optional[Dict] = None,
@@ -48,10 +50,6 @@ def construct_data_context_config():
     ):
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
-        if validation_operators is None:
-            validation_operators = copy.deepcopy(
-                DataContextConfigDefaults.DEFAULT_VALIDATION_OPERATORS.value
-            )
         if data_docs_sites is None:
             data_docs_sites = copy.deepcopy(
                 DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
@@ -63,6 +61,7 @@ def construct_data_context_config():
             "expectations_store_name": expectations_store_name,
             "validations_store_name": validations_store_name,
             "evaluation_parameter_store_name": evaluation_parameter_store_name,
+            "checkpoint_store_name": checkpoint_store_name,
             "plugins_directory": plugins_directory,
             "validation_operators": validation_operators,
             "stores": stores,
@@ -122,6 +121,7 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
     and produces a valid DataContextConfig
     """
 
+    store_backend_defaults = BaseStoreBackendDefaults()
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -134,7 +134,8 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
                 },
             )
         },
-        store_backend_defaults=BaseStoreBackendDefaults(),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     desired_config = construct_data_context_config(
@@ -143,7 +144,9 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
     )
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -156,6 +159,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
     defaults, including default_bucket_name getting propagated to all stores.
     """
 
+    store_backend_defaults = S3StoreBackendDefaults(
+        default_bucket_name="my_default_bucket"
+    )
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -168,9 +174,8 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
                 },
             )
         },
-        store_backend_defaults=S3StoreBackendDefaults(
-            default_bucket_name="my_default_bucket"
-        ),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -219,7 +224,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
     )
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -232,6 +239,18 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
     E.g. Make sure that default_bucket_name is ignored if individual bucket names are passed
     """
 
+    store_backend_defaults = S3StoreBackendDefaults(
+        default_bucket_name="custom_default_bucket_name",
+        expectations_store_bucket_name="custom_expectations_store_bucket_name",
+        validations_store_bucket_name="custom_validations_store_bucket_name",
+        data_docs_bucket_name="custom_data_docs_store_bucket_name",
+        expectations_store_prefix="custom_expectations_store_prefix",
+        validations_store_prefix="custom_validations_store_prefix",
+        data_docs_prefix="custom_data_docs_prefix",
+        expectations_store_name="custom_expectations_S3_store_name",
+        validations_store_name="custom_validations_S3_store_name",
+        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+    )
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -249,18 +268,8 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
                 },
             )
         },
-        store_backend_defaults=S3StoreBackendDefaults(
-            default_bucket_name="custom_default_bucket_name",
-            expectations_store_bucket_name="custom_expectations_store_bucket_name",
-            validations_store_bucket_name="custom_validations_store_bucket_name",
-            data_docs_bucket_name="custom_data_docs_store_bucket_name",
-            expectations_store_prefix="custom_expectations_store_prefix",
-            validations_store_prefix="custom_validations_store_prefix",
-            data_docs_prefix="custom_data_docs_prefix",
-            expectations_store_name="custom_expectations_S3_store_name",
-            validations_store_name="custom_validations_S3_store_name",
-            evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
-        ),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -311,7 +320,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
     )
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -326,6 +337,9 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
 
     test_root_directory = "test_root_dir"
 
+    store_backend_defaults = FilesystemStoreBackendDefaults(
+        root_directory=test_root_directory
+    )
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -338,9 +352,8 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
                 },
             )
         },
-        store_backend_defaults=FilesystemStoreBackendDefaults(
-            root_directory=test_root_directory
-        ),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -360,7 +373,9 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     ] = test_root_directory
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -373,6 +388,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     This test does not set the optional root_directory parameter
     """
 
+    store_backend_defaults = FilesystemStoreBackendDefaults()
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -385,7 +401,8 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
                 },
             )
         },
-        store_backend_defaults=FilesystemStoreBackendDefaults(),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -395,7 +412,9 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     )
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -409,6 +428,10 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
     to all stores.
     """
 
+    store_backend_defaults = GCSStoreBackendDefaults(
+        default_bucket_name="my_default_bucket",
+        default_project_name="my_default_project",
+    )
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -426,10 +449,8 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
                 },
             )
         },
-        store_backend_defaults=GCSStoreBackendDefaults(
-            default_bucket_name="my_default_bucket",
-            default_project_name="my_default_project",
-        ),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -482,7 +503,9 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
     )
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -495,6 +518,22 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
     E.g. Make sure that default_bucket_name is ignored if individual bucket names are passed
     """
 
+    store_backend_defaults = GCSStoreBackendDefaults(
+        default_bucket_name="custom_default_bucket_name",
+        default_project_name="custom_default_project_name",
+        expectations_store_bucket_name="custom_expectations_store_bucket_name",
+        validations_store_bucket_name="custom_validations_store_bucket_name",
+        data_docs_bucket_name="custom_data_docs_store_bucket_name",
+        expectations_store_project_name="custom_expectations_store_project_name",
+        validations_store_project_name="custom_validations_store_project_name",
+        data_docs_project_name="custom_data_docs_store_project_name",
+        expectations_store_prefix="custom_expectations_store_prefix",
+        validations_store_prefix="custom_validations_store_prefix",
+        data_docs_prefix="custom_data_docs_prefix",
+        expectations_store_name="custom_expectations_GCS_store_name",
+        validations_store_name="custom_validations_GCS_store_name",
+        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+    )
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -512,22 +551,8 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
                 },
             )
         },
-        store_backend_defaults=GCSStoreBackendDefaults(
-            default_bucket_name="custom_default_bucket_name",
-            default_project_name="custom_default_project_name",
-            expectations_store_bucket_name="custom_expectations_store_bucket_name",
-            validations_store_bucket_name="custom_validations_store_bucket_name",
-            data_docs_bucket_name="custom_data_docs_store_bucket_name",
-            expectations_store_project_name="custom_expectations_store_project_name",
-            validations_store_project_name="custom_validations_store_project_name",
-            data_docs_project_name="custom_data_docs_store_project_name",
-            expectations_store_prefix="custom_expectations_store_prefix",
-            validations_store_prefix="custom_validations_store_prefix",
-            data_docs_prefix="custom_data_docs_prefix",
-            expectations_store_name="custom_expectations_GCS_store_name",
-            validations_store_name="custom_validations_GCS_store_name",
-            evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
-        ),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -580,7 +605,9 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
     )
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -593,6 +620,16 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     defaults, including default_credentials getting propagated to stores and not data_docs
     """
 
+    store_backend_defaults = DatabaseStoreBackendDefaults(
+        default_credentials={
+            "drivername": "postgresql",
+            "host": "localhost",
+            "port": "65432",
+            "username": "ge_tutorials",
+            "password": "ge_tutorials",
+            "database": "ge_tutorials",
+        },
+    )
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -610,16 +647,8 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                 },
             )
         },
-        store_backend_defaults=DatabaseStoreBackendDefaults(
-            default_credentials={
-                "drivername": "postgresql",
-                "host": "localhost",
-                "port": "65432",
-                "username": "ge_tutorials",
-                "password": "ge_tutorials",
-                "database": "ge_tutorials",
-            },
-        ),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -679,7 +708,9 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     )
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -692,6 +723,35 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
     E.g. Make sure that default_credentials is ignored if individual store credentials are passed
     """
 
+    store_backend_defaults = DatabaseStoreBackendDefaults(
+        default_credentials={
+            "drivername": "postgresql",
+            "host": "localhost",
+            "port": "65432",
+            "username": "ge_tutorials",
+            "password": "ge_tutorials",
+            "database": "ge_tutorials",
+        },
+        expectations_store_credentials={
+            "drivername": "custom_expectations_store_drivername",
+            "host": "custom_expectations_store_host",
+            "port": "custom_expectations_store_port",
+            "username": "custom_expectations_store_username",
+            "password": "custom_expectations_store_password",
+            "database": "custom_expectations_store_database",
+        },
+        validations_store_credentials={
+            "drivername": "custom_validations_store_drivername",
+            "host": "custom_validations_store_host",
+            "port": "custom_validations_store_port",
+            "username": "custom_validations_store_username",
+            "password": "custom_validations_store_password",
+            "database": "custom_validations_store_database",
+        },
+        expectations_store_name="custom_expectations_database_store_name",
+        validations_store_name="custom_validations_database_store_name",
+        evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+    )
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -709,35 +769,8 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
                 },
             )
         },
-        store_backend_defaults=DatabaseStoreBackendDefaults(
-            default_credentials={
-                "drivername": "postgresql",
-                "host": "localhost",
-                "port": "65432",
-                "username": "ge_tutorials",
-                "password": "ge_tutorials",
-                "database": "ge_tutorials",
-            },
-            expectations_store_credentials={
-                "drivername": "custom_expectations_store_drivername",
-                "host": "custom_expectations_store_host",
-                "port": "custom_expectations_store_port",
-                "username": "custom_expectations_store_username",
-                "password": "custom_expectations_store_password",
-                "database": "custom_expectations_store_database",
-            },
-            validations_store_credentials={
-                "drivername": "custom_validations_store_drivername",
-                "host": "custom_validations_store_host",
-                "port": "custom_validations_store_port",
-                "username": "custom_validations_store_username",
-                "password": "custom_validations_store_password",
-                "database": "custom_validations_store_database",
-            },
-            expectations_store_name="custom_expectations_database_store_name",
-            validations_store_name="custom_validations_database_store_name",
-            evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
-        ),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -799,7 +832,9 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
     )
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -874,10 +909,19 @@ def test_override_general_defaults(
             "custom_evaluation_parameter_store": {
                 "class_name": "EvaluationParameterStore"
             },
+            "checkpoint_S3_store": {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "class_name": "TupleS3StoreBackend",
+                    "bucket": "REPLACE_ME",
+                    "prefix": "REPLACE_ME",
+                },
+            },
         },
         expectations_store_name="custom_expectations_store_name",
         validations_store_name="custom_validations_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="checkpoint_S3_store",
         data_docs_sites={
             "s3_site": {
                 "class_name": "SiteBuilder",
@@ -957,6 +1001,14 @@ def test_override_general_defaults(
                 "prefix": "REPLACE_ME",
             },
         },
+        "checkpoint_S3_store": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "REPLACE_ME",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "REPLACE_ME",
+            },
+        },
     }
 
     desired_data_docs_sites_config = {
@@ -1012,6 +1064,7 @@ def test_override_general_defaults(
         expectations_store_name="custom_expectations_store_name",
         validations_store_name="custom_validations_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="checkpoint_S3_store",
         stores=desired_stores,
         validation_operators=desired_validation_operators,
         data_docs_sites=desired_data_docs_sites_config,
@@ -1020,7 +1073,9 @@ def test_override_general_defaults(
     desired_config["config_variables_file_path"] = "custom_config_variables_file_path"
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
 
@@ -1035,6 +1090,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
 
     monkeypatch.setenv("SUBSTITUTED_BASE_DIRECTORY", "../data/")
 
+    store_backend_defaults = S3StoreBackendDefaults(
+        default_bucket_name="my_default_bucket"
+    )
     data_context_config = DataContextConfig(
         datasources={
             "my_pandas_datasource": DatasourceConfig(
@@ -1047,9 +1105,8 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
                 },
             )
         },
-        store_backend_defaults=S3StoreBackendDefaults(
-            default_bucket_name="my_default_bucket"
-        ),
+        store_backend_defaults=store_backend_defaults,
+        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -1102,7 +1159,9 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
     ]["base_directory"] = "${SUBSTITUTED_BASE_DIRECTORY}"
 
     data_context_config_schema = DataContextConfigSchema()
-    assert data_context_config_schema.dump(data_context_config) == desired_config
+    assert filter_properties_dict(
+        properties=data_context_config_schema.dump(data_context_config)
+    ) == filter_properties_dict(properties=desired_config)
     assert DataContext.validate_config(project_config=data_context_config)
 
     data_context = BaseDataContext(project_config=data_context_config)
