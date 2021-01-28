@@ -46,16 +46,8 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
                 suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
 
-        There are two paths you can follow for step 2 to create a Batch. If you want to create a Pandas DataFrame by reading a CSV from disk, follow the instructions under 2(a). If you already have a Pandas DataFrame that you have previously created, follow the steps under 2(b).
 
-        2(a). Construct a Batch from a CSV
-
-            .. code-block:: python
-
-                batch = ge.read_csv("insert_path_to_your_csv_here", expectation_suite=suite)
-
-
-        2(b). Construct batch_kwargs and get a Batch
+        2. Construct batch_kwargs and get a Batch
 
             ``batch_kwargs`` describe the data you plan to validate. Here we are using a Datasource you have configured and are passing in a DataFrame under the ``"dataset"`` key.
 
