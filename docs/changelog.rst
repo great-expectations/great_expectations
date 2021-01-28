@@ -7,7 +7,14 @@ Changelog
 
 Develop
 -----------------
-[BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract
+* [DOCS] How to load a Pandas DataFrame as a Batch #2327
+
+
+0.13.8
+-----------------
+* [FEATURE] New implementation of Checkpoints that uses dedicated CheckpointStore (based on the new ConfigurationStore mechanism) #2311, #2338
+* [BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract #2334
+
 
 0.13.7
 -----------------
