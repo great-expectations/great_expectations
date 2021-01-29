@@ -162,7 +162,7 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
     library_metadata = {
         "maturity": "experimental",
         "package": "great_expectations_experimental",
-        "tags": [],
+        "tags": ["experimental"],
         "contributors": [
             "@ljohnston931",
             "@rexboyce",
