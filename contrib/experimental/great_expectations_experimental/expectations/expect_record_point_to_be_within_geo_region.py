@@ -1,4 +1,6 @@
 import json
+import geopandas
+from shapely.geometry import Point
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -36,13 +38,24 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.point_within_geo_region"
+    condition_value_keys = ("country_iso_a3",)
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
-        return column == 3
+    def _pandas(cls, column, country_iso_a3, **kwargs):
+        # Fetches polygon points from Geopandas library for the iso code
+        world = geopandas.read_file(geopandas.datasets.get_path('naturalearth_lowres'))
+        country_shapes = world[['geometry', 'iso_a3']]
+        country_shapes = country_shapes[country_shapes['iso_a3'] == country_iso_a3]
+        country_shapes.reset_index(drop=True, inplace=True)
+        if country_shapes.empty:
+            raise Exception("This ISO country code is not supported.")
+        country_polygon = country_shapes['geometry'][0]
+
+        points = geopandas.GeoSeries(column.apply(Point))
+        return points.within(country_polygon)
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -60,23 +73,24 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
 class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     """This expectation will check a (latitude, longitude) tuple to see if it falls within a country input by the
     user. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
-    that are in the Geopandas world database."""
+    that are in the Geopandas world database. Importantly, countries are defined by their iso_a3 country code, not their
+    full name."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [{
         "data": {
-            "mostly_points_within_geo_region": [(12.0464, 140.58), (-13.163068, -72.545128), (55.378051, -3.435973)],
+            "mostly_points_within_geo_region": [(-77.0428, -12.0464), (-72.545128, -13.163068), (-75.01515, -9.18997), (-3.435973, 55.378051)],
         },
         "tests": [
             {
                 "title": "positive_test_with_mostly",
                 "exact_match_out": False,
                 "include_in_gallery": True,
-                "in": {"column": "mostly_points_within_geo_region", "country": "Peru", "mostly": 0.5},
+                "in": {"column": "mostly_points_within_geo_region", "country_iso_a3": "PER", "mostly": 0.5},
                 "out": {
                     "success": True,
-                    "unexpected_index_list": [2],
-                    "unexpected_list": [(55.378051, -3.435973)],
+                    "unexpected_index_list": [3],
+                    "unexpected_list": [(-3.435973, 55.378051)],
                 },
             }
         ],
@@ -101,7 +115,7 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
-    success_keys = ("mostly",)
+    success_keys = ("country_iso_a3", "mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
