@@ -78,7 +78,9 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
                 ur, vi, vo, wa, xh, zh, zu
         
         Notes:
-            * Language identification uses the `langid` package.
+            * Language identification uses the [`langid` package](https://github.com/saffsd/langid.py).
+            * `langid` uses a custom, permissive [LICENSE](https://github.com/saffsd/langid.py/blob/master/LICENSE),
+              suitable for commercial purposes.
             * Results may be inaccurate for strings shorter than 50 characters.
             * No confidence threshold has been set, so language with the highest confidence will be selected, even if
               confidence is low.
