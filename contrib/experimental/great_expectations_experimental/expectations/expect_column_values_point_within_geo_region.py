@@ -1,4 +1,5 @@
 import json
+
 import geopandas
 from shapely.geometry import Point
 
