@@ -32,6 +32,10 @@ from great_expectations.validator.validator import Validator
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesHasValueIndex(ColumnMapMetricProvider):
+    """
+    Determines whether an element at a given index for a string value matches a given value. Will fail if an element is
+    not a string.
+    """
 
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
@@ -41,13 +45,17 @@ class ColumnValuesHasValueIndex(ColumnMapMetricProvider):
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
-
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, value, index, **kwargs):
         # print(column, str(type(column)))
-        return column.apply(lambda element: element[index] == value)
+        return column.apply(
+            lambda element: element[index] == value
+            if str(element) == element
+            else False
+        )
 
         # return column == 3
+
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -68,24 +76,112 @@ class ExpectValueAtIndex(ColumnMapExpectation):
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    examples = [{
-        "data": {
-            "mostly_has_decimal": ["$125.23", "$0.99", "$0.00", "$1234", "$11.11", "$1.10", "$2.22", "$-1.43", None, None],
-        },
-        "tests": [
-            {
-                "title": "positive_test_with_mostly",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "mostly_has_decimal", "value": '.', "index": -3, "mostly": 0.6},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [3],
-                    "unexpected_list": ["$1234"],
+    examples = [
+        {
+            "data": {
+                "mostly_has_decimal": [
+                    "$125.23",
+                    "$0.99",
+                    "$0.00",
+                    "$1234",
+                    "$11.11",
+                    "$1.10",
+                    "$2.22",
+                    "$-1.43",
+                    None,
+                    None,
+                ],
+                "numeric": [
+                    125.23,
+                    0.99,
+                    0.00,
+                    1234,
+                    11.11,
+                    1.10,
+                    2.22,
+                    -1.43,
+                    None,
+                    None,
+                ],
+                "words_that_begin_with_a": [
+                    "apple",
+                    "alligator",
+                    "alibi",
+                    "argyle",
+                    None,
+                    "ambulance",
+                    "aardvark",
+                    "ambiguous",
+                    None,
+                    None,
+                ],
+            },
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_has_decimal",
+                        "value": ".",
+                        "index": -3,
+                        "mostly": 0.6,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": ["$1234"],
+                    },
                 },
-            }
-        ],
-    }]
+                {
+                    "title": "negative_test_without_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_has_decimal",
+                        "value": ".",
+                        "index": -3,
+                        "mostly": 1.0,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": ["$1234"],
+                    },
+                },
+                {
+                    "title": "negative_test_for_numeric_column",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "numeric",
+                        "value": ".",
+                        "index": -3,
+                        "mostly": 0.6,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [0, 1, 2, 3, 4, 5, 6, 7],
+                    },
+                },
+                {
+                    "title": "positive_test_for_column_starting_with_a",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "words_that_begin_with_a",
+                        "value": "a",
+                        "index": 0,
+                        "mostly": 1.0,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                    },
+                },
+            ],
+        }
+    ]
 
     # examples = [{
     #     "data": {
@@ -112,10 +208,10 @@ class ExpectValueAtIndex(ColumnMapExpectation):
         "tags": [  # Tags for this Expectation in the gallery
             #         "experimental"
         ],
-        "contributors": [ 
+        "contributors": [
             "@prem1835213",
             "@YaosenLin"
-             # Github handles for all contributors to this Expectation.
+            # Github handles for all contributors to this Expectation.
             #         "@your_name_here", # Don't forget to add your github handle here!
         ],
         "package": "experimental_expectations",
