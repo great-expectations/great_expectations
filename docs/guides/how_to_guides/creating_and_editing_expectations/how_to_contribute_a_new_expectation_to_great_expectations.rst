@@ -420,6 +420,7 @@ Steps
                 #         "@your_name_here", # Don't forget to add your github handle here!
             ],
             "package": "experimental_expectations",
+            "requirements": ["package1", "package2"]  # List any external packages imported by your Expectation.
         }
 
 #. **Implement (some) renderers.**
