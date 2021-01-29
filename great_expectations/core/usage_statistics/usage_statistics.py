@@ -38,7 +38,7 @@ from great_expectations.core.usage_statistics.anonymizers.validation_operator_an
 from great_expectations.core.usage_statistics.schemas import (
     usage_statistics_record_schema,
 )
-from great_expectations.core.usage_statistics.util import get_pipeline_dag_runners
+from great_expectations.core.usage_statistics.util import get_imported_packages
 from great_expectations.core.util import nested_update
 
 STOP_SIGNAL = object()
@@ -136,7 +136,7 @@ class UsageStatisticsHandler:
             self._data_context.get_expectation_suite(expectation_suite_name)
             for expectation_suite_name in self._data_context.list_expectation_suite_names()
         ]
-        pipeline_dag_runners = get_pipeline_dag_runners()
+        imported_packages = get_imported_packages()
         return {
             "platform.system": platform.system(),
             "platform.release": platform.release(),
@@ -170,7 +170,7 @@ class UsageStatisticsHandler:
                 )
                 for expectation_suite in expectation_suites
             ],
-            "pipeline_dag_runners": pipeline_dag_runners,
+            "imported_packages": imported_packages,
         }
 
     def build_envelope(self, message):

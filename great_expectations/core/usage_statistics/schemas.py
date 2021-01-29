@@ -191,11 +191,26 @@ anonymized_expectation_suite_schema = {
     ],
 }
 
-pipeline_dag_runner_string_schema = {
+# environment_info_schema = {
+#     "$schema": "https://json-schema.org/draft-04/schema",
+#     "title": "environment-info-schema",
+#     "type": "object",
+#     "properties": {
+#         "airflow": {"enum": ["1.0.0"]},
+#         "pandas": {"enum": ["1.0.0"]},
+#     },
+#     "additionalProperties": False,
+# }
+
+imported_package_schema = {
     "$schema": "https://json-schema.org/draft-04/schema",
-    "title": "pipeline-dag-runner",
-    "type": "string",
-    "maxLength": 256,
+    "title": "imported-package-schema",
+    "type": "object",
+    "properties": {
+        "package": {"type": "string", "maxLength": 256},
+        "version": {"enum": ["1.0.0"]},
+        "additionalProperties": False,
+    },
 }
 
 init_payload_schema = {
@@ -203,13 +218,14 @@ init_payload_schema = {
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_class_info": anonymized_class_info_schema,
+        # "environment_info_definition": environment_info_schema,
+        "imported_package": imported_package_schema,
         "anonymized_datasource": anonymized_datasource_schema,
         "anonymized_validation_operator": anonymized_validation_operator_schema,
         "anonymized_data_docs_site": anonymized_data_docs_site_schema,
         "anonymized_store": anonymized_store_schema,
         "anonymized_action": anonymized_action_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
-        "pipeline_dag_runner": pipeline_dag_runner_string_schema,
     },
     "type": "object",
     "properties": {
@@ -217,6 +233,20 @@ init_payload_schema = {
         "platform.system": {"type": "string", "maxLength": 256},
         "platform.release": {"type": "string", "maxLength": 256},
         "version_info": {"type": "string", "maxLength": 256},
+        "imported_packages": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {"$ref": "#/definitions/imported_package"},
+        },
+        # "environment_info": {
+        #     "type": "object",
+        #     "$ref": "#/definitions/environment_info_definition"
+        # },
+        # "environment_info": {
+        #     "type": "array",
+        #     "maxItems": 1000,
+        #     "items": {"$ref": "#/definitions/environment_info_definition"},
+        # },
         "anonymized_datasources": {
             "type": "array",
             "maxItems": 1000,
@@ -241,15 +271,17 @@ init_payload_schema = {
             "type": "array",
             "items": {"$ref": "#/definitions/anonymized_expectation_suite"},
         },
-        "pipeline_dag_runners": {
-            "type": "array",
-            "items": {"$ref": "#/definitions/pipeline_dag_runner"},
-        },
+        # "pipeline_dag_runners": {
+        #     "type": "array",
+        #     "items": {"$ref": "#/definitions/pipeline_dag_runner"},
+        # },
+        # "pipeline_dag_runners": {"type": "string", "maxLength": 256},
     },
     "required": [
         "platform.system",
         "platform.release",
         "version_info",
+        # "imported_packages",
         "anonymized_datasources",
         "anonymized_stores",
         "anonymized_validation_operators",
@@ -475,5 +507,6 @@ usage_statistics_record_schema = {
 if __name__ == "__main__":
     import json
 
-    with open("usage_statistics_record_schema.json", "w") as outfile:
-        json.dump(usage_statistics_record_schema, outfile, indent=2)
+    print(json.dumps(usage_statistics_record_schema, indent=2))
+    # with open("usage_statistics_record_schema.json", "w") as outfile:
+    #     json.dump(usage_statistics_record_schema, outfile, indent=2)

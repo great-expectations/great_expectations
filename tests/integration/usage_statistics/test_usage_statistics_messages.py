@@ -22,6 +22,16 @@ valid_usage_statistics_messages = {
                 "platform.system": "Darwin",
                 "platform.release": "19.3.0",
                 "version_info": "sys.version_info(major=3, minor=7, micro=4, releaselevel='final', serial=0)",
+                # "imported_packages": [
+                #     {
+                #         "package": "airflow",
+                #         "version": "1.10.12",
+                #     },
+                #     {
+                #         "package": "pandas",
+                #         "version": "0.23.4"
+                #     }
+                # ],
                 "anonymized_datasources": [
                     {
                         "anonymized_name": "f57d8a6edae4f321b833384801847498",
@@ -100,6 +110,7 @@ valid_usage_statistics_messages = {
                         },
                     }
                 ],
+                # "pipeline_dag_runners": "airflow",
             },
             "event": "data_context.__init__",
             "success": True,
@@ -115,6 +126,13 @@ valid_usage_statistics_messages = {
                 "platform.system": "Darwin",
                 "platform.release": "19.3.0",
                 "version_info": "sys.version_info(major=3, minor=7, micro=4, releaselevel='final', serial=0)",
+                "imported_packages": [
+                    {
+                        "package": "airflow",
+                        "version": "1.10.12",
+                    },
+                    {"package": "pandas", "version": "0.23.4"},
+                ],
                 "anonymized_datasources": [
                     {
                         "anonymized_name": "f57d8a6edae4f321b833384801847498",
@@ -214,6 +232,7 @@ valid_usage_statistics_messages = {
                         ],
                     }
                 ],
+                # "pipeline_dag_runners": "airflow",
             },
             "event": "data_context.__init__",
             "success": True,
