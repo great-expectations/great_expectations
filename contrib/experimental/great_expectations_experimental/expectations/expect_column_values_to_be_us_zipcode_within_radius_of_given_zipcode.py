@@ -33,6 +33,10 @@ from great_expectations.validator.validator import Validator
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesAreUSZipcodeWithinMileRadiusOfGivenZipcode(ColumnMapMetricProvider):
+    """
+    Determines whether a US zip code is within a the given radius in miles of another given zip code.
+    """
+
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.us_zipcode_within_radius_of_given_zipcode"
@@ -201,6 +205,25 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
                         "unexpected_list": [],
                     },
                 },
+                {
+                    "title": "negative_test_with_some_zipcodes_in_5mi_radius_of_30338",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "all_zip_codes_within_20mi_radius_of_30338",
+                        "mostly": 1.0,
+                        "central_zip": 30338,
+                        "radius_in_miles": 5,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [4, 5],
+                        "unexpected_list": [
+                            30319,
+                            30342,
+                        ],
+                    },
+                },
             ],
         }
     ]
@@ -208,12 +231,17 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["experimental"],  # Tags for this Expectation in the gallery
+        "tags": [
+            "experimental",
+            "hackathon-20200123",
+        ],  # Tags for this Expectation in the gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@sethdmay",
-            "@maximetokman",  # Don't forget to add your github handle here!
+            "@maximetokman",
+            "@talagluck",
         ],
         "package": "experimental_expectations",
+        "requirements": ["uszipcode"],
     }
 
     # This is the id string of the Metric used by this Expectation.
