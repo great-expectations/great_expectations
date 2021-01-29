@@ -1,7 +1,6 @@
 import json
-from user_agents import parse
 
-# Need to install external dependency package of user_agents
+from user_agents import parse
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -29,6 +28,9 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validator import Validator
+
+# Need to install external dependency package of user_agents
+
 
 
 # This class defines a Metric to support your Expectation
