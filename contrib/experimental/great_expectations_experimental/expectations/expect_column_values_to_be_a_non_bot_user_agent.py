@@ -99,7 +99,7 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
+            "experimental"
         ],
         "contributors": ["@ktshannon"],
         "package": "experimental_expectations",
