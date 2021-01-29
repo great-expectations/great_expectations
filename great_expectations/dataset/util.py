@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -43,7 +43,7 @@ SCHEMAS = {
 def get_sql_dialect_floating_point_infinity_value(
     schema: str, negative: bool = False
 ) -> float:
-    res: Union[Dict, None] = SCHEMAS.get(schema)
+    res: Optional[dict] = SCHEMAS.get(schema)
     if res is None:
         if negative:
             return -np.inf

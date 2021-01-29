@@ -13,16 +13,17 @@ except ImportError:
     pypd = None
 
 
-from great_expectations.data_context.util import instantiate_class_from_config
-
-from ..data_context.store.metric_store import MetricStore
-from ..data_context.types.resource_identifiers import ValidationResultIdentifier
-from ..exceptions import ClassInstantiationError, DataContextError
-from .util import (
+from great_expectations.checkpoint.util import (
     send_microsoft_teams_notifications,
     send_opsgenie_alert,
     send_slack_notification,
 )
+from great_expectations.data_context.store.metric_store import MetricStore
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+)
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 logger = logging.getLogger(__name__)
 
