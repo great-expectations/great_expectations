@@ -14,7 +14,11 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    verify_dynamic_loading_support,
+)
 
 
 class ValidationsStore(Store):
@@ -131,6 +135,16 @@ class ValidationsStore(Store):
             store_name=store_name,
         )
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True,
+            **{
+                "class_name": self.__class__.__name__,
+            },
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def serialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.dumps(value)
 
@@ -190,3 +204,7 @@ class ValidationsStore(Store):
             print()
 
         return return_obj
+
+    @property
+    def config(self) -> dict:
+        return self._config

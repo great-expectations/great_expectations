@@ -3,7 +3,7 @@
 How to add a Validation Operator
 ======================================
 
-This guide will help you add a new instance of a :ref:`Validation Operator <validation_operators_and_actions>`. Validation Operators give you the ability to encode business logic around validation, such as validating multiple batches of data together, differentiating between warnings and errors, and kicking off actions based on the results of validation.
+This guide will help you add a new instance of a :ref:`Validation Operator <checkpoints_and_actions>`. Validation Operators give you the ability to encode business logic around validation, such as validating multiple batches of data together, differentiating between warnings and errors, and kicking off actions based on the results of validation.
 
 As a general rule, Validation Operators should be invoked from within :ref:`Checkpoints <reference__core_concepts__validation__checkpoints>`. Separating out the configuration for Validation Operators and Checkpoints can help make Operator code reusable.
 

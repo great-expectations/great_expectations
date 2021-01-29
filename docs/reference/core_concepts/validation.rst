@@ -115,9 +115,9 @@ If you would like to review the raw validation results in JSON format, the defau
 Note that by default, Data Docs will only compile Validation Results located in this directory.
 
 
-*************************************************
-Checkpoints (also known as Validation Operators)
-*************************************************
+****************************************************
+Checkpoints (formerly known as Validation Operators)
+****************************************************
 
 The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method returns a dictionary of validation results. This is sufficient when exploring your data and getting to know Great Expectations.
 When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
@@ -126,9 +126,9 @@ When deploying Great Expectations in a real data pipeline, you will typically di
 * validating a batch against several expectation suites
 * doing something with the validation results (e.g., saving them for a later review, sending notifications in case of failures, etc.).
 
-Validation Operators are mini-applications that can be configured to implement these scenarios.
+Checkpoints are mini-applications that can be configured to implement these scenarios.
 
-Read :ref:`validation_operators_and_actions` to learn more.
+Read :ref:`checkpoints_and_actions` to learn more.
 
 
 *******************
