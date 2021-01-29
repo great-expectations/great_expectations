@@ -86,7 +86,7 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
                         "column_B": "fk_col",
                     },
                     "out": {"success": False},
-                }
+                },
             ],
         }
     ]
