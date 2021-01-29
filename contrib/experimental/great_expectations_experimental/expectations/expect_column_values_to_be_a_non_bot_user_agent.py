@@ -63,7 +63,10 @@ class ColumnValuesEqualNonBotUserAgent(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
-    """Expect useragents to be non bots"""
+    """
+    Expect useragents to be non bots
+    requirements: user_agents
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -120,7 +123,6 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
         "tags": ["experimental"],  # Tags for this Expectation in the gallery
         "contributors": ["@ktshannon"],
         "package": "experimental_expectations",
-        "requirements": ["user_agents"],
     }
 
     # This is the id string of the Metric used by this Expectation.
