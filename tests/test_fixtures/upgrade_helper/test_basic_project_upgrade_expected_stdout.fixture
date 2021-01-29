@@ -4,7 +4,7 @@ Checking project...[0m
 ================================================================================
 [0m
 [31m
-Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2.[0m[0m
+Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3.[0m[0m
 
 Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]: 
 
@@ -55,6 +55,32 @@ The config_version of your great_expectations.yml has been automatically increme
 A log detailing the upgrade can be found here:
 
     - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json[0m[0m
+++====================================++
+|| UpgradeHelperV13: Upgrade Overview ||
+++====================================++
+
+UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.13.x.
+
+Good news! No special upgrade steps are required to bring your project up to date.
+The Upgrade Helper will simply increment the config_version of your great_expectations.yml for you.
+
+Would you like to proceed?
+ [Y/n]: 
+
+Upgrading project...[0m
+
+================================================================================
+[0m
+[36m++================++
+|| Upgrade Report ||
+++================++[0m
+
+[32mYour project was successfully upgraded to be compatible with Great Expectations 0.13.x.
+The config_version of your great_expectations.yml has been automatically incremented to 3.0.
+
+A log detailing the upgrade can be found here:
+
+    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV13_20190926T134241.000000Z.json[0m[0m
 
 ================================================================================
 [0m

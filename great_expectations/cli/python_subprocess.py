@@ -3,7 +3,7 @@ import sys
 import time
 import traceback
 from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, run
-from typing import Union
+from typing import Optional
 
 import click
 
@@ -105,7 +105,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                 encoding=None,
                 errors=None,
             ) as proc:
-                poll_status_code: Union[int, None] = proc.poll()
+                poll_status_code: Optional[int] = proc.poll()
                 poll_stdout: str = proc.stdout.readline()
                 while poll_status_code is None:
                     gathered += max([len(poll_stdout), poll_period_seconds])
