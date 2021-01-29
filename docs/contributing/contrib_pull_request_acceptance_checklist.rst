@@ -86,5 +86,8 @@ Both contributors and reviewers should follow this checklist:
 
  * Verify that changes to existing renderers (or new renderers) make sense--the language needs to accurately describe the semantics and behavior of the Expectation. 
 
+* Clarification about imports, renderers
+    * At this time, unused module imports and commented out renderer code from the template should not be removed if left in by the contributor. However if the contributor has already removed it, please do not put it back in.
+
 * And finally, "Does it run?"
     * Check out the PR branch and run the ``run_diagnostics`` method of the Expectation. This :ref:`how-to guide <how_to_guides__creating_and_editing_expectations__how_to_template>` shows how to do it. Check the output and make sure everything ran without errors.
