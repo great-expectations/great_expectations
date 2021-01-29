@@ -54,7 +54,7 @@ class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+    """Ensure that values in the column of interest (ColumnA) are in a valueset provided as a dataframe (df parameter) + column (column_B parameter) or as a list of elements supported by pandas.DataFrame() (e.g. list of dicts [{"col_name": value},], list of tuples [(value, value), (value, value)]"""
 
     examples = [
         {
@@ -75,6 +75,17 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
                         "column_B": "fk_col",
                     },
                     "out": {"success": True},
+                },
+                {
+                    "title": "basic_negative_test_case_number_set",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "x",
+                        "df": [{"fk_col": 1}, {"fk_col": 2}, {"fk_col": 7}],
+                        "column_B": "fk_col",
+                    },
+                    "out": {"success": False},
                 }
             ],
         }
