@@ -45,7 +45,7 @@ Steps
 
         Expectations follow a naming convention.
 
-        Names of Expectations are snake_case (e.g., ``expect_column_values_to_be_three``).
+        Names of Expectations are snake_case (e.g., ``expect_column_values_to_equal_three``).
 
         Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
 
@@ -56,15 +56,15 @@ Steps
 
     #. Name the file
 
-        The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_be_three.py``).
+        The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_equal_three.py``).
 
-        For example, if you call your Expectation ``expect_column_values_to_be_three``, the file with its implementation should be:   ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
+        For example, if you call your Expectation ``expect_column_values_to_equal_three``, the file with its implementation should be:   ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
 
     #. Name the class
 
         Within the file, update the name of the class that implements your Expectation.
-        Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToBeThree``). The framework will
-        automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_be_three``.
+        Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToEqualThree``). The framework will
+        automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_equal_three``.
         You will make this change in two places:
 
         * Class declaration (search for ``class Expect``)
