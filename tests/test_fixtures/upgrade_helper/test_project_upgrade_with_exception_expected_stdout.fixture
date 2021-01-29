@@ -4,7 +4,7 @@ Checking project...[0m
 ================================================================================
 [0m
 [31m
-Your project appears to have an out-of-date config version (1.0) - the version number must be at least 2.[0m[0m
+Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3.[0m[0m
 
 Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]: 
 

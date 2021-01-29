@@ -2,12 +2,15 @@ import datetime
 import decimal
 import logging
 import sys
+from collections import OrderedDict
 from collections.abc import Mapping
+from typing import Any, Optional, Union
 
 import numpy as np
 import pandas as pd
 from IPython import get_ipython
 
+from great_expectations import exceptions as ge_exceptions
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -277,3 +280,60 @@ def ensure_json_serializable(data):
 
 def requires_lossy_conversion(d):
     return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
+
+
+def substitute_all_strftime_format_strings(
+    data: Union[dict, list, str, Any], datetime_obj: Optional[datetime.datetime] = None
+) -> Union[str, Any]:
+    """
+    This utility function will iterate over input data and for all strings, replace any strftime format
+    elements using either the provided datetime_obj or the current datetime
+    """
+
+    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
+    if isinstance(data, dict) or isinstance(data, OrderedDict):
+        return {
+            k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
+            for k, v in data.items()
+        }
+    elif isinstance(data, list):
+        return [
+            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj)
+            for el in data
+        ]
+    elif isinstance(data, str):
+        return get_datetime_string_from_strftime_format(data, datetime_obj=datetime_obj)
+    else:
+        return data
+
+
+def get_datetime_string_from_strftime_format(
+    format_str: str, datetime_obj: Optional[datetime.datetime] = None
+) -> str:
+    """
+    This utility function takes a string with strftime format elements and substitutes those elements using
+    either the provided datetime_obj or current datetime
+    """
+    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
+    return datetime_obj.strftime(format_str)
+
+
+def parse_string_to_datetime(
+    datetime_string: str, datetime_format_string: str
+) -> datetime.date:
+    if not isinstance(datetime_string, str):
+        raise ge_exceptions.SorterError(
+            f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
+            """
+        )
+    if datetime_format_string and not isinstance(datetime_format_string, str):
+        raise ge_exceptions.SorterError(
+            f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
+"{str(type(datetime_format_string))}").
+            """
+        )
+    return datetime.datetime.strptime(datetime_string, datetime_format_string).date()
+
+
+def datetime_to_int(dt: datetime.date) -> int:
+    return int(dt.strftime("%Y%m%d%H%M%S"))
