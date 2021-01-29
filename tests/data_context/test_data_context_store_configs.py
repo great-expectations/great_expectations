@@ -78,6 +78,7 @@ def test_default_config_yml_stores(tmp_path_factory):
         "expectations_store",
         "validations_store",
         "evaluation_parameter_store",
+        "checkpoint_store",
     }
 
     context.add_store(
@@ -89,6 +90,7 @@ def test_default_config_yml_stores(tmp_path_factory):
     )
 
     assert set(context.stores.keys()) == {
+        "checkpoint_store",
         "expectations_store",
         "validations_store",
         "evaluation_parameter_store",

@@ -13,7 +13,7 @@ This guide will help you add a new Expectation to Great Expectations’ shared l
 Steps
 -----
 
-#. Choose a Parent Class to Help your Implementation.
+#. **Choose a parent class to help your implementation.**
 
     There are four Expectation subclasses that make the development of particular types of Expectations significantly easier by handling boilerplate code and letting you focus on the business logic of your Expectation. Consider choosing one that suites your Expectation:
 
@@ -23,41 +23,58 @@ Steps
         - ``TableExpectation`` s are a generic catchall for other types of Expectations applied to tabular data.
 
 
-    Find the appropriate template file in ``great_expectations/examples/expectations/``. Starting your development with these templates is significantly easier than developing from scratch.
+    Choose the template that fits your Expectation. Starting your development with these templates is significantly easier than developing from scratch:
 
-#. Copy the template file into the appropriate ``contrib/`` directory (see below).
+    * ``ColumnMapExpectation``: ``examples/expectations/column_map_expectation_template.py``
+    * ``ColumnExpectation``: ``examples/expectations/column_aggregate_expectation_template.py``
+    * ``ColumnPairMapExpectation``: coming soon...
+    * ``TableExpectation``: coming soon...
 
-    Recently we introduced a fast-track release process for Expectations that a contributor places in one of the subdirectories of ``contrib``.
-    They are released as PyPI packages separate from ``great-expectations``. When you create a new Expectation in ``contrib/experimental/great_expectations_experimental/expectations/``,
-    once your PR is approved and merged, a new version of PyPI package ``great-expectations-experimental`` is automatically published.
 
-#. Pick a name for your Expectation, rename the file and the class within it.
+#. **Copy the template file**
 
-    Great Expectations follows a naming convention. Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToBeThree``). The framework will
-    automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_be_three``.
-    The Python file that contains the class should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_be_three.py``).
+    Copy the template file into ``contrib/experimental/great_expectations_experimental/expectations/`` directory.
 
-    Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
+    Recently we introduced a fast-track release process for community contributed Expectations.
+    You will commit the file with your Expectation's implementation into ``great_expectations`` repo.
+    Once your PR is approved and merged, your Expectation will be automatically published in the PyPI package ``great-expectations-experimental``. This package contains community contributed Expectations and is separate from ``great-expectations``.
 
-    * Column map Expectations: ``expect_column_values_...`` (e.g., ``expect_column_values_to_match_regex``)
-    * Column aggregate Expectations: ``expect_column_...`` (e.g., ``expect_column_mean_to_be_between``)
-    * Column pair map Expectations: ``expect_column_pair_values_...`` (e.g., ``expect_column_pair_values_to_be_in_set``)
-    * Tabe Expectatons: ``expect_table_...`` (e.g., ``expect_table_row_count_to_be_equal``)
+#. **Pick a name for your Expectation, rename the file and the class within it.**
 
-    For example, if you call your Expectation ``ExpectColumnValuesToEqualThree``, you will copy it to ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
+    #. Pick a name for your Expectation
+
+        Expectations follow a naming convention.
+
+        Names of Expectations are snake_case (e.g., ``expect_column_values_to_be_three``).
+
+        Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
+
+        * Column map Expectations: ``expect_column_values_...`` (e.g., ``expect_column_values_to_match_regex``)
+        * Column aggregate Expectations: ``expect_column_...`` (e.g., ``expect_column_mean_to_be_between``)
+        * Column pair map Expectations: ``expect_column_pair_values_...`` (e.g., ``expect_column_pair_values_to_be_in_set``)
+        * Table Expectatons: ``expect_table_...`` (e.g., ``expect_table_row_count_to_be_equal``)
+
+    #. Name the file
+
+        The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_be_three.py``).
+
+        For example, if you call your Expectation ``expect_column_values_to_be_three``, the file with its implementation should be:   ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
+
+    #. Name the class
+
+        Within the file, update the name of the class that implements your Expectation.
+        Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToBeThree``). The framework will
+        automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_be_three``.
+        You will make this change in two places:
+
+        * Class declaration (search for ``class Expect``)
+        * A call to ``run_diagnostic`` in the very end of the template (search for ``diagnostics_report = ``). Next section explains the role this code plays.
 
     For more style conventions that your code should follow consult our :ref:`Style Guide <contributing__style_guide>`
 
-#. Within the file, update the name of your Expectation.
+#. **Run diagnostics on your Expectation.**
 
-    You'll to do this in two places:
-
-    * Class declaration (search for ``class ExpectColumnValuesToEqualThree``)
-    * A call to ``run_diagnostic`` in the very end of the template (search for ``diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()``). Next section explains the role this code plays.
-
-#. Execute the template file.
-
-    The simplest way to do this is as a standalone script. Note: if you prefer, you can also execute within a notebook or IDE.
+    Expectations contain a self diagnostic tool that will help you during development. The simplest way to run it is to execute the file as a standalone script. Note: if you prefer, you can also run it within a notebook or IDE.
 
     .. code-block:: yaml
 
@@ -84,6 +101,8 @@ Steps
           "examples": [],
           "metrics": [],
           "execution_engines": {}
+          "test_report": [],
+          "diagnostics_report": []
         }
 
     This output is a report on the completeness of your Expectation.
@@ -91,7 +110,7 @@ Steps
     You will repeat this step many times during developing your Expectation. ``run_diagnostics`` creates an easy and fast "dev loop" for you -
     make a small change in the code, run ``run_diagnostics``, examine its output for failures and next steps.
 
-    From this point on, we'll start filling in the pieces of your Expectation. You can stop this at any point.
+    From this point on, we will start filling in the pieces of your Expectation. You don't have to fill in all the pieces to submit your Expectation. For example, you may choose to provide only Pandas implementation. Another contributor may add a Spark implementation in a separate PR later. Expectation development can be done in bite-size pieces.
 
     .. admonition:: Note:
 
@@ -103,7 +122,7 @@ Steps
             diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
             print(json.dumps(diagnostics_report, indent=2))
 
-#. Add an example test.
+#. **Add an example test.**
 
     Search for ``examples = [`` in your file.
 
@@ -112,7 +131,7 @@ Steps
         * help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. When your Expectation is released, its entry in the Expectations Gallery site will render these examples.
         * provide test cases that the Great Expectations testing framework can execute automatically
 
-    We will explain the structure of these tests using the example provided in one of the templates that implements ``expect_column_values_to_equal_three``.
+    We will explain the structure of these tests using the example provided in one of the templates that implements ``expect_column_values_to_equal_three``:
 
     .. code-block:: python
 
@@ -123,6 +142,7 @@ Steps
             "tests": [
                 {
                     "title": "positive_test_with_mostly",
+                    "include_in_gallery": True,
                     "exact_match_out": False,
                     "in": {"column": "mostly_threes", "mostly": 0.6},
                     "out": {
@@ -140,9 +160,11 @@ Steps
 
     Each example is a dictionary with two keys:
 
-    * data: defines the input data of the example as a table/data frame. In this example the table has one column named "mostly_threes" with 10 rows.
-    * tests: a list of test cases that use the data defined above as input to validate
+    * ``data``: defines the input data of the example as a table/data frame. In this example the table has one column named "mostly_threes" with 10 rows. If you define multiple columns, make sure that they have the same number of rows. If possible, include test data and tests that includes null values (``None`` in the python test definition).
+    * ``tests``: a list of test cases that use the data defined above as input to validate
+
         * ``title`` should be a descriptive name for the test case. Make sure to have no spaces.
+        * ``include_in_gallery``: set it to True if you want this test case to be visible in the gallery as an example (true for most test cases).
         * ``in`` contains exactly the parameters that you want to pass in to the Expectation. ``"in": {"column": "mostly_threes", "mostly": 0.6}`` in the example above is equivalent to ``expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)``
         * ``out`` is based on the Validation Result returned when executing the Expectation.
         * ``exact_match_out``: if you set ``exact_match_out=False``, then you don’t need to include all the elements of the result object - only the ones that are important to test.
@@ -153,7 +175,7 @@ Steps
 
     .. admonition:: Note:
 
-        - When you define data in your examples, we will mostly guess the type of the columns. Sometimes you need to specify the precise type of the columns for each backend. Then you use ``schema`` atribute in an example to achieve this:
+        - When you define data in your examples, we will mostly guess the type of the columns. Sometimes you need to specify the precise type of the columns for each backend. Then you use ``schema`` attribute (on the same level as ``data`` and ``tests`` in the dictionary):
 
         .. code-block:: json
 
@@ -167,12 +189,14 @@ Steps
 
 
 
-#. Implement the logic. The details of this step differ based on the type of Expectations you are implementing. Click on the appropriate tab below.
+#. **Implement the logic.**
+
+    The details of this step differ based on the type of Expectations you are implementing. Click on the appropriate tab below.
 
     .. content-tabs::
 
         .. tab-container:: tab0
-            :title: ColumnMapExpectations
+            :title: ColumnMapExpectation
 
 
             Expectations that extend ColumnMapExpectation class work as follows:
@@ -276,6 +300,7 @@ Steps
                         def _pandas(cls, column, integer=None, **kwargs):
                             return column == integer
 
+                    * Add the new arguments to the test cases in the examples.
 
                 .. admonition:: Note:
 
@@ -380,7 +405,7 @@ Steps
             Under construction...
 
 
-#. Fill in the ``library_metadata`` dictionary.
+#. **Fill in the ``library_metadata`` dictionary.**
 
     Find this code snippet in your file and edit tags and contributors:
 
@@ -397,7 +422,17 @@ Steps
             "package": "experimental_expectations",
         }
 
-#. Follow :ref:`Contribution Checklist <contributing_contribution_checklist>` to submit your contribution.
+#. **Implement (some) renderers.**
+
+    Renderers are methods in the class that implements your Expectation that can display your Expectation and its Validation Result as HTML or other human-friendly format.
+
+    The template file that you used to start your development has some renderer implementations commented out. You can use them as a starting point.
+
+    For more comprehensive documentation consilt this :ref:`how-to guide <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`.
+
+#. **Submit your contribution**
+
+    Follow :ref:`Contribution Checklist <contributing_contribution_checklist>` to submit your contribution.
 
 
 Additional notes
@@ -412,4 +447,4 @@ Comments
 --------
 
 .. discourse::
-   :topic_identifier: {{topic_id}}
+   :topic_identifier: 604
