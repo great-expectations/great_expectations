@@ -1,13 +1,6 @@
 trigger:
   - develop
 
-repositories:
-  - repository: great_expectations
-    type: github
-    endpoint: great_expectations
-    name: great-expectations/great_expectations
-    ref: develop
-
 variables:
   contrib_major: 0
   contrib_minor: 1
@@ -22,7 +15,6 @@ stages:
     jobs:
       - job: changes
         steps:
-          - checkout: great_expectations
           - task: ChangedFiles@1
             name: CheckChanges
             inputs:
