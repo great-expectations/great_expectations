@@ -89,8 +89,27 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "user_agents", "mostly": 0.9},
-                    "out": {"success": True,},
-                }
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [9],
+                        "unexpected_list": [
+                            "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+                        ],
+                    },
+                },
+                {
+                    "title": "negative_test_with_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "user_agents", "mostly": 1.0},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [9],
+                        "unexpected_list": [
+                            "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+                        ],
+                    },
+                },
             ],
         }
     ]
@@ -98,9 +117,7 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            "experimental"
-        ],
+        "tags": ["experimental"],  # Tags for this Expectation in the gallery
         "contributors": ["@ktshannon"],
         "package": "experimental_expectations",
         "requirements": ["user_agents"],
@@ -206,5 +223,5 @@ class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesEqualNonBotUserAgent().run_diagnostics()
+    diagnostics_report = ExpectColumnValuesToBeANonBotUserAgent().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
