@@ -78,7 +78,10 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
                 ur, vi, vo, wa, xh, zh, zu
         
         Notes:
-            Language identification uses the `langid` package.
+            * Language identification uses the `langid` package.
+            * Results may be inaccurate for strings shorter than 50 characters.
+            * No confidence threshold has been set, so language with the highest confidence will be selected, even if
+              confidence is low.
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
