@@ -32,6 +32,10 @@ from great_expectations.validator.validator import Validator
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesAreAscii(ColumnMapMetricProvider):
+    """
+    Determines whether column values consist only of ascii characters. If value consists of any non-ascii character
+    then that value will not pass.
+    """
 
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
@@ -39,11 +43,14 @@ class ColumnValuesAreAscii(ColumnMapMetricProvider):
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
-    __ascii_pattern = '[ -~]'
-
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column.astype(str).str.contains(cls.__ascii_pattern)
+        def check_if_ascii(x):
+            return str(x).isascii()
+
+        column_ascii_check = column.apply(check_if_ascii)
+        return column_ascii_check
+
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -91,59 +98,89 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
            """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    examples = [{
-        "data": {
-            "mostly_ascii": [1, 12.34, 'a;lskdjfji', "””", '#$%^&*(', None, None],
-            "mostly_numbers": [42, 404, 858, 8675309, 62, 48, 17],
-            "mostly_characters": ["Lantsberger", "Gil Pasternak", "Vincent", "J@sse", "R!ck R00l", "A_", "B+"],
-        },
-        "tests": [
-            {
-                "title": "test_with_mostly_ascii",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "mostly_ascii", "mostly": 0.6},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [3],
-                    "unexpected_list": ["””"],
-                },
+    examples = [
+        {
+            "data": {
+                "mostly_ascii": [1, 12.34, "a;lskdjfji", "””", "#$%^&*(", None, None],
+                "mostly_numbers": [42, 404, 858, 8675309, 62, 48, 17],
+                "mostly_characters": [
+                    "Lantsberger",
+                    "Gil Pasternak",
+                    "Vincent",
+                    "J@sse",
+                    "R!ck R00l",
+                    "A_",
+                    "B+",
+                ],
+                "not_ascii": [
+                    "ဟယ်လို",
+                    " שלום",
+                    "नमस्ते",
+                    "رحبا",
+                    "ନମସ୍କାର",
+                    "สวัสดี",
+                    "ಹಲೋ ",
+                ],
             },
-            {
-                "title": "test_with_mostly_numbers",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "mostly_numbers", "mostly": 1.0},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [],
-                    "unexpected_list": [],
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly_ascii",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_ascii", "mostly": 0.6},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": ["””"],
+                    },
                 },
-            },
-            {
-                "title": "test_with_mostly_ascii",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "mostly_characters", "mostly": 1.0},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [],
-                    "unexpected_list": [],
+                {
+                    "title": "positive_test_with_mostly_numbers",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_numbers", "mostly": 1.0},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
                 },
-            },
-        ],
-    }]
+                {
+                    "title": "positive_test_with_mostly_ascii",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_characters", "mostly": 1.0},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+                {
+                    "title": "negative_test_with_non_ascii",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "not_ascii", "mostly": 1.0},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [0, 1, 2, 3, 4, 5, 6],
+                    },
+                },
+            ],
+        }
+    ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": [  # Tags for this Expectation in the gallery
-                    "experimental"
+            "experimental",
+            "hackathon-20200123",
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
-
             "@jsteinberg4",
-            "@vraimondi04"
+            "@vraimondi04",
+            "@talagluck",
         ],
         "package": "experimental_expectations",
     }

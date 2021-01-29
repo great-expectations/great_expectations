@@ -1,6 +1,5 @@
 import json
 
-
 #!!! This giant block of imports should be something simpler, such as:
 # from great_expectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import (
@@ -33,17 +32,22 @@ from great_expectations.validator.validator import Validator
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
 class ColumnValuesToNotContainCharacter(ColumnMapMetricProvider):
+    """
+    Determines whether column values do not contain a specific character. Column values pass if they do NOT contain the
+    character
+    """
 
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.to_not_contain_character"
+    condition_metric_name = "column_values.not_contain_character"
 
-    condition_value_keys = ('character',)
+    condition_value_keys = ("character",)
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, character, **kwargs):
-        return column.apply(lambda val: str(character) not in str(val) if val is not None else False)
+        return column.apply(lambda val: str(character) not in str(val))
+
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -92,71 +96,112 @@ class ExpectColumnValuesToNotContainCharacter(ColumnMapExpectation):
                :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
            """
 
-   
-
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    examples = [{
-        "data": {
-            "mostly_non_spaced": ['hello', 'snake_case_words_h', 'this has spaces', '@@@-somh?-stuff', None, 3.14159265]
-        },
-        "tests": [
-            {
-                "title": "test_for_spaces",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "mostly_non_spaced", "character": " ", "mostly": 0.7},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [2],
-                    "unexpected_list": ['this has spaces'],
+    examples = [
+        {
+            "data": {
+                "mostly_non_spaced": [
+                    "hello",
+                    "snake_case_words_h",
+                    "this has spaces",
+                    "@@@-somh?-stuff",
+                    None,
+                    3.1415965,
+                ],
+                "mostly_none": [None, None, None, "@@@-somh?-stuff", None, 3.14159265],
+            },
+            "tests": [
+                {
+                    "title": "test_for_spaces",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_non_spaced",
+                        "character": " ",
+                        "mostly": 0.7,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [2],
+                        "unexpected_list": ["this has spaces"],
+                    },
                 },
-            },
-            {
-                "title": "test_for_at_symbol",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "mostly_non_spaced", "character": "@", "mostly": 0.7},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [3],
-                    "unexpected_list": ['@@@-som?-stuff'],
+                {
+                    "title": "test_for_at_symbol",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_non_spaced",
+                        "character": "@",
+                        "mostly": 0.7,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": ["@@@-som?-stuff"],
+                    },
                 },
-            },
-            {
-                "title": "test_for_letter",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "mostly_non_spaced", "character": "h", "mostly": 0.7},
-                "out": {
-                    "success": False,
-                    "unexpected_index_list": [0, 1, 2, 3],
-                    "unexpected_list": ['hello', 'snake_case_words_h', 'this has spaces', '@@@-somh?-stuff'],
-                }
-            },
-        ],
-    }]
+                {
+                    "title": "test_for_letter",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_non_spaced",
+                        "character": "h",
+                        "mostly": 0.7,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [0, 1, 2, 3],
+                        "unexpected_list": [
+                            "hello",
+                            "snake_case_words_h",
+                            "this has spaces",
+                            "@@@-somh?-stuff",
+                        ],
+                    },
+                },
+                {
+                    "title": "test_column_with_mostly_nones",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_none", "character": " ", "mostly": 1.0},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+            ],
+        }
+    ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": [  # Tags for this Expectation in the gallery
-                    "experimental"
+            "experimental",
+            "hackathon-20200123",
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
             #         "@your_name_here", # Don't forget to add your github handle here!
             "@jsteinberg4",
-            "@vraimondi04"
+            "@vraimondi04",
+            "@talagluck",
         ],
         "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.to_not_contain_character"
+    map_metric = "column_values.not_contain_character"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
-    success_keys = ("character", "mostly",)
+    success_keys = (
+        "character",
+        "mostly",
+    )
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
