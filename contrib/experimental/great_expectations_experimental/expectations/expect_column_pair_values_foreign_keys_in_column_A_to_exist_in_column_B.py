@@ -3,9 +3,7 @@ import pandas as pd
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,
@@ -38,7 +36,6 @@ class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
     condition_value_keys = ("df", "column_B")
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
-
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, df, column_B, **kwargs):
         if type(df) == list:
@@ -46,6 +43,7 @@ class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
         value_set = set(df[column_B])
         return column.isin(value_set)
         # return True
+
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -58,44 +56,37 @@ class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
 class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
     """TODO: add a docstring here"""
 
-    examples = [{
-      # "expectation_type": "expect_column_values_to_be_in_set",
-        "data" : {
-          "x" : [1,2,4],
-          "y" : [1.1,2.2,5.5],
-          "z" : ["hello", "jello", "mello"]
-        },
-        "tests" : [
-          {
-            "title": "basic_positive_test_case_number_set",
-            "exact_match_out": False,
-            "include_in_gallery": True,
-            "in": {
-              "column": "x",
-              "df": [{'fk_col': 1}, {'fk_col': 2}, {'fk_col': 4}],
-              "column_B": 'fk_col'
+    examples = [
+        {
+            # "expectation_type": "expect_column_values_to_be_in_set",
+            "data": {
+                "x": [1, 2, 4],
+                "y": [1.1, 2.2, 5.5],
+                "z": ["hello", "jello", "mello"],
             },
-            "out": {
-              "success": True
-            }
-          }
-      ],
-    }]
-
+            "tests": [
+                {
+                    "title": "basic_positive_test_case_number_set",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "x",
+                        "df": [{"fk_col": 1}, {"fk_col": 2}, {"fk_col": 4}],
+                        "column_B": "fk_col",
+                    },
+                    "out": {"success": True},
+                }
+            ],
+        }
+    ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
-        ],
+        "tags": ["experimental"],  # Tags for this Expectation in the gallery
+        "contributors": ["@robertparker"],
         "package": "experimental_expectations",
     }
-
-
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
@@ -196,58 +187,58 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
 #             )
 #         ]
 
-    # def get_validation_dependencies(
-    #     self,
-    #     configuration: Optional[ExpectationConfiguration] = None,
-    #     execution_engine: Optional[ExecutionEngine] = None,
-    #     runtime_configuration: Optional[dict] = None,
-    # ):
-    #     dependencies = super().get_validation_dependencies(
-    #         configuration, execution_engine, runtime_configuration
-    #     )
-    #     # get other_table_name kwarg
-    #     # get the column_B kwarg
-    #     # get metric expect_column_values_to_be_unique
+# def get_validation_dependencies(
+#     self,
+#     configuration: Optional[ExpectationConfiguration] = None,
+#     execution_engine: Optional[ExecutionEngine] = None,
+#     runtime_configuration: Optional[dict] = None,
+# ):
+#     dependencies = super().get_validation_dependencies(
+#         configuration, execution_engine, runtime_configuration
+#     )
+#     # get other_table_name kwarg
+#     # get the column_B kwarg
+#     # get metric expect_column_values_to_be_unique
 
 
-    #     other_table_name = configuration.kwargs.get("other_table_name")
-    #     # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
-    #     table_row_count_metric_config_other = deepcopy(
-    #         dependencies["metrics"]["table.row_count"]
-    #     )
-    #     table_row_count_metric_config_other.metric_domain_kwargs[
-    #         "table"
-    #     ] = other_table_name
-    #     # rename original "table.row_count" metric to "table.row_count.self"
-    #     dependencies["metrics"]["table.row_count.self"] = dependencies["metrics"].pop(
-    #         "table.row_count"
-    #     )
-    #     # add a new metric dependency named "table.row_count.other" with modified metric config
-    #     dependencies["metrics"][
-    #         "table.row_count.other"
-    #     ] = table_row_count_metric_config_other
+#     other_table_name = configuration.kwargs.get("other_table_name")
+#     # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
+#     table_row_count_metric_config_other = deepcopy(
+#         dependencies["metrics"]["table.row_count"]
+#     )
+#     table_row_count_metric_config_other.metric_domain_kwargs[
+#         "table"
+#     ] = other_table_name
+#     # rename original "table.row_count" metric to "table.row_count.self"
+#     dependencies["metrics"]["table.row_count.self"] = dependencies["metrics"].pop(
+#         "table.row_count"
+#     )
+#     # add a new metric dependency named "table.row_count.other" with modified metric config
+#     dependencies["metrics"][
+#         "table.row_count.other"
+#     ] = table_row_count_metric_config_other
 
-    #     return dependencies
+#     return dependencies
 
-    # def _validate(
-    #     self,
-    #     configuration: ExpectationConfiguration,
-    #     metrics: Dict,
-    #     runtime_configuration: dict = None,
-    #     execution_engine: ExecutionEngine = None,
-    # ):
-    #     table_row_count_self = metrics["table.row_count.self"]
-    #     table_row_count_other = metrics["table.row_count.other"]
+# def _validate(
+#     self,
+#     configuration: ExpectationConfiguration,
+#     metrics: Dict,
+#     runtime_configuration: dict = None,
+#     execution_engine: ExecutionEngine = None,
+# ):
+#     table_row_count_self = metrics["table.row_count.self"]
+#     table_row_count_other = metrics["table.row_count.other"]
 
-    #     return {
-    #         "success": table_row_count_self == table_row_count_other,
-    #         "result": {
-    #             "observed_value": {
-    #                 "self": table_row_count_self,
-    #                 "other": table_row_count_other,
-    #             }
-    #         },
-    #     }
+#     return {
+#         "success": table_row_count_self == table_row_count_other,
+#         "result": {
+#             "observed_value": {
+#                 "self": table_row_count_self,
+#                 "other": table_row_count_other,
+#             }
+#         },
+#     }
 
 if __name__ == "__main__":
     diagnostics_report = ExpectForeignKeysInColumnAToExistInColumnB().run_diagnostics()
