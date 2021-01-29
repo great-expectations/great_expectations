@@ -31,18 +31,18 @@ from great_expectations.validator.validator import Validator
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
+class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.equal_three"
+    condition_metric_name = "column_values.point_within_geo_region"
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
 
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, **kwargs):
+        return column == 3
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -57,44 +57,47 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
+    """This expectation will check a (latitude, longitude) tuple to see if it falls within a country input by the
+    user. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
+    that are in the Geopandas world database."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # examples = [{
-    #     "data": {
-    #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-    #     },
-    #     "tests": [
-    #         {
-    #             "title": "positive_test_with_mostly",
-    #             "exact_match_out": False,
-    #             "include_in_gallery": True,
-    #             "in": {"column": "mostly_threes", "mostly": 0.6},
-    #             "out": {
-    #                 "success": True,
-    #                 "unexpected_index_list": [6, 7],
-    #                 "unexpected_list": [2, -1],
-    #             },
-    #         }
-    #     ],
-    # }]
+    examples = [{
+        "data": {
+            "mostly_points_within_geo_region": [(12.0464, 140.58), (-13.163068, -72.545128), (55.378051, -3.435973)],
+        },
+        "tests": [
+            {
+                "title": "positive_test_with_mostly",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {"column": "mostly_points_within_geo_region", "country": "Peru", "mostly": 0.5},
+                "out": {
+                    "success": True,
+                    "unexpected_index_list": [2],
+                    "unexpected_list": [(55.378051, -3.435973)],
+                },
+            }
+        ],
+    }]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
+                    "experimental"
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
+                    "@DXcarlos", "@Rxmeez", "@ryanlindeborg" # Don't forget to add your github handle here!
         ],
         "package": "experimental_expectations",
+        "requirements": ["geopandas"]
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.equal_three"
+    map_metric = "column_values.point_within_geo_region"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
@@ -192,5 +195,5 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    diagnostics_report = ExpectColumnValuesPointWithinGeoRegion().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
