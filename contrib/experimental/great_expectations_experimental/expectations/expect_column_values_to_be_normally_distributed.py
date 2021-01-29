@@ -147,7 +147,9 @@ class ColumnNormallyDistributed(ColumnMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnToBeNormallyDistributed(ColumnExpectation):
+class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
+    """Test whether column values are normally distributed. NaN values are omitted."""
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.normally_distributed",)
     success_keys = (
@@ -162,11 +164,11 @@ class ExpectColumnToBeNormallyDistributed(ColumnExpectation):
         "package": "great_expectations_experimental",
         "tags": [],
         "contributors": [
-            "ljohnston931",
-            "rexboyce",
-            "lodeous",
-            "sophiarawlings",
-            "vtdangg",
+            "@ljohnston931",
+            "@rexboyce",
+            "@lodeous",
+            "@sophiarawlings",
+            "@vtdangg",
         ],
     }
 
@@ -338,5 +340,5 @@ class ExpectColumnToBeNormallyDistributed(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnToBeNormallyDistributed().run_diagnostics()
+    self_check_report = ExpectColumnValuesToBeNormallyDistributed().run_diagnostics()
     print(json.dumps(self_check_report, indent=2))
