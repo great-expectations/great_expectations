@@ -35,6 +35,7 @@ from great_expectations.validator.validator import Validator
 class ColumnValuesAreUSZipcodeWithinMileRadiusOfGivenZipcode(ColumnMapMetricProvider):
     """
     Determines whether a US zip code is within a the given radius in miles of another given zip code.
+    requirements: uszipcode
     """
 
     # This is the id string that will be used to reference your metric.
@@ -241,7 +242,6 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
             "@talagluck",
         ],
         "package": "experimental_expectations",
-        "requirements": ["uszipcode"],
     }
 
     # This is the id string of the Metric used by this Expectation.
