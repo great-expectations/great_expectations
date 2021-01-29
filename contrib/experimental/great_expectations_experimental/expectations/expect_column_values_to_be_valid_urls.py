@@ -31,12 +31,13 @@ from great_expectations.validator.validator import Validator
 # This method compares a string to a url validation regex using Django's URLValidator class
 def fits_regex(x):
     regex = re.compile(
-        r'^(?:http|ftp)s?://' # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
-        r'localhost|' #localhost...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
-        r'(?::\d+)?' # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE
+        r"^(?:http|ftp)s?://"  # http:// or https://
+        r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain...
+        r"localhost|"  # localhost...
+        r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+        r"(?::\d+)?"  # optional port
+        r"(?:/?|[/?]\S+)$",
+        re.IGNORECASE,
     )
     if re.match(regex, str(x)):
         return True
@@ -53,7 +54,6 @@ class ColumnValuesToBeValidUrls(ColumnMapMetricProvider):
     condition_metric_name = "column_values.to_be_valid_urls"
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
-
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
@@ -76,40 +76,55 @@ class ColumnValuesToBeValidUrls(ColumnMapMetricProvider):
 class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
     """Expect the column to be a valid url. Uses UrlValidator class in Django."""
 
-    examples = [{
-        "data": {
-            "mostly_urls": ["http://www.caseycaruso.com", "http://www.bvp.com", "http://www.tlccollective.space", "kittens", "www.google.com"],
-            "valid_urls": ["http://www.facebook.com", "http://www.twitter.com", "http://www.github.com", "http://www.stackoverflow.com", "http://www.google.com"]
-        },
-        "tests": [
-            {
-                "title": "mostly_valid_urls",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "mostly_urls", "mostly": 0.1},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [3, 4],
-                    "unexpected_list": ["kittens", "wwww.googlecom"],
-                },
+    examples = [
+        {
+            "data": {
+                "mostly_urls": [
+                    "http://www.caseycaruso.com",
+                    "http://www.bvp.com",
+                    "http://www.tlccollective.space",
+                    "kittens",
+                    "www.google.com",
+                ],
+                "valid_urls": [
+                    "http://www.facebook.com",
+                    "http://www.twitter.com",
+                    "http://www.github.com",
+                    "http://www.stackoverflow.com",
+                    "http://www.google.com",
+                ],
             },
-            {
-                "title": "valid_urls",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "valid_urls", "mostly": 1},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [],
-                    "unexpected_list": [],
+            "tests": [
+                {
+                    "title": "mostly_valid_urls",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_urls", "mostly": 0.1},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3, 4],
+                        "unexpected_list": ["kittens", "wwww.googlecom"],
+                    },
                 },
-            },
-        ],
-    }]
+                {
+                    "title": "valid_urls",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "valid_urls", "mostly": 1},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+            ],
+        }
+    ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental", "hackathon"  # "experimental", "beta", or "production"
+        "maturity": "experimental",
+        "hackathon"  # "experimental", "beta", or "production"
         "tags": [  # Tags for this Expectation in the gallery
             #         "experimental"
         ],
