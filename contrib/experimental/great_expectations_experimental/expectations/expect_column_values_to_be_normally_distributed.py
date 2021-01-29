@@ -150,39 +150,6 @@ class ColumnNormallyDistributed(ColumnMetricProvider):
 class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
     """Test whether column values are normally distributed. NaN values are omitted."""
 
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.custom.normally_distributed",)
-    success_keys = (
-        "min_value",
-        "strict_min",
-        "max_value",
-        "strict_max",
-    )
-
-    library_metadata = {
-        "maturity": "experimental",
-        "package": "great_expectations_experimental",
-        "tags": ["experimental"],
-        "contributors": [
-            "@ljohnston931",
-            "@rexboyce",
-            "@lodeous",
-            "@sophiarawlings",
-            "@vtdangg",
-        ],
-    }
-
-    # Default values
-    default_kwarg_values = {
-        "min_value": 0.01,
-        "max_value": None,
-        "strict_min": None,
-        "strict_max": None,
-        "result_format": "BASIC",
-        "include_config": True,
-        "catch_exceptions": False,
-    }
-
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
@@ -231,17 +198,38 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
         },
     ]
 
-    # This dictionary contains metadata for display in the public gallery
-    # library_metadata = {
-    #     "maturity": "experimental",  # "experimental", "beta", or "production"
-    #     "tags": [  # Tags for this Expectation in the gallery
-    #         #         "experimental"
-    #     ],
-    #     "contributors": [  # Github handles for all contributors to this Expectation.
-    #         #         "@your_name_here", # Don't forget to add your github handle here!
-    #     ],
-    #     "package": "experimental_expectations",
-    # }
+    library_metadata = {
+        "maturity": "experimental",
+        "package": "great_expectations_experimental",
+        "tags": ["experimental"],
+        "contributors": [
+            "@ljohnston931",
+            "@rexboyce",
+            "@lodeous",
+            "@sophiarawlings",
+            "@vtdangg",
+        ],
+    }
+
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    metric_dependencies = ("column.custom.normally_distributed",)
+    success_keys = (
+        "min_value",
+        "strict_min",
+        "max_value",
+        "strict_max",
+    )
+
+    # Default values
+    default_kwarg_values = {
+        "min_value": 0.01,
+        "max_value": None,
+        "strict_min": None,
+        "strict_max": None,
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": False,
+    }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
