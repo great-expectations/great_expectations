@@ -170,6 +170,19 @@ class BatchRequestBase(DictDot):
     This class is for internal inter-object protocol purposes only.
     As such, it contains all attributes of a batch_request, but does not validate them.
     See the BatchRequest class, which extends BatchRequestBase and validates the attributes.
+
+    BatchRequestBase is used for the internal protocol purposes exclusively, not part of API for the developer users.
+
+    Previously, the very same BatchRequest was used for both the internal protocol purposes and as part of the API
+    exposed to developers.  However, while convenient for internal data interchange, using the same BatchRequest class
+    as arguments to the externally-exported DataContext.get_batch(), DataContext.get_batch_list(), and
+    DataContext.get_validator() API calls for obtaining batches and/or validators was insufficiently expressive to
+    fulfill the needs of both. In the user-accessible API, BatchRequest, must enforce that all members of the triple,
+    consisting of data_source_name, data_connector_name, and data_asset_name, are not NULL.  Whereas for the internal
+    protocol, BatchRequest is used as a flexible bag of attributes, in which any fields are allowed to be NULL.  Hence,
+    now, BatchRequestBase is dedicated for the use as the bag oof attributes for the internal protocol use, whereby NULL
+    values are allowed as per the internal needs.  The BatchRequest class extends BatchRequestBase and adds to it strong
+    validation (described above plus additional attribute validation) so as to formally validate user specified fields.
     """
 
     def __init__(
@@ -257,7 +270,7 @@ class BatchRequestBase(DictDot):
 
 class BatchRequest(BatchRequestBase):
     """
-    This class contains all attributes of a batch_request.
+    This class contains all attributes of a batch_request.  See the comments in BatchRequestBase for design specifics.
     """
 
     def __init__(

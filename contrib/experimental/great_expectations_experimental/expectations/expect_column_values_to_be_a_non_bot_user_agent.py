@@ -32,7 +32,6 @@ from great_expectations.validator.validator import Validator
 # Need to install external dependency package of user_agents
 
 
-
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit {some doc}.
