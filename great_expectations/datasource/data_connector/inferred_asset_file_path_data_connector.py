@@ -2,7 +2,7 @@ import copy
 import logging
 from typing import List, Optional
 
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.datasource.data_connector import FilePathDataConnector
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -108,8 +108,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         # This will fetch ALL batch_definitions in the cache
         batch_definition_list: List[
             BatchDefinition
-        ] = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
+        ] = self._get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequestBase(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
             )

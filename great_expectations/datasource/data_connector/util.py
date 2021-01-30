@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionDefinitionSubset,
@@ -41,20 +41,26 @@ DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 def batch_definition_matches_batch_request(
     batch_definition: BatchDefinition,
-    batch_request: BatchRequest,
+    batch_request: BatchRequestBase,
 ) -> bool:
     assert isinstance(batch_definition, BatchDefinition)
-    assert isinstance(batch_request, BatchRequest)
+    assert isinstance(batch_request, BatchRequestBase)
 
-    if batch_request.datasource_name:
-        if batch_request.datasource_name != batch_definition.datasource_name:
-            return False
-    if batch_request.data_connector_name:
-        if batch_request.data_connector_name != batch_definition.data_connector_name:
-            return False
-    if batch_request.data_asset_name:
-        if batch_request.data_asset_name != batch_definition.data_asset_name:
-            return False
+    if (
+        batch_request.datasource_name
+        and batch_request.datasource_name != batch_definition.datasource_name
+    ):
+        return False
+    if (
+        batch_request.data_connector_name
+        and batch_request.data_connector_name != batch_definition.data_connector_name
+    ):
+        return False
+    if (
+        batch_request.data_asset_name
+        and batch_request.data_asset_name != batch_definition.data_asset_name
+    ):
+        return False
 
     if batch_request.partition_request:
         partition_identifiers: Any = batch_request.partition_request.get(
