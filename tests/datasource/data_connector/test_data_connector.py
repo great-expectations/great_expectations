@@ -5,6 +5,7 @@ from ruamel.yaml import YAML
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
+    BatchRequestBase,
     PartitionDefinition,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -171,16 +172,16 @@ def test__batch_definition_matches_batch_request():
     )
 
     assert batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequest(datasource_name="A")
+        batch_definition=A, batch_request=BatchRequestBase(datasource_name="A")
     )
 
     assert not batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequest(datasource_name="B")
+        batch_definition=A, batch_request=BatchRequestBase(datasource_name="B")
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
+        batch_request=BatchRequestBase(
             datasource_name="A",
             data_connector_name="a",
         ),
@@ -188,7 +189,7 @@ def test__batch_definition_matches_batch_request():
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
+        batch_request=BatchRequestBase(
             datasource_name="A",
             data_connector_name="a",
             data_asset_name="aaa",
@@ -197,7 +198,7 @@ def test__batch_definition_matches_batch_request():
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
+        batch_request=BatchRequestBase(
             datasource_name="A",
             data_connector_name="a",
             data_asset_name="bbb",
@@ -206,7 +207,7 @@ def test__batch_definition_matches_batch_request():
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
+        batch_request=BatchRequestBase(
             datasource_name="A",
             data_connector_name="a",
             data_asset_name="aaa",
@@ -218,7 +219,7 @@ def test__batch_definition_matches_batch_request():
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
+        batch_request=BatchRequestBase(
             partition_request={
                 "partition_identifiers": {"id": "A"},
             }

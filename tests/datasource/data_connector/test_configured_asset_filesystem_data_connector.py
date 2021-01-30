@@ -9,6 +9,7 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
+    BatchRequestBase,
     PartitionDefinition,
     PartitionRequest,
 )
@@ -254,9 +255,19 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         my_data_connector.get_batch_definition_list_from_batch_request()
 
     # with unnamed data_asset_name
-    unsorted_batch_definition_list = (
+    with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name=None,
+            )
+        )
+
+    # with unnamed data_asset_name
+    unsorted_batch_definition_list = (
+        my_data_connector._get_batch_definition_list_from_batch_request(
+            BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name=None,
@@ -1148,6 +1159,7 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="alpha",
                 )
@@ -1160,6 +1172,7 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="beta",
                 )
@@ -1172,6 +1185,7 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="gamma",
                 )
