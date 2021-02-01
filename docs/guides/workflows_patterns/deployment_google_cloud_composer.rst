@@ -86,7 +86,7 @@ Note: These steps are basically following the :ref:`Deploying Great Expectations
           validations_store_prefix = "dags/validations",
           data_docs_prefix = "dags/data_docs"
       )
-  
+  If you don't specify a prefix, the stores will be created in the base directory of your bucket.
 
 4. Create a DAG with Validations
 
