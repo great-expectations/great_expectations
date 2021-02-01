@@ -46,6 +46,15 @@ class ExpectColumnToExist(TableExpectation):
 
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": []
+    }
+
     metric_dependencies = ("table.columns",)
     success_keys = (
         "column",

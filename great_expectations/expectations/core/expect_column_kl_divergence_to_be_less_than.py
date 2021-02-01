@@ -159,6 +159,15 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
             """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": []
+    }
+
     success_keys = (
         "partition_object",
         "threshold",
