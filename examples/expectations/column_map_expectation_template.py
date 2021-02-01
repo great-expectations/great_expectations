@@ -30,7 +30,7 @@ from great_expectations.validator.validator import Validator
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit 
+# To learn about the relationship between Metrics and Expectations, please visit
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
@@ -107,7 +107,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see 
+    # For more info on Renderers, see
     # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
