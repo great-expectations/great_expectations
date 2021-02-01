@@ -949,7 +949,8 @@ class Expectation(metaclass=MetaExpectation):
             return rendered_result.__str__()
 
         else:
-            print(type(rendered_result))
+            pass
+            # print(type(rendered_result))
 
     def _get_renderer_dict(
         self,
