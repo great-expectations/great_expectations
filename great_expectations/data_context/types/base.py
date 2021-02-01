@@ -522,7 +522,9 @@ class DatasourceConfig(DictDot):
         credentials=None,
         introspection=None,
         tables=None,
+        boto3_options=None,
         reader_method=None,
+        reader_options=None,
         limit=None,
         **kwargs,
     ):
@@ -563,8 +565,12 @@ class DatasourceConfig(DictDot):
             self.introspection = introspection
         if tables is not None:
             self.tables = tables
+        if boto3_options is not None:
+            self.boto3_options = boto3_options
         if reader_method is not None:
             self.reader_method = reader_method
+        if reader_options is not None:
+            self.reader_options = reader_options
         if limit is not None:
             self.limit = limit
         for k, v in kwargs.items():
@@ -607,6 +613,14 @@ class DatasourceConfigSchema(Schema):
     credentials = fields.Raw(required=False, allow_none=True)
     introspection = fields.Dict(required=False, allow_none=True)
     tables = fields.Dict(required=False, allow_none=True)
+    boto3_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    reader_method = fields.String(required=False, allow_none=True)
+    reader_options = fields.Dict(
+        keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
+    )
+    limit = fields.Integer(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
