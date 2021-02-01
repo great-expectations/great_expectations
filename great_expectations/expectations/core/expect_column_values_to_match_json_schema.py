@@ -70,7 +70,7 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
-        "requirements": []
+        "requirements": [],
     }
 
     map_metric = "column_values.match_json_schema"

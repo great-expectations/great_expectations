@@ -71,7 +71,7 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
         "package": "great_expectations",
         "tags": ["core expectation", "column map expectation"],
         "contributors": ["@great_expectations"],
-        "requirements": []
+        "requirements": [],
     }
 
     map_metric = "column_values.dateutil_parsable"
