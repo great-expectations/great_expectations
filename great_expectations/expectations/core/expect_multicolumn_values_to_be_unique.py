@@ -10,6 +10,16 @@ from great_expectations.render.util import (
 
 
 class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
+
     metric_dependencies = tuple()
     success_keys = (
         "column_list",

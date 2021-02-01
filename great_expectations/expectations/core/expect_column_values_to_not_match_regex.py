@@ -84,6 +84,16 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
 
     """
 
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
+
     map_metric = "column_values.not_match_regex"
     success_keys = (
         "regex",
