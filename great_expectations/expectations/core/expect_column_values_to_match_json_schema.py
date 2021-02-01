@@ -64,6 +64,15 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         The `JSON-schema docs <http://json-schema.org/>`_.
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": []
+    }
+
     map_metric = "column_values.match_json_schema"
     success_keys = (
         "json_schema",

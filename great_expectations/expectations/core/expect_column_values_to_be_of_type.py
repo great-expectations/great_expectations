@@ -133,6 +133,15 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": []
+    }
+
     map_metric = "column_values.of_type"
     success_keys = (
         "type_",

@@ -43,8 +43,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """
     Expect a column to contain values from a specified type list.
 
-    expect_column_values_to_be_in_type_list is a :func:`column_aggregate_expectation \
-    <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>` for typed-column backends,
+    expect_column_values_to_be_in_type_list is a \
+    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
+    .column_map_expectation>` for typed-column backends,
     and also for PandasDataset where the column dtype provides an unambiguous constraints (any dtype except
     'object'). For PandasDataset columns with dtype of 'object' expect_column_values_to_be_of_type is a
     :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` and will
@@ -90,6 +91,15 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         :func:`expect_column_values_to_be_of_type \
         <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_of_type>`
     """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": []
+    }
 
     map_metric = "column_values.in_type_list"
 

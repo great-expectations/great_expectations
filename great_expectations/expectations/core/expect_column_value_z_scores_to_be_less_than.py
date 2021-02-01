@@ -12,11 +12,9 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
 
             expect_column_values_to_be_of_type is a :func:`column_map_expectation \
             <great_expectations.execution_engine.execution_engine.MetaExecutionEngine.column_map_expectation>` for
-            typed-column
-            backends,
-            and also for PandasExecutionEngine where the column dtype and provided type_ are unambiguous constraints (any
-            dtype
-            except 'object' or dtype of 'object' with type_ specified as 'object').
+            typed-column backends,
+            and also for PandasExecutionEngine where the column dtype and provided type_ are unambiguous constraints
+            (any dtype except 'object' or dtype of 'object' with type_ specified as 'object').
 
             Parameters:
                 column (str): \
@@ -57,6 +55,15 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
                 Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
                 :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": []
+    }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     map_metric = "column_values.z_score.under_threshold"
