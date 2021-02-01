@@ -1,5 +1,8 @@
 import json
 
+import geopandas
+from shapely.geometry import Point
+
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import (
@@ -30,21 +33,30 @@ from great_expectations.validator.validator import Validator
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit 
-# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
+# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
+class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
-    # for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.equal_three"
+    # Please see {some doc} for information on how to choose an id string for your Metric.
+    condition_metric_name = "column_values.point_within_geo_region"
+    condition_value_keys = ("country_iso_a3",)
+    world = geopandas.read_file(geopandas.datasets.get_path("naturalearth_lowres"))
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, country_iso_a3, **kwargs):
+        # Fetches polygon points from Geopandas library for the iso code
+        country_shapes = cls.world[["geometry", "iso_a3"]]
+        country_shapes = country_shapes[country_shapes["iso_a3"] == country_iso_a3]
+        country_shapes.reset_index(drop=True, inplace=True)
+        if country_shapes.empty:
+            raise Exception("This ISO country code is not supported.")
+        country_polygon = country_shapes["geometry"][0]
 
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
+        points = geopandas.GeoSeries(column.apply(Point))
+        return points.within(country_polygon)
+
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -59,56 +71,95 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
+    """This expectation will check a (longitude, latitude) tuple to see if it falls within a country input by the
+    user. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
+    that are in the Geopandas world database. Importantly, countries are defined by their iso_a3 country code, not their
+    full name."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # examples = [{
-    #     "data": {
-    #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-    #     },
-    #     "tests": [
-    #         {
-    #             "title": "positive_test_with_mostly",
-    #             "exact_match_out": False,
-    #             "include_in_gallery": True,
-    #             "in": {"column": "mostly_threes", "mostly": 0.6},
-    #             "out": {
-    #                 "success": True,
-    #                 "unexpected_index_list": [6, 7],
-    #                 "unexpected_list": [2, -1],
-    #             },
-    #         }
-    #     ],
-    # }]
+    examples = [
+        {
+            "data": {
+                "mostly_points_within_geo_region_PER": [
+                    (-77.0428, -12.0464),
+                    (-72.545128, -13.163068),
+                    (-75.01515, -9.18997),
+                    (-3.435973, 55.378051),
+                    None,
+                ],
+                "mostly_points_within_geo_region_GBR": [
+                    (-77.0428, -12.0464),
+                    (-72.545128, -13.163068),
+                    (2.2426, 53.4808),
+                    (-3.435973, 55.378051),
+                    None,
+                ],
+            },
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_points_within_geo_region_PER",
+                        "country_iso_a3": "PER",
+                        "mostly": 0.5,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": [(-3.435973, 55.378051)],
+                    },
+                },
+                {
+                    "title": "negative_test_with_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_points_within_geo_region_GBR",
+                        "country_iso_a3": "PER",
+                        "mostly": 0.9,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [2, 3],
+                        "unexpected_list": [(2.2426, 53.4808), (-3.435973, 55.378051)],
+                    },
+                },
+            ],
+        }
+    ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
+        "tags": ["experimental"],  # Tags for this Expectation in the gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
+            "@DXcarlos",
+            "@Rxmeez",
+            "@ryanlindeborg",  # Don't forget to add your github handle here!
         ],
         "package": "experimental_expectations",
+        "requirements": ["geopandas"],
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.equal_three"
+    map_metric = "column_values.point_within_geo_region"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
-    # for more information about domain and success keys, and other arguments to Expectations
-    success_keys = ("mostly",)
+    # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
+    success_keys = (
+        "country_iso_a3",
+        "mostly",
+    )
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see 
-    # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
+    # For more info on Renderers, see {some doc}
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
 
@@ -196,5 +247,5 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    diagnostics_report = ExpectColumnValuesPointWithinGeoRegion().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))

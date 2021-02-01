@@ -30,21 +30,27 @@ from great_expectations.validator.validator import Validator
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit 
-# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
+# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
+class ColumnValuesAreAscii(ColumnMapMetricProvider):
+    """
+    Determines whether column values consist only of ascii characters. If value consists of any non-ascii character
+    then that value will not pass.
+    """
 
     # This is the id string that will be used to reference your metric.
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
-    # for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.equal_three"
+    # Please see {some doc} for information on how to choose an id string for your Metric.
+    condition_metric_name = "column_values.are_ascii"
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, **kwargs):
+        def check_if_ascii(x):
+            return str(x).isascii()
 
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
+        column_ascii_check = column.apply(check_if_ascii)
+        return column_ascii_check
+
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -59,56 +65,139 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
+    """Expect the set of column values to be ASCII characters
+
+           expect_column_values_to_not_contain_character is a \
+           :func:`column_map_expectation
+   <great_expectations.execution_engine.MetaExecutionEngine.column_map_expectation>`.
+
+           Args:
+               column (str): \
+                   The provided column name
+
+           Other Parameters:
+               result_format (str or None): \
+                   Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+                   For more detail, see :ref:`result_format <result_format>`.
+               include_config (boolean): \
+                   If True, then include the expectation config as part of the result object. \
+                   For more detail, see :ref:`include_config`.
+               catch_exceptions (boolean or None): \
+                   If True, then catch exceptions and include them as part of the result object. \
+                   For more detail, see :ref:`catch_exceptions`.
+               meta (dict or None): \
+                   A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+                   modification. For more detail, see :ref:`meta`.
+
+           Returns:
+               An ExpectationSuiteValidationResult
+
+               Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+               :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+           """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # examples = [{
-    #     "data": {
-    #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-    #     },
-    #     "tests": [
-    #         {
-    #             "title": "positive_test_with_mostly",
-    #             "exact_match_out": False,
-    #             "include_in_gallery": True,
-    #             "in": {"column": "mostly_threes", "mostly": 0.6},
-    #             "out": {
-    #                 "success": True,
-    #                 "unexpected_index_list": [6, 7],
-    #                 "unexpected_list": [2, -1],
-    #             },
-    #         }
-    #     ],
-    # }]
+    examples = [
+        {
+            "data": {
+                "mostly_ascii": [1, 12.34, "a;lskdjfji", "””", "#$%^&*(", None, None],
+                "mostly_numbers": [42, 404, 858, 8675309, 62, 48, 17],
+                "mostly_characters": [
+                    "Lantsberger",
+                    "Gil Pasternak",
+                    "Vincent",
+                    "J@sse",
+                    "R!ck R00l",
+                    "A_",
+                    "B+",
+                ],
+                "not_ascii": [
+                    "ဟယ်လို",
+                    " שלום",
+                    "नमस्ते",
+                    "رحبا",
+                    "ନମସ୍କାର",
+                    "สวัสดี",
+                    "ಹಲೋ ",
+                ],
+            },
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly_ascii",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_ascii", "mostly": 0.6},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": ["””"],
+                    },
+                },
+                {
+                    "title": "positive_test_with_mostly_numbers",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_numbers", "mostly": 1.0},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+                {
+                    "title": "positive_test_with_mostly_ascii",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_characters", "mostly": 1.0},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
+                {
+                    "title": "negative_test_with_non_ascii",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "not_ascii", "mostly": 1.0},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [0, 1, 2, 3, 4, 5, 6],
+                    },
+                },
+            ],
+        }
+    ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
+            "experimental",
+            "hackathon-20200123",
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
+            "@jsteinberg4",
+            "@vraimondi04",
+            "@talagluck",
         ],
         "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.equal_three"
+    map_metric = "column_values.are_ascii"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
-    # for more information about domain and success keys, and other arguments to Expectations
+    # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
     success_keys = ("mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see 
-    # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
+    # For more info on Renderers, see {some doc}
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
 
@@ -196,5 +285,5 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    diagnostics_report = ExpectColumnValuesToBeAscii().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))

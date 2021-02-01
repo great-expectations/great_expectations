@@ -30,21 +30,32 @@ from great_expectations.validator.validator import Validator
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit 
-# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
+# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
+class ColumnValuesDecimalPlacesEquals(ColumnMapMetricProvider):
+    """
+    Computes number of decimal places of values in column through string conversion. In the case of an integer, the
+    value automatically passes.
+    """
 
     # This is the id string that will be used to reference your metric.
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
-    # for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.equal_three"
+    # Please see {some doc} for information on how to choose an id string for your Metric.
+    condition_metric_name = "column_values.decimal_places_equal"
+    condition_value_keys = ("decimal_places",)
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, decimal_places, **kwargs):
+        def decimal_func(x):
+            try:
+                if x == int(x):
+                    return decimal_places
+            except:
+                pass
+            return len(str(x).split(".")[1])
 
+        column_decimal_places = column.apply(decimal_func)
+        return column_decimal_places == decimal_places
 
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -59,56 +70,80 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
+    """
+    This expectation tests if all the values in a column has the same number of decimal places as the
+    inputted number of decimal places. In the case where the decimal places are all 0s (an integer),
+    the value automatically passes. Currently have not figured out how to preserve 0s in decimal to string conversion.
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # examples = [{
-    #     "data": {
-    #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-    #     },
-    #     "tests": [
-    #         {
-    #             "title": "positive_test_with_mostly",
-    #             "exact_match_out": False,
-    #             "include_in_gallery": True,
-    #             "in": {"column": "mostly_threes", "mostly": 0.6},
-    #             "out": {
-    #                 "success": True,
-    #                 "unexpected_index_list": [6, 7],
-    #                 "unexpected_list": [2, -1],
-    #             },
-    #         }
-    #     ],
-    # }]
+    examples = [
+        {
+            "data": {
+                "a": [2.15, 17.57, 34.21, 1.00],
+                "b": [1.17, 4.3, 6.433, 2.14],
+                "c": [1, 4.00, 6.43, 2.14],
+            },
+            "schemas": {},
+            "tests": [
+                {
+                    "title": "positive_test",
+                    "exact_match_out": False,
+                    "in": {"column": "a", "decimal_places": 2},
+                    "out": {"success": True},
+                },
+                {
+                    "title": "negative_test",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "b", "decimal_places": 2},
+                    "out": {"success": False},
+                },
+                {
+                    "title": "positive_test_whole_numbers",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "c", "decimal_places": 2},
+                    "out": {"success": True},
+                },
+            ],
+        },
+    ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
+        "tags": [
+            "experimental",
+            "precision",
+            "formatting",
+            "floating_point",
+            "hackathon-20200123",
         ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
+        "contributors": [
+            "@samsonq",
+            "@spbail",
+            "@Lord-of-Bugs",
+            "@BladderBoy",
+            "@Rim921",
         ],
         "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.equal_three"
+    map_metric = "column_values.decimal_places_equal"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
-    # for more information about domain and success keys, and other arguments to Expectations
-    success_keys = ("mostly",)
+    # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
+    success_keys = ("decimal_places",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see 
-    # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
+    # For more info on Renderers, see {some doc}
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
 
@@ -196,5 +231,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    diagnostics_report = (
+        ExpectColumnValuesNumberOfDecimalPlacesToEqual().run_diagnostics()
+    )
     print(json.dumps(diagnostics_report, indent=2))

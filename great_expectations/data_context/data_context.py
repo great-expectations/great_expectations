@@ -2470,8 +2470,6 @@ class BaseDataContext:
             )
         total_data_assets = len(available_data_asset_name_list)
 
-        data_asset_names_to_profiled = None
-
         if isinstance(data_assets, list) and len(data_assets) > 0:
             not_found_data_assets = [
                 name

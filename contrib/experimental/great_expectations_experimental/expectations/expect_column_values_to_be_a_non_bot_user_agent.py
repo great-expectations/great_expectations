@@ -1,5 +1,7 @@
 import json
 
+from user_agents import parse
+
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import (
@@ -27,24 +29,24 @@ from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validator import Validator
 
+# Need to install external dependency package of user_agents
+
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit 
-# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
+# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
+class ColumnValuesEqualNonBotUserAgent(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
-    # for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.equal_three"
+    # Please see {some doc} for information on how to choose an id string for your Metric.
+    condition_metric_name = "column_values.equal_non_bot_user_agent"
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, **kwargs):
+        return column.apply(lambda x: not parse(x).is_bot)
 
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -59,56 +61,84 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+
+
+class ExpectColumnValuesToBeANonBotUserAgent(ColumnMapExpectation):
+    """
+    Expect useragents to be non bots
+    requirements: user_agents
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # examples = [{
-    #     "data": {
-    #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-    #     },
-    #     "tests": [
-    #         {
-    #             "title": "positive_test_with_mostly",
-    #             "exact_match_out": False,
-    #             "include_in_gallery": True,
-    #             "in": {"column": "mostly_threes", "mostly": 0.6},
-    #             "out": {
-    #                 "success": True,
-    #                 "unexpected_index_list": [6, 7],
-    #                 "unexpected_list": [2, -1],
-    #             },
-    #         }
-    #     ],
-    # }]
+    examples = [
+        {
+            "data": {
+                "user_agents": [
+                    "Mozilla/5.0 (Linux; Android 7.0; SM-G892A Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/60.0.3112.107 Mobile Safari/537.36",
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/69.0.3497.105 Mobile/15E148 Safari/605.1",
+                    "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 6P Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36",
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B179 Safari/7534.48.3",
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1",
+                    "Mozilla/5.0 (iPhone9,3; U; CPU iPhone OS 10_0_1 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/14A403 Safari/602.1",
+                    "Mozilla/5.0 (Linux; Android 5.0.2; LG-V410/V41020c Build/LRX22G) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/34.0.1847.118 Safari/537.36",
+                    "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36",
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
+                    "Mozilla/5.0 (CrKey armv7l 1.5.16041) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.0 Safari/537.36"
+                    "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+                ]
+            },
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "user_agents", "mostly": 0.9},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [9],
+                        "unexpected_list": [
+                            "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+                        ],
+                    },
+                },
+                {
+                    "title": "negative_test_with_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "user_agents", "mostly": 1.0},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [9],
+                        "unexpected_list": [
+                            "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.96 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+                        ],
+                    },
+                },
+            ],
+        }
+    ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
-        ],
+        "tags": ["experimental"],  # Tags for this Expectation in the gallery
+        "contributors": ["@ktshannon"],
         "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.equal_three"
+    map_metric = "column_values.equal_non_bot_user_agent"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
-    # for more information about domain and success keys, and other arguments to Expectations
+    # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
     success_keys = ("mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see 
-    # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
+    # For more info on Renderers, see {some doc}
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
 
@@ -196,5 +226,5 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    diagnostics_report = ExpectColumnValuesToBeANonBotUserAgent().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
