@@ -102,14 +102,12 @@ def test_partition_request_non_recognized_param(
 
     # Test 2: Unrecognized custom_filter is not a function
     with pytest.raises(ge_exceptions.PartitionQueryError):
-        sorted_batch_definition_list = (
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                BatchRequest(
-                    datasource_name="test_environment",
-                    data_connector_name="general_filesystem_data_connector",
-                    data_asset_name="TestFiles",
-                    partition_request={"custom_filter_function": "I_wont_work_either"},
-                )
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={"custom_filter_function": "I_wont_work_either"},
             )
         )
 

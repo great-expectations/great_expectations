@@ -2293,7 +2293,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     pattern: (.*)\\.csv
                     group_names:
                         - data_asset_name
-                    
+
             my_special_data_connector:
                 class_name: ConfiguredAssetFilesystemDataConnector
                 base_directory: {data_path}
@@ -2311,7 +2311,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                             - name
                             - timestamp
                             - size
-            
+
             my_other_data_connector:
                 class_name: ConfiguredAssetFilesystemDataConnector
                 base_directory: {data_path}
@@ -2323,7 +2323,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                         - name
                 assets:
                     users: {{}}
-                    
+
             my_runtime_data_connector:
                 module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
