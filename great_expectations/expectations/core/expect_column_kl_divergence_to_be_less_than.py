@@ -163,7 +163,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
     library_metadata = {
         "maturity": "production",
         "package": "great_expectations",
-        "tags": ["core expectation", "table expectation"],
+        "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
         "requirements": []
     }
