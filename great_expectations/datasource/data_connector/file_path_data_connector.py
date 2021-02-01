@@ -1,8 +1,12 @@
 import logging
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Optional, cast
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchRequest,
+    BatchRequestBase,
+)
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.partition_query import (
     PartitionQuery,
@@ -79,8 +83,8 @@ class FilePathDataConnector(DataConnector):
         pattern: str = regex_config["pattern"]
         group_names: List[str] = regex_config["group_names"]
 
-        batch_definition_list = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
+        batch_definition_list = self._get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequestBase(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,
@@ -113,7 +117,33 @@ class FilePathDataConnector(DataConnector):
             - if data_connector has sorters configured, then sort the batch_definition list before returning.
 
         Args:
-            batch_request (BatchRequest): BatchRequest to process
+            batch_request (BatchRequest): BatchRequest (containing previously validated attributes) to process
+
+        Returns:
+            A list of BatchDefinition objects that match BatchRequest
+
+        """
+        batch_request = BatchRequest(
+            **batch_request.get_json_dict()
+        )  # Make sure that attributes are valid.
+        batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
+        return self._get_batch_definition_list_from_batch_request(
+            batch_request=batch_request_base
+        )
+
+    def _get_batch_definition_list_from_batch_request(
+        self,
+        batch_request: BatchRequestBase,
+    ) -> List[BatchDefinition]:
+        """
+        Retrieve batch_definitions that match batch_request.
+
+        First retrieves all batch_definitions that match batch_request
+            - if batch_request also has a partition_query, then select batch_definitions that match partition_query.
+            - if data_connector has sorters configured, then sort the batch_definition list before returning.
+
+        Args:
+            batch_request (BatchRequestBase): BatchRequestBase (BatchRequest without attribute validation) to process
 
         Returns:
             A list of BatchDefinition objects that match BatchRequest
@@ -227,8 +257,8 @@ partition definition {batch_definition.partition_definition} from batch definiti
         )
         return {"path": path}
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
-        super()._validate_batch_request(batch_request)
+    def _validate_batch_request(self, batch_request: BatchRequestBase):
+        super()._validate_batch_request(batch_request=batch_request)
         self._validate_sorters_configuration(
             data_asset_name=batch_request.data_asset_name
         )
