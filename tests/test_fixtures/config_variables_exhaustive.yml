@@ -48,5 +48,3 @@ cps: checkpoint_store
 cpu: CheckpointStore
 cpv: TupleFilesystemStoreBackend
 cpw: checkpoints/
-
-

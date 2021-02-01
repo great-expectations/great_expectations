@@ -31,7 +31,7 @@ except ImportError:
 
 class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
     """Expect column entries to be strings that match a given regular expression.
-    
+
     Valid matches can be found \
     anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
     "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
