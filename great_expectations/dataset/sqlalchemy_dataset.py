@@ -395,7 +395,6 @@ class MetaSqlAlchemyDataset(Dataset):
 
         return count_query
 
-
     def _get_count_query_generic_sqlalchemy(
         self,
         expected_condition: BinaryExpression,
@@ -1796,9 +1795,9 @@ WHERE
             self.engine.execute(stmt)
             dup_query = (
                 sa.select([sa.column(column)])
-                    .select_from(sa.text(table_name))
-                    .group_by(sa.column(column))
-                    .having(sa.func.count(sa.column(column)) > 1)
+                .select_from(sa.text(table_name))
+                .group_by(sa.column(column))
+                .having(sa.func.count(sa.column(column)) > 1)
             )
         return sa.column(column).notin_(dup_query)
 
