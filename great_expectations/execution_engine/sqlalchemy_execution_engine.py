@@ -197,6 +197,9 @@ class SqlAlchemyBatchData:
         self._schema_name = schema_name
         self._use_quoted_name = use_quoted_name
 
+        if self._engine.dialect.name.lower() == "mysql":
+            create_temp_table = False
+
         if sum(bool(x) for x in [table_name, query, selectable is not None]) != 1:
             raise ValueError(
                 "Exactly one of table_name, query, or selectable must be specified"

@@ -395,6 +395,7 @@ class MetaSqlAlchemyDataset(Dataset):
 
         return count_query
 
+
     def _get_count_query_generic_sqlalchemy(
         self,
         expected_condition: BinaryExpression,
@@ -503,7 +504,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # retrieve the schema from the Connection object i.e. self.engine
                 conn_object = self.engine
                 temp_table_schema_name = conn_object.engine.url.query.get("schema")
-
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         # Get the dialect **for purposes of identifying types**
@@ -1783,17 +1783,23 @@ WHERE
             .group_by(sa.column(column))
             .having(sa.func.count(sa.column(column)) > 1)
         )
-
         # Will - 20210126
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
-        # more than once in the same query. So instead of passing dup_query as-is, the query is executed, and
-        # the notin_() calculation is done against the resulting list instead.
+        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created,
+        # and the query is performed against it
         if self.sql_engine_dialect.name.lower() == "mysql":
-            rows = self.engine.execute(dup_query).fetchall()
-            dup_query = []
-            for row in rows:
-                row_as_dict = dict(row)
-                dup_query.append(row_as_dict[column])
+            table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+            create_query = sa.select([sa.column(column)]).select_from(self._table)
+            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=create_query
+            )
+            self.engine.execute(stmt)
+            dup_query = (
+                sa.select([sa.column(column)])
+                    .select_from(sa.text(table_name))
+                    .group_by(sa.column(column))
+                    .having(sa.func.count(sa.column(column)) > 1)
+            )
         return sa.column(column).notin_(dup_query)
 
     def _get_dialect_regex_expression(self, column, regex, positive=True):
