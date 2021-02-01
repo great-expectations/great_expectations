@@ -16,7 +16,7 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         "package": "great_expectations",
         "tags": ["core expectation", "multi-column expectation"],
         "contributors": ["@great_expectations"],
-        "requirements": []
+        "requirements": [],
     }
 
     metric_dependencies = tuple()

@@ -68,7 +68,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "package": "great_expectations",
         "tags": ["core expectation", "multi-column expectation"],
         "contributors": ["@great_expectations"],
-        "requirements": []
+        "requirements": [],
     }
 
     map_metric = ("column_pair_values.in_set",)

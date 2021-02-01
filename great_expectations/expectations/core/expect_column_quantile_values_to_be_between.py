@@ -122,7 +122,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
-        "requirements": []
+        "requirements": [],
     }
 
     metric_dependencies = ("column.quantile_values",)

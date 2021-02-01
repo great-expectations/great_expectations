@@ -165,7 +165,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
         "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
-        "requirements": []
+        "requirements": [],
     }
 
     success_keys = (

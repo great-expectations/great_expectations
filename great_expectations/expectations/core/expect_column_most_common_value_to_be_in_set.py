@@ -75,7 +75,7 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
         "package": "great_expectations",
         "tags": ["core expectation", "column aggregate expectation"],
         "contributors": ["@great_expectations"],
-        "requirements": []
+        "requirements": [],
     }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\

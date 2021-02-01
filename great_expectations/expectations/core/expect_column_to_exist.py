@@ -52,7 +52,7 @@ class ExpectColumnToExist(TableExpectation):
         "package": "great_expectations",
         "tags": ["core expectation", "table expectation"],
         "contributors": ["@great_expectations"],
-        "requirements": []
+        "requirements": [],
     }
 
     metric_dependencies = ("table.columns",)
