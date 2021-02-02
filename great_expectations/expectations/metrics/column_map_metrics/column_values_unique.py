@@ -56,6 +56,22 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
             .group_by(column)
             .having(sa.func.count(column) > 1)
         )
+
+        dialect = kwargs.get("_dialect", None)
+        sql_engine = kwargs.get("_sqlalchemy_engine", None)
+        if dialect == "mysql":
+            table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+            create_query = sa.select([sa.column(column)]).select_from(_table)
+            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=create_query
+            )
+            sql_engine.engine.execute(stmt)
+            dup_query = (
+                sa.select([sa.column(column)])
+                .select_from(sa.text(table_name))
+                .group_by(sa.column(column))
+                .having(sa.func.count(sa.column(column)) > 1)
+            )
         return column.notin_(dup_query)
 
     @column_condition_partial(
