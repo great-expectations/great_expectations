@@ -46,39 +46,74 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
 
     You can have more fine-grained control over where your stores are located by passing the ``stores`` parameter to DataContextConfig as in the following example.
 
-    .. code-block:: python
-        :linenos:
+    .. content-tabs::
 
-        data_context_config = DataContextConfig(
-            datasources={<set_your_datasources_here>},
-            stores={
-                "insert_your_custom_expectations_store_name_here": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "/dbfs/FileStore/path_to_your_expectations_store/",
+        .. tab-container:: tab0
+            :title: Docs for Legacy Checkpoints (<=0.13.7)
+
+            .. code-block:: python
+                :linenos:
+
+                data_context_config = DataContextConfig(
+                    datasources={<set_your_datasources_here>},
+                    stores={
+                        "insert_your_custom_expectations_store_name_here": {
+                            "class_name": "ExpectationsStore",
+                            "store_backend": {
+                                "class_name": "TupleFilesystemStoreBackend",
+                                "base_directory": "/dbfs/FileStore/path_to_your_expectations_store/",
+                            },
+                        },
+                        "insert_your_custom_validations_store_name_here": {
+                            "class_name": "ValidationsStore",
+                            "store_backend": {
+                                "class_name": "TupleFilesystemStoreBackend",
+                                "base_directory": "/dbfs/FileStore/path_to_your_validations_store/",
+                            },
+                        },
+                        "insert_your_custom_evaluation_parameter_store_name_here": {
+                            "class_name": "EvaluationParameterStore"
+                        },
                     },
-                },
-                "insert_your_custom_validations_store_name_here": {
-                    "class_name": "ValidationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "/dbfs/FileStore/path_to_your_validations_store/",
+                    store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="/dbfs/FileStore/"),
+                    )
+
+        .. tab-container:: tab1
+            :title: Docs for Class-Based Checkpoints (>=0.13.8)
+
+            .. code-block:: python
+                :linenos:
+
+                data_context_config = DataContextConfig(
+                    datasources={<set_your_datasources_here>},
+                    stores={
+                        "insert_your_custom_expectations_store_name_here": {
+                            "class_name": "ExpectationsStore",
+                            "store_backend": {
+                                "class_name": "TupleFilesystemStoreBackend",
+                                "base_directory": "/dbfs/FileStore/path_to_your_expectations_store/",
+                            },
+                        },
+                        "insert_your_custom_validations_store_name_here": {
+                            "class_name": "ValidationsStore",
+                            "store_backend": {
+                                "class_name": "TupleFilesystemStoreBackend",
+                                "base_directory": "/dbfs/FileStore/path_to_your_validations_store/",
+                            },
+                        },
+                        "insert_your_custom_evaluation_parameter_store_name_here": {
+                            "class_name": "EvaluationParameterStore"
+                        },
+                        "insert_your_custom_checkpoint_store_name_here": {
+                            "class_name": "CheckpointStore",
+                            "store_backend": {
+                                "class_name": "TupleFilesystemStoreBackend",
+                                "base_directory": "/dbfs/FileStore/path_to_your_checkpoints_store/",
+                            },
+                        },
                     },
-                },
-                "insert_your_custom_evaluation_parameter_store_name_here": {
-                    "class_name": "EvaluationParameterStore"
-                },
-                "insert_your_custom_checkpoint_store_name_here": {
-                    "class_name": "CheckpointStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "/dbfs/FileStore/path_to_your_checkpoints_store/",
-                    },
-                },
-            },
-            store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="/dbfs/FileStore/"),
-            )
+                    store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="/dbfs/FileStore/"),
+                    )
 
 3. **Test your configuration.**
 
