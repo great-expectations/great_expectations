@@ -1,7 +1,8 @@
 import pytest
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_asset import DataAsset, FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
 
@@ -135,11 +136,14 @@ def test_valid_expectation_types(dataset, pandas_dataset):
         "expect_column_values_to_not_be_null",
         "expect_column_values_to_not_match_regex",
         "expect_column_values_to_not_match_regex_list",
+        "expect_compound_columns_to_be_unique",
         "expect_multicolumn_sum_to_equal",
         "expect_multicolumn_values_to_be_unique",
+        "expect_select_column_values_to_be_unique_within_record",
         "expect_table_column_count_to_be_between",
         "expect_table_column_count_to_equal",
         "expect_table_columns_to_match_ordered_list",
+        "expect_table_columns_to_match_set",
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
     ]

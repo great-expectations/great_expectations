@@ -95,7 +95,7 @@ Steps
 Additional Notes
 ----------------
 
-- For best practices, we highly recommend that you store Expectations in a version-control system like Git. The JSON format of Expectations will allow for informative diff-statements and effective tracking of modifications. In the example below, 2 changes have been made to ``npi_expectations``.  The Expectation ```expect_table_column_count_to_equal`` was been changed from ``330`` to ``333`` to ``331``.
+- For best practices, we highly recommend that you store Expectations in a version-control system like Git. The JSON format of Expectations will allow for informative diff-statements and effective tracking of modifications. In the example below, 2 changes have been made to ``npi_expectations``.  The Expectation ```expect_table_column_count_to_equal`` was changed from ``330`` to ``333`` to ``331``.
 
 
     .. code-block:: bash

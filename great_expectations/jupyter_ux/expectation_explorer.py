@@ -111,6 +111,7 @@ class ExpectationExplorer:
                 "max_value",
             ],
             "expect_table_columns_to_match_ordered_list": ["column_list"],
+            "expect_table_columns_to_match_set": ["column_set", "exact_match"],
             ####
             "expect_column_pair_values_to_be_equal": ["ignore_row_if"],
             "expect_column_pair_values_A_to_be_greater_than_B": [
@@ -122,7 +123,8 @@ class ExpectationExplorer:
                 "value_pairs_set",
                 "ignore_row_if",
             ],
-            "expect_multicolumn_values_to_be_unique": ["ignore_row_if"],
+            "expect_compound_columns_to_be_unique": ["ignore_row_if"],
+            "expect_select_column_values_to_be_unique_within_record": ["ignore_row_if"],
             "expect_column_values_to_be_of_type": ["type_", "mostly"],
             "expect_column_values_to_be_in_type_list": ["type_list", "mostly"],
             "expect_column_kl_divergence_to_be_less_than": [

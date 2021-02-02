@@ -9,14 +9,20 @@ from great_expectations.render.renderer.suite_scaffold_notebook_renderer import 
 )
 
 
-def test_render_snapshot_test(titanic_data_context):
-    batch_kwargs = titanic_data_context.build_batch_kwargs(
-        "mydatasource", "mygenerator", "Titanic"
+def test_render_snapshot_test(titanic_data_context_stats_enabled_no_config_store):
+    batch_kwargs = (
+        titanic_data_context_stats_enabled_no_config_store.build_batch_kwargs(
+            "mydatasource", "mygenerator", "Titanic"
+        )
     )
     csv_path = batch_kwargs["path"]
     suite_name = "my_suite"
-    suite = titanic_data_context.create_expectation_suite(suite_name)
-    renderer = SuiteScaffoldNotebookRenderer(titanic_data_context, suite, batch_kwargs)
+    suite = titanic_data_context_stats_enabled_no_config_store.create_expectation_suite(
+        suite_name
+    )
+    renderer = SuiteScaffoldNotebookRenderer(
+        titanic_data_context_stats_enabled_no_config_store, suite, batch_kwargs
+    )
     obs = renderer.render(None)
     assert isinstance(obs, nbformat.NotebookNode)
     ## NOTE!!! - When updating this snapshot be sure to include the dynamic
@@ -109,11 +115,12 @@ contains a list of possible expectations.""",
     del obs["nbformat_minor"]
 
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
 
-def test_notebook_execution_with_pandas_backend(titanic_data_context):
+def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_docs):
     """
     This tests that the notebook is written to disk and executes without error.
 
@@ -127,7 +134,10 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    context = titanic_data_context
+    # Since we'll run the notebook, we use a context with no data docs to avoid
+    # the renderer's default behavior of building and opening docs, which is not
+    # part of this test.
+    context = titanic_data_context_no_data_docs
     root_dir = context.root_directory
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "my_suite"
@@ -160,7 +170,9 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     assert not os.path.isfile(notebook_path)
 
     # Create notebook
-    renderer = SuiteScaffoldNotebookRenderer(titanic_data_context, suite, batch_kwargs)
+    renderer = SuiteScaffoldNotebookRenderer(
+        titanic_data_context_no_data_docs, suite, batch_kwargs
+    )
     renderer.render_to_disk(notebook_path)
     assert os.path.isfile(notebook_path)
 

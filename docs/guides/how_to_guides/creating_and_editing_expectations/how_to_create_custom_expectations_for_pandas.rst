@@ -118,7 +118,7 @@ Steps
         my_pd_df = pd.read_csv("./data/Titanic.csv")
         my_df = MyCustomPandasDataset(my_pd_df)
 
-    Note: We're using the ``read_csv`` method to fetch data, instead of the more typical ``DataContext.get_batch``. This is for convenience: it allows us to handle the full developmentment loop for a custom Expectation within a notebook with a minimum of configuration.
+    Note: We're using the ``read_csv`` method to fetch data, instead of the more typical ``DataContext.get_batch``. This is for convenience: it allows us to handle the full development loop for a custom Expectation within a notebook with a minimum of configuration.
     
     In a moment, we'll demonstrate how to configure a Datasource to use ``MyCustomPandasDataset`` when calling ``get_batch``.
 

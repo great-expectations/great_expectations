@@ -5,7 +5,10 @@ from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.utils import (
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    assert_no_logging_messages_or_tracebacks,
+)
 
 
 def test_validation_operator_run_interactive_golden_path(
@@ -37,19 +40,23 @@ def test_validation_operator_run_interactive_golden_path(
         catch_exceptions=False,
     )
     stdout = result.stdout
-    assert "Validation Failed" in stdout
+    assert "Validation failed" in stdout
     assert result.exit_code == 1
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_validation_operator_run_interactive_pass_non_existing_expectation_suite(
-    caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
+    caplog,
+    data_context_parameterized_expectation_suite_no_checkpoint_store,
+    filesystem_csv_2,
 ):
     """
     Interactive mode: pass an non-existing suite name and an existing validation
     operator name, select an existing file.
     """
-    not_so_empty_data_context = data_context_parameterized_expectation_suite
+    not_so_empty_data_context = (
+        data_context_parameterized_expectation_suite_no_checkpoint_store
+    )
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -77,13 +84,17 @@ def test_validation_operator_run_interactive_pass_non_existing_expectation_suite
 
 
 def test_validation_operator_run_interactive_pass_non_existing_operator_name(
-    caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
+    caplog,
+    data_context_parameterized_expectation_suite_no_checkpoint_store,
+    filesystem_csv_2,
 ):
     """
     Interactive mode: pass an non-existing suite name and an existing validation
     operator name, select an existing file.
     """
-    not_so_empty_data_context = data_context_parameterized_expectation_suite
+    not_so_empty_data_context = (
+        data_context_parameterized_expectation_suite_no_checkpoint_store
+    )
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -156,19 +167,23 @@ def test_validation_operator_run_noninteractive_golden_path(
         catch_exceptions=False,
     )
     stdout = result.stdout
-    assert "Validation Failed" in stdout
+    assert "Validation failed" in stdout
     assert result.exit_code == 1
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 def test_validation_operator_run_noninteractive_validation_config_file_does_not_exist(
-    caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
+    caplog,
+    data_context_parameterized_expectation_suite_no_checkpoint_store,
+    filesystem_csv_2,
 ):
     """
     Non-nteractive mode. Use the --validation_config_file argument to pass the path
     to a validation config file that does not exist.
     """
-    not_so_empty_data_context = data_context_parameterized_expectation_suite
+    not_so_empty_data_context = (
+        data_context_parameterized_expectation_suite_no_checkpoint_store
+    )
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -196,14 +211,18 @@ def test_validation_operator_run_noninteractive_validation_config_file_does_not_
 
 
 def test_validation_operator_run_noninteractive_validation_config_file_does_is_misconfigured(
-    caplog, data_context_parameterized_expectation_suite, filesystem_csv_2
+    caplog,
+    data_context_parameterized_expectation_suite_no_checkpoint_store,
+    filesystem_csv_2,
 ):
     """
     Non-nteractive mode. Use the --validation_config_file argument to pass the path
     to a validation config file that is misconfigured - one of the batches does not
     have expectation_suite_names attribute
     """
-    not_so_empty_data_context = data_context_parameterized_expectation_suite
+    not_so_empty_data_context = (
+        data_context_parameterized_expectation_suite_no_checkpoint_store
+    )
     root_dir = not_so_empty_data_context.root_directory
     os.mkdir(os.path.join(root_dir, "uncommitted"))
 
@@ -273,13 +292,17 @@ def test_validation_operator_list_with_zero_validation_operators(
     assert result.exit_code == 0
     assert "No Validation Operators found" in result.output
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 def test_validation_operator_list_with_one_validation_operator(
-    caplog, empty_data_context
+    caplog, filesystem_csv_data_context_with_validation_operators
 ):
-    project_dir = empty_data_context.root_directory
+    project_dir = filesystem_csv_data_context_with_validation_operators.root_directory
     runner = CliRunner(mix_stderr=False)
 
     expected_result = """[33mHeads up! This feature is Experimental. It may change. Please give us your feedback![0m[0m
@@ -298,13 +321,17 @@ def test_validation_operator_list_with_one_validation_operator(
     # _capture_ansi_codes_to_file(result)
     assert result.output.strip() == expected_result
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 def test_validation_operator_list_with_multiple_validation_operators(
-    caplog, empty_data_context
+    caplog, filesystem_csv_data_context_with_validation_operators
 ):
-    project_dir = empty_data_context.root_directory
+    project_dir = filesystem_csv_data_context_with_validation_operators.root_directory
     runner = CliRunner(mix_stderr=False)
     context = DataContext(project_dir)
     context.add_validation_operator(
@@ -352,7 +379,11 @@ def test_validation_operator_list_with_multiple_validation_operators(
     # _capture_ansi_codes_to_file(result)
     assert result.output.strip() == expected_result
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 def _capture_ansi_codes_to_file(result):

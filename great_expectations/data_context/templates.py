@@ -1,7 +1,36 @@
 import os
 import uuid
 
-PROJECT_HELP_COMMENT = """
+from ruamel.yaml import YAML
+from ruamel.yaml.compat import StringIO
+
+from great_expectations.data_context.types.base import DataContextConfigDefaults
+
+
+class YAMLToString(YAML):
+    """
+    Get yaml dump as a string: https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
+    """
+
+    def dump(self, data, stream=None, **kw):
+        inefficient = False
+        if not stream:
+            inefficient = True
+            stream = StringIO()
+        YAML.dump(self, data, stream, **kw)
+        if inefficient:
+            return stream.getvalue()
+
+
+yaml = YAMLToString()
+yaml.indent(mapping=2, sequence=4, offset=4)
+yaml.default_flow_style = False
+
+# TODO: maybe bring params in via f-strings from base.ConfigDefaults or whatever
+#  I end up using for the base level configs. Specifically PROJECT_OPTIONAL_CONFIG_COMMENT
+#  and PROJECT_HELP_COMMENT
+
+PROJECT_HELP_COMMENT = f"""
 # Welcome to Great Expectations! Always know what to expect from your data.
 #
 # Here you can define datasources, batch kwargs generators, integrations and
@@ -12,12 +41,12 @@ PROJECT_HELP_COMMENT = """
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
-config_version: 2
+config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
 
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource_reference.html
-datasources: {}
+datasources: {{}}
 """
 
 CONFIG_VARIABLES_INTRO = """
@@ -36,7 +65,7 @@ CONFIG_VARIABLES_INTRO = """
 # nested value such as a dictionary, or an environment variable (i.e. ${ENV_VAR})
 #
 #
-# https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html
+# https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html
 
 """
 
@@ -44,43 +73,42 @@ CONFIG_VARIABLES_TEMPLATE = (
     CONFIG_VARIABLES_INTRO + "instance_id: " + str(uuid.uuid4()) + os.linesep
 )
 
+# Create yaml strings
+# NOTE: .replace("\n", "\n  ")[:-2] is a hack to indent all lines two spaces,
+# and remove the inserted final two spaces.
+EXPECTATIONS_STORE_STRING = yaml.dump(
+    {
+        "expectations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "expectations_store"
+        ]
+    }
+).replace("\n", "\n  ")[:-2]
+VALIDATIONS_STORE_STRING = yaml.dump(
+    {
+        "validations_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "validations_store"
+        ]
+    }
+).replace("\n", "\n  ")[:-2]
+EVALUATION_PARAMETER_STORE_STRING = yaml.dump(
+    DataContextConfigDefaults.DEFAULT_STORES.value["evaluation_parameter_store"]
+)
+CHECKPOINT_STORE_STRING = yaml.dump(
+    {
+        "checkpoint_store": DataContextConfigDefaults.DEFAULT_STORES.value[
+            "checkpoint_store"
+        ]
+    }
+).replace("\n", "\n  ")[:-2]
+
 PROJECT_OPTIONAL_CONFIG_COMMENT = (
     CONFIG_VARIABLES_INTRO
-    + """
-config_variables_file_path: uncommitted/config_variables.yml
+    + f"""
+config_variables_file_path: {DataContextConfigDefaults.DEFAULT_CONFIG_VARIABLES_FILEPATH.value}
 
 # The plugins_directory will be added to your python path for custom modules
 # used to override and extend Great Expectations.
-plugins_directory: plugins/
-
-# Validation Operators are customizable workflows that bundle the validation of
-# one or more expectation suites and subsequent actions. The example below
-# stores validations and send a slack notification. To read more about
-# customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html
-validation_operators:
-  action_list_operator:
-    # To learn how to configure sending Slack notifications during evaluation
-    # (and other customizations), read: https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/validation_operators/index.html#great_expectations.validation_operators.ActionListValidationOperator
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-      # - name: send_slack_notification_on_validation_result
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     # put the actual webhook URL in the uncommitted/config_variables.yml file
-      #     slack_webhook: ${validation_notification_slack_webhook}
-      #     notify_on: all # possible values: "all", "failure", "success"
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
+plugins_directory: {DataContextConfigDefaults.DEFAULT_PLUGINS_DIRECTORY.value}
 
 stores:
 # Stores are configurable places to store things like Expectations, Validations
@@ -89,27 +117,18 @@ stores:
 #
 # Three stores are required: expectations, validations, and
 # evaluation_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, validation_operators, etc.
-  expectations_store:
-    class_name: ExpectationsStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: expectations/
-
-  validations_store:
-    class_name: ValidationsStore
-    store_backend:
-      class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/validations/
-
+# stores can be configured for uses such as data_docs, etc.
+  {EXPECTATIONS_STORE_STRING}
+  {VALIDATIONS_STORE_STRING}
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
     # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
-    class_name: EvaluationParameterStore
-
+    {EVALUATION_PARAMETER_STORE_STRING}
+  {CHECKPOINT_STORE_STRING}
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
+checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These

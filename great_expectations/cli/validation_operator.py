@@ -10,7 +10,7 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_dict
-from great_expectations.core import RunIdentifier
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 json_parse_exception = json.decoder.JSONDecodeError
@@ -319,13 +319,13 @@ Let us help you specify the batch of data your want the validation operator to v
             sys.exit(1)
 
         if not results["success"]:
-            cli_message("Validation Failed!")
+            cli_message("Validation failed!")
             send_usage_message(
                 data_context=context, event="cli.validation_operator.run", success=True
             )
             sys.exit(1)
         else:
-            cli_message("Validation Succeeded!")
+            cli_message("Validation succeeded!")
             send_usage_message(
                 data_context=context, event="cli.validation_operator.run", success=True
             )

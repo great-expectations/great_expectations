@@ -10,11 +10,13 @@ from freezegun import freeze_time
 import great_expectations as ge
 from great_expectations.core import (
     ExpectationConfiguration,
-    ExpectationSuite,
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
+)
+from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
 )
 from great_expectations.data_asset.data_asset import (
     ValidationStatistics,
@@ -980,6 +982,11 @@ def test_stats_mixed_expectations():
     actual = _calc_validation_statistics(expectation_results)
     expected = ValidationStatistics(2, 1, 1, 50.0, False)
     assert expected == actual
+
+
+def test_generate_library_json_from_registered_expectations():
+    library_json = ge.util.generate_library_json_from_registered_expectations()
+    assert len(library_json) > 50
 
 
 class TestIO(unittest.TestCase):

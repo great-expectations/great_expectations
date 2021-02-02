@@ -14,7 +14,11 @@ from great_expectations.data_context.util import (
     load_class,
 )
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    verify_dynamic_loading_support,
+)
 
 from ...core.data_context_key import DataContextKey
 from .tuple_store_backend import TupleStoreBackend
@@ -129,6 +133,7 @@ class HtmlSiteStore:
                 "module_name": module_name,
                 "filepath_prefix": filepath_prefix,
                 "filepath_suffix": filepath_suffix,
+                "suppress_store_backend_id": True,
             },
         )
         if not expectation_suite_identifier_obj:
@@ -146,6 +151,7 @@ class HtmlSiteStore:
                 "module_name": module_name,
                 "filepath_prefix": filepath_prefix,
                 "filepath_suffix": filepath_suffix,
+                "suppress_store_backend_id": True,
             },
         )
         if not validation_result_idendifier_obj:
@@ -162,6 +168,7 @@ class HtmlSiteStore:
             config_defaults={
                 "module_name": module_name,
                 "filepath_template": filepath_template,
+                "suppress_store_backend_id": True,
             },
         )
         if not index_page_obj:
@@ -178,6 +185,7 @@ class HtmlSiteStore:
             config_defaults={
                 "module_name": module_name,
                 "filepath_template": filepath_template,
+                "suppress_store_backend_id": True,
             },
         )
         if not static_assets_obj:
@@ -203,6 +211,16 @@ class HtmlSiteStore:
         # It's a pretty reasonable way for HtmlSiteStore to do its job---you just ahve to remember that it
         # can't necessarily set and list_keys like most other Stores.
         self.keys = set()
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True,
+            **{
+                "class_name": self.__class__.__name__,
+            }
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def get(self, key):
         self._validate_key(key)
@@ -244,13 +262,33 @@ class HtmlSiteStore:
                 "Cannot get URL for resource {:s}".format(str(resource_identifier))
             )
 
-        if only_if_exists:
-            return (
-                store_backend.get_url_for_key(key)
-                if store_backend.has_key(key)
-                else None
-            )
-        return store_backend.get_url_for_key(key)
+        # <WILL> : this is a hack for Taylor. Change this back. 20200924
+        # if only_if_exists:
+        #    return (
+        #        store_backend.get_url_for_key(key)
+        #        if store_backend.has_key(key)
+        #        else None
+        #    )
+        # return store_backend.get_url_for_key(key)
+
+        if store_backend.base_public_path:
+            if only_if_exists:
+                return (
+                    store_backend.get_public_url_for_key(key)
+                    if store_backend.has_key(key)
+                    else None
+                )
+            else:
+                return store_backend.get_public_url_for_key(key)
+        else:
+            if only_if_exists:
+                return (
+                    store_backend.get_url_for_key(key)
+                    if store_backend.has_key(key)
+                    else None
+                )
+            else:
+                return store_backend.get_url_for_key(key)
 
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
@@ -361,3 +399,7 @@ class HtmlSiteStore:
                         content_encoding=content_encoding,
                         content_type=content_type,
                     )
+
+    @property
+    def config(self) -> dict:
+        return self._config

@@ -113,7 +113,7 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
         class_name: SiteBuilder
         store_backend:
           class_name: TupleGCSStoreBackend
-          project: my_org_project  # UPDATE the project name with your own
+          project: my_org_project # UPDATE the project name with your own
           bucket: my_org_data_docs  # UPDATE the bucket name here to match the bucket you configured above
         site_index_builder:
           class_name: DefaultSiteIndexBuilder
@@ -139,6 +139,26 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 8. **Test that everything was configured properly by launching your App Engine app.**
 
   Issue the following CLI command: ``gcloud app browse``. If successful, the gcloud CLI will provide the URL to your app and launch it in a new browser window. The page displayed should be the index page of your Data Docs site.
+
+
+**Additional notes**
+
+- If you wish to host a Data Docs site through a private DNS, you can configure a ``base_public_path`` for the Data Docs Store.  The following example will configure a GCS site with the ``base_public_path`` set to ``www.mydns.com``.  Data Docs will still be written to the configured location on GCS (for example ``https://storage.cloud.google.com/my_org_data_docs/index.html``), but you will be able to access the pages from your DNS (``http://www.mydns.com/index.html`` in our example).
+
+.. code-block:: yaml
+
+    data_docs_sites:
+      gs_site:  # this is a user-selected name - you may select your own
+        class_name: SiteBuilder
+        store_backend:
+          class_name: TupleGCSStoreBackend
+          project: my_org_project
+          bucket: my_org_data_docs
+          base_public_path: http://www.mydns.com
+        site_index_builder:
+          class_name: DefaultSiteIndexBuilder
+
+
 
 **Additional resources**
 

@@ -21,7 +21,7 @@ from great_expectations.cli.util import (
     cli_message_dict,
     verify_library_dependent_modules,
 )
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
 from great_expectations.datasource import (
@@ -39,9 +39,17 @@ from great_expectations.exceptions import (
     BatchKwargsError,
     DatasourceInitializationError,
 )
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator
 
 logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sqlalchemy = None
 
 
 class DatasourceTypes(enum.Enum):
@@ -184,6 +192,14 @@ def _build_datasource_intro_string(datasource_count):
     "If True, this will override --max_data_assets.",
 )
 @click.option(
+    "--assume-yes",
+    "--yes",
+    "-y",
+    is_flag=True,
+    default=False,
+    help="By default request confirmation unless you specify -y/--yes/--assume-yes flag to skip dialog",
+)
+@click.option(
     "--directory",
     "-d",
     default=None,
@@ -208,6 +224,7 @@ def datasource_profile(
     directory,
     view,
     additional_batch_kwargs,
+    assume_yes,
 ):
     """
     Profile a datasource (Experimental)
@@ -253,6 +270,7 @@ def datasource_profile(
                     profile_all_data_assets=profile_all_data_assets,
                     open_docs=view,
                     additional_batch_kwargs=additional_batch_kwargs,
+                    skip_prompt_flag=assume_yes,
                 )
                 send_usage_message(
                     data_context=context, event="cli.datasource.profile", success=True
@@ -266,6 +284,7 @@ def datasource_profile(
                 profile_all_data_assets=profile_all_data_assets,
                 open_docs=view,
                 additional_batch_kwargs=additional_batch_kwargs,
+                skip_prompt_flag=assume_yes,
             )
             send_usage_message(
                 data_context=context, event="cli.datasource.profile", success=True
@@ -1045,7 +1064,7 @@ Would you like to:
     2. enter the path of a data file
 """
     msg_prompt_file_path = """
-Enter the path (relative or absolute) of a data file
+Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
 """
 
     msg_prompt_enter_data_asset_name = "\nWhich data would you like to use?\n"
@@ -1133,13 +1152,16 @@ We could not determine the format of the file. What is it?
 
     path = None
     while True:
+        # do not use Click to check if the file exists - the get_batch
+        # logic will check this
         path = click.prompt(
             msg_prompt_file_path,
-            type=click.Path(exists=True, dir_okay=dir_okay),
+            type=click.Path(dir_okay=dir_okay),
             default=path,
         )
 
-        path = os.path.abspath(path)
+        if not path.startswith("gs:") and not path.startswith("s3"):
+            path = os.path.abspath(path)
 
         batch_kwargs = {"path": path, "datasource": datasource_name}
 
@@ -1181,7 +1203,6 @@ We could not determine the format of the file. What is it?
                     batch = datasource.get_batch(batch_kwargs=batch_kwargs)
                     break
         else:
-            # TODO: read the file and confirm with user that we read it correctly (headers, columns, etc.)
             try:
                 batch_kwargs["reader_method"] = reader_method
                 if isinstance(datasource, SparkDFDatasource) and reader_method == "csv":
@@ -1220,87 +1241,74 @@ We have saved your setup progress. When you are ready, run great_expectations in
     return (data_asset_name, batch_kwargs)
 
 
+def _get_default_schema(datasource):
+    inspector = sqlalchemy.inspect(datasource.engine)
+    return inspector.default_schema_name
+
+
 def _get_batch_kwargs_for_sqlalchemy_datasource(
     context, datasource_name, additional_batch_kwargs=None
 ):
-    msg_prompt_query = """
-Enter an SQL query
-"""
-
-    msg_prompt_enter_data_asset_name = (
-        "\nWhich table would you like to use? (Choose one)\n"
-    )
-
-    msg_prompt_enter_data_asset_name_suffix = (
-        "    Do not see the table in the list above? Just type the SQL query\n"
-    )
-
-    if additional_batch_kwargs is None:
-        additional_batch_kwargs = {}
-
     data_asset_name = None
-
+    sql_query = None
     datasource = context.get_datasource(datasource_name)
-
+    msg_prompt_how_to_connect_to_data = """
+You have selected a datasource that is a SQL database. How would you like to specify the data?
+1. Enter a table name and schema
+2. Enter a custom SQL query
+3. List all tables in the database (this may take a very long time)
+"""
+    default_schema = _get_default_schema(datasource)
     temp_generator = TableBatchKwargsGenerator(name="temp", datasource=datasource)
 
-    available_data_asset_names = temp_generator.get_available_data_asset_names()[
-        "names"
-    ]
-    available_data_asset_names_str = [
-        "{} ({})".format(name[0], name[1]) for name in available_data_asset_names
-    ]
-
-    data_asset_names_to_display = available_data_asset_names_str[:5]
-    choices = "\n".join(
-        [
-            "    {}. {}".format(i, name)
-            for i, name in enumerate(data_asset_names_to_display, 1)
-        ]
-    )
-    prompt = (
-        msg_prompt_enter_data_asset_name
-        + choices
-        + os.linesep
-        + msg_prompt_enter_data_asset_name_suffix.format(
-            len(data_asset_names_to_display)
+    while data_asset_name is None:
+        single_or_multiple_data_asset_selection = click.prompt(
+            msg_prompt_how_to_connect_to_data,
+            type=click.Choice(["1", "2", "3"]),
+            show_choices=False,
         )
-    )
+        if single_or_multiple_data_asset_selection == "1":  # name the table and schema
+            schema_name = click.prompt(
+                "Please provide the schema name of the table (this is optional)",
+                default=default_schema,
+            )
+            table_name = click.prompt(
+                "Please provide the table name (this is required)"
+            )
+            data_asset_name = f"{schema_name}.{table_name}"
 
-    # Some backends require named temporary table parameters. We specifically elicit those and add them
-    # where appropriate.
-    temp_table_kwargs = dict()
-    datasource = context.get_datasource(datasource_name)
-    if datasource.engine.dialect.name.lower() == "snowflake":
-        # snowflake requires special handling
-        table_name = click.prompt(
-            "In Snowflake, GE may need to create a transient table "
-            "to use for validation."
-            + os.linesep
-            + "Please enter a name to use for that table: ",
-            default="ge_tmp_" + str(uuid.uuid4())[:8],
-        )
-        temp_table_kwargs = {
-            "snowflake_transient_table": table_name,
-        }
-    elif datasource.engine.dialect.name.lower() == "bigquery":
-        # bigquery also requires special handling
-        table_name = click.prompt(
-            "GE will create a table to use for "
-            "validation." + os.linesep + "Please enter a name for this table: ",
-            default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
-        )
-        temp_table_kwargs = {
-            "bigquery_temp_table": table_name,
-        }
+        elif single_or_multiple_data_asset_selection == "2":  # SQL query
+            sql_query = click.prompt("Please provide the SQL query")
+            data_asset_name = "custom_sql_query"
 
-    while True:
-        try:
-            query = None
+        elif single_or_multiple_data_asset_selection == "3":  # list it all
+            msg_prompt_warning = fr"""Warning: If you have a large number of tables in your datasource, this may take a very long time. \m
+                    Would you like to continue?"""
+            confirmation = click.prompt(
+                msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
+            )
+            if confirmation == "y":
+                # avoid this call until necessary
+                available_data_asset_names = (
+                    temp_generator.get_available_data_asset_names()["names"]
+                )
+                available_data_asset_names_str = [
+                    "{} ({})".format(name[0], name[1])
+                    for name in available_data_asset_names
+                ]
 
-            if len(available_data_asset_names) > 0:
+                data_asset_names_to_display = available_data_asset_names_str
+                choices = "\n".join(
+                    [
+                        "    {}. {}".format(i, name)
+                        for i, name in enumerate(data_asset_names_to_display, 1)
+                    ]
+                )
+                msg_prompt_enter_data_asset_name = (
+                    "\nWhich table would you like to use? (Choose one)\n"
+                )
+                prompt = msg_prompt_enter_data_asset_name + choices + os.linesep
                 selection = click.prompt(prompt, show_default=False)
-
                 selection = selection.strip()
                 try:
                     data_asset_index = int(selection) - 1
@@ -1308,35 +1316,52 @@ Enter an SQL query
                         data_asset_name = [
                             name[0] for name in available_data_asset_names
                         ][data_asset_index]
+
                     except IndexError:
+                        print(
+                            f"You have specified {selection}, which is an incorrect index"
+                        )
                         pass
                 except ValueError:
-                    query = selection
+                    print(
+                        f"You have specified {selection}, which is an incorrect value"
+                    )
+                    pass
 
-            else:
-                query = click.prompt(msg_prompt_query, show_default=False)
+    if additional_batch_kwargs is None:
+        additional_batch_kwargs = {}
 
-            if query is None:
-                batch_kwargs = temp_generator.build_batch_kwargs(
-                    data_asset_name, **additional_batch_kwargs
-                )
-                batch_kwargs.update(temp_table_kwargs)
-            else:
-                batch_kwargs = {"query": query, "datasource": datasource_name}
-                batch_kwargs.update(temp_table_kwargs)
-                Validator(
-                    batch=datasource.get_batch(batch_kwargs),
-                    expectation_suite=ExpectationSuite("throwaway"),
-                ).get_dataset()
+    # Some backends require named temporary table parameters. We specifically elicit those and add them
+    # where appropriate.
+    temp_table_kwargs = dict()
+    datasource = context.get_datasource(datasource_name)
 
-            break
-        except ge_exceptions.GreatExpectationsError as error:
-            cli_message("""<red>ERROR: {}</red>""".format(str(error)))
-        except KeyError as error:
-            cli_message("""<red>ERROR: {}</red>""".format(str(error)))
+    if datasource.engine.dialect.name.lower() == "bigquery":
+        # bigquery also requires special handling
+        bigquery_temp_table = click.prompt(
+            "GE will create a table to use for "
+            "validation." + os.linesep + "Please enter a name for this table: ",
+            default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
+        )
+        temp_table_kwargs = {
+            "bigquery_temp_table": bigquery_temp_table,
+        }
+
+    # now building the actual batch_kwargs
+    if sql_query is None:
+        batch_kwargs = temp_generator.build_batch_kwargs(
+            data_asset_name, **additional_batch_kwargs
+        )
+        batch_kwargs.update(temp_table_kwargs)
+    else:
+        batch_kwargs = {"query": sql_query, "datasource": datasource_name}
+        batch_kwargs.update(temp_table_kwargs)
+        BridgeValidator(
+            batch=datasource.get_batch(batch_kwargs),
+            expectation_suite=ExpectationSuite("throwaway"),
+        ).get_dataset()
 
     batch_kwargs["data_asset_name"] = data_asset_name
-
     return data_asset_name, batch_kwargs
 
 
@@ -1402,6 +1427,14 @@ def _verify_pyspark_dependent_modules() -> bool:
     )
 
 
+def skip_prompt_message(skip_flag, prompt_message_text) -> bool:
+
+    if not skip_flag:
+        return click.confirm(prompt_message_text, default=True)
+
+    return skip_flag
+
+
 def profile_datasource(
     context,
     datasource_name,
@@ -1411,6 +1444,7 @@ def profile_datasource(
     max_data_assets=20,
     additional_batch_kwargs=None,
     open_docs=False,
+    skip_prompt_flag=False,
 ):
     """"Profile a named datasource using the specified context"""
     # Note we are explicitly not using a logger in all CLI output to have
@@ -1477,8 +1511,8 @@ Great Expectations is building Data Docs from the data you just profiled!"""
         if (
             data_assets
             or profile_all_data_assets
-            or click.confirm(
-                msg_confirm_ok_to_proceed.format(datasource_name), default=True
+            or skip_prompt_message(
+                skip_prompt_flag, msg_confirm_ok_to_proceed.format(datasource_name)
             )
         ):
             profiling_results = context.profile_datasource(
@@ -1577,7 +1611,7 @@ Great Expectations is building Data Docs from the data you just profiled!"""
                 break
 
     cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
-    build_docs(context, view=open_docs)
+    build_docs(context, view=open_docs, assume_yes=skip_prompt_flag)
     if open_docs:  # This is mostly to keep tests from spawning windows
         context.open_data_docs()
 

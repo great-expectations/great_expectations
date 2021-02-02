@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from dateutil.parser import parse
 
-from great_expectations.core import RunIdentifier
+from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
@@ -16,8 +16,9 @@ from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+from great_expectations.validator.validator import Validator
 
-from .util import send_slack_notification
+from ..core.run_identifier import RunIdentifier
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +118,7 @@ class ActionListValidationOperator(ValidationOperator):
               # put the actual webhook URL in the uncommitted/config_variables.yml file
               slack_webhook: ${validation_notification_slack_webhook}
               notify_on: all # possible values: "all", "failure", "success"
+              notify_with: optional list of DataDocs sites (ie local_site or gcs_site") to include in Slack notification. Will default to including all configured DataDocs sites.
               renderer:
                 module_name: great_expectations.render.renderer.slack_renderer
                 class_name: SlackRenderer
@@ -259,7 +261,7 @@ class ActionListValidationOperator(ValidationOperator):
             A batch of data
 
         """
-        if not isinstance(item, DataAsset):
+        if not isinstance(item, (DataAsset, Validator)):
             if not (
                 isinstance(item, tuple)
                 and len(item) == 2
@@ -311,11 +313,17 @@ class ActionListValidationOperator(ValidationOperator):
         for item in assets_to_validate:
             run_result_obj = {}
             batch = self._build_batch_from_item(item)
+
+            if isinstance(batch, Validator):
+                batch_identifier = batch.active_batch_id
+            else:
+                batch_identifier = batch.batch_id
+
             expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=batch._expectation_suite.expectation_suite_name
             )
             validation_result_id = ValidationResultIdentifier(
-                batch_identifier=batch.batch_id,
+                batch_identifier=batch_identifier,
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
             )
@@ -370,10 +378,15 @@ class ActionListValidationOperator(ValidationOperator):
                 "Processing validation action with name {}".format(action["name"])
             )
 
+            if isinstance(batch, Validator):
+                batch_identifier = batch.active_batch_id
+            else:
+                batch_identifier = batch.batch_id
+
             validation_result_id = ValidationResultIdentifier(
                 expectation_suite_identifier=expectation_suite_identifier,
                 run_id=run_id,
-                batch_identifier=batch.batch_id,
+                batch_identifier=batch_identifier,
             )
             try:
                 action_result = self.actions[action["name"]].run(
@@ -520,6 +533,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     "stop_on_first_error": ...,
                     "slack_webhook": ...,
                     "notify_on": ...,
+                    "notify_with":...,
                 },
             },
             "run_results": {
@@ -547,6 +561,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         stop_on_first_error=False,
         slack_webhook=None,
         notify_on="all",
+        notify_with=None,
         result_format={"result_format": "SUMMARY"},
     ):
         super().__init__(data_context, action_list, name)
@@ -564,6 +579,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         self.slack_webhook = slack_webhook
         self.notify_on = notify_on
+        self.notify_with = notify_with
         result_format = parse_result_format(result_format)
         assert result_format["result_format"] in [
             "BOOLEAN_ONLY",
@@ -587,6 +603,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     "stop_on_first_error": self.stop_on_first_error,
                     "slack_webhook": self.slack_webhook,
                     "notify_on": self.notify_on,
+                    "notify_with": self.notify_with,
                     "result_format": self.result_format,
                 },
             }

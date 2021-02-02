@@ -1,6 +1,7 @@
 import inspect
 import json
 import logging
+import warnings
 from datetime import datetime
 from functools import wraps
 from typing import List
@@ -11,7 +12,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -62,7 +63,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -177,7 +178,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -281,7 +282,7 @@ class MetaPandasDataset(Dataset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
 
             if result_format is None:
@@ -392,6 +393,12 @@ Notes:
     # We may want to expand or alter support for subclassing dataframes in the future:
     # See http://pandas.pydata.org/pandas-docs/stable/extending.html#extending-subclassing-pandas
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.discard_subset_failing_expectations = kwargs.get(
+            "discard_subset_failing_expectations", False
+        )
+
     @property
     def _constructor(self):
         return self.__class__
@@ -410,12 +417,6 @@ Notes:
                 self.discard_failing_expectations()
         super().__finalize__(other, method, **kwargs)
         return self
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.discard_subset_failing_expectations = kwargs.get(
-            "discard_subset_failing_expectations", False
-        )
 
     def _apply_row_condition(self, row_condition, condition_parser):
         if condition_parser not in ["python", "pandas"]:
@@ -492,11 +493,22 @@ Notes:
         return self[column].median()
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
-        if allow_relative_error is not False:
+        interpolation_options = ("linear", "lower", "higher", "midpoint", "nearest")
+
+        if not allow_relative_error:
+            allow_relative_error = "nearest"
+
+        if allow_relative_error not in interpolation_options:
             raise ValueError(
-                "PandasDataset does not support relative error in column quantiles."
+                f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'"
+                f"parameter of .quantile() (one of {interpolation_options})"
             )
-        return self[column].quantile(quantiles, interpolation="nearest").tolist()
+
+        return (
+            self[column]
+            .quantile(quantiles, interpolation=allow_relative_error)
+            .tolist()
+        )
 
     def get_column_stdev(self, column):
         return self[column].std()
@@ -556,13 +568,35 @@ Notes:
             n_bins = 10
 
         if series.dtype in ["int", "float"]:
+            if bins is not None:
+                bins = sorted(np.unique(bins))
+                if np.min(series) < bins[0]:
+                    bins = [np.min(series)] + bins
+                if np.max(series) > bins[-1]:
+                    bins = bins + [np.max(series)]
+
             if bins is None:
                 bins = np.histogram_bin_edges(series[series.notnull()], bins=n_bins)
-                # Make sure max of series is included in rightmost bin
-                bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
 
-            # Missings get digitized into bin = n_bins+1
-            return np.digitize(series, bins=bins)
+            # Make sure max of series is included in rightmost bin
+            bins[-1] = np.nextafter(bins[-1], bins[-1] + 1)
+
+            # Create labels for returned series
+            # Used in e.g. crosstab that is printed as observed value in data docs.
+            precision = int(np.log10(min(bins[1:] - bins[:-1]))) + 2
+            labels = [
+                f"[{round(lower, precision)}, {round(upper, precision)})"
+                for lower, upper in zip(bins[:-1], bins[1:])
+            ]
+            if any(np.isnan(series)):
+                # Missings get digitized into bin = n_bins+1
+                labels += ["(missing)"]
+
+            return pd.Categorical.from_codes(
+                codes=np.digitize(series, bins=bins) - 1,
+                categories=labels,
+                ordered=True,
+            )
 
         else:
             if bins is None:
@@ -576,7 +610,11 @@ Notes:
                 replace = dict()
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
-            return series.replace(to_replace=replace).fillna("(missing)")
+            return (
+                series.replace(to_replace=replace)
+                .fillna("(missing)")
+                .astype("category")
+            )
 
     ### Expectation methods ###
 
@@ -1827,15 +1865,43 @@ Notes:
 
         return pd.Series(results, temp_df.index)
 
-    @DocInherit
-    @MetaPandasDataset.multicolumn_map_expectation
     def expect_multicolumn_values_to_be_unique(
         self,
         column_list,
+        mostly=None,
         ignore_row_if="all_values_are_missing",
         result_format=None,
-        row_condition=None,
-        condition_parser=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        deprecation_warning = (
+            "expect_multicolumn_values_to_be_unique is being deprecated. Please use "
+            "expect_select_column_values_to_be_unique_within_record instead."
+        )
+        warnings.warn(
+            deprecation_warning,
+            DeprecationWarning,
+        )
+
+        return self.expect_select_column_values_to_be_unique_within_record(
+            column_list=column_list,
+            mostly=mostly,
+            ignore_row_if=ignore_row_if,
+            result_format=result_format,
+            include_config=include_config,
+            catch_exceptions=catch_exceptions,
+            meta=meta,
+        )
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_select_column_values_to_be_unique_within_record(
+        self,
+        column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
         include_config=True,
         catch_exceptions=None,
         meta=None,
@@ -1866,3 +1932,19 @@ Notes:
                 expected sum of columns
         """
         return column_list.sum(axis=1) == sum_total
+
+    @DocInherit
+    @MetaPandasDataset.multicolumn_map_expectation
+    def expect_compound_columns_to_be_unique(
+        self,
+        column_list,
+        mostly=None,
+        ignore_row_if="all_values_are_missing",
+        result_format=None,
+        include_config=True,
+        catch_exceptions=None,
+        meta=None,
+    ):
+        # Do not dropna here, since we have separately dealt with na in decorator
+        # Invert boolean so that duplicates are False and non-duplicates are True
+        return ~column_list.duplicated(keep=False)

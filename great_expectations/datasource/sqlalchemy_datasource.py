@@ -4,11 +4,10 @@ from pathlib import Path
 from string import Template
 from urllib.parse import urlparse
 
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import nested_update
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
-from great_expectations.datasource import Datasource
-from great_expectations.datasource.types import BatchMarkers
+from great_expectations.datasource import LegacyDatasource
 from great_expectations.exceptions import (
     DatasourceInitializationError,
     DatasourceKeyPairAuthBadPassphraseError,
@@ -21,6 +20,8 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy
     from sqlalchemy import create_engine
+    from sqlalchemy.sql.elements import quoted_name
+
 except ImportError:
     sqlalchemy = None
     create_engine = None
@@ -45,7 +46,7 @@ if sqlalchemy != None:
         )
 
 
-class SqlAlchemyDatasource(Datasource):
+class SqlAlchemyDatasource(LegacyDatasource):
     """
     A SqlAlchemyDatasource will provide data_assets converting batch_kwargs using the following rules:
         - if the batch_kwargs include a table key, the datasource will provide a dataset object connected to that table
@@ -242,12 +243,14 @@ class SqlAlchemyDatasource(Datasource):
             elif "connection_string" in kwargs:
                 connection_string = kwargs.pop("connection_string")
                 self.engine = create_engine(connection_string, **kwargs)
-                self.engine.connect()
+                connection = self.engine.connect()
+                connection.close()
             elif "url" in credentials:
                 url = credentials.pop("url")
                 self.drivername = urlparse(url).scheme
                 self.engine = create_engine(url, **kwargs)
-                self.engine.connect()
+                connection = self.engine.connect()
+                connection.close()
 
             # Otherwise, connect using remaining kwargs
             else:
@@ -258,7 +261,8 @@ class SqlAlchemyDatasource(Datasource):
                 ) = self._get_sqlalchemy_connection_options(**kwargs)
                 self.drivername = drivername
                 self.engine = create_engine(options, **create_engine_kwargs)
-                self.engine.connect()
+                connection = self.engine.connect()
+                connection.close()
 
             # since we switched to lazy loading of Datasources when we initialise a DataContext,
             # the dialect of SQLAlchemy Datasources cannot be obtained reliably when we send
@@ -372,7 +376,7 @@ class SqlAlchemyDatasource(Datasource):
         if "bigquery_temp_table" in batch_kwargs:
             query_support_table_name = batch_kwargs.get("bigquery_temp_table")
         elif "snowflake_transient_table" in batch_kwargs:
-            # Snowflake uses a transient table, so we expect a table_name to be provided
+            # Snowflake can use either a transient or temp table, so we allow a table_name to be provided
             query_support_table_name = batch_kwargs.get("snowflake_transient_table")
         else:
             query_support_table_name = None
@@ -397,15 +401,26 @@ class SqlAlchemyDatasource(Datasource):
             )
         elif "table" in batch_kwargs:
             table = batch_kwargs["table"]
+            if batch_kwargs.get("use_quoted_name"):
+                table = quoted_name(table, quote=True)
+
             limit = batch_kwargs.get("limit")
             offset = batch_kwargs.get("offset")
             if limit is not None or offset is not None:
+                # AWS Athena does not support offset
+                if (
+                    offset is not None
+                    and self.engine.dialect.name.lower() == "awsathena"
+                ):
+                    raise NotImplementedError("AWS Athena does not support OFFSET.")
                 logger.info(
                     "Generating query from table batch_kwargs based on limit and offset"
                 )
+
                 # In BigQuery the table name is already qualified with its schema name
                 if self.engine.dialect.name.lower() == "bigquery":
                     schema = None
+
                 else:
                     schema = batch_kwargs.get("schema")
                 raw_query = (

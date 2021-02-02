@@ -50,7 +50,7 @@ This will output the following:
 .. code-block:: bash
 
     Heads up! This feature is Experimental. It may change. Please give us your feedback!
-    Validation Failed!
+    Validation failed!
 
 **What just happened?**
 

@@ -4,17 +4,241 @@
 Changelog
 #########
 
+
 Develop
 -----------------
+* [DOCS] How to load a Pandas DataFrame as a Batch #2327
+* [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for #1691 to @mgorsk1!) #2371
 
+
+0.13.8
+-----------------
+* [FEATURE] New implementation of Checkpoints that uses dedicated CheckpointStore (based on the new ConfigurationStore mechanism) #2311, #2338
+* [BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract #2334
+* [BUGFIX] DataContext with multiple DataSources no longer scans all configurations #2250
+
+
+0.13.7
+-----------------
+* [BUGFIX] Fix Local variable 'temp_table_schema_name' might be referenced before assignment bug in sqlalchemy_dataset.py #2302
+* [MAINTENANCE] Ensure compatibility with new pip resolver v20.3+ #2256
+* [ENHANCEMENT] Improvements in the how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. #2296
+* [ENHANCEMENT] Improvements in the output of Expectations tests to make it more legible. #2296
+* [DOCS] Clarification of the instructions for using conda in the "Setting Up Your Dev Environment" doc. #2306
+
+
+0.13.6
+-----------------
+* [ENHANCEMENT] Skip checks when great_expectations package did not change #2287
+* [ENHANCEMENT] A how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. #2222
+* [BUGFIX] Fix Local variable 'query_schema' might be referenced before assignment bug in sqlalchemy_dataset.py #2286 (Thanks @alessandrolacorte!)
+* [BUGFIX] Use correct schema to fetch table and column metadata #2284 (Thanks @armaandhull!)
+* [BUGFIX] Updated sqlalchemy_dataset to convert numeric metrics to json_serializable up front, avoiding an issue where expectations on data immediately fail due to the conversion to/from json. #2207
+
+
+0.13.5
+-----------------
+* [FEATURE] Add MicrosoftTeamsNotificationAction (Thanks @Antoninj!)
+* [FEATURE] New ``contrib`` package #2264
+* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API #2224
+* [ENHANCEMENT] Speed up new suite creation flow when connecting to Databases. Issue #1670 (Thanks @armaandhull!)
+* [ENHANCEMENT] Serialize PySpark DataFrame by converting to dictionary #2237
+* [BUGFIX] Mask passwords in DataContext.list_datasources(). Issue #2184
+* [BUGFIX] Skip escaping substitution variables in escape_all_config_variables #2243. Issue #2196 (Thanks @
+varundunga!)
+* [BUGFIX] Pandas extension guessing #2239 (Thanks @sbrugman!)
+* [BUGFIX] Replace runtime batch_data DataFrame with string #2240
+* [BUGFIX] Update Notebook Render Tests to Reflect Updated Python Packages #2262
+* [DOCS] Updated the code of conduct to mention events #2278
+* [DOCS] Update the diagram for batch metadata #2161
+* [DOCS] Update metrics.rst #2257
+* [MAINTENANCE] Different versions of Pandas react differently to corrupt XLS files. #2230
+* [MAINTENANCE] remove the obsolete TODO comments #2229 (Thanks @beyondacm!)
+* [MAINTENANCE] Update run_id to airflow_run_id for clarity. #2233
+
+
+0.13.4
+-----------------
+* [FEATURE] Implement expect_column_values_to_not_match_regex_list in Spark (Thanks @mikaylaedwards!)
+* [ENHANCEMENT] Improve support for quantile calculations in Snowflake
+* [ENHANCEMENT] DataDocs show values of Evaluation Parameters #2165. Issue #2010
+* [ENHANCEMENT] Work on requirements.txt #2052 (Thanks @shapiroj18!)
+* [ENHANCEMENT] expect_table_row_count_to_equal_other_table #2133
+* [ENHANCEMENT] Improved support for quantile calculations in Snowflake #2176
+* [ENHANCEMENT] DataDocs show values of Evaluation Parameters #2165
+* [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169. Issue #2164
+* [BUGFIX] Fixed black conflict, upgraded black, made import optional #2183
+* [BUGFIX] Made improvements for the treatment of decimals for database backends for lossy conversion #2207
+* [BUGFIX] Pass manually_initialize_store_backend_id to database store backends to mirror functionality of other backends. Issue #2181
+* [BUGFIX] Make glob_directive more permissive in ConfiguredAssetFilesystemDataConnector #2197. Issue #2193
+* [DOCS] Added link to Youtube video on in-code contexts #2177
+* [DOCS] Docstrings for DataConnector and associated classes #2172
+* [DOCS] Custom expectations improvement #2179
+* [DOCS] Add a conda example to creating virtualenvs #2189
+* [DOCS] Fix Airflow logo URL #2198 (Thanks @floscha!)
+* [DOCS] Update explore_expectations_in_a_notebook.rst #2174
+* [DOCS] Change to DOCS that describe Evaluation Parameters #2209
+* [MAINTENANCE] Removed mentions of show_cta_footer and added deprecation notes in usage stats #2190. Issue #2120
+
+0.13.3
+-----------------
+* [ENHANCEMENT] Updated the BigQuery Integration to create a view instead of a table (thanks @alessandrolacorte!) #2082.
+* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
+* [ENHANCEMENT] Add support for connection_string and url in configuring DatabaseStoreBackend, bringing parity to other SQL-based objects. In the rare case of user code that instantiates a DatabaseStoreBackend without using the Great Expectations config architecture, users should ensure they are providing kwargs to init, because the init signature order has changed.
+* [ENHANCEMENT] Improved exception handling in the Slack notifications rendering logic
+* [ENHANCEMENT] Uniform configuration support for both 0.13 and 0.12 versions of the Datasource class
+* [ENHANCEMENT] A single `DataContext.get_batch()` method supports both 0.13 and 0.12 style call arguments
+* [ENHANCEMENT] Initializing DataContext in-code is now available in both 0.13 and 0.12 versions
+* [BUGFIX] Fixed a bug in the error printing logic in several exception handling blocks in the Data Docs rendering. This will make it easier for users to submit error messages in case of an error in rendering.
+* [DOCS] Miscellaneous doc improvements
+* [DOCS] Update cloud composer workflow to use GCSStoreBackendDefaults
+
+0.13.2
+-----------------
+* [ENHANCEMENT] Support avro format in Spark datasource (thanks @ryanaustincarlson!) #2122
+* [ENHANCEMENT] Made improvements to the backend for expect_column_quantile_values_to_be_between #2127
+* [ENHANCEMENT] Robust Representation in Configuration of Both Legacy and New Datasource
+* [ENHANCEMENT] Continuing 0.13 clean-up and improvements
+* [BUGFIX] Fix spark configuration not getting passed to the SparkSession builder (thanks @EricSteg!) #2124
+* [BUGFIX] Misc bugfixes and improvements to code & documentation for new in-code data context API #2118
+* [BUGFIX] When Introspecting a database, sql_data_connector will ignore view_names that are also system_tables
+* [BUGFIX] Made improvements for code & documentation for in-code data context
+* [BUGFIX] Fixed bug where TSQL mean on `int` columns returned incorrect result
+* [DOCS] Updated explanation for ConfiguredAssetDataConnector and InferredAssetDataConnector
+* [DOCS] General 0.13 docs improvements
+
+0.13.1
+-----------------
+* [ENHANCEMENT] Improved data docs performance by ~30x for large projects and ~4x for smaller projects by changing instantiation of Jinja environment #2100
+* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file #2058 (thanks @GTLangseth!)
+* [ENHANCEMENT] More detailed information in Datasource.self_check() diagnostic (concerning ExecutionEngine objects)
+* [ENHANCEMENT] Improve UI for in-code data contexts #2068
+* [ENHANCEMENT] Add a store_backend_id property to StoreBackend #2030, #2075
+* [ENHANCEMENT] Use an existing expectation_store.store_backend_id to initialize an in-code DataContext #2046, #2075
+* [BUGFIX] Corrected handling of boto3_options by PandasExecutionEngine
+* [BUGFIX] New Expectation via CLI / SQL Query no longer throws TypeError
+* [BUGFIX] Implement validator.default_expectations_arguments
+* [DOCS] Fix doc create and editing expectations #2105 (thanks @Lee-W!)
+* [DOCS] Updated documentation on 0.13 classes
+* [DOCS] Fixed a typo in the HOWTO guide for adding a self-managed Spark datasource
+* [DOCS] Updated documentation for new UI for in-code data contexts
+
+0.13.0
+-----------------
+* INTRODUCING THE NEW MODULAR EXPECTATIONS API (Experimental): this release introduces a new way to create expectation logic in its own class, making it much easier to author and share expectations. ``Expectation`` and ``MetricProvider`` classes now work together to validate data and consolidate logic for all backends by function. See the how-to guides in our documentation for more information on how to use the new API.
+* INTRODUCING THE NEW DATASOURCE API (Experimental): this release introduces a new way to connect to datasources providing much richer guarantees for discovering ("inferring") data assets and partitions. The new API replaces "BatchKwargs" and "BatchKwargsGenerators" with BatchDefinition and BatchSpec objects built from DataConnector classes. You can read about the new API in our docs.
+* The Core Concepts section of our documentation has been updated with descriptions of the classes and concepts used in the new API; we will continue to update that section and welcome questions and improvements.
+* BREAKING: Data Docs rendering is now handled in the new Modular Expectations, which means that any custom expectation rendering needs to be migrated to the new API to function in version 0.13.0.
+* BREAKING: **Renamed** Datasource to LegacyDatasource and introduced the new Datasource class. Because most installations rely on one PandasDatasource, SqlAlchemyDatasource, or SparkDFDatasource, most users will not be affected. However, if you have implemented highly customized Datasource class inheriting from the base class, you may need to update your inheritance.
+* BREAKING: The new Modular Expectations API will begin removing the ``parse_strings_as_datetimes`` and ``allow_cross_type_comparisons`` flags in expectations. Expectation Suites that use the flags will need to be updated to use the new Modular Expectations. In general, simply removing the flag will produce correct behavior; if you still want the exact same semantics, you should ensure your raw data already has typed datetime objects.
+* **NOTE:** Both the new Datasource API and the new Modular Expectations API are *experimental* and will change somewhat during the next several point releases. We are extremely excited for your feedback while we iterate rapidly, and continue to welcome new community contributions.
+
+
+0.12.10
+-----------------
+* [BUGFIX] Update requirements.txt for ruamel.yaml to >=0.16 - #2048 (thanks @mmetzger!)
+* [BUGFIX] Added option to return scalar instead of list from query store #2060
+* [BUGFIX] Add missing markdown_content_block_container #2063
+* [BUGFIX] Fixed a divided by zero error for checkpoints on empty expectation suites #2064
+* [BUGFIX] Updated sort to correctly return partial unexpected results when expect_column_values_to_be_of_type has more than one unexpected type #2074
+* [BUGFIX] Resolve Data Docs resource identifier issues to speed up UpdateDataDocs action #2078
+* [DOCS] Updated contribution changelog location #2051 (thanks @shapiroj18!)
+* [DOCS] Adding Airflow operator and Astrononomer deploy guides #2070
+* [DOCS] Missing image link to bigquery logo #2071 (thanks @nelsonauner!)
+
+0.12.9
+-----------------
+* [BUGFIX] Fixed the import of s3fs to use the optional import pattern - issue #2053
+* [DOCS] Updated the title styling and added a Discuss comment article for the OpsgenieAlertAction how-to guide
+
+0.12.8
+-----------------
+* [FEATURE] Add OpsgenieAlertAction #2012 (thanks @miike!)
+* [FEATURE] Add S3SubdirReaderBatchKwargsGenerator #2001 (thanks @noklam)
+* [ENHANCEMENT] Snowflake uses temp tables by default while still allowing transient tables
+* [ENHANCEMENT] Enabled use of lowercase table and column names in GE with the `use_quoted_name` key in batch_kwargs #2023
+* [BUGFIX] Basic suite builder profiler (suite scaffold) now skips excluded expectations #2037
+* [BUGFIX] Off-by-one error in linking to static images #2036 (thanks @NimaVaziri!)
+* [BUGFIX] Improve handling of pandas NA type issue #2029 PR #2039 (thanks @isichei!)
+* [DOCS] Update Virtual Environment Example #2027 (thanks @shapiroj18!)
+* [DOCS] Update implemented_expectations.rst (thanks @jdimatteo!)
+* [DOCS] Update how_to_configure_a_pandas_s3_datasource.rst #2042 (thanks @CarstenFrommhold!)
+
+0.12.7
+-----------------
+* [ENHANCEMENT] CLI supports s3a:// or gs:// paths for Pandas Datasources (issue #2006)
+* [ENHANCEMENT] Escape $ characters in configuration, support multiple substitutions (#2005 & #2015)
+* [ENHANCEMENT] Implement Skip prompt flag on datasource profile cli (#1881 Thanks @thcidale0808!)
+* [BUGFIX] Fixed bug where slack messages cause stacktrace when data docs pages have issue
+* [DOCS] How to use docker images (#1797)
+* [DOCS] Remove incorrect doc line from PagerdutyAlertAction (Thanks @niallrees!)
+* [MAINTENANCE] Update broken link (Thanks @noklam!)
+* [MAINTENANCE] Fix path for how-to guide (Thanks @gauthamzz!)
+
+0.12.6
+-----------------
+* [BUGFIX] replace black in requirements.txt
+
+0.12.5
+-----------------
+* [ENHANCEMENT] Implement expect_column_values_to_be_json_parseable in spark (Thanks @mikaylaedwards!)
+* [ENHANCEMENT] Fix boto3 options passing into datasource correctly (Thanks @noklam!)
+* [ENHANCEMENT] Add .pkl to list of recognized extensions (Thanks @KPLauritzen!)
+* [BUGFIX] Query batch kwargs support for Athena backend (issue 1964)
+* [BUGFIX] Skip config substitution if key is "password" (issue 1927)
+* [BUGFIX] fix site_names functionality and add site_names param to get_docs_sites_urls (issue 1991)
+* [BUGFIX] Always render expectation suites in data docs unless passing a specific ExpectationSuiteIdentifier in resource_identifiers (issue 1944)
+* [BUGFIX] remove black from requirements.txt
+* [BUGFIX] docs build cli: fix --yes argument (Thanks @varunbpatil!)
+* [DOCS] Update docstring for SubdirReaderBatchKwargsGenerator (Thanks @KPLauritzen!)
+* [DOCS] Fix broken link in README.md (Thanks @eyaltrabelsi!)
+* [DOCS] Clarifications on several docs (Thanks all!!)
+
+0.12.4
+-----------------
+* [FEATURE] Add PagerdutyAlertAction (Thanks @NiallRees!)
+* [FEATURE] enable using Minio for S3 backend (Thanks @noklam!)
+* [ENHANCEMENT] Add SqlAlchemy support for expect_compound_columns_to_be_unique (Thanks @jhweaver!)
+* [ENHANCEMENT] Add Spark support for expect_compound_columns_to_be_unique (Thanks @tscottcoombes1!)
+* [ENHANCEMENT] Save expectation suites with datetimes in evaluation parameters (Thanks @mbakunze!)
+* [ENHANCEMENT] Show data asset name in Slack message (Thanks @haydarai!)
+* [ENHANCEMENT] Enhance data doc to show data asset name in overview block (Thanks @noklam!)
+* [ENHANCEMENT] Clean up checkpoint output
+* [BUGFIX] Change default prefix for TupleStoreBackend (issue 1907)
+* [BUGFIX] Duplicate s3 approach for GCS for building object keys
+* [BUGFIX] import NotebookConfig (Thanks @cclauss!)
+* [BUGFIX] Improve links (Thanks @sbrugman!)
+* [MAINTENANCE] Unpin black in requirements (Thanks @jtilly!)
+* [MAINTENANCE] remove test case name special characters
+
+0.12.3
+-----------------
+* [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness
+* [ENHANCEMENT] Add expectation expect_table_columns_to_match_set
+* [ENHANCEMENT] Checkpoint run command now prints out details on each validation #1437
+* [ENHANCEMENT] Slack notifications can now display links to GCS-hosted DataDocs sites
+* [ENHANCEMENT] Public base URL can be configured for Data Docs sites
+* [ENHANCEMENT] SuiteEditNotebookRenderer.add_header class now allows usage of env variables in jinja templates (thanks @mbakunze)!
+* [ENHANCEMENT] Display table for Cramer's Phi expectation in Data Docs (thanks @mlondschien)!
+* [BUGFIX] Explicitly convert keys to tuples when removing from TupleS3StoreBackend (thanks @balexander)!
+* [BUGFIX] Use more-specific s3.meta.client.exceptions with dealing with boto resource api (thanks @lcorneliussen)!
+* [BUGFIX] Links to Amazon S3 are compatible with virtual host-style access and path-style access
+* [DOCS] How to Instantiate a Data Context on a Databricks Spark Cluster
+* [DOCS] Update to Deploying Great Expectations with Google Cloud Composer
+* [MAINTENANCE] Update moto dependency to include cryptography (see #spulec/moto/3290)
+
+0.12.2
+-----------------
 * [ENHANCEMENT] Update schema for anonymized expectation types to avoid large key domain
+* [ENHANCEMENT] BaseProfiler type mapping expanded to include more pandas and numpy dtypes
+* [BUGFIX] Allow for pandas reader option inference with parquet and Excel (thanks @dlachasse)!
 * [BUGFIX] Fix bug where running checkpoint fails if GCS data docs site has a prefix (thanks @sergii-tsymbal-exa)!
 * [BUGFIX] Fix bug in deleting datasource config from config file (thanks @rxmeez)!
 * [BUGFIX] clarify inclusiveness of min/max values in string rendering
+* [BUGFIX] Building data docs no longer crashes when a data asset name is an integer #1913
 * [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
 * [DOCS] Fixed several broken links and glossary organization (thanks @JavierMonton and @sbrugman)!
 * [DOCS] Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)
-
 
 0.12.1
 -----------------
@@ -255,7 +479,7 @@ Develop
     - `checkpoint list`
     - `checkpoint run`
     - `checkpoint script`
-    
+
 * marked cli `tap` commands as deprecating on next release
 * marked cli `validation-operator run` command as deprecating
 * internal improvements in the cli code

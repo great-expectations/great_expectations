@@ -5,7 +5,7 @@
 How-to guides
 #############
 
-The how-to guides in this secetion contain (mostly bite-size) instructions that will explain specific aspects of using and deploying Great Expectations.
+The how-to guides in this section contain (mostly bite-size) instructions that will explain specific aspects of using and deploying Great Expectations.
 
 .. warning::
 

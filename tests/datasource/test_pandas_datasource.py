@@ -1,42 +1,33 @@
 import os
 import shutil
+from tempfile import mkstemp
 
+import boto3
 import pandas as pd
 import pytest
+from moto import mock_s3
 from ruamel.yaml import YAML
 
-from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import DataContextConfigSchema
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
-from great_expectations.datasource.types.batch_kwargs import (
-    BatchMarkers,
-    PathBatchKwargs,
-)
+from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator, Validator
 
 yaml = YAML()
 
 
-@pytest.fixture(scope="module")
-def test_folder_connection_path(tmp_path_factory):
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    path = str(tmp_path_factory.mktemp("test_folder_connection_path"))
-    df1.to_csv(os.path.join(path, "test.csv"))
-
-    return str(path)
-
-
-def test_standalone_pandas_datasource(test_folder_connection_path):
+def test_standalone_pandas_datasource(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": test_folder_connection_path,
+                "base_directory": test_folder_connection_path_csv,
             }
         },
     )
@@ -45,7 +36,7 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
         "subdir_reader": {"names": [("test", "file")], "is_complete_list": True}
     }
     manual_batch_kwargs = PathBatchKwargs(
-        path=os.path.join(str(test_folder_connection_path), "test.csv")
+        path=os.path.join(str(test_folder_connection_path_csv), "test.csv")
     )
 
     generator = datasource.get_batch_kwargs_generator("subdir_reader")
@@ -54,9 +45,10 @@ def test_standalone_pandas_datasource(test_folder_connection_path):
     assert manual_batch_kwargs["path"] == auto_batch_kwargs["path"]
 
     # Include some extra kwargs...
-    auto_batch_kwargs.update(
-        {"reader_options": {"sep": ",", "header": 0, "index_col": 0}}
-    )
+    # auto_batch_kwargs.update(
+    #     {"reader_options": {"sep": ",", "header": 0, "index_col": 0}}
+    # )
+    auto_batch_kwargs.update({"reader_options": {"sep": ","}})
     batch = datasource.get_batch(batch_kwargs=auto_batch_kwargs)
     assert isinstance(batch, Batch)
     dataset = batch.data
@@ -116,7 +108,7 @@ def test_create_pandas_datasource(
 
 
 def test_pandas_datasource_custom_data_asset(
-    data_context_parameterized_expectation_suite, test_folder_connection_path
+    data_context_parameterized_expectation_suite, test_folder_connection_path_csv
 ):
     name = "test_pandas_datasource"
     class_name = "PandasDatasource"
@@ -132,7 +124,7 @@ def test_pandas_datasource_custom_data_asset(
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(test_folder_connection_path),
+                "base_directory": str(test_folder_connection_path_csv),
             }
         },
     )
@@ -273,6 +265,57 @@ def test_pandas_source_read_csv(
     assert "😁" in list(batch["Μ"])
 
 
+@mock_s3
+def test_s3_pandas_source_read_parquet(
+    data_context_parameterized_expectation_suite, tmp_path_factory
+):
+    test_bucket = "test-bucket"
+    # set up dummy bucket
+    s3 = boto3.client("s3", region_name="us-east-1")
+    s3.create_bucket(Bucket=test_bucket)
+
+    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
+    _, tmp = mkstemp(suffix=".parquet")
+    with open(tmp, "wb") as fp:
+        df1.to_parquet(fp)
+
+    with open(tmp, "rb") as fp:
+        s3.upload_fileobj(fp, test_bucket, "test_data.parquet")
+
+    data_context_parameterized_expectation_suite.add_datasource(
+        "parquet_source",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "s3_reader": {
+                "class_name": "S3GlobReaderBatchKwargsGenerator",
+                "bucket": test_bucket,
+                "assets": {
+                    "test_data": {
+                        "prefix": "",
+                        "regex_filter": r".*parquet",
+                    },
+                },
+                "reader_options": {"columns": ["col_1"]},
+            }
+        },
+    )
+
+    data_context_parameterized_expectation_suite.create_expectation_suite(
+        expectation_suite_name="test_parquet"
+    )
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        data_context_parameterized_expectation_suite.build_batch_kwargs(
+            "parquet_source",
+            "s3_reader",
+            "test_data",
+        ),
+        "test_parquet",
+    )
+    assert batch.columns == ["col_1"]
+    assert batch["col_1"][4] == 5
+
+
 def test_invalid_reader_pandas_datasource(tmp_path_factory):
     basepath = str(tmp_path_factory.mktemp("test_invalid_reader_pandas_datasource"))
     datasource = PandasDatasource(
@@ -319,21 +362,22 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
     assert batch.data["a"][0] == 1
 
 
-def test_read_limit(test_folder_connection_path):
+def test_read_limit(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": test_folder_connection_path,
+                "base_directory": test_folder_connection_path_csv,
             }
         },
     )
 
     batch_kwargs = PathBatchKwargs(
         {
-            "path": os.path.join(str(test_folder_connection_path), "test.csv"),
-            "reader_options": {"sep": ",", "header": 0, "index_col": 0},
+            "path": os.path.join(str(test_folder_connection_path_csv), "test.csv"),
+            # "reader_options": {"sep": ",", "header": 0, "index_col": 0},
+            "reader_options": {"sep": ","},
         }
     )
     nested_update(batch_kwargs, datasource.process_batch_parameters(limit=1))
@@ -359,13 +403,13 @@ def test_process_batch_parameters():
     assert batch_kwargs == {"dataset_options": {"caching": False}}
 
 
-def test_pandas_datasource_processes_dataset_options(test_folder_connection_path):
+def test_pandas_datasource_processes_dataset_options(test_folder_connection_path_csv):
     datasource = PandasDatasource(
         "PandasCSV",
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": test_folder_connection_path,
+                "base_directory": test_folder_connection_path_csv,
             }
         },
     )
@@ -374,6 +418,6 @@ def test_pandas_datasource_processes_dataset_options(test_folder_connection_path
     )
     batch_kwargs["dataset_options"] = {"caching": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False

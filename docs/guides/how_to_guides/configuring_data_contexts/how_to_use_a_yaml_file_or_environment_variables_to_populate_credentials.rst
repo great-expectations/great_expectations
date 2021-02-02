@@ -17,7 +17,7 @@ Steps
   .. admonition:: Note:
 
     - In the ``great_expectations.yml`` config file, environment variables take precedence over variables defined in a config variables YAML
-    - Environment variable substitution is also supported in the ``great_expectations.yml`` config file.
+    - Environment variable substitution is supported in both the ``great_expectations.yml`` and config variables ``config_variables.yml`` config file.
 
   If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another YAML file of your choosing:
 
@@ -32,6 +32,12 @@ Steps
       username: administrator
       password: ${MY_DB_PW}
       database: postgres
+
+  .. admonition:: Note:
+
+    - If you wish to store values that include the dollar sign character ``$``, please escape them using a backslash ``\`` so substitution is not attempted. For example in the above example for postgres credentials you could set ``password: pa\$sword`` if your password is ``pa$sword``. Say that 5 times fast, and also please choose a more secure password!
+    - When you save values via the CLI, they are automatically escaped if they contain the ``$`` character.
+    - You can also have multiple substitutions for the same item, e.g. ``database_string: ${USER}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}``
 
   If using environment variables, set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
 
@@ -53,7 +59,7 @@ Steps
 
     config_variables_file_path: uncommitted/config_variables.yml
 
-3. Replace credentials or other values in your ``great_expectations.yml`` with ${}-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
+3. Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
 
   .. code-block:: yaml
 

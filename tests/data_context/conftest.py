@@ -27,6 +27,7 @@ def data_context_without_config_variables_filepath_configured(tmp_path_factory):
 @pytest.fixture()
 def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("FOO", "BAR")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")

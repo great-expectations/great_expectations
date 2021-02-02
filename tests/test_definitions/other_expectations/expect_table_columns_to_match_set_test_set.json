@@ -1,0 +1,217 @@
+{
+  "expectation_type" : "expect_table_columns_to_match_set",
+  "datasets" : [
+    {
+      "data": {
+        "c1" : [4,5,6,7],
+        "c2" : ["a","b","c","d"],
+        "c3" : [null,null,null,null]
+      },
+      "schemas": {
+        "spark": {
+          "c1": "IntegerType",
+          "c2": "StringType",
+          "c3": "StringType"
+        }
+      },
+    "tests": [{
+      "title": "basic_positive_test_exact_match_true",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2", "c3"],
+        "exact_match": true
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {"mismatched": {}}
+        }
+      }
+    },{
+      "title": "basic_positive_test_exact_match_false",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2", "c3"],
+        "exact_match": false
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {"mismatched": {}}
+        }
+      }
+    },{
+      "title": "negative_test_column_is_missing_exact_match_true",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2"],
+        "exact_match": true
+      },
+      "out":{
+        "success":false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "unexpected": ["c3"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "positive_test_column_is_missing_exact_match_false",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2"],
+        "exact_match": false
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "unexpected": ["c3"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "negative_test_column_is_misnamed_exact_match_true",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["b1", "c2", "c3"],
+        "exact_match": true
+      },
+      "out":{
+        "success":false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "unexpected": ["c1"],
+              "missing": ["b1"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "negative_test_column_is_misnamed_exact_match_false",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["b1", "c2", "c3"],
+        "exact_match": false
+      },
+      "out":{
+        "success":false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "unexpected": ["c1"],
+              "missing": ["b1"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "positive_test_columns_are_right_but_ordering_wrong_exact_match_true",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c3", "c2", "c1"],
+        "exact_match": true
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {"mismatched": {}}
+        }
+      }
+    },{
+      "title": "positive_test_columns_are_right_but_ordering_wrong_exact_match_false",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c3", "c2", "c1"],
+        "exact_match": false
+      },
+      "out":{
+        "success":true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {"mismatched": {}}
+        }
+      }
+    },{
+      "title": "negative_test_extra_column_exact_match_true",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2", "c3", "c4"],
+        "exact_match": true
+      },
+      "out":{
+        "success": false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "missing": ["c4"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "negative_test_extra_column_exact_match_false",
+      "exact_match_out": true,
+      "in":{
+        "column_set": ["c1", "c2", "c3", "c4"],
+        "exact_match": false
+      },
+      "out":{
+        "success": false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "missing": ["c4"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "negative_test_null_set_exact_match_true",
+      "exact_match_out": true,
+      "in":{
+        "column_set": null,
+        "exact_match": true
+      },
+      "out":{
+        "success": false,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"],
+          "details": {
+            "mismatched": {
+              "missing": ["c1", "c2", "c3"]
+            }
+          }
+        }
+      }
+    },{
+      "title": "positive_test_vacuously_true_null_set_exact_match_false",
+      "exact_match_out": true,
+      "in":{
+        "column_set": null,
+        "exact_match": false
+      },
+      "out":{
+        "success": true,
+        "result": {
+          "observed_value": ["c1", "c2", "c3"]
+        }
+      }
+    }
+  ]
+  }]
+}

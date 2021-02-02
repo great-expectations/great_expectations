@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
 
 @pytest.fixture

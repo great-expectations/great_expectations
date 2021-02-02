@@ -1,14 +1,24 @@
-from great_expectations.core import ExpectationSuiteValidationResultSchema
+import random
+
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+    ExpectationSuiteValidationResultSchema,
+)
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    verify_dynamic_loading_support,
+)
 
 
 class ValidationsStore(Store):
@@ -82,7 +92,7 @@ class ValidationsStore(Store):
 
     _key_class = ValidationResultIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None):
+    def __init__(self, store_backend=None, runtime_environment=None, store_name=None):
         self._expectationSuiteValidationResultSchema = (
             ExpectationSuiteValidationResultSchema()
         )
@@ -120,11 +130,81 @@ class ValidationsStore(Store):
                     ],
                 )
         super().__init__(
-            store_backend=store_backend, runtime_environment=runtime_environment
+            store_backend=store_backend,
+            runtime_environment=runtime_environment,
+            store_name=store_name,
         )
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True,
+            **{
+                "class_name": self.__class__.__name__,
+            },
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def serialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.dumps(value)
 
     def deserialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.loads(value)
+
+    def self_check(self, pretty_print):
+        return_obj = {}
+
+        if pretty_print:
+            print("Checking for existing keys...")
+
+        return_obj["keys"] = self.list_keys()
+        return_obj["len_keys"] = len(return_obj["keys"])
+        len_keys = return_obj["len_keys"]
+
+        if pretty_print:
+            if return_obj["len_keys"] == 0:
+                print(f"\t{len_keys} keys found")
+            else:
+                print(f"\t{len_keys} keys found:")
+                for key in return_obj["keys"][:10]:
+                    print("\t\t" + str(key))
+            if len_keys > 10:
+                print("\t\t...")
+            print()
+
+        test_key_name = "test-key-" + "".join(
+            [random.choice(list("0123456789ABCDEF")) for i in range(20)]
+        )
+
+        test_key = self._key_class(
+            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                expectation_suite_name="temporary_test_suite",
+            ),
+            run_id="temporary_test_run_id",
+            batch_identifier=test_key_name,
+        )
+        test_value = ExpectationSuiteValidationResult(success=True)
+
+        if pretty_print:
+            print(f"Attempting to add a new test key: {test_key}...")
+        self.set(key=test_key, value=test_value)
+        if pretty_print:
+            print("\tTest key successfully added.")
+            print()
+
+        if pretty_print:
+            print(
+                f"Attempting to retrieve the test value associated with key: {test_key}..."
+            )
+        test_value = self.get(
+            key=test_key,
+        )
+        if pretty_print:
+            print("\tTest value successfully retreived.")
+            print()
+
+        return return_obj
+
+    @property
+    def config(self) -> dict:
+        return self._config
