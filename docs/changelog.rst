@@ -8,7 +8,7 @@ Changelog
 Develop
 -----------------
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
-
+* [DOCS] Update How to instantiate a Data Context on Databricks Spark cluster for 0.13+ #2379
 
 0.13.8
 -----------------
