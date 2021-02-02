@@ -6,19 +6,13 @@ import pandas as pd
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...data_asset.util import parse_result_format
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
-from ..registry import extract_metrics
+from ..expectation import InvalidExpectationConfigurationError, TableExpectation
 
 
 class ExpectTableColumnCountToEqual(TableExpectation):
@@ -55,6 +49,16 @@ class ExpectTableColumnCountToEqual(TableExpectation):
     See Also:
         expect_table_column_count_to_be_between
     """
+
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
 
     metric_dependencies = ("table.column_count",)
 
@@ -104,6 +108,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,
@@ -132,45 +137,6 @@ class ExpectTableColumnCountToEqual(TableExpectation):
                 }
             )
         ]
-
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
-    ):
-        """Validates given column count against expected value"""
-        # Obtaining dependencies used to validate the expectation
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-        column_count = metric_vals.get("columns.count")
-
-        # Obtaining components needed for validation
-        value = self.get_success_kwargs(configuration).get("value")
-
-        # Checking if the column count is equivalent to value
-        success = column_count == value
-        return {"success": success, "result": {"observed_value": column_count}}
 
     def _validate(
         self,

@@ -410,7 +410,7 @@ following to your data context configuration:
       data_context_id: <randomly-generated-uuid>
       enabled: false
 
-You can also disable usage statistics system-wide by setting the ``GE_USAGE_STATS``` environment variable to
+You can also disable usage statistics system-wide by setting the ``GE_USAGE_STATS`` environment variable to
 ``FALSE`` or adding the following code block to a file called ``great_expectations.conf`` located in ``/etc/`` or
 ``~/.great_expectations``:
 

@@ -4659,7 +4659,7 @@ class Dataset(MetaDataset):
 
         For example::
 
-            A B C            
+            A B C
             1 1 2 Fail
             1 2 3 Pass
             8 2 7 Pass
@@ -4711,7 +4711,7 @@ class Dataset(MetaDataset):
         Note that all instances of any duplicates are considered failed
 
         For example::
-        
+
             A B C
             1 1 2 Fail
             1 2 3 Pass

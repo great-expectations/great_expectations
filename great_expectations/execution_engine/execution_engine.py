@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterable, Tuple, Union
 
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import Batch, BatchSpec
+from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import (
@@ -311,6 +311,11 @@ class ExecutionEngine:
         new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
         new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
         return new_domain_kwargs
+
+    def get_batch_data_and_markers(
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:
+        raise NotImplementedError
 
 
 class MetricPartialFunctionTypes(Enum):

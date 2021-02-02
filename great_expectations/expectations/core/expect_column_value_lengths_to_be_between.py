@@ -23,13 +23,14 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, Expectation, _format_map_output
-from ..registry import extract_metrics
+from ..expectation import ColumnMapExpectation
 
 try:
     import sqlalchemy as sa
 except ImportError:
     pass
+
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
@@ -86,6 +87,15 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_value_lengths_to_equal>`
 
     """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
 
     map_metric = "column_values.value_length.between"
     success_keys = (
@@ -145,6 +155,7 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration: ExpectationConfiguration = None,

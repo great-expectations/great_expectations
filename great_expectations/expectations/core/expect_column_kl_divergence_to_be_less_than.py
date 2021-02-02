@@ -14,6 +14,7 @@ from great_expectations.execution_engine.util import (
     is_valid_partition_object,
 )
 from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     RenderedContentBlockContainer,
@@ -157,6 +158,15 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
                 <great_expectations.dataset.dataset.Dataset.expect_column_unique_value_count_to_be_between>`
 
             """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
 
     success_keys = (
         "partition_object",
@@ -852,6 +862,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,
