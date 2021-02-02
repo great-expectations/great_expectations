@@ -8,6 +8,7 @@ Changelog
 Develop
 -----------------
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
+* [BUGFIX] expect_column_values_to_be_unique works in mysql #2327
 
 
 0.13.8
