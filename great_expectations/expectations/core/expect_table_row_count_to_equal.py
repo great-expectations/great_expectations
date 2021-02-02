@@ -53,6 +53,16 @@ class ExpectTableRowCountToEqual(TableExpectation):
         expect_table_row_count_to_be_between
     """
 
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
+
     metric_dependencies = ("table.row_count",)
 
     success_keys = ("value",)
