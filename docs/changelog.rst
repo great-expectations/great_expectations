@@ -9,7 +9,6 @@ Develop
 -----------------
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
 * [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for #1691 to @mgorsk1!) #2371
-
 * [DOCS] Update How to instantiate a Data Context on Databricks Spark cluster for 0.13+ #2379
 
 0.13.8
