@@ -1209,6 +1209,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             self.stores[self.validations_store_name]["store_backend"][
                 "root_directory"
             ] = root_directory
+            self.stores[self.checkpoint_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
             self.data_docs_sites[self.data_docs_site_name]["store_backend"][
                 "root_directory"
             ] = root_directory
