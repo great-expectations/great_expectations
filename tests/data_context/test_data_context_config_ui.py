@@ -252,12 +252,15 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         expectations_store_bucket_name="custom_expectations_store_bucket_name",
         validations_store_bucket_name="custom_validations_store_bucket_name",
         data_docs_bucket_name="custom_data_docs_store_bucket_name",
+        checkpoint_store_bucket_name="custom_checkpoint_store_bucket_name",
         expectations_store_prefix="custom_expectations_store_prefix",
         validations_store_prefix="custom_validations_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
+        checkpoint_store_prefix="custom_checkpoint_store_prefix",
         expectations_store_name="custom_expectations_S3_store_name",
         validations_store_name="custom_validations_S3_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_S3_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -277,7 +280,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -299,6 +301,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
                 "bucket": "custom_validations_store_bucket_name",
                 "class_name": "TupleS3StoreBackend",
                 "prefix": "custom_validations_store_prefix",
+            },
+        },
+        "custom_checkpoint_S3_store_name": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "custom_checkpoint_store_bucket_name",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "custom_checkpoint_store_prefix",
             },
         },
     }
@@ -323,6 +333,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         expectations_store_name="custom_expectations_S3_store_name",
         validations_store_name="custom_validations_S3_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_S3_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
