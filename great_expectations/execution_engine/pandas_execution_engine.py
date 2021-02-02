@@ -172,12 +172,12 @@ Notes:
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
             splitter_fn = getattr(self, batch_spec.get("splitter_method"))
-            splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+            splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
         if batch_spec.get("sampling_method"):
             sampling_fn = getattr(self, batch_spec.get("sampling_method"))
-            sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+            sampling_kwargs: dict = batch_spec.get("sampling_kwargs") or {}
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
 

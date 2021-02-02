@@ -1487,8 +1487,6 @@ class BaseDataContext:
                     f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
                 )
             datasource_name = batch_request.datasource_name
-        else:
-            datasource_name = datasource_name
 
         datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
@@ -1520,24 +1518,27 @@ class BaseDataContext:
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
+                partition_request = PartitionRequest(partition_request_params)
+            else:
+                # Raise a warning if partition_identifiers or kwargs exist
+                partition_request = PartitionRequest(partition_request)
+
+            if batch_spec_passthrough is None:
+                batch_spec_passthrough = {}
                 if sampling_method is not None:
                     sampling_params: dict = {
                         "sampling_method": sampling_method,
                     }
                     if sampling_kwargs is not None:
                         sampling_params["sampling_kwargs"] = sampling_kwargs
-                    partition_request_params.update(sampling_params)
+                    batch_spec_passthrough.update(sampling_params)
                 if splitter_method is not None:
                     splitter_params: dict = {
                         "splitter_method": splitter_method,
                     }
                     if splitter_kwargs is not None:
                         splitter_params["splitter_kwargs"] = splitter_kwargs
-                    partition_request_params.update(splitter_params)
-                partition_request = PartitionRequest(partition_request_params)
-            else:
-                # Raise a warning if partition_identifiers or kwargs exist
-                partition_request = PartitionRequest(partition_request)
+                    batch_spec_passthrough.update(splitter_params)
 
             batch_request: BatchRequest = BatchRequest(
                 datasource_name=datasource_name,

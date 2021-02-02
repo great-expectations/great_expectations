@@ -2,6 +2,7 @@ from typing import Dict, List, Optional
 
 from great_expectations.core.batch import (
     BatchDefinition,
+    BatchRequest,
     BatchSpec,
     PartitionDefinition,
 )
@@ -136,13 +137,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
         return []
 
-    def get_batch_definition_list_from_batch_request(self, batch_request):
+    def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
         self._validate_batch_request(batch_request=batch_request)
 
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
 
-        batch_definition_list = []
+        batch_definition_list: List[BatchDefinition] = []
 
         try:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
@@ -152,7 +153,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         for partition_definition in sub_cache:
-            batch_definition = BatchDefinition(
+            batch_definition: BatchDefinition = BatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,

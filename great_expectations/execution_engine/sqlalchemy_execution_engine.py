@@ -989,7 +989,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def _build_selectable_from_batch_spec(self, batch_spec):
-        table_name = batch_spec["table_name"]
         table_name: str = batch_spec["table_name"]
 
         if "splitter_method" in batch_spec:
