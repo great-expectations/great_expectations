@@ -1467,6 +1467,8 @@ class DataContextConfig(BaseYamlConfig):
                 )
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
+            if checkpoint_store_name is None:
+                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
 
         self._config_version = config_version
         if datasources is None:
