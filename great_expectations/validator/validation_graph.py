@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 from great_expectations.core.id_dict import IDDict
 
@@ -55,9 +55,7 @@ class MetricConfiguration:
 
 
 class MetricEdge:
-    def __init__(
-        self, left: MetricConfiguration, right: Union[MetricConfiguration, None]
-    ):
+    def __init__(self, left: MetricConfiguration, right: Optional[MetricConfiguration]):
         self._left = left
         self._right = right
 

@@ -7,16 +7,12 @@ import pandas as pd
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing
-from ..expectation import (
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-)
-from ..registry import extract_metrics
+from ..expectation import InvalidExpectationConfigurationError, TableExpectation
 
 
 class ExpectTableColumnsToMatchOrderedList(TableExpectation):
@@ -51,6 +47,16 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
     """
+
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
 
     metric_dependencies = ("table.columns",)
     success_keys = ("column_list",)
@@ -106,6 +112,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

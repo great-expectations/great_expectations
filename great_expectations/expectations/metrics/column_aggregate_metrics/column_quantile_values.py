@@ -32,7 +32,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
@@ -47,10 +46,19 @@ class ColumnQuantileValues(ColumnMetricProvider):
     value_keys = ("quantiles", "allow_relative_error")
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, quantiles, **kwargs):
+    def _pandas(cls, column, quantiles, allow_relative_error, **kwargs):
         """Quantile Function"""
+        interpolation_options = ("linear", "lower", "higher", "midpoint", "nearest")
 
-        return column.quantile(quantiles, interpolation="nearest").tolist()
+        if not allow_relative_error:
+            allow_relative_error = "nearest"
+
+        if allow_relative_error not in interpolation_options:
+            raise ValueError(
+                f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'"
+                f"parameter of .quantile() (one of {interpolation_options})"
+            )
+        return column.quantile(quantiles, interpolation=allow_relative_error).tolist()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
@@ -92,6 +100,23 @@ class ColumnQuantileValues(ColumnMetricProvider):
             return _get_column_quantiles_mysql(
                 column=column,
                 quantiles=quantiles,
+                selectable=selectable,
+                sqlalchemy_engine=sqlalchemy_engine,
+            )
+        elif dialect.name.lower() == "snowflake":
+            # NOTE: 20201216 - JPC - snowflake has a representation/precision limitation
+            # in its percentile_disc implementation that causes an error when we do
+            # not round. It is unclear to me *how* the call to round affects the behavior --
+            # the binary representation should be identical before and after, and I do
+            # not observe a type difference. However, the issue is replicable in the
+            # snowflake console and directly observable in side-by-side comparisons with
+            # and without the call to round()
+            quantiles = [round(x, 10) for x in quantiles]
+            return _get_column_quantiles_generic_sqlalchemy(
+                column=column,
+                quantiles=quantiles,
+                allow_relative_error=allow_relative_error,
+                dialect=dialect,
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )

@@ -6,6 +6,7 @@ import pandas as pd
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...data_asset.util import parse_result_format
 from ...render.renderer.renderer import renderer
@@ -18,7 +19,6 @@ from ..expectation import (
     TableExpectation,
     _format_map_output,
 )
-from ..registry import extract_metrics
 
 
 class ExpectTableColumnCountToBeBetween(TableExpectation):
@@ -65,6 +65,16 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
         expect_table_column_count_to_equal
     """
 
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
+
     metric_dependencies = ("table.column_count",)
     success_keys = (
         "min_value",
@@ -98,6 +108,7 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

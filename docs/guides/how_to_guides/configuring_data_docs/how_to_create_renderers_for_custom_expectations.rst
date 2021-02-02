@@ -3,6 +3,8 @@
 How to Create Renderers for Custom Expectations
 ================================================
 
+.. warning:: This guide only applies to Great Expectations versions 0.13 and above, which make use of the new modular Expectation architecture. If you have implemented a custom Expectation but have not yet migrated it using the new modular patterns, you can still use this guide to implement custom renderers for your Expectation.
+
 This guide will help you implement renderers for your custom Expectations, allowing you to control how your custom Expectations are displayed in Data Docs. Implementing renderers as part of your custom Expectations is not strictly required - if not provided, Great Expectations will render your Expectation using a basic default renderer:
 
 .. figure:: expectation_fallback.png
@@ -37,12 +39,15 @@ Steps
 
 2. **Next, implement a renderer with type ``renderer.prescriptive``.**
 
-  Declare a class method in your custom Expectation class and decorate it with ``@renderer(renderer_type="renderer.prescriptive")``. The method name is arbitrary, but the convention is to camelcase the renderer type and convert the "renderer" prefix to a suffix (e.g. ``_prescriptive_renderer``). The method should have the following signature, which is shared across renderers:
+  Declare a class method in your custom Expectation class and decorate it with ``@renderer(renderer_type="renderer.prescriptive")``. The method name is arbitrary, but the convention is to camelcase the renderer type and convert the "renderer" prefix to a suffix (e.g. ``_prescriptive_renderer``).  Adding the ``@render_evaluation_parameter_string`` decorator allows :ref:`Expectations that use Evaluation Parameters <how_to_guides__creating_and_editing_expectations__how_to_create_expectations_that_span_multiple_tables_using_evaluation_parameters>` to render the values of the Evaluation Parameters along with the rest of the output.
+
+  The method should have the following signature, which is shared across renderers:
 
   .. code-block:: python
 
       @classmethod
       @renderer(renderer_type="renderer.prescriptive")
+      @render_evaluation_parameter_string
       def _prescriptive_renderer(
           cls,
           configuration: ExpectationConfiguration = None,
@@ -90,6 +95,7 @@ Steps
 
                   @classmethod
                   @renderer(renderer_type="renderer.prescriptive")
+                  @render_evaluation_parameter_string
                   def _prescriptive_renderer(
                           cls,
                           configuration: ExpectationConfiguration = None,
@@ -201,6 +207,7 @@ Steps
 
                   @classmethod
                   @renderer(renderer_type="renderer.prescriptive")
+                  @render_evaluation_parameter_string
                   def _prescriptive_renderer(
                           cls,
                           configuration: ExpectationConfiguration = None,
@@ -323,6 +330,7 @@ Steps
 
                   @classmethod
                   @renderer(renderer_type="renderer.prescriptive")
+                  @render_evaluation_parameter_string
                   def _prescriptive_renderer(
                       cls,
                       configuration=None,
@@ -465,6 +473,7 @@ Steps
 
                   @classmethod
                   @renderer(renderer_type="renderer.prescriptive")
+                  @render_evaluation_parameter_string
                   def _prescriptive_renderer(
                       cls,
                       configuration=None,

@@ -156,8 +156,10 @@ You can also add notes and structured metadata to Expectations:
         "Name",
         "^[A-Za-z\, \(\)\']+$",
         meta = {
-            "notes": "A simple experimental regex for name matching.",
-            "source": "max@company.com"
+            "notes": {
+               "content": [ "A simple experimental regex for name matching." ],
+               "format": "markdown",
+               "source": "max@company.com"
             }
        )
 

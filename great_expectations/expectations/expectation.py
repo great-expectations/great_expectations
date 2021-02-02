@@ -1,12 +1,14 @@
 import logging
 import re
+import traceback
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type, Union
+from typing import Dict, List, Optional, Tuple
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,
     parse_result_format,
@@ -20,14 +22,20 @@ from great_expectations.exceptions import (
     InvalidExpectationKwargsError,
 )
 from great_expectations.expectations.registry import (
+    _registered_metrics,
+    _registered_renderers,
     get_metric_kwargs,
     register_expectation,
     register_renderer,
 )
+from great_expectations.expectations.self_check_util import (
+    evaluate_json_test_cfe,
+    generate_expectation_tests,
+)
 from great_expectations.expectations.util import legacy_method_parameters
+from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update
-from ..data_asset.util import recursively_convert_to_json_serializable
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..render.renderer.renderer import renderer
 from ..render.types import (
@@ -59,7 +67,7 @@ class MetaExpectation(ABCMeta):
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
-        if not isabstract(newclass):
+        if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
         newclass._register_renderer_functions()
@@ -74,7 +82,7 @@ class MetaExpectation(ABCMeta):
         return newclass
 
 
-class Expectation(ABC, metaclass=MetaExpectation):
+class Expectation(metaclass=MetaExpectation):
     """Base class for all Expectations.
 
     Expectation classes *must* have the following attributes set:
@@ -129,6 +137,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
         self._configuration = configuration
 
     @classmethod
+    def is_abstract(cls):
+        return isabstract(cls)
+
+    @classmethod
     def _register_renderer_functions(cls):
         expectation_type = camel_to_snake(cls.__name__)
 
@@ -139,15 +151,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
             register_renderer(
                 object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj
             )
-
-    @abstractmethod
-    def get_validation_dependencies(
-        self,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
-    ):
-        raise NotImplementedError
 
     @abstractmethod
     def _validate(
@@ -488,15 +491,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
     def get_allowed_config_keys(cls):
         return cls.domain_keys + cls.success_keys + cls.runtime_keys
 
-    def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict[str, Any],
-        runtime_configuration: Dict,
-        execution_engine: ExecutionEngine,
-    ):
-        raise NotImplementedError
-
     def metrics_validate(
         self,
         metrics: Dict,
@@ -619,9 +613,9 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if configuration is None:
             configuration = self.configuration
         try:
-            assert configuration.expectation_type == self.expectation_type, (
-                "expectation configuration type does not match " "expectation type"
-            )
+            assert (
+                configuration.expectation_type == self.expectation_type
+            ), f"expectation configuration type {configuration.expectation_type} does not match expectation type {self.expectation_type}"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
@@ -693,6 +687,351 @@ class Expectation(ABC, metaclass=MetaExpectation):
             kwargs=convert_to_json_serializable(deepcopy(all_args)),
             meta=meta,
         )
+
+    def run_diagnostics(self, pretty_print=True):
+        """
+        Produce a diagnostic report about this expectation.
+        The current uses for this method's output are
+        using the JSON structure to populate the Public Expectation Gallery
+        and enabling a fast devloop for developing new expectations where the
+        contributors can quickly check the completeness of their expectations.
+
+        The content of the report:
+        * name and description
+        * "library metadata", such as the GitHub usernames of the expectation's authors
+        * the execution engines the expectation is implemented for
+        * the implemented renderers
+        * tests in "examples" member variable
+        * the tests are executed against the execution engines for which the expectation
+        is implemented and the output of the test runs is included in the report.
+
+        At least one test case with include_in_gallery=True must be present in the examples to
+        produce the metrics, renderers and execution engines parts of the report. This is due to
+        a get_validation_dependencies requiring expectation_config as an argument.
+
+        If errors are encountered in the process of running the diagnostics, they are assumed to be due to
+        incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
+        that do not exist). These errors are added under "errors" key in the report.
+
+        :param pretty_print: TODO: this argument is not currently used. The intent is to return
+        a well formatted and easily readable text instead of the dictionary when the argument is set
+        to True
+        :return: a dictionary view of the report
+        """
+
+        camel_name = self.__class__.__name__
+        snake_name = camel_to_snake(self.__class__.__name__)
+        docstring, short_description = self._get_docstring_and_short_description()
+        library_metadata = self._get_library_metadata()
+
+        report_obj = {
+            "description": {
+                "camel_name": camel_name,
+                "snake_name": snake_name,
+                "short_description": short_description,
+                "docstring": docstring,
+            },
+            "library_metadata": library_metadata,
+            "renderers": {},
+            "examples": [],
+            "metrics": [],
+            "execution_engines": {},
+            "test_report": [],
+            "diagnostics_report": [],
+        }
+
+        # Generate artifacts from an example case
+        gallery_examples = self._get_examples()
+        report_obj.update({"examples": gallery_examples})
+
+        if gallery_examples != []:
+            example_data, example_test = self._choose_example(gallery_examples)
+
+            test_batch = Batch(data=example_data)
+
+            expectation_config = ExpectationConfiguration(
+                **{"expectation_type": snake_name, "kwargs": example_test}
+            )
+
+            validation_result = None
+            try:
+                validation_results = self._instantiate_example_validation_results(
+                    test_batch=test_batch,
+                    expectation_config=expectation_config,
+                )
+                validation_result = validation_results[0]
+            except GreatExpectationsError as e:
+                report_obj = self._add_error_to_diagnostics_report(
+                    report_obj, e, traceback.format_exc()
+                )
+
+            if validation_result is not None:
+                renderers = self._get_renderer_dict(
+                    expectation_name=snake_name,
+                    expectation_config=expectation_config,
+                    validation_result=validation_result,
+                )
+                report_obj.update({"renderers": renderers})
+
+            upstream_metrics = None
+            try:
+                upstream_metrics = self._get_upstream_metrics(expectation_config)
+                report_obj.update({"metrics": upstream_metrics})
+            except GreatExpectationsError as e:
+                report_obj = self._add_error_to_diagnostics_report(
+                    report_obj, e, traceback.format_exc()
+                )
+
+            execution_engines = None
+            if upstream_metrics is not None:
+                execution_engines = self._get_execution_engine_dict(
+                    upstream_metrics=upstream_metrics,
+                )
+                report_obj.update({"execution_engines": execution_engines})
+
+            try:
+                tests = self._get_examples(return_only_gallery_examples=False)
+                if len(tests) > 0:
+                    if execution_engines is not None:
+                        test_results = self._get_test_results(
+                            snake_name,
+                            tests,
+                            execution_engines,
+                        )
+                        report_obj.update({"test_report": test_results})
+            except Exception as e:
+                report_obj = self._add_error_to_diagnostics_report(
+                    report_obj, e, traceback.format_exc()
+                )
+
+        return report_obj
+
+    def _add_error_to_diagnostics_report(
+        self, report_obj: Dict, error: Exception, stack_trace: str
+    ) -> Dict:
+        error_entries = report_obj.get("diagnostics_report")
+        if error_entries is None:
+            error_entries = []
+            report_obj["diagnostics_report"] = error_entries
+
+        error_entries.append(
+            {
+                "error_message": str(error),
+                "stack_trace": stack_trace,
+            }
+        )
+
+        return report_obj
+
+    def _get_examples(self, return_only_gallery_examples=True) -> List[Dict]:
+        """
+        Get a list of examples from the object's `examples` member variable.
+
+        :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
+        :return: list of examples or [], if no examples exist
+        """
+        try:
+            all_examples = self.examples
+        except AttributeError:
+            return []
+
+        included_examples = []
+        for example in all_examples:
+            # print(example)
+
+            included_tests = []
+            for test in example["tests"]:
+                if (
+                    test.get("include_in_gallery") == True
+                    or return_only_gallery_examples == False
+                ):
+                    included_tests.append(test)
+
+            if len(included_tests) > 0:
+                copied_example = deepcopy(example)
+                copied_example["tests"] = included_tests
+                included_examples.append(copied_example)
+
+        return included_examples
+
+    def _get_docstring_and_short_description(self) -> Tuple[str, str]:
+        if self.__doc__ is not None:
+            docstring = self.__doc__
+            short_description = self.__doc__.split("\n")[0]
+        else:
+            docstring = ""
+            short_description = ""
+
+        return docstring, short_description
+
+    def _choose_example(self, examples):
+        example = examples[0]
+
+        example_data = example["data"]
+        example_test = example["tests"][0]["in"]
+
+        return example_data, example_test
+
+    def _instantiate_example_validation_results(
+        self,
+        test_batch: Batch,
+        expectation_config: ExpectationConfiguration,
+    ) -> List[ExpectationValidationResult]:
+
+        validation_results = Validator(
+            execution_engine=PandasExecutionEngine(), batches=[test_batch]
+        ).graph_validate(configurations=[expectation_config])
+
+        return validation_results
+
+    def _get_supported_renderers(self, snake_name: str) -> List[str]:
+        supported_renderers = list(_registered_renderers[snake_name].keys())
+        supported_renderers.sort()
+        return supported_renderers
+
+    def _get_test_results(
+        self,
+        snake_name,
+        examples,
+        execution_engines,
+    ):
+        test_results = []
+
+        exp_tests = generate_expectation_tests(
+            snake_name,
+            examples,
+            expectation_execution_engines_dict=execution_engines,
+        )
+
+        for exp_test in exp_tests:
+            try:
+                evaluate_json_test_cfe(
+                    validator=exp_test["validator_with_data"],
+                    expectation_type=exp_test["expectation_type"],
+                    test=exp_test["test"],
+                )
+                test_results.append(
+                    {
+                        "test title": exp_test["test"]["title"],
+                        "backend": exp_test["backend"],
+                        "test_passed": "true",
+                    }
+                )
+            except Exception as e:
+                test_results.append(
+                    {
+                        "test title": exp_test["test"]["title"],
+                        "backend": exp_test["backend"],
+                        "test_passed": "false",
+                        "error_message": str(e),
+                        "stack_trace": traceback.format_exc(),
+                    }
+                )
+
+        return test_results
+
+    from great_expectations.render.types import RenderedStringTemplateContent
+
+    # NOTE: Abe 20201228: This method probably belong elsewhere. Putting it here for now.
+    def _get_rendered_result_as_string(self, rendered_result):
+
+        if type(rendered_result) == str:
+            return rendered_result
+
+        elif type(rendered_result) == list:
+            sub_result_list = []
+            for sub_result in rendered_result:
+                sub_result_list.append(self._get_rendered_result_as_string(sub_result))
+
+            return "\n".join(sub_result_list)
+
+        elif type(rendered_result) == RenderedStringTemplateContent:
+            return rendered_result.__str__()
+
+        else:
+            pass
+            # print(type(rendered_result))
+
+    def _get_renderer_dict(
+        self,
+        expectation_name: str,
+        expectation_config: ExpectationConfiguration,
+        validation_result: ExpectationValidationResult,
+        standard_renderers=[
+            "renderer.answer",
+            "renderer.diagnostic.unexpected_statement",
+            "renderer.diagnostic.observed_value",
+            "renderer.diagnostic.status_icon",
+            "renderer.diagnostic.unexpected_table",
+            "renderer.prescriptive",
+            "renderer.question",
+        ],
+    ) -> Dict[str, str]:
+        supported_renderers = self._get_supported_renderers(expectation_name)
+
+        standard_renderer_dict = {}
+
+        for renderer_name in standard_renderers:
+            if renderer_name in supported_renderers:
+                _, renderer = _registered_renderers[expectation_name][renderer_name]
+
+                rendered_result = renderer(
+                    configuration=expectation_config,
+                    result=validation_result,
+                )
+                standard_renderer_dict[
+                    renderer_name
+                ] = self._get_rendered_result_as_string(rendered_result)
+
+            else:
+                standard_renderer_dict[renderer_name] = None
+
+        return {
+            "standard": standard_renderer_dict,
+            "custom": [],
+        }
+
+    def _get_execution_engine_dict(
+        self,
+        upstream_metrics,
+    ) -> Dict:
+        expectation_engines = {}
+        for provider in [
+            "PandasExecutionEngine",
+            "SqlAlchemyExecutionEngine",
+            "SparkDFExecutionEngine",
+        ]:
+            all_true = True
+            for metric in upstream_metrics:
+                if not provider in _registered_metrics[metric]["providers"]:
+                    all_true = False
+                    break
+
+            expectation_engines[provider] = all_true
+
+        return expectation_engines
+
+    def _get_upstream_metrics(self, expectation_config) -> List[str]:
+        # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
+        # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.
+        validation_dependencies = self.get_validation_dependencies(
+            configuration=expectation_config
+        )
+
+        return list(validation_dependencies["metrics"].keys())
+
+    def _get_library_metadata(self):
+        library_metadata = {
+            "maturity": None,
+            "package": None,
+            "tags": [],
+            "contributors": [],
+        }
+
+        if hasattr(self, "library_metadata"):
+            library_metadata.update(self.library_metadata)
+
+        return library_metadata
 
 
 class TableExpectation(Expectation, ABC):
@@ -837,6 +1176,10 @@ class ColumnMapExpectation(TableExpectation, ABC):
         "include_config": True,
         "catch_exceptions": True,
     }
+
+    @classmethod
+    def is_abstract(cls):
+        return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if not super().validate_configuration(configuration):
@@ -1030,6 +1373,10 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "include_config": True,
         "catch_exceptions": True,
     }
+
+    @classmethod
+    def is_abstract(cls):
+        return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if not super().validate_configuration(configuration):
