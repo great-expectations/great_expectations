@@ -45,7 +45,7 @@ Steps
 
         Expectations follow a naming convention.
 
-        Names of Expectations are snake_case (e.g., ``expect_column_values_to_be_three``).
+        Names of Expectations are snake_case (e.g., ``expect_column_values_to_equal_three``).
 
         Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
 
@@ -56,15 +56,15 @@ Steps
 
     #. Name the file
 
-        The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_be_three.py``).
+        The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_equal_three.py``).
 
-        For example, if you call your Expectation ``expect_column_values_to_be_three``, the file with its implementation should be:   ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
+        For example, if you call your Expectation ``expect_column_values_to_equal_three``, the file with its implementation should be:   ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
 
     #. Name the class
 
         Within the file, update the name of the class that implements your Expectation.
-        Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToBeThree``). The framework will
-        automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_be_three``.
+        Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToEqualThree``). The framework will
+        automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_equal_three``.
         You will make this change in two places:
 
         * Class declaration (search for ``class Expect``)
@@ -160,7 +160,7 @@ Steps
 
     Each example is a dictionary with two keys:
 
-    * ``data``: defines the input data of the example as a table/data frame. In this example the table has one column named "mostly_threes" with 10 rows.
+    * ``data``: defines the input data of the example as a table/data frame. In this example the table has one column named "mostly_threes" with 10 rows. If you define multiple columns, make sure that they have the same number of rows. If possible, include test data and tests that includes null values (``None`` in the python test definition).
     * ``tests``: a list of test cases that use the data defined above as input to validate
 
         * ``title`` should be a descriptive name for the test case. Make sure to have no spaces.
@@ -300,6 +300,7 @@ Steps
                         def _pandas(cls, column, integer=None, **kwargs):
                             return column == integer
 
+                    * Add the new arguments to the test cases in the examples.
 
                 .. admonition:: Note:
 
@@ -427,7 +428,7 @@ Steps
 
     The template file that you used to start your development has some renderer implementations commented out. You can use them as a starting point.
 
-    For more comprehensive documentation consilt this :ref:`how-to guide <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`.
+    For more comprehensive documentation consult this :ref:`how-to guide <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`.
 
 #. **Submit your contribution**
 

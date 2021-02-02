@@ -30,11 +30,13 @@ from great_expectations.validator.validator import Validator
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
+# To learn about the relationship between Metrics and Expectations, please visit
+# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    # Please see {some doc} for information on how to choose an id string for your Metric.
+    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
+    # for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.equal_three"
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
@@ -97,14 +99,16 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     map_metric = "column_values.equal_three"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
+    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
+    # for more information about domain and success keys, and other arguments to Expectations
     success_keys = ("mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see {some doc}
+    # For more info on Renderers, see
+    # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
 

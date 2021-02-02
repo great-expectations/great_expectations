@@ -35,6 +35,24 @@ You will most likely be prompted to install a new template. Rest assured that
 your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
+.. _upgrading_to_0.13:
+
+*************************
+Upgrading to 0.13.x
+*************************
+
+The 0.13.8 release introduces a formal `CheckpointStore`, which is a type of a `ConfigurationStore` that allows any of the supported `StoreBackend` alternatives to be specified for the various configurable components of Great Expectations.  With `CheckpointStore`, developers can save their `Checkpoint` configuration on the local filesystem or in various cloud storage services.
+
+The migration of Great Expectations from 0.12.x to 0.13.8 is seamless.  Simply execute:
+
+.. code-block:: bash
+
+    great_expectations project upgrade
+
+
+on the command line, and if you created any checkpoints in the previous versions, they will become managed under the auspices of the `CheckpointStore` with its `StoreBackend` pointing to the same `checkpoints` directory in your Great Expectations installation directory as was configured prior to the upgrade.
+
+
 .. _upgrading_to_0.12:
 
 *************************

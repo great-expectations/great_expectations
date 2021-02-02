@@ -50,6 +50,16 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         expect_table_column_count_to_be_between
     """
 
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
+
     metric_dependencies = ("table.column_count",)
 
     success_keys = ("value",)

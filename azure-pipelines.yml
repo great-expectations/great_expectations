@@ -55,6 +55,8 @@ stages:
 
                 [GEChanged]
                 great_expectations/**
+                /*.txt
+                /*.yml
 
   - stage: lint
     dependsOn: scope_check
@@ -80,7 +82,7 @@ stages:
               exit $EXIT_STATUS
 
   - stage: required
-    dependsOn: scope_check
+    dependsOn: [scope_check, lint]
     pool:
       vmImage: 'ubuntu-latest'
 

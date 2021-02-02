@@ -1,0 +1,16 @@
+{
+  "skipped_upgrade": false,
+  "update_version": true,
+  "added_checkpoint_store": {
+    "stores": {
+      "checkpoint_store": {
+        "class_name": "CheckpointStore",
+        "store_backend": {
+          "class_name": "TupleFilesystemStoreBackend",
+          "base_directory": "checkpoints/"
+        }
+      }
+    },
+    "checkpoint_store_name": "checkpoint_store"
+  }
+}
