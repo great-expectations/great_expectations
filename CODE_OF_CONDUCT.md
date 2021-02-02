@@ -59,9 +59,9 @@ when an individual is representing the project or its community. Examples of
 representing a project or community include using an official project e-mail
 address, posting via an official social media account, or acting as an appointed
 representative at an online or offline event. Representation of a project may be
-further defined and clarified by project maintainers. 
+further defined and clarified by project maintainers.
 
-The Code of Conduct also applies to any events associated with the Great 
+The Code of Conduct also applies to any events associated with the Great
 Expectations project, both in-person and virtual.
 
 ## Enforcement

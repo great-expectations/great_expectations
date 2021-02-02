@@ -65,7 +65,7 @@ class ColumnValuesAreInLanguage(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
-    """Expect the column to be in a specified language. 
+    """Expect the column to be in a specified language.
 
         Args:
             column (str): \
@@ -76,7 +76,7 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
                 jv, ka, kk, km, kn, ko, ku, ky, la, lb, lo, lt, lv, mg, mk, ml, mn, mr, ms, mt, nb, ne, nl, nn, no, \
                 oc, or, pa, pl, ps, pt, qu, ro, ru, rw, se, si, sk, sl, sq, sr, sv, sw, ta, te, th, tl, tr, ug, uk, \
                 ur, vi, vo, wa, xh, zh, zu
-        
+
         Notes:
             * Language identification uses the [`langid` package](https://github.com/saffsd/langid.py).
             * `langid` uses a custom, permissive [LICENSE](https://github.com/saffsd/langid.py/blob/master/LICENSE),
@@ -149,6 +149,7 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
         "tags": ["nlp", "hackathon"],
         "contributors": ["@victorwyee"],
         "package": "experimental_expectations",
+        "requirements": [],
     }
 
     # This is the id string of the Metric used by this Expectation.
