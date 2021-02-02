@@ -82,7 +82,7 @@ stages:
               exit $EXIT_STATUS
 
   - stage: required
-    dependsOn: scope_check
+    dependsOn: [scope_check, lint]
     pool:
       vmImage: 'ubuntu-latest'
 
