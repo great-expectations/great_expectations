@@ -80,6 +80,15 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
 
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.unique_proportion",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
