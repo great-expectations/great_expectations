@@ -1,19 +1,12 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...core.batch import Batch
-from ...data_asset.util import parse_result_format
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
@@ -22,11 +15,6 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
-
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
 
 
 class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
@@ -92,6 +80,16 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_values_to_be_in_set>`
 
     """
+
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
 
     map_metric = "column_values.not_in_set"
     success_keys = (
