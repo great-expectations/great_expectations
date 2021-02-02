@@ -416,7 +416,7 @@ def test_expectation__get_renderers():
     assert renderer_dict == {
         "standard": {
             "renderer.answer": None,
-            "renderer.diagnostic.observed_value": "20% unexpected",
+            "renderer.diagnostic.observed_value": "25% unexpected",
             "renderer.diagnostic.status_icon": "",
             "renderer.diagnostic.unexpected_statement": "",
             "renderer.diagnostic.unexpected_table": None,
@@ -457,7 +457,7 @@ def test_expectation__get_renderers():
     assert renderer_dict == {
         "standard": {
             "renderer.answer": 'At least 60.0% of values in column "mostly_threes" equal 3.',
-            "renderer.diagnostic.observed_value": "20% unexpected",
+            "renderer.diagnostic.observed_value": "25% unexpected",
             "renderer.diagnostic.status_icon": "",
             "renderer.diagnostic.unexpected_statement": "",
             "renderer.diagnostic.unexpected_table": None,

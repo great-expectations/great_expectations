@@ -1122,12 +1122,13 @@ class DataAsset:
         missing_count = element_count - nonnull_count
 
         if element_count > 0:
-            unexpected_percent_total = unexpected_count / element_count * 100
             missing_percent = missing_count / element_count * 100
 
             if nonnull_count > 0:
+                unexpected_percent_total = unexpected_count / element_count * 100
                 unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
             else:
+                unexpected_percent_total = None
                 unexpected_percent_nonmissing = None
 
         else:

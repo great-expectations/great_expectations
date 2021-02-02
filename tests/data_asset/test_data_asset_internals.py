@@ -473,8 +473,8 @@ def test_format_map_output():
             "missing_percent": 100,
             "partial_unexpected_list": [],
             "unexpected_count": 0,
-            "unexpected_percent": 0.0,
-            "unexpected_percent_total": 0.0,
+            "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
         },
     }
