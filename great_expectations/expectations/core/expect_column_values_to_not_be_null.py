@@ -1,21 +1,10 @@
-from typing import Dict, Optional
-
-import pandas as pd
+from typing import Dict
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import parse_result_format
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    Expectation,
     _format_map_output,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
@@ -72,6 +61,16 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         <great_expectations.execution_engine.execution_engine.ExecutionEngine.expect_column_values_to_be_null>`
 
     """
+
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
 
     map_metric = "column_values.nonnull"
 
