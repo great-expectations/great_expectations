@@ -175,7 +175,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -195,6 +194,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",
                 "prefix": "validations",
+            },
+        },
+        "checkpoint_S3_store": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "checkpoints",
             },
         },
     }
@@ -219,6 +226,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         expectations_store_name="expectations_S3_store",
         validations_store_name="validations_S3_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        checkpoint_store_name="checkpoint_S3_store",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
