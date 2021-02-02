@@ -57,20 +57,24 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
             .having(sa.func.count(column) > 1)
         )
 
+        # Will - 20210126
+        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
+        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
+        # just the column we will be performing the expectation on, and the query is performed against it.
         dialect = kwargs.get("_dialect", None)
         sql_engine = kwargs.get("_sqlalchemy_engine", None)
-        if dialect == "mysql":
-            table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-            create_query = sa.select([sa.column(column)]).select_from(_table)
-            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=create_query
+        if sql_engine and dialect and dialect.dialect.name == "mysql":
+            temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_creation_query = sa.select([column]).select_from(_table)
+            temp_table_stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+                table_name=temp_table_name, custom_sql=temp_table_creation_query
             )
-            sql_engine.engine.execute(stmt)
+            sql_engine.execute(temp_table_stmt)
             dup_query = (
-                sa.select([sa.column(column)])
-                .select_from(sa.text(table_name))
-                .group_by(sa.column(column))
-                .having(sa.func.count(sa.column(column)) > 1)
+                sa.select([column])
+                .select_from(sa.text(temp_table_name))
+                .group_by(column)
+                .having(sa.func.count(column) > 1)
             )
         return column.notin_(dup_query)
 

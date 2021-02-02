@@ -1785,18 +1785,18 @@ WHERE
         )
         # Will - 20210126
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
-        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created,
-        # and the query is performed against it
+        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
+        # just the column we will be performing the expectation on, and the query is performed against it.
         if self.sql_engine_dialect.name.lower() == "mysql":
-            table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-            create_query = sa.select([sa.column(column)]).select_from(self._table)
-            stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=create_query
+            temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_creation_query = sa.select([sa.column(column)]).select_from(self._table)
+            temp_table_stmt = "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+                table_name=temp_table_name, custom_sql=temp_table_creation_query
             )
-            self.engine.execute(stmt)
+            self.engine.execute(temp_table_stmt)
             dup_query = (
                 sa.select([sa.column(column)])
-                .select_from(sa.text(table_name))
+                .select_from(sa.text(temp_table_name))
                 .group_by(sa.column(column))
                 .having(sa.func.count(sa.column(column)) > 1)
             )
