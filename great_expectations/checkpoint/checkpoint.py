@@ -597,26 +597,26 @@ class SimpleCheckpoint(Checkpoint):
         )
 
     def run(
-            self,
-            template_name: Optional[str] = None,
-            run_name_template: Optional[str] = None,
-            expectation_suite_name: Optional[str] = None,
-            batch_request: Optional[Union[BatchRequest, dict]] = None,
-            action_list: Optional[List[dict]] = None,
-            evaluation_parameters: Optional[dict] = None,
-            runtime_configuration: Optional[dict] = None,
-            validations: Optional[List[dict]] = None,
-            profilers: Optional[List[dict]] = None,
-            run_id: Optional[Union[str, RunIdentifier]] = None,
-            run_name: Optional[str] = None,
-            run_time: Optional[Union[str, datetime]] = None,
-            result_format: Optional[str] = None,
-            # the following four arguments are specific to SimpleCheckpoint
-            site_names: Optional[Union[str, List[str]]] = "all",
-            slack_webhook: Optional[str] = None,
-            notify_on: Optional[str] = "all",
-            notify_with: Optional[Union[str, List[str]]] = "all",
-            **kwargs
+        self,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime]] = None,
+        result_format: Optional[str] = None,
+        # the following four arguments are specific to SimpleCheckpoint
+        site_names: Optional[Union[str, List[str]]] = "all",
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = "all",
+        notify_with: Optional[Union[str, List[str]]] = "all",
+        **kwargs,
     ) -> CheckpointResult:
         new_baseline_config = None
 
@@ -639,7 +639,9 @@ class SimpleCheckpoint(Checkpoint):
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
-            action_list=new_baseline_config.action_list if new_baseline_config else action_list,
+            action_list=new_baseline_config.action_list
+            if new_baseline_config
+            else action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
             validations=validations,
@@ -648,5 +650,5 @@ class SimpleCheckpoint(Checkpoint):
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
-            **kwargs
+            **kwargs,
         )
