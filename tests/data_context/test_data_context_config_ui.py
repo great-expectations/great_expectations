@@ -372,7 +372,6 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -385,6 +384,9 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         "store_backend"
     ]["root_directory"] = test_root_directory
     desired_config["stores"][desired_config["validations_store_name"]]["store_backend"][
+        "root_directory"
+    ] = test_root_directory
+    desired_config["stores"][desired_config["checkpoint_store_name"]]["store_backend"][
         "root_directory"
     ] = test_root_directory
     desired_config["data_docs_sites"]["local_site"]["store_backend"][
