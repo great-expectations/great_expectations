@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import pandas as pd
 
 from great_expectations.core import IDDict
-from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
@@ -36,6 +36,7 @@ except ImportError:
 try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.engine.url import URL
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
@@ -111,7 +112,10 @@ def _get_dialect_type_module(dialect):
     # Bigquery works with newer versions, but use a patch if we had to define bigquery_types_tuple
     try:
         if (
-            isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect,)
+            isinstance(
+                dialect,
+                pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+            )
             and bigquery_types_tuple is not None
         ):
             return bigquery_types_tuple
@@ -213,11 +217,15 @@ class SqlAlchemyBatchData:
                     )
                 # In BigQuery the table name is already qualified with its schema name
                 self._selectable = sa.Table(
-                    table_name, sa.MetaData(), schema_name=None,
+                    table_name,
+                    sa.MetaData(),
+                    schema_name=None,
                 )
             else:
                 self._selectable = sa.Table(
-                    table_name, sa.MetaData(), schema_name=schema_name,
+                    table_name,
+                    sa.MetaData(),
+                    schema_name=schema_name,
                 )
 
         elif create_temp_table:
@@ -246,7 +254,9 @@ class SqlAlchemyBatchData:
                 temp_table_schema_name=temp_table_schema_name,
             )
             self._selectable = sa.Table(
-                generated_table_name, sa.MetaData(), schema_name=temp_table_schema_name,
+                generated_table_name,
+                sa.MetaData(),
+                schema_name=temp_table_schema_name,
             )
         else:
             if query:
@@ -285,8 +295,10 @@ class SqlAlchemyBatchData:
         elif self.sql_engine_dialect.name.lower() == "snowflake":
             if temp_table_schema_name is not None:
                 temp_table_name = temp_table_schema_name + "." + temp_table_name
-            stmt = "CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}".format(
-                temp_table_name=temp_table_name, query=query
+            stmt = (
+                "CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}".format(
+                    temp_table_name=temp_table_name, query=query
+                )
             )
         elif self.sql_engine_dialect.name == "mysql":
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the
@@ -466,7 +478,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             **{"class_name": self.__class__.__name__}
         )
         filter_properties_dict(
-            properties=self._config, inplace=True,
+            properties=self._config,
+            inplace=True,
         )
 
     @property
@@ -513,7 +526,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _get_sqlalchemy_key_pair_auth_url(
         self, drivername: str, credentials: dict
-    ) -> Tuple[str, dict]:
+    ) -> Tuple["sa.engine.url.URL", Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -603,8 +616,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
-            if domain_kwargs["table"] != data_object.record_set_name:
-                raise ValueError("Unrecognized table name.")
+            # TODO: Add logic to handle record_set_name once implemented
+            # (i.e. multiple record sets (tables) in one batch
+            if domain_kwargs["table"] != data_object.selectable.name:
+                selectable = sa.Table(
+                    domain_kwargs["table"],
+                    sa.MetaData(),
+                    schema_name=data_object._schema_name,
+                )
             else:
                 selectable = data_object.selectable
         elif "query" in domain_kwargs:
@@ -762,7 +781,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
     def resolve_metric_bundle(
-        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
+        self,
+        metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
     ) -> dict:
         """For every metrics in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds a
         bundles the metrics into one large query dictionary so that they are all executed simultaneously. Will fail if
@@ -839,7 +859,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return 1 == 1
 
     def _split_on_column_value(
-        self, table_name: str, column_name: str, partition_definition: dict,
+        self,
+        table_name: str,
+        column_name: str,
+        partition_definition: dict,
     ):
         """Split using the values in the named column"""
 
@@ -855,7 +878,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Convert the values in the named column to the given date_format, and split on that"""
 
         return (
-            sa.func.strftime(date_format_string, sa.column(column_name),)
+            sa.func.strftime(
+                date_format_string,
+                sa.column(column_name),
+            )
             == partition_definition[column_name]
         )
 
@@ -874,14 +900,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def _split_on_mod_integer(
-        self, table_name: str, column_name: str, mod: int, partition_definition: dict,
+        self,
+        table_name: str,
+        column_name: str,
+        mod: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
         return sa.column(column_name) % mod == partition_definition[column_name]
 
     def _split_on_multi_column_values(
-        self, table_name: str, column_names: List[str], partition_definition: dict,
+        self,
+        table_name: str,
+        column_names: List[str],
+        partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
 
@@ -915,7 +948,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     # _sample_using_md5
 
     def _sample_using_random(
-        self, p: float = 0.1,
+        self,
+        p: float = 0.1,
     ):
         """Take a random sample of rows, retaining proportion p
 
@@ -924,19 +958,27 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return sa.func.random() < p
 
     def _sample_using_mod(
-        self, column_name, mod: int, value: int,
+        self,
+        column_name,
+        mod: int,
+        value: int,
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
         return sa.column(column_name) % mod == value
 
     def _sample_using_a_list(
-        self, column_name: str, value_list: list,
+        self,
+        column_name: str,
+        value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
         return sa.column(column_name).in_(value_list)
 
     def _sample_using_md5(
-        self, column_name: str, hash_digits: int = 1, hash_value: str = "f",
+        self,
+        column_name: str,
+        hash_digits: int = 1,
+        hash_value: str = "f",
     ):
         """Hash the values in the named column, and split on that"""
         return (
@@ -981,15 +1023,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .select_from(sa.text(table_name))
                     .where(
                         sa.and_(
-                            split_clause, sampler_fn(**batch_spec["sampling_kwargs"]),
+                            split_clause,
+                            sampler_fn(**batch_spec["sampling_kwargs"]),
                         )
                     )
                 )
         return sa.select("*").select_from(sa.text(table_name)).where(split_clause)
 
     def get_batch_data_and_markers(
-        self, batch_spec
-    ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:
 
         selectable = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
         if "bigquery_temp_table" in batch_spec:

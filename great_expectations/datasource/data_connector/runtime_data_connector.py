@@ -1,8 +1,12 @@
 import logging
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, cast
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchRequest,
+    BatchRequestBase,
+)
 from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionDefinitionSubset,
@@ -45,8 +49,7 @@ class RuntimeDataConnector(DataConnector):
         self._runtime_keys = runtime_keys
 
     def _refresh_data_references_cache(self):
-        """
-        """
+        """"""
         # Map data_references to batch_definitions
         data_reference: str = self._get_data_reference_list()[0]
         mapped_batch_definition_list: List[
@@ -68,12 +71,11 @@ class RuntimeDataConnector(DataConnector):
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
     ) -> List[str]:
-        """Fetch data_references corresponding to data_asset_name from the cache.
-        """
+        """Fetch data_references corresponding to data_asset_name from the cache."""
         batch_definition_list: List[
             BatchDefinition
-        ] = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
+        ] = self._get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequestBase(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,
@@ -104,9 +106,10 @@ class RuntimeDataConnector(DataConnector):
         # This will fetch ALL batch_definitions in the cache
         batch_definition_list: List[
             BatchDefinition
-        ] = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name=self.datasource_name, data_connector_name=self.name,
+        ] = self._get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequestBase(
+                datasource_name=self.datasource_name,
+                data_connector_name=self.name,
             )
         )
 
@@ -116,13 +119,15 @@ class RuntimeDataConnector(DataConnector):
 
         return list(data_asset_names)
 
+    # noinspection PyMethodOverriding
     def get_batch_data_and_metadata(
-        self, batch_definition: BatchDefinition, batch_data: Any,
-    ) -> Tuple[
-        Any, BatchSpec, BatchMarkers,  # batch_data
-    ]:
+        self,
+        batch_definition: BatchDefinition,
+        batch_data: Any,
+    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
-            batch_definition=batch_definition, batch_data=batch_data,
+            batch_definition=batch_definition,
+            batch_data=batch_data,
         )
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
@@ -134,7 +139,21 @@ class RuntimeDataConnector(DataConnector):
         )
 
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequest,
+        self,
+        batch_request: BatchRequest,
+    ) -> List[BatchDefinition]:
+        batch_data: Any = batch_request.batch_data
+        batch_request = BatchRequest(
+            batch_data=batch_data, **batch_request.get_json_dict()
+        )  # Make sure that attributes are valid.
+        batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
+        return self._get_batch_definition_list_from_batch_request(
+            batch_request=batch_request_base
+        )
+
+    def _get_batch_definition_list_from_batch_request(
+        self,
+        batch_request: BatchRequestBase,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
@@ -184,20 +203,26 @@ class RuntimeDataConnector(DataConnector):
         ]
 
     def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition,
+        self,
+        batch_definition: BatchDefinition,
     ) -> str:
         if not isinstance(batch_definition, BatchDefinition):
             raise TypeError(
                 "batch_definition is not of an instance of type BatchDefinition"
             )
-        partition_definition: PartitionDefinition = batch_definition.partition_definition
+        partition_definition: PartitionDefinition = (
+            batch_definition.partition_definition
+        )
         data_reference: str = self._get_data_reference_name(
             partition_identifiers=partition_definition
         )
         return data_reference
 
     def _self_check_fetch_batch(
-        self, pretty_print, example_data_reference, data_asset_name,
+        self,
+        pretty_print,
+        example_data_reference,
+        data_asset_name,
     ):
         return {}
 
@@ -208,8 +233,11 @@ class RuntimeDataConnector(DataConnector):
         return {}
 
     # This method is currently called called only in tests.
+    # noinspection PyMethodOverriding
     def build_batch_spec(
-        self, batch_definition: BatchDefinition, batch_data: Any,
+        self,
+        batch_definition: BatchDefinition,
+        batch_data: Any,
     ) -> RuntimeDataBatchSpec:
         batch_spec = super().build_batch_spec(batch_definition=batch_definition)
         batch_spec["batch_data"] = batch_data
@@ -226,7 +254,7 @@ class RuntimeDataConnector(DataConnector):
         )
         return data_reference_name
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
+    def _validate_batch_request(self, batch_request: BatchRequestBase):
         super()._validate_batch_request(batch_request=batch_request)
 
         # Insure that batch_data and batch_request satisfy the "if and only if" condition.
@@ -251,8 +279,6 @@ class RuntimeDataConnector(DataConnector):
             )
 
     def _validate_partition_identifiers(self, partition_identifiers: dict):
-        """
-        """
         if partition_identifiers is None:
             partition_identifiers = {}
         self._validate_runtime_keys_configuration(

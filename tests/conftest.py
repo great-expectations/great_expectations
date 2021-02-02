@@ -6,7 +6,7 @@ import random
 import shutil
 import threading
 from types import ModuleType
-from typing import Union
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -21,7 +21,9 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
 from great_expectations.data_context.util import (
@@ -100,10 +102,14 @@ def pytest_addoption(parser):
         help="If set, suppress all tests against postgresql",
     )
     parser.addoption(
-        "--mysql", action="store_true", help="If set, execute tests against mysql",
+        "--mysql",
+        action="store_true",
+        help="If set, execute tests against mysql",
     )
     parser.addoption(
-        "--mssql", action="store_true", help="If set, execute tests against mssql",
+        "--mssql",
+        action="store_true",
+        help="If set, execute tests against mssql",
     )
     parser.addoption(
         "--aws-integration",
@@ -126,7 +132,7 @@ def build_test_backends_list(metafunc):
     if not no_sqlalchemy:
         test_backends += ["sqlite"]
 
-        sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
+        sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
 
         no_postgresql = metafunc.config.getoption("--no-postgresql")
         if not (sa is None or no_postgresql):
@@ -191,7 +197,7 @@ def build_test_backends_list_cfe(metafunc):
     if not no_sqlalchemy:
         test_backends += ["sqlite"]
 
-        sa: Union[ModuleType, None] = import_library_module(module_name="sqlalchemy")
+        sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
 
         no_postgresql = metafunc.config.getoption("--no-postgresql")
         if not (sa is None or no_postgresql):
@@ -1356,15 +1362,25 @@ def numeric_high_card_dict():
 @pytest.fixture
 def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
     schemas = {
-        "pandas": {"norm_0_1": "float64",},
+        "pandas": {
+            "norm_0_1": "float64",
+        },
         "postgresql": {
             # "norm_0_1": "DOUBLE_PRECISION",
             "norm_0_1": "NUMERIC",
         },
-        "sqlite": {"norm_0_1": "FLOAT",},
-        "mysql": {"norm_0_1": "DOUBLE",},
-        "mssql": {"norm_0_1": "FLOAT",},
-        "spark": {"norm_0_1": "FloatType",},
+        "sqlite": {
+            "norm_0_1": "FLOAT",
+        },
+        "mysql": {
+            "norm_0_1": "DOUBLE",
+        },
+        "mssql": {
+            "norm_0_1": "FLOAT",
+        },
+        "spark": {
+            "norm_0_1": "FloatType",
+        },
     }
     return get_dataset(test_backend, numeric_high_card_dict, schemas=schemas)
 
@@ -1387,12 +1403,24 @@ def datetime_dataset(test_backend):
     }
 
     schemas = {
-        "pandas": {"datetime": "datetime64",},
-        "postgresql": {"datetime": "TIMESTAMP",},
-        "sqlite": {"datetime": "TIMESTAMP",},
-        "mysql": {"datetime": "TIMESTAMP",},
-        "mssql": {"datetime": "DATETIME",},
-        "spark": {"datetime": "TimestampType",},
+        "pandas": {
+            "datetime": "datetime64",
+        },
+        "postgresql": {
+            "datetime": "TIMESTAMP",
+        },
+        "sqlite": {
+            "datetime": "TIMESTAMP",
+        },
+        "mysql": {
+            "datetime": "TIMESTAMP",
+        },
+        "mssql": {
+            "datetime": "DATETIME",
+        },
+        "spark": {
+            "datetime": "TimestampType",
+        },
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
@@ -1512,12 +1540,24 @@ def non_numeric_low_card_dataset(test_backend):
         ]
     }
     schemas = {
-        "pandas": {"lowcardnonnum": "str",},
-        "postgresql": {"lowcardnonnum": "TEXT",},
-        "sqlite": {"lowcardnonnum": "VARCHAR",},
-        "mysql": {"lowcardnonnum": "TEXT",},
-        "mssql": {"lowcardnonnum": "VARCHAR",},
-        "spark": {"lowcardnonnum": "StringType",},
+        "pandas": {
+            "lowcardnonnum": "str",
+        },
+        "postgresql": {
+            "lowcardnonnum": "TEXT",
+        },
+        "sqlite": {
+            "lowcardnonnum": "VARCHAR",
+        },
+        "mysql": {
+            "lowcardnonnum": "TEXT",
+        },
+        "mssql": {
+            "lowcardnonnum": "VARCHAR",
+        },
+        "spark": {
+            "lowcardnonnum": "StringType",
+        },
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
@@ -1940,12 +1980,30 @@ def non_numeric_high_card_dataset(test_backend):
         ],
     }
     schemas = {
-        "pandas": {"highcardnonnum": "str", "medcardnonnum": "str",},
-        "postgresql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
-        "sqlite": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
-        "mysql": {"highcardnonnum": "TEXT", "medcardnonnum": "TEXT",},
-        "mssql": {"highcardnonnum": "VARCHAR", "medcardnonnum": "VARCHAR",},
-        "spark": {"highcardnonnum": "StringType", "medcardnonnum": "StringType",},
+        "pandas": {
+            "highcardnonnum": "str",
+            "medcardnonnum": "str",
+        },
+        "postgresql": {
+            "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
+        },
+        "sqlite": {
+            "highcardnonnum": "VARCHAR",
+            "medcardnonnum": "VARCHAR",
+        },
+        "mysql": {
+            "highcardnonnum": "TEXT",
+            "medcardnonnum": "TEXT",
+        },
+        "mssql": {
+            "highcardnonnum": "VARCHAR",
+            "medcardnonnum": "VARCHAR",
+        },
+        "spark": {
+            "highcardnonnum": "StringType",
+            "medcardnonnum": "StringType",
+        },
     }
     return get_dataset(test_backend, data, schemas=schemas)
 
@@ -2183,7 +2241,7 @@ def postgresql_engine(test_backend):
 
 
 @pytest.fixture
-def empty_data_context(tmp_path_factory):
+def empty_data_context(tmp_path_factory) -> DataContext:
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
@@ -2193,24 +2251,10 @@ def empty_data_context(tmp_path_factory):
 
 
 @pytest.fixture
-def empty_data_context_v3(tmp_path_factory):
-    project_path = str(tmp_path_factory.mktemp("empty_data_context_v3"))
-    context = ge.data_context.DataContextV3.create(project_path)
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
-    os.makedirs(asset_config_path, exist_ok=True)
-    return context
-
-
-@pytest.fixture
-def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
-    """
-    Based on titanic_data_context, but with 2 identical batches of
-    data asset "titanic", with a PandasExecutionEngine
-    :param tmp_path_factory:
-    :return:
-    """
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context_v3"))
+def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store(
+    tmp_path_factory,
+):
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "../data/titanic")
@@ -2223,30 +2267,342 @@ def titanic_pandas_multibatch_data_context_v3(tmp_path_factory):
     )
     shutil.copy(
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(os.path.join(context_path, "../data/titanic/Titanic_19120414_1313.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(context_path, "../data/titanic/Titanic_1911.csv")),
     )
     shutil.copy(
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(context_path, "../data/titanic/Titanic_1912.csv")),
     )
-    context = ge.data_context.DataContextV3(context_path)
+    context = ge.data_context.DataContext(context_path)
 
     datasource_config = f"""
-            class_name: Datasource
+        class_name: Datasource
 
-            execution_engine:
-                class_name: PandasExecutionEngine
+        execution_engine:
+            class_name: PandasExecutionEngine
 
-            data_connectors:
-                my_data_connector:
-                    class_name: InferredAssetFilesystemDataConnector
-                    base_directory: {data_path}
-                    default_regex:
-                        pattern: (.*)\\.csv
+        data_connectors:
+            my_basic_data_connector:
+                class_name: InferredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                default_regex:
+                    pattern: (.*)\\.csv
+                    group_names:
+                        - data_asset_name
+
+            my_special_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users:
+                        base_directory: {data_path}
+                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
                         group_names:
-                            - data_asset_name
-            """
-    context.test_yaml_config(name="titanic_multi_batch", yaml_config=datasource_config)
+                            - name
+                            - timestamp
+                            - size
+
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users: {{}}
+
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                runtime_keys:
+                    - pipeline_stage_name
+                    - airflow_run_id
+        """
+
+    context.test_yaml_config(name="my_datasource", yaml_config=datasource_config)
+    return context
+
+
+@pytest.fixture
+def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+
+    # add simple template config
+    simple_checkpoint_template_config = CheckpointConfig(
+        name="my_simple_template_checkpoint",
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template-$VAR",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+        },
+        runtime_configuration={
+            "result_format": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 20,
+            }
+        },
+    )
+    simple_checkpoint_template_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_template_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_template_config_key,
+        value=simple_checkpoint_template_config,
+    )
+
+    # add nested template configs
+    nested_checkpoint_template_config_1 = CheckpointConfig(
+        name="my_nested_checkpoint_template_1",
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template-$VAR",
+        expectation_suite_name="suite_from_template_1",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        evaluation_parameters={
+            "environment": "FOO",
+            "tolerance": "FOOBOO",
+            "aux_param_0": "FOOBARBOO",
+            "aux_param_1": "FOOBARBOO",
+            "template_1_key": 456,
+        },
+        runtime_configuration={
+            "result_format": "FOOBARBOO",
+            "partial_unexpected_count": "FOOBARBOO",
+            "template_1_key": 123,
+        },
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource_template_1",
+                    "data_connector_name": "my_special_data_connector_template_1",
+                    "data_asset_name": "users_from_template_1",
+                    "partition_request": {"partition_index": -999},
+                }
+            }
+        ],
+    )
+    nested_checkpoint_template_config_1_key = ConfigurationIdentifier(
+        configuration_key=nested_checkpoint_template_config_1.name
+    )
+    context.checkpoint_store.set(
+        key=nested_checkpoint_template_config_1_key,
+        value=nested_checkpoint_template_config_1,
+    )
+
+    nested_checkpoint_template_config_2 = CheckpointConfig(
+        name="my_nested_checkpoint_template_2",
+        config_version=1,
+        template_name="my_nested_checkpoint_template_1",
+        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+            {
+                "name": "new_action_from_template_2",
+                "action": {"class_name": "Template2SpecialAction"},
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+        },
+        runtime_configuration={
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+        },
+    )
+    nested_checkpoint_template_config_2_key = ConfigurationIdentifier(
+        configuration_key=nested_checkpoint_template_config_2.name
+    )
+    context.checkpoint_store.set(
+        key=nested_checkpoint_template_config_2_key,
+        value=nested_checkpoint_template_config_2,
+    )
+
+    nested_checkpoint_template_config_3 = CheckpointConfig(
+        name="my_nested_checkpoint_template_3",
+        config_version=1,
+        template_name="my_nested_checkpoint_template_2",
+        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+            {
+                "name": "new_action_from_template_3",
+                "action": {"class_name": "Template3SpecialAction"},
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+            "template_3_key": 123,
+        },
+        runtime_configuration={
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+            "template_3_key": "bloopy!",
+        },
+    )
+    nested_checkpoint_template_config_3_key = ConfigurationIdentifier(
+        configuration_key=nested_checkpoint_template_config_3.name
+    )
+    context.checkpoint_store.set(
+        key=nested_checkpoint_template_config_3_key,
+        value=nested_checkpoint_template_config_3,
+    )
+
+    # add minimal SimpleCheckpoint
+    simple_checkpoint_config = CheckpointConfig(
+        name="my_minimal_simple_checkpoint",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+    )
+    simple_checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_config_key,
+        value=simple_checkpoint_config,
+    )
+
+    # add SimpleCheckpoint with slack webhook
+    simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_slack",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        slack_webhook="https://hooks.slack.com/foo/bar",
+    )
+    simple_checkpoint_with_slack_webhook_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_slack_webhook_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_slack_webhook_config_key,
+        value=simple_checkpoint_with_slack_webhook_config,
+    )
+
+    # add SimpleCheckpoint with slack webhook and notify_with
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_slack_and_notify_with_all",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        slack_webhook="https://hooks.slack.com/foo/bar",
+        notify_with="all",
+    )
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key,
+        value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
+    )
+
+    # add SimpleCheckpoint with site_names
+    simple_checkpoint_with_site_names_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_site_names",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        site_names=["local_site"],
+    )
+    simple_checkpoint_with_site_names_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_site_names_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_site_names_config_key,
+        value=simple_checkpoint_with_site_names_config,
+    )
+
     return context
 
 
@@ -2256,11 +2612,13 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     root_dir = empty_data_context.root_directory
     ge_config_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_basic_with_variables.yml",
+        __file__,
+        "./test_fixtures/great_expectations_basic_with_variables.yml",
     )
     shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
     config_variables_path = file_relative_path(
-        __file__, "./test_fixtures/config_variables.yml",
+        __file__,
+        "./test_fixtures/config_variables.yml",
     )
     shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
     return DataContext(context_root_dir=root_dir)
@@ -2314,7 +2672,28 @@ def titanic_data_context(tmp_path_factory):
     data_path = os.path.join(context_path, "../data")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(
-        __file__, "./test_fixtures/great_expectations_titanic.yml"
+        __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "../data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_titanic_pre_v013_no_data_docs.yml"
     )
     shutil.copy(
         titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
@@ -2348,7 +2727,7 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 
 
 @pytest.fixture
-def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
+def titanic_data_context_stats_enabled_no_config_store(tmp_path_factory, monkeypatch):
     # Reenable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
@@ -2359,6 +2738,29 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
+    # Reenable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "../data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
     )
     shutil.copy(
         titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
@@ -2486,6 +2888,75 @@ def site_builder_data_context_with_html_store_titanic_random(
 
 
 @pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
+def site_builder_data_context_v013_with_html_store_titanic_random(
+    tmp_path_factory, filesystem_csv_3
+):
+    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    project_dir = os.path.join(base_dir, "project_path")
+    os.mkdir(project_dir)
+
+    os.makedirs(os.path.join(project_dir, "data"))
+    os.makedirs(os.path.join(project_dir, "data/titanic"))
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(os.path.join(project_dir, "data/titanic/Titanic.csv")),
+    )
+
+    os.makedirs(os.path.join(project_dir, "data/random"))
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f1.csv"),
+        str(os.path.join(project_dir, "data/random/f1.csv")),
+    )
+    shutil.copy(
+        os.path.join(filesystem_csv_3, "f2.csv"),
+        str(os.path.join(project_dir, "data/random/f2.csv")),
+    )
+    ge.data_context.DataContext.create(project_dir)
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/great_expectations_v013_site_builder.yml"
+        ),
+        str(os.path.join(project_dir, "great_expectations", "great_expectations.yml")),
+    )
+    context = ge.data_context.DataContext(
+        context_root_dir=os.path.join(project_dir, "great_expectations")
+    )
+
+    context.add_datasource(
+        "titanic",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": os.path.join(project_dir, "data/titanic/"),
+            }
+        },
+    )
+    context.add_datasource(
+        "random",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": os.path.join(project_dir, "data/random/"),
+            }
+        },
+    )
+
+    context.profile_datasource("titanic")
+    context.profile_datasource("random")
+    context.profile_datasource(context.list_datasources()[0]["name"])
+
+    context._project_config.anonymous_usage_statistics = {
+        "enabled": True,
+        "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
+    }
+
+    return context
+
+
+@pytest.fixture
 def titanic_multibatch_data_context(tmp_path_factory):
     """
     Based on titanic_data_context, but with 2 identical batches of
@@ -2536,6 +3007,140 @@ def v10_project_directory(tmp_path_factory):
 
 
 @pytest.fixture
+def v20_project_directory(tmp_path_factory):
+    """
+    GE config_version: 2 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v20_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v20_project/"
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_basic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_with_bad_datasource(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+
+    This DataContext has a connection to a datasource named my_postgres_db
+    which is not a valid datasource.
+
+    It is used by test_get_batch_multiple_datasources_do_not_scan_all()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_parameterized_expectation_suite_no_checkpoint_store_with_usage_statistics_enabled(
+    tmp_path_factory,
+):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir, "great_expectations_basic_with_usage_stats_enabled.yml"
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
 def data_context_parameterized_expectation_suite(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
@@ -2546,10 +3151,56 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_basic.yml"),
+        os.path.join(fixture_dir, "great_expectations_v013_basic.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(asset_config_path, "my_dag_node/default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
+        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
+    tmp_path_factory,
+):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    os.makedirs(
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
+        ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
@@ -2588,7 +3239,8 @@ def data_context_with_bad_notebooks(tmp_path_factory):
     custom_notebook_assets_dir = "notebook_assets"
 
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"),
@@ -2621,7 +3273,8 @@ def data_context_custom_notebooks(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
@@ -2651,14 +3304,18 @@ def data_context_simple_expectation_suite(tmp_path_factory):
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"), exist_ok=True,
+        os.path.join(asset_config_path, "my_dag_node"),
+        exist_ok=True,
     )
     shutil.copy(
         os.path.join(fixture_dir, "great_expectations_basic.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "rendering_fixtures/expectations_suite_1.json",),
+        os.path.join(
+            fixture_dir,
+            "rendering_fixtures/expectations_suite_1.json",
+        ),
         os.path.join(asset_config_path, "default.json"),
     )
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
@@ -2675,6 +3332,24 @@ def data_context_simple_expectation_suite(tmp_path_factory):
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
     return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture()
+def filesystem_csv_data_context_with_validation_operators(
+    titanic_data_context_stats_enabled, filesystem_csv_2
+):
+    titanic_data_context_stats_enabled.add_datasource(
+        "rad_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return titanic_data_context_stats_enabled
 
 
 @pytest.fixture()
@@ -2745,7 +3420,12 @@ def filesystem_csv_4(tmp_path_factory):
     base_dir = str(base_dir)
 
     # Put a file in the directory
-    toy_dataset = PandasDataset({"x": [1, 2, 3], "y": [1, 2, 3],})
+    toy_dataset = PandasDataset(
+        {
+            "x": [1, 2, 3],
+            "y": [1, 2, 3],
+        }
+    )
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
 
     return base_dir
@@ -2937,14 +3617,18 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
         raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
     db_file = file_relative_path(
-        __file__, os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
     )
 
     engine = sa.create_engine(f"sqlite:////{db_file}")
     conn = engine.connect()
 
     # Build a SqlAlchemyDataset using that database
-    return SqlAlchemyExecutionEngine(name="test_sql_execution_engine", engine=conn,)
+    return SqlAlchemyExecutionEngine(
+        name="test_sql_execution_engine",
+        engine=conn,
+    )
 
 
 @pytest.fixture
@@ -3091,11 +3775,12 @@ SELECT EXISTS (
 
 
 @pytest.fixture
-def data_context_with_sql_datasource_for_testing_get_batch(empty_data_context_v3,):
-    context = empty_data_context_v3
+def data_context_with_sql_datasource_for_testing_get_batch(sa, empty_data_context):
+    context = empty_data_context
 
     db_file = file_relative_path(
-        __file__, "test_sets/test_cases_for_sql_data_connector.db",
+        __file__,
+        "test_sets/test_cases_for_sql_data_connector.db",
     )
 
     config = yaml.load(
@@ -3128,7 +3813,7 @@ introspection:
     )
 
     try:
-        context.add_datasource("my_sqlite_db", config)
+        context.add_datasource("my_sqlite_db", **config)
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
@@ -3152,7 +3837,7 @@ data_connectors:
         class_name: RuntimeDataConnector
         runtime_keys:
         - pipeline_stage_name
-        - run_id
+        - airflow_run_id
         - custom_key_0
 
 execution_engine:
@@ -3160,8 +3845,12 @@ execution_engine:
 
     """,
         ),
-        runtime_environment={"name": "my_datasource",},
-        config_defaults={"module_name": "great_expectations.datasource",},
+        runtime_environment={
+            "name": "my_datasource",
+        },
+        config_defaults={
+            "module_name": "great_expectations.datasource",
+        },
     )
 
     return basic_datasource

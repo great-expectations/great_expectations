@@ -17,6 +17,7 @@ from great_expectations.expectations.expectation import (
     TableExpectation,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -132,6 +133,15 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     map_metric = "column_values.of_type"
     success_keys = (
         "type_",
@@ -155,6 +165,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,
@@ -211,7 +222,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         ]
 
     def _validate_pandas(
-        self, actual_column_type, expected_type,
+        self,
+        actual_column_type,
+        expected_type,
     ):
         if expected_type is None:
             success = True
@@ -279,7 +292,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         }
 
     def _validate_spark(
-        self, actual_column_type, expected_type,
+        self,
+        actual_column_type,
+        expected_type,
     ):
         if expected_type is None:
             success = True
@@ -406,7 +421,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             )
 
 
-def _get_dialect_type_module(execution_engine,):
+def _get_dialect_type_module(
+    execution_engine,
+):
     if execution_engine.dialect is None:
         logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."

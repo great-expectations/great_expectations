@@ -27,12 +27,14 @@ The Data Connector uses ``Partitions`` to identify the available batches availab
 
 A **Partition** is what differentiates a specific ``Batch`` of data that is part of a Data Asset. The partition uniquely identifies a subset of data based on the purpose for which you validate, such as the most recent delivery. The ``ConfiguredAssetFilesystemDataConnector`` can use a regex strring to match files and prouce named match groups that define unique partitions. Data Connectors use **Sorters** to help define a unique order for partitions, such as sorting files by date or alphabetically.
 
+.. _specifying_batches:
 Batches
 =========
 
 The main goal of Data Connectors is to provide useful guarantees about *Batches*, for example ensuring that they cover data from non-overlapping date ranges. A **Batch** is a combination of data and metadata.
 
-    .. image:: /images/batch_what_is_a_batch.png
+    .. image:: https://lucid.app/publicSegments/view/5eddbad8-d189-4f72-9af3-f94155fb5523/image.png
+
 
 The ``Datasource`` is responsible for orchestrating the building of a Batch, using the following components:
 
@@ -144,7 +146,7 @@ A full journey
 
 Let's follow the outline in this diagram to follow the journey from ``BatchRequest`` to ``BatchDefinition`` to ``BatchSpec`` to ``Batch``:
 
-    .. image:: /images/batch_life_of_a_batch.png
+    .. image:: https://lucid.app/publicSegments/view/429a4083-ad56-477c-907a-671df36e3346/image.png
 
 1. ``BatchRequest``
 
@@ -199,7 +201,7 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
 
 
 ************************************************************
-RuntimeDataConnector 
+RuntimeDataConnector
 ************************************************************
 
 A ``RuntimeDataConnector`` is a special kind of DataConnector that supports easy integration with Pipeline Runners where the data is already available as a reference that needs only a lightweight wrapper to track validations.

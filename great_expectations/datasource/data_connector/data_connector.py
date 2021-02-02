@@ -2,11 +2,13 @@ import logging
 import random
 from typing import Any, List, Optional, Tuple
 
-from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
-from great_expectations.core.id_dict import BatchSpec
-from great_expectations.datasource.data_connector.util import (
-    fetch_batch_data_as_pandas_df,
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchMarkers,
+    BatchRequest,
+    BatchRequestBase,
 )
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -40,6 +42,15 @@ class DataConnector:
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
     ):
+        """
+        Base class for DataConnectors
+
+        Args:
+            name (str): required name for DataConnector
+            datasource_name (str): required name for datasource
+            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+
+        """
         self._name = name
         self._datasource_name = datasource_name
         self._execution_engine = execution_engine
@@ -66,10 +77,17 @@ class DataConnector:
         self._data_context_root_directory = data_context_root_directory
 
     def get_batch_data_and_metadata(
-        self, batch_definition: BatchDefinition,
-    ) -> Tuple[
-        Any, BatchSpec, BatchMarkers,  # batch_data
-    ]:
+        self,
+        batch_definition: BatchDefinition,
+    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+        """
+        Uses batch_definition to retrieve batch_data and batch_markers by building a batch_spec from batch_definition,
+        then using execution_engine to return batch_data and batch_markers
+
+        Args:
+            batch_definition (BatchDefinition): required batch_definition parameter for retrieval
+
+        """
         batch_spec: BatchSpec = self.build_batch_spec(batch_definition=batch_definition)
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
@@ -81,8 +99,19 @@ class DataConnector:
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
-        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
-            batch_definition=batch_definition
+        """
+        Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
+
+        Args:
+            batch_definition (BatchDefinition): required batch_definition parameter for retrieval
+        Returns:
+            BatchSpec object built from BatchDefinition
+
+        """
+        batch_spec_params: dict = (
+            self._generate_batch_spec_parameters_from_batch_definition(
+                batch_definition=batch_definition
+            )
         )
         batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
         if isinstance(batch_spec_passthrough, dict):
@@ -90,14 +119,21 @@ class DataConnector:
         batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
         return batch_spec
 
-    def _refresh_data_references_cache(self,):
+    def _refresh_data_references_cache(
+        self,
+    ):
         raise NotImplementedError
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
-        """List objects in the underlying data store to create a list of data_references.
-        This method is used to refresh the cache.
+        """
+        List objects in the underlying data store to create a list of data_references.
+        This method is used to refresh the cache by classes that extend this base DataConnector class
+
+        Args:
+            data_asset_name (str): optional data_asset_name to retrieve more specific results
+
         """
         raise NotImplementedError
 
@@ -124,7 +160,8 @@ class DataConnector:
         raise NotImplementedError
 
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequest,
+        self,
+        batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         raise NotImplementedError
 
@@ -144,6 +181,22 @@ class DataConnector:
         raise NotImplementedError
 
     def self_check(self, pretty_print=True, max_examples=3):
+        """
+        Checks the configuration of the current DataConnector by doing the following :
+
+        1. refresh or create data_reference_cache
+        2. print batch_definition_count and example_data_references for each data_asset_names
+        3. also print unmatched data_references, and allow the user to modify the regex or glob configuration if necessary
+        4. select a random data_reference and attempt to retrieve and print the first few rows to user
+
+        When used as part of the test_yaml_config() workflow, the user will be able to know if the data_connector is properly configured,
+        and if the associated execution_engine can properly retrieve data using the configuration.
+
+        Args:
+            pretty_print (bool): should the output be printed?
+            max_examples (int): how many data_references should be printed?
+
+        """
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
 
@@ -152,7 +205,6 @@ class DataConnector:
             print()
 
         asset_names = self.get_available_data_asset_names()
-        # <WILL> : do these need to be sorted using sorter? Sorters currently act on BatchDefinitions, and this returns a list of strings
         asset_names.sort()
         len_asset_names = len(asset_names)
 
@@ -170,8 +222,10 @@ class DataConnector:
             )
 
         for asset_name in asset_names[:max_examples]:
-            data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(
-                data_asset_name=asset_name
+            data_reference_list = (
+                self._get_data_reference_list_from_cache_by_data_asset_name(
+                    data_asset_name=asset_name
+                )
             )
             len_batch_definition_list = len(data_reference_list)
             example_data_references = data_reference_list[:max_examples]
@@ -212,11 +266,13 @@ class DataConnector:
                 print(f"\t\tNo references available.")
             return report_obj
 
-        for data_asset_name, data_asset_return_obj in available_references:
+        data_asset_name: Optional[str] = None
+        for tmp_data_asset_name, data_asset_return_obj in available_references:
             if data_asset_return_obj["batch_definition_count"] > 0:
                 example_data_reference = random.choice(
                     data_asset_return_obj["example_data_references"]
                 )
+                data_asset_name = tmp_data_asset_name
                 break
 
         if example_data_reference is not None:
@@ -224,6 +280,10 @@ class DataConnector:
                 print(f"\t\tReference chosen: {example_data_reference}")
 
             # ...and fetch it.
+            if data_asset_name is None:
+                raise ValueError(
+                    "The data_asset_name for the chosen example data reference cannot be null."
+                )
             report_obj["example_data_reference"] = self._self_check_fetch_batch(
                 pretty_print=pretty_print,
                 example_data_reference=example_data_reference,
@@ -235,13 +295,27 @@ class DataConnector:
         return report_obj
 
     def _self_check_fetch_batch(
-        self, pretty_print: bool, example_data_reference, data_asset_name: str,
+        self,
+        pretty_print: bool,
+        example_data_reference: Any,
+        data_asset_name: str,
     ):
+        """
+        Helper function for self_check() to retrieve batch using example_data_reference and data_asset_name,
+        all while printing helpful messages. First 5 rows of batch_data are printed by default.
+
+        Args:
+            pretty_print (bool): print to console?
+            example_data_reference (Any): data_reference to retrieve
+            data_asset_name (str): data_asset_name to retrieve
+
+        """
         if pretty_print:
             print(f"\n\t\tFetching batch data...")
 
         batch_definition_list = self._map_data_reference_to_batch_definition_list(
-            data_reference=example_data_reference, data_asset_name=data_asset_name,
+            data_reference=example_data_reference,
+            data_asset_name=data_asset_name,
         )
         assert len(batch_definition_list) == 1
         batch_definition = batch_definition_list[0]
@@ -263,22 +337,26 @@ class DataConnector:
             "n_rows": n_rows,
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
-        if not (
-            batch_request.datasource_name is None
-            or batch_request.datasource_name == self.datasource_name
-        ):
+    def _validate_batch_request(self, batch_request: BatchRequestBase):
+        """
+        Validate batch_request by checking:
+            1. if configured datasource_name matches batch_request's datasource_name
+            2. if current data_connector_name matches batch_request's data_connector_name
+
+        Args:
+            batch_request (BatchRequest): batch_request to validate
+
+        """
+        if batch_request.datasource_name != self.datasource_name:
+
             raise ValueError(
-                f"""execution_envrironment_name in BatchRequest: "{batch_request.datasource_name}" does not
+                f"""datasource_name in BatchRequestBase: "{batch_request.datasource_name}" does not
 match DataConnector datasource_name: "{self.datasource_name}".
                 """
             )
-        if not (
-            batch_request.data_connector_name is None
-            or batch_request.data_connector_name == self.name
-        ):
+        if batch_request.data_connector_name != self.name:
             raise ValueError(
-                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match
+                f"""data_connector_name in BatchRequestBase: "{batch_request.data_connector_name}" does not match
 DataConnector name: "{self.name}".
                 """
             )

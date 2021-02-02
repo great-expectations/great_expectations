@@ -86,22 +86,26 @@ def test_get_batch_definition_list_from_batch_request(
     my_data_connector = ConfiguredAssetSqlDataConnector(**config)
     my_data_connector._refresh_data_references_cache()
 
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="table_partitioned_by_date_column__A",
-            partition_request={"partition_identifiers": {"date": "2020-01-01"}},
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+                partition_request={"partition_identifiers": {"date": "2020-01-01"}},
+            )
         )
     )
     assert len(batch_definition_list) == 1
 
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="table_partitioned_by_date_column__A",
-            partition_request={"partition_identifiers": {}},
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+                partition_request={"partition_identifiers": {}},
+            )
         )
     )
     assert len(batch_definition_list) == 30
@@ -123,16 +127,18 @@ def test_get_batch_definition_list_from_batch_request(
     #     ))
     # assert "Unmatched key" in e.value.message
 
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=BatchRequest(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="table_partitioned_by_date_column__A",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+            )
         )
     )
     assert len(batch_definition_list) == 30
 
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
@@ -140,12 +146,14 @@ def test_get_batch_definition_list_from_batch_request(
             )
         )
 
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(datasource_name="FAKE_Datasource_NAME",)
+            batch_request=BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+            )
         )
 
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest()
         )
@@ -287,7 +295,11 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
         "data_assets": {
             "table_partitioned_by_regularly_spaced_incrementing_id_column__C": {
                 "batch_definition_count": 12,
-                "example_data_references": [{"id": 0}, {"id": 1}, {"id": 2},],
+                "example_data_references": [
+                    {"id": 0},
+                    {"id": 1},
+                    {"id": 2},
+                ],
             }
         },
         "unmatched_data_reference_count": 0,
@@ -454,7 +466,11 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "n_rows": 8,
             "batch_spec": {
                 "table_name": "table_partitioned_by_multiple_columns__G",
-                "partition_definition": {"y": 2020, "m": 1, "d": 2,},
+                "partition_definition": {
+                    "y": 2020,
+                    "m": 1,
+                    "d": 2,
+                },
                 "splitter_method": "_split_on_multi_column_values",
                 "splitter_kwargs": {"column_names": ["y", "m", "d"]},
             },
@@ -574,7 +590,11 @@ def test_sampling_method__mod(
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
                 "sampling_method": "_sample_using_mod",
-                "sampling_kwargs": {"column_name": "id", "mod": 10, "value": 8,},
+                "sampling_kwargs": {
+                    "column_name": "id",
+                    "mod": 10,
+                    "value": 8,
+                },
             }
         )
     )
@@ -637,7 +657,11 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
                 "table_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {},
                 "sampling_method": "_sample_using_mod",
-                "sampling_kwargs": {"column_name": "id", "mod": 10, "value": 8,},
+                "sampling_kwargs": {
+                    "column_name": "id",
+                    "mod": 10,
+                    "value": 8,
+                },
             }
         )
     )
@@ -689,33 +713,39 @@ def test_default_behavior_with_no_splitter(
     report_object = my_data_connector.self_check()
     print(json.dumps(report_object, indent=2))
 
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="table_partitioned_by_date_column__A",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+            )
         )
     )
     assert len(batch_definition_list) == 1
     assert batch_definition_list[0]["partition_definition"] == {}
 
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="table_partitioned_by_date_column__A",
-            partition_request={},
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+                partition_request={},
+            )
         )
     )
     assert len(batch_definition_list) == 1
     assert batch_definition_list[0]["partition_definition"] == {}
 
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="table_partitioned_by_date_column__A",
-            partition_request={"partition_identifiers": {}},
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+                partition_request={"partition_identifiers": {}},
+            )
         )
     )
     assert len(batch_definition_list) == 1
@@ -744,33 +774,39 @@ def test_behavior_with_whole_table_splitter(
     report_object = my_data_connector.self_check()
     print(json.dumps(report_object, indent=2))
 
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="table_partitioned_by_date_column__A",
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+            )
         )
     )
     assert len(batch_definition_list) == 1
     assert batch_definition_list[0]["partition_definition"] == {}
 
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="table_partitioned_by_date_column__A",
-            partition_request={},
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+                partition_request={},
+            )
         )
     )
     assert len(batch_definition_list) == 1
     assert batch_definition_list[0]["partition_definition"] == {}
 
-    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="FAKE_Datasource_NAME",
-            data_connector_name="my_sql_data_connector",
-            data_asset_name="table_partitioned_by_date_column__A",
-            partition_request={"partition_identifiers": {}},
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+                partition_request={"partition_identifiers": {}},
+            )
         )
     )
     assert len(batch_definition_list) == 1

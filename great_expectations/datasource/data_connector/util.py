@@ -7,12 +7,12 @@ import re
 import sre_constants
 import sre_parse
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionDefinitionSubset,
@@ -40,20 +40,27 @@ DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
 def batch_definition_matches_batch_request(
-    batch_definition: BatchDefinition, batch_request: BatchRequest,
+    batch_definition: BatchDefinition,
+    batch_request: BatchRequestBase,
 ) -> bool:
     assert isinstance(batch_definition, BatchDefinition)
-    assert isinstance(batch_request, BatchRequest)
+    assert isinstance(batch_request, BatchRequestBase)
 
-    if batch_request.datasource_name:
-        if batch_request.datasource_name != batch_definition.datasource_name:
-            return False
-    if batch_request.data_connector_name:
-        if batch_request.data_connector_name != batch_definition.data_connector_name:
-            return False
-    if batch_request.data_asset_name:
-        if batch_request.data_asset_name != batch_definition.data_asset_name:
-            return False
+    if (
+        batch_request.datasource_name
+        and batch_request.datasource_name != batch_definition.datasource_name
+    ):
+        return False
+    if (
+        batch_request.data_connector_name
+        and batch_request.data_connector_name != batch_definition.data_connector_name
+    ):
+        return False
+    if (
+        batch_request.data_asset_name
+        and batch_request.data_asset_name != batch_definition.data_asset_name
+    ):
+        return False
 
     if batch_request.partition_request:
         partition_identifiers: Any = batch_request.partition_request.get(
@@ -75,35 +82,40 @@ def batch_definition_matches_batch_request(
 def map_data_reference_string_to_batch_definition_list_using_regex(
     datasource_name: str,
     data_connector_name: str,
-    data_asset_name: str,
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
+    data_asset_name: Optional[str] = None,
 ) -> Optional[List[BatchDefinition]]:
-    batch_request: BatchRequest = convert_data_reference_string_to_batch_request_using_regex(
+    processed_data_reference: Optional[
+        Tuple[str, PartitionDefinitionSubset]
+    ] = convert_data_reference_string_to_partition_definition_using_regex(
         data_reference=data_reference,
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
-    if batch_request is None:
+    if processed_data_reference is None:
         return None
-
+    data_asset_name_from_partition_definition: str = processed_data_reference[0]
+    partition_definition: PartitionDefinitionSubset = processed_data_reference[1]
     if data_asset_name is None:
-        data_asset_name = batch_request.data_asset_name
+        data_asset_name = data_asset_name_from_partition_definition
 
     return [
         BatchDefinition(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_definition=PartitionDefinition(batch_request.partition_request),
+            partition_definition=PartitionDefinition(partition_definition),
         )
     ]
 
 
-def convert_data_reference_string_to_batch_request_using_regex(
-    data_reference: str, regex_pattern: str, group_names: List[str],
-) -> Optional[BatchRequest]:
+def convert_data_reference_string_to_partition_definition_using_regex(
+    data_reference: str,
+    regex_pattern: str,
+    group_names: List[str],
+) -> Optional[Tuple[str, PartitionDefinitionSubset]]:
     # noinspection PyUnresolvedReferences
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
     if matches is None:
@@ -114,20 +126,18 @@ def convert_data_reference_string_to_batch_request_using_regex(
     )
 
     # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
-    # TODO: <Alex>Update: Approach -- we can differentiate "convert_data_reference_string_to_batch_request_using_regex()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
+    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in partition_definition:
         data_asset_name = partition_definition.pop("data_asset_name")
-    batch_request: BatchRequest = BatchRequest(
-        data_asset_name=data_asset_name, partition_request=partition_definition,
-    )
-    return batch_request
+    return data_asset_name, partition_definition
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
-    batch_definition: BatchDefinition, regex_pattern: str, group_names: List[str],
+    batch_definition: BatchDefinition,
+    regex_pattern: str,
+    group_names: List[str],
 ) -> str:
-
     if not isinstance(batch_definition, BatchDefinition):
         raise TypeError(
             "batch_definition is not of an instance of type BatchDefinition"
@@ -135,32 +145,40 @@ def map_batch_definition_to_data_reference_string_using_regex(
 
     data_asset_name: str = batch_definition.data_asset_name
     partition_definition: PartitionDefinition = batch_definition.partition_definition
-    partition_request: dict = partition_definition
-    batch_request: BatchRequest = BatchRequest(
-        data_asset_name=data_asset_name, partition_request=partition_request,
-    )
-    data_reference: str = convert_batch_request_to_data_reference_string_using_regex(
-        batch_request=batch_request,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    data_reference: str = (
+        convert_partition_definition_to_data_reference_string_using_regex(
+            data_asset_name=data_asset_name,
+            partition_definition=partition_definition,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
     return data_reference
 
 
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
-def convert_batch_request_to_data_reference_string_using_regex(
-    batch_request: BatchRequest, regex_pattern: str, group_names: List[str],
+def convert_partition_definition_to_data_reference_string_using_regex(
+    partition_definition: PartitionDefinition,
+    regex_pattern: str,
+    group_names: List[str],
+    data_asset_name: Optional[str] = None,
 ) -> str:
-    if not isinstance(batch_request, BatchRequest):
-        raise TypeError("batch_request is not of an instance of type BatchRequest")
+    if not isinstance(
+        partition_definition, (PartitionDefinitionSubset, PartitionDefinition)
+    ):
+        raise TypeError(
+            "partition_definition is not "
+            "an instance of type PartitionDefinitionSubset or PartitionDefinition"
+        )
 
-    template_arguments: dict = copy.deepcopy(batch_request.partition_request)
+    template_arguments: dict = copy.deepcopy(partition_definition)
     # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>
-    if batch_request.data_asset_name is not None:
-        template_arguments["data_asset_name"] = batch_request.data_asset_name
+    if data_asset_name is not None:
+        template_arguments["data_asset_name"] = data_asset_name
 
     filepath_template: str = _invert_regex_to_data_reference_template(
-        regex_pattern=regex_pattern, group_names=group_names,
+        regex_pattern=regex_pattern,
+        group_names=group_names,
     )
     converted_string = filepath_template.format(**template_arguments)
 
@@ -169,7 +187,8 @@ def convert_batch_request_to_data_reference_string_using_regex(
 
 # noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
-    regex_pattern: str, group_names: List[str],
+    regex_pattern: str,
+    group_names: List[str],
 ) -> str:
     """
     NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
@@ -225,7 +244,7 @@ def normalize_directory_path(
     if Path(dir_path).is_absolute() or root_directory_path is None:
         return dir_path
     else:
-        return Path(root_directory_path).joinpath(dir_path)
+        return str(Path(root_directory_path).joinpath(dir_path))
 
 
 def get_filesystem_one_level_directory_glob_path_list(

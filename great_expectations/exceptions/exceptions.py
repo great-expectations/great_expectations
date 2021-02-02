@@ -1,4 +1,5 @@
 import importlib
+import itertools
 import json
 
 from great_expectations.marshmallow__shade import ValidationError
@@ -11,9 +12,16 @@ class GreatExpectationsError(Exception):
 
 
 class GreatExpectationsValidationError(ValidationError, GreatExpectationsError):
-    def __init__(self, message, validation_error):
+    def __init__(self, message, validation_error=None):
         self.message = message
-        self.messages = validation_error.messages
+        self.messages = None
+        if validation_error is not None:
+            self.messages = validation_error.messages
+
+    def __str__(self) -> str:
+        if self.message is None:
+            return self.messages
+        return self.message
 
 
 class SuiteEditNotebookCustomTemplateModuleNotFoundError(ModuleNotFoundError):
@@ -58,10 +66,28 @@ class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
     pass
 
 
-class InvalidDataContextConfigError(GreatExpectationsValidationError):
-    def __init__(self, message, validation_error, field_name=None):
+class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
+    def __init__(self, message, validation_error=None, field_name=None):
+        if validation_error is not None:
+            if (
+                validation_error
+                and validation_error.messages
+                and isinstance(validation_error.messages, dict)
+                and all([key is None for key in validation_error.messages.keys()])
+            ):
+                validation_error.messages = list(
+                    itertools.chain.from_iterable(validation_error.messages.values())
+                )
         super().__init__(message=message, validation_error=validation_error)
         self.field_name = field_name
+
+
+class InvalidDataContextConfigError(InvalidBaseYamlConfigError):
+    pass
+
+
+class InvalidCheckpointConfigError(InvalidBaseYamlConfigError):
+    pass
 
 
 class InvalidBatchKwargsError(GreatExpectationsError):
@@ -115,10 +141,6 @@ class AmbiguousDataAssetNameError(DataContextError):
 
 
 class StoreConfigurationError(DataContextError):
-    pass
-
-
-class DatasourceConfigurationError(DataContextError):
     pass
 
 
@@ -231,7 +253,9 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             )
         else:
             self.cli_colored_message = colored_template.format(
-                module_snippet, class_snippet, class_snippet,
+                module_snippet,
+                class_snippet,
+                class_snippet,
             )
         super().__init__(self.message)
 
@@ -282,12 +306,21 @@ class BatchSpecError(DataContextError):
         super().__init__(self.message)
 
 
-class DatasourceInitializationError(GreatExpectationsError):
+class DatasourceError(DataContextError):
     def __init__(self, datasource_name, message):
         self.message = "Cannot initialize datasource {}, error: {}".format(
-            datasource_name, message,
+            datasource_name,
+            message,
         )
         super().__init__(self.message)
+
+
+class DatasourceConfigurationError(DatasourceError):
+    pass
+
+
+class DatasourceInitializationError(DatasourceError):
+    pass
 
 
 class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
@@ -296,12 +329,6 @@ class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
 
 class InvalidConfigValueTypeError(DataContextError):
     pass
-
-
-class DatasourceError(DataContextError):
-    def __init__(self, message):
-        self.message = message
-        super().__init__(self.message)
 
 
 class DataConnectorError(DataContextError):

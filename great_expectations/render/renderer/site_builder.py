@@ -269,7 +269,7 @@ class SiteBuilder:
     def clean_site(self):
         self.target_store.clean_site()
 
-    def build(self, resource_identifiers=None):
+    def build(self, resource_identifiers=None, build_index: bool = True):
         """
 
         :param resource_identifiers: a list of resource identifiers
@@ -280,6 +280,9 @@ class SiteBuilder:
                             This supports incremental build of data docs sites
                             (e.g., when a new validation result is created)
                             and avoids full rebuild.
+
+        :param build_index: a flag if False, skips building the index page
+
         :return:
         """
 
@@ -289,10 +292,12 @@ class SiteBuilder:
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
-        index_page_resource_identifier_tuple = self.site_index_builder.build()
+        index_page_url, index_links_dict = self.site_index_builder.build(
+            build_index=build_index
+        )
         return (
             self.get_resource_url(only_if_exists=False),
-            index_page_resource_identifier_tuple[1],
+            index_links_dict,
         )
 
     def get_resource_url(self, resource_identifier=None, only_if_exists=True):
@@ -449,7 +454,8 @@ class DefaultSiteSectionBuilder:
 
                 self.target_store.set(
                     SiteSectionIdentifier(
-                        site_section_name=self.name, resource_identifier=resource_key,
+                        site_section_name=self.name,
+                        resource_identifier=resource_key,
                     ),
                     viewable_content,
                 )
@@ -464,7 +470,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     f'{type(e).__name__}: "{str(e)}".  '
                     f'Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message, e, exc_info=True)
+                logger.error(exception_message)
 
 
 class DefaultSiteIndexBuilder:
@@ -683,15 +689,19 @@ class DefaultSiteIndexBuilder:
         return results
 
     # TODO: deprecate dual batch api support
-    def build(self, skip_and_clean_missing=True):
+    def build(self, skip_and_clean_missing=True, build_index: bool = True):
         """
         :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
         be skipped and removed from the target store
+        :param build_index: a flag if False, skips building the index page
         :return: tuple(index_page_url, index_links_dict)
         """
 
         # Loop over sections in the HtmlStore
         logger.debug("DefaultSiteIndexBuilder.build")
+        if not build_index:
+            logger.debug("Skipping index rendering")
+            return None, None
 
         index_links_dict = OrderedDict()
         index_links_dict["site_name"] = self.site_name
@@ -700,6 +710,7 @@ class DefaultSiteIndexBuilder:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
         if (
+            # TODO why is this duplicated?
             self.site_section_builders_config.get("expectations", "None")
             and self.site_section_builders_config.get("expectations", "None")
             not in FALSEY_YAML_STRINGS
@@ -735,6 +746,7 @@ class DefaultSiteIndexBuilder:
 
         validation_and_profiling_result_site_keys = []
         if (
+            # TODO why is this duplicated?
             self.site_section_builders_config.get("validations", "None")
             and self.site_section_builders_config.get("validations", "None")
             not in FALSEY_YAML_STRINGS
@@ -744,6 +756,7 @@ class DefaultSiteIndexBuilder:
         ):
             source_store = (
                 "validations"
+                # TODO why is this duplicated?
                 if self.site_section_builders_config.get("validations", "None")
                 and self.site_section_builders_config.get("validations", "None")
                 not in FALSEY_YAML_STRINGS
@@ -775,6 +788,7 @@ class DefaultSiteIndexBuilder:
                 validation_and_profiling_result_site_keys = cleaned_keys
 
         if (
+            # TODO why is this duplicated?
             self.site_section_builders_config.get("profiling", "None")
             and self.site_section_builders_config.get("profiling", "None")
             not in FALSEY_YAML_STRINGS
@@ -821,6 +835,7 @@ class DefaultSiteIndexBuilder:
                     logger.warning(error_msg)
 
         if (
+            # TODO why is this duplicated?
             self.site_section_builders_config.get("validations", "None")
             and self.site_section_builders_config.get("validations", "None")
             not in FALSEY_YAML_STRINGS
@@ -894,7 +909,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
             )
-            logger.error(exception_message, e, exc_info=True)
+            logger.error(exception_message)
 
         return (self.target_store.write_index_page(viewable_content), index_links_dict)
 

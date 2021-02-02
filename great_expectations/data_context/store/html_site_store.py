@@ -14,7 +14,11 @@ from great_expectations.data_context.util import (
     load_class,
 )
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+    verify_dynamic_loading_support,
+)
 
 from ...core.data_context_key import DataContextKey
 from .tuple_store_backend import TupleStoreBackend
@@ -24,71 +28,71 @@ logger = logging.getLogger(__name__)
 
 class HtmlSiteStore:
     """
-A HtmlSiteStore facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results.
+    A HtmlSiteStore facilitates publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results.
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: html_site_store_filesystem
-    title: HTML Site Store - Filesystem
-    icon:
-    short_description: DataDocs on Filesystem
-    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on the Filesystem
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.html
-    maturity: Production
-    maturity_details:
-        api_stability: Mostly Stable (profiling)
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: N/A
-        documentation_completeness: Partial
-        bug_risk: Low
+        id: html_site_store_filesystem
+        title: HTML Site Store - Filesystem
+        icon:
+        short_description: DataDocs on Filesystem
+        description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on the Filesystem
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.html
+        maturity: Production
+        maturity_details:
+            api_stability: Mostly Stable (profiling)
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness: Partial
+            bug_risk: Low
 
-    id: html_site_store_s3
-    title: HTML Site Store - S3
-    icon:
-    short_description: DataDocs on S3
-    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on S3
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_s3.html
-    maturity: Beta
-    maturity_details:
-        api_stability: Mostly Stable (profiling)
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Complete
-        bug_risk: Moderate
+        id: html_site_store_s3
+        title: HTML Site Store - S3
+        icon:
+        short_description: DataDocs on S3
+        description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on S3
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_s3.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Mostly Stable (profiling)
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Complete
+            bug_risk: Moderate
 
-    id: html_site_store_gcs
-    title: HTMLSiteStore - GCS
-    icon:
-    short_description: DataDocs on GCS
-    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on GCS
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.html
-    maturity: Beta
-    maturity_details:
-        api_stability: Mostly Stable (profiling)
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Partial (needs auth)
-        bug_risk: Moderate (resource URL may have bugs)
+        id: html_site_store_gcs
+        title: HTMLSiteStore - GCS
+        icon:
+        short_description: DataDocs on GCS
+        description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on GCS
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Mostly Stable (profiling)
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Partial (needs auth)
+            bug_risk: Moderate (resource URL may have bugs)
 
-    id: html_site_store_azure_blob_storage
-    title: HTMLSiteStore - Azure
-    icon:
-    short_description: DataDocs on Azure Blob Storage
-    description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on Azure Blob Storage
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.html
-    maturity: N/A
-    maturity_details:
-        api_stability: Mostly Stable (profiling)
-        implementation_completeness: Minimal
-        unit_test_coverage: Minimal
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Minimal
-        bug_risk: Moderate
+        id: html_site_store_azure_blob_storage
+        title: HTMLSiteStore - Azure
+        icon:
+        short_description: DataDocs on Azure Blob Storage
+        description: For publishing rendered documentation built from Expectation Suites, Profiling Results, and Validation Results on Azure Blob Storage
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.html
+        maturity: N/A
+        maturity_details:
+            api_stability: Mostly Stable (profiling)
+            implementation_completeness: Minimal
+            unit_test_coverage: Minimal
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Minimal
+            bug_risk: Moderate
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     _key_class = SiteSectionIdentifier
@@ -208,6 +212,16 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
         # can't necessarily set and list_keys like most other Stores.
         self.keys = set()
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True,
+            **{
+                "class_name": self.__class__.__name__,
+            }
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def get(self, key):
         self._validate_key(key)
         return self.store_backends[type(key.resource_identifier)].get(key.to_tuple())
@@ -280,7 +294,8 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
         if not isinstance(key, SiteSectionIdentifier):
             raise TypeError(
                 "key: {!r} must a SiteSectionIdentifier, not {!r}".format(
-                    key, type(key),
+                    key,
+                    type(key),
                 )
             )
 
@@ -295,7 +310,9 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
         # The key's resource_identifier didn't match any known key_class
         raise TypeError(
             "resource_identifier in key: {!r} must one of {}, not {!r}".format(
-                key, set(self.store_backends.keys()), type(key),
+                key,
+                set(self.store_backends.keys()),
+                type(key),
             )
         )
 
@@ -382,3 +399,7 @@ A HtmlSiteStore facilitates publishing rendered documentation built from Expecta
                         content_encoding=content_encoding,
                         content_type=content_type,
                     )
+
+    @property
+    def config(self) -> dict:
+        return self._config

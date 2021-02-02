@@ -143,7 +143,7 @@ class UsageStatisticsHandler:
                 self._datasource_anonymizer.anonymize_datasource_info(
                     datasource_name, datasource_config
                 )
-                for datasource_name, datasource_config in self._data_context._project_config_with_variables_substituted.datasources.items()
+                for datasource_name, datasource_config in self._data_context.project_config_with_variables_substituted.datasources.items()
             ],
             "anonymized_stores": [
                 self._store_anonymizer.anonymize_store_info(store_name, store_obj)
@@ -160,7 +160,7 @@ class UsageStatisticsHandler:
                 self._data_docs_sites_anonymizer.anonymize_data_docs_site_info(
                     site_name=site_name, site_config=site_config
                 )
-                for site_name, site_config in self._data_context._project_config_with_variables_substituted.data_docs_sites.items()
+                for site_name, site_config in self._data_context.project_config_with_variables_substituted.data_docs_sites.items()
             ],
             "anonymized_expectation_suites": [
                 self._expectation_suite_anonymizer.anonymize_expectation_suite_info(

@@ -16,7 +16,6 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.validator.validation_graph import (
     MetricConfiguration,
-    MetricEdge,
     ValidationGraph,
 )
 from great_expectations.validator.validator import Validator
@@ -26,7 +25,12 @@ def test_parse_validation_graph():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
@@ -56,7 +60,12 @@ def test_parse_validation_graph_with_bad_metrics_args():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
@@ -67,7 +76,10 @@ def test_parse_validation_graph_with_bad_metrics_args():
         )
         validation_dependencies = expectation_impl(
             configuration
-        ).get_validation_dependencies(configuration, execution_engine=engine,)
+        ).get_validation_dependencies(
+            configuration,
+            execution_engine=engine,
+        )
 
         for metric_configuration in validation_dependencies["metrics"].values():
             validator.build_metric_dependency_graph(
@@ -83,7 +95,12 @@ def test_populate_dependencies():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
@@ -95,7 +112,10 @@ def test_populate_dependencies():
         )
         validation_dependencies = expectation_impl(
             configuration
-        ).get_validation_dependencies(configuration, engine,)
+        ).get_validation_dependencies(
+            configuration,
+            engine,
+        )
 
         for metric_configuration in validation_dependencies["metrics"].values():
             Validator(execution_engine=engine).build_metric_dependency_graph(
@@ -108,7 +128,12 @@ def test_populate_dependencies_with_incorrect_metric_name():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "a", "mostly": 0.9, "threshold": 4, "double_sided": True,},
+        kwargs={
+            "column": "a",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
     batch = Batch(data=df)
@@ -120,7 +145,10 @@ def test_populate_dependencies_with_incorrect_metric_name():
         )
         validation_dependencies = expectation_impl(
             configuration
-        ).get_validation_dependencies(configuration, engine,)
+        ).get_validation_dependencies(
+            configuration,
+            engine,
+        )
 
         try:
             Validator(execution_engine=engine).build_metric_dependency_graph(
@@ -137,22 +165,19 @@ def test_populate_dependencies_with_incorrect_metric_name():
 
 def test_graph_validate(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-    expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 0.9, "threshold": 4, "double_sided": True,},
-    )
 
     batch = basic_datasource.get_single_batch_from_batch_request(
         BatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
                         "partition_identifiers": {
                             "pipeline_stage_name": 0,
-                            "run_id": 0,
+                            "airflow_run_id": 0,
                             "custom_key_0": 0,
                         }
                     }
@@ -161,9 +186,18 @@ def test_graph_validate(basic_datasource):
         )
     )
 
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={
+            "column": "b",
+            "mostly": 0.9,
+            "threshold": 4,
+            "double_sided": True,
+        },
+    )
     result = Validator(
         execution_engine=PandasExecutionEngine(), batches=[batch]
-    ).graph_validate(configurations=[expectationConfiguration])
+    ).graph_validate(configurations=[expectation_configuration])
     assert result == [
         ExpectationValidationResult(
             success=True,
@@ -186,23 +220,19 @@ def test_graph_validate(basic_datasource):
 # this might indicate that we need to validate configuration a little more strictly prior to actually validating
 def test_graph_validate_with_bad_config(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-    expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_max_to_be_between",
-        kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
-    )
-    expectation = ExpectColumnMaxToBeBetween(expectationConfiguration)
 
     batch = basic_datasource.get_single_batch_from_batch_request(
         BatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
                         "partition_identifiers": {
                             "pipeline_stage_name": 0,
-                            "run_id": 0,
+                            "airflow_run_id": 0,
                             "custom_key_0": 0,
                         }
                     }
@@ -211,10 +241,14 @@ def test_graph_validate_with_bad_config(basic_datasource):
         )
     )
 
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_max_to_be_between",
+        kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
+    )
     try:
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=[batch]
-        ).graph_validate(configurations=[expectationConfiguration])
+        ).graph_validate(configurations=[expectation_configuration])
     except KeyError as e:
         result = e
     assert isinstance(result, KeyError)
@@ -225,23 +259,19 @@ def test_graph_validate_with_runtime_config(basic_datasource):
     df = pd.DataFrame(
         {"a": [1, 5, 22, 3, 5, 10, 2, 3], "b": [97, 332, 3, 4, 5, 6, 7, None]}
     )
-    expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 1, "threshold": 2, "double_sided": True},
-    )
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
 
     batch = basic_datasource.get_single_batch_from_batch_request(
         BatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
                         "partition_identifiers": {
                             "pipeline_stage_name": 0,
-                            "run_id": 0,
+                            "airflow_run_id": 0,
                             "custom_key_0": 0,
                         }
                     }
@@ -250,11 +280,15 @@ def test_graph_validate_with_runtime_config(basic_datasource):
         )
     )
 
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_value_z_scores_to_be_less_than",
+        kwargs={"column": "b", "mostly": 1, "threshold": 2, "double_sided": True},
+    )
     try:
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=(batch,)
         ).graph_validate(
-            configurations=[expectationConfiguration],
+            configurations=[expectation_configuration],
             runtime_configuration={"result_format": "COMPLETE"},
         )
     except AssertionError as e:
@@ -284,22 +318,19 @@ def test_graph_validate_with_runtime_config(basic_datasource):
 
 def test_validator_default_expectation_args__pandas(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
-    expectationConfiguration = ExpectationConfiguration(
-        expectation_type="expect_column_value_z_scores_to_be_less_than",
-        kwargs={"column": "b", "mostly": 0.9, "threshold": 4, "double_sided": True,},
-    )
 
     batch = basic_datasource.get_single_batch_from_batch_request(
         BatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
                         "partition_identifiers": {
                             "pipeline_stage_name": 0,
-                            "run_id": 0,
+                            "airflow_run_id": 0,
                             "custom_key_0": 0,
                         }
                     }

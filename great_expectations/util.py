@@ -20,9 +20,8 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional
 
-import black
 from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
@@ -30,6 +29,7 @@ from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
+from great_expectations.expectations.registry import _registered_expectations
 
 try:
     # This library moved in python 3.8
@@ -61,7 +61,7 @@ def measure_execution_time(func: Callable = None) -> Callable:
 
 
 # noinspection SpellCheckingInspection
-def get_project_distribution() -> Union[Distribution, None]:
+def get_project_distribution() -> Optional[Distribution]:
     ditr: Distribution
     for distr in importlib_metadata.distributions():
         relative_path: Path
@@ -162,12 +162,12 @@ templates, and assets is supported in your execution environment.  This error is
         raise FileNotFoundError(message)
 
 
-def import_library_module(module_name: str) -> Union[ModuleType, None]:
+def import_library_module(module_name: str) -> Optional[ModuleType]:
     """
     :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
     :return: raw source code of the module (if can be retrieved)
     """
-    module_obj: Union[ModuleType, None]
+    module_obj: Optional[ModuleType]
 
     try:
         module_obj = importlib.import_module(module_name)
@@ -178,19 +178,25 @@ def import_library_module(module_name: str) -> Union[ModuleType, None]:
 
 
 def is_library_loadable(library_name: str) -> bool:
-    module_obj: Union[ModuleType, None] = import_library_module(
-        module_name=library_name
-    )
+    module_obj: Optional[ModuleType] = import_library_module(module_name=library_name)
     return module_obj is not None
 
 
-def load_class(class_name, module_name):
+def load_class(class_name: str, module_name: str):
+    if class_name is None:
+        raise TypeError("class_name must not be None")
+    if not isinstance(class_name, str):
+        raise TypeError("class_name must be a string")
+    if module_name is None:
+        raise TypeError("module_name must not be None")
+    if not isinstance(module_name, str):
+        raise TypeError("module_name must be a string")
     try:
         verify_dynamic_loading_support(module_name=module_name)
     except FileNotFoundError:
         raise PluginModuleNotFoundError(module_name)
 
-    module_obj: Union[ModuleType, None] = import_library_module(module_name=module_name)
+    module_obj: Optional[ModuleType] = import_library_module(module_name=module_name)
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
@@ -758,14 +764,24 @@ def gen_directory_tree_str(startpath):
 
 
 def lint_code(code):
-    """Lint strings of code passed in."""
-    black_file_mode = black.FileMode()
-    if not isinstance(code, str):
-        raise TypeError
+    """Lint strings of code passed in. Optional dependency "black" must be installed."""
     try:
-        linted_code = black.format_file_contents(code, fast=True, mode=black_file_mode)
-        return linted_code
-    except (black.NothingChanged, RuntimeError):
+        import black
+
+        black_file_mode = black.FileMode()
+        if not isinstance(code, str):
+            raise TypeError
+        try:
+            linted_code = black.format_file_contents(
+                code, fast=True, mode=black_file_mode
+            )
+            return linted_code
+        except (black.NothingChanged, RuntimeError):
+            return code
+    except ImportError:
+        logger.warning(
+            "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
+        )
         return code
 
 
@@ -815,6 +831,7 @@ def filter_properties_dict(
                 for key, value in properties.items()
                 if not (
                     (keep_fields and key in keep_fields)
+                    or (delete_fields and key in delete_fields)
                     or is_numeric(value=value)
                     or value
                 )
@@ -853,6 +870,29 @@ def is_float(value: Any) -> bool:
 
 
 def get_context():
-    from great_expectations.data_context.data_context_v3 import DataContextV3
+    from great_expectations.data_context.data_context import DataContext
 
-    return DataContextV3()
+    return DataContext()
+
+
+def is_sane_slack_webhook(url: str) -> bool:
+    """Really basic sanity checking."""
+    if url is None:
+        return False
+
+    return url.strip().startswith("https://hooks.slack.com/")
+
+
+def is_list_of_strings(_list) -> bool:
+    return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
+
+
+def generate_library_json_from_registered_expectations():
+    """Generate the JSON object used to populate the public gallery"""
+    library_json = {}
+
+    for expectation_name, expectation in _registered_expectations.items():
+        report_object = expectation().run_diagnostics()
+        library_json[expectation_name] = report_object
+
+    return library_json

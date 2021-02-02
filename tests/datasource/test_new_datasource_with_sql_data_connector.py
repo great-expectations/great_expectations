@@ -5,6 +5,7 @@ import random
 import pytest
 from ruamel.yaml import YAML
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -99,8 +100,8 @@ data_connectors:
     }
 
 
-def test_SimpleSqlalchemyDatasource(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_SimpleSqlalchemyDatasource(empty_data_context):
+    context = empty_data_context
     # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
 
     db_file = file_relative_path(
@@ -264,12 +265,18 @@ tables:
             "view_that_should_be_partitioned_by_random_hash__H",
             "view_with_fk_reference_from_F",
         ],
-        "hourly": ["table_partitioned_by_timestamp_column__B",],
-        "daily": ["table_partitioned_by_date_column__A__daily",],
+        "hourly": [
+            "table_partitioned_by_timestamp_column__B",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A__daily",
+        ],
         "weekly": [
             "some_string__table_partitioned_by_date_column__A__some_other_string",
         ],
-        "by_id_dozens": ["table_partitioned_by_date_column__A",],
+        "by_id_dozens": [
+            "table_partitioned_by_date_column__A",
+        ],
     }
 
     # Here we should test getting another batch
@@ -304,10 +311,18 @@ tables:
     )
     print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
     assert my_sql_datasource.get_available_data_asset_names() == {
-        "whole_table": ["table_partitioned_by_date_column__A",],
-        "daily": ["table_partitioned_by_date_column__A",],
-        "weekly": ["table_partitioned_by_date_column__A",],
-        "by_id_dozens": ["table_partitioned_by_date_column__A",],
+        "whole_table": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "weekly": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "by_id_dozens": [
+            "table_partitioned_by_date_column__A",
+        ],
     }
 
     # Here we should test getting another batch
@@ -812,8 +827,8 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
     assert len(batch_definition_list) == 1
 
 
-def test_skip_inapplicable_tables(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_skip_inapplicable_tables(empty_data_context):
+    context = empty_data_context
     # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
 
     db_file = file_relative_path(
@@ -847,7 +862,8 @@ introspection:
         ]
     }
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ge_exceptions.DatasourceInitializationError):
+        # noinspection PyUnusedLocal
         my_sql_datasource = context.test_yaml_config(
             f"""
 class_name: SimpleSqlalchemyDatasource

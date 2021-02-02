@@ -13,7 +13,10 @@ class SlackRenderer(Renderer):
         super().__init__()
 
     def render(
-        self, validation_result=None, data_docs_pages=None, notify_with=None,
+        self,
+        validation_result=None,
+        data_docs_pages=None,
+        notify_with=None,
     ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
@@ -22,7 +25,10 @@ class SlackRenderer(Renderer):
 
         title_block = {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": default_text,},
+            "text": {
+                "type": "mrkdwn",
+                "text": default_text,
+            },
         }
 
         query = {
@@ -116,10 +122,6 @@ class SlackRenderer(Renderer):
                 }
                 query["blocks"].append(dataset_element)
 
-        custom_blocks = self._custom_blocks(evr=validation_result)
-        if custom_blocks:
-            query["blocks"].append(custom_blocks)
-
         documentation_url = "https://docs.greatexpectations.io/en/latest/guides/tutorials/getting_started/set_up_data_docs.html"
         footer_section = {
             "type": "context",
@@ -136,29 +138,36 @@ class SlackRenderer(Renderer):
         query["blocks"].append(footer_section)
         return query
 
-    def _custom_blocks(self, evr):
-        return None
-
     def _get_report_element(self, docs_link):
-        if docs_link is None:
-            logger.warn("No docs link found. Skipping data docs link in slack message.")
-            return
-
-        if "file://" in docs_link:
-            # handle special case since Slack does not render these links
-            report_element = {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into a browser to view)\n",
-                },
-            }
+        report_element = None
+        if docs_link:
+            try:
+                if "file://" in docs_link:
+                    # handle special case since Slack does not render these links
+                    report_element = {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"*DataDocs* can be found here: `{docs_link}` \n (Please copy and paste link into a browser to view)\n",
+                        },
+                    }
+                else:
+                    report_element = {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"*DataDocs* can be found here: <{docs_link}|{docs_link}>",
+                        },
+                    }
+            except Exception as e:
+                logger.warning(
+                    f"""SlackRenderer had a problem with generating the docs link.
+                    link used to generate the docs link is: {docs_link} and is of type: {type(docs_link)}.
+                    Error: {e}"""
+                )
+                return
         else:
-            report_element = {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"*DataDocs* can be found here: <{docs_link}|{docs_link}>",
-                },
-            }
+            logger.warning(
+                "No docs link found. Skipping data docs link in Slack message."
+            )
         return report_element

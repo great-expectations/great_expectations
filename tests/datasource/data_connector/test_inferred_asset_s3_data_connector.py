@@ -96,7 +96,10 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check():
         datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
             "pattern": r"(.+)-(\d+)\.csv",
-            "group_names": ["data_asset_name", "number",],
+            "group_names": [
+                "data_asset_name",
+                "number",
+            ],
         },
         bucket=bucket,
         prefix="",
@@ -208,18 +211,9 @@ def test_complex_regex_example_with_implicit_data_asset_names():
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
-                    data_connector_name="my_data_connector", data_asset_name="alpha",
-                )
-            )
-        )
-        == 3
-    )
-
-    assert (
-        len(
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
-                    data_connector_name="my_data_connector", data_asset_name="beta",
+                    datasource_name="FAKE_DATASOURCE_NAME",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="beta",
                 )
             )
         )
@@ -232,7 +226,10 @@ def test_complex_regex_example_with_implicit_data_asset_names():
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
             partition_request={
-                "partition_identifiers": {"year_dir": "2020", "month_dir": "03",}
+                "partition_identifiers": {
+                    "year_dir": "2020",
+                    "month_dir": "03",
+                }
             },
         )
     ) == [
@@ -240,7 +237,10 @@ def test_complex_regex_example_with_implicit_data_asset_names():
             datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
-            partition_definition=PartitionDefinition(year_dir="2020", month_dir="03",),
+            partition_definition=PartitionDefinition(
+                year_dir="2020",
+                month_dir="03",
+            ),
         )
     ]
 
@@ -303,8 +303,8 @@ def test_self_check():
 
 
 @mock_s3
-def test_test_yaml_config(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_test_yaml_config(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -375,8 +375,8 @@ default_regex:
 
 
 @mock_s3
-def test_yaml_config_excluding_non_regex_matching_files(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_yaml_config_excluding_non_regex_matching_files(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -451,8 +451,8 @@ default_regex:
 
 
 @mock_s3
-def test_nested_directory_data_asset_name_in_folder(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_nested_directory_data_asset_name_in_folder(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -524,8 +524,8 @@ def test_nested_directory_data_asset_name_in_folder(empty_data_context_v3):
 
 
 @mock_s3
-def test_redundant_information_in_naming_convention_random_hash(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_redundant_information_in_naming_convention_random_hash(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -590,8 +590,8 @@ def test_redundant_information_in_naming_convention_random_hash(empty_data_conte
 
 
 @mock_s3
-def test_redundant_information_in_naming_convention_timestamp(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_redundant_information_in_naming_convention_timestamp(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -654,8 +654,8 @@ def test_redundant_information_in_naming_convention_timestamp(empty_data_context
 
 
 @mock_s3
-def test_redundant_information_in_naming_convention_bucket(empty_data_context_v3):
-    context = empty_data_context_v3
+def test_redundant_information_in_naming_convention_bucket(empty_data_context):
+    context = empty_data_context
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -776,11 +776,13 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="my_inferred_asset_filesystem_data_connector",
-            data_asset_name="some_bucket",
+    sorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="my_inferred_asset_filesystem_data_connector",
+                data_asset_name="some_bucket",
+            )
         )
     )
 

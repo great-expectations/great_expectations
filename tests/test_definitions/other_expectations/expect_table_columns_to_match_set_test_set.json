@@ -15,7 +15,7 @@
         }
       },
     "tests": [{
-      "title": "basic_positive_test__exact_match__true",
+      "title": "basic_positive_test_exact_match_true",
       "exact_match_out": true,
       "in":{
         "column_set": ["c1", "c2", "c3"],
@@ -29,7 +29,7 @@
         }
       }
     },{
-      "title": "basic_positive_test__exact_match__false",
+      "title": "basic_positive_test_exact_match_false",
       "exact_match_out": true,
       "in":{
         "column_set": ["c1", "c2", "c3"],
@@ -43,7 +43,7 @@
         }
       }
     },{
-      "title": "negative_test_column_is_missing__exact_match__true",
+      "title": "negative_test_column_is_missing_exact_match_true",
       "exact_match_out": true,
       "in":{
         "column_set": ["c1", "c2"],
@@ -61,7 +61,7 @@
         }
       }
     },{
-      "title": "positive_test_column_is_missing__exact_match__false",
+      "title": "positive_test_column_is_missing_exact_match_false",
       "exact_match_out": true,
       "in":{
         "column_set": ["c1", "c2"],
@@ -79,7 +79,7 @@
         }
       }
     },{
-      "title": "negative_test_column_is_misnamed__exact_match__true",
+      "title": "negative_test_column_is_misnamed_exact_match_true",
       "exact_match_out": true,
       "in":{
         "column_set": ["b1", "c2", "c3"],
@@ -98,7 +98,7 @@
         }
       }
     },{
-      "title": "negative_test_column_is_misnamed__exact_match__false",
+      "title": "negative_test_column_is_misnamed_exact_match_false",
       "exact_match_out": true,
       "in":{
         "column_set": ["b1", "c2", "c3"],
@@ -117,7 +117,7 @@
         }
       }
     },{
-      "title": "positive_test_columns_are_right__but_ordering_wrong__exact_match__true",
+      "title": "positive_test_columns_are_right_but_ordering_wrong_exact_match_true",
       "exact_match_out": true,
       "in":{
         "column_set": ["c3", "c2", "c1"],
@@ -131,7 +131,7 @@
         }
       }
     },{
-      "title": "positive_test_columns_are_right__but_ordering_wrong__exact_match__false",
+      "title": "positive_test_columns_are_right_but_ordering_wrong_exact_match_false",
       "exact_match_out": true,
       "in":{
         "column_set": ["c3", "c2", "c1"],
@@ -145,7 +145,7 @@
         }
       }
     },{
-      "title": "negative_test_extra_column__exact_match__true",
+      "title": "negative_test_extra_column_exact_match_true",
       "exact_match_out": true,
       "in":{
         "column_set": ["c1", "c2", "c3", "c4"],
@@ -163,7 +163,7 @@
         }
       }
     },{
-      "title": "negative_test_extra_column__exact_match__false",
+      "title": "negative_test_extra_column_exact_match_false",
       "exact_match_out": true,
       "in":{
         "column_set": ["c1", "c2", "c3", "c4"],
@@ -181,7 +181,7 @@
         }
       }
     },{
-      "title": "negative_test_null_set__exact_match__true",
+      "title": "negative_test_null_set_exact_match_true",
       "exact_match_out": true,
       "in":{
         "column_set": null,
@@ -199,7 +199,7 @@
         }
       }
     },{
-      "title": "positive_test_vacuously_true_null_set__exact_match__false",
+      "title": "positive_test_vacuously_true_null_set_exact_match_false",
       "exact_match_out": true,
       "in":{
         "column_set": null,

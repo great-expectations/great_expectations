@@ -174,7 +174,13 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 batch_kwargs = SqlAlchemyDatasourceTableBatchKwargs(
                     table=table_name, schema=schema_name
                 )
-
+            else:
+                raise BatchKwargsError(
+                    "TableBatchKwargsGenerator cannot access the following data:"
+                    f"SCHEMA : {schema_name}"
+                    f"TABLE : {table_name}",
+                    {},
+                )
         if batch_kwargs is not None:
             if partition_id is not None:
                 logger.warning(
@@ -187,7 +193,6 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             if offset is not None:
                 batch_kwargs["offset"] = offset
             return iter([batch_kwargs])
-
         # Otherwise, we return None
         return
 

@@ -5,8 +5,8 @@ import numpy as np
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.expectations.registry import extract_metrics
+from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     RenderedStringTemplateContent,
@@ -18,7 +18,7 @@ from great_expectations.render.util import (
 )
 
 
-class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
+class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     """Expect specific provided column quantiles to be between provided minimum and maximum values.
 
            ``quantile_ranges`` must be a dictionary with two keys:
@@ -116,7 +116,16 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
 
            """
 
-    metric_dependencies = ("column.quantiles",)
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
+    metric_dependencies = ("column.quantile_values",)
     success_keys = (
         "quantile_ranges",
         "allow_relative_error",
@@ -135,29 +144,12 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
 
-        # Ensuring necessary parameters are present and of the proper type
-        min_val = None
-        max_val = None
-
-        # Testing that proper thresholds are in place
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
-
         try:
-            assert (
-                "column" in configuration.kwargs
-            ), "'column' parameter is required for metric"
-            assert (
-                min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be none"
             assert (
                 "quantile_ranges" in configuration.kwargs
             ), "quantile ranges must be provided"
-            assert (
-                type(configuration.kwargs["quantile_ranges"]) == dict
+            assert isinstance(
+                configuration.kwargs["quantile_ranges"], dict
             ), "quantile_ranges should be a dictionary"
 
         except AssertionError as e:
@@ -185,6 +177,7 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,
@@ -359,42 +352,37 @@ class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
                 "table": table_rows,
                 "styling": {
                     "classes": ["col-3", "mt-1", "pl-1", "pr-1"],
-                    "body": {"classes": ["table", "table-sm", "table-unbordered"],},
+                    "body": {
+                        "classes": ["table", "table-sm", "table-unbordered"],
+                    },
                 },
             }
         )
 
-    # @Expectation.validates(metric_dependencies=metric_dependencies)
-    def _validates(
+    def get_validation_dependencies(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        all_dependencies = super().get_validation_dependencies(
+            configuration, execution_engine, runtime_configuration
+        )
+        # column.quantile_values expects a "quantiles" key
+        all_dependencies["metrics"]["column.quantile_values"].metric_value_kwargs[
+            "quantiles"
+        ] = configuration.kwargs["quantile_ranges"]["quantiles"]
+        return all_dependencies
+
+    def _validate(
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        validation_dependencies = self.get_validation_dependencies(
-            configuration, execution_engine, runtime_configuration
-        )["metrics"]
-        # Extracting metrics
-        metric_vals = extract_metrics(
-            validation_dependencies, metrics, configuration, runtime_configuration
-        )
-
-        # Runtime configuration has preference
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
-        quantile_vals = metric_vals.get("column.quantiles")
-        quantile_ranges = self.get_success_kwargs(configuration).get("quantile_ranges")
+        quantile_vals = metrics.get("column.quantile_values")
+        quantile_ranges = configuration.kwargs.get("quantile_ranges")
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
 

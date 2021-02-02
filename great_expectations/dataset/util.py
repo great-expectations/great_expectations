@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -21,17 +21,29 @@ except ImportError:
 
 
 SCHEMAS = {
-    "api_np": {"NegativeInfinity": -np.inf, "PositiveInfinity": np.inf,},
-    "api_cast": {"NegativeInfinity": -float("inf"), "PositiveInfinity": float("inf"),},
-    "mysql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
-    "mssql": {"NegativeInfinity": -1.79e308, "PositiveInfinity": 1.79e308,},
+    "api_np": {
+        "NegativeInfinity": -np.inf,
+        "PositiveInfinity": np.inf,
+    },
+    "api_cast": {
+        "NegativeInfinity": -float("inf"),
+        "PositiveInfinity": float("inf"),
+    },
+    "mysql": {
+        "NegativeInfinity": -1.79e308,
+        "PositiveInfinity": 1.79e308,
+    },
+    "mssql": {
+        "NegativeInfinity": -1.79e308,
+        "PositiveInfinity": 1.79e308,
+    },
 }
 
 
 def get_sql_dialect_floating_point_infinity_value(
     schema: str, negative: bool = False
 ) -> float:
-    res: Union[Dict, None] = SCHEMAS.get(schema)
+    res: Optional[dict] = SCHEMAS.get(schema)
     if res is None:
         if negative:
             return -np.inf
@@ -615,7 +627,8 @@ def get_approximate_percentile_disc_sql(selects: List, sql_engine_dialect: Any) 
 
 
 def check_sql_engine_dialect(
-    actual_sql_engine_dialect: Any, candidate_sql_engine_dialect: Any,
+    actual_sql_engine_dialect: Any,
+    candidate_sql_engine_dialect: Any,
 ) -> bool:
     try:
         # noinspection PyTypeChecker

@@ -5,14 +5,16 @@ import tempfile
 
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.exceptions import PluginClassNotFoundError
 from tests.test_utils import create_files_in_directory
 
 
-def test_empty_store(empty_data_context_v3):
-    my_expectation_store = empty_data_context_v3.test_yaml_config(
+def test_empty_store(empty_data_context):
+    # noinspection PyUnusedLocal
+    my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -26,10 +28,10 @@ store_backend:
     # assert False
 
 
-def test_config_with_yaml_error(empty_data_context_v3):
-
+def test_config_with_yaml_error(empty_data_context):
     with pytest.raises(Exception):
-        my_expectation_store = empty_data_context_v3.test_yaml_config(
+        # noinspection PyUnusedLocal
+        my_expectation_store = empty_data_context.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 class_name: ExpectationsStore
@@ -41,19 +43,19 @@ EGREGIOUS FORMATTING ERROR
         )
 
 
-def test_filesystem_store(empty_data_context_v3):
+def test_expectations_store_with_filesystem_store_backend(empty_data_context):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
         f_.write("\n")
     with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:
         f_.write("\n")
 
-    my_expectation_store = empty_data_context_v3.test_yaml_config(
+    # noinspection PyUnusedLocal
+    my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config=f"""
-module_name: great_expectations.data_context.store.expectations_store
+module_name: great_expectations.data_context.store
 class_name: ExpectationsStore
 store_backend:
-
     module_name: "great_expectations.data_context.store"
     class_name: TupleFilesystemStoreBackend
     base_directory: {tmp_dir}
@@ -61,8 +63,88 @@ store_backend:
     )
 
 
-def test_empty_store2(empty_data_context_v3):
-    empty_data_context_v3.test_yaml_config(
+def test_checkpoint_store_with_filesystem_store_backend(
+    empty_data_context, tmp_path_factory
+):
+    tmp_dir: str = str(
+        tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
+    )
+
+    yaml_config: str = f"""
+    store_name: my_checkpoint_store
+    class_name: CheckpointStore
+    module_name: great_expectations.data_context.store
+    store_backend:
+        class_name: TupleFilesystemStoreBackend
+        module_name: "great_expectations.data_context.store"
+        base_directory: {tmp_dir}/checkpoints
+    """
+
+    my_checkpoint_store: CheckpointStore = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        return_mode="instantiated_class",
+    )
+
+    report_object: dict = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
+
+    assert my_checkpoint_store.config == report_object["config"]
+
+    expected_checkpoint_store_config: dict
+
+    expected_checkpoint_store_config = {
+        "store_name": "my_checkpoint_store",
+        "class_name": "CheckpointStore",
+        "module_name": "great_expectations.data_context.store.configuration_store",
+        "store_backend": {
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": f"{tmp_dir}/checkpoints",
+            "suppress_store_backend_id": True,
+            "filepath_template": "{0}.yml",
+        },
+        "overwrite_existing": False,
+        "runtime_environment": {
+            "root_directory": f"{empty_data_context.root_directory}",
+        },
+    }
+    assert my_checkpoint_store.config == expected_checkpoint_store_config
+
+    checkpoint_store_name: str = my_checkpoint_store.config["store_name"]
+    empty_data_context.get_config()["checkpoint_store_name"] = checkpoint_store_name
+
+    assert (
+        empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        == "my_checkpoint_store"
+    )
+    assert (
+        empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        == my_checkpoint_store.config["store_name"]
+    )
+
+    expected_checkpoint_store_config = {
+        "store_name": "my_checkpoint_store",
+        "class_name": "CheckpointStore",
+        "module_name": "great_expectations.data_context.store",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "module_name": "great_expectations.data_context.store",
+            "base_directory": f"{tmp_dir}/checkpoints",
+            "suppress_store_backend_id": True,
+        },
+    }
+    assert (
+        empty_data_context.get_config_with_variables_substituted().stores[
+            empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        ]
+        == expected_checkpoint_store_config
+    )
+
+
+def test_empty_store2(empty_data_context):
+    empty_data_context.test_yaml_config(
         yaml_config="""
 class_name: ValidationsStore
 store_backend:
@@ -73,7 +155,7 @@ store_backend:
     )
 
 
-def test_datasource_config(empty_data_context_v3):
+def test_datasource_config(empty_data_context):
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -92,7 +174,7 @@ def test_datasource_config(empty_data_context_v3):
     )
     print(temp_dir)
 
-    return_obj = empty_data_context_v3.test_yaml_config(
+    return_obj = empty_data_context.test_yaml_config(
         yaml_config=f"""
 class_name: Datasource
 
@@ -138,25 +220,25 @@ data_connectors:
     }
 
 
-def test_error_states(empty_data_context_v3):
-
-    first_config = """
+def test_error_states(empty_data_context):
+    first_config: str = """
 class_name: Datasource
 
 execution_engine:
     class_name: NOT_A_REAL_CLASS_NAME
 """
 
-    with pytest.raises(PluginClassNotFoundError) as excinfo:
-        empty_data_context_v3.test_yaml_config(yaml_config=first_config)
-    # print(excinfo.value.message)
-    # shortened_message_len = len(excinfo.value.message)
-    # print("="*80)
+    with pytest.raises(ge_exceptions.DatasourceInitializationError) as excinfo:
+        empty_data_context.test_yaml_config(yaml_config=first_config)
+        # print(excinfo.value.message)
+        # shortened_message_len = len(excinfo.value.message)
+        # print("="*80)
 
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
-    empty_data_context_v3.test_yaml_config(
-        yaml_config=first_config, shorten_tracebacks=True,
+    empty_data_context.test_yaml_config(
+        yaml_config=first_config,
+        shorten_tracebacks=True,
     )
 
     # For good measure, do it again, with a different config and a different type of error
@@ -181,16 +263,15 @@ data_connectors:
         NOT_A_REAL_KEY: nothing
 """
 
-    with pytest.raises(TypeError) as excinfo:
-        empty_data_context_v3.test_yaml_config(yaml_config=second_config,)
-
-    empty_data_context_v3.test_yaml_config(
-        yaml_config=second_config, shorten_tracebacks=True
+    datasource = empty_data_context.test_yaml_config(yaml_config=second_config)
+    assert (
+        "NOT_A_REAL_KEY"
+        not in datasource.config["data_connectors"]["my_filesystem_data_connector"]
     )
 
 
-def test_config_variables_in_test_yaml_config(empty_data_context_v3, sa):
-    context = empty_data_context_v3
+def test_config_variables_in_test_yaml_config(empty_data_context, sa):
+    context = empty_data_context
 
     db_file = file_relative_path(
         __file__,
@@ -234,10 +315,10 @@ introspection:
 
 
 def test_golden_path_sql_datasource_configuration(
-    sa, empty_data_context_v3, test_connectable_postgresql_db
+    sa, empty_data_context, test_connectable_postgresql_db
 ):
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
-    context = empty_data_context_v3
+    context = empty_data_context
 
     os.chdir(context.root_directory)
 
@@ -264,17 +345,25 @@ introspection:
 """
     # noinspection PyUnusedLocal
     report_object = context.test_yaml_config(
-        name="my_datasource", yaml_config=yaml_config, return_mode="report_object",
+        name="my_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
     )
     print(json.dumps(report_object, indent=2))
     print(context.datasources)
 
-    my_batch = context.get_batch("my_datasource", "whole_table_with_limits", "test_df",)
+    my_batch = context.get_batch(
+        "my_datasource",
+        "whole_table_with_limits",
+        "test_df",
+    )
     # assert len(my_batch.data.fetchall()) == 10
 
     with pytest.raises(KeyError):
         my_batch = context.get_batch(
-            "my_datasource", "whole_table_with_limits", "DOES_NOT_EXIST",
+            "my_datasource",
+            "whole_table_with_limits",
+            "DOES_NOT_EXIST",
         )
 
     my_validator = context.get_validator(
@@ -293,12 +382,13 @@ introspection:
     # )
     # assert my_evr.success
 
+    # TODO: <Alex>ALEX</Alex>
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
     # assert my_evr.success
 
 
 def test_golden_path_inferred_asset_pandas_datasource_configuration(
-    empty_data_context_v3, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -326,7 +416,7 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context_v3
+    context = empty_data_context
 
     os.chdir(context.root_directory)
     import great_expectations as ge
@@ -366,7 +456,9 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"number": "2",},
+        partition_identifiers={
+            "number": "2",
+        },
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -420,12 +512,13 @@ data_connectors:
     )
     assert my_evr.success
 
+    # TODO: <Alex>ALEX</Alex>
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
     # assert my_evr.success
 
 
 def test_golden_path_configured_asset_pandas_datasource_configuration(
-    empty_data_context_v3, test_df, tmp_path_factory
+    empty_data_context, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -455,7 +548,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         file_content_fn=lambda: test_df.to_csv(header=True, index=False),
     )
 
-    context = empty_data_context_v3
+    context = empty_data_context
 
     os.chdir(context.root_directory)
     import great_expectations as ge
@@ -519,7 +612,9 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"number": "2",},
+        partition_identifiers={
+            "number": "2",
+        },
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {

@@ -4604,13 +4604,14 @@ class Dataset(MetaDataset):
         Expect the values for each record to be unique across the columns listed.
         Note that records can be duplicated.
 
-        E.g.
-        A B C
-        1 1 2 Fail
-        1 2 3 Pass
-        8 2 7 Pass
-        1 2 3 Pass
-        4 4 4 Fail
+        For example::
+
+            A B C
+            1 1 2 Fail
+            1 2 3 Pass
+            8 2 7 Pass
+            1 2 3 Pass
+            4 4 4 Fail
 
         Args:
             column_list (tuple or list): The column names to evaluate
@@ -4656,13 +4657,14 @@ class Dataset(MetaDataset):
         Expect the values for each record to be unique across the columns listed.
         Note that records can be duplicated.
 
-        E.g.
-        A B C
-        1 1 2 Fail
-        1 2 3 Pass
-        8 2 7 Pass
-        1 2 3 Pass
-        4 4 4 Fail
+        For example::
+
+            A B C
+            1 1 2 Fail
+            1 2 3 Pass
+            8 2 7 Pass
+            1 2 3 Pass
+            4 4 4 Fail
 
         Args:
             column_list (tuple or list): The column names to evaluate
@@ -4708,13 +4710,14 @@ class Dataset(MetaDataset):
         Expect that the columns are unique together, e.g. a multi-column primary key
         Note that all instances of any duplicates are considered failed
 
-        E.g.
-        A B C
-        1 1 2 Fail
-        1 2 3 Pass
-        1 1 2 Fail
-        2 2 2 Pass
-        3 2 3 Pass
+        For example::
+
+            A B C
+            1 1 2 Fail
+            1 2 3 Pass
+            1 1 2 Fail
+            2 2 2 Pass
+            3 2 3 Pass
 
         Args:
             column_list (tuple or list): The column names to evaluate

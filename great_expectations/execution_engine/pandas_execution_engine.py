@@ -4,7 +4,7 @@ import hashlib
 import logging
 import random
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
 from ruamel.yaml.compat import StringIO
@@ -118,6 +118,7 @@ Notes:
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
+            batch_spec.batch_data = "PandasDataFrame"
 
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.get("reader_method")
@@ -237,13 +238,13 @@ Notes:
     def guess_reader_method_from_path(path):
         """Helper method for deciding which reader to use to read in a certain path.
 
-               Args:
-                   path (str): the to use to guess
+        Args:
+            path (str): the to use to guess
 
-               Returns:
-                   ReaderMethod to use for the filepath
+        Returns:
+            ReaderMethod to use for the filepath
 
-               """
+        """
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif path.endswith(".parquet"):
@@ -256,7 +257,7 @@ Notes:
             return {"reader_method": "read_pickle"}
         elif path.endswith(".feather"):
             return {"reader_method": "read_feather"}
-        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+        elif path.endswith(".csv.gz") or path.endswith(".tsv.gz"):
             return {
                 "reader_method": "read_csv",
                 "reader_options": {"compression": "gzip"},
@@ -426,12 +427,16 @@ Notes:
 
     ### Splitter methods for partitioning dataframes ###
     @staticmethod
-    def _split_on_whole_table(df,) -> pd.DataFrame:
+    def _split_on_whole_table(
+        df,
+    ) -> pd.DataFrame:
         return df
 
     @staticmethod
     def _split_on_column_value(
-        df, column_name: str, partition_definition: dict,
+        df,
+        column_name: str,
+        partition_definition: dict,
     ) -> pd.DataFrame:
 
         return df[df[column_name] == partition_definition[column_name]]
@@ -452,7 +457,10 @@ Notes:
 
     @staticmethod
     def _split_on_divided_integer(
-        df, column_name: str, divisor: int, partition_definition: dict,
+        df,
+        column_name: str,
+        divisor: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
@@ -465,7 +473,10 @@ Notes:
 
     @staticmethod
     def _split_on_mod_integer(
-        df, column_name: str, mod: int, partition_definition: dict,
+        df,
+        column_name: str,
+        mod: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
@@ -476,7 +487,9 @@ Notes:
 
     @staticmethod
     def _split_on_multi_column_values(
-        df, column_names: List[str], partition_definition: dict,
+        df,
+        column_names: List[str],
+        partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
 
@@ -520,7 +533,8 @@ Notes:
 
     @staticmethod
     def _sample_using_random(
-        df, p: float = 0.1,
+        df,
+        p: float = 0.1,
     ):
         """Take a random sample of rows, retaining proportion p
 
@@ -530,14 +544,19 @@ Notes:
 
     @staticmethod
     def _sample_using_mod(
-        df, column_name: str, mod: int, value: int,
+        df,
+        column_name: str,
+        mod: int,
+        value: int,
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
         return df[df[column_name].map(lambda x: x % mod == value)]
 
     @staticmethod
     def _sample_using_a_list(
-        df, column_name: str, value_list: list,
+        df,
+        column_name: str,
+        value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
         return df[df[column_name].isin(value_list)]

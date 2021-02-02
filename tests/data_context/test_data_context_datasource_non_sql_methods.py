@@ -7,7 +7,6 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.new_datasource import Datasource
 
 from ..test_utils import create_files_in_directory
 
@@ -15,9 +14,9 @@ yaml = YAML()
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_inferred_assets(
-    empty_data_context_v3, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_v3
+    context = empty_data_context
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -58,7 +57,8 @@ data_connectors:
     )
 
     context.add_datasource(
-        "my_datasource", config,
+        "my_datasource",
+        **config,
     )
 
     batch_request: Union[dict, BatchRequest] = {
@@ -89,9 +89,9 @@ data_connectors:
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets(
-    empty_data_context_v3, tmp_path_factory
+    empty_data_context, tmp_path_factory
 ):
-    context = empty_data_context_v3
+    context = empty_data_context
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -139,7 +139,8 @@ data_connectors:
     )
 
     context.add_datasource(
-        "my_datasource", config,
+        "my_datasource",
+        **config,
     )
 
     batch_request: Union[dict, BatchRequest] = {

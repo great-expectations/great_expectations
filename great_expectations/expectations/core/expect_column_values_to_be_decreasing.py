@@ -4,6 +4,7 @@ import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...data_asset.util import parse_result_format
 from ...render.renderer.renderer import renderer
@@ -14,7 +15,6 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import ColumnMapExpectation, Expectation, _format_map_output
-from ..registry import extract_metrics, get_metric_kwargs
 
 
 class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
@@ -70,6 +70,15 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
 
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     map_metric = "column_values.decreasing"
     success_keys = (
         "strictly",
@@ -93,6 +102,7 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

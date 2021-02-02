@@ -1,5 +1,6 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.validation_operators import (
+    MicrosoftTeamsNotificationAction,
     NoOpAction,
     PagerdutyAlertAction,
     SlackNotificationAction,
@@ -23,6 +24,7 @@ class ActionAnonymizer(Anonymizer):
             StoreEvaluationParametersAction,
             SlackNotificationAction,
             PagerdutyAlertAction,
+            MicrosoftTeamsNotificationAction,
             UpdateDataDocsAction,
             ValidationAction,
         ]

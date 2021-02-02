@@ -89,18 +89,20 @@ def test_partition_request_non_recognized_param(
     my_data_connector = create_files_and_instantiate_data_connector
     # Test 1: non valid_partition_identifiers_limit
     with pytest.raises(ge_exceptions.PartitionQueryError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                partition_request={"fake": "I_wont_work"},
+        sorted_batch_definition_list = (
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                BatchRequest(
+                    datasource_name="test_environment",
+                    data_connector_name="general_filesystem_data_connector",
+                    data_asset_name="TestFiles",
+                    partition_request={"fake": "I_wont_work"},
+                )
             )
         )
 
     # Test 2: Unrecognized custom_filter is not a function
     with pytest.raises(ge_exceptions.PartitionQueryError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
@@ -111,12 +113,14 @@ def test_partition_request_non_recognized_param(
 
     # Test 3: partition_definitions is not dict
     with pytest.raises(ge_exceptions.PartitionQueryError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                partition_request={"partition_identifiers": 1},
+        sorted_batch_definition_list = (
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                BatchRequest(
+                    datasource_name="test_environment",
+                    data_connector_name="general_filesystem_data_connector",
+                    data_asset_name="TestFiles",
+                    partition_request={"partition_identifiers": 1},
+                )
             )
         )
 
@@ -134,35 +138,41 @@ def test_partition_request_non_recognized_param(
 def test_partition_request_limit(create_files_and_instantiate_data_connector):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={"limit": None},
+    sorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={"limit": None},
+            )
         )
     )
     assert len(sorted_batch_definition_list) == 10
 
     # proper limit
-    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={"limit": 3},
+    sorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={"limit": 3},
+            )
         )
     )
     assert len(sorted_batch_definition_list) == 3
 
     # illegal limit
     with pytest.raises(ge_exceptions.PartitionQueryError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                partition_request={"limit": "apples"},
+        sorted_batch_definition_list = (
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                BatchRequest(
+                    datasource_name="test_environment",
+                    data_connector_name="general_filesystem_data_connector",
+                    data_asset_name="TestFiles",
+                    partition_request={"limit": "apples"},
+                )
             )
         )
 
@@ -172,12 +182,14 @@ def test_partition_request_illegal_index_and_limit_combination(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     with pytest.raises(ge_exceptions.PartitionQueryError):
-        sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                partition_request={"index": 0, "limit": 1},
+        sorted_batch_definition_list = (
+            my_data_connector.get_batch_definition_list_from_batch_request(
+                BatchRequest(
+                    datasource_name="test_environment",
+                    data_connector_name="general_filesystem_data_connector",
+                    data_asset_name="TestFiles",
+                    partition_request={"index": 0, "limit": 1},
+                )
             )
         )
 
@@ -197,12 +209,16 @@ def test_partition_request_sorted_filtered_by_custom_filter(
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={"custom_filter_function": my_custom_partition_selector},
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "custom_filter_function": my_custom_partition_selector
+                },
+            )
         )
     )
 
@@ -267,15 +283,17 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_limit(
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "custom_filter_function": my_custom_partition_selector,
-                "limit": 4,
-            },
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "custom_filter_function": my_custom_partition_selector,
+                    "limit": 4,
+                },
+            )
         )
     )
 
@@ -332,15 +350,17 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "custom_filter_function": my_custom_partition_selector,
-                "index": 0,
-            },
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "custom_filter_function": my_custom_partition_selector,
+                    "index": 0,
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -374,15 +394,17 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_string
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "custom_filter_function": my_custom_partition_selector,
-                "index": "-1",
-            },
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "custom_filter_function": my_custom_partition_selector,
+                    "index": "-1",
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -415,15 +437,17 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "custom_filter_function": my_custom_partition_selector,
-                "index": [1, 3],
-            },
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "custom_filter_function": my_custom_partition_selector,
+                    "index": [1, 3],
+                },
+            )
         )
     )
 
@@ -466,15 +490,17 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "custom_filter_function": my_custom_partition_selector,
-                "index": (0, 4, 3),
-            },
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "custom_filter_function": my_custom_partition_selector,
+                    "index": (0, 4, 3),
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 2
@@ -516,15 +542,17 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "custom_filter_function": my_custom_partition_selector,
-                "index": "3:5",
-            },
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "custom_filter_function": my_custom_partition_selector,
+                    "index": "3:5",
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 2
@@ -566,15 +594,17 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(
             > datetime.datetime(2020, 7, 15).date()
         )
 
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "custom_filter_function": my_custom_partition_selector,
-                "index": slice(3, 5, None),
-            },
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "custom_filter_function": my_custom_partition_selector,
+                    "index": slice(3, 5, None),
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 2
@@ -605,12 +635,16 @@ def test_partition_request_partition_request_partition_identifiers_1_key(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={"partition_identifiers": {"timestamp": "20200809"},},
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "partition_identifiers": {"timestamp": "20200809"},
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 4
@@ -657,12 +691,17 @@ def test_partition_request_partition_request_partition_identifiers_1_key_and_ind
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={"partition_identifiers": {"name": "james"}, "index": 0,},
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "partition_identifiers": {"name": "james"},
+                    "index": 0,
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -685,14 +724,16 @@ def test_partition_request_partition_request_partition_identifiers_2_key_name_ti
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            partition_request={
-                "partition_identifiers": {"timestamp": "20200809", "name": "will"},
-            },
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={
+                    "partition_identifiers": {"timestamp": "20200809", "name": "will"},
+                },
+            )
         )
     )
     assert len(returned_batch_definition_list) == 1
@@ -715,11 +756,13 @@ def test_partition_request_for_data_asset_name(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
-    returned_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+            )
         )
     )
     assert len(returned_batch_definition_list) == 10

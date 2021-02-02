@@ -9,6 +9,10 @@ This guide will help you instantiate a Data Context without a yml file, aka conf
 
     - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration<tutorials__getting_started>`.
 
+.. note::
+
+    See also our companion video for this guide: `Data Contexts In Code <https://youtu.be/4VMOYpjHNhM>`_.
+
 Steps
 -----
 
@@ -65,7 +69,8 @@ Steps
                 )
             },
             store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="optional/absolute/path/for/stores"),
-    )
+        )
+
 
     The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. ``default_bucket_name``, ``default_project_name`` sets the default value for all stores that are not specified individually.
 
@@ -185,6 +190,10 @@ Steps
         context = BaseDataContext(project_config=data_context_config)
 
 3. Use this BaseDataContext instance as your DataContext
+
+    If you are using Airflow, you may wish to pass this Data Context to your GreatExpectationsOperator as a parameter. See the following guide for more details:
+
+    - :ref:`deployment_airflow`
 
 
 Additional resources

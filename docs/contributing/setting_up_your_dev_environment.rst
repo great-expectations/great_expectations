@@ -51,12 +51,14 @@ Install python dependencies
 **5. Create a new virtual environment**
 
     * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar.
-    * Ex: ``python3 -m venv <path_to_environments_folder>/great_expectations_dev`` and then ``<source path_to_environments_folder>/great_expectations_dev/bin/activate``
+    * Ex virtualenv: ``python3 -m venv <path_to_environments_folder>/great_expectations_dev`` and then ``<source path_to_environments_folder>/great_expectations_dev/bin/activate``
+    * Ex conda: ``conda create --name great_expectations_dev`` and then ``conda activate great_expectations_dev``
     * This is not required, but highly recommended.
 
 **6. Install dependencies from requirements-dev.txt**
 
-    * ``pip install -r requirements-dev.txt``
+    * ``pip install -r requirements-dev.txt -c constraints-dev.txt``
+    *  MacOS users will be able to pip / pip3 install ``requirements-dev.txt`` using the above command from within conda, yet Windows users utilizing a conda environment will need to individually install all files within ``requirements-dev.txt``
     *  This will ensure that sure you have the right libraries installed in your python environment.
     
       * Note that you can also substitute ``requirements-dev-test.txt`` to only install requirements required for testing all backends, and ``requirements-dev-spark.txt`` or ``requirements-dev-sqlalchemy.txt`` if you would like to add support for spark or sqlalchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.

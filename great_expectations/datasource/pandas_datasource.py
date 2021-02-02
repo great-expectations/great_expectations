@@ -145,7 +145,11 @@ class PandasDatasource(LegacyDatasource):
 
     # TODO: move to data connector
     def process_batch_parameters(
-        self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
+        self,
+        reader_method=None,
+        reader_options=None,
+        limit=None,
+        dataset_options=None,
     ):
         # Note that we do not pass limit up, since even that will be handled by PandasDatasource
         batch_kwargs = super().process_batch_parameters(dataset_options=dataset_options)
@@ -244,7 +248,7 @@ class PandasDatasource(LegacyDatasource):
 
         else:
             raise BatchKwargsError(
-                "Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
+                "Invalid batch_kwargs: path, s3, or dataset is required for a PandasDatasource",
                 batch_kwargs,
             )
 
