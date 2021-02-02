@@ -39,24 +39,26 @@ stages:
     jobs:
       - job: changes
         steps:
-          - task: ChangedFiles@1
-            name: CheckChanges
-            inputs:
-              verbose: true
-              rules: |
-                [ContribChanged]
-                contrib/**
-
-                [ExperimentalChanged]
-                contrib/experimental/**
-
-                [DocsChanged]
-                docs/**
-
-                [GEChanged]
-                great_expectations/**
-                /*.txt
-                /*.yml
+#          - task: ChangedFiles@1
+#            name: CheckChanges
+#            inputs:
+#              verbose: true
+#              rules: |
+#                [ContribChanged]
+#                contrib/**
+#
+#                [ExperimentalChanged]
+#                contrib/experimental/**
+#
+#                [DocsChanged]
+#                docs/**
+#
+#                [GEChanged]
+#                great_expectations/**
+#                /*.txt
+#                /*.yml
+          - script: |
+              echo "Hello world!"
 
   - stage: lint
     dependsOn: scope_check
