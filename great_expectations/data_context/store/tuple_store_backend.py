@@ -633,13 +633,6 @@ class TupleS3StoreBackend(TupleStoreBackend):
             location = "s3-" + location
         s3_key = self._convert_key_to_filepath(key)
 
-        location = boto3.client(
-            "s3", endpoint_url=self.endpoint_url
-        ).get_bucket_location(Bucket=self.bucket)["LocationConstraint"]
-        if location is None:
-            location = "s3"
-        else:
-            location = "s3-" + location
         if not self.prefix:
             url = f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
         else:
