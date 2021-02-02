@@ -201,10 +201,10 @@ class Checkpoint:
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        run_id=None,
-        run_name=None,
-        run_time=None,
-        result_format=None,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime]] = None,
+        result_format: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
         assert not (run_id and run_name) and not (
