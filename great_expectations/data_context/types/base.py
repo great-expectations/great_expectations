@@ -1360,9 +1360,11 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         default_credentials: Use these credentials for all stores that do not have credentials provided
         expectations_store_credentials: Overrides default_credentials if supplied
         validations_store_credentials: Overrides default_credentials if supplied
+        checkpoint_store_credentials: Overrides default_credentials if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
+        checkpoint_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1370,9 +1372,11 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         default_credentials: Optional[Dict] = None,
         expectations_store_credentials: Optional[Dict] = None,
         validations_store_credentials: Optional[Dict] = None,
+        checkpoint_store_credentials: Optional[Dict] = None,
         expectations_store_name: str = "expectations_database_store",
         validations_store_name: str = "validations_database_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        checkpoint_store_name: str = "checkpoint_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1382,11 +1386,14 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
             expectations_store_credentials = default_credentials
         if validations_store_credentials is None:
             validations_store_credentials = default_credentials
+        if checkpoint_store_credentials is None:
+            checkpoint_store_credentials = default_credentials
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.checkpoint_store_name = checkpoint_store_name
 
         self.stores = {
             expectations_store_name: {
@@ -1404,6 +1411,13 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            checkpoint_store_name: {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "class_name": "DatabaseStoreBackend",
+                    "credentials": checkpoint_store_credentials,
+                },
+            },
         }
 
 
