@@ -849,8 +849,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     The key to this StoreBackend must be a tuple with fixed length based on the filepath_template,
     or a variable-length tuple may be used and returned with an optional filepath_suffix (to be) added.
     The filepath_template is a string template used to convert the key to a filepath.
-    
-    You need to setup the connection string environment variable 
+
+    You need to setup the connection string environment variable
     https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python
     """
 
@@ -940,9 +940,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         az_blob_key = self._convert_key_to_filepath(key)
         az_blob_path = os.path.join(self.container, self.prefix, az_blob_key)
 
-        return "https://%s.blob.core.windows.net/%s" % (
-            self._get_container_client().account_name,
-            az_blob_path,
+        return "https://{}.blob.core.windows.net/{}".format(
+            self._get_container_client().account_name, az_blob_path,
         )
 
     def _has_key(self, key):

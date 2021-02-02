@@ -170,7 +170,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, table_name: str,
     ):
         """'Split' by returning the whole table
-        
+
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """
 

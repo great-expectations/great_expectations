@@ -8,10 +8,10 @@ from .query_store import SqlAlchemyQueryStore
 from .store import Store
 from .store_backend import InMemoryStoreBackend, StoreBackend
 from .tuple_store_backend import (
+    TupleAzureBlobStoreBackend,
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
-    TupleAzureBlobStoreBackend,
     TupleStoreBackend,
 )
 from .validations_store import ValidationsStore

@@ -13,10 +13,10 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import (
     InMemoryStoreBackend,
     StoreBackend,
+    TupleAzureBlobStoreBackend,
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
-    TupleAzureBlobStoreBackend,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
