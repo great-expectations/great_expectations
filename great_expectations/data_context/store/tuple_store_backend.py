@@ -9,6 +9,10 @@ from itertools import chain
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
+from great_expectations.util import (
+    filter_properties_dict,
+    get_currently_executing_function_call_arguments,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -213,6 +217,10 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
             )
 
+    @property
+    def config(self) -> dict:
+        return self._config
+
 
 class TupleFilesystemStoreBackend(TupleStoreBackend):
     """Uses a local filepath as a store.
@@ -270,14 +278,23 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True,
+            **{
+                "class_name": self.__class__.__name__,
+            },
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def _get(self, key):
-        contents = ""
-        filepath = os.path.join(
+        filepath: str = os.path.join(
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
         try:
             with open(filepath) as infile:
-                contents = infile.read()
+                contents: str = infile.read()
         except FileNotFoundError:
             raise InvalidKeyError(
                 f"Unable to retrieve object from TupleFilesystemStoreBackend with the following Key: {str(filepath)}"
@@ -402,6 +419,10 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             os.path.join(self.full_base_directory, self._convert_key_to_filepath(key))
         )
 
+    @property
+    def config(self) -> dict:
+        return self._config
+
 
 class TupleS3StoreBackend(TupleStoreBackend):
     """
@@ -416,6 +437,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         self,
         bucket,
         prefix="",
+        boto3_options=None,
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
@@ -449,10 +471,23 @@ class TupleS3StoreBackend(TupleStoreBackend):
             # whether the rest of the key is built with platform-specific separators or not
             prefix = prefix.strip("/")
         self.prefix = prefix
+        if boto3_options is None:
+            boto3_options = {}
+        self._boto3_options = boto3_options
         self.endpoint_url = endpoint_url
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True,
+            **{
+                "class_name": self.__class__.__name__,
+            },
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def _build_s3_object_key(self, key):
         if self.platform_specific_separator:
@@ -472,11 +507,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return s3_object_key
 
     def _get(self, key):
-        import boto3
-
-        s3 = boto3.client("s3", endpoint_url=self.endpoint_url)
-
         s3_object_key = self._build_s3_object_key(key)
+
+        s3 = self._create_client()
 
         try:
             s3_response_object = s3.get_object(Bucket=self.bucket, Key=s3_object_key)
@@ -494,11 +527,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _set(
         self, key, value, content_encoding="utf-8", content_type="application/json"
     ):
-        import boto3
-
-        s3 = boto3.resource("s3", endpoint_url=self.endpoint_url)
-
         s3_object_key = self._build_s3_object_key(key)
+
+        s3 = self._create_resource()
 
         try:
             result_s3 = s3.Object(self.bucket, s3_object_key)
@@ -517,9 +548,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return s3_object_key
 
     def _move(self, source_key, dest_key, **kwargs):
-        import boto3
-
-        s3 = boto3.resource("s3", endpoint_url=self.endpoint_url)
+        s3 = self._create_resource()
 
         source_filepath = self._convert_key_to_filepath(source_key)
         if not source_filepath.startswith(self.prefix):
@@ -535,11 +564,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3.Object(self.bucket, source_filepath).delete()
 
     def list_keys(self):
-        key_list = []
-
-        import boto3
-
-        s3 = boto3.client("s3", endpoint_url=self.endpoint_url)
+        s3 = self._create_client()
         paginator = s3.get_paginator("list_objects_v2")
 
         if self.prefix:
@@ -565,6 +590,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             if current_page_contents is not None:
                 objects.extend(current_page_contents)
 
+        key_list = []
         for s3_object_info in objects:
             s3_object_key = s3_object_info["Key"]
             if self.platform_specific_separator:
@@ -591,31 +617,21 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return key_list
 
     def get_url_for_key(self, key, protocol=None):
-        import boto3
-
-        location = boto3.client(
-            "s3", endpoint_url=self.endpoint_url
-        ).get_bucket_location(Bucket=self.bucket)["LocationConstraint"]
-        if location is None:
-            location = "s3"
+        location = self._create_client().get_bucket_location(Bucket=self.bucket)[
+            "LocationConstraint"
+        ]
+        if self.boto3_options.get("endpoint_url"):
+            location = self.boto3_options.get("endpoint_url")
+        elif location is None:
+            location = "https://s3.amazonaws.com"
         else:
-            location = "s3-" + location
+            location = "https://s3-" + location + ".amazonaws.com"
+
         s3_key = self._convert_key_to_filepath(key)
 
-        location = boto3.client(
-            "s3", endpoint_url=self.endpoint_url
-        ).get_bucket_location(Bucket=self.bucket)["LocationConstraint"]
-        if location is None:
-            location = "s3"
-        else:
-            location = "s3-" + location
         if not self.prefix:
-            url = f"https://{location}.amazonaws.com/{self.bucket}/{s3_key}"
-        else:
-            url = (
-                f"https://{location}.amazonaws.com/{self.bucket}/{self.prefix}/{s3_key}"
-            )
-        return url
+            return f"{location}/{self.bucket}/{s3_key}"
+        return f"{location}/{self.bucket}/{self.prefix}/{s3_key}"
 
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
@@ -633,13 +649,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return public_url
 
     def remove_key(self, key):
-        import boto3
         from botocore.exceptions import ClientError
 
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
-        s3 = boto3.resource("s3", endpoint_url=self.endpoint_url)
+        s3 = self._create_resource()
         s3_object_key = self._build_s3_object_key(key)
         s3.Object(self.bucket, s3_object_key).delete()
         if s3_object_key:
@@ -649,13 +664,14 @@ class TupleS3StoreBackend(TupleStoreBackend):
                     Bucket=self.bucket, Prefix=self.prefix
                 )
 
-                delete_keys = {"Objects": []}
-                delete_keys["Objects"] = [
-                    {"Key": k}
-                    for k in [
-                        obj["Key"] for obj in objects_to_delete.get("Contents", [])
+                delete_keys = {
+                    "Objects": [
+                        {"Key": k}
+                        for k in [
+                            obj["Key"] for obj in objects_to_delete.get("Contents", [])
+                        ]
                     ]
-                ]
+                }
                 s3.meta.client.delete_objects(Bucket=self.bucket, Delete=delete_keys)
                 return True
             except ClientError as e:
@@ -666,6 +682,32 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def _has_key(self, key):
         all_keys = self.list_keys()
         return key in all_keys
+
+    @property
+    def boto3_options(self):
+        from botocore.client import Config
+
+        result = {}
+        if self._boto3_options.get("signature_version"):
+            signature_version = self._boto3_options.pop("signature_version")
+            result["config"] = Config(signature_version=signature_version)
+        result.update(self._boto3_options)
+
+        return result
+
+    def _create_client(self):
+        import boto3
+
+        return boto3.client("s3", **self.boto3_options)
+
+    def _create_resource(self):
+        import boto3
+
+        return boto3.resource("s3", **self.boto3_options)
+
+    @property
+    def config(self) -> dict:
+        return self._config
 
 
 class TupleGCSStoreBackend(TupleStoreBackend):
@@ -714,6 +756,16 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = get_currently_executing_function_call_arguments(
+            include_module_name=True,
+            **{
+                "class_name": self.__class__.__name__,
+            },
+        )
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def _build_gcs_object_key(self, key):
         if self.platform_specific_separator:
@@ -864,3 +916,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def _has_key(self, key):
         all_keys = self.list_keys()
         return key in all_keys
+
+    @property
+    def config(self) -> dict:
+        return self._config

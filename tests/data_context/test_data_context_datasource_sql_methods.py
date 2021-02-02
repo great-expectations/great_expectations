@@ -5,7 +5,6 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
-from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
@@ -70,7 +69,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
         )
 
     # Failed specification using an incomplete BatchRequest
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         context.get_batch(
             batch_request=BatchRequest(
                 datasource_name="my_sqlite_db",
@@ -80,7 +79,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
 
     # Failed specification using an incomplete BatchRequest
     # with pytest.raises(ValueError):
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         context.get_batch(
             batch_request=BatchRequest(
                 # datasource_name=MISSING
@@ -194,7 +193,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
         )
 
     # Failed specification using an incomplete BatchRequest
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         context.get_validator(
             batch_request=BatchRequest(
                 datasource_name="my_sqlite_db",
@@ -205,7 +204,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
 
     # Failed specification using an incomplete BatchRequest
     # with pytest.raises(ValueError):
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         context.get_validator(
             batch_request=BatchRequest(
                 # datasource_name=MISSING

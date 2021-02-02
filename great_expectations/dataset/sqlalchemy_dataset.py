@@ -461,6 +461,7 @@ class MetaSqlAlchemyDataset(Dataset):
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     """
 
+
     --ge-feature-maturity-info--
 
         id: validation_engine_sqlalchemy
@@ -497,7 +498,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         *args,
         **kwargs,
     ):
-
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
@@ -528,7 +528,17 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if self.engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
+            temp_table_schema_name = None
         else:
+            try:
+                # use the schema name configured for the datasource
+                temp_table_schema_name = self.engine.url.query.get("schema")
+            except AttributeError as err:
+                # sqlite/mssql dialects use a Connection object instead of Engine and override self.engine
+                # retrieve the schema from the Connection object i.e. self.engine
+                conn_object = self.engine
+                temp_table_schema_name = conn_object.engine.url.query.get("schema")
+
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         # Get the dialect **for purposes of identifying types**
@@ -589,7 +599,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
 
         if custom_sql:
-            self.create_temporary_table(table_name, custom_sql, schema_name=schema)
+            self.create_temporary_table(
+                table_name, custom_sql, schema_name=temp_table_schema_name
+            )
 
             if self.generated_table_name is not None:
                 if self.engine.dialect.name.lower() == "bigquery":

@@ -15,7 +15,6 @@ from ...render.util import (
     substitute_none_for_missing,
 )
 from ..expectation import ColumnMapExpectation, Expectation, _format_map_output
-from ..registry import extract_metrics, get_metric_kwargs
 
 
 class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
@@ -70,6 +69,15 @@ class ExpectColumnValuesToBeDecreasing(ColumnMapExpectation):
         .expect_column_values_to_be_increasing>`
 
     """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
 
     map_metric = "column_values.decreasing"
     success_keys = (

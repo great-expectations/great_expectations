@@ -27,8 +27,7 @@ except ImportError:
 
 
 from ...render.renderer.renderer import renderer
-from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
-from ..registry import extract_metrics
+from ..expectation import ColumnExpectation
 
 
 class ExpectColumnMaxToBeBetween(ColumnExpectation):
@@ -91,6 +90,15 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                * If max_value is None, then min_value is treated as a lower bound
 
            """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.max",)

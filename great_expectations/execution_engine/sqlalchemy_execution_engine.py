@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import pandas as pd
 
 from great_expectations.core import IDDict
-from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
@@ -1035,8 +1035,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return sa.select("*").select_from(sa.text(table_name)).where(split_clause)
 
     def get_batch_data_and_markers(
-        self, batch_spec
-    ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:
 
         selectable = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
         if "bigquery_temp_table" in batch_spec:

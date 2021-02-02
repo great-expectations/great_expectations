@@ -20,15 +20,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    ColumnPairMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
-from ..registry import extract_metrics, get_metric_kwargs
+from ..expectation import ColumnPairMapExpectation, InvalidExpectationConfigurationError
 
 try:
     import sqlalchemy as sa
@@ -69,6 +61,15 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
     """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "multi-column expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
 
     map_metric = ("column_pair_values.in_set",)
     domain_keys = (

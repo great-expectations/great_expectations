@@ -127,13 +127,15 @@ Steps
 
         #. **List files in your directory.**
 
-            Use a utility like ``tree`` on the command line or ``glob`` to list files, so that you can see how paths and filenames are formatted. Our example will use the following 3 files in the ``test_directory/`` folder.
+            Use a utility like ``tree`` on the command line or ``glob`` to list files, so that you can see how paths and filenames are formatted. Our example will use the following 3 files in the ``test_directory/`` folder, which is a sibling of the ``great_expectations/`` folder in our project directory:
 
             .. code-block:: bash
-
-                test_directory/abe_20201119_200.csv
-                test_directory/alex_20201212_300.csv
-                test_directory/will_20201008_100.csv
+                - my_ge_project
+                    |- great_expectations
+                    |- test_directory
+                        |- abe_20201119_200.csv
+                        |- alex_20201212_300.csv
+                        |- will_20201008_100.csv
 
 
         #.  **Create or copy a yaml config.**
@@ -142,6 +144,8 @@ Steps
                 The example yaml config will take the 3 files shown above and create 1 asset named ``TestAsset``, with ``name``, ``timestamp`` and ``size`` as the group names.
 
                 **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences.  More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+
+                **Note**: The ``base_directory`` path needs to be specified either as an absolute path or relative to the ``great_expectations/`` directory.
 
                 .. code-block:: python
 
@@ -152,18 +156,29 @@ Steps
                             data_connectors:
                               my_data_connector:
                                 class_name: ConfiguredAssetFilesystemDataConnector
-                                base_directory: test_directory/
+                                base_directory: ../test_directory/
                                 glob_directive: "*.csv"
                                 assets:
-                                  TestAsset:
+                                  MyAsset:
+                                    pattern: (.+)\\.csv
+                                    group_names:
+                                      - filename
+                            """
+
+                A more complex version of the ``MyAsset`` regex definition that takes into account the naming structure of the CSV files in the ``base_directory/`` would look like this:
+
+                .. code-block:: python
+
+                    config = f"""
+                            ... see the config above ..
+                                  MyAsset:
                                     pattern: (.+)_(\\d+)_(\\d+)\\.csv
                                     group_names:
                                       - name
                                       - timestamp
                                       - size
-                            """
 
-                Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+                Additional examples of yaml configurations can be found in the following document: :ref:`how_to_guides_how_to_configure_a_configuredassetdataconnector`
 
         #. **Run context.test_yaml_config.**
 
@@ -182,7 +197,8 @@ Steps
 
                 Attempting to instantiate class from config...
                 Instantiating as a Datasource, since class_name is Datasource
-                Instantiating class from config without an explicit class_name is dangerous. Consider adding an explicit class_name for None
+                Instantiating class from config without an explicit class_name is dangerous.
+                Consider adding an explicit class_name for None
                     Successfully instantiated Datasource
 
                 Execution engine: PandasExecutionEngine
@@ -200,18 +216,14 @@ Steps
                         Fetching batch data...
 
                         Showing 5 rows
-                   Unnamed: 0                                           Name PClass    Age     Sex  Survived  SexCode
-                0           1                   Allen, Miss Elisabeth Walton    1st  29.00  female         1        1
-                1           2                    Allison, Miss Helen Loraine    1st   2.00  female         0        1
-                2           3            Allison, Mr Hudson Joshua Creighton    1st  30.00    male         0        0
-                3           4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)    1st  25.00  female         0        1
-                4           5                  Allison, Master Hudson Trevor    1st   0.92    male         1        0
+                        ...
 
-            This means all has went well and you can proceed with exploring data with your new filesystem-backed Pandas data source.
+
+            Pay attention to the "Available data_asset_names" and "Unmatched data_references" output to ensure that the regex pattern you specified matches your desired data files.
 
         #. **Save the config.**
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup:
             First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_pandas_datasource`` in our example).
             Next, copy the yml snippet from Step 3 into the new entry.
 
@@ -222,7 +234,7 @@ Additional Notes
 ----------------
 
 #.
-    For the Stable API (up to 0.12.x), relative path locations should be specified from the perspective of the directory, in which the
+    For the Stable API (up to 0.12.x), relative path locations (e.g. for the ``base_directory``) should be specified from the perspective of the directory, in which the
 
     .. code-block:: bash
 
@@ -232,7 +244,7 @@ Additional Notes
 
 
 #.
-    For the Experimental API (0.13), relative path locations should be specified from the perspective of the ``great_expectations/`` directory.
+    For the Experimental API (0.13), relative path locations  (e.g. for the ``base_directory``) should be specified from the perspective of the ``great_expectations/`` directory.
 
 
 --------
