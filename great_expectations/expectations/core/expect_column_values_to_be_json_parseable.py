@@ -23,13 +23,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from ..registry import extract_metrics, get_metric_kwargs
+from ..expectation import ColumnMapExpectation
 
 try:
     import sqlalchemy as sa
@@ -79,6 +73,15 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         .expect_column_values_to_match_json_schema>`
 
     """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
 
     map_metric = "column_values.json_parsable"
     success_keys = ("mostly",)

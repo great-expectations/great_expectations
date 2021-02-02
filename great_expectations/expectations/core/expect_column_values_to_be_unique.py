@@ -21,13 +21,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from ..registry import extract_metrics, get_metric_kwargs
+from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
 
 try:
     import sqlalchemy as sa
@@ -76,6 +70,15 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
     """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
 
     map_metric = "column_values.unique"
     success_keys = ("mostly",)

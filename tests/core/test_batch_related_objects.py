@@ -8,16 +8,17 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchSpec,
     PartitionDefinition,
-    PartitionRequest,
 )
 from great_expectations.datasource.types import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError
 
 
 def test_batch_definition_id():
+    # noinspection PyUnusedLocal,PyPep8Naming
     A = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
     print(A.id)
 
+    # noinspection PyUnusedLocal,PyPep8Naming
     B = BatchDefinition("B", "b", "bbb", PartitionDefinition({"id": "B"}))
     print(B.id)
 
@@ -26,6 +27,7 @@ def test_batch_definition_id():
 
 def test_batch_definition_instantiation():
     with pytest.raises(TypeError):
+        # noinspection PyTypeChecker,PyUnusedLocal,PyPep8Naming
         A = BatchDefinition("A", "a", "aaa", {"id": "A"})
 
     A = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
@@ -34,12 +36,15 @@ def test_batch_definition_instantiation():
 
 
 def test_batch_definition_equality():
+    # noinspection PyUnusedLocal,PyPep8Naming
     A = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
 
+    # noinspection PyUnusedLocal,PyPep8Naming
     B = BatchDefinition("B", "b", "bbb", PartitionDefinition({"id": "B"}))
 
     assert A != B
 
+    # noinspection PyUnusedLocal,PyPep8Naming
     A2 = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
 
     assert A == A2
@@ -106,13 +111,21 @@ def test_batch_request_instantiation():
     #         })
     #     )
 
-    BatchRequest(
-        data_connector_name="a", data_asset_name="aaa", partition_request={"id": "A"}
-    )
+    # No data_source_name specified
+    with pytest.raises(TypeError):
+        BatchRequest(
+            data_connector_name="a",
+            data_asset_name="aaa",
+            partition_request={"id": "A"},
+        )
 
-    BatchRequest(data_asset_name="aaa", partition_request={"id": "A"})
+    # No data_source_name and data_connector_name specified
+    with pytest.raises(TypeError):
+        BatchRequest(data_asset_name="aaa", partition_request={"id": "A"})
 
-    BatchRequest(partition_request={"id": "A"})
+    # No data_source_name and data_connector_name and data_asset_name specified
+    with pytest.raises(TypeError):
+        BatchRequest(partition_request={"id": "A"})
 
     BatchRequest(
         datasource_name="A",

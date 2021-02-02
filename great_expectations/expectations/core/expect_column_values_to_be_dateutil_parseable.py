@@ -24,18 +24,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from ..registry import extract_metrics, get_metric_kwargs
-
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
+from ..expectation import ColumnMapExpectation
 
 
 class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
@@ -75,6 +64,15 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
 
     """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
 
     map_metric = "column_values.dateutil_parsable"
     success_keys = ("mostly",)

@@ -14,19 +14,21 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnExpectation,
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
+from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
 from ..metrics.util import parse_value_set
-from ..registry import extract_metrics
 
 
 class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.value_counts",)
     success_keys = (

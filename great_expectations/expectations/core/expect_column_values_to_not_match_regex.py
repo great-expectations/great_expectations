@@ -27,7 +27,6 @@ from ..expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from ..registry import extract_metrics, get_metric_kwargs
 
 try:
     import sqlalchemy as sa
@@ -84,6 +83,16 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         .expect_column_values_to_match_regex_list>`
 
     """
+
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
 
     map_metric = "column_values.not_match_regex"
     success_keys = (

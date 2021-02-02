@@ -46,10 +46,19 @@ class ColumnQuantileValues(ColumnMetricProvider):
     value_keys = ("quantiles", "allow_relative_error")
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, quantiles, **kwargs):
+    def _pandas(cls, column, quantiles, allow_relative_error, **kwargs):
         """Quantile Function"""
+        interpolation_options = ("linear", "lower", "higher", "midpoint", "nearest")
 
-        return column.quantile(quantiles, interpolation="nearest").tolist()
+        if not allow_relative_error:
+            allow_relative_error = "nearest"
+
+        if allow_relative_error not in interpolation_options:
+            raise ValueError(
+                f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'"
+                f"parameter of .quantile() (one of {interpolation_options})"
+            )
+        return column.quantile(quantiles, interpolation=allow_relative_error).tolist()
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(

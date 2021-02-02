@@ -1,25 +1,13 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...data_asset.util import parse_result_format
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import ordinal, substitute_none_for_missing
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
-from ..registry import extract_metrics
+from ..expectation import InvalidExpectationConfigurationError, TableExpectation
 
 
 class ExpectColumnToExist(TableExpectation):
@@ -58,6 +46,15 @@ class ExpectColumnToExist(TableExpectation):
 
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     metric_dependencies = ("table.columns",)
     success_keys = (
         "column",
@@ -66,49 +63,11 @@ class ExpectColumnToExist(TableExpectation):
     domain_keys = (
         "batch_id",
         "table",
-        "row_condition",
-        "condition_parser",
     )
-
     default_kwarg_values = {
-        "row_condition": None,
-        "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
-        "mostly": 1,
-        "min_value": None,
-        "max_value": None,
-        "result_format": "BASIC",
         "column": None,
         "column_index": None,
-        "include_config": True,
-        "catch_exceptions": False,
-        "meta": None,
     }
-
-    """ A Metric Decorator for the Columns"""
-
-    # @PandasExecutionEngine.metric(
-    #        metric_name="columns",
-    #        metric_domain_keys=("batch_id", "table", "row_condition", "condition_parser"),
-    #        metric_value_keys=(),
-    #        metric_dependencies=(),
-    #        filter_column_isnull=False,
-    #    )
-    def _pandas_columns(
-        self,
-        batches: Dict[str, Batch],
-        execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-    ):
-        """Metric which returns all columns in a dataframe"""
-        df = execution_engine.get_domain_dataframe(
-            domain_kwargs=metric_domain_kwargs, batches=batches
-        )
-
-        cols = df.columns
-        return cols.tolist()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

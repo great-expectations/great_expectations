@@ -427,6 +427,7 @@ class MetaSqlAlchemyDataset(Dataset):
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     """
 
+
     --ge-feature-maturity-info--
 
         id: validation_engine_sqlalchemy
@@ -493,17 +494,18 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if self.engine.dialect.name.lower() == "bigquery":
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
+            temp_table_schema_name = None
         else:
             try:
                 # use the schema name configured for the datasource
-                query_schema = self.engine.url.query.get("schema")
+                temp_table_schema_name = self.engine.url.query.get("schema")
             except AttributeError as err:
                 # sqlite/mssql dialects use a Connection object instead of Engine and override self.engine
                 # retrieve the schema from the Connection object i.e. self.engine
                 conn_object = self.engine
-                query_schema = conn_object.engine.url.query.get("schema")
+                temp_table_schema_name = conn_object.engine.url.query.get("schema")
 
-            self._table = sa.Table(table_name, sa.MetaData(), schema=query_schema)
+            self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
 
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
@@ -564,7 +566,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if custom_sql:
             self.create_temporary_table(
-                table_name, custom_sql, schema_name=query_schema
+                table_name, custom_sql, schema_name=temp_table_schema_name
             )
 
             if self.generated_table_name is not None:
@@ -583,7 +585,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         try:
             insp = reflection.Inspector.from_engine(self.engine)
-            self.columns = insp.get_columns(table_name, schema=query_schema)
+            self.columns = insp.get_columns(table_name, schema=schema)
         except KeyError:
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema

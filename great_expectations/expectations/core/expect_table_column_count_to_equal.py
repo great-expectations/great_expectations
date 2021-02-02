@@ -12,14 +12,7 @@ from ...data_asset.util import parse_result_format
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import substitute_none_for_missing
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
-from ..registry import extract_metrics
+from ..expectation import InvalidExpectationConfigurationError, TableExpectation
 
 
 class ExpectTableColumnCountToEqual(TableExpectation):
@@ -56,6 +49,16 @@ class ExpectTableColumnCountToEqual(TableExpectation):
     See Also:
         expect_table_column_count_to_be_between
     """
+
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
 
     metric_dependencies = ("table.column_count",)
 
