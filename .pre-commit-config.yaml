@@ -11,7 +11,7 @@ repos:
       - id: requirements-txt-fixer
         exclude: docs/.*
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.4.2
+    rev: 5.5.2
     hooks:
       - id: isort
         exclude: venv/.*\|docs/.*|tests/test_sets/broken_excel_file\.xls

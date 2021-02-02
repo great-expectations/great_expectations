@@ -130,7 +130,6 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format,
                 success,
-                percent_success,
                 element_count,
                 nonnull_count,
                 len(unexpected_list),
@@ -251,7 +250,6 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format,
                 success,
-                percent_success,
                 element_count,
                 nonnull_count,
                 len(unexpected_list),
@@ -324,7 +322,6 @@ class MetaPandasDataset(Dataset):
             return_obj = self._format_map_output(
                 result_format,
                 success,
-                percent_success,
                 element_count,
                 nonnull_count,
                 len(unexpected_list),

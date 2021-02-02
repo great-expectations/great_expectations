@@ -121,7 +121,6 @@ class MetaFileDataAsset(DataAsset):
                     return_obj = self._format_map_output(
                         result_format,
                         success,
-                        percent_success,
                         element_count,
                         nonnull_count,
                         len(unexpected_list),
@@ -132,7 +131,6 @@ class MetaFileDataAsset(DataAsset):
                     return_obj = self._format_map_output(
                         result_format=result_format,
                         success=None,
-                        percent_success=None,
                         element_count=element_count,
                         nonnull_count=0,
                         unexpected_count=0,
@@ -143,7 +141,6 @@ class MetaFileDataAsset(DataAsset):
                 return_obj = self._format_map_output(
                     result_format=result_format,
                     success=None,
-                    percent_success=None,
                     element_count=0,
                     nonnull_count=0,
                     unexpected_count=0,
