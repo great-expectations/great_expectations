@@ -1135,7 +1135,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_name: str = "expectations_S3_store",
         validations_store_name: str = "validations_S3_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
-        checkpoint_store_name: str = "checkpoint_store",
+        checkpoint_store_name: str = "checkpoint_S3_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1277,7 +1277,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_name: str = "expectations_GCS_store",
         validations_store_name: str = "validations_GCS_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
-        checkpoint_store_name: str = "evaluation_parameter_store",
+        checkpoint_store_name: str = "checkpoint_GCS_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1376,7 +1376,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_name: str = "expectations_database_store",
         validations_store_name: str = "validations_database_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
-        checkpoint_store_name: str = "checkpoint_store",
+        checkpoint_store_name: str = "checkpoint_database_store",
     ):
         # Initialize base defaults
         super().__init__()
