@@ -158,12 +158,12 @@ Additional notes
 
                 # NOTE: project_config is a DataContextConfig set up as in the examples above.
                 context = BaseDataContext(project_config=project_config)
-                context.create_expectation_suite("my_new_suite")
+                context.create_expectation_suite("insert_your_suite_name_here")
 
                 my_batch = context.get_batch({
                     "dataset": df,
                     "datasource": "insert_your_datasource_name_here",
-                }, "my_new_suite")
+                }, "insert_your_suite_name_here")
 
                 my_batch.expect_table_row_count_to_equal(140)
 
