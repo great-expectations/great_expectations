@@ -17,36 +17,6 @@ config_variables_file_path: uncommitted/config_variables.yml
 # used to override and extend Great Expectations.
 plugins_directory: plugins/
 
-# Validation Operators are customizable workflows that bundle the validation of
-# one or more expectation suites and subsequent actions. The example below
-# stores validations and send a slack notification. To read more about
-# customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html
-validation_operators:
-  action_list_operator:
-    # To learn how to configure sending Slack notifications during evaluation
-    # (and other customizations), read: https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/validation_operators/index.html#great_expectations.validation_operators.ActionListValidationOperator
-    class_name: ActionListValidationOperator
-    action_list:
-      - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-      - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-      - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-      # - name: send_slack_notification_on_validation_result
-      #   action:
-      #     class_name: SlackNotificationAction
-      #     # put the actual webhook URL in the uncommitted/config_variables.yml file
-      #     slack_webhook: ${validation_notification_slack_webhook}
-      #     notify_on: all # possible values: "all", "failure", "success"
-      #     notify_with: # optional list containing the DataDocs sites to include in the notification.
-      #     renderer:
-      #       module_name: great_expectations.render.renderer.slack_renderer
-      #       class_name: SlackRenderer
-
 stores:
 # Stores are configurable places to store things like Expectations, Validations
 # Data Docs, and more. These are for advanced users only - most users can simply
@@ -54,7 +24,7 @@ stores:
 #
 # Three stores are required: expectations, validations, and
 # evaluation_parameters, and must exist with a valid store entry. Additional
-# stores can be configured for uses such as data_docs, validation_operators, etc.
+# stores can be configured for uses such as data_docs, etc.
   expectations_store:
     class_name: ExpectationsStore
     store_backend:
@@ -72,9 +42,16 @@ stores:
     # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
     class_name: EvaluationParameterStore
 
+  checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: checkpoints/
+
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
+checkpoint_store_name: checkpoint_store
 
 data_docs_sites:
   # Data Docs make it simple to visualize data quality in your project. These
@@ -108,7 +85,7 @@ def project_help_comment():
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
-config_version: 2
+config_version: 3
 
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you

@@ -95,6 +95,7 @@ def test_cli_init_on_new_project(
     .gitignore
     great_expectations.yml
     checkpoints/
+        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
         Titanic/
@@ -493,8 +494,8 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
         "- Please check the file and try again or select a different data file."
         in stdout
     )
-    assert (
-        "- Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
+    assert ("- Error: File is not a recognized excel file" in stdout) or (
+        "Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
         in stdout
     )
     assert "Try again? [Y/n]:" in stdout
@@ -562,8 +563,8 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         "- Please check the file and try again or select a different data file."
         in stdout
     )
-    assert (
-        "- Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
+    assert ("- Error: File is not a recognized excel file" in stdout) or (
+        "Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
         in stdout
     )
     assert "Try again? [Y/n]:" in stdout
@@ -602,6 +603,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     .gitignore
     great_expectations.yml
     checkpoints/
+        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
         Titanic/

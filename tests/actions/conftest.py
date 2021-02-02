@@ -1,9 +1,10 @@
 import pytest
 
-from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.core import ExpectationSuiteValidationResult, RunIdentifier
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
+    BatchIdentifier,
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
@@ -100,4 +101,17 @@ def validation_result_suite_id():
         expectation_suite_identifier=ExpectationSuiteIdentifier("asset.default"),
         run_id="test_100",
         batch_identifier="1234",
+    )
+
+
+@pytest.fixture(scope="module")
+def validation_result_suite_extended_id():
+    return ValidationResultIdentifier(
+        expectation_suite_identifier=ExpectationSuiteIdentifier("asset.default"),
+        run_id=RunIdentifier(
+            run_name="test_100", run_time="Tue May 08 15:14:45 +0800 2012"
+        ),
+        batch_identifier=BatchIdentifier(
+            batch_identifier="1234", data_asset_name="asset"
+        ),
     )

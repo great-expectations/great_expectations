@@ -34,7 +34,7 @@ Types of MetricProvider Functions
 
 This diagram shows the relationship between different types of MetricProvider functions.
 
-<div style="width: 640px; height: 480px; margin: 10px; position: relative;"><iframe allowfullscreen frameborder="0" style="width:640px; height:480px" src="https://lucid.app/documents/embeddedchart/2ff1f2ed-e985-43e9-b0ff-e667e8cfe904" id="l6ZQLQN4fGHN"></iframe></div>
+.. image:: https://lucid.app/documents/embeddedchart/2ff1f2ed-e985-43e9-b0ff-e667e8cfe904
 
 
 Accessing Metrics

@@ -2,7 +2,12 @@ import logging
 import random
 from typing import Any, List, Optional, Tuple
 
-from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchMarkers,
+    BatchRequest,
+    BatchRequestBase,
+)
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -261,11 +266,13 @@ class DataConnector:
                 print(f"\t\tNo references available.")
             return report_obj
 
-        for data_asset_name, data_asset_return_obj in available_references:
+        data_asset_name: Optional[str] = None
+        for tmp_data_asset_name, data_asset_return_obj in available_references:
             if data_asset_return_obj["batch_definition_count"] > 0:
                 example_data_reference = random.choice(
                     data_asset_return_obj["example_data_references"]
                 )
+                data_asset_name = tmp_data_asset_name
                 break
 
         if example_data_reference is not None:
@@ -273,6 +280,10 @@ class DataConnector:
                 print(f"\t\tReference chosen: {example_data_reference}")
 
             # ...and fetch it.
+            if data_asset_name is None:
+                raise ValueError(
+                    "The data_asset_name for the chosen example data reference cannot be null."
+                )
             report_obj["example_data_reference"] = self._self_check_fetch_batch(
                 pretty_print=pretty_print,
                 example_data_reference=example_data_reference,
@@ -326,7 +337,7 @@ class DataConnector:
             "n_rows": n_rows,
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
+    def _validate_batch_request(self, batch_request: BatchRequestBase):
         """
         Validate batch_request by checking:
             1. if configured datasource_name matches batch_request's datasource_name
@@ -336,21 +347,16 @@ class DataConnector:
             batch_request (BatchRequest): batch_request to validate
 
         """
-        if not (
-            batch_request.datasource_name is None
-            or batch_request.datasource_name == self.datasource_name
-        ):
+        if batch_request.datasource_name != self.datasource_name:
+
             raise ValueError(
-                f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not
+                f"""datasource_name in BatchRequestBase: "{batch_request.datasource_name}" does not
 match DataConnector datasource_name: "{self.datasource_name}".
                 """
             )
-        if not (
-            batch_request.data_connector_name is None
-            or batch_request.data_connector_name == self.name
-        ):
+        if batch_request.data_connector_name != self.name:
             raise ValueError(
-                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match
+                f"""data_connector_name in BatchRequestBase: "{batch_request.data_connector_name}" does not match
 DataConnector name: "{self.name}".
                 """
             )

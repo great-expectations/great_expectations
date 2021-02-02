@@ -1,19 +1,8 @@
-from typing import Dict, List, Optional, Union
-
-import numpy as np
-import pandas as pd
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...core.batch import Batch
-from ...data_asset.util import parse_result_format
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
@@ -21,22 +10,13 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from ..registry import extract_metrics, get_metric_kwargs
-
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
+from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
 
 
 class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
-    """Expect column entries to be strings that match a given regular expression. Valid matches can be found \
+    """Expect column entries to be strings that match a given regular expression.
+
+    Valid matches can be found \
     anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
     "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
 
@@ -86,6 +66,16 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
 
     """
 
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
+
     map_metric = "column_values.match_regex"
     success_keys = (
         "regex",
@@ -119,7 +109,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         return True
 
     @classmethod
-    @renderer(renderer_type="question")
+    @renderer(renderer_type="renderer.question")
     def _question_renderer(
         cls, configuration, result=None, language=None, runtime_configuration=None
     ):
@@ -130,7 +120,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         return f'Do at least {mostly * 100}% of values in column "{column}" match the regular expression {regex}?'
 
     @classmethod
-    @renderer(renderer_type="answer")
+    @renderer(renderer_type="renderer.answer")
     def _answer_renderer(
         cls, configuration=None, result=None, language=None, runtime_configuration=None
     ):
@@ -202,3 +192,60 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                 }
             )
         ]
+
+    examples = [
+        {
+            "data": {
+                "a": ["aaa", "abb", "acc", "add", "bee"],
+                "b": ["aaa", "abb", "acc", "bdd", None],
+                "column_name with space": ["aaa", "abb", "acc", "add", "bee"],
+            },
+            "tests": [
+                {
+                    "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
+                    "exact_match_out": False,
+                    "in": {"column": "a", "regex": "^a", "mostly": 0.9},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [4],
+                        "unexpected_list": ["bee"],
+                    },
+                    "include_in_gallery": True,
+                    "suppress_test_for": ["sqlite", "mssql"],
+                },
+                {
+                    "title": "positive_test_exact_mostly_w_one_non_matching_value",
+                    "exact_match_out": False,
+                    "in": {"column": "a", "regex": "^a", "mostly": 0.8},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [4],
+                        "unexpected_list": ["bee"],
+                    },
+                    "include_in_gallery": True,
+                    "suppress_test_for": ["sqlite", "mssql"],
+                },
+            ],
+        }
+    ]
+
+    # NOTE: Abe 20201228: These are fields that will eventually live in a database
+    # TODO: Make all of these not fake
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": [
+            "arrows",
+            "design",
+            "flows",
+            "prototypes",
+            "svg",
+            "whiteboarding",
+            "wireframe",
+            "wirefames",
+        ],
+        "contributors": [
+            "@shinnyshinshin",
+            "@abegong",
+        ],
+    }

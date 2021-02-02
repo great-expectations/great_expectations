@@ -16,13 +16,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
-from ..registry import extract_metrics
+from ..expectation import TableExpectation
 
 
 class ExpectTableRowCountToBeBetween(TableExpectation):
@@ -68,6 +62,16 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     See Also:
         expect_table_row_count_to_equal
     """
+
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
 
     metric_dependencies = ("table.row_count",)
 

@@ -9,7 +9,11 @@ from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from great_expectations.data_context.types.base import DataContextConfigDefaults
+from tests.cli.utils import (
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    assert_no_logging_messages_or_tracebacks,
+)
 
 
 @pytest.fixture
@@ -18,6 +22,7 @@ def titanic_checkpoint(titanic_data_context_stats_enabled, titanic_expectation_s
         titanic_data_context_stats_enabled.root_directory, "..", "data", "Titanic.csv"
     )
     return {
+        "validation_operator_name": "action_list_operator",
         "batches": [
             {
                 "batch_kwargs": {
@@ -42,7 +47,9 @@ def titanic_data_context_with_checkpoint_suite_and_stats_enabled(
     context.save_expectation_suite(titanic_expectation_suite)
     # TODO context should save a checkpoint
     checkpoint_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "my_checkpoint.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_checkpoint.yml",
     )
     with open(checkpoint_path, "w") as f:
         yaml.dump(titanic_checkpoint, f)
@@ -147,7 +154,11 @@ def test_checkpoint_new_raises_error_on_no_suite_found(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -218,7 +229,9 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
         ),
     ]
     expected_checkpoint = os.path.join(
-        root_dir, context.CHECKPOINTS_DIR, "passengers.yml"
+        root_dir,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "passengers.yml",
     )
     assert os.path.isfile(expected_checkpoint)
 
@@ -229,40 +242,51 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments(
     with open(expected_checkpoint) as f:
         obs_file = f.read()
 
-    # This is snapshot-ish to prove that comments remain in place
-    assert (
-        """\
-# This checkpoint was created by the command `great_expectations checkpoint new`.
-#
-# A checkpoint is a list of one or more batches paired with one or more
-# Expectation Suites and a configurable Validation Operator.
-#
-# It can be run with the `great_expectations checkpoint run` command.
-# You can edit this file to add batches of data and expectation suites.
-#
-# For more details please see
-# https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
-validation_operator_name: action_list_operator
-# Batches are a list of batch_kwargs paired with a list of one or more suite
-# names. A checkpoint can have one or more batches. This makes deploying
-# Great Expectations in your pipelines easy!
+        # This is snapshot-ish to prove that comments remain in place
+        # TODO: <Alex>ALEX</Alex>
+        #     assert (
+        #         """\
+        # # This checkpoint was created by the command `great_expectations checkpoint new`.
+        # #
+        # # A checkpoint is a list of one or more batches paired with one or more
+        # # Expectation Suites and a configurable Validation Operator.
+        # #
+        # # It can be run with the `great_expectations checkpoint run` command.
+        # # You can edit this file to add batches of data and expectation suites.
+        # #
+        # # For more details please see
+        # # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
+        # validation_operator_name: action_list_operator
+        # # Batches are a list of batch_kwargs paired with a list of one or more suite
+        # # names. A checkpoint can have one or more batches. This makes deploying
+        # # Great Expectations in your pipelines easy!
+        # batches:
+        #   - batch_kwargs:"""
+        #         in obs_file
+        #     )
+        assert (
+            """\
 batches:
   - batch_kwargs:"""
-        in obs_file
-    )
+            in obs_file
+        )
 
     assert "/data/Titanic.csv" in obs_file
 
     assert (
         """datasource: mydatasource
       data_asset_name: Titanic
-    expectation_suite_names: # one or more suites may validate against a single batch
+    expectation_suite_names:
       - Titanic.warning
 """
         in obs_file
     )
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -299,7 +323,9 @@ def test_checkpoint_new_specify_datasource(
         ),
     ]
     expected_checkpoint = os.path.join(
-        root_dir, context.CHECKPOINTS_DIR, "passengers.yml"
+        root_dir,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "passengers.yml",
     )
     assert os.path.isfile(expected_checkpoint)
 
@@ -307,7 +333,11 @@ def test_checkpoint_new_specify_datasource(
     context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -318,7 +348,9 @@ def test_checkpoint_new_works_if_checkpoints_directory_is_missing(
 ):
     context = titanic_data_context_stats_enabled
     root_dir = context.root_directory
-    checkpoints_dir = os.path.join(root_dir, context.CHECKPOINTS_DIR)
+    checkpoints_dir = os.path.join(
+        root_dir, DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value
+    )
     shutil.rmtree(checkpoints_dir)
     assert not os.path.isdir(checkpoints_dir)
     assert context.list_checkpoints() == []
@@ -348,7 +380,9 @@ def test_checkpoint_new_works_if_checkpoints_directory_is_missing(
         ),
     ]
     expected_checkpoint = os.path.join(
-        root_dir, context.CHECKPOINTS_DIR, "passengers.yml"
+        root_dir,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "passengers.yml",
     )
     assert os.path.isfile(expected_checkpoint)
 
@@ -356,7 +390,11 @@ def test_checkpoint_new_works_if_checkpoints_directory_is_missing(
     context = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -390,7 +428,10 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -411,7 +452,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     stdout = result.stdout
     assert result.exit_code == 1
 
-    assert "Could not find a suite named `suite_one`" in stdout
+    assert "expectation_suite suite_one not found" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -423,7 +464,10 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
@@ -440,7 +484,9 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
 
     root_dir = context.root_directory
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "bad_batch.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "bad_batch.yml",
     )
     bad = {
         "batches": [
@@ -465,15 +511,18 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     stdout = result.stdout
     assert result.exit_code == 1
 
-    assert "There was a problem loading a batch:" in stdout
-    assert (
-        "{'path': '/totally/not/a/file.csv', 'datasource': 'mydatasource', 'reader_method': 'read_csv'}"
-        in stdout
-    )
-    assert (
-        "Please verify these batch kwargs in the checkpoint file: `great_expectations/checkpoints/bad_batch.yml`"
-        in stdout
-    )
+    # Note: Abe : 2020/09: This was a better error message, but it should live in DataContext.get_batch, not a random CLI method.
+    # assert "There was a problem loading a batch:" in stdout
+    # assert (
+    #     "{'path': '/totally/not/a/file.csv', 'datasource': 'mydatasource', 'reader_method': 'read_csv'}"
+    #     in stdout
+    # )
+    # assert (
+    #     "Please verify these batch kwargs in checkpoint bad_batch`"
+    #     in stdout
+    # )
+    # assert "No such file or directory" in stdout
+    assert ("No such file or directory" in stdout) or ("does not exist" in stdout)
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -485,7 +534,11 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -499,7 +552,9 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
 
     root_dir = context.root_directory
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "bad_batch.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "bad_batch.yml",
     )
     bad = {
         "batches": [
@@ -529,13 +584,10 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         in stdout
     )
     assert (
-        "Batch: {'path': '/totally/not/a/file.csv', 'datasource': 'mydatasource', 'reader_method': 'read_csv'}"
+        'Batch: {"path": "/totally/not/a/file.csv", "datasource": "mydatasource", "reader_method": "read_csv"}'
         in stdout
     )
-    assert (
-        "Please add at least one suite to your checkpoint file: great_expectations/checkpoints/bad_batch.yml"
-        in stdout
-    )
+    assert "Please add at least one suite to checkpoint bad_batch" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -547,7 +599,11 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -566,7 +622,9 @@ def test_checkpoint_run_on_non_existent_validation_operator(
     mock_emit.reset_mock()
 
     checkpoint_file_path = os.path.join(
-        context.root_directory, context.CHECKPOINTS_DIR, "bad_operator.yml"
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "bad_operator.yml",
     )
     bad = {
         "validation_operator_name": "foo",
@@ -603,7 +661,11 @@ def test_checkpoint_run_on_non_existent_validation_operator(
     assert usage_emits[1][0][0]["success"] is False
     assert usage_emits[2][0][0]["success"] is False
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -626,30 +688,6 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert result.exit_code == 0
     assert "Validation succeeded!" in stdout
 
-    # Check to make sure data docs are built
-    assert os.path.isfile(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
-    )
-    assert os.path.isfile(
-        os.path.join(
-            root_dir,
-            "uncommitted",
-            "data_docs",
-            "local_site",
-            "expectations",
-            "Titanic",
-            "warning.html",
-        )
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "expectations")
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
-    )
     assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
@@ -661,14 +699,15 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
-    assert usage_emits[3][0][0]["success"] is True
-
     assert usage_emits[4] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -697,31 +736,6 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert result.exit_code == 1
     assert "Validation failed!" in stdout
 
-    # Check to make sure data docs are built
-    assert os.path.isfile(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "index.html")
-    )
-    assert os.path.isfile(
-        os.path.join(
-            root_dir,
-            "uncommitted",
-            "data_docs",
-            "local_site",
-            "expectations",
-            "Titanic",
-            "warning.html",
-        )
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "validations")
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "expectations")
-    )
-    assert os.path.isdir(
-        os.path.join(root_dir, "uncommitted", "data_docs", "local_site", "static")
-    )
-
     assert mock_emit.call_count == 5
     usage_emits = mock_emit.call_args_list
     assert usage_emits[0] == mock.call(
@@ -733,14 +747,15 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
     assert usage_emits[2][0][0]["success"] is True
 
-    assert usage_emits[3][0][0]["event"] == "data_context.run_validation_operator"
-    assert usage_emits[3][0][0]["success"] is True
-
     assert usage_emits[4] == mock.call(
         {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
     )
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -775,7 +790,11 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -822,7 +841,11 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     with open(script_path) as f:
         assert f.read() == "script here"
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -870,7 +893,11 @@ def test_checkpoint_script_happy_path_generates_script(
     )
     assert os.path.isfile(expected_script)
 
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
 
 def test_checkpoint_script_happy_path_executable_successful_validation(
@@ -897,7 +924,11 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
     script_path = os.path.abspath(
         os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
@@ -917,8 +948,9 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
 
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
+
     assert status == 0
-    assert output == "Validation succeeded!"
+    assert "Validation succeeded!" in output
 
 
 def test_checkpoint_script_happy_path_executable_failed_validation(
@@ -948,9 +980,12 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
         f"checkpoint script my_checkpoint -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
 
     script_path = os.path.abspath(
         os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
@@ -971,7 +1006,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
-    assert output == "Validation failed!"
+    assert "Validation failed!" in output
 
 
 def _write_checkpoint_dict_to_file(bad, checkpoint_file_path):

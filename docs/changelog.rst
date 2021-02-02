@@ -4,10 +4,79 @@
 Changelog
 #########
 
+
 Develop
 -----------------
-* [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169 issue #2164
-*  [BUGFIX] Fix black conflict, upgrade black, make import optional #2183
+* [DOCS] How to load a Pandas DataFrame as a Batch #2327
+
+
+0.13.8
+-----------------
+* [FEATURE] New implementation of Checkpoints that uses dedicated CheckpointStore (based on the new ConfigurationStore mechanism) #2311, #2338
+* [BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract #2334
+
+
+0.13.7
+-----------------
+* [BUGFIX] Fix Local variable 'temp_table_schema_name' might be referenced before assignment bug in sqlalchemy_dataset.py #2302
+* [MAINTENANCE] Ensure compatibility with new pip resolver v20.3+ #2256
+* [ENHANCEMENT] Improvements in the how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. #2296
+* [ENHANCEMENT] Improvements in the output of Expectations tests to make it more legible. #2296
+* [DOCS] Clarification of the instructions for using conda in the "Setting Up Your Dev Environment" doc. #2306
+
+
+0.13.6
+-----------------
+* [ENHANCEMENT] Skip checks when great_expectations package did not change #2287
+* [ENHANCEMENT] A how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. #2222
+* [BUGFIX] Fix Local variable 'query_schema' might be referenced before assignment bug in sqlalchemy_dataset.py #2286 (Thanks @alessandrolacorte!)
+* [BUGFIX] Use correct schema to fetch table and column metadata #2284 (Thanks @armaandhull!)
+* [BUGFIX] Updated sqlalchemy_dataset to convert numeric metrics to json_serializable up front, avoiding an issue where expectations on data immediately fail due to the conversion to/from json. #2207
+
+
+0.13.5
+-----------------
+* [FEATURE] Add MicrosoftTeamsNotificationAction (Thanks @Antoninj!)
+* [FEATURE] New ``contrib`` package #2264
+* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API #2224
+* [ENHANCEMENT] Speed up new suite creation flow when connecting to Databases. Issue #1670 (Thanks @armaandhull!)
+* [ENHANCEMENT] Serialize PySpark DataFrame by converting to dictionary #2237
+* [BUGFIX] Mask passwords in DataContext.list_datasources(). Issue #2184
+* [BUGFIX] Skip escaping substitution variables in escape_all_config_variables #2243. Issue #2196 (Thanks @
+varundunga!)
+* [BUGFIX] Pandas extension guessing #2239 (Thanks @sbrugman!)
+* [BUGFIX] Replace runtime batch_data DataFrame with string #2240
+* [BUGFIX] Update Notebook Render Tests to Reflect Updated Python Packages #2262
+* [DOCS] Updated the code of conduct to mention events #2278
+* [DOCS] Update the diagram for batch metadata #2161
+* [DOCS] Update metrics.rst #2257
+* [MAINTENANCE] Different versions of Pandas react differently to corrupt XLS files. #2230
+* [MAINTENANCE] remove the obsolete TODO comments #2229 (Thanks @beyondacm!)
+* [MAINTENANCE] Update run_id to airflow_run_id for clarity. #2233
+
+
+0.13.4
+-----------------
+* [FEATURE] Implement expect_column_values_to_not_match_regex_list in Spark (Thanks @mikaylaedwards!)
+* [ENHANCEMENT] Improve support for quantile calculations in Snowflake
+* [ENHANCEMENT] DataDocs show values of Evaluation Parameters #2165. Issue #2010
+* [ENHANCEMENT] Work on requirements.txt #2052 (Thanks @shapiroj18!)
+* [ENHANCEMENT] expect_table_row_count_to_equal_other_table #2133
+* [ENHANCEMENT] Improved support for quantile calculations in Snowflake #2176
+* [ENHANCEMENT] DataDocs show values of Evaluation Parameters #2165
+* [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169. Issue #2164
+* [BUGFIX] Fixed black conflict, upgraded black, made import optional #2183
+* [BUGFIX] Made improvements for the treatment of decimals for database backends for lossy conversion #2207
+* [BUGFIX] Pass manually_initialize_store_backend_id to database store backends to mirror functionality of other backends. Issue #2181
+* [BUGFIX] Make glob_directive more permissive in ConfiguredAssetFilesystemDataConnector #2197. Issue #2193
+* [DOCS] Added link to Youtube video on in-code contexts #2177
+* [DOCS] Docstrings for DataConnector and associated classes #2172
+* [DOCS] Custom expectations improvement #2179
+* [DOCS] Add a conda example to creating virtualenvs #2189
+* [DOCS] Fix Airflow logo URL #2198 (Thanks @floscha!)
+* [DOCS] Update explore_expectations_in_a_notebook.rst #2174
+* [DOCS] Change to DOCS that describe Evaluation Parameters #2209
+* [MAINTENANCE] Removed mentions of show_cta_footer and added deprecation notes in usage stats #2190. Issue #2120
 
 0.13.3
 -----------------

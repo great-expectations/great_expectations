@@ -9,6 +9,16 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 
 
 class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "multi-column expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     metric_dependencies = tuple()
     success_keys = (
         "column_A",

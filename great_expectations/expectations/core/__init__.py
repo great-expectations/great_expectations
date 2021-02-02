@@ -41,7 +41,6 @@ from .expect_column_value_lengths_to_be_between import (
     ExpectColumnValueLengthsToBeBetween,
 )
 from .expect_column_value_lengths_to_equal import ExpectColumnValueLengthsToEqual
-from .expect_column_value_ratio_to_be_between import ExpectColumnValueRatioToBeBetween
 from .expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
 )
