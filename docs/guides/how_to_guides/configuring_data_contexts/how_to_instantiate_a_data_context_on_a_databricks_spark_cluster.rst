@@ -9,7 +9,7 @@ The guide demonstrates the recommended path for instantiating a Data Context wit
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
-    - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration<getting_started>`.
+    - :ref:`Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration <getting_started>`.
 
 Steps
 -----
@@ -83,38 +83,93 @@ You can have more fine-grained control over where your stores are located by pas
 Additional notes
 ----------------
 
-- If you're continuing to work in a Databricks notebook, the following code-snippet could be used to load and run Expectations on a `csv` file that lives in DBFS.
+- If you're continuing to work in a Databricks notebook, the following code-snippet could be used to load and run Expectations on a `csv` file that lives in DBFS. Please note that this code-snippet assumes that you have already configured a :ref:`Datasource <reference__core_concepts__datasources>`.
+
+.. content-tabs::
+
+    .. tab-container:: tab0
+        :title: Show Docs for Stable API (up to 0.12.x)
+
+        .. code-block:: python
+            :linenos:
+
+            from great_expectations.data_context import BaseDataContext
+
+            file_location = "/FileStore/tables/dc_wikia_data.csv"
+            file_type = "csv"
+
+            # CSV options
+            infer_schema = "false"
+            first_row_is_header = "false"
+            delimiter = ","
+
+            # The applied options are for CSV files. For other file types, these will be ignored.
+            df = spark.read.format(file_type) \
+                .option("inferSchema", infer_schema) \
+                .option("header", first_row_is_header) \
+                .option("sep", delimiter) \
+                .load(file_location)
+
+            # NOTE: project_config is a DataContextConfig set up as in the examples above.
+            context = BaseDataContext(project_config=project_config)
+            context.create_expectation_suite("my_new_suite")
+
+            my_batch = context.get_batch({
+                "dataset": df,
+                "datasource": "insert_your_datasource_name_here",
+            }, "my_new_suite")
+
+            my_batch.expect_table_row_count_to_equal(140)
 
 
-.. code-block:: python
+    .. tab-container:: tab1
+        :title: Show Docs for Experimental API (0.13)
 
-   from great_expectations.data_context import BaseDataContext
+        .. code-block:: python
+            :linenos:
 
-   file_location = "/FileStore/tables/dc_wikia_data.csv"
-   file_type = "csv"
+            from great_expectations.data_context import BaseDataContext
 
-   # CSV options
-   infer_schema = "false"
-   first_row_is_header = "false"
-   delimiter = ","
+            file_location = "/FileStore/tables/dc_wikia_data.csv"
+            file_type = "csv"
 
-   # The applied options are for CSV files. For other file types, these will be ignored.
-   df = spark.read.format(file_type) \
-     .option("inferSchema", infer_schema) \
-     .option("header", first_row_is_header) \
-     .option("sep", delimiter) \
-     .load(file_location)
+            # CSV options
+            infer_schema = "false"
+            first_row_is_header = "false"
+            delimiter = ","
 
-   context = BaseDataContext(project_config=project_config)
-   context.create_expectation_suite("my_new_suite")
+            # The applied options are for CSV files. For other file types, these will be ignored.
+            df = spark.read.format(file_type) \
+                .option("inferSchema", infer_schema) \
+                .option("header", first_row_is_header) \
+                .option("sep", delimiter) \
+                .load(file_location)
 
-   my_batch = context.get_batch({
-      "dataset": df,
-      "datasource": "my_local_datasource",
-   }, "my_new_suite")
+            # NOTE: project_config is a DataContextConfig set up as in the examples above.
+            context = BaseDataContext(project_config=project_config)
+            context.create_expectation_suite("my_new_suite")
 
-   my_batch.expect_table_row_count_to_equal(140)
+            from great_expectations.core.batch import BatchRequest
 
+            batch_request = BatchRequest(
+                datasource_name="insert_your_datasource_name_here",
+                data_connector_name="insert_your_runtime_data_connector_name_here",
+                batch_data=df,
+                data_asset_name="IN_MEMORY_DATA_ASSET",
+                partition_request={
+                    "partition_identifiers": {
+                        "some_key_maybe_pipeline_stage": "ingestion step 1",
+                        "some_other_key_maybe_run_id": "run 18"
+                    }
+                }
+            )
+
+            my_validator = context.get_validator(
+                batch_request=batch_request,
+                expectation_suite=suite
+            )
+
+            my_validator.expect_table_row_count_to_equal(140)
 
 Additional resources
 --------------------
