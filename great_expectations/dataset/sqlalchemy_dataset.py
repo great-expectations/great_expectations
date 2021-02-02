@@ -384,7 +384,8 @@ class MetaSqlAlchemyDataset(Dataset):
                 select_qry = select_qry.where(sa.text(row_condition))
 
             inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
-                count_case_statement, select_qry,
+                count_case_statement,
+                select_qry,
             )
 
             self.engine.execute(inner_case_query)
