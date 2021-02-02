@@ -1589,7 +1589,7 @@ def _format_map_output(
         missing_count = element_count - nonnull_count
 
     if element_count > 0:
-        unexpected_percent = unexpected_count / element_count * 100
+        unexpected_percent_total = unexpected_count / element_count * 100
 
         if not skip_missing:
             missing_percent = missing_count / element_count * 100
@@ -1600,13 +1600,13 @@ def _format_map_output(
 
     else:
         missing_percent = None
-        unexpected_percent = None
+        unexpected_percent_total = None
         unexpected_percent_nonmissing = None
 
     return_obj["result"] = {
         "element_count": element_count,
         "unexpected_count": unexpected_count,
-        "unexpected_percent": unexpected_percent,
+        "unexpected_percent": unexpected_percent_nonmissing,
         "partial_unexpected_list": unexpected_list[
             : result_format["partial_unexpected_count"]
         ],
@@ -1618,6 +1618,7 @@ def _format_map_output(
         return_obj["result"][
             "unexpected_percent_nonmissing"
         ] = unexpected_percent_nonmissing
+        return_obj["result"]["unexpected_percent_total"] = unexpected_percent_total
 
     if result_format["result_format"] == "BASIC":
         return return_obj
