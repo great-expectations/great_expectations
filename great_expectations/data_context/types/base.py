@@ -1330,7 +1330,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             checkpoint_store_name: {
                 "class_name": "CheckpointStore",
                 "store_backend": {
-                    "class_name": "TupleS3StoreBackend",
+                    "class_name": "TupleGCSStoreBackend",
+                    "project": checkpoint_store_project_name,
                     "bucket": checkpoint_store_bucket_name,
                     "prefix": checkpoint_store_prefix,
                 },

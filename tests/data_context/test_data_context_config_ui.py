@@ -471,7 +471,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -496,6 +495,15 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
                 "prefix": "validations",
             },
         },
+        "checkpoint_GCS_store": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "project": "my_default_project",
+                "class_name": "TupleGCSStoreBackend",
+                "prefix": "checkpoints",
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "gcs_site": {
@@ -518,6 +526,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_GCS_store",
         validations_store_name="validations_GCS_store",
+        checkpoint_store_name="checkpoint_GCS_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
