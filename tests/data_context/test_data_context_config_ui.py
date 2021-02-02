@@ -805,9 +805,18 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             "password": "custom_validations_store_password",
             "database": "custom_validations_store_database",
         },
+        checkpoint_store_credentials={
+            "drivername": "custom_checkpoint_store_drivername",
+            "host": "custom_checkpoint_store_host",
+            "port": "custom_checkpoint_store_port",
+            "username": "custom_checkpoint_store_username",
+            "password": "custom_checkpoint_store_password",
+            "database": "custom_checkpoint_store_database",
+        },
         expectations_store_name="custom_expectations_database_store_name",
         validations_store_name="custom_validations_database_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_database_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -827,7 +836,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -863,6 +871,20 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
                 },
             },
         },
+        "custom_checkpoint_database_store_name": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "class_name": "DatabaseStoreBackend",
+                "credentials": {
+                    "database": "custom_checkpoint_store_database",
+                    "drivername": "custom_checkpoint_store_drivername",
+                    "host": "custom_checkpoint_store_host",
+                    "password": "custom_checkpoint_store_password",
+                    "port": "custom_checkpoint_store_port",
+                    "username": "custom_checkpoint_store_username",
+                },
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "local_site": {
@@ -884,6 +906,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         expectations_store_name="custom_expectations_database_store_name",
         validations_store_name="custom_validations_database_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_database_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
