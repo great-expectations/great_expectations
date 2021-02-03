@@ -29,7 +29,7 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 from great_expectations.validator.validator import Validator
 
 
-# This method compares a string to a url validation regex using Django's URLValidator class
+# This method compares a string to a url validation regex
 def fits_regex(x):
     regex = re.compile(
         r"^(?:http|ftp)s?://"  # http:// or https://
@@ -75,7 +75,7 @@ class ColumnValuesToBeValidUrls(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
-    """Expect the column to be a valid url. Uses UrlValidator class in Django."""
+    """Expect the column to be a valid url.  Maps row values to regex to check if value is a valid url."""
 
     examples = [
         {
