@@ -28,19 +28,26 @@ class BatchMarkers(BatchSpec):
         return self.get("ge_load_time")
 
 
-class PandasDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
-    """This is an abstract class and should not be instantiated. It's relevant for testing whether
-    a subclass is allowed
-    """
+class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "path" not in self:
+            raise InvalidBatchSpecError("PathBatchSpec requires a path element")
 
-    pass
+    @property
+    def path(self) -> str:
+        return self.get("path")
+
+    @property
+    def reader_method(self) -> str:
+        return self.get("reader_method")
+
+    @property
+    def reader_options(self) -> dict:
+        return self.get("reader_options") or {}
 
 
-class SparkDFDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
-    """This is an abstract class and should not be instantiated. It's relevant for testing whether
-    a subclass is allowed
-    """
-
+class S3BatchSpec(PathBatchSpec):
     pass
 
 
@@ -56,36 +63,6 @@ class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
     @property
     def schema(self):
         return self.get("schema")
-
-
-class PathBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if "path" not in self:
-            raise InvalidBatchSpecError("PathBatchSpec requires a path element")
-
-    @property
-    def path(self):
-        return self.get("path")
-
-    @property
-    def reader_method(self):
-        return self.get("reader_method")
-
-
-class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if "s3" not in self:
-            raise InvalidBatchSpecError("S3BatchSpec requires an S3 path element")
-
-    @property
-    def s3(self):
-        return self.get("s3")
-
-    @property
-    def reader_method(self):
-        return self.get("reader_method")
 
 
 class RuntimeDataBatchSpec(BatchSpec):
