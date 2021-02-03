@@ -65,27 +65,27 @@ class PathBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
             raise InvalidBatchSpecError("PathBatchSpec requires a path element")
 
     @property
-    def path(self):
+    def path(self) -> str:
         return self.get("path")
 
     @property
-    def reader_method(self):
+    def reader_method(self) -> str:
         return self.get("reader_method")
 
+    @property
+    def reader_options(self) -> dict:
+        return self.get("reader_options") or {}
 
-class S3BatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
+
+class S3BatchSpec(PathBatchSpec):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "s3" not in self:
             raise InvalidBatchSpecError("S3BatchSpec requires an S3 path element")
 
     @property
-    def s3(self):
-        return self.get("s3")
-
-    @property
-    def reader_method(self):
-        return self.get("reader_method")
+    def s3(self) -> str:
+        return self.path
 
 
 class RuntimeDataBatchSpec(BatchSpec):

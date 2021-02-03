@@ -6,6 +6,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     BatchRequestBase,
+    BatchSpec,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.partition_query import (
@@ -234,7 +235,9 @@ class FilePathDataConnector(DataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
         return PathBatchSpec(batch_spec)
 
     def _generate_batch_spec_parameters_from_batch_definition(

@@ -115,20 +115,17 @@ Notes:
             }
         )
 
+        batch_data: Any
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
             batch_spec.batch_data = "PandasDataFrame"
-
         elif isinstance(batch_spec, PathBatchSpec):
-            reader_method: str = batch_spec.get("reader_method")
-            reader_options: dict = batch_spec.get("reader_options") or {}
-
-            path: str = batch_spec["path"]
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options
+            path: str = batch_spec.path
             reader_fn: Callable = self._get_reader_fn(reader_method, path)
-
             batch_data = reader_fn(path, **reader_options)
-
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
@@ -136,12 +133,10 @@ Notes:
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
             s3_engine = self._s3
-            s3_url = S3Url(batch_spec.get("s3"))
-            reader_method: str = batch_spec.get("reader_method")
-            reader_options: dict = batch_spec.get("reader_options") or {}
-
+            s3_url = S3Url(batch_spec.path)
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options or {}
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
-
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
                     s3_url.bucket, s3_url.key

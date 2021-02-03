@@ -323,7 +323,9 @@ class DataConnector:
         # _execution_engine might be None for some tests
         if self._execution_engine is None:
             return {}
-        batch_data, batch_spec, _ = self.get_batch_data_and_metadata(batch_definition=batch_definition)
+        batch_data, batch_spec, _ = self.get_batch_data_and_metadata(
+            batch_definition=batch_definition
+        )
 
         df = batch_data.head(n=5)
         n_rows = batch_data.row_count()

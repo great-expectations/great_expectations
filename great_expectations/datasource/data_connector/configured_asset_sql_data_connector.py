@@ -6,11 +6,11 @@ from great_expectations.core.batch import (
     BatchSpec,
     PartitionDefinition,
 )
-from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
+from great_expectations.datasource.types import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 try:
@@ -35,8 +35,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        data_assets: Optional[Dict[str, Asset]] = None,
+        data_assets: Optional[Dict[str, dict]] = None,
     ):
+        if data_assets is None:
+            data_assets = {}
         self._data_assets = data_assets
 
         super().__init__(
@@ -46,13 +48,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         )
 
     @property
-    def data_assets(self) -> Dict[str, Asset]:
+    def data_assets(self) -> Dict[str, dict]:
         return self._data_assets
 
     def add_data_asset(
         self,
-        name,
-        config,
+        name: str,
+        config: dict,
     ):
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
@@ -183,9 +185,41 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
         ]
 
-    def build_batch_spec(self, batch_definition: BatchDefinition):
+    def build_batch_spec(
+        self, batch_definition: BatchDefinition
+    ) -> SqlAlchemyDatasourceBatchSpec:
         """
-        Build BatchSpec from batch_definition with the following components:
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+
+        data_asset_name: str = batch_definition.data_asset_name
+        if (
+            data_asset_name in self.data_assets
+            and self.data_assets[data_asset_name].get("batch_spec_passthrough")
+            and isinstance(
+                self.data_assets[data_asset_name].get("batch_spec_passthrough"), dict
+            )
+        ):
+            batch_spec.update(
+                self.data_assets[data_asset_name]["batch_spec_passthrough"]
+            )
+
+        return SqlAlchemyDatasourceBatchSpec(batch_spec)
+
+    def _generate_batch_spec_parameters_from_batch_definition(
+        self, batch_definition: BatchDefinition
+    ) -> dict:
+        """
+        Build BatchSpec parameters from batch_definition with the following components:
             1. data_asset_name from batch_definition
             2. partition_definition from batch_definition
             3. data_asset from data_connector
@@ -194,19 +228,16 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             batch_definition (BatchDefinition): to be used to build batch_spec
 
         Returns:
-            BatchSpec built from batch_definition
+            dict built from batch_definition
         """
-        data_asset_name = batch_definition.data_asset_name
-        batch_spec = BatchSpec(
-            {
-                "table_name": data_asset_name,
-                "partition_definition": batch_definition.partition_definition,
-                **self.data_assets[data_asset_name],
-            }
-        )
-        return batch_spec
+        data_asset_name: str = batch_definition.data_asset_name
+        return {
+            "table_name": data_asset_name,
+            "partition_definition": batch_definition.partition_definition,
+            **self.data_assets[data_asset_name],
+        }
 
-    ### Splitter methods for listing partitions ###
+    # Splitter methods for listing partitions
 
     def _split_on_whole_table(
         self,
