@@ -993,7 +993,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def _build_selectable_from_batch_spec(self, batch_spec):
-        table_name = batch_spec["table_name"]
         table_name: str = batch_spec["table_name"]
 
         if "splitter_method" in batch_spec:
@@ -1037,7 +1036,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:
-
         selectable = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
         if "bigquery_temp_table" in batch_spec:
             temp_table_name = batch_spec.get("bigquery_temp_table")
@@ -1046,7 +1044,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_data = SqlAlchemyBatchData(
             engine=self.engine, selectable=selectable, temp_table_name=temp_table_name
         )
-
         batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
