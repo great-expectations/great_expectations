@@ -67,7 +67,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
             temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
             temp_table_creation_query = sa.select([column]).select_from(_table)
             temp_table_stmt = (
-                "CREATE TEMPORARY TABLE {table_name} AS {custom_sql}".format(
+                "CREATE TEMPORARY TABLE {table_name} AS {custom_sql};".format(
                     table_name=temp_table_name, custom_sql=temp_table_creation_query
                 )
             )
