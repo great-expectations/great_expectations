@@ -142,10 +142,6 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        batch_data: Any = batch_request.batch_data
-        batch_request = BatchRequest(
-            batch_data=batch_data, **batch_request.get_json_dict()
-        )  # Make sure that attributes are valid.
         batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request_base
