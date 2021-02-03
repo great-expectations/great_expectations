@@ -2,12 +2,14 @@ import logging
 import os
 from typing import List, Optional
 
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.datasource.types import PathBatchSpec, S3BatchSpec
+
 try:
     import boto3
 except ImportError:
     boto3 = None
 
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector import (
     InferredAssetFilePathDataConnector,
 )
@@ -38,10 +40,11 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: str = "",
-        delimiter: str = "/",
-        max_keys: int = 1000,
-        boto3_options: dict = None,
+        prefix: Optional[str] = "",
+        delimiter: Optional[str] = "/",
+        max_keys: Optional[int] = 1000,
+        boto3_options: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         InferredAssetS3DataConnector for connecting to S3.
@@ -66,6 +69,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         self._bucket = bucket
@@ -82,6 +86,21 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             raise ImportError(
                 "Unable to load boto3 (it is required for InferredAssetS3DataConnector)."
             )
+
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+        batch_spec: PathBatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+        return S3BatchSpec(batch_spec)
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
