@@ -28,37 +28,7 @@ class BatchMarkers(BatchSpec):
         return self.get("ge_load_time")
 
 
-class PandasDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
-    """This is an abstract class and should not be instantiated. It's relevant for testing whether
-    a subclass is allowed
-    """
-
-    pass
-
-
-class SparkDFDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
-    """This is an abstract class and should not be instantiated. It's relevant for testing whether
-    a subclass is allowed
-    """
-
-    pass
-
-
-class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
-    """This is an abstract class and should not be instantiated. It's relevant for testing whether
-    a subclass is allowed
-    """
-
-    @property
-    def limit(self):
-        return self.get("limit")
-
-    @property
-    def schema(self):
-        return self.get("schema")
-
-
-class PathBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
+class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "path" not in self:
@@ -78,14 +48,21 @@ class PathBatchSpec(PandasDatasourceBatchSpec, SparkDFDatasourceBatchSpec):
 
 
 class S3BatchSpec(PathBatchSpec):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if "s3" not in self:
-            raise InvalidBatchSpecError("S3BatchSpec requires an S3 path element")
+    pass
+
+
+class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
+    """This is an abstract class and should not be instantiated. It's relevant for testing whether
+    a subclass is allowed
+    """
 
     @property
-    def s3(self) -> str:
-        return self.path
+    def limit(self):
+        return self.get("limit")
+
+    @property
+    def schema(self):
+        return self.get("schema")
 
 
 class RuntimeDataBatchSpec(BatchSpec):
