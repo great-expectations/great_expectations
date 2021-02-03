@@ -9,6 +9,7 @@ Develop
 -----------------
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
 * [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for #1691 to @mgorsk1!) #2371
+* [DOCS] How to load a Spark DataFrame as a Batch #2385
 
 
 0.13.8
