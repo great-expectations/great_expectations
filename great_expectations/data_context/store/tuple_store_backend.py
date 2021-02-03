@@ -917,6 +917,152 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         all_keys = self.list_keys()
         return key in all_keys
 
+
+class TupleAzureBlobStoreBackend(TupleStoreBackend):
+    """
+    Uses an Azure Blob as a store.
+
+    The key to this StoreBackend must be a tuple with fixed length based on the filepath_template,
+    or a variable-length tuple may be used and returned with an optional filepath_suffix (to be) added.
+    The filepath_template is a string template used to convert the key to a filepath.
+
+    You need to setup the connection string environment variable
+    https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-python
+    """
+
+    # We will use blobclient here
+    def __init__(
+        self,
+        container,
+        connection_string,
+        prefix="",
+        filepath_template=None,
+        filepath_prefix=None,
+        filepath_suffix=None,
+        forbidden_substrings=None,
+        platform_specific_separator=False,
+        fixed_length_key=False,
+    ):
+        super().__init__(
+            filepath_template=filepath_template,
+            filepath_prefix=filepath_prefix,
+            filepath_suffix=filepath_suffix,
+            forbidden_substrings=forbidden_substrings,
+            platform_specific_separator=platform_specific_separator,
+            fixed_length_key=fixed_length_key,
+        )
+        self.connection_string = connection_string
+        self.prefix = prefix
+        self.container = container
+
+    def _get_container_client(self):
+
+        from azure.storage.blob import BlobServiceClient
+
+        if self.connection_string:
+            return BlobServiceClient.from_connection_string(
+                self.connection_string
+            ).get_container_client(self.container)
+        else:
+            raise StoreBackendError(
+                "Unable to initialze ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
+            )
+
+    def _get(self, key):
+        az_blob_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
+        return (
+            self._get_container_client()
+            .download_blob(az_blob_key)
+            .readall()
+            .decode("utf-8")
+        )
+
+    def _set(self, key, value, content_encoding="utf-8", **kwargs):
+        az_blob_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
+
+        if isinstance(value, str):
+            self._get_container_client().upload_blob(
+                name=az_blob_key,
+                data=value,
+                encoding=content_encoding,
+                overwrite=True,
+            )
+        else:
+            self._get_container_client().upload_blob(
+                name=az_blob_key, data=value, overwrite=True
+            )
+        return az_blob_key
+
+    def list_keys(self):
+        key_list = []
+
+        for obj in self._get_container_client().list_blobs(
+            name_starts_with=self.prefix
+        ):
+            az_blob_key = os.path.relpath(obj.name)
+            if az_blob_key.startswith(self.prefix + "/"):
+                az_blob_key = az_blob_key[len(self.prefix) + 1 :]
+            if self.filepath_prefix and not az_blob_key.startswith(
+                self.filepath_prefix
+            ):
+                continue
+            elif self.filepath_suffix and not az_blob_key.endswith(
+                self.filepath_suffix
+            ):
+                continue
+            key = self._convert_filepath_to_key(az_blob_key)
+
+            key_list.append(key)
+        return key_list
+
+    def get_url_for_key(self, key, protocol=None):
+        az_blob_key = self._convert_key_to_filepath(key)
+        az_blob_path = os.path.join(self.container, self.prefix, az_blob_key)
+
+        return "https://{}.blob.core.windows.net/{}".format(
+            self._get_container_client().account_name,
+            az_blob_path,
+        )
+
+    def _has_key(self, key):
+        all_keys = self.list_keys()
+        return key in all_keys
+
+    def _move(self, source_key, dest_key, **kwargs):
+        source_blob_path = self._convert_key_to_filepath(source_key)
+        if not source_blob_path.startswith(self.prefix):
+            source_blob_path = os.path.join(self.prefix, source_blob_path)
+        dest_blob_path = self._convert_key_to_filepath(dest_key)
+        if not dest_blob_path.startswith(self.prefix):
+            dest_blob_path = os.path.join(self.prefix, dest_blob_path)
+
+        # azure storage sdk does not have _move method
+        source_blob = self._get_container_client().get_blob_client(source_blob_path)
+        dest_blob = self._get_container_client().get_blob_client(dest_blob_path)
+
+        dest_blob.start_copy_from_url(source_blob.url, requires_sync=True)
+        copy_properties = dest_blob.get_blob_properties().copy
+
+        if copy_properties.status != "success":
+            dest_blob.abort_copy(copy_properties.id)
+            raise StoreBackendError(
+                f"Unable to copy blob %s with status %s"
+                % (source_blob_path, copy_properties.status)
+            )
+        source_blob.delete_blob()
+
+    def remove_key(self, key):
+        if not isinstance(key, tuple):
+            key = key.to_tuple()
+
+        az_blob_path = self._convert_key_to_filepath(key)
+        if not az_blob_path.startswith(self.prefix):
+            az_blob_path = os.path.join(self.prefix, az_blob_path)
+
+        blob = self._get_container_client().get_blob_client(az_blob_path)
+        blob.delete_blob()
+        return True
+
     @property
     def config(self) -> dict:
         return self._config
