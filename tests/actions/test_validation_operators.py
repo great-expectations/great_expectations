@@ -1,6 +1,7 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
 
 import pandas as pd
+import pytest
 from freezegun import freeze_time
 
 import great_expectations as ge
@@ -12,9 +13,27 @@ from great_expectations.validation_operators.validation_operators import (
 from ..test_utils import modify_locale
 
 
-@modify_locale
-@freeze_time("09/26/2019 13:42:41")
-def test_errors_warnings_validation_operator_run_slack_query(
+@pytest.fixture
+def assets_to_validate():
+    my_df_1 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, None]})
+    my_ge_df_1 = ge.dataset.PandasDataset(
+        my_df_1, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8226-acde48001122"}
+    )
+
+    my_df_2 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, 5]})
+    my_ge_df_2 = ge.dataset.PandasDataset(
+        my_df_2, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8133-acde48001122"}
+    )
+
+    my_df_3 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, 5]})
+    my_ge_df_3 = ge.dataset.PandasDataset(
+        my_df_3, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-a53d-acde48001122"}
+    )
+    return [my_ge_df_1, my_ge_df_2, my_ge_df_3]
+
+
+@pytest.fixture
+def warning_failure_validation_operator_data_context(
     basic_data_context_config_for_validation_operator,
     tmp_path_factory,
     filesystem_csv_4,
@@ -79,6 +98,16 @@ def test_errors_warnings_validation_operator_run_slack_query(
     data_context.save_expectation_suite(
         warning_expectations, expectation_suite_name="f3.warning"
     )
+    return data_context
+
+
+@modify_locale
+@freeze_time("09/26/2019 13:42:41")
+def test_errors_warnings_validation_operator_run_slack_query(
+    warning_failure_validation_operator_data_context,
+    assets_to_validate
+):
+    data_context = warning_failure_validation_operator_data_context
 
     vo = WarningAndFailureExpectationSuitesValidationOperator(
         data_context=data_context,
@@ -87,23 +116,8 @@ def test_errors_warnings_validation_operator_run_slack_query(
         slack_webhook="https://hooks.slack.com/services/test/slack/webhook",
     )
 
-    my_df_1 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, None]})
-    my_ge_df_1 = ge.dataset.PandasDataset(
-        my_df_1, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8226-acde48001122"}
-    )
-
-    my_df_2 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_2 = ge.dataset.PandasDataset(
-        my_df_2, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8133-acde48001122"}
-    )
-
-    my_df_3 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_3 = ge.dataset.PandasDataset(
-        my_df_3, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-a53d-acde48001122"}
-    )
-
     return_obj = vo.run(
-        assets_to_validate=[my_ge_df_1, my_ge_df_2, my_ge_df_3],
+        assets_to_validate=assets_to_validate,
         run_id="test_100",
         base_expectation_suite_name="f1",
     )
