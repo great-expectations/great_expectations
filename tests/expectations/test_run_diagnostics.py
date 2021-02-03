@@ -310,22 +310,11 @@ def test_self_check_on_an_existing_expectation():
             }
         ],
         "library_metadata": {
+            "contributors": ["@great_expectations"],
             "maturity": "production",
             "package": "great_expectations",
-            "tags": [
-                "arrows",
-                "design",
-                "flows",
-                "prototypes",
-                "svg",
-                "whiteboarding",
-                "wireframe",
-                "wirefames",
-            ],
-            "contributors": [
-                "@shinnyshinshin",
-                "@abegong",
-            ],
+            "requirements": [],
+            "tags": ["core expectation", "column map expectation"],
         },
         # "test_report": [
         #     {
