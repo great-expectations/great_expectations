@@ -8,12 +8,14 @@ Changelog
 Develop
 -----------------
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
+* [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for #1691 to @mgorsk1!) #2371
 
 
 0.13.8
 -----------------
 * [FEATURE] New implementation of Checkpoints that uses dedicated CheckpointStore (based on the new ConfigurationStore mechanism) #2311, #2338
 * [BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract #2334
+* [BUGFIX] DataContext with multiple DataSources no longer scans all configurations #2250
 
 
 0.13.7
