@@ -20,7 +20,7 @@ class ActionDicts:
     }
     UPDATE_DATA_DOCS = {
         "name": "update_data_docs",
-        "action": {"class_name": "UpdateDataDocsAction", "site_names": None},
+        "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
     }
 
     @staticmethod
