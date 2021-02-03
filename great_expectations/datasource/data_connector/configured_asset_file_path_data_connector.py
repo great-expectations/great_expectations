@@ -242,11 +242,12 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+        batch_spec: PathBatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
 
-        if batch_definition.data_asset_name in self.assets:
-            batch_spec.update(
-                self.assets[batch_definition.data_asset_name].batch_spec_passthrough
-            )
+        data_asset_name: str = batch_definition.data_asset_name
+        if data_asset_name in self.assets:
+            batch_spec.update(self.assets[data_asset_name].batch_spec_passthrough)
 
-        return PathBatchSpec(batch_spec)
+        return batch_spec

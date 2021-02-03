@@ -5,12 +5,12 @@ import logging
 import uuid
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
-from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.types.batch_spec import (
+    BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
-    S3BatchSpec,
 )
 from great_expectations.exceptions import exceptions as ge_exceptions
 
@@ -204,10 +204,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
             batch_spec.batch_data = "SparkDataFrame"
-        elif isinstance(batch_spec, (PathBatchSpec, S3BatchSpec)):
-            reader_method: str = batch_spec.get("reader_method")
-            reader_options: dict = batch_spec.get("reader_options") or {}
-            path: str = batch_spec.get("path") or batch_spec.get("s3")
+        elif isinstance(batch_spec, PathBatchSpec):
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options
+            path: str = batch_spec.path
             try:
                 reader_options = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
