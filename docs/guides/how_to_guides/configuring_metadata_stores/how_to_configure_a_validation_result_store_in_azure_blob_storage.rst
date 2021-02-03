@@ -1,5 +1,7 @@
 .. _how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_azure_blob_storage:
 
+.. warning:: This doc is a stub.
+
 How to configure a Validation Result store in Azure blob storage
 ================================================================
 
