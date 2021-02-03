@@ -125,12 +125,9 @@ class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",
-        "hackathon"  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
+        "tags": ["experimental", "hackathon"],
         "contributors": [  # Github handles for all contributors to this Expectation
-            "ckathleen"
+            "@ckathleen"
         ],
         "package": "experimental_expectations",
     }
