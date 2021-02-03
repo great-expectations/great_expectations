@@ -84,7 +84,7 @@ stages:
   - stage: required
     dependsOn: [scope_check, lint]
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-18.04'
 
     jobs:
       - job: compatibility_matrix
