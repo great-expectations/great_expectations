@@ -28,6 +28,7 @@ from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validator import Validator
 
+
 # This method compares a string to a url validation regex using Django's URLValidator class
 def fits_regex(x):
     regex = re.compile(
