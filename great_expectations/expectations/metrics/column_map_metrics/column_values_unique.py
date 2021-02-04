@@ -56,7 +56,26 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
             .group_by(column)
             .having(sa.func.count(column) > 1)
         )
-
+        # Will - 20210126
+        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
+        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
+        # the column we will be performing the expectation on, and the query is performed against it.
+        dialect = kwargs.get("_dialect", None)
+        sql_engine = kwargs.get("_sqlalchemy_engine", None)
+        if sql_engine and dialect and dialect.dialect.name == "mysql":
+            temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
+                new_temp_table=temp_table_name,
+                source_table=_table,
+                column_name=column.name,
+            )
+            sql_engine.execute(temp_table_stmt)
+            dup_query = (
+                sa.select([column])
+                .select_from(sa.text(temp_table_name))
+                .group_by(column)
+                .having(sa.func.count(column) > 1)
+            )
         return column.notin_(dup_query)
 
     @column_condition_partial(
