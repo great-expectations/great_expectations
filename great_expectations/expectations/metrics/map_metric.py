@@ -1371,7 +1371,7 @@ class MapMetricProvider(MetricProvider):
                 )
 
         try:
-            _ = get_metric_provider(metric_name + ".map")
+            _ = get_metric_provider(metric_name + ".map", execution_engine)
             dependencies["metric_map_fn"] = MetricConfiguration(
                 metric_name + ".map",
                 metric.metric_domain_kwargs,
