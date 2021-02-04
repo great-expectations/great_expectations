@@ -336,7 +336,7 @@ def test_get_batch_with_split_on_whole_table_s3(spark_session):
 
     test_sparkdf = spark_engine.get_batch_data(
         S3BatchSpec(
-            s3="s3://bucket/test/test.csv",
+            path="s3://bucket/test/test.csv",
             reader_method="csv",
             reader_options={"header": True},
             splitter_method="_split_on_whole_table",

@@ -949,7 +949,8 @@ class Expectation(metaclass=MetaExpectation):
             return rendered_result.__str__()
 
         else:
-            print(type(rendered_result))
+            pass
+            # print(type(rendered_result))
 
     def _get_renderer_dict(
         self,
@@ -1588,7 +1589,7 @@ def _format_map_output(
         missing_count = element_count - nonnull_count
 
     if element_count > 0:
-        unexpected_percent = unexpected_count / element_count * 100
+        unexpected_percent_total = unexpected_count / element_count * 100
 
         if not skip_missing:
             missing_percent = missing_count / element_count * 100
@@ -1596,16 +1597,18 @@ def _format_map_output(
                 unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
             else:
                 unexpected_percent_nonmissing = None
+        else:
+            unexpected_percent_nonmissing = unexpected_percent_total
 
     else:
         missing_percent = None
-        unexpected_percent = None
+        unexpected_percent_total = None
         unexpected_percent_nonmissing = None
 
     return_obj["result"] = {
         "element_count": element_count,
         "unexpected_count": unexpected_count,
-        "unexpected_percent": unexpected_percent,
+        "unexpected_percent": unexpected_percent_nonmissing,
         "partial_unexpected_list": unexpected_list[
             : result_format["partial_unexpected_count"]
         ],
@@ -1614,6 +1617,7 @@ def _format_map_output(
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
         return_obj["result"]["missing_percent"] = missing_percent
+        return_obj["result"]["unexpected_percent_total"] = unexpected_percent_total
         return_obj["result"][
             "unexpected_percent_nonmissing"
         ] = unexpected_percent_nonmissing
