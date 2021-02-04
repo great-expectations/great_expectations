@@ -10,7 +10,8 @@ Develop
 * [FEATURE] Add TupleAzureBlobStoreBackend
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
 * [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for #1691 to @mgorsk1!) #2371
-
+* [BUGFIX] Display correct unexpected_percent in DataDocs - corrects the result object from map expectations to return the same "unexpected_percent" as is used to evaluate success (excluding null values from the denominator). The old value is now returned in a key called "unexpected_percent_total" (thanks @mlondschien) #1875
+* [MAINTENANCE] Add checkpoint store to store backend defaults #2378
 
 0.13.8
 -----------------
