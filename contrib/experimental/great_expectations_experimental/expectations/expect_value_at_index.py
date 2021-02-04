@@ -30,21 +30,32 @@ from great_expectations.validator.validator import Validator
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit
-# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
+# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
+class ColumnValuesHasValueIndex(ColumnMapMetricProvider):
+    """
+    Determines whether an element at a given index for a string value matches a given value. Will fail if an element is
+    not a string.
+    """
 
     # This is the id string that will be used to reference your metric.
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
-    # for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.equal_three"
+    # Please see {some doc} for information on how to choose an id string for your Metric.
+    # condition_metric_name = "column_values.equal_three"
+    condition_metric_name = "column_values.has_value_at_index"
+    condition_value_keys = ("value", "index")
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, value, index, **kwargs):
+        # print(column, str(type(column)))
+        return column.apply(
+            lambda element: element[index] == value
+            if str(element) == element
+            else False
+        )
 
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
+        # return column == 3
+
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -59,28 +70,137 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+class ExpectValueAtIndex(ColumnMapExpectation):
+    """
+    check for a specified value at a given index location within each element of the column
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    examples = [{
-        "data": {
-            "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-        },
-        "tests": [
-            {
-                "title": "positive_test_with_mostly",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {"column": "mostly_threes", "mostly": 0.6},
-                "out": {
-                    "success": True,
-                    "unexpected_index_list": [6, 7],
-                    "unexpected_list": [2, -1],
+    examples = [
+        {
+            "data": {
+                "mostly_has_decimal": [
+                    "$125.23",
+                    "$0.99",
+                    "$0.00",
+                    "$1234",
+                    "$11.11",
+                    "$1.10",
+                    "$2.22",
+                    "$-1.43",
+                    None,
+                    None,
+                ],
+                "numeric": [
+                    125.23,
+                    0.99,
+                    0.00,
+                    1234,
+                    11.11,
+                    1.10,
+                    2.22,
+                    -1.43,
+                    None,
+                    None,
+                ],
+                "words_that_begin_with_a": [
+                    "apple",
+                    "alligator",
+                    "alibi",
+                    "argyle",
+                    None,
+                    "ambulance",
+                    "aardvark",
+                    "ambiguous",
+                    None,
+                    None,
+                ],
+            },
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_has_decimal",
+                        "value": ".",
+                        "index": -3,
+                        "mostly": 0.6,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": ["$1234"],
+                    },
                 },
-            }
-        ],
-    }]
+                {
+                    "title": "negative_test_without_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_has_decimal",
+                        "value": ".",
+                        "index": -3,
+                        "mostly": 1.0,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": ["$1234"],
+                    },
+                },
+                {
+                    "title": "negative_test_for_numeric_column",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "numeric",
+                        "value": ".",
+                        "index": -3,
+                        "mostly": 0.6,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [0, 1, 2, 3, 4, 5, 6, 7],
+                    },
+                },
+                {
+                    "title": "positive_test_for_column_starting_with_a",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "words_that_begin_with_a",
+                        "value": "a",
+                        "index": 0,
+                        "mostly": 1.0,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                    },
+                },
+            ],
+        }
+    ]
+
+    # examples = [{
+    #     "data": {
+    #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
+    #     },
+    #     "tests": [
+    #         {
+    #             "title": "positive_test_with_mostly",
+    #             "exact_match_out": False,
+    #             "include_in_gallery": True,
+    #             "in": {"column": "mostly_threes", "mostly": 0.6},
+    #             "out": {
+    #                 "success": True,
+    #                 "unexpected_index_list": [6, 7],
+    #                 "unexpected_list": [2, -1],
+    #             },
+    #         }
+    #     ],
+    # }]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
@@ -88,7 +208,10 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         "tags": [  # Tags for this Expectation in the gallery
             #         "experimental"
         ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
+        "contributors": [
+            "@prem1835213",
+            "@YaosenLin"
+            # Github handles for all contributors to this Expectation.
             #         "@your_name_here", # Don't forget to add your github handle here!
         ],
         "package": "experimental_expectations",
@@ -96,19 +219,17 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.equal_three"
+    map_metric = "column_values.has_value_at_index"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
-    # for more information about domain and success keys, and other arguments to Expectations
-    success_keys = ("mostly",)
+    # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
+    success_keys = ("mostly", "value", "index")
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see
-    # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
+    # For more info on Renderers, see {some doc}
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
 
@@ -196,5 +317,5 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    diagnostics_report = ExpectValueAtIndex().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
