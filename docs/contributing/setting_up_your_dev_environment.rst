@@ -5,6 +5,10 @@
 Setting up your dev environment
 ===============================
 
+This Guide will walk you through setting up your environment to contribute to Great Expectations.
+
+You can also watch steps 1-7 of this guide as a `video <https://www.youtube.com/watch?v=sps0C1fblu4>`__.
+
 Prerequisites
 -------------
 
