@@ -1,12 +1,9 @@
 import json
+import pandas as pd
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,
@@ -26,60 +23,70 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validator import Validator
-
+from typing import Optional
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit
-# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
+# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
+class ForeignKeysInColumnAExistInColumnB(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
-    # for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.equal_three"
-
+    # Please see {some doc} for information on how to choose an id string for your Metric.
+    condition_metric_name = "column_values.foreign_key_in_other_col"
+    condition_value_keys = ("df", "column_B")
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, df, column_B, **kwargs):
+        if type(df) == list:
+            df = pd.DataFrame(df)
+        value_set = set(df[column_B])
+        return column.isin(value_set)
+        # return True
 
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
 #     def _sqlalchemy(cls, column, _dialect, **kwargs):
 #         return column.in_([3])
 
-# This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-#     @column_condition_partial(engine=SparkDFExecutionEngine)
-#     def _spark(cls, column, **kwargs):
-#         return column.isin([3])
-
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
+    """Ensure that values in the column of interest (ColumnA) are in a valueset provided as a dataframe (df parameter) + column (column_B parameter) or as a list of elements supported by pandas.DataFrame() (e.g. list of dicts [{"col_name": value},], list of tuples [(value, value), (value, value)]. This is a very experimental implementation to describe the functionality, but this expectation should be revisited once cross-table expectation templates are available."""
 
-    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
+            # "expectation_type": "expect_column_values_to_be_in_set",
             "data": {
-                "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
+                "x": [1, 2, 4],
+                "y": [1.1, 2.2, 5.5],
+                "z": ["hello", "jello", "mello"],
             },
             "tests": [
                 {
-                    "title": "positive_test_with_mostly",
+                    "title": "basic_positive_test_case_number_set",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "mostly_threes", "mostly": 0.6},
-                    "out": {
-                        "success": True,
-                        "unexpected_index_list": [6, 7],
-                        "unexpected_list": [2, -1],
+                    "in": {
+                        "column": "x",
+                        "df": [{"fk_col": 1}, {"fk_col": 2}, {"fk_col": 4}],
+                        "column_B": "fk_col",
                     },
-                }
+                    "out": {"success": True},
+                },
+                {
+                    "title": "basic_negative_test_case_number_set",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "x",
+                        "df": [{"fk_col": 1}, {"fk_col": 2}, {"fk_col": 7}],
+                        "column_B": "fk_col",
+                    },
+                    "out": {"success": False},
+                },
             ],
         }
     ]
@@ -87,30 +94,24 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
-        ],
+        "tags": ["experimental", "help_wanted"],  # Tags for this Expectation in the gallery
+        "contributors": ["@robertparker"],
         "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.equal_three"
+    map_metric = "column_values.foreign_key_in_other_col"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
-    # for more information about domain and success keys, and other arguments to Expectations
-    success_keys = ("mostly",)
+    # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
+    success_keys = ("df", "column_B")
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see
-    # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
+    # For more info on Renderers, see {some doc}
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
 
@@ -197,6 +198,59 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #             )
 #         ]
 
+# def get_validation_dependencies(
+#     self,
+#     configuration: Optional[ExpectationConfiguration] = None,
+#     execution_engine: Optional[ExecutionEngine] = None,
+#     runtime_configuration: Optional[dict] = None,
+# ):
+#     dependencies = super().get_validation_dependencies(
+#         configuration, execution_engine, runtime_configuration
+#     )
+#     # get other_table_name kwarg
+#     # get the column_B kwarg
+#     # get metric expect_column_values_to_be_unique
+
+
+#     other_table_name = configuration.kwargs.get("other_table_name")
+#     # create copy of table.row_count metric and modify "table" metric domain kwarg to be other table name
+#     table_row_count_metric_config_other = deepcopy(
+#         dependencies["metrics"]["table.row_count"]
+#     )
+#     table_row_count_metric_config_other.metric_domain_kwargs[
+#         "table"
+#     ] = other_table_name
+#     # rename original "table.row_count" metric to "table.row_count.self"
+#     dependencies["metrics"]["table.row_count.self"] = dependencies["metrics"].pop(
+#         "table.row_count"
+#     )
+#     # add a new metric dependency named "table.row_count.other" with modified metric config
+#     dependencies["metrics"][
+#         "table.row_count.other"
+#     ] = table_row_count_metric_config_other
+
+#     return dependencies
+
+# def _validate(
+#     self,
+#     configuration: ExpectationConfiguration,
+#     metrics: Dict,
+#     runtime_configuration: dict = None,
+#     execution_engine: ExecutionEngine = None,
+# ):
+#     table_row_count_self = metrics["table.row_count.self"]
+#     table_row_count_other = metrics["table.row_count.other"]
+
+#     return {
+#         "success": table_row_count_self == table_row_count_other,
+#         "result": {
+#             "observed_value": {
+#                 "self": table_row_count_self,
+#                 "other": table_row_count_other,
+#             }
+#         },
+#     }
+
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    diagnostics_report = ExpectForeignKeysInColumnAToExistInColumnB().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
