@@ -56,7 +56,7 @@ Install python dependencies
 
     * Make a new virtual environment (e.g. using virtualenv or conda), name it "great_expectations_dev" or similar.
     * Ex virtualenv: ``python3 -m venv <path_to_environments_folder>/great_expectations_dev`` and then ``<source path_to_environments_folder>/great_expectations_dev/bin/activate``
-    * Ex conda: ``conda create --name great_expectations_dev`` and then ``conda activate great_expectations_dev``
+    * Ex conda: ``conda create --name great_expectations_dev python=3.7`` and then ``conda activate great_expectations_dev`` (we support multiple python versions, you may select something other than 3.7).
     * This is not required, but highly recommended.
 
 **6. Install dependencies from requirements-dev.txt**
