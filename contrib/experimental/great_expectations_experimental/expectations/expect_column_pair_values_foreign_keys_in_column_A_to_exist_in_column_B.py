@@ -1,4 +1,6 @@
 import json
+from typing import Optional
+
 import pandas as pd
 
 #!!! This giant block of imports should be something simpler, such as:
@@ -23,7 +25,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validator import Validator
-from typing import Optional
+
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
@@ -94,7 +96,10 @@ class ExpectForeignKeysInColumnAToExistInColumnB(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["experimental", "help_wanted"],  # Tags for this Expectation in the gallery
+        "tags": [
+            "experimental",
+            "help_wanted",
+        ],  # Tags for this Expectation in the gallery
         "contributors": ["@robertparker"],
         "package": "experimental_expectations",
     }
