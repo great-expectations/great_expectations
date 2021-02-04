@@ -62,6 +62,7 @@ Install python dependencies
     *  This will ensure that sure you have the right libraries installed in your python environment.
     
       * Note that you can also substitute ``requirements-dev-test.txt`` to only install requirements required for testing all backends, and ``requirements-dev-spark.txt`` or ``requirements-dev-sqlalchemy.txt`` if you would like to add support for spark or sqlalchemy tests, respectively. For some database backends, such as MSSQL additional driver installation may required in your environment; see below for more information.
+      * For some users, installation of certain Pyspark versions (such as 2.4.7) may cause import errors. To fix this simply run ``pip install pyspark --upgrade`` to upgrade to the latest version, which should fix all import errors.
       * `Installing Microsoft ODBC driver for MacOS <https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos>`__
       * `Installing Microsoft ODBC driver for Linux <https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server>`__
 
