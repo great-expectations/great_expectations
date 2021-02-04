@@ -12,7 +12,6 @@ Develop
 * [BUGFIX] expect_column_values_to_be_unique works in mysql #2327
 * [BUGFIX] Display correct unexpected_percent in DataDocs - corrects the result object from map expectations to return the same "unexpected_percent" as is used to evaluate success (excluding null values from the denominator). The old value is now returned in a key called "unexpected_percent_total" (thanks @mlondschien) #1875
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
-* [DOCS] How to load a Pandas DataFrame as a Batch #2327
 * [MAINTENANCE] Add checkpoint store to store backend defaults #2378
 
 
