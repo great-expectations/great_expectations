@@ -76,7 +76,7 @@ use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
 The suites generated here are **not meant to be production suites** - they are **scaffolds to build upon**.
 
 **To get to a production grade suite, you will definitely want to [edit this
-suite](https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html)
+suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=scaffold_expectations)
 after scaffolding gets you close to what you want.**
 
 This is highly configurable depending on your goals. You can include or exclude
