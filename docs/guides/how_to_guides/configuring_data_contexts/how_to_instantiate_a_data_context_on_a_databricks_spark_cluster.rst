@@ -35,7 +35,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
     .. code-block:: python
         :linenos:
 
-        from great_expectations.data_context.types.base import DataContextConfig
+        from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, FilesystemStoreBackendDefaults
         from great_expectations.data_context import BaseDataContext
 
         data_context_config = DataContextConfig(
