@@ -1789,10 +1789,10 @@ WHERE
         # just the column we will be performing the expectation on, and the query is performed against it.
         if self.sql_engine_dialect.name.lower() == "mysql":
             temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-            temp_table_stmt = (
-                "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
-                    new_temp_table=temp_table_name, source_table=self._table, column_name=column
-                )
+            temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
+                new_temp_table=temp_table_name,
+                source_table=self._table,
+                column_name=column,
             )
             self.engine.execute(temp_table_stmt)
             dup_query = (
