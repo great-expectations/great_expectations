@@ -65,11 +65,10 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         sql_engine = kwargs.get("_sqlalchemy_engine", None)
         if sql_engine and dialect and dialect.dialect.name == "mysql":
             temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-            temp_table_creation_query = sa.select([column]).select_from(_table)
             temp_table_stmt = (
-                "CREATE TEMPORARY TABLE {table_name} AS {custom_sql};".format(
-                    table_name=temp_table_name, custom_sql=temp_table_creation_query
-                )
+               "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
+                   new_temp_table=temp_table_name, source_table=_table, column_name=column.name
+               )
             )
             sql_engine.execute(temp_table_stmt)
             dup_query = (
