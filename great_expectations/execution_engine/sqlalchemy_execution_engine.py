@@ -648,7 +648,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             elif condition_parser == "raw_sql":
                 selectable = sa.select(
-                    "*", from_obj=selectable, whereclause=domain_kwargs["row_condition"]
+                    "*",
+                    from_obj=selectable,
+                    whereclause=sa.text(domain_kwargs["row_condition"]),
                 )
             else:
                 raise GreatExpectationsError(
