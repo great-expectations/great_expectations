@@ -335,7 +335,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
 
     test_df = PandasExecutionEngine().get_batch_data(
         batch_spec=S3BatchSpec(
-            s3=full_path,
+            path=full_path,
             reader_method="read_csv",
             splitter_method="_split_on_whole_table",
         )
@@ -367,7 +367,7 @@ def test_get_batch_with_split_on_whole_table_s3():
     full_path = f"s3a://{os.path.join(bucket, path)}"
     test_df = PandasExecutionEngine().get_batch_data(
         batch_spec=S3BatchSpec(
-            s3=full_path,
+            path=full_path,
             reader_method="read_csv",
             splitter_method="_split_on_whole_table",
         )
@@ -380,7 +380,7 @@ def test_get_batch_with_split_on_whole_table_s3():
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine_no_s3.get_batch_data(
             batch_spec=S3BatchSpec(
-                s3=full_path,
+                path=full_path,
                 reader_method="read_csv",
                 splitter_method="_split_on_whole_table",
             )
