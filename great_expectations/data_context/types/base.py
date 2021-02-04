@@ -1110,12 +1110,15 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_bucket_name: Overrides default_bucket_name if supplied
         validations_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
+        checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_prefix: Overrides default if supplied
         validations_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
+        checkpoint_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
+        checkpoint_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1124,12 +1127,15 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_bucket_name: Optional[str] = None,
         validations_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
+        checkpoint_store_bucket_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
+        checkpoint_store_prefix: str = "checkpoints",
         expectations_store_name: str = "expectations_S3_store",
         validations_store_name: str = "validations_S3_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        checkpoint_store_name: str = "checkpoint_S3_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1141,11 +1147,14 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
             validations_store_bucket_name = default_bucket_name
         if data_docs_bucket_name is None:
             data_docs_bucket_name = default_bucket_name
+        if checkpoint_store_bucket_name is None:
+            checkpoint_store_bucket_name = default_bucket_name
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.checkpoint_store_name = checkpoint_store_name
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -1164,6 +1173,14 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            checkpoint_store_name: {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "class_name": "TupleS3StoreBackend",
+                    "bucket": checkpoint_store_bucket_name,
+                    "prefix": checkpoint_store_prefix,
+                },
+            },
         }
         self.data_docs_sites = {
             "s3_site": {
@@ -1209,6 +1226,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             self.stores[self.validations_store_name]["store_backend"][
                 "root_directory"
             ] = root_directory
+            self.stores[self.checkpoint_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
             self.data_docs_sites[self.data_docs_site_name]["store_backend"][
                 "root_directory"
             ] = root_directory
@@ -1223,15 +1243,19 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_bucket_name: Overrides default_bucket_name if supplied
         validations_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
+        checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_project_name: Overrides default_project_name if supplied
         validations_store_project_name: Overrides default_project_name if supplied
         data_docs_project_name: Overrides default_project_name if supplied
+        checkpoint_store_project_name: Overrides default_project_name if supplied
         expectations_store_prefix: Overrides default if supplied
         validations_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
+        checkpoint_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
+        checkpoint_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1241,15 +1265,19 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_bucket_name: Optional[str] = None,
         validations_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
+        checkpoint_store_bucket_name: Optional[str] = None,
         expectations_store_project_name: Optional[str] = None,
         validations_store_project_name: Optional[str] = None,
         data_docs_project_name: Optional[str] = None,
+        checkpoint_store_project_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
+        checkpoint_store_prefix: str = "checkpoints",
         expectations_store_name: str = "expectations_GCS_store",
         validations_store_name: str = "validations_GCS_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        checkpoint_store_name: str = "checkpoint_GCS_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1261,6 +1289,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             validations_store_bucket_name = default_bucket_name
         if data_docs_bucket_name is None:
             data_docs_bucket_name = default_bucket_name
+        if checkpoint_store_bucket_name is None:
+            checkpoint_store_bucket_name = default_bucket_name
 
         # Use default_project_name if separate store projects are not provided
         if expectations_store_project_name is None:
@@ -1269,11 +1299,14 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             validations_store_project_name = default_project_name
         if data_docs_project_name is None:
             data_docs_project_name = default_project_name
+        if checkpoint_store_project_name is None:
+            checkpoint_store_project_name = default_project_name
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.checkpoint_store_name = checkpoint_store_name
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -1294,6 +1327,15 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            checkpoint_store_name: {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "class_name": "TupleGCSStoreBackend",
+                    "project": checkpoint_store_project_name,
+                    "bucket": checkpoint_store_bucket_name,
+                    "prefix": checkpoint_store_prefix,
+                },
+            },
         }
         self.data_docs_sites = {
             "gcs_site": {
@@ -1319,9 +1361,11 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         default_credentials: Use these credentials for all stores that do not have credentials provided
         expectations_store_credentials: Overrides default_credentials if supplied
         validations_store_credentials: Overrides default_credentials if supplied
+        checkpoint_store_credentials: Overrides default_credentials if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
+        checkpoint_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1329,9 +1373,11 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         default_credentials: Optional[Dict] = None,
         expectations_store_credentials: Optional[Dict] = None,
         validations_store_credentials: Optional[Dict] = None,
+        checkpoint_store_credentials: Optional[Dict] = None,
         expectations_store_name: str = "expectations_database_store",
         validations_store_name: str = "validations_database_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
+        checkpoint_store_name: str = "checkpoint_database_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1341,11 +1387,14 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
             expectations_store_credentials = default_credentials
         if validations_store_credentials is None:
             validations_store_credentials = default_credentials
+        if checkpoint_store_credentials is None:
+            checkpoint_store_credentials = default_credentials
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
+        self.checkpoint_store_name = checkpoint_store_name
 
         self.stores = {
             expectations_store_name: {
@@ -1363,6 +1412,13 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
             evaluation_parameter_store_name: {"class_name": "EvaluationParameterStore"},
+            checkpoint_store_name: {
+                "class_name": "CheckpointStore",
+                "store_backend": {
+                    "class_name": "DatabaseStoreBackend",
+                    "credentials": checkpoint_store_credentials,
+                },
+            },
         }
 
 
@@ -1412,6 +1468,8 @@ class DataContextConfig(BaseYamlConfig):
                 )
             if data_docs_sites is None:
                 data_docs_sites = store_backend_defaults.data_docs_sites
+            if checkpoint_store_name is None:
+                checkpoint_store_name = store_backend_defaults.checkpoint_store_name
 
         self._config_version = config_version
         if datasources is None:
