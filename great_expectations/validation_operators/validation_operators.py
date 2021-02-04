@@ -854,6 +854,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 [
                     run_result_obj["validation_result"].success
                     for run_result_obj in run_results.values()
+                    if run_result_obj["expectation_suite_severity_level"] == "failure"
                 ]
             ),
         )
