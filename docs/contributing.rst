@@ -67,6 +67,9 @@ Our goal is to make your experience as great as possible. Please follow these st
 
     If there’s no issue for what you want to work on, please create one. Add a comment to let everyone know that you're working on it. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
 
+    Some Expectations are implemented in the core library. Many others are contributed by the community of data practitioners that bring their domain knowledge and share it as Expectations.
+    This :ref:`how-to guide <how_to_guides__creating_and_editing_expectations__how_to_template>` will walk you through the steps required to develop and contribute a new Expectation.
+
     Our :ref:`contributing__levels_of_maturity` grid provides guidelines for how the maintainers of Great Expectations evaluate levels of maturity of a feature.
 
 ..
