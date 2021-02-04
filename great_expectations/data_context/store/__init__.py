@@ -10,6 +10,7 @@ from .tuple_store_backend import (  # isort:skip
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
     TupleStoreBackend,
+    TupleAzureBlobStoreBackend,
 )
 from .database_store_backend import DatabaseStoreBackend  # isort:skip
 from .configuration_store import ConfigurationStore  # isort:skip
