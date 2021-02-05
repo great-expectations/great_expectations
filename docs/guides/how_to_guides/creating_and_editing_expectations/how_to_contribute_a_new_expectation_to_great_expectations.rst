@@ -5,6 +5,8 @@ How to contribute a new Expectation to Great Expectations
 
 This guide will help you add a new Expectation to Great Expectations’ shared library. Your Expectation will be featured in the Expectations Gallery, along with many others developed by data practitioners from around the world as part of this collaborative community effort.
 
+To watch the video complement to this guide that shows an Expectation being implemented in real time, click `here <https://www.youtube.com/watch?v=fMiW91d0l6M&t=101s>`__.
+
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up your dev environment to contribute <contributing_setting_up_your_dev_environment>`

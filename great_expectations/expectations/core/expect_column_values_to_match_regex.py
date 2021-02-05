@@ -228,24 +228,3 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             ],
         }
     ]
-
-    # NOTE: Abe 20201228: These are fields that will eventually live in a database
-    # TODO: Make all of these not fake
-    library_metadata = {
-        "maturity": "production",
-        "package": "great_expectations",
-        "tags": [
-            "arrows",
-            "design",
-            "flows",
-            "prototypes",
-            "svg",
-            "whiteboarding",
-            "wireframe",
-            "wirefames",
-        ],
-        "contributors": [
-            "@shinnyshinshin",
-            "@abegong",
-        ],
-    }

@@ -84,7 +84,7 @@ stages:
   - stage: required
     dependsOn: [scope_check, lint]
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-18.04'
 
     jobs:
       - job: compatibility_matrix
@@ -210,7 +210,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: scope_check
+    dependsOn: [scope_check, lint]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -244,7 +244,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: scope_check
+    dependsOn: [scope_check, lint]
 
     jobs:
       - job: mysql
