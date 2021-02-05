@@ -6,7 +6,7 @@ import pytest
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, PartitionRequest
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -64,7 +64,10 @@ data_connectors:
     report["execution_engine"].pop("connection_string")
 
     assert report == {
-        "execution_engine": {"class_name": "SqlAlchemyExecutionEngine"},
+        "execution_engine": {
+            "class_name": "SqlAlchemyExecutionEngine",
+            "create_temp_table": True,
+        },
         "data_connectors": {
             "count": 1,
             "my_sqlite_db": {
@@ -116,7 +119,7 @@ class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
-introspection:
+inferred_assets:
     whole_table: {}
 """
     )
@@ -157,7 +160,7 @@ class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
-introspection:
+inferred_assets:
     whole_table:
         data_asset_name_suffix: __whole_table
         introspection_directives: {}
@@ -198,7 +201,7 @@ introspection:
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 
-introspection:
+inferred_assets:
     whole_table:
         excluded_tables:
             - main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D
@@ -219,7 +222,7 @@ introspection:
             include_views: true
 
 
-tables:
+assets:
     table_partitioned_by_date_column__A:
         partitioners:
             daily:
@@ -288,7 +291,7 @@ class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
 """
         + """
-tables:
+assets:
     table_partitioned_by_date_column__A:
         partitioners:
             whole_table: {}
@@ -699,7 +702,8 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(
         "example_unmatched_data_references": [],
         "example_data_reference": {
             "batch_spec": {
-                "table_name": "main.table_containing_id_spacers_for_D",
+                "schema_name": "main",
+                "table_name": "table_containing_id_spacers_for_D",
                 "partition_definition": {},
             },
             "n_rows": 30,
@@ -785,7 +789,8 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
         "example_data_reference": {
             "batch_spec": {
                 "partition_definition": {},
-                "table_name": "main.table_containing_id_spacers_for_D",
+                "schema_name": "main",
+                "table_name": "table_containing_id_spacers_for_D",
             },
             "n_rows": 30,
         },
@@ -840,7 +845,7 @@ def test_skip_inapplicable_tables(empty_data_context):
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
-introspection:
+inferred_assets:
     daily:
         skip_inapplicable_tables: true
         splitter_method: _split_on_converted_datetime
@@ -868,7 +873,7 @@ introspection:
             f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
-introspection:
+inferred_assets:
     daily:
         skip_inapplicable_tables: false
         splitter_method: _split_on_converted_datetime
@@ -877,3 +882,44 @@ introspection:
             date_format_string: "%Y-%m-%d"
     """
         )
+
+
+def test_column_type_introspection_on_selectable(
+    data_context_with_sql_datasource_for_testing_get_batch,
+):
+    context = data_context_with_sql_datasource_for_testing_get_batch
+    context.create_expectation_suite("my_expectations")
+
+    my_validator = context.get_validator(
+        batch_request=BatchRequest(
+            datasource_name="my_sqlite_db",
+            data_connector_name="daily",
+            data_asset_name="table_partitioned_by_date_column__A",
+            partition_request=PartitionRequest(
+                partition_identifiers={"date": "2020-01-15"}
+            ),
+        ),
+        expectation_suite_name="my_expectations",
+    )
+
+    # ["id", "date", "event_type", "favorite_color"]
+    result = my_validator.expect_column_values_to_be_of_type(
+        "event_type", "INTEGER"
+    ).to_json_dict()
+    print(result)
+    print(type(result))
+    assert result == {
+        "meta": {},
+        "result": {"observed_value": "TEXT"},
+        "success": False,
+        "exception_info": {
+            "raised_exception": False,
+            "exception_traceback": None,
+            "exception_message": None,
+        },
+        "expectation_config": {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {"column": "event_type", "type_": "INTEGER"},
+            "meta": {},
+        },
+    }
