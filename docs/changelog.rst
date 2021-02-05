@@ -14,6 +14,7 @@ Develop
 * [BUGFIX] Add python=3.7 argument to conda env creation (thanks @scouvreur!) #2391
 * [MAINTENANCE] Add checkpoint store to store backend defaults #2378
 * [ENHANCEMENT] Removed the logic that prints the "This configuration object was built using version..." warning when current version of Great Expectations is not the same as the one used to build the suite, since it was not actionable #2366
+* [DOCS] Update How to instantiate a Data Context on Databricks Spark cluster for 0.13+ #2379
 
 0.13.8
 -----------------
