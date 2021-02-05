@@ -97,6 +97,7 @@ def register_metric(
     metric_domain_keys: Tuple[str, ...],
     metric_value_keys: Tuple[str, ...],
     execution_engine: Type["ExecutionEngine"],
+    dialect: Union[str, None],
     metric_class: Type["MetricProvider"],
     metric_provider: Optional[Callable],
     metric_fn_type: Optional[
@@ -132,34 +133,50 @@ def register_metric(
             )
         providers = metric_definition.get("providers", dict())
         if execution_engine_name in providers:
-            current_provider_cls, current_provider_fn = providers[execution_engine_name]
-            if current_provider_fn != metric_provider:
-                logger.warning(
-                    f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"
+            if dialect not in providers[execution_engine_name]:
+                providers[execution_engine_name][dialect] = (
+                    metric_class,
+                    metric_provider,
                 )
-                _add_response_key(
-                    res,
-                    "warning",
-                    f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider",
-                )
-                providers[execution_engine_name] = metric_class, metric_provider
             else:
-                logger.info(
-                    f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}."
-                )
-                _add_response_key(
-                    res,
-                    "info",
-                    f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}.",
-                )
+                current_provider_cls, current_provider_fn = providers[
+                    execution_engine_name
+                ][dialect]
+                if current_provider_fn != metric_provider:
+                    logger.warning(
+                        f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"
+                    )
+                    _add_response_key(
+                        res,
+                        "warning",
+                        f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider",
+                    )
+                    providers[(execution_engine_name, dialect)] = (
+                        metric_class,
+                        metric_provider,
+                    )
+                else:
+                    logger.info(
+                        f"Multiple declarations of metric {metric_name} for engine {execution_engine_name} and dialect {dialect}."
+                    )
+                    _add_response_key(
+                        res,
+                        "info",
+                        f"Multiple declarations of metric {metric_name} for engine {execution_engine_name} and dialect {dialect}.",
+                    )
         else:
-            providers[execution_engine_name] = metric_class, metric_provider
+            providers[execution_engine_name] = {
+                dialect: (metric_class, metric_provider)
+            }
+
     else:
         metric_definition = {
             "metric_domain_keys": metric_domain_keys,
             "metric_value_keys": metric_value_keys,
             "default_kwarg_values": metric_class.default_kwarg_values,
-            "providers": {execution_engine_name: (metric_class, metric_provider)},
+            "providers": {
+                execution_engine_name: {dialect: (metric_class, metric_provider)}
+            },
         }
         _registered_metrics[metric_name] = metric_definition
     res["success"] = True
@@ -167,11 +184,16 @@ def register_metric(
 
 
 def get_metric_provider(
-    metric_name: str, execution_engine: "ExecutionEngine"
+    metric_name: str,
+    execution_engine: "ExecutionEngine",
+    dialect=None,
 ) -> Tuple["MetricProvider", Callable]:
     try:
         metric_definition = _registered_metrics[metric_name]
-        return metric_definition["providers"][type(execution_engine).__name__]
+        dialects = metric_definition["providers"][type(execution_engine).__name__]
+        if execution_engine.dialect in dialects:
+            return dialects[execution_engine.dialect]
+        return dialects[None]
     except KeyError:
         raise MetricProviderError(
             f"No provider found for {metric_name} using {type(execution_engine).__name__}"
@@ -184,7 +206,10 @@ def get_metric_function_type(
     try:
         metric_definition = _registered_metrics[metric_name]
         provider_fn, provider_class = metric_definition["providers"][
-            type(execution_engine).__name__
+            (
+                type(execution_engine).__name__,
+                getattr(execution_engine, "dialect", None),
+            )
         ]
         return getattr(provider_fn, "metric_fn_type", None)
     except KeyError:

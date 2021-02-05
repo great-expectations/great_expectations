@@ -495,6 +495,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def url(self):
         return self._url
 
+    @property
+    def dialect(self):
+        return self.engine.dialect.name.lower()
+
     def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a

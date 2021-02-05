@@ -2,14 +2,18 @@ import logging
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import get_metric_provider
@@ -27,17 +31,17 @@ def _build_spark_engine(df, spark_session):
         ],
         df.columns.tolist(),
     )
-    engine = SparkDFExecutionEngine(batch_data_dict={"my_id": df})
+    engine = SparkDFExecutionEngine()
+    engine.load_batch_data("my_id", SparkDFBatchData(engine, df))
     return engine
 
 
 def _build_sa_engine(df, sa):
     eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng, index=False)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={"my_id": batch_data}
-    )
+    engine = SqlAlchemyExecutionEngine(engine=eng)
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name="test")
+    engine.load_batch_data("my_id", batch_data)
     return engine
 
 
@@ -181,7 +185,11 @@ def test_map_of_type_sa(sa):
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     df.to_sql("test", eng, index=False)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=eng,
+        table_name="test",
+        source_table_name="test",
+    )
     engine = SqlAlchemyExecutionEngine(
         engine=eng, batch_data_dict={"my_id": batch_data}
     )
@@ -375,28 +383,28 @@ def test_map_unique_sa(sa):
     )
     metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
 
-    # This is no longer a MAP_CONDITION because mssql does not support it. Instead, it is a WINDOW_CONDITION
-    #
-    # aggregate_fn = MetricConfiguration(
-    #     metric_name="column_values.unique.unexpected_count.aggregate_fn",
-    #     metric_domain_kwargs={"column": "a"},
-    #     metric_value_kwargs=dict(),
-    #     metric_dependencies={"unexpected_condition": condition_metric},
-    # )
-    # aggregate_fn_metrics = engine.resolve_metrics(
-    #     metrics_to_resolve=(aggregate_fn,), metrics=metrics
-    # )
+    # This is a MAP_CONDITION for all dialects except mssql, which requires it be implemented as a WINDOW_CONDITION
+    if engine.dialect == "mssql":
+        pytest.skip("skipping test not designed for mssql")
+
+    aggregate_fn = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count.aggregate_fn",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    aggregate_fn_metrics = engine.resolve_metrics(
+        metrics_to_resolve=(aggregate_fn,), metrics=metrics
+    )
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        # metric_dependencies={"metric_partial_fn": aggregate_fn},
-        metric_dependencies={"unexpected_condition": condition_metric},
+        metric_dependencies={"metric_partial_fn": aggregate_fn},
     )
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,),
-        metrics=metrics,  # metrics=aggregate_fn_metrics
+        metrics_to_resolve=(desired_metric,), metrics=aggregate_fn_metrics
     )
     assert results[desired_metric.id] == 2
 

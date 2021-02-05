@@ -117,6 +117,10 @@ class ExecutionEngine:
     def config(self) -> dict:
         return self._config
 
+    @property
+    def dialect(self):
+        return None
+
     def get_batch_data(
         self,
         batch_spec: BatchSpec,
