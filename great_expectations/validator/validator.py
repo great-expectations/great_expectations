@@ -272,6 +272,15 @@ class Validator:
         """Returns the execution engine being used by the validator at the given time"""
         return self._execution_engine
 
+    def head(self, n_rows=5, domain_kwargs=None, fetch_all=False):
+        if domain_kwargs is None:
+            domain_kwargs = {"batch_id": self.execution_engine.active_batch_data_id}
+        return self.get_metric(
+            MetricConfiguration(
+                "table.head", domain_kwargs, {"n_rows": n_rows, "fetch_all": fetch_all}
+            )
+        )
+
     def list_available_expectation_types(self):
         """ Returns a list of all expectations available to the validator"""
         keys = dir(self)
