@@ -69,7 +69,7 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "tags": [
             "core expectation",
             "multi-column expectation",
-            "needs migration to modular api",
+            "needs migration to modular expectations api",
         ],
         "contributors": ["@great_expectations"],
         "requirements": [],

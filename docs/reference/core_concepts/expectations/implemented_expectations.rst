@@ -118,4 +118,4 @@ out the missing implementations!
 |`expect_multicolumn_sum_to_equal` *                                                  | Y          | N       | Y         |
 +-------------------------------------------------------------------------------------+------------+---------+-----------+
 
-`*` This expectation has not yet been migrated to the modular API.
+`*` This expectation has not yet been migrated to the modular Expectations API (0.13)

@@ -16,7 +16,7 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(ColumnMapExpectation):
         "tags": [
             "core expectation",
             "table expectation",
-            "needs migration to modular api",
+            "needs migration to modular expectations api",
         ],
         "contributors": [
             "@great_expectations",
