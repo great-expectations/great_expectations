@@ -83,8 +83,7 @@ stages:
 
   - stage: required
     dependsOn: [scope_check, lint]
-    pool:
-      vmImage: 'ubuntu-18.04'
+    pool: vmssagentpool
 
     jobs:
       - job: compatibility_matrix
@@ -241,8 +240,7 @@ stages:
             displayName: 'pytest'
 
   - stage: db_integration
-    pool:
-      vmImage: 'ubuntu-latest'
+    pool: vmssagentpool
 
     dependsOn: [scope_check, lint]
 
