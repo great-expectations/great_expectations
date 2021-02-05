@@ -1,4 +1,5 @@
 import json
+import re
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -28,23 +29,37 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 from great_expectations.validator.validator import Validator
 
 
+# This method compares a string to a url validation regex
+def fits_regex(x):
+    regex = re.compile(
+        r"^(?:http|ftp)s?://"  # http:// or https://
+        r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"  # domain...
+        r"localhost|"  # localhost...
+        r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+        r"(?::\d+)?"  # optional port
+        r"(?:/?|[/?]\S+)$",
+        re.IGNORECASE,
+    )
+    if re.match(regex, str(x)):
+        return True
+    return False
+
+
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit
-# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
+# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
+class ColumnValuesToBeValidUrls(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
-    # for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.equal_three"
+    # Please see {some doc} for information on how to choose an id string for your Metric.
+    condition_metric_name = "column_values.to_be_valid_urls"
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, **kwargs):
+        return column.apply(lambda x: fits_regex(x))
 
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -59,58 +74,77 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
+    """Expect the column to be a valid url.  Maps row values to regex to check if value is a valid url."""
 
-    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
             "data": {
-                "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
+                "mostly_urls": [
+                    "http://www.caseycaruso.com",
+                    "http://www.bvp.com",
+                    "http://www.tlccollective.space",
+                    "kittens",
+                    "www.google.com",
+                ],
+                "valid_urls": [
+                    "http://www.facebook.com",
+                    "http://www.twitter.com",
+                    "http://www.github.com",
+                    "http://www.stackoverflow.com",
+                    "http://www.google.com",
+                ],
             },
             "tests": [
                 {
-                    "title": "positive_test_with_mostly",
+                    "title": "mostly_valid_urls",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "mostly_threes", "mostly": 0.6},
+                    "in": {"column": "mostly_urls", "mostly": 0.1},
                     "out": {
                         "success": True,
-                        "unexpected_index_list": [6, 7],
-                        "unexpected_list": [2, -1],
+                        "unexpected_index_list": [3, 4],
+                        "unexpected_list": ["kittens", "wwww.googlecom"],
                     },
-                }
+                },
+                {
+                    "title": "valid_urls",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "valid_urls", "mostly": 1},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
+                    },
+                },
             ],
         }
     ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
+        "maturity": "experimental",
+        "tags": ["experimental", "hackathon"],
+        "contributors": [  # Github handles for all contributors to this Expectation
+            "@ckathleen"
         ],
         "package": "experimental_expectations",
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.equal_three"
+    map_metric = "column_values.to_be_valid_urls"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
-    # for more information about domain and success keys, and other arguments to Expectations
+    # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
     success_keys = ("mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see
-    # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
+    # For more info on Renderers, see {some doc}
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
 
@@ -198,5 +232,5 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
+    diagnostics_report = ExpectColumnValuesToBeValidUrls().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
