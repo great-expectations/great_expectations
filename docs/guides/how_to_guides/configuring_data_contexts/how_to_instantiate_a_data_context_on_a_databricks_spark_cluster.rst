@@ -32,17 +32,64 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
     .. note::
        If you are using DBFS for your stores, make sure to set the ``root_directory`` of FilesystemStoreBackendDefaults to ``/dbfs/`` or ``/dbfs/FileStore/`` to make sure you are writing to DBFS and not the Spark driver node filesystem. If you have mounted another file store (e.g. s3 bucket) to use instead of DBFS, you can use that path here instead.
 
-    .. code-block:: python
-        :linenos:
+    .. content-tabs::
 
-        from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, FilesystemStoreBackendDefaults
-        from great_expectations.data_context import BaseDataContext
+        .. tab-container:: tab0
+            :title: Show Docs for Stable API (up to 0.12.x)
 
-        data_context_config = DataContextConfig(
-            datasources={<set_your_datasources_here>},
-            store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="/dbfs/FileStore/"),
-        )
-        context = BaseDataContext(project_config=data_context_config)
+            .. code-block:: python
+                :linenos:
+
+                from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, FilesystemStoreBackendDefaults
+                from great_expectations.data_context import BaseDataContext
+
+                # Example filesystem Datasource
+                my_spark_datasource_config = DatasourceConfig(
+                    class_name="SparkDFDatasource",
+                    batch_kwargs_generators={
+                        "subdir_reader": {
+                            "class_name": "SubdirReaderBatchKwargsGenerator",
+                            "base_directory": "/FileStore/tables/",
+                        }
+                    },
+                )
+
+                data_context_config = DataContextConfig(
+                    datasources={"my_spark_datasource": my_spark_datasource_config},
+                    store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="/dbfs/FileStore/"),
+                )
+                context = BaseDataContext(project_config=data_context_config)
+
+        .. tab-container:: tab1
+            :title: Show Docs for Experimental API (0.13)
+
+            .. code-block:: python
+                :linenos:
+
+                from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, FilesystemStoreBackendDefaults
+                from great_expectations.data_context import BaseDataContext
+
+                # Example RuntimeDataConnector for use with a dataframe batch
+                my_spark_datasource_config = DatasourceConfig(
+                    class_name="Datasource",
+                    execution_engine={"class_name": "SparkDFExecutionEngine"},
+                    data_connectors={
+                        "insert_your_runtime_data_connector_name_here": {
+                            "module_name": "great_expectations.datasource.data_connector",
+                            "class_name": "RuntimeDataConnector",
+                            "runtime_keys": [
+                                "some_key_maybe_pipeline_stage",
+                                "some_other_key_maybe_run_id"
+                            ]
+                        }
+                    }
+                )
+
+                data_context_config = DataContextConfig(
+                    datasources={"my_spark_datasource": my_spark_datasource_config},
+                    store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="/dbfs/FileStore/"),
+                )
+                context = BaseDataContext(project_config=data_context_config)
 
     You can have more fine-grained control over where your stores are located by passing the ``stores`` parameter to DataContextConfig as in the following example.
 
@@ -55,7 +102,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
                 :linenos:
 
                 data_context_config = DataContextConfig(
-                    datasources={<set_your_datasources_here>},
+                    datasources={"my_spark_datasource": my_spark_datasource_config},
                     stores={
                         "insert_your_custom_expectations_store_name_here": {
                             "class_name": "ExpectationsStore",
@@ -85,7 +132,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
                 :linenos:
 
                 data_context_config = DataContextConfig(
-                    datasources={<set_your_datasources_here>},
+                    datasources={"my_spark_datasource": my_spark_datasource_config},
                     stores={
                         "insert_your_custom_expectations_store_name_here": {
                             "class_name": "ExpectationsStore",
