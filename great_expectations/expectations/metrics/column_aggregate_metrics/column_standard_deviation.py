@@ -41,6 +41,8 @@ class ColumnStandardDeviation(ColumnMetricProvider):
         """SqlAlchemy Standard Deviation implementation"""
         if _dialect.name.lower() == "mssql":
             standard_deviation = sa.func.stdev(column)
+        elif _dialect.name.lower() == "sqlite":
+            raise NotImplementedError
         else:
             standard_deviation = sa.func.stddev_samp(column)
         return standard_deviation

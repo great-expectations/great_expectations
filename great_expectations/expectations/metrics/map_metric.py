@@ -1,6 +1,7 @@
+import logging
 import uuid
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import numpy as np
 
@@ -33,6 +34,8 @@ from great_expectations.expectations.registry import (
     register_metric,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
+
+logger = logging.getLogger(__name__)
 
 
 def column_function_partial(
@@ -758,6 +761,10 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     if execution_engine.engine.dialect.name.lower() == "mssql":
         # mssql expects all temporary table names to have a prefix '#'
         temp_table_name = f"#{temp_table_name}"
+    else:
+        logger.warning(
+            "WINDOW_FN subquery for dialects other than mssql will create a table to execute"
+        )
 
     with execution_engine.engine.begin():
         metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
