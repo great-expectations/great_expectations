@@ -7,13 +7,14 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
+from great_expectations.core.evaluation_parameters import build_evaluation_parameters
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -31,10 +32,12 @@ from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
 )
+from great_expectations.exceptions.metric_exceptions import MetricResolutionError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.registry import (
     get_expectation_impl,
+    get_metric_kwargs,
     get_metric_provider,
     list_registered_expectation_implementations,
 )
@@ -333,7 +336,7 @@ class Validator:
         self,
         graph: ValidationGraph,
         child_node: MetricConfiguration,
-        configuration: ExpectationConfiguration,
+        configuration: Union[ExpectationConfiguration, None],
         execution_engine: "ExecutionEngine",
         parent_node: Optional[MetricConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
@@ -341,7 +344,6 @@ class Validator:
         """Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
         until all metrics have been added."""
 
-        # metric_kwargs = get_metric_kwargs(metric_name)
         metric_impl = get_metric_provider(
             child_node.metric_name, execution_engine=execution_engine
         )[0]
@@ -449,6 +451,7 @@ class Validator:
                     raised_exception = True
                     exception_traceback = traceback.format_exc()
                     result = ExpectationValidationResult(
+                        expectation_config=configuration,
                         success=False,
                         exception_info={
                             "raised_exception": raised_exception,
@@ -478,6 +481,7 @@ class Validator:
                     exception_traceback = traceback.format_exc()
 
                     result = ExpectationValidationResult(
+                        expectation_config=configuration,
                         success=False,
                         exception_info={
                             "raised_exception": raised_exception,
@@ -492,17 +496,50 @@ class Validator:
 
     def resolve_validation_graph(self, graph, metrics, runtime_configuration=None):
         done: bool = False
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
+        failed_metric_counts = {}
+        aborted_metrics = set()
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
-            metrics.update(
-                self._resolve_metrics(
+            computable_metrics = set()
+            for metric in ready_metrics:
+                if (
+                    metric.id in failed_metric_counts
+                    and failed_metric_counts[metric.id] > 2
+                ):
+                    aborted_metrics.add(metric.id)
+                if metric.id not in aborted_metrics:
+                    computable_metrics.add(metric)
+            try:
+                resolved_metrics = self._resolve_metrics(
                     execution_engine=self._execution_engine,
-                    metrics_to_resolve=ready_metrics,
+                    metrics_to_resolve=computable_metrics,
                     metrics=metrics,
                     runtime_configuration=runtime_configuration,
                 )
-            )
-            if len(ready_metrics) + len(needed_metrics) == 0:
+                metrics.update(resolved_metrics)
+            except MetricResolutionError as e:
+                if runtime_configuration.get("catch_exceptions", False):
+                    for failed_metric in e.failed_metrics:
+                        if failed_metric.id in failed_metric_counts:
+                            failed_metric_counts[failed_metric.id] += 1
+                        else:
+                            failed_metric_counts[failed_metric.id] = 1
+                else:
+                    raise e
+            except Exception as e:
+                if runtime_configuration.get("catch_exceptions", False):
+                    logger.error(
+                        f"Caught exception {str(e)} while trying to resolve a batch of {len(ready_metrics)} metrics; aborting graph resolution."
+                    )
+                    done = True
+                else:
+                    raise e
+            if (len(ready_metrics) + len(needed_metrics) == 0) or (
+                len(ready_metrics) == len(aborted_metrics)
+            ):
                 done = True
 
         return metrics

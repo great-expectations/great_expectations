@@ -8,6 +8,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.exceptions.metric_exceptions import MetricResolutionError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -200,13 +201,14 @@ class ExecutionEngine(ABC):
             metric_class, metric_fn = get_metric_provider(
                 metric_name=metric_to_resolve.metric_name, execution_engine=self
             )
-            try:
-                metric_dependencies = {
-                    k: metrics[v.id]
-                    for k, v in metric_to_resolve.metric_dependencies.items()
-                }
-            except KeyError as e:
-                raise GreatExpectationsError(f"Missing metric dependency: {str(e)}")
+            metric_dependencies = dict()
+            for k, v in metric_to_resolve.metric_dependencies.items():
+                if v.id in metrics:
+                    metric_dependencies[k] = metrics[v.id]
+                elif self._caching and v.id in self._metric_cache:
+                    metric_dependencies[k] = self._metric_cache[v.id]
+                else:
+                    raise GreatExpectationsError(f"Missing metric dependency: {str(k)}")
             metric_provider_kwargs = {
                 "cls": metric_class,
                 "execution_engine": self,
@@ -250,22 +252,37 @@ class ExecutionEngine(ABC):
             ]:
                 # NOTE: 20201026 - JPC - we could use the fact that these metric functions return functions rather
                 # than data to optimize compute in the future
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
+                try:
+                    resolved_metrics[metric_to_resolve.id] = metric_fn(
+                        **metric_provider_kwargs
+                    )
+                except RuntimeError as e:
+                    raise MetricResolutionError(str(e), (metric_to_resolve,))
             elif metric_fn_type == MetricFunctionTypes.VALUE:
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
+                try:
+                    resolved_metrics[metric_to_resolve.id] = metric_fn(
+                        **metric_provider_kwargs
+                    )
+                except RuntimeError as e:
+                    raise MetricResolutionError(str(e), (metric_to_resolve))
             else:
                 logger.warning(
                     f"Unrecognized metric function type while trying to resolve {str(metric_to_resolve.id)}"
                 )
-                resolved_metrics[metric_to_resolve.id] = metric_fn(
-                    **metric_provider_kwargs
-                )
+                try:
+                    resolved_metrics[metric_to_resolve.id] = metric_fn(
+                        **metric_provider_kwargs
+                    )
+                except RuntimeError as e:
+                    raise MetricResolutionError(str(e), (metric_to_resolve))
         if len(metric_fn_bundle) > 0:
-            resolved_metrics.update(self.resolve_metric_bundle(metric_fn_bundle))
+            try:
+                new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
+                resolved_metrics.update(new_resolved)
+            except RuntimeError as e:
+                raise MetricResolutionError(str(e), [x[0] for x in metric_fn_bundle])
+        if self._caching:
+            self._metric_cache.update(resolved_metrics)
 
         return resolved_metrics
 
