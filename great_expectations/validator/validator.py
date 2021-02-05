@@ -1070,21 +1070,6 @@ class Validator:
                 "great_expectations_version"
             ) or expectation_suite.meta.get("great_expectations.__version__")
 
-            if suite_ge_version:
-                if suite_ge_version != ge_version:
-                    warnings.warn(
-                        "WARNING: This configuration object was built using version %s of great_expectations, but "
-                        "is currently being validated by version %s."
-                        % (
-                            suite_ge_version,
-                            ge_version,
-                        )
-                    )
-            else:
-                warnings.warn(
-                    "WARNING: No great_expectations version found in configuration object."
-                )
-
             # Group expectations by column
             columns = {}
 
