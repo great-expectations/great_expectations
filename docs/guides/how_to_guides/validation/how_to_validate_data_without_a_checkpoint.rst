@@ -3,13 +3,13 @@
 How to validate data without a Checkpoint
 =========================================
 
-This guide demonstrates how to load an Expectation Suite and validate data without using a :ref:`Checkpoint<how_to_guides__validation__how_to_create_a_new_checkpoint>`. This might be suitable for environments or workflows where a user does not want to or cannot create a Checkpoint, e.g. in a `hosted environment<deployment_hosted_enviroments>`.
+This guide demonstrates how to load an Expectation Suite and validate data without using a :ref:`Checkpoint<how_to_guides__validation__how_to_create_a_new_checkpoint>`. This might be suitable for environments or workflows where a user does not want to or cannot create a Checkpoint, e.g. in a :ref:`hosted environment<deployment_hosted_enviroments>`.
 
 
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Docs for Legacy Checkpoints (<=0.13.7)
 
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
@@ -64,9 +64,9 @@ This guide demonstrates how to load an Expectation Suite and validate data witho
         This runs validation and executes any ValidationActions configured for this ValidationOperator (e.g. saving the results to a ValidationResult Store).
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Docs for Class-Based Checkpoints (>=0.13.8)
 
-        .. Attention:: As part of the new modular expectations API in Great Expectations, Validation Operators are evolving into Checkpoints. This means running a Validation without a Checkpoint is no longer supported in Great Expectations version 0.13 or later. Please read :ref:`Checkpoints and Actions<checkpoints_and_actions>` to learn more.
+        .. Attention:: As part of the new modular expectations API in Great Expectations, Validation Operators are evolving into Checkpoints. This means running a Validation without a Checkpoint is no longer supported in Great Expectations version 0.13.8 or later. Please read :ref:`Checkpoints and Actions<checkpoints_and_actions>` to learn more.
 
 
 
