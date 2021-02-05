@@ -520,7 +520,7 @@ class Validator:
         """
         # Checking type of expectation_suite.
         # Check for expectation_suite_name is already done by ExpectationSuiteIdentifier
-        if not isinstance(expectation_suite, ExpectationSuite):
+        if expectation_suite and not isinstance(expectation_suite, ExpectationSuite):
             raise TypeError(
                 "expectation_suite must be of type ExpectationSuite, not {}".format(
                     type(expectation_suite)
