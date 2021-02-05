@@ -66,7 +66,7 @@ This guide demonstrates how to load an Expectation Suite and validate data witho
     .. tab-container:: tab1
         :title: Docs for Class-Based Checkpoints (>=0.13.8)
 
-        .. Attention:: As part of the new modular expectations API in Great Expectations, Validation Operators are evolving into Checkpoints. This means running a Validation without a Checkpoint is no longer supported in Great Expectations version 0.13.8 or later. Please read :ref:`Checkpoints and Actions<checkpoints_and_actions>` to learn more.
+        .. Attention:: As part of the new modular expectations API in Great Expectations, Validation Operators have evolved into Class-Based Checkpoints. This means running a Validation without a Checkpoint is no longer supported in Great Expectations version 0.13.8 or later. Please read :ref:`Checkpoints and Actions<checkpoints_and_actions>` to learn more.
 
 
 
