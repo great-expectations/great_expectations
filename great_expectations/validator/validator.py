@@ -32,6 +32,7 @@ from great_expectations.exceptions import (
     InvalidExpectationConfigurationError,
 )
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     get_metric_provider,
@@ -154,10 +155,10 @@ class Validator:
             return self.validate_expectation(name)
         elif (
             self._expose_dataframe_methods
-            and isinstance(self.active_batch.data, pd.DataFrame)
+            and isinstance(self.active_batch.data, PandasBatchData)
             and hasattr(pd.DataFrame, name)
         ):
-            return getattr(self.active_batch.data, name)
+            return getattr(self.active_batch.data.dataframe, name)
         else:
             raise AttributeError(
                 f"'{type(self).__name__}'  object has no attribute '{name}'"

@@ -3,7 +3,7 @@ import os
 from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.datasource.types import PathBatchSpec, S3BatchSpec
+from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.exceptions.exceptions import ParserError
 
 try:
