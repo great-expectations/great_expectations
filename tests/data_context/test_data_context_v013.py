@@ -232,7 +232,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
     )
     assert my_batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
 
-    assert my_batch.data.equals(test_df)
+    assert my_batch.data.dataframe.equals(test_df)
 
 
 def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas_execution_engine(
@@ -297,7 +297,7 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
@@ -323,7 +323,7 @@ data_connectors:
             },
         },
     )
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (4, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
@@ -333,6 +333,97 @@ data_connectors:
     )
     df_data = df_data[df_data["belongs_in_split"]]
     assert df_data.drop("belongs_in_split", axis=1).shape == (4, 10)
+
+
+def test_get_available_asset_names(
+    data_context_with_pandas_datasource_for_testing_get_batch,
+):
+    context = data_context_with_pandas_datasource_for_testing_get_batch
+
+    available_data_asset_names = context.get_available_data_asset_names()
+    # {
+    #     "my_pandas_datasource" : {
+    #         "my_filesystem_data_connector" : [
+    #             "A", "B", "C", "D"
+    #         ]
+    #     }
+    # }
+    assert set(available_data_asset_names.keys()) == {"my_pandas_datasource"}
+    assert set(available_data_asset_names["my_pandas_datasource"].keys()) == {
+        "my_filesystem_data_connector"
+    }
+    assert set(
+        available_data_asset_names["my_pandas_datasource"][
+            "my_filesystem_data_connector"
+        ]
+    ) == {"A", "B", "C", "D"}
+
+    with pytest.raises(ValueError):
+        context.get_available_data_asset_names(datasource_name="does_not_exist") == {}
+
+    with pytest.raises(ValueError):
+        assert context.get_available_data_asset_names(
+            datasource_names=["does_not_exist"]
+        )
+
+    with pytest.raises(KeyError):
+        assert context.get_available_data_asset_names(
+            datasource_name="my_pandas_datasource", data_connector_name="does_not_exist"
+        )
+
+    with pytest.raises(KeyError):
+        assert context.get_available_data_asset_names(
+            datasource_name="my_pandas_datasource",
+            data_connector_names=["does_not_exist"],
+        )
+
+    # NOTE: Abe 20201209 : Add tests for edge cases and error conditions.
+    # NOTE: Abe 20201209 : This test only covers new_datasources.
+    # We should extend to cover old-style datasources too, including tests of type detection logic.
+
+
+def test_list_datasource_names(
+    data_context_with_pandas_datasource_for_testing_get_batch,
+):
+    context = data_context_with_pandas_datasource_for_testing_get_batch
+
+    assert context.list_datasource_names() == ["my_pandas_datasource"]
+
+    # NOTE: Abe 20201209 : Add tests for edge cases and error conditions.
+
+
+def test_list_data_connector_names(
+    data_context_with_pandas_datasource_for_testing_get_batch,
+):
+    context = data_context_with_pandas_datasource_for_testing_get_batch
+
+    assert (
+        context.list_data_connector_names(
+            datasource_name="my_pandas_datasource",
+        )
+        == ["my_filesystem_data_connector"]
+    )
+
+    # NOTE: Abe 20201209 : Add tests for edge cases and error conditions.
+
+
+def test_list_data_asset_names(
+    data_context_with_pandas_datasource_for_testing_get_batch,
+):
+    context = data_context_with_pandas_datasource_for_testing_get_batch
+
+    assert (
+        set(
+            context.list_data_asset_names(
+                datasource_name="my_pandas_datasource",
+                data_connector_name="my_filesystem_data_connector",
+            )
+        )
+        == {"A", "B", "C", "D"}
+    )
+
+    # NOTE: Abe 20201209 : Perhaps enforce some kind of sort order on the returned list.
+    # NOTE: Abe 20201209 : Add tests for edge cases and error conditions.
 
 
 def test_relative_data_connector_default_and_relative_asset_base_directory_paths(
@@ -402,7 +493,7 @@ data_connectors:
         data_asset_name="A",
     )
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (120, 10)
 
 

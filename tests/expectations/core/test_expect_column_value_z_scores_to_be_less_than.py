@@ -9,8 +9,10 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
@@ -51,12 +53,11 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(postgresql_engine)
         },
     )
     expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
+    engine = SqlAlchemyExecutionEngine(engine=postgresql_engine)
     batch_data = SqlAlchemyBatchData(
-        engine=postgresql_engine, table_name="z_score_test_data"
+        execution_engine=engine, table_name="z_score_test_data"
     )
-    engine = SqlAlchemyExecutionEngine(
-        engine=postgresql_engine, batch_data_dict={"my_id": batch_data}
-    )
+    engine.load_batch_data("my_id", batch_data)
     result = expectation.validate(Validator(execution_engine=engine))
     assert result == ExpectationValidationResult(
         success=True,

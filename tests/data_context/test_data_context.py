@@ -1931,7 +1931,8 @@ data_connectors:
         partition_identifiers={
             "alphanumeric": "some_file",
         },
-        create_expectation_suite_with_name="A_expectation_suite",
+        expectation_suite_name="A_expectation_suite",
+        overwrite_existing_expectation_suite=True,
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 

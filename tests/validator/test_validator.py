@@ -316,6 +316,23 @@ def test_graph_validate_with_runtime_config(basic_datasource):
     ]
 
 
+def test_validator_default_expectation_args(
+    data_context_with_sql_datasource_for_testing_get_batch,
+):
+    context = data_context_with_sql_datasource_for_testing_get_batch
+
+    my_validator = context.get_validator(
+        datasource_name="my_sqlite_db",
+        data_connector_name="daily",
+        data_asset_name="table_partitioned_by_date_column__A",
+        partition_identifiers={"date": "2020-01-15"},
+        expectation_suite_name="test_suite",
+        overwrite_existing_expectation_suite=True,
+    )
+
+    print(my_validator.get_default_expectation_arguments())
+
+
 def test_validator_default_expectation_args__pandas(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
@@ -354,7 +371,8 @@ def test_validator_default_expectation_args__sql(
         data_connector_name="daily",
         data_asset_name="table_partitioned_by_date_column__A",
         partition_identifiers={"date": "2020-01-15"},
-        create_expectation_suite_with_name="test_suite",
+        expectation_suite_name="test_suite",
+        overwrite_existing_expectation_suite=True,
     )
 
     print(my_validator.get_default_expectation_arguments())
