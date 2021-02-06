@@ -1,4 +1,6 @@
 import json
+import pandas
+import operator
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -118,11 +120,11 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
                 "exact_match_out": False,
                 "include_in_gallery": True,
                 "in": {
-                    "column": "is_alphabetical_lowercase",
+                    "column": "out_of_order",
                     "mostly": 1.0
                 },
                 "out": {
-                    "success": True,
+                    "success": False,
                     "unexpected_index_list": [2, 3, 7],
                     "unexpected_list": ["up", "down", "east"],
                 },
@@ -134,7 +136,7 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
         "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
+            "experimental"
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
             #         "@your_name_here", # Don't forget to add your github handle here!
@@ -148,7 +150,7 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
-    success_keys = ("mostly",)
+    success_keys = ("mostly","reverse")
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
