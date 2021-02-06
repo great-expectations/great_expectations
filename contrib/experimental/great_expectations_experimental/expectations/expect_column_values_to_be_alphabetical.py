@@ -61,24 +61,57 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
     """TODO: add a docstring here"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    # examples = [{
-    #     "data": {
-    #         "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-    #     },
-    #     "tests": [
-    #         {
-    #             "title": "positive_test_with_mostly",
-    #             "exact_match_out": False,
-    #             "include_in_gallery": True,
-    #             "in": {"column": "mostly_threes", "mostly": 0.6},
-    #             "out": {
-    #                 "success": True,
-    #                 "unexpected_index_list": [6, 7],
-    #                 "unexpected_list": [2, -1],
-    #             },
-    #         }
-    #     ],
-    # }]
+    examples = [{
+        "data": {
+            "is_alphabetical_lowercase": ["apple", "banana", "coconut", "donut", "eggplant", "flour", "grapes", "jellybean", None, None, None],
+            "is_alphabetical_mixedcase": ["Atlanta", "bonnet", "Delaware", "gymnasium", "igloo", "Montreal", "Tennessee", "toast", "Washington", "xylophone", "zebra"],
+            "out_of_order": ["Right", "wrong", "up", "down", "Opposite", "Same", "west", "east", None, None, None]
+        },
+        "tests": [
+            {
+                "title": "positive_test_with_all_values_alphabetical_lowercase",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {
+                    "column": "is_alphabetical_lowercase",
+                    "mostly": 1.0
+                },
+                "out": {
+                    "success": True,
+                    "unexpected_index_list": [],
+                    "unexpected_list": [],
+                },
+            },
+            {
+                "title": "positive_test_with_all_values_alphabetical_mixedcase",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {
+                    "column": "is_alphabetical_mixedcase",
+                    "mostly": 1.0
+                },
+                "out": {
+                    "success": True,
+                    "unexpected_index_list": [],
+                    "unexpected_list": [],
+                },
+            },
+            {
+                "title": "negative_test_with_out_of_order_mixedcase",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {
+                    "column": "is_alphabetical_lowercase",
+                    "mostly": 1.0
+                },
+                "out": {
+                    "success": True,
+                    "unexpected_index_list": [2, 3, 7],
+                    "unexpected_list": ["up", "down", "east"],
+                },
+            }
+        ],
+    }]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
