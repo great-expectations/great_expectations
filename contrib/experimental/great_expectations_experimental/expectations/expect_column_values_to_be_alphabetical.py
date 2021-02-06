@@ -36,13 +36,29 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.are_alphabetical"
+    condition_value_keys = ("reverse")
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
 
-#     @column_condition_partial(engine=PandasExecutionEngine)
-#     def _pandas(cls, column, **kwargs):
-#         return column == 3
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, reverse=False, **kwargs):
+        column_lower = column.map(str.lower)
+
+        column_length = column.size
+
+        output = [True]
+        for i in range(1,column_length):
+            if column_lower[i - 1] <= column_lower[i]:
+                output.append(True)
+            else:
+                output.append(False)
+
+        return pandas.Series(output)
+
+
+
+
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -74,6 +90,7 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
                 "include_in_gallery": True,
                 "in": {
                     "column": "is_alphabetical_lowercase",
+                    "reverse":
                     "mostly": 1.0
                 },
                 "out": {
