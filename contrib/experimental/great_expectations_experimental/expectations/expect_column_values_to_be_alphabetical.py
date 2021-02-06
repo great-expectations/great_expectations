@@ -38,7 +38,7 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.are_alphabetical"
-    condition_value_keys = ("reverse")
+    condition_value_keys = ("reverse",)
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
@@ -49,12 +49,17 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 
         column_length = column.size
 
+        if reverse:
+            compare_function = operator.ge
+        else:
+            compare_function = operator.le
+
         output = [True]
         for i in range(1,column_length):
-            if column_lower[i - 1] <= column_lower[i]:
-                output.append(True)
+            if column_lower[i] and column_lower[i - 1]:
+                output.append(compare_function(column_lower[i - 1], column_lower[i]))
             else:
-                output.append(False)
+                output.append(None)
 
         return pandas.Series(output)
 
@@ -82,6 +87,7 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
     examples = [{
         "data": {
             "is_alphabetical_lowercase": ["apple", "banana", "coconut", "donut", "eggplant", "flour", "grapes", "jellybean", None, None, None],
+            "is_alphabetical_lowercase_reversed": ["moon", "monster", "messy", "mellow", "marble", "maple", "malted", "machine", None, None, None],
             "is_alphabetical_mixedcase": ["Atlanta", "bonnet", "Delaware", "gymnasium", "igloo", "Montreal", "Tennessee", "toast", "Washington", "xylophone", "zebra"],
             "out_of_order": ["Right", "wrong", "up", "down", "Opposite", "Same", "west", "east", None, None, None]
         },
@@ -92,7 +98,37 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
                 "include_in_gallery": True,
                 "in": {
                     "column": "is_alphabetical_lowercase",
-                    "reverse":
+                    "reverse": False,
+                    "mostly": 1.0
+                },
+                "out": {
+                    "success": True,
+                    "unexpected_index_list": [],
+                    "unexpected_list": [],
+                },
+            },
+            {
+                "title": "negative_test_with_all_values_alphabetical_lowercase_reversed",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {
+                    "column": "is_alphabetical_lowercase_reversed",
+                    "reverse": False,
+                    "mostly": 1.0
+                },
+                "out": {
+                    "success": False,
+                    "unexpected_index_list": [1,2,3,4,5,6,7],
+                    "unexpected_list": ["monster", "messy", "mellow", "marble", "maple", "malted", "machine"],
+                },
+            },
+            {
+                "title": "positive_test_with_all_values_alphabetical_lowercase_reversed",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {
+                    "column": "is_alphabetical_lowercase_reversed",
+                    "reverse": True,
                     "mostly": 1.0
                 },
                 "out": {
