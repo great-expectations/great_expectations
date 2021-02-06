@@ -32,6 +32,7 @@ from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
 )
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     get_metric_provider,
@@ -491,7 +492,9 @@ class Validator:
         )
 
     def _initialize_expectations(
-        self, expectation_suite=None, expectation_suite_name=None
+        self,
+        expectation_suite: ExpectationSuite = None,
+        expectation_suite_name: str = None,
     ):
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
@@ -515,6 +518,14 @@ class Validator:
         Returns:
             None
         """
+        # Checking type of expectation_suite.
+        # Check for expectation_suite_name is already done by ExpectationSuiteIdentifier
+        if expectation_suite and not isinstance(expectation_suite, ExpectationSuite):
+            raise TypeError(
+                "expectation_suite must be of type ExpectationSuite, not {}".format(
+                    type(expectation_suite)
+                )
+            )
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
                 expectation_suite = expectationSuiteSchema.load(expectation_suite)
