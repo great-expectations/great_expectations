@@ -175,7 +175,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "a", "min_value": 0.25, "max_value": 10},
-                    "out": {"success": True, "observed_value":  1.6974323016687487},
+                    "out": {"success": True, "observed_value": 1.6974323016687487},
                 },
                 {
                     "title": "negative_test_no_skew",
@@ -216,7 +216,9 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
             #         "experimental"
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
+            "@lodeous",
+            "@rexboyce",
+            "@bragleg",
         ],
         "package": "experimental_expectations",
     }
