@@ -7,14 +7,13 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
-from great_expectations.core.evaluation_parameters import build_evaluation_parameters
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -278,6 +277,47 @@ class Validator:
         return [
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
+
+    def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
+        """Return a dictionary with the requested metrics"""
+        graph = ValidationGraph()
+        resolved_metrics = {}
+        for metric_name, metric_configuration in metrics.items():
+            provider_cls, _ = get_metric_provider(
+                metric_configuration.metric_name, self.execution_engine
+            )
+            for key in provider_cls.domain_keys:
+                if (
+                    key not in metric_configuration.metric_domain_kwargs
+                    and key in provider_cls.default_kwarg_values
+                ):
+                    metric_configuration.metric_domain_kwargs[
+                        key
+                    ] = provider_cls.default_kwarg_values[key]
+            for key in provider_cls.value_keys:
+                if (
+                    key not in metric_configuration.metric_value_kwargs
+                    and key in provider_cls.default_kwarg_values
+                ):
+                    metric_configuration.metric_value_kwargs[
+                        key
+                    ] = provider_cls.default_kwarg_values[key]
+            self.build_metric_dependency_graph(
+                graph,
+                child_node=metric_configuration,
+                configuration=None,
+                execution_engine=self._execution_engine,
+                runtime_configuration=None,
+            )
+        self.resolve_validation_graph(graph, resolved_metrics)
+        return {
+            metric_name: resolved_metrics[metric_configuration.id]
+            for (metric_name, metric_configuration) in metrics.items()
+        }
+
+    def get_metric(self, metric: MetricConfiguration) -> Any:
+        """return the value of the requested metric."""
+        return self.get_metrics({"_": metric})["_"]
 
     def build_metric_dependency_graph(
         self,
