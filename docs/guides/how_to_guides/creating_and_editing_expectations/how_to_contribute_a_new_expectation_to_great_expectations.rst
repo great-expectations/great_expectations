@@ -5,6 +5,8 @@ How to contribute a new Expectation to Great Expectations
 
 This guide will help you add a new Expectation to Great Expectations’ shared library. Your Expectation will be featured in the Expectations Gallery, along with many others developed by data practitioners from around the world as part of this collaborative community effort.
 
+To watch the video complement to this guide that shows an Expectation being implemented in real time, click `here <https://www.youtube.com/watch?v=fMiW91d0l6M&t=101s>`__.
+
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
   - :ref:`Set up your dev environment to contribute <contributing_setting_up_your_dev_environment>`
@@ -45,7 +47,7 @@ Steps
 
         Expectations follow a naming convention.
 
-        Names of Expectations are snake_case (e.g., ``expect_column_values_to_be_three``).
+        Names of Expectations are snake_case (e.g., ``expect_column_values_to_equal_three``).
 
         Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
 
@@ -56,15 +58,15 @@ Steps
 
     #. Name the file
 
-        The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_be_three.py``).
+        The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., ``expect_column_values_to_equal_three.py``).
 
-        For example, if you call your Expectation ``expect_column_values_to_be_three``, the file with its implementation should be:   ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
+        For example, if you call your Expectation ``expect_column_values_to_equal_three``, the file with its implementation should be:   ``contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py``
 
     #. Name the class
 
         Within the file, update the name of the class that implements your Expectation.
-        Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToBeThree``). The framework will
-        automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_be_three``.
+        Classes that implement Expectations have CamelCase names (e.g., ``ExpectColumnValuesToEqualThree``). The framework will
+        automatically translate this class name into a method with the snake_case name of ``expect_column_values_to_equal_three``.
         You will make this change in two places:
 
         * Class declaration (search for ``class Expect``)
@@ -428,7 +430,7 @@ Steps
 
     The template file that you used to start your development has some renderer implementations commented out. You can use them as a starting point.
 
-    For more comprehensive documentation consilt this :ref:`how-to guide <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`.
+    For more comprehensive documentation consult this :ref:`how-to guide <how_to_guides__configuring_data_docs__how_to_create_renderers_for_custom_expectations>`.
 
 #. **Submit your contribution**
 

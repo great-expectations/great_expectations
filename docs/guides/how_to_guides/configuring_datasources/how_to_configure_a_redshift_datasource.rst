@@ -185,16 +185,15 @@ Steps
             .. code-block:: python
 
                 config = f"""
-                my_datasource_name:
-                  class_name: SimpleSqlalchemyDatasource
-                  credentials:
-                    drivername: postgresql+psycopg2
-                    username: YOUR_REDSHIFT_USERNAME
-                    password: YOUR_REDSHIFT_PASSWORD
-                    host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
-                    port: 5439
-                    database: dev
-                    query:
+                class_name: SimpleSqlalchemyDatasource
+                credentials:
+                  drivername: postgresql+psycopg2
+                  username: YOUR_REDSHIFT_USERNAME
+                  password: YOUR_REDSHIFT_PASSWORD
+                  host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
+                  port: 5439
+                  database: dev
+                  query:
                       sslmode: prefer
                 introspection:
                   whole_table:

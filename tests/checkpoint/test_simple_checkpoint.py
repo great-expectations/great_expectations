@@ -1,7 +1,13 @@
+from unittest.mock import patch
+
 import pytest
 
 from great_expectations.checkpoint import SimpleCheckpointConfigurator
-from great_expectations.checkpoint.checkpoint import Checkpoint, CheckpointResult
+from great_expectations.checkpoint.checkpoint import (
+    Checkpoint,
+    CheckpointResult,
+    SimpleCheckpoint,
+)
 from great_expectations.data_context.types.base import CheckpointConfig
 
 
@@ -9,7 +15,7 @@ from great_expectations.data_context.types.base import CheckpointConfig
 def update_data_docs_action():
     return {
         "name": "update_data_docs",
-        "action": {"class_name": "UpdateDataDocsAction", "site_names": None},
+        "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
     }
 
 
@@ -65,12 +71,22 @@ def context_with_data_source_and_empty_suite(
 
 
 @pytest.fixture
+def context_with_data_source_and_empty_suite_with_templates(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
+    datasources = context.list_datasources()
+    assert datasources[0]["class_name"] == "Datasource"
+    assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
+    context.create_expectation_suite("one", overwrite_existing=True)
+    assert context.list_expectation_suite_names() == ["one"]
+    return context
+
+
+@pytest.fixture
 def simple_checkpoint_defaults(context_with_data_source_and_empty_suite):
-    return Checkpoint(
-        data_context=context_with_data_source_and_empty_suite,
-        **SimpleCheckpointConfigurator("foo", context_with_data_source_and_empty_suite)
-        .build()
-        .to_json_dict()
+    return SimpleCheckpoint(
+        name="foo", data_context=context_with_data_source_and_empty_suite
     )
 
 
@@ -286,7 +302,7 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_all_si
     ).build()
     # This is confusing: the UpdateDataDocsAction default behavior is to update
     # all sites if site_names=None
-    update_data_docs_action["action"]["site_names"] = None
+    update_data_docs_action["action"]["site_names"] = []
     assert checkpoint_config.action_list == [
         store_validation_result_action,
         store_eval_parameter_action,
@@ -445,6 +461,314 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
     assert result.list_expectation_suite_names() == ["one"]
     assert len(result.list_validation_results()) == 1
     assert result.success
+
+
+def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_persisting_checkpoint(
+    context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
+):
+    # verify checkpoint is not persisted in the data context
+    assert context_with_data_source_and_empty_suite.list_checkpoints() == []
+
+    expected_runtime_kwargs = {
+        "template_name": None,
+        "run_name_template": None,
+        "expectation_suite_name": None,
+        "batch_request": None,
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                    "site_names": ["local_site"],
+                },
+            },
+        ],
+        "evaluation_parameters": None,
+        "runtime_configuration": {},
+        "validations": [
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                },
+                "expectation_suite_name": "one",
+            }
+        ],
+        "profilers": None,
+    }
+
+    # verify that runtime_kwargs were processed correctly
+    with patch(
+        "great_expectations.checkpoint.checkpoint.Checkpoint.get_substituted_config"
+    ) as get_substituted_config_mock:
+        simple_checkpoint_defaults.run(
+            run_name="bar", validations=[one_validation], site_names=["local_site"]
+        )
+        get_substituted_config_mock.assert_called_with(
+            runtime_kwargs=expected_runtime_kwargs
+        )
+
+    substituted_runtime_config = simple_checkpoint_defaults.get_substituted_config(
+        runtime_kwargs=expected_runtime_kwargs
+    )
+    assert (
+        substituted_runtime_config.action_list == expected_runtime_kwargs["action_list"]
+    )
+
+
+def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_persisting_checkpoint(
+    context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
+):
+    # verify checkpoint is not persisted in the data context
+    assert context_with_data_source_and_empty_suite.list_checkpoints() == []
+
+    expected_runtime_kwargs = {
+        "template_name": None,
+        "run_name_template": None,
+        "expectation_suite_name": None,
+        "batch_request": None,
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+            },
+            {
+                "name": "send_slack_notification",
+                "action": {
+                    "class_name": "SlackNotificationAction",
+                    "slack_webhook": "https://hooks.slack.com/my_slack_webhook.geocities",
+                    "notify_on": "all",
+                    "notify_with": None,
+                    "renderer": {
+                        "module_name": "great_expectations.render.renderer.slack_renderer",
+                        "class_name": "SlackRenderer",
+                    },
+                },
+            },
+        ],
+        "evaluation_parameters": None,
+        "runtime_configuration": {},
+        "validations": [
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                },
+                "expectation_suite_name": "one",
+            }
+        ],
+        "profilers": None,
+    }
+
+    # verify that runtime_kwargs were processed correctly
+    with patch(
+        "great_expectations.checkpoint.checkpoint.Checkpoint.get_substituted_config"
+    ) as get_substituted_config_mock:
+        simple_checkpoint_defaults.run(
+            run_name="bar",
+            validations=[one_validation],
+            slack_webhook="https://hooks.slack.com/my_slack_webhook.geocities",
+        )
+        get_substituted_config_mock.assert_called_with(
+            runtime_kwargs=expected_runtime_kwargs
+        )
+
+    substituted_runtime_config = simple_checkpoint_defaults.get_substituted_config(
+        runtime_kwargs=expected_runtime_kwargs
+    )
+    assert (
+        substituted_runtime_config.action_list == expected_runtime_kwargs["action_list"]
+    )
+
+
+def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_persisting_checkpoint(
+    context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
+):
+    # verify checkpoint is not persisted in the data context
+    assert context_with_data_source_and_empty_suite.list_checkpoints() == []
+
+    expected_runtime_kwargs = {
+        "template_name": None,
+        "run_name_template": None,
+        "expectation_suite_name": None,
+        "batch_request": None,
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                    "site_names": ["local_site"],
+                },
+            },
+            {
+                "name": "send_slack_notification",
+                "action": {
+                    "class_name": "SlackNotificationAction",
+                    "slack_webhook": "https://hooks.slack.com/my_slack_webhook.geocities",
+                    "notify_on": "failure",
+                    "notify_with": ["local_site"],
+                    "renderer": {
+                        "module_name": "great_expectations.render.renderer.slack_renderer",
+                        "class_name": "SlackRenderer",
+                    },
+                },
+            },
+        ],
+        "evaluation_parameters": None,
+        "runtime_configuration": {},
+        "validations": [
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                },
+                "expectation_suite_name": "one",
+            }
+        ],
+        "profilers": None,
+    }
+
+    # verify that runtime_kwargs were processed correctly
+    with patch(
+        "great_expectations.checkpoint.checkpoint.Checkpoint.get_substituted_config"
+    ) as get_substituted_config_mock:
+        simple_checkpoint_defaults.run(
+            run_name="bar",
+            validations=[one_validation],
+            site_names=["local_site"],
+            notify_with=["local_site"],
+            notify_on="failure",
+            slack_webhook="https://hooks.slack.com/my_slack_webhook.geocities",
+        )
+        get_substituted_config_mock.assert_called_with(
+            runtime_kwargs=expected_runtime_kwargs
+        )
+
+    substituted_runtime_config = simple_checkpoint_defaults.get_substituted_config(
+        runtime_kwargs=expected_runtime_kwargs
+    )
+    assert (
+        substituted_runtime_config.action_list == expected_runtime_kwargs["action_list"]
+    )
+
+
+def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
+    context_with_data_source_and_empty_suite_with_templates,
+    simple_checkpoint_defaults,
+    one_validation,
+    monkeypatch,
+):
+    monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
+    monkeypatch.setenv("MY_PARAM", "1")
+
+    expected_runtime_kwargs = {
+        "template_name": "my_simple_template_checkpoint",
+        "run_name_template": "my_runtime_run_name_template",
+        "expectation_suite_name": "my_runtime_suite",
+        "batch_request": {"my_special_runtime_key": "my_special_runtime_value"},
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                    "site_names": ["local_site"],
+                },
+            },
+            {
+                "name": "send_slack_notification",
+                "action": {
+                    "class_name": "SlackNotificationAction",
+                    "slack_webhook": "https://hooks.slack.com/my_slack_webhook.geocities",
+                    "notify_on": "failure",
+                    "notify_with": ["local_site"],
+                    "renderer": {
+                        "module_name": "great_expectations.render.renderer.slack_renderer",
+                        "class_name": "SlackRenderer",
+                    },
+                },
+            },
+        ],
+        "evaluation_parameters": {"my_runtime_key": "my_runtime_value"},
+        "runtime_configuration": {"my_runtime_key": "my_runtime_value"},
+        "validations": [
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource",
+                    "data_connector_name": "my_special_data_connector",
+                    "data_asset_name": "users",
+                },
+                "expectation_suite_name": "one",
+            }
+        ],
+        "profilers": None,
+    }
+
+    # verify that runtime_kwargs were processed correctly
+    with patch(
+        "great_expectations.checkpoint.checkpoint.Checkpoint.get_substituted_config"
+    ) as get_substituted_config_mock:
+        simple_checkpoint_defaults.run(
+            run_name="bar",
+            template_name="my_simple_template_checkpoint",
+            run_name_template="my_runtime_run_name_template",
+            expectation_suite_name="my_runtime_suite",
+            batch_request={"my_special_runtime_key": "my_special_runtime_value"},
+            validations=[one_validation],
+            evaluation_parameters={"my_runtime_key": "my_runtime_value"},
+            runtime_configuration={"my_runtime_key": "my_runtime_value"},
+            site_names=["local_site"],
+            notify_with=["local_site"],
+            notify_on="failure",
+            slack_webhook="https://hooks.slack.com/my_slack_webhook.geocities",
+        )
+        get_substituted_config_mock.assert_called_with(
+            runtime_kwargs=expected_runtime_kwargs
+        )
+
+    substituted_runtime_config = simple_checkpoint_defaults.get_substituted_config(
+        runtime_kwargs=expected_runtime_kwargs
+    )
+    assert (
+        substituted_runtime_config.action_list == expected_runtime_kwargs["action_list"]
+    )
+
+    monkeypatch.delenv("GE_ENVIRONMENT")
+    monkeypatch.delenv("MY_PARAM")
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_checkpoint_loaded_from_store(

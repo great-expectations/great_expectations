@@ -4,6 +4,7 @@ import random
 import pytest
 from ruamel.yaml import YAML
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, BatchSpec
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 
@@ -114,17 +115,18 @@ def test_get_batch_definition_list_from_batch_request(
     # In this case, "date" should go inside "partition_identifiers".
     # Currently, the method ignores "date" entirely, and matches on too many partitions.
     # I don't think this is unique to ConfiguredAssetSqlDataConnector.
-    # with pytest.raises(DataConnectorError) as e:
+    # with pytest.raises(ge_exceptions.DataConnectorError) as e:
     #     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
     #         batch_request=BatchRequest(
     #             datasource_name="FAKE_Datasource_NAME",
     #             data_connector_name="my_sql_data_connector",
     #             data_asset_name="table_partitioned_by_date_column__A",
     #             partition_request={
-    #                 "partition_identifiers" : {},
+    #                 "partition_identifiers": {},
     #                 "date" : "2020-01-01",
     #             }
-    #     ))
+    #         )
+    #     )
     # assert "Unmatched key" in e.value.message
 
     batch_definition_list = (
@@ -138,7 +140,7 @@ def test_get_batch_definition_list_from_batch_request(
     )
     assert len(batch_definition_list) == 30
 
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
@@ -146,14 +148,14 @@ def test_get_batch_definition_list_from_batch_request(
             )
         )
 
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
             )
         )
 
-    with pytest.raises(KeyError):
+    with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest()
         )
@@ -715,7 +717,7 @@ def test_default_behavior_with_no_splitter(
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
@@ -727,7 +729,7 @@ def test_default_behavior_with_no_splitter(
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
@@ -740,7 +742,7 @@ def test_default_behavior_with_no_splitter(
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
@@ -776,7 +778,7 @@ def test_behavior_with_whole_table_splitter(
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
@@ -788,7 +790,7 @@ def test_behavior_with_whole_table_splitter(
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
@@ -801,7 +803,7 @@ def test_behavior_with_whole_table_splitter(
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
