@@ -28,40 +28,32 @@ from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validator import Validator
 
-#The ideas of this file were formulated on 2/6/2021 during the Great Expectations Student Hackathon.
-#This final implementation was written afterwards.
-#Authors: Tyler, Rodney
-#Mentor: Gil
 class ColumnRuleFollowers(ColumnMapMetricProvider):
+    """
+    Checks to see if all rows  satisfy a given minimum length and rule. 
+    A rule is defined as a JSON object (interpreted as a Python dict) with the following fields:
 
+        -ranges (dict): a nonempty dictionary that contains nested lists.
+            +Expected Values: Nested lists must be length 2, holding ints in increasing order, or length 0. 
+            +Special Cases: [] will pass in the entire string contained in the row.
+            Some examples. Suppose the row is the string "1234".
+            {"a": []}        - The variable a in the expression is set to "1234". 
+            {"x": [0, 1]}    - The variable x in the expression is set to "1".
+            {"x1": [0, 1],   - The variable x1 in the expression is set to "1", and x2 is set to "4".
+                "x2": [3, 4]} 
+                    
+        -expr (string): The expression. This is a string in the form of a Python expression. Python functions are
+            available, as it is parsed using exec(). Each variable is passed in as a string.
+            +Expected Value: A well-formed python expression that evaluates to a boolean value.
+            +Special Cases: "True" and "False" will evaluate to True and False, respectively.
+    """
     condition_metric_name = "column_values.expect_column_to_follow_rule"
     condition_value_keys = ("min_len", "rule") 
 
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, min_len, rule, **kwargs):
-        """Checks a row against a rule, assuming there is a minimum length.
-            A Rule is defined as a JSON object (interpreted as a Python dict) with the following fields:
-            -ranges: a nonempty dictionary of range of indices for which an expression should act on, with 
-                inclusive lower bound and exclusive upper bound.
-                *Expected Type: Dictionary of lists. Nested lists must be length 2. If the dictionary 
-                                is empty, the expectation will input the entire string into the function.
-                *Expected Values: Nested lists must be length 2, in increasing order.
-                Special Cases: [] will pass in the entire string contained in the row.
-                Some examples. Suppose the row is the string "1234".
-                {"a": []}        - The variable a in the expression is set to "1234". 
-                {"x": [0, 1]}    - The variable x in the expression is set to "1".
-                {"x1": [0, 1],   - The variable x1 in the expression is set to "1", and x2 is set to "4".
-                 "x2": [3, 4]}
-                                   
-            -expr: The expression. This is a string in the form of a Python expression. Python functions are
-                   available, as it is parsed using exec(). Note that values are passed in as a string, 
-                   so to get integer values use int(). If the row value is None, it is set to the empty string.
-                *Expected Type: String. 
-                *Expected Value: A valid python expression that evaluates to a boolean value.
-                *Special Cases: "True" and "False" will evaluate to True and False, respectively.
-            
-        """
+        
         if rule["ranges"] is {}:
             raise ValueError("Ranges must contain at least 1 variable!")
 
@@ -89,20 +81,20 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
 
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
+# TODO: SQL Alchemy
 #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
 #     def _sqlalchemy(cls, column, _dialect, **kwargs):
 #         return column.in_([3])
 
+#TODO: Pyspark
 # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
 #     @column_condition_partial(engine=SparkDFExecutionEngine)
 #     def _spark(cls, column, **kwargs):
 #         return column.isin([3])
 
 
-# This class defines the Expectation itself
-# The main business logic for calculation lives here.
 class expect_column_to_follow_rule(ColumnMapExpectation):
-    """Expect"""
+    """This expectation compares all rows of a column against a given input expression."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [{
@@ -159,9 +151,9 @@ class expect_column_to_follow_rule(ColumnMapExpectation):
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "maturity": "experimental",
         "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
+            "experimental"
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@firenoo", "@rldejournett"#         "@your_name_here", # Don't forget to add your github handle here!
@@ -169,16 +161,10 @@ class expect_column_to_follow_rule(ColumnMapExpectation):
         "package": "experimental_expectations",
     }
 
-    # This is the id string of the Metric used by this Expectation.
-    # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
     map_metric = "column_values.expect_column_to_follow_rule"
 
-    # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
-    # for more information about domain and success keys, and other arguments to Expectations
     success_keys = ("min_len", "rule", "mostly",)
 
-    # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {"min_len": 0}
 
     # This method defines a question Renderer
