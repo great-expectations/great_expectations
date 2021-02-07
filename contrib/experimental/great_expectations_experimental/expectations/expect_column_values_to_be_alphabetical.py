@@ -45,18 +45,24 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, reverse=False, **kwargs):
+
+        # lowercase the whole column to avoid issues with capitalization
+        # (since every capital letter is "before" the lowercase letters)
         column_lower = column.map(str.lower)
 
         column_length = column.size
 
+        # choose the operator to use for comparion of consecutive items
+        # could be easily adapted for other comparisons, perhaps of custom objects
         if reverse:
             compare_function = operator.ge
         else:
             compare_function = operator.le
 
-        output = [True]
+
+        output = [True] # first value is automatically in order
         for i in range(1,column_length):
-            if column_lower[i] and column_lower[i - 1]:
+            if column_lower[i] and column_lower[i - 1]: # make sure we aren't comparing Nones
                 output.append(compare_function(column_lower[i - 1], column_lower[i]))
             else:
                 output.append(None)
@@ -81,7 +87,14 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+    """
+    Given a list of string values, check if the list is alphabetical, either forwards or backwards (specified with the
+    `reverse` parameter). Comparison is case-insensitive. Using `mostly` will give you how many items are alphabetical
+    relative to the immediately previous item in the list.
+
+    conditions:
+        reverse: Checks for Z to A alphabetical if True, otherwise checks A to Z
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [{
@@ -175,7 +188,7 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
             "experimental"
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
+            "@sethdmay", "@maximetokman", "@Harriee02" # Don't forget to add your github handle here!
         ],
         "package": "experimental_expectations",
     }
