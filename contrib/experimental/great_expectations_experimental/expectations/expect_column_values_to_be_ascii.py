@@ -1,5 +1,7 @@
 import json
 
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
+
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import (
@@ -58,9 +60,14 @@ class ColumnValuesAreAscii(ColumnMapMetricProvider):
 #         return column.in_([3])
 
 # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-#     @column_condition_partial(engine=SparkDFExecutionEngine)
-#     def _spark(cls, column, **kwargs):
-#         return column.isin([3])
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        def is_ascii(val):
+            return str(val).isascii()
+
+        is_ascii_udf = F.udf(is_ascii, sparktypes.BooleanType())
+
+        return is_ascii_udf(column)
 
 
 # This class defines the Expectation itself
@@ -122,6 +129,14 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
                     "ಹಲೋ ",
                 ],
             },
+            "schemas": {
+                "spark": {
+                    "mostly_ascii": "StringType",
+                    "mostly_numbers": "StringType",
+                    "mostly_characters": "StringType",
+                    "not_ascii": "StringType",
+                }
+            },
             "tests": [
                 {
                     "title": "positive_test_with_mostly_ascii",
@@ -181,6 +196,9 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
             "@jsteinberg4",
             "@vraimondi04",
             "@talagluck",
+            "@lodeous",
+            "@rexboyce",
+            "@bragleg",
         ],
         "package": "experimental_expectations",
     }
