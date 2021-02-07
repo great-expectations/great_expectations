@@ -325,7 +325,7 @@ def test_get_validator_expectation_suite_options(
         )
 
     # Failed specification: incorrectly typed expectation suite
-    with pytest.raises(ValidationError):
+    with pytest.raises(TypeError):
         context.get_validator(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",

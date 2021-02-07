@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 import great_expectations.expectations.metrics
 from great_expectations.core import IDDict
@@ -7,6 +8,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.exceptions import InvalidDataContextKeyError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnMaxToBeBetween
@@ -358,3 +360,23 @@ def test_validator_default_expectation_args__sql(
     )
 
     print(my_validator.get_default_expectation_arguments())
+
+    with pytest.raises(InvalidDataContextKeyError):
+        # expectation_suite_name is a number not str
+        my_validator = context.get_validator(
+            datasource_name="my_sqlite_db",
+            data_connector_name="daily",
+            data_asset_name="table_partitioned_by_date_column__A",
+            partition_identifiers={"date": "2020-01-15"},
+            expectation_suite_name=1,
+        )
+
+    with pytest.raises(TypeError):
+        # expectation_suite is a string not an ExpectationSuite
+        my_validator = context.get_validator(
+            datasource_name="my_sqlite_db",
+            data_connector_name="daily",
+            data_asset_name="table_partitioned_by_date_column__A",
+            partition_identifiers={"date": "2020-01-15"},
+            expectation_suite="I_am_not_an_expectation_suite",
+        )
