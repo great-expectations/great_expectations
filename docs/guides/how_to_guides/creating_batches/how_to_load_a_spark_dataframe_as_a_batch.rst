@@ -114,7 +114,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
         1. Configure a Datasource
 
-            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Spark DataFrame, we use the ``SparkExecutionEngine``. You can use ``runtime_keys`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
+            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Spark DataFrame, we use the ``SparkExecutionEngine``. You can use ``runtime_keys`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3). You can use the below example Datasource as a template, and paste it into your great_expectations.yml
 
             .. code-block:: yaml
 
