@@ -168,8 +168,10 @@ Steps
                       result_format: BASIC
                       partial_unexpected_count: 20
                 """
+                
+            The above Checkpoint can be run using the code below, providing missing parameters from the configured Checkpoint at runtime.
 
-           .. code-block:: python
+            .. code-block:: python
 
                 checkpoint_run_result: CheckpointResult
 
@@ -288,4 +290,4 @@ Additional Resources
 
 
 .. discourse::
-   :topic_identifier: <TBD>
+   :topic_identifier: 220
