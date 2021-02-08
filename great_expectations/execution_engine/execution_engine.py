@@ -262,7 +262,7 @@ class ExecutionEngine:
         Returns:
             A tuple consisting of three elements:
 
-            1. data correspondig to the compute domain;
+            1. data corresponding to the compute domain;
             2. a modified copy of domain_kwargs describing the domain of the data returned in (1);
             3. a dictionary describing the access instructions for data elements included in the compute domain
                 (e.g. specific column name).

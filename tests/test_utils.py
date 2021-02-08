@@ -456,9 +456,14 @@ def get_dataset(
             if_exists="replace",
         )
 
-        # Build a SqlAlchemyDataset using that database
+        # Will - 20210126
+        # For mysql we want our tests to know when a temp_table is referred to more than once in the
+        # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
+        # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
+        # rather than referring the table by name.
+        custom_sql = "SELECT * FROM " + table_name
         return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
+            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mssql":
@@ -954,7 +959,16 @@ def _build_sa_validator_with_data(
         if_exists="replace",
     )
 
-    batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+    # Will - 20210126
+    # For mysql we want our tests to know when a temp_table is referred to more than once in the
+    # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
+    # Here we instantiate a SqlAlchemyBatchData with a query, which causes a temp_table to be created.
+    if sa_engine_name == "mysql":
+        query = "SELECT * FROM " + table_name
+        batch_data = SqlAlchemyBatchData(engine=engine, query=query)
+    else:
+        batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 

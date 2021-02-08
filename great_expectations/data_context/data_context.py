@@ -1487,8 +1487,6 @@ class BaseDataContext:
                     f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
                 )
             datasource_name = batch_request.datasource_name
-        else:
-            datasource_name = datasource_name
 
         datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
@@ -1505,39 +1503,33 @@ class BaseDataContext:
                     # Raise a warning if kwargs exist
                     pass
 
-                # Currently, the implementation of splitting and sampling is inconsistent between the
-                # Datasource and SimpleSqlalchemyDatasource classes.  The former communicates these
-                # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
-                # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
-                # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
-                # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
-                # of partitions is implemented using the PartitionQuery class, it will not recognize the keys
-                # representing the splitting and sampling directives and raise an exception.  Additional work is needed
-                # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
                 partition_request_params: dict = {
                     "partition_identifiers": partition_identifiers,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
+                partition_request = PartitionRequest(partition_request_params)
+            else:
+                # Raise a warning if partition_identifiers or kwargs exist
+                partition_request = PartitionRequest(partition_request)
+
+            if batch_spec_passthrough is None:
+                batch_spec_passthrough = {}
                 if sampling_method is not None:
                     sampling_params: dict = {
                         "sampling_method": sampling_method,
                     }
                     if sampling_kwargs is not None:
                         sampling_params["sampling_kwargs"] = sampling_kwargs
-                    partition_request_params.update(sampling_params)
+                    batch_spec_passthrough.update(sampling_params)
                 if splitter_method is not None:
                     splitter_params: dict = {
                         "splitter_method": splitter_method,
                     }
                     if splitter_kwargs is not None:
                         splitter_params["splitter_kwargs"] = splitter_kwargs
-                    partition_request_params.update(splitter_params)
-                partition_request = PartitionRequest(partition_request_params)
-            else:
-                # Raise a warning if partition_identifiers or kwargs exist
-                partition_request = PartitionRequest(partition_request)
+                    batch_spec_passthrough.update(splitter_params)
 
             batch_request: BatchRequest = BatchRequest(
                 datasource_name=datasource_name,

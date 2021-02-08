@@ -1,8 +1,11 @@
 import copy
+import cProfile
 import importlib
+import io
 import json
 import logging
 import os
+import pstats
 import time
 from collections import OrderedDict
 from functools import wraps
@@ -42,9 +45,26 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
+def profile(func: Callable = None) -> Callable:
+    @wraps(func)
+    def profile_function_call(*args, **kwargs) -> Any:
+        pr: cProfile.Profile = cProfile.Profile()
+        pr.enable()
+        retval: Any = func(*args, **kwargs)
+        pr.disable()
+        s: io.StringIO = io.StringIO()
+        sortby: str = pstats.SortKey.CUMULATIVE  # "cumulative"
+        ps: pstats.Stats = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+
+    return profile_function_call
+
+
 def measure_execution_time(func: Callable = None) -> Callable:
     @wraps(func)
-    def compute_delta_t(*args, **kwargs) -> Callable:
+    def compute_delta_t(*args, **kwargs) -> Any:
         time_begin: int = int(round(time.time() * 1000))
         try:
             return func(*args, **kwargs)
