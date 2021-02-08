@@ -15,6 +15,8 @@ Develop
 * [MAINTENANCE] Add checkpoint store to store backend defaults #2378
 * [ENHANCEMENT] Removed the logic that prints the "This configuration object was built using version..." warning when current version of Great Expectations is not the same as the one used to build the suite, since it was not actionable #2366
 * [DOCS] Update How to instantiate a Data Context on Databricks Spark cluster for 0.13+ #2379
+* [DOCS] How to load a Spark DataFrame as a Batch #2385
+
 
 0.13.8
 -----------------
