@@ -21,7 +21,9 @@ Changelog
 * [DOCS] Update How to instantiate a Data Context on Databricks Spark cluster for 0.13+ #2379
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
 * [DOCS] Added annotations for Expectations not yet ported to the new Modular Expectations API.
+* [DOCS] How to load a Spark DataFrame as a Batch #2385
 * [MAINTENANCE] Add checkpoint store to store backend defaults #2378
+
 
 0.13.8
 -----------------
