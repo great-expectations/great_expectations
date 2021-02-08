@@ -19,11 +19,12 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         url: str = None,
         credentials: dict = None,
         engine=None,  # sqlalchemy.engine.Engine
-        introspection: dict = None,
-        tables: dict = None,
+        inferred_assets: dict = None,
+        assets: dict = None,
+        create_temp_table: bool = False,
     ):
-        introspection = introspection or {}
-        tables = tables or {}
+        inferred_assets = inferred_assets or {}
+        assets = assets or {}
 
         self._execution_engine_config = {
             "class_name": "SqlAlchemyExecutionEngine",
@@ -31,29 +32,30 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
             "url": url,
             "credentials": credentials,
             "engine": engine,
+            "create_temp_table": create_temp_table,
         }
 
         super().__init__(name=name, execution_engine=self._execution_engine_config)
 
         self._data_connectors = {}
         self._init_data_connectors(
-            introspection_configs=introspection,
-            table_configs=tables,
+            inferred_asset_configs=inferred_assets,
+            asset_configs=assets,
         )
 
         # NOTE: Abe 20201111 : This is incorrect. Will need to be fixed when we reconcile all the configs.
         self._datasource_config = {}
 
     # noinspection PyMethodOverriding
-    # Note: This method is meant to overwrite Datasource._init_data_connectors (dispite signature mismatch).
+    # Note: This method is meant to overwrite Datasource._init_data_connectors (despite signature mismatch).
     def _init_data_connectors(
         self,
-        introspection_configs: dict,
-        table_configs: dict,
+        inferred_asset_configs: dict,
+        asset_configs: dict,
     ):
 
         # First, build DataConnectors for introspected assets
-        for name, config in introspection_configs.items():
+        for name, config in inferred_asset_configs.items():
             data_connector_config = dict(
                 **{
                     "class_name": "InferredAssetSqlDataConnector",
@@ -67,7 +69,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
             )
 
         # Second, build DataConnectors for tables. They will map to configured data_assets
-        for table_name, table_config in table_configs.items():
+        for table_name, table_config in asset_configs.items():
             for partitioner_name, partitioner_config in table_config[
                 "partitioners"
             ].items():

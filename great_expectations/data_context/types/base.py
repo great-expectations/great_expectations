@@ -520,8 +520,8 @@ class DatasourceConfig(DictDot):
         batch_kwargs_generators=None,
         connection_string=None,
         credentials=None,
-        introspection=None,
-        tables=None,
+        inferred_assets=None,
+        assets=None,
         boto3_options=None,
         reader_method=None,
         reader_options=None,
@@ -561,10 +561,10 @@ class DatasourceConfig(DictDot):
             self.connection_string = connection_string
         if credentials is not None:
             self.credentials = credentials
-        if introspection is not None:
-            self.introspection = introspection
-        if tables is not None:
-            self.tables = tables
+        if inferred_assets is not None:
+            self.inferred_assets = inferred_assets
+        if assets is not None:
+            self.assets = assets
         if boto3_options is not None:
             self.boto3_options = boto3_options
         if reader_method is not None:
@@ -611,8 +611,8 @@ class DatasourceConfigSchema(Schema):
     )
     connection_string = fields.String(required=False, allow_none=True)
     credentials = fields.Raw(required=False, allow_none=True)
-    introspection = fields.Dict(required=False, allow_none=True)
-    tables = fields.Dict(required=False, allow_none=True)
+    inferred_assets = fields.Dict(required=False, allow_none=True)
+    assets = fields.Dict(required=False, allow_none=True)
     boto3_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
@@ -635,8 +635,8 @@ class DatasourceConfigSchema(Schema):
         if (
             "connection_string" in data
             or "credentials" in data
-            or "introspection" in data
-            or "tables" in data
+            or "inferred_assets" in data
+            or "assets" in data
         ) and not (
             data["class_name"]
             in [
