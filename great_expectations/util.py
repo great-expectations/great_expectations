@@ -891,7 +891,7 @@ def is_float(value: Any) -> bool:
     return True
 
 
-def is_parseable_date(value: Any, fuzzy: bool=False) -> bool:
+def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
         parsed_date: datetime = parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
