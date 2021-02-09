@@ -1230,13 +1230,13 @@ class BaseDataContext:
     )
     def run_validation_operator(
         self,
-        validation_operator_name,
-        assets_to_validate,
-        run_id=None,
-        evaluation_parameters=None,
-        run_name=None,
-        run_time=None,
-        result_format={"result_format": "SUMMARY"},
+        validation_operator_name: str,
+        assets_to_validate: List,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
+        result_format: Optional[Union[str, dict]] = None,
         **kwargs,
     ):
         """
