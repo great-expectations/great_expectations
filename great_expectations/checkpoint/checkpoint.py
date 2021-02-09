@@ -11,7 +11,7 @@ from great_expectations.checkpoint.configurator import SimpleCheckpointConfigura
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
-from great_expectations.core.batch import BatchRequest, Batch
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -481,7 +481,7 @@ class LegacyCheckpoint(Checkpoint):
         evaluation_parameters: Optional[dict] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime]] = None,
-        result_format: Optional[Union[str, dict]]={"result_format": "SUMMARY"},
+        result_format: Optional[Union[str, dict]] = {"result_format": "SUMMARY"},
     ):
         result_format = result_format or {"result_format": "SUMMARY"}
 
@@ -516,7 +516,7 @@ class LegacyCheckpoint(Checkpoint):
                 {
                     "name": "update_data_docs",
                     "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
-                }
+                },
             ],
             result_format=result_format,
             name="default-action-list-validation-operator",
