@@ -11,7 +11,7 @@ Each Expectation is a declarative, machine-verifiable assertion about the expect
 
     "Take nothing on its looks; take everything on evidence. There's no better rule."
 
-The CLI will help you create your first Expectation Suite. :ref:`expectation_suites` are simply collections of Expectations. In order to create a new suite, we will use the ``scaffold`` command to automatically create an Expectation Suite called ``taxi.demo`` with the help of a built-in profiler. Type the following into your terminal:
+The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations. In order to create a new suite, we will use the ``scaffold`` command to automatically create an Expectation Suite called ``taxi.demo`` with the help of a built-in profiler. Type the following into your terminal:
 
 .. code-block:: bash
 
@@ -79,6 +79,6 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 #. The next cell passes the Profiler config to the ``BasicSuiteBuilderProfiler``, which will then profile the data and create the relevant Expectations to add to your ``taxi.demo`` suite.
 
-#. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the validation results.
+#. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the validation results. *We will explain the validation step later in the "Validate your data" section.*
 
 **Let's execute all the cells** and wait for Great Expectations to open a browser window with Data Docs. **Go to the next step in the tutorial** for an explanation of what you see in Data Docs!

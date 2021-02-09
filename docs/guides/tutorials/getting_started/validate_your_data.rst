@@ -7,65 +7,93 @@ Validate your data using a Checkpoint
 
 In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Checkpoints bundle :ref:`Batches` of data with corresponding :ref:`Expectation Suites` for validation.
 
-Let’s set up our first Checkpoint! **Go back to your terminal** and shut down the Jupyter notebook, if you haven't yet. Then run the following command:
+Let’s set up our first Checkpoint to validate the February data! In order to do this, we need to do two things:
 
-.. code-block:: bash
+1. Define the ``batch_kwargs`` for the February data
+2. Configure a Checkpoint to validate that data with our ``taxi.demo`` Expectation Suite.
 
-  great_expectations checkpoint new my_checkpoint taxi.demo
+.. warning::
 
-From there, you will be prompted by the CLI to configure the Checkpoint:
+   As of Great Expectations version 0.13.8 and above, we introduced new style (class-based) Checkpoints. These are **not yet supported by the CLI**, so you will need to configure new Checkpoints in code. We're working on releasing CLI support for Checkpoints very soon!
 
-.. code-block:: bash
+**Go back to your Jupyter notebook** and add a new cell with the following code:
 
-    Heads up! This feature is Experimental. It may change. Please give us your feedback!
+.. code-block:: python
 
-    Would you like to:
-        1. choose from a list of data assets in this datasource
-        2. enter the path of a data file
-    : 1
+    # This defines the batch for your February data set
+    batch_kwargs_2 = {
+        "path": "<path to my code>/ge_tutorials/data/yellow_tripdata_sample_2019-02.csv",
+        "datasource": "data__dir",
+        "data_asset_name": "yellow_tripdata_sample_2019-02",
+    }
 
-    Which data would you like to use?
-        1. yellow_tripdata_sample_2019-01 (file)
-        2. yellow_tripdata_sample_2019-02 (file)
-        Don't see the name of the data asset in the list above? Just type it
-    : 1
+    # This is where we configure a Checkpoint to validate the batch with the "taxi.demo" suite
+    my_checkpoint = LegacyCheckpoint(
+        name="my_checkpoint",
+        data_context=context,
+        batches=[
+            {
+              "batch_kwargs": batch_kwargs_2,
+              "expectation_suite_names": ["taxi.demo"]
+            }
+        ]
+    )
 
-    A checkpoint named `my_checkpoint` was added to your project!
-          - To run this checkpoint run `great_expectations checkpoint run my_checkpoint`
+    # And here we just run validation!
+    results = my_checkpoint.run()
 
 **What just happened?**
 
 - ``my_checkpoint`` is the name of your new Checkpoint.
 - The Checkpoint uses ``taxi.demo`` as its primary :ref:`Expectation Suite`.
-- You configured the Checkpoint to validate the ``yellow_tripdata_sample_2019-02`` file.
+- You configured the Checkpoint to validate the ``yellow_tripdata_sample_2019-02.csv`` file.
+- The ``results`` variable now contains the validation results (duh!)
 
-How to validate data by running Checkpoints
---------------------------------------------------
+How to save and load a Checkpoint
+-----------------------------------
 
-The final step in this tutorial is to use our Expectation Suite to alert us of the 0 values in the ``passenger_count`` column! Run the Checkpoint we just created to trigger validation of the new dataset:
+We're currently working on a more user-friendly version of interacting with the new, class-based Checkpoints. In the meantime, here's how you can save your Checkpoint to the Data Context:
 
-.. code-block:: bash
+.. code-block:: python
+    # Save the Checkpoint to your Data Context
+    my_checkpoint_json = my_checkpoint.config.to_json_dict()
+    context.add_checkpoint(**my_checkpoint_json)
 
-    great_expectations checkpoint run my_checkpoint
+Once you've configured and saved a Checkpoint, you can load and run it every time you want to validate your data. In this example, we're using a named CSV file which you might not want to validate repeatedly. But if you point your Checkpoint at a database table, this will save you a lot of time when running validation on the same table periodically.
 
-This will output the following:
+.. code-block:: python
+    # And here's how you can load it from your Data Context again
+    my_loaded_checkpoint = context.get_checkpoint("my_checkpoint")
 
-.. code-block:: bash
+    # And then run validation again if you'd like
+    my_loaded_checkpoint.run()
 
-    Heads up! This feature is Experimental. It may change. Please give us your feedback!
-    Validation failed!
+
+How to inspect your validation results
+---------------------------------------
+
+This is basically just a recap of the previous section on Data Docs! In order to build Data Docs and get your results in a nice, human-readable format, you can do the following:
+
+.. code-block:: python
+
+    validation_result_identifier = results.list_validation_result_identifiers()[0]
+    context.build_data_docs()
+    context.open_data_docs(validation_result_identifier)
+
+Check out the data validation results page that just opened. You'll see that the test suite **failed** when you ran it against the February data. Awesome!
 
 **What just happened? Why did it fail?? Help!?**
 
-We ran the Checkpoint and it successfully failed! **Wait - what?** Yes, that's correct, and that's we wanted. We know that in this example, the February data has data quality issues, which means we *expect* the validation to fail. Let's open up Data Docs again to see the details.
+We ran the Checkpoint and it successfully failed! **Wait - what?** Yes, that's correct, and that's we wanted. We know that in this example, the February data has data quality issues, which means we *expect* the validation to fail.
 
-If you navigate to the Data Docs *Home* page and refresh, you will now see a *failed* validation run at the top of the page:
+.. figure:: /images/validation_results_failed_detail.png
+
+On the validation results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the ``passenger_count`` column contained the value 0.0! This violates our Expectation, which makes the validation fail.
+
+If you navigate to the Data Docs *Home* page and refresh, you will also see a *failed* validation run at the top of the page:
 
 .. figure:: /images/validation_results_failed.png
 
-If you click through to the validation results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the ``passenger_count`` column contained the value 0.0! This violates our Expectation, which makes the validation fail.
-
-.. figure:: /images/validation_results_failed_detail.png
 
 **And this is it!**
 

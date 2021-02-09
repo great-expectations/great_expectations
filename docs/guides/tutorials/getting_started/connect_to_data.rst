@@ -48,7 +48,7 @@ Configuring Datasources
 When you completed those last few steps in ``great_expectations init``, you told Great Expectations that:
 
 1. You want to create a new Datasource called ``data__dir``.
-2. You want to use Pandas to read the data from CSV, hence ``data_asset_type.class_name = PandasDataset``.
+2. You want to use Pandas to read the data from CSV.
 
 Based on that information, the CLI added the following entry into your ``great_expectations.yml`` file, under the ``datasources`` header:
 
@@ -67,6 +67,6 @@ Based on that information, the CLI added the following entry into your ``great_e
 
 This datasource does not require any credentials. However, if you were to connect to a database that requires connection credentials, those would be stored in ``great_expectations/uncommitted/config_variables.yml``.
 
-In the future, you can modify or delete your configuration by editing your ``great_expectations.yml`` and ``config_variables.yml`` file directly.
+In the future, you can modify or delete your configuration by editing your ``great_expectations.yml`` and ``config_variables.yml`` files directly.
 
 **For now, let's move on to creating your first Expectations.**

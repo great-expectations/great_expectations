@@ -17,7 +17,7 @@ The `NYC taxi data <https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.pag
 In this tutorial, we provide two CSV files, each with a 10,000 row sample of the Yellow Taxi Trip Records set:
 
 * **yellow_tripdata_sample_2019-01.csv**: a sample of the January 2019 taxi data
-* **yellow_tripdata_sample_2019-01.csv**: a sample of the February 2019 taxi data
+* **yellow_tripdata_sample_2019-02.csv**: a sample of the February 2019 taxi data
 
 If we compare the ``passenger_count`` column in the January and February data, we find a significant difference: The February data contains a large proportion of rides with 0 passengers, which seems unexpected:
 
