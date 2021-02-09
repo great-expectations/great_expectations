@@ -1,6 +1,15 @@
 batch.save_expectation_suite(discard_failed_expectations=False)
 
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])
+results = LegacyCheckpoint(
+    name="default_validation_checkpoint",
+    data_context=context,
+    batches=[
+        {
+          "batch_kwargs": batch_kwargs,
+          "expectation_suite_names": [expectation_suite_name]
+        }
+    ]
+).run()
 validation_result_identifier = results.list_validation_result_identifiers()[0]
 context.build_data_docs()
 context.open_data_docs(validation_result_identifier)

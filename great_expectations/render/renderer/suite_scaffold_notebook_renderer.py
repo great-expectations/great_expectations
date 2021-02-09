@@ -36,6 +36,7 @@ We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Cha
 import datetime
 import great_expectations as ge
 import great_expectations.jupyter_ux
+from great_expectations.checkpoint import LegacyCheckpoint
 from great_expectations.profile import BasicSuiteBuilderProfiler
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
@@ -73,7 +74,16 @@ Let's save the scaffolded expectation suite as a JSON file in the
             """\
 context.save_expectation_suite(suite, expectation_suite_name)
 
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])
+results = LegacyCheckpoint(
+    name="default_validation_checkpoint",
+    data_context=context,
+    batches=[
+        {
+          "batch_kwargs": batch_kwargs,
+          "expectation_suite_names": [expectation_suite_name]
+        }
+    ]
+).run()
 validation_result_identifier = results.list_validation_result_identifiers()[0]
 context.build_data_docs()
 context.open_data_docs(validation_result_identifier)"""
