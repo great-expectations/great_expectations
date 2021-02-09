@@ -6,12 +6,14 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, Batch
 from great_expectations.core.util import get_datetime_string_from_strftime_format
+from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.exceptions import CheckpointError
@@ -472,6 +474,72 @@ class LegacyCheckpoint(Checkpoint):
     def batches(self):
         return self.config.batches
 
+    def _run_default_validation_operator(
+        self,
+        assets_to_validate: List,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime]] = None,
+        result_format: Optional[Union[str, dict]]={"result_format": "SUMMARY"},
+    ):
+        result_format = result_format or {"result_format": "SUMMARY"}
+
+        if not assets_to_validate:
+            raise ge_exceptions.DataContextError(
+                "No batches of data were passed in. These are required"
+            )
+
+        for batch in assets_to_validate:
+            if not isinstance(batch, (tuple, DataAsset, Validator)):
+                raise ge_exceptions.DataContextError(
+                    "Batches are required to be of type DataAsset or Validator"
+                )
+
+        if run_id is None and run_name is None:
+            run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            )
+            logger.info("Setting run_name to: {}".format(run_name))
+
+        default_validation_operator = ActionListValidationOperator(
+            data_context=self.data_context,
+            action_list=[
+                {
+                    "name": "store_validation_result",
+                    "action": {"class_name": "StoreValidationResultAction"},
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {"class_name": "StoreEvaluationParametersAction"},
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+                }
+            ],
+            result_format=result_format,
+            name="default-action-list-validation-operator",
+        )
+
+        if evaluation_parameters is None:
+            return default_validation_operator.run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
+            )
+        else:
+            return default_validation_operator.run(
+                assets_to_validate=assets_to_validate,
+                run_id=run_id,
+                evaluation_parameters=evaluation_parameters,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
+            )
+
     def run(
         self,
         run_id=None,
@@ -483,16 +551,26 @@ class LegacyCheckpoint(Checkpoint):
     ):
         batches_to_validate = self._get_batches_to_validate(self.batches)
 
-        results = self.data_context.run_validation_operator(
-            self.validation_operator_name,
-            assets_to_validate=batches_to_validate,
-            run_id=run_id,
-            evaluation_parameters=evaluation_parameters,
-            run_name=run_name,
-            run_time=run_time,
-            result_format=result_format,
-            **kwargs,
-        )
+        if self.validation_operator_name:
+            results = self.data_context.run_validation_operator(
+                self.validation_operator_name,
+                assets_to_validate=batches_to_validate,
+                run_id=run_id,
+                evaluation_parameters=evaluation_parameters,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
+                **kwargs,
+            )
+        else:
+            results = self._run_default_validation_operator(
+                assets_to_validate=batches_to_validate,
+                run_id=run_id,
+                evaluation_parameters=evaluation_parameters,
+                run_name=run_name,
+                run_time=run_time,
+                result_format=result_format,
+            )
 
         return results
 
