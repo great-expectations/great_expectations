@@ -274,7 +274,7 @@ class ValidationResultsPageRenderer(Renderer):
         # TODO: deprecate dual batch api support in 0.14
         batch_kwargs = validation_results.meta.get(
             "batch_kwargs", {}
-        ) or validation_results.meta.get("batch_spec", {})
+        ) or validation_results.meta.get("batch_spec", {}) or {}
         data_asset_name = batch_kwargs.get("data_asset_name")
 
         if success:
