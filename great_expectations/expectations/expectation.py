@@ -1085,13 +1085,15 @@ class TableExpectation(Expectation, ABC):
             max_val = configuration.kwargs["max_value"]
 
         if "parse_strings_as_datetimes" in configuration.kwargs:
-            parse_strings_as_datetimes = configuration.kwargs["parse_strings_as_datetimes"]
+            parse_strings_as_datetimes = configuration.kwargs[
+                "parse_strings_as_datetimes"
+            ]
 
         try:
             # Ensuring Proper interval has been provided
             if parse_strings_as_datetimes:
-                assert (
-                    min_val is None or is_parseable_date(min_val)
+                assert min_val is None or is_parseable_date(
+                    min_val
                 ), "Provided min threshold must be a dateutil-parseable date"
                 assert (
                     max_val is None or is_parseable_date(max_val),
