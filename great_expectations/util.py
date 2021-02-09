@@ -9,7 +9,6 @@ import pstats
 import time
 from collections import OrderedDict
 from datetime import datetime
-from dateutil.parser import parse
 from functools import wraps
 from gc import get_referrers
 from inspect import (
@@ -27,6 +26,7 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Optional
 
+from dateutil.parser import parse
 from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema

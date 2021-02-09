@@ -37,7 +37,6 @@ from great_expectations.expectations.self_check_util import (
 from great_expectations.expectations.util import legacy_method_parameters
 from great_expectations.validator.validator import Validator
 
-from ..util import is_parseable_date
 from ..core.util import convert_to_json_serializable, nested_update
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..render.renderer.renderer import renderer
@@ -47,6 +46,7 @@ from ..render.types import (
     RenderedTableContent,
 )
 from ..render.util import num_to_str
+from ..util import is_parseable_date
 from ..validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
