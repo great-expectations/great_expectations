@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from copy import deepcopy
-from datetime import datetime
+import datetime
 from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -205,7 +205,7 @@ class Checkpoint:
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime]] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
@@ -213,7 +213,7 @@ class Checkpoint:
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
-        run_time = run_time or datetime.now()
+        run_time = run_time or datetime.datetime.now()
         runtime_configuration: dict = runtime_configuration or {}
         result_format: Optional[dict] = result_format or runtime_configuration.get(
             "result_format"
@@ -480,7 +480,7 @@ class LegacyCheckpoint(Checkpoint):
         run_id: Optional[Union[str, RunIdentifier]] = None,
         evaluation_parameters: Optional[dict] = None,
         run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime]] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[Union[str, dict]] = {"result_format": "SUMMARY"},
     ):
         result_format = result_format or {"result_format": "SUMMARY"}
@@ -687,7 +687,7 @@ class SimpleCheckpoint(Checkpoint):
         profilers: Optional[List[dict]] = None,
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime]] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[str] = None,
         # the following four arguments are specific to SimpleCheckpoint
         site_names: Optional[Union[str, List[str]]] = "all",
