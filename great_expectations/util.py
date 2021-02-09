@@ -8,6 +8,8 @@ import os
 import pstats
 import time
 from collections import OrderedDict
+from datetime import datetime
+from dateutil.parser import parse
 from functools import wraps
 from gc import get_referrers
 from inspect import (
@@ -901,6 +903,14 @@ def is_int(value: Any) -> bool:
 def is_float(value: Any) -> bool:
     try:
         num: float = float(value)
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
+def is_parseable_date(value: Any, fuzzy: bool=False) -> bool:
+    try:
+        parsed_date: datetime = parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
         return False
     return True
