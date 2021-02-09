@@ -1254,6 +1254,8 @@ class BaseDataContext:
         Returns:
             ValidationOperatorResult
         """
+        result_format = result_format or {"result_format": "SUMMARY"}
+
         if not assets_to_validate:
             raise ge_exceptions.DataContextError(
                 "No batches of data were passed in. These are required"
@@ -1262,7 +1264,7 @@ class BaseDataContext:
         for batch in assets_to_validate:
             if not isinstance(batch, (tuple, DataAsset, Validator)):
                 raise ge_exceptions.DataContextError(
-                    "Batches are required to be of type DataAsset"
+                    "Batches are required to be of type DataAsset or Validator"
                 )
         try:
             validation_operator = self.validation_operators[validation_operator_name]
