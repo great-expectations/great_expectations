@@ -55,6 +55,7 @@ How to save and load a Checkpoint
 We're currently working on a more user-friendly version of interacting with the new, class-based Checkpoints. In the meantime, here's how you can save your Checkpoint to the Data Context:
 
 .. code-block:: python
+
     # Save the Checkpoint to your Data Context
     my_checkpoint_json = my_checkpoint.config.to_json_dict()
     context.add_checkpoint(**my_checkpoint_json)
@@ -62,6 +63,7 @@ We're currently working on a more user-friendly version of interacting with the 
 Once you've configured and saved a Checkpoint, you can load and run it every time you want to validate your data. In this example, we're using a named CSV file which you might not want to validate repeatedly. But if you point your Checkpoint at a database table, this will save you a lot of time when running validation on the same table periodically.
 
 .. code-block:: python
+
     # And here's how you can load it from your Data Context again
     my_loaded_checkpoint = context.get_checkpoint("my_checkpoint")
 
