@@ -2,22 +2,82 @@ from lxml import etree
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    ExpectationConfiguration,
+)
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
+from great_expectations.expectations.metrics.map_metric import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
+
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation
 
 try:
     import sqlalchemy as sa
 except ImportError:
     pass
 
+
+class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
+    condition_metric_name = "column_values.match_xml_schema"
+    condition_value_keys = ("xml_schema",)
+
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, xml_schema, format, **kwargs):
+        try:
+            xmlschema_doc = etree.fromstring(xml_schema)
+            xmlschema = etree.XMLSchema(xmlschema_doc)
+        except etree.ParseError:
+            raise
+        except:
+            raise
+        
+        def matches_xml_schema(val):
+            try:
+                xml_doc = etree.fromstring(val)
+                return xmlschema(xml_doc)
+            except:
+                raise
+
+        return column.map(matches_xml_schema)
+
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, xml_schema, **kwargs):
+        try:
+            xmlschema_doc = etree.fromstring(xml_schema)
+            xmlschema = etree.XMLSchema(xmlschema_doc)
+        except etree.ParseError:
+            raise
+        except:
+            raise
+
+        def matches_xml_schema(val):
+            if val is None:
+                return False
+            try:
+                xml_doc = etree.fromstring(val)
+                return xmlschema(xml_doc)
+            except:
+                raise
+
+        matches_xml_schema_udf = F.udf(matches_xml_schema, sparktypes.BooleanType())
+
+        return matches_xml_schema_udf(column)
 
 class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
     """Expect column entries to be XML documents matching a given [XMLSchema](https://en.wikipedia.org/wiki/XML_schema).
@@ -63,6 +123,26 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
 
         The `XMLSchema docs <https://www.w3.org/XML/Schema>`_.
     """
+
+    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
+    examples = [
+        {
+            "data": {
+                
+            },
+            "tests": [
+            ]
+        }
+    ]
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "tags": ["xml" , "glam"],
+        "contributors": ["@mielvds"],
+        "package": "experimental_expectations",
+        "requirements": [],
+    }
 
     map_metric = "column_values.match_xml_schema"
     success_keys = (

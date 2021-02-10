@@ -1,5 +1,4 @@
-import json
-from datetime import datetime
+from lxml import etree
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -7,34 +6,62 @@ import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    Expectation,
+    ExpectationConfiguration,
+    InvalidExpectationConfigurationError
+)
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
+from great_expectations.expectations.metrics.map_metric import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...core.batch import Batch
-from ...data_asset.util import parse_result_format
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from ..registry import extract_metrics, get_metric_kwargs
 
 try:
     import sqlalchemy as sa
 except ImportError:
     pass
+
+
+class ColumnValuesXmlParseable(ColumnMapMetricProvider):
+    condition_metric_name = "column_values.xml_parseable"
+
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, **kwargs):
+        def is_xml(val):
+            try:
+                xml_doc = etree.fromstring(val)
+                return True
+            except:
+                return False
+
+        return column.map(is_xml)
+
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        def is_xml(val):
+            try:
+                xml_doc = etree.fromstring(val)
+                return True
+            except:
+                return False
+
+        is_xml_udf = F.udf(is_xml, sparktypes.BooleanType())
+
+        return is_xml_udf(column)
 
 
 class ExpectColumnValuesToBeXmlParseable(ColumnMapExpectation):
@@ -79,6 +106,26 @@ class ExpectColumnValuesToBeXmlParseable(ColumnMapExpectation):
         .expect_column_values_to_match_xml_schema>`
 
     """
+
+    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
+    examples = [
+        {
+            "data": {
+                
+            },
+            "tests": [
+            ]
+        }
+    ]
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "tags": ["xml" , "glam"],
+        "contributors": ["@mielvds"],
+        "package": "experimental_expectations",
+        "requirements": [],
+    }
 
     map_metric = "column_values.xml_parsable"
     success_keys = ("mostly",)

@@ -1,3 +1,4 @@
+from polyglot.detect import Detector
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -9,31 +10,54 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    Expectation,
+    ExpectationConfiguration,
+    InvalidExpectationConfigurationError
+)
+from great_expectations.expectations.metrics import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+    column_function_partial
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...core.batch import Batch
-from ...data_asset.util import parse_result_format
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-)
-from ..registry import extract_metrics, get_metric_kwargs
 
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
+def detect_language(val):
+    return Detector(val, quiet=True).language.code
 
+class ColumnValuesDetectLanguage(ColumnMapMetricProvider):
+    condition_metric_name = "column_values.value_language.equals"
+    function_metric_name = "column_values.value_language"
+    
+    condition_value_keys = ("language",)
+
+    @column_function_partial(engine=PandasExecutionEngine)
+    def _pandas_function(cls, column, **kwargs):
+        return column.astype(str).map(detect_language)
+
+    @column_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column, language, _metrics, **kwargs):
+        column_languages, _, _ = _metrics.get("column_values.value_language.map")
+        return column_languages == language
+
+    
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, language, **kwargs):
+        def is_language(val):
+            return val == language
+
+        language_udf = F.udf(is_language, sparktypes.BooleanType())
+
+        return language_udf(column)
 
 class ExpectColumnValuesToMatchLanguage(ColumnMapExpectation):
     """Expect column entries to be strings in a given language.
@@ -66,7 +90,77 @@ class ExpectColumnValuesToMatchLanguage(ColumnMapExpectation):
         An ExpectationSuiteValidationResult
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    Notes:
+        * Language identification uses the [`polyglot` package](https://github.com/aboSamoor/polyglot).
+        * `polyglot` uses a [GPLv3 license](https://github.com/saffsd/langid.py/blob/master/LICENSE).
     """
+
+    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
+    examples = [
+        {
+            "data": {
+                "mostly_english": [
+                    "Twinkle, twinkle, little star. How I wonder what you are.",
+                    "Up above the world so high, Like a diamond in the sky.",
+                    "Twinkle, twinkle, little star. Up above the world so high.",
+                    "Brilla brilla pequeña estrella. Cómo me pregunto lo que eres.",
+                    None,
+                ],
+                "mostly_spanish": [
+                    "Brilla brilla pequeña estrella. Cómo me pregunto lo que eres.",
+                    "Por encima del mundo tan alto, Como un diamante en el cielo.",
+                    "Brilla brilla pequeña estrella. Por encima del mundo tan arriba.",
+                    "Twinkle, twinkle, little star. How I wonder what you are.",
+                    None,
+                ],
+            },
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly_english",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_english", "language": "en", "mostly": 0.6},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": [4, 5],
+                    },
+                },
+                {
+                    "title": "negative_test_with_mostly_english",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_spanish", "language": "en", "mostly": 0.6},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [0, 1, 2],
+                        "unexpected_list": [4, 5],
+                    },
+                },
+                {
+                    "title": "positive_test_with_mostly_spanish",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "mostly_spanish", "language": "es", "mostly": 0.6},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": [4, 5],
+                    },
+                },
+            ],
+        }
+    ]
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "tags": ["nlp", "language"],
+        "contributors": ["@mielvds"],
+        "package": "experimental_expectations",
+        "requirements": [],
+    }
 
     map_metric = "column_values.match_language"
     success_keys = (
