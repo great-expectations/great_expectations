@@ -196,7 +196,7 @@ def test_checkpoint_store(empty_data_context):
         "config": {
             "store_name": "checkpoint_store",
             "class_name": "CheckpointStore",
-            "module_name": "great_expectations.data_context.store.configuration_store",
+            "module_name": "great_expectations.data_context.store.checkpoint_store",
             "overwrite_existing": True,
             "store_backend": {
                 "base_directory": f"{empty_data_context.root_directory}/checkpoints",
