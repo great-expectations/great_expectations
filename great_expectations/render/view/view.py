@@ -504,6 +504,11 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         if not isinstance(template, (dict, OrderedDict)):
             return template
 
+        # replace and render any horizontal lines using ***
+        tag = template.get("tag", None)
+        if tag and tag == "hr":
+            template["template"] = "***"
+
         # if there are any groupings of two or more $, we need to double the groupings to account
         # for template string substitution escaping
         template["template"] = re.sub(
@@ -524,7 +529,13 @@ class DefaultMarkdownPageView(DefaultJinjaView):
             if parameter == "html_success_icon":
                 template["params"][parameter] = ""
                 continue
+            # to escape any values that are '*' which, when combined with bold ('**') in markdown,
+            # does not give the output we want.
+            elif template["params"][parameter] == "*":
+                template["params"][parameter] = "\\*"
+                continue
 
+            # distinct values must belong to this set
             template["params"][parameter] = pTemplate(
                 base_param_template_string
             ).safe_substitute(
