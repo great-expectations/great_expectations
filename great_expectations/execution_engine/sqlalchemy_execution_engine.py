@@ -479,6 +479,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "connection_string": connection_string,
             "url": url,
             "batch_data_dict": batch_data_dict,
+            "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
         self._config.update(kwargs)
