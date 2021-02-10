@@ -118,6 +118,11 @@ try:
 except ImportError:
     pyathena = None
 
+try:
+    import ibm_db_sa
+except ImportError:
+    ibm_db_sa = None
+
 
 class SqlAlchemyBatchReference:
     def __init__(self, engine, table_name=None, schema=None, query=None):
@@ -537,6 +542,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif self.engine.dialect.name.lower() == "awsathena":
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
+            )
+        elif self.engine.dialect.name.lower() == "ibm_db_sa":
+            self.dialect = import_library_module(
+                module_name="ibm_db_sa"
             )
         else:
             self.dialect = None
@@ -1291,6 +1300,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
+        elif self.sql_engine_dialect.name.lower() == "ibm_db_sa":
+            stmt = "CREATE TEMPORARY TABLE "
+            if schema_name:
+                stmt += "{schema_name}.".format(schema_name=schema_name)
+            stmt += "{table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
                 table_name=table_name, custom_sql=custom_sql
@@ -1875,6 +1891,22 @@ WHERE
             pass
 
         try:
+            # IBM Db2
+            # https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_74/db2/rbafzregexp_like.htm
+            if isinstance(self.sql_engine_dialect, ibm_db_sa.dialect):
+                if positive:
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("REGEXP_LIKE")
+                    )
+                else:
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("NOT REGEXP_LIKE")
+                    )
+        except AttributeError:
+            pass
+
+
+        try:
             # Snowflake
             if isinstance(
                 self.sql_engine_dialect,
@@ -2049,6 +2081,7 @@ WHERE
                 sa.dialects.postgresql.dialect,
                 sa.dialects.mysql.dialect,
                 sa.dialects.mssql.dialect,
+                ibm_db_sa.dialect,
             ),
         ):
             dialect_supported = True
