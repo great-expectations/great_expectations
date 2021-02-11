@@ -1,3 +1,5 @@
+import json
+
 from polyglot.detect import Detector
 from typing import Dict, List, Optional, Union
 
@@ -278,3 +280,7 @@ class ExpectColumnValuesToMatchLanguage(ColumnMapExpectation):
                 }
             )
         ]
+
+if __name__ == "__main__":
+    diagnostics_report = ExpectColumnValuesToMatchLanguage().run_diagnostics()
+    print(json.dumps(diagnostics_report, indent=2))

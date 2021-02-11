@@ -1,3 +1,4 @@
+import json
 from edtf import parse_edtf
 from typing import Dict, List, Optional, Union
 
@@ -91,9 +92,32 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                
+                "mostly_edtf": [
+                    "1979-08", # ISO8601 Date
+                    "2004-01-01T10:10:10+05:00", # ISO8601 Datetime
+                    "1979-08-28/1979-09-25", # Interval (start/end)
+                    "1979-08~", # Uncertain/Approximate dates
+                    "1979-08-uu", # Unspecified dates
+                    "1984-06-02?/2004-08-08~", # Extended intervals
+                    "y-12000", # Years exceeding four digits
+                    "asdwefefef", 
+                    "Octobre 12", 
+                    None, 
+                    None
+                    ],
             },
             "tests": [
+                {
+                    "title": "positive_test_with_mostly",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "mostly_edtf", "mostly": 0.6},
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                }
             ]
         }
     ]
@@ -179,3 +203,6 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                 }
             )
         ]
+if __name__ == "__main__":
+    diagnostics_report = ExpectColumnValuesToBeEdtfParseable().run_diagnostics()
+    print(json.dumps(diagnostics_report, indent=2))

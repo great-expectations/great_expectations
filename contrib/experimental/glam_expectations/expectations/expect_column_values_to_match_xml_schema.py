@@ -89,6 +89,8 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
+        xml_schema (str): \
+            The XMLSchema name.
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
