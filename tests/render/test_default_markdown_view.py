@@ -48,7 +48,7 @@ def validation_operator_result():
 def expectation_suite_to_render_with_notes():
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
-        meta={},
+        meta={"great_expectations_version": "0.13.0-test"},
         expectations=[
             ExpectationConfiguration(
                 expectation_type="expect_column_to_exist",
@@ -913,7 +913,7 @@ def test_render_expectation_suite_for_Markdown(expectation_suite_to_render_with_
  |  |  |
  | ------------  | ------------ | 
 Expectation Suite Name  | default  
-Great Expectations Version  | 0.13.9+8.geb1c0ad.dirty  
+Great Expectations Version  | 0.13.0-test  
 
 
 
