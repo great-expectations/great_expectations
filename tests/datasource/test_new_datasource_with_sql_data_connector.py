@@ -64,7 +64,10 @@ data_connectors:
     report["execution_engine"].pop("connection_string")
 
     assert report == {
-        "execution_engine": {"class_name": "SqlAlchemyExecutionEngine"},
+        "execution_engine": {
+            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
+            "class_name": "SqlAlchemyExecutionEngine",
+        },
         "data_connectors": {
             "count": 1,
             "my_sqlite_db": {
