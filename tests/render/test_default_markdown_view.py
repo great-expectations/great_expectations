@@ -6,10 +6,14 @@ import pytest
 
 import great_expectations as ge
 import great_expectations.render as render
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
-from great_expectations.render.renderer import ValidationResultsPageRenderer
+from great_expectations.render.renderer import (
+    ExpectationSuitePageRenderer,
+    ValidationResultsPageRenderer,
+)
 from great_expectations.render.types import (
     RenderedDocumentContent,
     RenderedHeaderContent,
@@ -38,6 +42,40 @@ def validation_operator_result():
                 validation_result["validation_result"]
             )
         return validation_operator_result
+
+
+@pytest.fixture()
+def expectation_suite_to_render_with_notes():
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name="default",
+        meta={},
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={"column": "infinities"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_unique",
+                kwargs={"column": "testings"},
+                meta={
+                    "notes": {
+                        "content": [
+                            "Example notes about this expectation. **Markdown** `Supported`.",
+                            "Second example note **with** *Markdown*",
+                        ],
+                        "format": "markdown",
+                    }
+                },
+            ),
+        ],
+    )
+    return expectation_suite
 
 
 def test_render_section_page():
@@ -494,7 +532,7 @@ def test_render_section_page_with_fixture_data_multiple_validations(
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
 
-    print(md_str)
+    # print(md_str)
 
     assert (
         md_str
@@ -836,6 +874,152 @@ Run Time  | 2020-07-27T17:19:32.959193+00:00
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
 """.replace(
+            " ", ""
+        )
+        .replace("\t", "")
+        .replace("\n", "")
+    )
+
+
+def test_render_expectation_suite_for_Markdown(expectation_suite_to_render_with_notes):
+    expectation_suite_page_renderer = ExpectationSuitePageRenderer()
+    rendered_document_content_list = expectation_suite_page_renderer.render(
+        expectation_suite_to_render_with_notes
+    )
+    md_str = DefaultMarkdownPageView().render(rendered_document_content_list)
+    md_str = " ".join(md_str)
+    md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
+    assert (
+        md_str
+        == """
+    # Validation Results
+
+
+  
+
+## Overview
+
+
+
+
+
+### Info
+
+
+  
+  
+  
+
+ |  |  |
+ | ------------  | ------------ | 
+Expectation Suite Name  | default  
+Great Expectations Version  | 0.13.9+8.geb1c0ad.dirty  
+
+
+
+
+    
+
+
+<div id="section-1-content-block-3-body" class="col-12 table-responsive mt-1" >
+  
+
+### Notes
+
+  <div >This Expectation suite currently contains 4 total Expectations across 4 columns.</div>
+    </div>
+
+
+  
+
+## infinities
+
+
+
+
+
+
+
+  * is a required field.
+
+  * ***
+
+
+
+  
+
+## naturals
+
+
+
+
+
+
+
+  * is a required field.
+
+  * ***
+
+
+
+  
+
+## nulls
+
+
+
+
+
+
+
+  * is a required field.
+
+  * ***
+
+
+
+  
+
+## testings
+
+
+
+
+
+
+
+  * values must be unique.
+
+
+
+
+      
+      
+        
+        
+
+
+    <div id="section-5-content-block-2-collapse-item-1-body" class="col-12 mt-2 mb-2" >
+      
+    #### Notes:
+
+      <div ><p>Example notes about this expectation. <strong>Markdown</strong> <code>Supported</code>.</p>
+    </div>
+        <div ><p>Second example note <strong>with</strong> <em>Markdown</em></p>
+    </div>
+        </div>
+
+
+
+  * ***
+
+
+
+
+-----------------------------------------------------------
+Powered by [Great Expectations](https://greatexpectations.io/)
+    
+    """.replace(
             " ", ""
         )
         .replace("\t", "")
