@@ -537,7 +537,6 @@ class DefaultMarkdownPageView(DefaultJinjaView):
                 template["params"][parameter] = "\\*"
                 continue
 
-            # distinct values must belong to this set
             template["params"][parameter] = pTemplate(
                 base_param_template_string
             ).safe_substitute(
