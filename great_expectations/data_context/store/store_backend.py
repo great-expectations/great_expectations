@@ -4,10 +4,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Optional
 
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
-from great_expectations.util import (
-    filter_properties_dict,
-    get_currently_executing_function_call_arguments,
-)
+from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
@@ -224,12 +221,15 @@ class InMemoryStoreBackend(StoreBackend):
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
-        self._config = get_currently_executing_function_call_arguments(
-            include_module_name=True,
-            **{
-                "class_name": self.__class__.__name__,
-            },
-        )
+        self._config = {
+            "runtime_environment": runtime_environment,
+            "fixed_length_key": fixed_length_key,
+            "suppress_store_backend_id": suppress_store_backend_id,
+            "manually_initialize_store_backend_id": manually_initialize_store_backend_id,
+            "store_name": store_name,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
         filter_properties_dict(properties=self._config, inplace=True)
 
     def _get(self, key):
