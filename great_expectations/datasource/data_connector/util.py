@@ -190,7 +190,27 @@ def _invert_regex_to_data_reference_template(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
-    """
+    """ Create a string template based on a regex and corresponding list of group names.
+
+    For example:
+    
+        filepath_template = _invert_regex_to_data_reference_template(
+            regex_pattern=r"^(.+)_(\d+)_(\d+)\.csv$",
+            group_names=["name", "timestamp", "price"],
+        )
+        filepath_template
+        >> "{name}_{timestamp}_{price}.csv"
+
+    Such templates are useful because they can be populated using string substitution:
+
+        filepath_template.format(**{
+            "name": "user_logs",
+            "timestamp": "20200101",
+            "price": "250",
+        })
+        >> "user_logs_20200101_250.csv"
+
+
     NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
     """
     data_reference_template: str = ""
