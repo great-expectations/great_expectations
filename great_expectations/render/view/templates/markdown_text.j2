@@ -1,6 +1,3 @@
-{% if not content_block_body_styling and content_block.get("styling") %}
-    {% set content_block_body_styling = content_block.get("styling") | render_styling %}
-{% endif %}
 
 {% include 'markdown_content_block_header.j2' %}
 {% for text in content_block["text"] -%}
