@@ -95,8 +95,8 @@ contains a list of possible expectations.""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\nresults = '
-                          'LegacyCheckpoint(\n    name="default_validation_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": "context.save_expectation_suite(suite, expectation_suite_name)\n\nresults = "
+                'LegacyCheckpoint(\n    name="default_validation_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
             {
