@@ -116,11 +116,15 @@ def pytest_addoption(parser):
         help="If set, execute tests against mssql",
     )
     parser.addoption(
+        "--ibm_db2",
+        action="store_true",
+        help="If set, execute tests against IBM Db2",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests",
     )
-
 
 def build_test_backends_list(metafunc):
     test_backends = ["PandasDataset"]
@@ -171,6 +175,19 @@ def build_test_backends_list(metafunc):
                     f"'mysql+pymysql://root@{db_hostname}/test_ci'"
                 )
             test_backends += ["mysql"]
+        ibm_db2 = metafunc.config.getoption("--ibm_db2")
+        if sa and ibm_db2:
+            try:
+                # db2+ibm_db://username:password@servername[:port]/database
+                engine = sa.create_engine("db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci")
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "IBM Db2 tests are requested, but unable to connect to the IBM Db2 instance at "
+                    "'db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci'"
+                )
+            test_backends += ["ibm_db2"]
         mssql = metafunc.config.getoption("--mssql")
         if sa and mssql:
             db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -259,6 +276,19 @@ def build_test_backends_list_cfe(metafunc):
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                 )
             test_backends += ["mssql"]
+        ibm_db2 = metafunc.config.getoption("--ibm_db2")
+        if sa and ibm_db2:
+            try:
+                # db2+ibm_db://username:password@servername[:port]/database
+                engine = sa.create_engine("db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci")
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "IBM Db2 tests are requested, but unable to connect to the IBM Db2 instance at "
+                    "'db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci'"
+                )
+            test_backends += ["ibm_db2"]
     return test_backends
 
 
@@ -295,6 +325,7 @@ def sa(test_backends):
         and "sqlite" not in test_backends
         and "mysql" not in test_backends
         and "mssql" not in test_backends
+        and "ibm_db2" not in test_backends
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
@@ -1433,6 +1464,11 @@ def numeric_high_card_dataset(test_backend, numeric_high_card_dict):
         "mssql": {
             "norm_0_1": "FLOAT",
         },
+        "ibm_db2": {
+            # http://public.dhe.ibm.com/software/dw/data/
+            # dm-1002postresqltodb2/PostgreSQL_to_DB2_Porting_Guide.pdf
+            "norm_0_1": "DECFLOAT(34)",
+        },
         "spark": {
             "norm_0_1": "FloatType",
         },
@@ -1472,6 +1508,9 @@ def datetime_dataset(test_backend):
         },
         "mssql": {
             "datetime": "DATETIME",
+        },
+        "ibm_db2": {
+            "datetime": "TIMESTAMP",
         },
         "spark": {
             "datetime": "TimestampType",
@@ -1608,6 +1647,9 @@ def non_numeric_low_card_dataset(test_backend):
             "lowcardnonnum": "TEXT",
         },
         "mssql": {
+            "lowcardnonnum": "VARCHAR",
+        },
+        "ibm_db2": {
             "lowcardnonnum": "VARCHAR",
         },
         "spark": {
@@ -2055,6 +2097,10 @@ def non_numeric_high_card_dataset(test_backend):
             "highcardnonnum": "VARCHAR",
             "medcardnonnum": "VARCHAR",
         },
+        "ibm_db2": {
+            "highcardnonnum": "VARCHAR",
+            "medcardnonnum": "VARCHAR",
+        },
         "spark": {
             "highcardnonnum": "StringType",
             "medcardnonnum": "StringType",
@@ -2212,6 +2258,10 @@ def dataset_sample_data(test_backend):
         "sqlite": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
         "mysql": {"nulls": "DOUBLE", "naturals": "DOUBLE"},
         "mssql": {"infinities": "FLOAT", "nulls": "FLOAT", "naturals": "FLOAT"},
+        "ibm_db2": {
+            "infinities": "DOUBLE_PRECISION",
+            "nulls": "DOUBLE_PRECISION",
+            "naturals": "INTEGER"},
         "spark": {
             "infinities": "FloatType",
             "nulls": "FloatType",
