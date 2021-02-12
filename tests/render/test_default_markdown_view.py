@@ -492,9 +492,9 @@ def test_render_expectation_suite_for_Markdown(expectation_suite_to_render_with_
 ## Overview
 ### Info
  |  |  |
- | ------------  | ------------ | 
-Expectation Suite Name  | default  
-Great Expectations Version  | 0.13.0-test  
+ | ------------  | ------------ |
+Expectation Suite Name  | default
+Great Expectations Version  | 0.13.0-test
 ### Notes
     This Expectation suite currently contains 5 total Expectations across 5 columns.
 ## infinities
@@ -512,9 +512,9 @@ Great Expectations Version  | 0.13.0-test
 ## testings
   * values must be unique.
     #### Notes:
-      <p>Example notes about this expectation. <strong>Markdown</strong> <code>Supported</code>.</p>
-    
-      <p>Second example note <strong>with</strong> <em>Markdown</em></p>
+      Example notes about this expectation. **Markdown** `Supported`.
+
+      Second example note **with** *Markdown*
   * ***
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)

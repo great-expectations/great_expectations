@@ -177,8 +177,7 @@ class DefaultJinjaView:
         if content_block_type is None:
             return content_block
 
-        if render_to_markdown and content_block_type is not "markdown":
-            # dont add `markdown_` for `markdown.j2`
+        if render_to_markdown:
             template_filename = f"markdown_{content_block_type}.j2"
         else:
             template_filename = f"{content_block_type}.j2"
