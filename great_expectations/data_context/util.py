@@ -283,9 +283,7 @@ def default_checkpoints_exist(directory_path: str) -> bool:
         directory_path,
         DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
     )
-    return (
-        os.path.isdir(checkpoints_directory_path)
-    )
+    return os.path.isdir(checkpoints_directory_path)
 
 
 class PasswordMasker:

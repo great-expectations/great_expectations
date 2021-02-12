@@ -11,16 +11,21 @@ from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from tests.cli.utils import (
-    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
+    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
 
 
 @pytest.fixture
-def titanic_checkpoint(titanic_data_context_stats_enabled_config_version_2, titanic_expectation_suite):
+def titanic_checkpoint(
+    titanic_data_context_stats_enabled_config_version_2, titanic_expectation_suite
+):
     csv_path = os.path.join(
-        titanic_data_context_stats_enabled_config_version_2.root_directory, "..", "data", "Titanic.csv"
+        titanic_data_context_stats_enabled_config_version_2.root_directory,
+        "..",
+        "data",
+        "Titanic.csv",
     )
     return {
         "validation_operator_name": "action_list_operator",
@@ -41,7 +46,9 @@ def titanic_checkpoint(titanic_data_context_stats_enabled_config_version_2, tita
 
 @pytest.fixture
 def titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled(
-    titanic_data_context_stats_enabled_config_version_2, titanic_checkpoint, titanic_expectation_suite
+    titanic_data_context_stats_enabled_config_version_2,
+    titanic_checkpoint,
+    titanic_expectation_suite,
 ):
     yaml = YAML()
     context = titanic_data_context_stats_enabled_config_version_2
@@ -96,7 +103,9 @@ def test_checkpoint_list_with_no_checkpoints_with_ge_config_v2(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_list_with_single_checkpoint_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2_with_checkpoint
+    mock_emit,
+    caplog,
+    titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
 ):
     context = titanic_data_context_stats_enabled_config_version_2_with_checkpoint
     root_dir = context.root_directory
@@ -121,7 +130,11 @@ def test_checkpoint_list_with_single_checkpoint_with_ge_config_v2(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result, allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE)
+    assert_no_logging_messages_or_tracebacks(
+        caplog,
+        result,
+        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
+    )
 
 
 @mock.patch(
@@ -166,7 +179,9 @@ def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2_with_checkpoint
+    mock_emit,
+    caplog,
+    titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
 ):
     context = titanic_data_context_stats_enabled_config_version_2_with_checkpoint
     root_dir = context.root_directory
@@ -193,14 +208,21 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
         ),
     ]
 
-    assert_no_logging_messages_or_tracebacks(caplog, result, allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE)
+    assert_no_logging_messages_or_tracebacks(
+        caplog,
+        result,
+        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
+    )
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2, titanic_expectation_suite
+    mock_emit,
+    caplog,
+    titanic_data_context_stats_enabled_config_version_2,
+    titanic_expectation_suite,
 ):
     context = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
@@ -294,7 +316,10 @@ batches:
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_new_specify_datasource_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2, titanic_expectation_suite
+    mock_emit,
+    caplog,
+    titanic_data_context_stats_enabled_config_version_2,
+    titanic_expectation_suite,
 ):
     context = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
@@ -345,7 +370,10 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2, titanic_expectation_suite
+    mock_emit,
+    caplog,
+    titanic_data_context_stats_enabled_config_version_2,
+    titanic_expectation_suite,
 ):
     context = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
@@ -368,7 +396,10 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     )
     stdout = result.stdout
     assert result.exit_code == 1
-    assert 'Attempted to access the "checkpoint_store_name" field with a legacy config version (2.0) and no `checkpoints` directory.' in stdout
+    assert (
+        'Attempted to access the "checkpoint_store_name" field with a legacy config version (2.0) and no `checkpoints` directory.'
+        in stdout
+    )
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -428,7 +459,9 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2_with_checkpoint
+    mock_emit,
+    caplog,
+    titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
 ):
     context = titanic_data_context_stats_enabled_config_version_2_with_checkpoint
     root_dir = context.root_directory
@@ -457,7 +490,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE
+        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
 
@@ -1003,7 +1036,9 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_new_with_ge_config_3_raises_error(mock_emit, caplog, titanic_data_context_stats_enabled):
+def test_checkpoint_new_with_ge_config_3_raises_error(
+    mock_emit, caplog, titanic_data_context_stats_enabled
+):
     context = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     mock_emit.reset_mock()
@@ -1016,7 +1051,10 @@ def test_checkpoint_new_with_ge_config_3_raises_error(mock_emit, caplog, titanic
     )
     stdout = result.stdout
     assert result.exit_code == 1
-    assert "The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3." in stdout
+    assert (
+        "The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3."
+        in stdout
+    )
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1038,7 +1076,9 @@ def test_checkpoint_new_with_ge_config_3_raises_error(mock_emit, caplog, titanic
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_with_ge_config_3_raises_error(mock_emit, caplog, titanic_data_context_stats_enabled):
+def test_checkpoint_run_with_ge_config_3_raises_error(
+    mock_emit, caplog, titanic_data_context_stats_enabled
+):
     context = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     mock_emit.reset_mock()
@@ -1051,7 +1091,10 @@ def test_checkpoint_run_with_ge_config_3_raises_error(mock_emit, caplog, titanic
     )
     stdout = result.stdout
     assert result.exit_code == 1
-    assert "The `checkpoint run` CLI command is not yet implemented for GE config versions >= 3." in stdout
+    assert (
+        "The `checkpoint run` CLI command is not yet implemented for GE config versions >= 3."
+        in stdout
+    )
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1073,7 +1116,9 @@ def test_checkpoint_run_with_ge_config_3_raises_error(mock_emit, caplog, titanic
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_script_with_ge_config_3_raises_error(mock_emit, caplog, titanic_data_context_stats_enabled):
+def test_checkpoint_script_with_ge_config_3_raises_error(
+    mock_emit, caplog, titanic_data_context_stats_enabled
+):
     context = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     mock_emit.reset_mock()
@@ -1086,7 +1131,10 @@ def test_checkpoint_script_with_ge_config_3_raises_error(mock_emit, caplog, tita
     )
     stdout = result.stdout
     assert result.exit_code == 1
-    assert "The `checkpoint script` CLI command is not yet implemented for GE config versions >= 3." in stdout
+    assert (
+        "The `checkpoint script` CLI command is not yet implemented for GE config versions >= 3."
+        in stdout
+    )
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [

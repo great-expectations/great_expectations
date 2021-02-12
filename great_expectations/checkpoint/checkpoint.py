@@ -1,9 +1,9 @@
 import copy
+import datetime
 import json
 import logging
 import os
 from copy import deepcopy
-import datetime
 from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions

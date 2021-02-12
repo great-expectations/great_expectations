@@ -2796,7 +2796,9 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 
 
 @pytest.fixture
-def titanic_data_context_stats_enabled_config_version_2_with_checkpoint(tmp_path_factory, monkeypatch, titanic_data_context_stats_enabled_config_version_2):
+def titanic_data_context_stats_enabled_config_version_2_with_checkpoint(
+    tmp_path_factory, monkeypatch, titanic_data_context_stats_enabled_config_version_2
+):
     context = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     fixture_name = "my_checkpoint.yml"

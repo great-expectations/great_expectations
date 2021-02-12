@@ -70,7 +70,9 @@ Let's save the scaffolded expectation suite as a JSON file in the
 `great_expectations/expectations` directory of your project and rebuild the Data
  Docs site to make it easy to review the scaffolded suite."""
         )
-        if self.context and self.context.validation_operators.get("action_list_operator"):
+        if self.context and self.context.validation_operators.get(
+            "action_list_operator"
+        ):
             code_cell = """\
 context.save_expectation_suite(suite, expectation_suite_name)
 

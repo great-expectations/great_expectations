@@ -44,7 +44,7 @@ class SuiteEditNotebookRenderer(Renderer):
         footer_code: Optional[NotebookTemplateConfig] = None,
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
-        context: Optional[DataContext] = None
+        context: Optional[DataContext] = None,
     ):
         super().__init__()
         custom_loader = []
@@ -102,9 +102,7 @@ class SuiteEditNotebookRenderer(Renderer):
                 "module_name": "great_expectations.render.renderer.suite_edit_notebook_renderer",
                 "class_name": "SuiteEditNotebookRenderer",
             },
-            runtime_environment={
-                "context": data_context
-            },
+            runtime_environment={"context": data_context},
             config_defaults={},
         )
 
@@ -181,10 +179,16 @@ class SuiteEditNotebookRenderer(Renderer):
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
         validation_operator_name = None
-        if self.context and self.context.validation_operators.get("action_list_operator"):
+        if self.context and self.context.validation_operators.get(
+            "action_list_operator"
+        ):
             validation_operator_name = "action_list_operator"
 
-        code = self.render_with_overwrite(self.footer_code, "footer.py.j2", validation_operator_name=validation_operator_name)
+        code = self.render_with_overwrite(
+            self.footer_code,
+            "footer.py.j2",
+            validation_operator_name=validation_operator_name,
+        )
         self.add_code_cell(code)
 
     def add_code_cell(self, code: str, lint: bool = False, **template_params) -> None:

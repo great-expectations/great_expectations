@@ -146,9 +146,7 @@ def _verify_checkpoint_does_not_exist(
             )
     except InvalidTopLevelConfigKeyError as e:
         toolkit.exit_with_failure_message_and_stats(
-            context,
-            usage_event,
-            f"<red>{e}</red>"
+            context, usage_event, f"<red>{e}</red>"
         )
 
 

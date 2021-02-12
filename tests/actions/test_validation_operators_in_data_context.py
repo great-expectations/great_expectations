@@ -82,7 +82,9 @@ def test_run_validation_operator_raises_error_if_non_batches_are_passed_in_list(
             validation_operator_name="store_val_res_and_extract_eval_params",
             assets_to_validate=["foo"],
         )
-    assert e.value.message == "Batches are required to be of type DataAsset or Validator"
+    assert (
+        e.value.message == "Batches are required to be of type DataAsset or Validator"
+    )
 
 
 def test_run_validation_operator_raises_error_if_no_matching_validation_operator_is_found(
