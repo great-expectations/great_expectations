@@ -181,9 +181,8 @@ class SuiteEditNotebookRenderer(Renderer):
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
         validation_operator_name = None
-        if self.context:
-            if self.context.validation_operators.get("action_list_operator"):
-                validation_operator_name = "action_list_operator"
+        if self.context and self.context.validation_operators.get("action_list_operator"):
+            validation_operator_name = "action_list_operator"
 
         code = self.render_with_overwrite(self.footer_code, "footer.py.j2", validation_operator_name=validation_operator_name)
         self.add_code_cell(code)
