@@ -1,10 +1,10 @@
 import json
 import math
 from typing import Any, Dict, Optional, Tuple
- 
+
 import numpy as np
 import pandas as pd
- 
+
 import great_expectations
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -42,8 +42,8 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
- 
- 
+
+
 # Source: https://stackoverflow.com/questions/26889711/extracting-significand-and-exponent-for-base-10-representation-from-decimal-form
 def sig_exp(num):
     num_str = str(abs(num))
@@ -55,8 +55,8 @@ def sig_exp(num):
     exp += len(digits) - len(trimmed)
     sig = int(trimmed) if trimmed else 0
     return sig
- 
- 
+
+
 # 1 for true, 0 for false
 def matchFirstDigit(value, digit):
     significand_string = str(sig_exp(value))
@@ -64,16 +64,19 @@ def matchFirstDigit(value, digit):
         return 1.0
     else:
         return 0.0
- 
- 
-class ColumnBenfordsLaw(ColumnMetricProvider):
-    """MetricProvider Class for Aggregate Mean MetricProvider
-    Tests whether data matches Benford's Law Fraud Detection Algorithm
-    Uses a Chi-Square Goodness of Fit test with an 80@ p-value"""
- 
-    metric_name = "column.custom.BenfordsLaw"
+
+
+class ColumnDistributionMatchesBenfordsLaw(ColumnMetricProvider):
+    """
+    MetricProvider tests whether data matches Benford's Law Fraud Detection
+    Algorithm.
+
+    Uses a Chi-Square Goodness of Fit test with an 80@ p-value
+    """
+
+    metric_name = "column.custom.DistributionMatchesBenfordsLaw"
     value_keys = tuple()
- 
+
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         totalVals = (column.apply(lambda x: 1.0 if x is not None else 0.0)).sum()
@@ -115,11 +118,11 @@ class ColumnBenfordsLaw(ColumnMetricProvider):
             num8 / totalVals,
             num9 / totalVals,
         ]
- 
+
         matchvalues = []
         for x in range(1, 10):
             matchvalues.append(math.log(1.0 + 1.0 / x) / math.log(10))
- 
+
         """
         listdata: length 10
         matchvalues: length 10
@@ -128,12 +131,12 @@ class ColumnBenfordsLaw(ColumnMetricProvider):
         stat = 0
         for i in range(9):
             stat += ((listdata[i] - matchvalues[i]) ** 2) / (matchvalues[i])
- 
+
         if stat >= 5.071:
             return False
         else:
             return True
- 
+
     # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     # def _sqlalchemy(
     #     cls,
@@ -154,13 +157,13 @@ class ColumnBenfordsLaw(ColumnMetricProvider):
     #     column = sa.column(column_name)
     #     sqlalchemy_engine = execution_engine.engine
     #     dialect = sqlalchemy_engine.dialect
- 
+
     #     column_median = None
- 
+
     #     # TODO: compute the value and return it
- 
+
     #     return column_median
- 
+
     # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     # def _spark(
     #     cls,
@@ -178,13 +181,13 @@ class ColumnBenfordsLaw(ColumnMetricProvider):
     #         metric_domain_kwargs, MetricDomainTypes.COLUMN
     #     )
     #     column = accessor_domain_kwargs["column"]
- 
+
     #     column_median = None
- 
+
     #     # TODO: compute the value and return it
- 
+
     #     return column_median
- 
+
     @classmethod
     def _get_evaluation_dependencies(
         cls,
@@ -194,24 +197,24 @@ class ColumnBenfordsLaw(ColumnMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         """This should return a dictionary:
- 
+
         {
           "dependency_name": MetricConfiguration,
           ...
         }
         """
- 
+
         dependencies = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
- 
+
         table_domain_kwargs = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
- 
+
         dependencies.update(
             {
                 "table.row_count": MetricConfiguration(
@@ -219,38 +222,47 @@ class ColumnBenfordsLaw(ColumnMetricProvider):
                 )
             }
         )
- 
+
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             dependencies["column_values.nonnull.count"] = MetricConfiguration(
                 "column_values.nonnull.count", metric.metric_domain_kwargs
             )
- 
+
         return dependencies
- 
- 
-class ExpectColumnMatchBenfordsLaw(ColumnExpectation):
-    """Tests whether data matches Benford's Law Fraud Detection Algorithm
-    Uses a Chi-Square Goodness of Fit test with an 80@ p-value"""
- 
+
+
+class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
+    """
+    Tests whether data matches Benford's Law Fraud Detection Algorithm.
+    Uses a Chi-Square Goodness of Fit test with an 80@ p-value
+    """
+
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
             "data": {
-                "a": [1, 1, 1, 1, 2, 2, 3, 4, 5, 6, 9],
-                "b": [1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+                "benford_distribution": [1, 1, 1, 1, 2, 2, 3, 4, 5, 6, 9],
+                "non_benford_distribution": [1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
             },
             "tests": [
                 {
-                    "title": "list1",
+                    "title": "matching_distribution",
                     "include_in_gallery": True,
                     "exact_match_out": False,
-                    "in": {"column": "a"},
+                    "in": {"column": "benford_distribution"},
                     "out": {"success": True, "observed_value": True},
+                },
+                {
+                    "title": "non_matching_distribution",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "non_benford_distribution"},
+                    "out": {"success": False, "observed_value": False},
                 },
             ],
         },
     ]
- 
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
@@ -263,14 +275,14 @@ class ExpectColumnMatchBenfordsLaw(ColumnExpectation):
         ],
         "package": "experimental_expectations",
     }
- 
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.custom.BenfordsLaw",)
+    metric_dependencies = ("column.custom.DistributionMatchesBenfordsLaw",)
     # success_keys = ("min_value", "strict_min", "max_value", "strict_max")
     success_keys = tuple()
- 
+
     # Default values
- 
+
     # default_kwarg_values = {
     #     "min_value": None,
     #     "max_value": None,
@@ -280,12 +292,12 @@ class ExpectColumnMatchBenfordsLaw(ColumnExpectation):
     #     "include_config": True,
     #     "catch_exceptions": False,
     # }
- 
+
     # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
     #     neccessary configuration arguments have been provided for the validation of the expectation.
- 
+
     #     Args:
     #         configuration (OPTIONAL[ExpectationConfiguration]): \
     #             An optional Expectation Configuration entry that will be used to configure the expectation
@@ -294,7 +306,7 @@ class ExpectColumnMatchBenfordsLaw(ColumnExpectation):
     #     """
     #     super().validate_configuration(configuration)
     #     # self.validate_metric_value_between_configuration(configuration=configuration)
- 
+
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")
     # @render_evaluation_parameter_string
@@ -359,7 +371,7 @@ class ExpectColumnMatchBenfordsLaw(ColumnExpectation):
     #             }
     #         )
     #     ]
- 
+
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -368,19 +380,23 @@ class ExpectColumnMatchBenfordsLaw(ColumnExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         # return self._validate_metric_value_between(
-        #     metric_name="column.custom.BenfordsLaw",
+        #     metric_name="column.custom.DistributionMatchesBenfordsLaw",
         #     configuration=configuration,
         #     metrics=metrics,
         #     runtime_configuration=runtime_configuration,
         #     execution_engine=execution_engine,
         # )
-        # return {"success": metrics.get("column.custom.BenfordsLaw"), "observed_value": metrics.get("column.custom.BenfordsLaw")}
+        # return {"success": metrics.get("column.custom.DistributionMatchesBenfordsLaw"), "observed_value": metrics.get("column.custom.DistributionMatchesBenfordsLaw")}
         return {
-            "success": metrics.get("column.custom.BenfordsLaw"),
-            "result": {"observed_value": metrics.get("column.custom.BenfordsLaw")},
+            "success": metrics.get("column.custom.DistributionMatchesBenfordsLaw"),
+            "result": {
+                "observed_value": metrics.get(
+                    "column.custom.DistributionMatchesBenfordsLaw"
+                )
+            },
         }
- 
- 
+
+
 if __name__ == "__main__":
-    self_check_report = ExpectColumnMatchBenfordsLaw().run_diagnostics()
+    self_check_report = ExpectColumnDistributionToMatchBenfordsLaw().run_diagnostics()
     print(json.dumps(self_check_report, indent=2))
