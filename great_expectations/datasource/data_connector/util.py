@@ -190,10 +190,10 @@ def _invert_regex_to_data_reference_template(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
-    """ Create a string template based on a regex and corresponding list of group names.
+    """Create a string template based on a regex and corresponding list of group names.
 
     For example:
-    
+
         filepath_template = _invert_regex_to_data_reference_template(
             regex_pattern=r"^(.+)_(\d+)_(\d+)\.csv$",
             group_names=["name", "timestamp", "price"],
