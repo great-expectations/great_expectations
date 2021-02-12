@@ -40,7 +40,7 @@ We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Cha
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.profile import BasicSuiteBuilderProfiler\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\nexpectation_suite_name = "my_suite"\nsuite = context.create_expectation_suite(\n    expectation_suite_name, overwrite_existing=True\n)\n\nbatch_kwargs = {\n    "path": "'
                 + csv_path
                 + '",\n    "datasource": "mydatasource",\n    "data_asset_name": "Titanic",\n}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
@@ -95,7 +95,8 @@ contains a list of possible expectations.""",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'context.save_expectation_suite(suite, expectation_suite_name)\n\nresults = '
+                          'LegacyCheckpoint(\n    name="default_validation_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
             {
