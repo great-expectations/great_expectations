@@ -91,6 +91,14 @@ def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
         suite_name = suite
         usage_event = "cli.checkpoint.new"
         context = toolkit.load_data_context_with_error_handling(directory)
+        ge_config_version = context.get_ge_config_version()
+        if ge_config_version >= 3:
+            cli_message(
+                f"""<red>The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3.</red>"""
+            )
+            send_usage_message(context, usage_event, success=False)
+            sys.exit(1)
+
         _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
         suite: ExpectationSuite = toolkit.load_expectation_suite(
             context, suite_name, usage_event
@@ -200,10 +208,18 @@ def checkpoint_list(directory):
 @mark.cli_as_experimental
 def checkpoint_run(checkpoint, directory):
     """Run a checkpoint. (Experimental)"""
+    usage_event = "cli.checkpoint.run"
     context = toolkit.load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=False
     )
-    usage_event = "cli.checkpoint.run"
+
+    ge_config_version = context.get_ge_config_version()
+    if ge_config_version >= 3:
+        cli_message(
+            f"""<red>The `checkpoint run` CLI command is not yet implemented for GE config versions >= 3.</red>"""
+        )
+        send_usage_message(context, usage_event, success=False)
+        sys.exit(1)
 
     checkpoint: Checkpoint = toolkit.load_checkpoint(
         context,
@@ -279,6 +295,14 @@ def checkpoint_script(checkpoint, directory):
     """
     context = toolkit.load_data_context_with_error_handling(directory)
     usage_event = "cli.checkpoint.script"
+    ge_config_version = context.get_ge_config_version()
+    if ge_config_version >= 3:
+        cli_message(
+            f"""<red>The `checkpoint script` CLI command is not yet implemented for GE config versions >= 3.</red>"""
+        )
+        send_usage_message(context, usage_event, success=False)
+        sys.exit(1)
+
     # Attempt to load the checkpoint and deal with errors
     _ = toolkit.load_checkpoint(context, checkpoint, usage_event)
 
