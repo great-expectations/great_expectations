@@ -1,8 +1,6 @@
 import json
 from typing import Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -34,7 +32,7 @@ except ImportError:
 
 
 class ColumnValuesPassFilter(ColumnMapMetricProvider):
-    condition_metric_name = "column_values.match_xml_schema"
+    condition_metric_name = "column_values.to_pass_filter"
     condition_value_keys = ("filter",)
 
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -110,6 +108,8 @@ class ExpectColumnValuesToPassFilter(ColumnMapExpectation):
                     },
                     "out": {
                         "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
                     },
                 },
                 {
@@ -122,6 +122,8 @@ class ExpectColumnValuesToPassFilter(ColumnMapExpectation):
                     },
                     "out": {
                         "success": False,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
                     },
                 },
             ]
@@ -137,7 +139,7 @@ class ExpectColumnValuesToPassFilter(ColumnMapExpectation):
         "requirements": [],
     }
 
-    map_metric = "column_values.match_filter"
+    map_metric = "column_values.to_pass_filter"
     success_keys = (
         "filter",
         "mostly",
@@ -176,7 +178,7 @@ class ExpectColumnValuesToPassFilter(ColumnMapExpectation):
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
-            ["column", "mostly", "filter", "row_condition", "condition_parser"],
+            ["column", "filter", "mostly", "row_condition", "condition_parser"],
         )
 
         if not params.get("filter"):
@@ -221,4 +223,6 @@ class ExpectColumnValuesToPassFilter(ColumnMapExpectation):
 
 if __name__ == "__main__":
     diagnostics_report = ExpectColumnValuesToPassFilter().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    print(diagnostics_report)
+    
+    #print(json.dumps(diagnostics_report, indent=2))
