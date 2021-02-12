@@ -500,7 +500,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     min_value = parse(min_value)
                 except TypeError:
                     pass
-                
+
                 try:
                     min_value = min_value + datetime.timedelta(days=-365)
                 except OverflowError:
@@ -528,7 +528,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     max_value = parse(max_value)
                 except TypeError:
                     pass
-                
+
                 try:
                     max_value = max_value + datetime.timedelta(days=365)
                 except OverflowError:
