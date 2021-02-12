@@ -1,4 +1,5 @@
 import json
+
 import requests
 
 #!!! This giant block of imports should be something simpler, such as:
@@ -42,15 +43,13 @@ class ColumnValuesValidWikipediaArticles(ColumnMapMetricProvider):
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
-
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        
         def is_valid_wikipedia_article(title):
             url = "https://en.wikipedia.org/wiki/" + title
             try:
                 r = requests.head(url)
-                #print(r.status_code)
+                # print(r.status_code)
                 if r.status_code == 200:
                     return True
             except requests.ConnectionError:
@@ -74,7 +73,11 @@ class ColumnValuesValidWikipediaArticles(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
-    """TODO: add a docstring here"""
+    """This Expectation checks whether a column contains valid titles/slugs of Wikipedia articles.
+    It simply plugs the column value into the Wikipedia URL and checks whether the HTTP status
+    code is 200. This Expectation can be used as a template for other (or a more generic) "does this website
+    exist" type checks, e.g. for things like user handles, dictionary entries, etc.
+    """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -91,8 +94,6 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
                     "in": {"column": "a"},
                     "out": {
                         "success": True,
-                        # "unexpected_index_list": [6, 7],
-                        # "unexpected_list": [2, -1],
                     },
                 },
                 {
@@ -105,7 +106,7 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
                         "unexpected_index_list": [0, 1],
                         "unexpected_list": ["peytonman", "theweekeeend"],
                     },
-                }
+                },
             ],
         }
     ]
@@ -113,15 +114,13 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-                    "experimental"
-        ],
+        "tags": ["experimental"],  # Tags for this Expectation in the gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-                     "@annaliuu",
-                     "@wangzhongyi0510"
+            "@annaliuu",
+            "@wangzhongyi0510",
         ],
         "package": "experimental_expectations",
-        "requirements": ["requests"]
+        "requirements": ["requests"],
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -226,5 +225,7 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeValidWikipediaArticles().run_diagnostics()
+    diagnostics_report = (
+        ExpectColumnValuesToBeValidWikipediaArticles().run_diagnostics()
+    )
     print(json.dumps(diagnostics_report, indent=2))
