@@ -97,7 +97,7 @@ def test_checkpoint_store_with_filesystem_store_backend(
     expected_checkpoint_store_config = {
         "store_name": "my_checkpoint_store",
         "class_name": "CheckpointStore",
-        "module_name": "great_expectations.data_context.store.configuration_store",
+        "module_name": "great_expectations.data_context.store.checkpoint_store",
         "store_backend": {
             "module_name": "great_expectations.data_context.store",
             "class_name": "TupleFilesystemStoreBackend",

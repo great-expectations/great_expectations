@@ -74,11 +74,11 @@ Steps
 
             word_counts = column.map(lambda x: count_words(str(x)))
 
-            if min_value != None and max_value != None:
+            if min_value is not None and max_value is not None:
                 return word_counts.map(lambda x: min_value <= x <= max_value)
-            elif min_value != None and max_value == None:
+            elif min_value is not None and max_value is None:
                 return word_counts.map(lambda x: min_value <= x)
-            elif min_value == None and max_value != None:
+            elif min_value is None and max_value is not None:
                 return word_counts.map(lambda x: x <= max_value)
             else:
                 return word_counts.map(lambda x: True)
@@ -305,11 +305,11 @@ Here's a single code block containing all the notebook code in this article:
 
             word_counts = column.map(lambda x: count_words(str(x)))
 
-            if min_value != None and max_value != None:
+            if min_value is not None and max_value is not None:
                 return word_counts.map(lambda x: min_value <= x <= max_value)
-            elif min_value != None and max_value == None:
+            elif min_value is not None and max_value is None:
                 return word_counts.map(lambda x: min_value <= x)
-            elif min_value == None and max_value != None:
+            elif min_value is None and max_value is not None:
                 return word_counts.map(lambda x: x <= max_value)
             else:
                 return word_counts.map(lambda x: True)

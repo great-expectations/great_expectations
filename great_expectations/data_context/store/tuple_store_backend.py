@@ -5,14 +5,10 @@ import random
 import re
 import shutil
 from abc import ABCMeta
-from itertools import chain
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
-from great_expectations.util import (
-    filter_properties_dict,
-    get_currently_executing_function_call_arguments,
-)
+from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
@@ -280,12 +276,22 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
-        self._config = get_currently_executing_function_call_arguments(
-            include_module_name=True,
-            **{
-                "class_name": self.__class__.__name__,
-            },
-        )
+        self._config = {
+            "base_directory": base_directory,
+            "filepath_template": filepath_template,
+            "filepath_prefix": filepath_prefix,
+            "filepath_suffix": filepath_suffix,
+            "forbidden_substrings": forbidden_substrings,
+            "platform_specific_separator": platform_specific_separator,
+            "root_directory": root_directory,
+            "fixed_length_key": fixed_length_key,
+            "suppress_store_backend_id": suppress_store_backend_id,
+            "manually_initialize_store_backend_id": manually_initialize_store_backend_id,
+            "base_public_path": base_public_path,
+            "store_name": store_name,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
         filter_properties_dict(properties=self._config, inplace=True)
 
     def _get(self, key):
@@ -481,12 +487,24 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
-        self._config = get_currently_executing_function_call_arguments(
-            include_module_name=True,
-            **{
-                "class_name": self.__class__.__name__,
-            },
-        )
+        self._config = {
+            "bucket": bucket,
+            "prefix": prefix,
+            "boto3_options": boto3_options,
+            "filepath_template": filepath_template,
+            "filepath_prefix": filepath_prefix,
+            "filepath_suffix": filepath_suffix,
+            "forbidden_substrings": forbidden_substrings,
+            "platform_specific_separator": platform_specific_separator,
+            "fixed_length_key": fixed_length_key,
+            "suppress_store_backend_id": suppress_store_backend_id,
+            "manually_initialize_store_backend_id": manually_initialize_store_backend_id,
+            "base_public_path = None": base_public_path,
+            "endpoint_url": endpoint_url,
+            "store_name": store_name,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
         filter_properties_dict(properties=self._config, inplace=True)
 
     def _build_s3_object_key(self, key):
@@ -759,12 +777,24 @@ class TupleGCSStoreBackend(TupleStoreBackend):
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
-        self._config = get_currently_executing_function_call_arguments(
-            include_module_name=True,
-            **{
-                "class_name": self.__class__.__name__,
-            },
-        )
+        self._config = {
+            "bucket": bucket,
+            "project": project,
+            "prefix": prefix,
+            "filepath_template": filepath_template,
+            "filepath_prefix": filepath_prefix,
+            "filepath_suffix": filepath_suffix,
+            "forbidden_substrings": forbidden_substrings,
+            "platform_specific_separator": platform_specific_separator,
+            "fixed_length_key": fixed_length_key,
+            "suppress_store_backend_id": suppress_store_backend_id,
+            "manually_initialize_store_backend_id": manually_initialize_store_backend_id,
+            "public_urls": public_urls,
+            "base_public_path": base_public_path,
+            "store_name": store_name,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
         filter_properties_dict(properties=self._config, inplace=True)
 
     def _build_gcs_object_key(self, key):
