@@ -4,6 +4,7 @@ from typing import Dict, Optional, Union
 import jinja2
 import nbformat
 
+from great_expectations import DataContext
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
@@ -43,6 +44,7 @@ class SuiteEditNotebookRenderer(Renderer):
         footer_code: Optional[NotebookTemplateConfig] = None,
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
+        context: Optional[DataContext] = None
     ):
         super().__init__()
         custom_loader = []
@@ -83,6 +85,7 @@ class SuiteEditNotebookRenderer(Renderer):
         self.footer_code = footer_code
         self.column_expectation_code = column_expectation_code
         self.table_expectation_code = table_expectation_code
+        self.context = context
 
     @staticmethod
     def from_data_context(data_context):
@@ -99,7 +102,9 @@ class SuiteEditNotebookRenderer(Renderer):
                 "module_name": "great_expectations.render.renderer.suite_edit_notebook_renderer",
                 "class_name": "SuiteEditNotebookRenderer",
             },
-            runtime_environment={},
+            runtime_environment={
+                "context": data_context
+            },
             config_defaults={},
         )
 
@@ -175,7 +180,12 @@ class SuiteEditNotebookRenderer(Renderer):
         self.add_markdown_cell(markdown)
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
-        code = self.render_with_overwrite(self.footer_code, "footer.py.j2")
+        validation_operator_name = None
+        if self.context:
+            if self.context.validation_operators.get("action_list_operator"):
+                validation_operator_name = "action_list_operator"
+
+        code = self.render_with_overwrite(self.footer_code, "footer.py.j2", validation_operator_name=validation_operator_name)
         self.add_code_cell(code)
 
     def add_code_cell(self, code: str, lint: bool = False, **template_params) -> None:

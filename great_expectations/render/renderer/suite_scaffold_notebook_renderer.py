@@ -70,8 +70,26 @@ Let's save the scaffolded expectation suite as a JSON file in the
 `great_expectations/expectations` directory of your project and rebuild the Data
  Docs site to make it easy to review the scaffolded suite."""
         )
-        self.add_code_cell(
-            """\
+        if self.context.validation_operators.get("action_list_operator"):
+            code_cell = """\
+context.save_expectation_suite(suite, expectation_suite_name)
+
+results = LegacyCheckpoint(
+    name="default_validation_checkpoint",
+    data_context=context,
+    batches=[
+        {
+          "batch_kwargs": batch_kwargs,
+          "expectation_suite_names": [expectation_suite_name]
+        }
+    ],
+    validation_operator_name="action_list_operator"
+).run()
+validation_result_identifier = results.list_validation_result_identifiers()[0]
+context.build_data_docs()
+context.open_data_docs(validation_result_identifier)"""
+        else:
+            code_cell = """\
 context.save_expectation_suite(suite, expectation_suite_name)
 
 results = LegacyCheckpoint(
@@ -87,7 +105,7 @@ results = LegacyCheckpoint(
 validation_result_identifier = results.list_validation_result_identifiers()[0]
 context.build_data_docs()
 context.open_data_docs(validation_result_identifier)"""
-        )
+        self.add_code_cell(code_cell)
         self.add_markdown_cell(
             f"""## Next steps
 After you review this scaffolded Expectation Suite in Data Docs you
