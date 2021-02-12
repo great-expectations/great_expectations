@@ -14,6 +14,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.exceptions import InvalidTopLevelConfigKeyError
 from great_expectations.util import lint_code
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -91,7 +92,7 @@ def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
         suite_name = suite
         usage_event = "cli.checkpoint.new"
         context = toolkit.load_data_context_with_error_handling(directory)
-        ge_config_version = context.get_ge_config_version()
+        ge_config_version = context.get_config().config_version
         if ge_config_version >= 3:
             cli_message(
                 f"""<red>The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3.</red>"""
@@ -136,11 +137,18 @@ def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
 def _verify_checkpoint_does_not_exist(
     context: DataContext, checkpoint: str, usage_event: str
 ) -> None:
-    if checkpoint in context.list_checkpoints():
+    try:
+        if checkpoint in context.list_checkpoints():
+            toolkit.exit_with_failure_message_and_stats(
+                context,
+                usage_event,
+                f"A checkpoint named `{checkpoint}` already exists. Please choose a new name.",
+            )
+    except InvalidTopLevelConfigKeyError as e:
         toolkit.exit_with_failure_message_and_stats(
             context,
             usage_event,
-            f"A checkpoint named `{checkpoint}` already exists. Please choose a new name.",
+            f"<red>{e}</red>"
         )
 
 
@@ -213,7 +221,7 @@ def checkpoint_run(checkpoint, directory):
         directory=directory, from_cli_upgrade_command=False
     )
 
-    ge_config_version = context.get_ge_config_version()
+    ge_config_version = context.get_config().config_version
     if ge_config_version >= 3:
         cli_message(
             f"""<red>The `checkpoint run` CLI command is not yet implemented for GE config versions >= 3.</red>"""
@@ -295,7 +303,7 @@ def checkpoint_script(checkpoint, directory):
     """
     context = toolkit.load_data_context_with_error_handling(directory)
     usage_event = "cli.checkpoint.script"
-    ge_config_version = context.get_ge_config_version()
+    ge_config_version = context.get_config().config_version
     if ge_config_version >= 3:
         cli_message(
             f"""<red>The `checkpoint script` CLI command is not yet implemented for GE config versions >= 3.</red>"""
