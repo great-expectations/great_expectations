@@ -495,10 +495,8 @@ def test_render_expectation_suite_for_Markdown(expectation_suite_to_render_with_
  | ------------  | ------------ | 
 Expectation Suite Name  | default  
 Great Expectations Version  | 0.13.0-test  
-<div id="section-1-content-block-3-body" class="col-12 table-responsive mt-1" >
 ### Notes
-  <div >This Expectation suite currently contains 5 total Expectations across 5 columns.</div>
-    </div>
+    This Expectation suite currently contains 5 total Expectations across 5 columns.
 ## infinities
   * is a required field.
   * ***
@@ -513,13 +511,10 @@ Great Expectations Version  | 0.13.0-test
   * ***
 ## testings
   * values must be unique.
-    <div id="section-6-content-block-2-collapse-item-1-body" class="col-12 mt-2 mb-2" >
     #### Notes:
-      <div ><p>Example notes about this expectation. <strong>Markdown</strong> <code>Supported</code>.</p>
-    </div>
-        <div ><p>Second example note <strong>with</strong> <em>Markdown</em></p>
-    </div>
-        </div>
+      <p>Example notes about this expectation. <strong>Markdown</strong> <code>Supported</code>.</p>
+    
+      <p>Second example note <strong>with</strong> <em>Markdown</em></p>
   * ***
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
