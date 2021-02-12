@@ -4,10 +4,5 @@
 
 {% include 'markdown_content_block_header.j2' %}
 {% for text in content_block["text"] -%}
-  {% if text is mapping and "styling" in text -%}
-    {% set paragraph_styling = text["styling"].get("parent", {}) | render_styling -%}
-  {% else -%}
-    {% set paragraph_styling = "" -%}
-  {% endif -%}
   {{text | render_content_block }}
 {% endfor -%}
