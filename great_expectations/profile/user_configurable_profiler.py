@@ -57,40 +57,40 @@ class UserConfigurableProfiler:
         value_set_threshold: str = "MANY",
     ):
         """
-        The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
-        instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
-        instantiated, if config items change, a new profiler will be needed.
-
-        Args:
-            dataset: A GE dataset object
-            excluded_expectations: A list of expectations to not include in the suite
-            ignored_columns: A list of columns for which you would like to NOT create expectations
-            not_null_only: Boolean, default False. By default, each column is evaluated for nullity. If the column
-                values contain fewer than 50% null values, then the profiler will add
-                `expect_column_values_to_not_be_null`; if greater than 50% it will add
-                `expect_column_values_to_be_null`. If not_null_only is set to True, the profiler will add a
-                not_null expectation irrespective of the percent nullity (and therefore will not add an
-                `expect_column_values_to_be_null`
-            primary_or_compound_key: A list containing one or more columns which are a dataset's primary or
-                compound key. This will create an `expect_column_values_to_be_unique` or
-                `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the
-                primary_or_compound_key columns are specified in ignored_columns
-            semantic_types_dict: A dictionary where the keys are available semantic_types (see profiler.base.profiler_semantic_types)
-                and the values are lists of columns for which you would like to create semantic_type specific
-                expectations e.g.:
-                "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
-            table_expectations_only: Boolean, default False. If True, this will only create the two table level expectations
-                available to this profiler (`expect_table_columns_to_match_ordered_list` and
-                `expect_table_row_count_to_be_between`). If a primary_or_compound key is specified, it will create
-                a uniqueness expectation for that column as well
-            value_set_threshold: Takes a string from the following ordered list - "none", "one", "two",
-                "very_few", "few", "many", "very_many", "unique". When the profiler runs without a semantic_types
-                dict, each column is profiled for cardinality. This threshold determines the greatest cardinality
-                for which to add `expect_column_values_to_be_in_set`. For example, if value_set_threshold is set to
-                "unique", it will add a value_set expectation for every included column. If set to "few", it will
-                add a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or
-                "few". The default value is "many". For the purposes of comparing whether two tables are identical,
-                it might make the most sense to set this to "unique"
+                The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
+                instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
+                instantiated, if config items change, a new profiler will be needed.
+        Write an entry on how to use the profiler for the GE docs site
+                Args:
+                    dataset: A GE dataset object
+                    excluded_expectations: A list of expectations to not include in the suite
+                    ignored_columns: A list of columns for which you would like to NOT create expectations
+                    not_null_only: Boolean, default False. By default, each column is evaluated for nullity. If the column
+                        values contain fewer than 50% null values, then the profiler will add
+                        `expect_column_values_to_not_be_null`; if greater than 50% it will add
+                        `expect_column_values_to_be_null`. If not_null_only is set to True, the profiler will add a
+                        not_null expectation irrespective of the percent nullity (and therefore will not add an
+                        `expect_column_values_to_be_null`
+                    primary_or_compound_key: A list containing one or more columns which are a dataset's primary or
+                        compound key. This will create an `expect_column_values_to_be_unique` or
+                        `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the
+                        primary_or_compound_key columns are specified in ignored_columns
+                    semantic_types_dict: A dictionary where the keys are available semantic_types (see profiler.base.profiler_semantic_types)
+                        and the values are lists of columns for which you would like to create semantic_type specific
+                        expectations e.g.:
+                        "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
+                    table_expectations_only: Boolean, default False. If True, this will only create the two table level expectations
+                        available to this profiler (`expect_table_columns_to_match_ordered_list` and
+                        `expect_table_row_count_to_be_between`). If a primary_or_compound key is specified, it will create
+                        a uniqueness expectation for that column as well
+                    value_set_threshold: Takes a string from the following ordered list - "none", "one", "two",
+                        "very_few", "few", "many", "very_many", "unique". When the profiler runs without a semantic_types
+                        dict, each column is profiled for cardinality. This threshold determines the greatest cardinality
+                        for which to add `expect_column_values_to_be_in_set`. For example, if value_set_threshold is set to
+                        "unique", it will add a value_set expectation for every included column. If set to "few", it will
+                        add a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or
+                        "few". The default value is "many". For the purposes of comparing whether two tables are identical,
+                        it might make the most sense to set this to "unique"
         """
         self.dataset = dataset
         self.column_info = {}
@@ -892,7 +892,6 @@ class UserConfigurableProfiler:
                 column,
                 min_value=None,
                 max_value=None,
-                parse_strings_as_datetimes=True,
                 result_format="SUMMARY",
             ).result["observed_value"]
 
@@ -916,7 +915,6 @@ class UserConfigurableProfiler:
                 column,
                 min_value=None,
                 max_value=None,
-                parse_strings_as_datetimes=True,
                 result_format="SUMMARY",
             ).result["observed_value"]
             if max_value is not None:
@@ -939,7 +937,6 @@ class UserConfigurableProfiler:
                     column,
                     min_value=min_value,
                     max_value=max_value,
-                    parse_strings_as_datetimes=True,
                 )
         return dataset
 
