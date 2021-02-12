@@ -754,7 +754,13 @@ class BaseDataContext:
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             raise ge_exceptions.InvalidTopLevelConfigKeyError(
-                f'Attempted to access the "checkpoint_store_name" field with an invalid config version ({config_version}).\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
+                f'Attempted to access the "checkpoint_store_name" field with a legacy config version ('
+                f'{config_version}) and no `checkpoints` directory.\n  To continue using legacy config version ('
+                f'{config_version}), please create the following directory: '
+                f'{os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To '
+                f'use the new "Checkpoint Store" '
+                f'feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit '
+                f'https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
             )
 
     @property
