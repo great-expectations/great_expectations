@@ -1,5 +1,5 @@
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
+    if context in ["sqlite", "postgresql", "mysql", "mssql", "ibm_db2"]:
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
             # "expect_table_columns_to_match_set",

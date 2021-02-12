@@ -18,5 +18,6 @@ class SupportedDatabases(enum.Enum):
     REDSHIFT = "Redshift"
     SNOWFLAKE = "Snowflake"
     BIGQUERY = "BigQuery"
+    IBM_DB2 = "IBMdb2"
     OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL

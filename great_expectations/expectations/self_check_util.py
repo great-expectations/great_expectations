@@ -65,7 +65,10 @@ try:
     from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 except (ImportError, KeyError):
     sqliteDialect = None
-
+try:
+    from ibm_db_sa import dialect as ibmdb2Dialect
+except (ImportError, KeyError):
+    ibmdb2Dialect = None
 
 tmp_dir = str(tempfile.mkdtemp())
 
@@ -182,6 +185,33 @@ try:
 except ImportError:
     mssqltypes = None
     MSSQL_TYPES = {}
+
+try:
+    import ibm_db_sa as ibmdb2types
+
+    # http://public.dhe.ibm.com/software/dw/data/dm-1002postresqltodb2/
+    # PostgreSQL_to_DB2_Porting_Guide.pdf
+    IBMDB2_TYPES = {
+        "BIGINT": ibmdb2types.BIGINT,
+        "BOOLEAN": ibmdb2types.SMALLINT,
+        "CHAR": ibmdb2types.CHAR,
+        "DATE": ibmdb2types.DATE,
+        "DATETIME": ibmdb2types.DATETIME,
+        "DECIMAL": ibmdb2types.DECIMAL,
+        "FLOAT": ibmdb2types.DOUBLE,
+        "DOUBLE_PRECISION": ibmdb2types.DOUBLE,
+        "INTEGER": ibmdb2types.INTEGER,
+        "NUMERIC": ibmdb2types.NUMERIC,
+        "REAL": ibmdb2types.REAL,
+        "SMALLINT": ibmdb2types.SMALLINT,
+        "TEXT": ibmdb2types.VARCHAR,
+        "TIME": ibmdb2types.TIME,
+        "TIMESTAMP": ibmdb2types.TIMESTAMP,
+        "VARCHAR": ibmdb2types.VARCHAR,
+    }
+except ImportError:
+    ibmdb2types = None
+    IBMDB2_TYPES = {}
 
 
 class SqlAlchemyConnectionManager:
@@ -594,7 +624,7 @@ def get_dataset(
                 string_schema = sparktypes.StructType(
                     [
                         sparktypes.StructField(column, sparktypes.StringType())
-                        for column in schema
+                        for columnb in schema
                     ]
                 )
                 spark_df = spark.createDataFrame(data_reshaped, string_schema)
@@ -665,12 +695,14 @@ def _build_sa_validator_with_data(
         "postgresql": postgresqltypes.dialect,
         "mysql": mysqltypes.dialect,
         "mssql": mssqltypes.dialect,
+        "ibm_db2": ibmdb2types.dialect,
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,
         "postgresql": POSTGRESQL_TYPES,
         "mysql": MYSQL_TYPES,
         "mssql": MSSQL_TYPES,
+        "ibm_db2": IBMDB2_TYPES,
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -689,6 +721,10 @@ def _build_sa_validator_with_data(
             f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 "
             "for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
+        )
+    elif sa_engine_name == "ibm_db2":
+        engine = create_engine(
+            "db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci"
         )
     else:
         engine = None
@@ -759,14 +795,14 @@ def _build_sa_validator_with_data(
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
     if context in ["sqlite"]:
         return getter in ["get_column_modes", "get_column_stdev"]
-    if context in ["postgresql", "mysql", "mssql"]:
+    if context in ["postgresql", "mysql", "mssql", "ibm_db2"]:
         return getter in ["get_column_modes"]
     if context == "spark":
         return getter in []
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
+    if context in ["sqlite", "postgresql", "mysql", "mssql", "ibm_db2"]:
         return expectation_type in [
             # "expect_column_to_exist",
             # "expect_table_row_count_to_be_between",
@@ -1259,7 +1295,7 @@ def validate_uuid4(uuid_string: str) -> bool:
 
 
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
+    if context in ["sqlite", "postgresql", "mysql", "mssql", "ibm_db2"]:
         return expectation_type in [
             "expect_select_column_values_to_be_unique_within_record",
             # "expect_table_columns_to_match_set",
@@ -1471,6 +1507,7 @@ def build_test_backends_list(
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
+    include_ibm_db2=False,
 ):
     test_backends = []
 
@@ -1543,6 +1580,20 @@ def build_test_backends_list(
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                 )
             test_backends += ["mssql"]
+
+        if include_ibm_db2:
+            try:
+                engine = sa.create_engine(
+                    "db2+ibm_db://db2inst1:my_db_password@{db_hostname}:50000/test_ci"
+                )
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError):
+                raise ImportError(
+                    "ibm_db2 tests are requested, but unable to connect to the IBM Db2 database at "
+                    "'db2+ibm_db://db2inst1:my_db_password@{db_hostname}:50000/test_ci'",
+                )
+            test_backends += ["ibm_db2"]
 
     return test_backends
 
@@ -1786,6 +1837,19 @@ def generate_expectation_tests(
                         and isinstance(
                             validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
                             mssqlDialect,
+                        )
+                    )
+                    or (
+                        "ibm_db2" in test["suppress_test_for"]
+                        and ibmdb2Dialect is not None
+                        and validator_with_data
+                        and isinstance(
+                            validator_with_data.execution_engine.active_batch_data,
+                            SqlAlchemyBatchData,
+                        )
+                        and isinstance(
+                            validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                            ibmdb2Dialect,
                         )
                     )
                     or (

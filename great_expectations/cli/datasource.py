@@ -54,6 +54,7 @@ class SupportedDatabases(enum.Enum):
     REDSHIFT = "Redshift"
     SNOWFLAKE = "Snowflake"
     BIGQUERY = "BigQuery"
+    IBM_DB2 = "IBMdb2"
     OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL
 
@@ -359,6 +360,11 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
                 return None
 
             credentials = _collect_bigquery_credentials(default_credentials=credentials)
+        elif selected_database == SupportedDatabases.IBM_DB2:
+            if not _verify_ibm_db2_dependent_modules():
+                return None
+
+            credentials = _collect_ibm_db2_credentials(default_credentials=credentials)
         elif selected_database == SupportedDatabases.OTHER:
             sqlalchemy_url = click.prompt(
                 """What is the url/connection string for the sqlalchemy connection?
@@ -613,6 +619,36 @@ def _collect_bigquery_credentials(default_credentials=None):
 
     return credentials
 
+def _collect_ibm_db2_credentials(default_credentials=None):
+    if default_credentials is None:
+        default_credentials = {}
+
+    credentials = {"drivername": "db2+ibm_db"}
+
+    credentials["host"] = click.prompt(
+        "What is the host for the IBM Db2 connection?",
+        default=default_credentials.get("host", "host.docker.internal"),
+    ).strip()
+    credentials["port"] = click.prompt(
+        "What is the port for the IBM Db2 connection?",
+        default=default_credentials.get("port", "50000"),
+    ).strip()
+    credentials["username"] = click.prompt(
+        "What is the username for the IBM Db2 connection?",
+        default=default_credentials.get("username", "db2inst1"),
+    ).strip()
+    credentials["password"] = click.prompt(
+        "What is the password for the IBM Db2 connection?",
+        default="my_db_password",
+        show_default=False,
+        hide_input=True,
+    )
+    credentials["database"] = click.prompt(
+        "What is the database name for the IBM Db2 connection?",
+        default=default_credentials.get("database", "test_ci"),
+    ).strip()
+
+    return credentials
 
 def _collect_mysql_credentials(default_credentials=None):
     # We are insisting on pymysql driver when adding a MySQL datasource through the CLI
@@ -833,6 +869,14 @@ def _verify_bigquery_dependent_modules() -> bool:
 def _verify_pyspark_dependent_modules() -> bool:
     return verify_library_dependent_modules(
         python_import_name="pyspark", pip_library_name="pyspark"
+    )
+
+
+def _verify_ibm_db2_dependent_modules() -> bool:
+    return verify_library_dependent_modules(
+        python_import_name="ibm_db_sa",
+        pip_library_name="ibm_db_sa",
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
 
 

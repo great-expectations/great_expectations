@@ -166,6 +166,32 @@ except ImportError:
     mssqltypes = None
     MSSQL_TYPES = {}
 
+try:
+    import ibm_db_sa.base as ibmdb2types
+
+    # http://public.dhe.ibm.com/software/dw/data/dm-1002postresqltodb2/
+    # PostgreSQL_to_DB2_Porting_Guide.pdf
+    IBMDB2_TYPES = {
+        "BIGINT": ibmdb2types.BIGINT,
+        "CHAR": ibmdb2types.CHAR,
+        "DATE": ibmdb2types.DATE,
+        "DATETIME": ibmdb2types.TIMESTAMP,
+        "DECIMAL": ibmdb2types.DECIMAL,
+        "FLOAT": ibmdb2types.DOUBLE,
+        "DOUBLE_PRECISION": ibmdb2types.DOUBLE,
+        "INTEGER": ibmdb2types.INTEGER,
+        "NUMERIC": ibmdb2types.NUMERIC,
+        "REAL": ibmdb2types.REAL,
+        "SMALLINT": ibmdb2types.SMALLINT,
+        "TEXT": ibmdb2types.VARCHAR,
+        "TIME": ibmdb2types.TIME,
+        "TIMESTAMP": ibmdb2types.TIMESTAMP,
+        "VARCHAR": ibmdb2types.VARCHAR,
+    }
+except ImportError:
+    ibmdb2types = None
+    IBMDB2_TYPES = {}
+
 
 class SqlAlchemyConnectionManager:
     def __init__(self):
@@ -505,6 +531,65 @@ def get_dataset(
                 if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
                     df[col] = pd.to_numeric(df[col], downcast="signed")
                 elif type_ in ["FLOAT"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
+        )
+
+    elif dataset_type == "ibm_db2":
+        if not create_engine:
+            return None
+
+        engine = create_engine(
+            "db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci",
+        )
+        sql_dtypes = {}
+        if (
+            schemas
+            and dataset_type in schemas
+            and isinstance(engine.dialect, ibmdb2types.dialect)
+        ):
+            schema = schemas[dataset_type]
+            sql_dtypes = {col: IBMDB2_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                     df[col] = pd.to_numeric(df[col])
                     min_value_dbms = get_sql_dialect_floating_point_infinity_value(
                         schema=dataset_type, negative=True
@@ -903,12 +988,14 @@ def _build_sa_validator_with_data(
         "postgresql": postgresqltypes.dialect,
         "mysql": mysqltypes.dialect,
         "mssql": mssqltypes.dialect,
+        "ibm_db2": ibmdb2types,
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,
         "postgresql": POSTGRESQL_TYPES,
         "mysql": MYSQL_TYPES,
         "mssql": MSSQL_TYPES,
+        "ibm_db2": IBMDB2_TYPES,
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -927,6 +1014,10 @@ def _build_sa_validator_with_data(
             f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
             "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
+        )
+    elif sa_engine_name == "ibm_db2":
+        engine = create_engine(
+            "db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci"
         )
     else:
         engine = None
@@ -1009,14 +1100,14 @@ def _build_sa_validator_with_data(
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
     if context in ["sqlite"]:
         return getter in ["get_column_modes", "get_column_stdev"]
-    if context in ["postgresql", "mysql", "mssql"]:
+    if context in ["postgresql", "mysql", "mssql", "ibm_db2"]:
         return getter in ["get_column_modes"]
     if context == "spark":
         return getter in []
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
+    if context in ["sqlite", "postgresql", "mysql", "mssql", "ibm_db2"]:
         return expectation_type in [
             # "expect_column_to_exist",
             # "expect_table_row_count_to_be_between",

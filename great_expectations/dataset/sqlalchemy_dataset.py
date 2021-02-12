@@ -77,6 +77,13 @@ except (ImportError, KeyError):
     snowflake = None
 
 try:
+    import ibm_db_sa.ibm_db
+    registry.register("db2", "ibm_db_sa.ibm_db", "DB2Dialect_ibm_db")
+    registry.register("db2.ibm_db", "ibm_db_sa.ibm_db", "DB2Dialect_ibm_db")
+except (ImportError, KeyError):
+    ibm_db_sa = None
+
+try:
     import pybigquery.sqlalchemy_bigquery
 
     # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
@@ -545,13 +552,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
         elif self.engine.dialect.name.lower() == "ibm_db_sa":
             self.dialect = import_library_module(
-                module_name="ibm_db_sa"
+                module_name="ibm_db_sa.ibm_db"
             )
         else:
             self.dialect = None
 
-        if engine and engine.dialect.name.lower() in ["sqlite", "mssql", "snowflake"]:
-            # sqlite/mssql/snowflake temp tables only persist within a connection so override the engine
+        if engine and engine.dialect.name.lower() in ["sqlite", "mssql", "snowflake", "ibm_db_sa"]:
+            # sqlite/mssql/snowflake/IBM_Db2 temporary tables
+            # only persist within a connection so override the engine
             self.engine = engine.connect()
 
         if schema is not None and custom_sql is not None:
@@ -1300,15 +1308,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name.lower() == "ibm_db_sa":
-            stmt = "CREATE TEMPORARY TABLE "
-            if schema_name:
-                stmt += "{schema_name}.".format(schema_name=schema_name)
-            stmt += "{table_name} AS {custom_sql}".format(
-                table_name=table_name, custom_sql=custom_sql
-            )
         else:
-            stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
+            stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS ( {custom_sql} )'.format(
                 table_name=table_name, custom_sql=custom_sql
             )
 
