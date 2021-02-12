@@ -285,14 +285,6 @@ def default_checkpoints_exist(directory_path: str) -> bool:
     )
     return (
         os.path.isdir(checkpoints_directory_path)
-        and len(
-            [
-                os.path.join(checkpoints_directory_path, filename)
-                for filename in os.listdir(checkpoints_directory_path)
-                if filename.endswith(r".yml")
-            ]
-        )
-        > 0
     )
 
 
