@@ -1,8 +1,12 @@
 import logging
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, cast
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchRequest,
+    BatchRequestBase,
+)
 from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionDefinitionSubset,
@@ -70,8 +74,8 @@ class RuntimeDataConnector(DataConnector):
         """Fetch data_references corresponding to data_asset_name from the cache."""
         batch_definition_list: List[
             BatchDefinition
-        ] = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
+        ] = self._get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequestBase(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,
@@ -102,8 +106,8 @@ class RuntimeDataConnector(DataConnector):
         # This will fetch ALL batch_definitions in the cache
         batch_definition_list: List[
             BatchDefinition
-        ] = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
+        ] = self._get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequestBase(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
             )
@@ -115,6 +119,7 @@ class RuntimeDataConnector(DataConnector):
 
         return list(data_asset_names)
 
+    # noinspection PyMethodOverriding
     def get_batch_data_and_metadata(
         self,
         batch_definition: BatchDefinition,
@@ -136,6 +141,15 @@ class RuntimeDataConnector(DataConnector):
     def get_batch_definition_list_from_batch_request(
         self,
         batch_request: BatchRequest,
+    ) -> List[BatchDefinition]:
+        batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
+        return self._get_batch_definition_list_from_batch_request(
+            batch_request=batch_request_base
+        )
+
+    def _get_batch_definition_list_from_batch_request(
+        self,
+        batch_request: BatchRequestBase,
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
@@ -215,6 +229,7 @@ class RuntimeDataConnector(DataConnector):
         return {}
 
     # This method is currently called called only in tests.
+    # noinspection PyMethodOverriding
     def build_batch_spec(
         self,
         batch_definition: BatchDefinition,
@@ -235,7 +250,7 @@ class RuntimeDataConnector(DataConnector):
         )
         return data_reference_name
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
+    def _validate_batch_request(self, batch_request: BatchRequestBase):
         super()._validate_batch_request(batch_request=batch_request)
 
         # Insure that batch_data and batch_request satisfy the "if and only if" condition.

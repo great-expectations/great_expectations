@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from dateutil.parser import parse
 
+from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
@@ -18,7 +19,6 @@ from great_expectations.validation_operators.types.validation_operator_result im
 from great_expectations.validator.validator import Validator
 
 from ..core.run_identifier import RunIdentifier
-from .util import send_slack_notification
 
 logger = logging.getLogger(__name__)
 
@@ -854,6 +854,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                 [
                     run_result_obj["validation_result"].success
                     for run_result_obj in run_results.values()
+                    if run_result_obj["expectation_suite_severity_level"] == "failure"
                 ]
             ),
         )

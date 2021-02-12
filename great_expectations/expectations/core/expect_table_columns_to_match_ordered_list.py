@@ -48,6 +48,16 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
 
     """
 
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "table expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
+
     metric_dependencies = ("table.columns",)
     success_keys = ("column_list",)
     domain_keys = (

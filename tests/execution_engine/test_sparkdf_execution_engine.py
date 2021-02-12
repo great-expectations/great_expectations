@@ -18,13 +18,6 @@ from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.expectations.metrics import (
-    ColumnMean,
-    ColumnStandardDeviation,
-    ColumnValuesInSet,
-    ColumnValuesUnique,
-    ColumnValuesZScore,
-)
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 try:
@@ -262,7 +255,7 @@ def test_get_batch_data(test_sparkdf):
     assert len(test_sparkdf.columns) == 10
 
 
-def test_get_batch_empty_splitter(test_folder_connection_path_csv):
+def test_get_batch_empty_splitter(test_folder_connection_path_csv, spark_session):
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(
@@ -276,7 +269,7 @@ def test_get_batch_empty_splitter(test_folder_connection_path_csv):
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_empty_splitter_tsv(test_folder_connection_path_tsv):
+def test_get_batch_empty_splitter_tsv(test_folder_connection_path_tsv, spark_session):
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
     # reader_options are also needed to specify the separator (otherwise, comma will be used as the default separator)
@@ -291,7 +284,9 @@ def test_get_batch_empty_splitter_tsv(test_folder_connection_path_tsv):
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_empty_splitter_parquet(test_folder_connection_path_parquet):
+def test_get_batch_empty_splitter_parquet(
+    test_folder_connection_path_parquet, spark_session
+):
     # Note: reader method and reader_options are not needed, because
     # SparkDFExecutionEngine automatically determines the file type as well as the schema of the Parquet file.
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(
@@ -305,7 +300,7 @@ def test_get_batch_empty_splitter_parquet(test_folder_connection_path_parquet):
 
 
 def test_get_batch_with_split_on_whole_table_filesystem(
-    test_folder_connection_path_csv,
+    test_folder_connection_path_csv, spark_session
 ):
     # reader_method not configured because spark will configure own reader by default
     test_sparkdf = SparkDFExecutionEngine().get_batch_data(
@@ -341,7 +336,7 @@ def test_get_batch_with_split_on_whole_table_s3(spark_session):
 
     test_sparkdf = spark_engine.get_batch_data(
         S3BatchSpec(
-            s3="s3://bucket/test/test.csv",
+            path="s3://bucket/test/test.csv",
             reader_method="csv",
             reader_options={"header": True},
             splitter_method="_split_on_whole_table",
@@ -831,7 +826,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
 
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
-def test_get_compute_domain_with_no_domain_kwargs():
+def test_get_compute_domain_with_no_domain_kwargs(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
@@ -852,7 +847,7 @@ def test_get_compute_domain_with_no_domain_kwargs():
 
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_column_pair():
+def test_get_compute_domain_with_column_pair(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
@@ -890,7 +885,7 @@ def test_get_compute_domain_with_column_pair():
 
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_multicolumn():
+def test_get_compute_domain_with_multicolumn(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]})
     )
@@ -928,7 +923,7 @@ def test_get_compute_domain_with_multicolumn():
 
 
 # Testing whether compute domain is properly calculated, but this time obtaining a column
-def test_get_compute_domain_with_column_domain():
+def test_get_compute_domain_with_column_domain(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
@@ -949,7 +944,7 @@ def test_get_compute_domain_with_column_domain():
 
 
 # Using an unmeetable row condition to see if empty dataset will result in errors
-def test_get_compute_domain_with_row_condition():
+def test_get_compute_domain_with_row_condition(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
@@ -977,7 +972,7 @@ def test_get_compute_domain_with_row_condition():
 
 
 # What happens when we filter such that no value meets the condition?
-def test_get_compute_domain_with_unmeetable_row_condition():
+def test_get_compute_domain_with_unmeetable_row_condition(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
@@ -1025,7 +1020,7 @@ def test_get_compute_domain_with_unmeetable_row_condition():
 
 
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
-def test_get_compute_domain_with_ge_experimental_condition_parser():
+def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
@@ -1078,7 +1073,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser():
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
-def test_get_compute_domain_with_nonexistent_condition_parser():
+def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
@@ -1099,7 +1094,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser():
 
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
-def test_resolve_metric_bundle_with_nonexistent_metric():
+def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
     engine = _build_spark_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
     )
@@ -1139,7 +1134,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
 
 
 # Making sure dataframe property is functional
-def test_dataframe_property_given_loaded_batch():
+def test_dataframe_property_given_loaded_batch(spark_session):
     from pyspark.sql import SparkSession
 
     engine = SparkDFExecutionEngine()

@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import pandas as pd
 
 from great_expectations.core import IDDict
-from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
@@ -19,11 +19,7 @@ from great_expectations.exceptions import (
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.row_conditions import parse_condition_to_sqlalchemy
-from great_expectations.util import (
-    filter_properties_dict,
-    get_currently_executing_function_call_arguments,
-    import_library_module,
-)
+from great_expectations.util import filter_properties_dict, import_library_module
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -452,6 +448,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "sqlite",
             "mssql",
             "snowflake",
+            "mysql",
         ]:
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
@@ -474,13 +471,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values,
         # and set the instance "_config" variable equal to the resulting dictionary.
-        self._config = get_currently_executing_function_call_arguments(
-            **{"class_name": self.__class__.__name__}
-        )
-        filter_properties_dict(
-            properties=self._config,
-            inplace=True,
-        )
+        self._config = {
+            "name": name,
+            "credentials": credentials,
+            "data_context": data_context,
+            "engine": engine,
+            "connection_string": connection_string,
+            "url": url,
+            "batch_data_dict": batch_data_dict,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
+        self._config.update(kwargs)
+        filter_properties_dict(properties=self._config, inplace=True)
 
     @property
     def credentials(self):
@@ -989,7 +992,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         )
 
     def _build_selectable_from_batch_spec(self, batch_spec):
-        table_name = batch_spec["table_name"]
         table_name: str = batch_spec["table_name"]
 
         if "splitter_method" in batch_spec:
@@ -1031,9 +1033,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return sa.select("*").select_from(sa.text(table_name)).where(split_clause)
 
     def get_batch_data_and_markers(
-        self, batch_spec
-    ) -> Tuple[SqlAlchemyBatchData, BatchMarkers]:
-
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:
         selectable = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
         if "bigquery_temp_table" in batch_spec:
             temp_table_name = batch_spec.get("bigquery_temp_table")
@@ -1042,7 +1043,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_data = SqlAlchemyBatchData(
             engine=self.engine, selectable=selectable, temp_table_name=temp_table_name
         )
-
         batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(

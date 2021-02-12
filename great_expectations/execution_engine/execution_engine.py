@@ -5,13 +5,10 @@ from typing import Any, Dict, Iterable, Tuple, Union
 
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import Batch, BatchSpec
+from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
-from great_expectations.util import (
-    filter_properties_dict,
-    get_currently_executing_function_call_arguments,
-)
+from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -73,13 +70,16 @@ class ExecutionEngine:
 
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values, and
         # set the instance "_config" variable equal to the resulting dictionary.
-        self._config = get_currently_executing_function_call_arguments(
-            **{"class_name": self.__class__.__name__}
-        )
-        filter_properties_dict(
-            properties=self._config,
-            inplace=True,
-        )
+        self._config = {
+            "name": name,
+            "caching": caching,
+            "batch_spec_defaults": batch_spec_defaults,
+            "batch_data_dict": batch_data_dict,
+            "validator": validator,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def configure_validator(self, validator):
         """Optionally configure the validator as appropriate for the execution engine."""
@@ -262,7 +262,7 @@ class ExecutionEngine:
         Returns:
             A tuple consisting of three elements:
 
-            1. data correspondig to the compute domain;
+            1. data corresponding to the compute domain;
             2. a modified copy of domain_kwargs describing the domain of the data returned in (1);
             3. a dictionary describing the access instructions for data elements included in the compute domain
                 (e.g. specific column name).
@@ -311,6 +311,11 @@ class ExecutionEngine:
         new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
         new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
         return new_domain_kwargs
+
+    def get_batch_data_and_markers(
+        self, batch_spec: BatchSpec
+    ) -> Tuple[Any, BatchMarkers]:
+        raise NotImplementedError
 
 
 class MetricPartialFunctionTypes(Enum):

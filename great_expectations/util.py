@@ -1,8 +1,11 @@
 import copy
+import cProfile
 import importlib
+import io
 import json
 import logging
 import os
+import pstats
 import time
 from collections import OrderedDict
 from functools import wraps
@@ -20,7 +23,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional
 
 from pkg_resources import Distribution
 
@@ -42,9 +45,26 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
+def profile(func: Callable = None) -> Callable:
+    @wraps(func)
+    def profile_function_call(*args, **kwargs) -> Any:
+        pr: cProfile.Profile = cProfile.Profile()
+        pr.enable()
+        retval: Any = func(*args, **kwargs)
+        pr.disable()
+        s: io.StringIO = io.StringIO()
+        sortby: str = pstats.SortKey.CUMULATIVE  # "cumulative"
+        ps: pstats.Stats = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+
+    return profile_function_call
+
+
 def measure_execution_time(func: Callable = None) -> Callable:
     @wraps(func)
-    def compute_delta_t(*args, **kwargs) -> Callable:
+    def compute_delta_t(*args, **kwargs) -> Any:
         time_begin: int = int(round(time.time() * 1000))
         try:
             return func(*args, **kwargs)
@@ -61,7 +81,7 @@ def measure_execution_time(func: Callable = None) -> Callable:
 
 
 # noinspection SpellCheckingInspection
-def get_project_distribution() -> Union[Distribution, None]:
+def get_project_distribution() -> Optional[Distribution]:
     ditr: Distribution
     for distr in importlib_metadata.distributions():
         relative_path: Path
@@ -93,6 +113,23 @@ def get_currently_executing_function() -> Callable:
 def get_currently_executing_function_call_arguments(
     include_module_name: bool = False, include_caller_names: bool = False, **kwargs
 ) -> dict:
+    """
+    :param include_module_name: bool If True, module name will be determined and included in output dictionary (default is False)
+    :param include_caller_names: bool If True, arguments, such as "self" and "cls", if present, will be included in output dictionary (default is False)
+    :param kwargs:
+    :return: dict Output dictionary, consisting of call arguments as attribute "name: value" pairs.
+
+    Example usage:
+    # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+    # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+    self._config = get_currently_executing_function_call_arguments(
+        include_module_name=True,
+        **{
+            "class_name": self.__class__.__name__,
+        },
+    )
+    filter_properties_dict(properties=self._config, inplace=True)
+    """
     cf: FrameType = currentframe()
     fb: FrameType = cf.f_back
     argvs: ArgInfo = getargvalues(fb)
@@ -162,12 +199,12 @@ templates, and assets is supported in your execution environment.  This error is
         raise FileNotFoundError(message)
 
 
-def import_library_module(module_name: str) -> Union[ModuleType, None]:
+def import_library_module(module_name: str) -> Optional[ModuleType]:
     """
     :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
     :return: raw source code of the module (if can be retrieved)
     """
-    module_obj: Union[ModuleType, None]
+    module_obj: Optional[ModuleType]
 
     try:
         module_obj = importlib.import_module(module_name)
@@ -178,19 +215,25 @@ def import_library_module(module_name: str) -> Union[ModuleType, None]:
 
 
 def is_library_loadable(library_name: str) -> bool:
-    module_obj: Union[ModuleType, None] = import_library_module(
-        module_name=library_name
-    )
+    module_obj: Optional[ModuleType] = import_library_module(module_name=library_name)
     return module_obj is not None
 
 
-def load_class(class_name, module_name):
+def load_class(class_name: str, module_name: str):
+    if class_name is None:
+        raise TypeError("class_name must not be None")
+    if not isinstance(class_name, str):
+        raise TypeError("class_name must be a string")
+    if module_name is None:
+        raise TypeError("module_name must not be None")
+    if not isinstance(module_name, str):
+        raise TypeError("module_name must be a string")
     try:
         verify_dynamic_loading_support(module_name=module_name)
     except FileNotFoundError:
         raise PluginModuleNotFoundError(module_name)
 
-    module_obj: Union[ModuleType, None] = import_library_module(module_name=module_name)
+    module_obj: Optional[ModuleType] = import_library_module(module_name=module_name)
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
@@ -825,6 +868,7 @@ def filter_properties_dict(
                 for key, value in properties.items()
                 if not (
                     (keep_fields and key in keep_fields)
+                    or (delete_fields and key in delete_fields)
                     or is_numeric(value=value)
                     or value
                 )
@@ -866,6 +910,18 @@ def get_context():
     from great_expectations.data_context.data_context import DataContext
 
     return DataContext()
+
+
+def is_sane_slack_webhook(url: str) -> bool:
+    """Really basic sanity checking."""
+    if url is None:
+        return False
+
+    return url.strip().startswith("https://hooks.slack.com/")
+
+
+def is_list_of_strings(_list) -> bool:
+    return isinstance(_list, list) and all([isinstance(site, str) for site in _list])
 
 
 def generate_library_json_from_registered_expectations():

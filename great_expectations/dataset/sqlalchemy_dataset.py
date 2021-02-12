@@ -427,6 +427,7 @@ class MetaSqlAlchemyDataset(Dataset):
 class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     """
 
+
     --ge-feature-maturity-info--
 
         id: validation_engine_sqlalchemy
@@ -1784,6 +1785,24 @@ WHERE
             .having(sa.func.count(sa.column(column)) > 1)
         )
 
+        # Will - 20210126
+        # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
+        # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
+        # just the column we will be performing the expectation on, and the query is performed against it.
+        if self.sql_engine_dialect.name.lower() == "mysql":
+            temp_table_name = f"ge_tmp_{str(uuid.uuid4())[:8]}"
+            temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
+                new_temp_table=temp_table_name,
+                source_table=self._table,
+                column_name=column,
+            )
+            self.engine.execute(temp_table_stmt)
+            dup_query = (
+                sa.select([sa.column(column)])
+                .select_from(sa.text(temp_table_name))
+                .group_by(sa.column(column))
+                .having(sa.func.count(sa.column(column)) > 1)
+            )
         return sa.column(column).notin_(dup_query)
 
     def _get_dialect_regex_expression(self, column, regex, positive=True):
