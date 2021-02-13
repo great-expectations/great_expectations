@@ -5,9 +5,18 @@ Changelog
 #########
 
 
-Develop
+0.13.10
 -----------------
-
+* [ENHANCEMENT] Optimize tests #2421
+* [ENHANCEMENT] Add docstring for _invert_regex_to_data_reference_template #2428
+* [ENHANCEMENT] Added expectation to check if data is in alphabetical ordering #2407 (Thanks @sethdmay!)
+* [BUGFIX] Fixed a broken docs link #2433
+* [BUGFIX] Missing `markown_text.j2` jinja template #2422
+* [BUGFIX] parse_strings_as_datetimes error with user_configurable_profiler #2429
+* [BUGFIX] Update `suite edit` and `suite scaffold` notebook renderers to output functional validation cells #2432
+* [DOCS] Update how_to_create_custom_expectations_for_pandas.rst #2426 (Thanks @henriquejsfj!)
+* [DOCS] Correct regex escape for data connectors #2425 (Thanks @lukedyer-peak!)
+* [CONTRIB] Expectation: Matches benfords law with 80 percent confidence interval test #2406 (Thanks @vinodkri1!)
 
 
 0.13.9
@@ -17,7 +26,7 @@ Develop
 * [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for #1691 to @mgorsk1!) #2371
 * [ENHANCEMENT] Removed the logic that prints the "This configuration object was built using version..." warning when current version of Great Expectations is not the same as the one used to build the suite, since it was not actionable #2366
 * [ENHANCEMENT] Update Validator with more informative error message
-* [BUGFIX] Ensure that batch_spec_passthrough is handled correctly by properly refactoring build_batch_spec and _generate_batch_spec_parameters_from_batch_definition for all DataConnector classes 
+* [BUGFIX] Ensure that batch_spec_passthrough is handled correctly by properly refactoring build_batch_spec and _generate_batch_spec_parameters_from_batch_definition for all DataConnector classes
 * [BUGFIX] Display correct unexpected_percent in DataDocs - corrects the result object from map expectations to return the same "unexpected_percent" as is used to evaluate success (excluding null values from the denominator). The old value is now returned in a key called "unexpected_percent_total" (thanks @mlondschien) #1875
 * [BUGFIX] Add python=3.7 argument to conda env creation (thanks @scouvreur!) #2391
 * [BUGFIX] Fix issue with temporary table creation in MySQL #2389
