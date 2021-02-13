@@ -10,12 +10,11 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
 
 class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
     def __init__(self, context: DataContext, suite: ExpectationSuite, batch_kwargs):
-        self.context = context
+        super().__init__(context=context)
         self.suite = suite
         self.suite_name = suite.expectation_suite_name
         self.batch_kwargs = self.get_batch_kwargs(self.suite, batch_kwargs)
         self.batch = self.load_batch()
-        super().__init__()
 
     def add_header(self):
         self.add_markdown_cell(
@@ -36,6 +35,7 @@ We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Cha
 import datetime
 import great_expectations as ge
 import great_expectations.jupyter_ux
+from great_expectations.checkpoint import LegacyCheckpoint
 from great_expectations.profile import BasicSuiteBuilderProfiler
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
@@ -69,15 +69,44 @@ Let's save the scaffolded expectation suite as a JSON file in the
 `great_expectations/expectations` directory of your project and rebuild the Data
  Docs site to make it easy to review the scaffolded suite."""
         )
-        self.add_code_cell(
-            """\
+        if self.context and self.context.validation_operators.get(
+            "action_list_operator"
+        ):
+            code_cell = """\
 context.save_expectation_suite(suite, expectation_suite_name)
 
-results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])
+results = LegacyCheckpoint(
+    name="_temp_checkpoint",
+    data_context=context,
+    batches=[
+        {
+          "batch_kwargs": batch_kwargs,
+          "expectation_suite_names": [expectation_suite_name]
+        }
+    ],
+    validation_operator_name="action_list_operator"
+).run()
 validation_result_identifier = results.list_validation_result_identifiers()[0]
 context.build_data_docs()
 context.open_data_docs(validation_result_identifier)"""
-        )
+        else:
+            code_cell = """\
+context.save_expectation_suite(suite, expectation_suite_name)
+
+results = LegacyCheckpoint(
+    name="_temp_checkpoint",
+    data_context=context,
+    batches=[
+        {
+          "batch_kwargs": batch_kwargs,
+          "expectation_suite_names": [expectation_suite_name]
+        }
+    ]
+).run()
+validation_result_identifier = results.list_validation_result_identifiers()[0]
+context.build_data_docs()
+context.open_data_docs(validation_result_identifier)"""
+        self.add_code_cell(code_cell)
         self.add_markdown_cell(
             f"""## Next steps
 After you review this scaffolded Expectation Suite in Data Docs you
