@@ -193,7 +193,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     assert config["datasources"] == {
         "my_db": {
             "data_asset_type": {
-                "module_name": "great_expectations.dataset",
+                "module_name": None,
                 "class_name": "SqlAlchemyDataset",
             },
             "credentials": "${my_db}",
