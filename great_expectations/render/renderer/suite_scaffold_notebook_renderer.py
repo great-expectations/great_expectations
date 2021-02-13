@@ -10,12 +10,11 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
 
 class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
     def __init__(self, context: DataContext, suite: ExpectationSuite, batch_kwargs):
-        self.context = context
+        super().__init__(context=context)
         self.suite = suite
         self.suite_name = suite.expectation_suite_name
         self.batch_kwargs = self.get_batch_kwargs(self.suite, batch_kwargs)
         self.batch = self.load_batch()
-        super().__init__()
 
     def add_header(self):
         self.add_markdown_cell(
