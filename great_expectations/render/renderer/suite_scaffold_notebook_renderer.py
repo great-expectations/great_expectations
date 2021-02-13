@@ -77,7 +77,7 @@ Let's save the scaffolded expectation suite as a JSON file in the
 context.save_expectation_suite(suite, expectation_suite_name)
 
 results = LegacyCheckpoint(
-    name="default_validation_checkpoint",
+    name="_temp_checkpoint",
     data_context=context,
     batches=[
         {
@@ -95,7 +95,7 @@ context.open_data_docs(validation_result_identifier)"""
 context.save_expectation_suite(suite, expectation_suite_name)
 
 results = LegacyCheckpoint(
-    name="default_validation_checkpoint",
+    name="_temp_checkpoint",
     data_context=context,
     batches=[
         {
