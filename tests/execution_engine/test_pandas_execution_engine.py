@@ -322,7 +322,7 @@ def test_df_small() -> pd.DataFrame:
 
 
 @pytest.fixture
-def test_files(s3, s3_bucket, test_df_small):
+def test_s3_files(s3, s3_bucket, test_df_small):
     keys: List[str] = [
         "path/A-100.csv",
         "path/A-101.csv",
@@ -335,8 +335,8 @@ def test_files(s3, s3_bucket, test_df_small):
 
 
 @pytest.fixture
-def batch_with_split_on_whole_table_s3(test_files) -> S3BatchSpec:
-    bucket, keys = test_files
+def batch_with_split_on_whole_table_s3(test_s3_files) -> S3BatchSpec:
+    bucket, keys = test_s3_files
     path = keys[0]
     full_path = f"s3a://{os.path.join(bucket, path)}"
 
@@ -368,7 +368,7 @@ def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
 
 
 @pytest.fixture
-def test_files_compressed(s3, s3_bucket, test_df_small):
+def test_s3_files_compressed(s3, s3_bucket, test_df_small):
     keys: List[str] = [
         "path/A-100.csv.gz",
         "path/A-101.csv.gz",
@@ -384,8 +384,8 @@ def test_files_compressed(s3, s3_bucket, test_df_small):
     return s3_bucket, keys
 
 
-def test_get_batch_s3_compressed_files(test_files_compressed, test_df_small):
-    bucket, keys = test_files_compressed
+def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
+    bucket, keys = test_s3_files_compressed
     path = keys[0]
     full_path = f"s3a://{os.path.join(bucket, path)}"
 
