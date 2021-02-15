@@ -4,10 +4,10 @@ import hashlib
 import logging
 import random
 from functools import partial
+from io import BytesIO
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
-from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.datasource.types.batch_spec import (
@@ -139,11 +139,7 @@ Notes:
             )
             reader_fn = self._get_reader_fn(reader_method, s3_url.key)
             batch_data = reader_fn(
-                StringIO(
-                    s3_object["Body"]
-                    .read()
-                    .decode(s3_object.get("ContentEncoding", "utf-8"))
-                ),
+                BytesIO(s3_object["Body"].read()),
                 **reader_options,
             )
         elif isinstance(batch_spec, PathBatchSpec):

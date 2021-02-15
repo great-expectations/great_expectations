@@ -9,11 +9,6 @@ import pytest
 from moto import mock_s3
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetS3DataConnector,
-    InferredAssetS3DataConnector,
-)
 from great_expectations.datasource.types.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
@@ -299,15 +294,35 @@ def test_get_batch_with_split_on_whole_table_filesystem(
     assert test_df.shape == (5, 2)
 
 
-@mock_s3
-def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector():
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+@pytest.fixture(scope="function")
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
 
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+@pytest.fixture
+def s3(aws_credentials):
+    with mock_s3():
+        yield boto3.client("s3", region_name="us-east-1")
+
+
+@pytest.fixture
+def s3_bucket(s3):
+    bucket: str = "test_bucket"
+    s3.create_bucket(Bucket=bucket)
+    return bucket
+
+
+@pytest.fixture
+def test_df_small() -> pd.DataFrame:
+    return pd.DataFrame(data={"col1": [1, 0, 505], "col2": [3, 4, 101]})
+
+
+@pytest.fixture
+def test_files(s3, s3_bucket, test_df_small):
     keys: List[str] = [
         "path/A-100.csv",
         "path/A-101.csv",
@@ -315,76 +330,71 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
         "directory/B-2.csv",
     ]
     for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
-    path = "path/A-100.csv"
+        s3.put_object(Bucket=s3_bucket, Body=test_df_small.to_csv(index=False), Key=key)
+    return s3_bucket, keys
+
+
+@pytest.fixture
+def batch_with_split_on_whole_table_s3(test_files) -> S3BatchSpec:
+    bucket, keys = test_files
+    path = keys[0]
     full_path = f"s3a://{os.path.join(bucket, path)}"
 
-    my_data_connector = ConfiguredAssetS3DataConnector(
-        name="my_data_connector",
-        datasource_name="FAKE_DATASOURCE_NAME",
-        default_regex={
-            "pattern": "alpha-(.*)\\.csv",
-            "group_names": ["index"],
-        },
-        bucket=bucket,
-        prefix="",
-        assets={"alpha": {}},
+    batch_spec = S3BatchSpec(
+        path=full_path,
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table",
     )
+    return batch_spec
 
-    test_df = PandasExecutionEngine().get_batch_data(
-        batch_spec=S3BatchSpec(
-            path=full_path,
-            reader_method="read_csv",
-            splitter_method="_split_on_whole_table",
-        )
+
+def test_get_batch_with_split_on_whole_table_s3(
+    batch_with_split_on_whole_table_s3, test_df_small
+):
+    df = PandasExecutionEngine().get_batch_data(
+        batch_spec=batch_with_split_on_whole_table_s3
     )
-    assert test_df.shape == (2, 2)
+    assert test_df_small.shape == df.shape
 
 
-@mock_s3
-def test_get_batch_with_split_on_whole_table_s3():
-    region_name: str = "us-east-1"
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=region_name)
-    conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
-
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    keys: List[str] = [
-        "path/A-100.csv",
-        "path/A-101.csv",
-        "directory/B-1.csv",
-        "directory/B-2.csv",
-    ]
-    for key in keys:
-        client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
-        )
-
-    path = "path/A-100.csv"
-    full_path = f"s3a://{os.path.join(bucket, path)}"
-    test_df = PandasExecutionEngine().get_batch_data(
-        batch_spec=S3BatchSpec(
-            path=full_path,
-            reader_method="read_csv",
-            splitter_method="_split_on_whole_table",
-        )
-    )
-    assert test_df.shape == (2, 2)
-
+def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
     # if S3 was not configured
     execution_engine_no_s3 = PandasExecutionEngine()
     execution_engine_no_s3._s3 = None
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine_no_s3.get_batch_data(
-            batch_spec=S3BatchSpec(
-                path=full_path,
-                reader_method="read_csv",
-                splitter_method="_split_on_whole_table",
-            )
+            batch_spec=batch_with_split_on_whole_table_s3
         )
+
+
+@pytest.fixture
+def test_files_compressed(s3, s3_bucket, test_df_small):
+    keys: List[str] = [
+        "path/A-100.csv.gz",
+        "path/A-101.csv.gz",
+        "directory/B-1.csv.gz",
+        "directory/B-2.csv.gz",
+    ]
+    for key in keys:
+        s3.put_object(
+            Bucket=s3_bucket,
+            Body=test_df_small.to_csv(index=False, compression="gzip"),
+            Key=key,
+        )
+    return s3_bucket, keys
+
+
+def test_get_batch_s3_compressed_files(test_files_compressed, test_df_small):
+    bucket, keys = test_files_compressed
+    path = keys[0]
+    full_path = f"s3a://{os.path.join(bucket, path)}"
+
+    batch_spec = S3BatchSpec(
+        path=full_path,
+        reader_method="read_csv",
+    )
+    df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
+    assert df.shape == test_df_small.shape
 
 
 def test_get_batch_with_split_on_column_value(test_df):
