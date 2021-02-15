@@ -2,7 +2,7 @@ import copy
 import datetime
 import hashlib
 import json
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 from great_expectations.core.id_dict import (
     BatchKwargs,
@@ -29,6 +29,7 @@ class BatchDefinition(SerializableDictDot):
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             partition_definition=partition_definition,
+            batch_spec_passthrough=batch_spec_passthrough,
             # limit=limit,
         )
 
@@ -40,13 +41,19 @@ class BatchDefinition(SerializableDictDot):
         self._partition_definition = partition_definition
         self._batch_spec_passthrough = batch_spec_passthrough
 
-    def to_json_dict(self) -> Dict:
+    # TODO: <Alex>02/15/2021: This is the actual interface method -- get_json_dict() is not.</Alex>
+    def to_json_dict(self) -> dict:
         return {
-            "datasource_name": self._datasource_name,
-            "data_connector_name": self._data_connector_name,
+            "datasource_name": self.datasource_name,
+            "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_definition": self._partition_definition,
+            "partition_definition": self.partition_definition,
+            "batch_spec_passthrough": self.batch_spec_passthrough,
         }
+
+    # TODO: <Alex>02/15/2021: We should standardize on to_json_dict() -- we do not need both, get_json_dict() and to_json_dict().</Alex>
+    def get_json_dict(self) -> dict:
+        return self.to_json_dict()
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
@@ -54,6 +61,7 @@ class BatchDefinition(SerializableDictDot):
             "data_connector_name": self._data_connector_name,
             "data_asset_name": self.data_asset_name,
             "partition_definition": repr(self._partition_definition),
+            "batch_spec_passthrough": self._batch_spec_passthrough,
         }
         return str(doc_fields_dict)
 
@@ -63,6 +71,7 @@ class BatchDefinition(SerializableDictDot):
         data_connector_name: str,
         data_asset_name: str,
         partition_definition: PartitionDefinition,
+        batch_spec_passthrough: Optional[dict],
         # limit: Optional[int] = None,
     ):
         if datasource_name is None:
@@ -98,6 +107,13 @@ class BatchDefinition(SerializableDictDot):
                 """
             )
 
+        if batch_spec_passthrough and not isinstance(batch_spec_passthrough, dict):
+            raise TypeError(
+                f"""The type of a batch_spec_passthrough must be a Python "dict" object.  The type given is
+"{str(type(batch_spec_passthrough))}", which is illegal.
+                """
+            )
+
     #         if limit and not isinstance(limit, int):
     #             raise ge_exceptions.BatchDefinitionError(
     #                 f'''The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
@@ -128,14 +144,6 @@ class BatchDefinition(SerializableDictDot):
     @batch_spec_passthrough.setter
     def batch_spec_passthrough(self, batch_spec_passthrough: Optional[dict]):
         self._batch_spec_passthrough = batch_spec_passthrough
-
-    def get_json_dict(self) -> dict:
-        return {
-            "datasource_name": self.datasource_name,
-            "data_connector_name": self.data_connector_name,
-            "data_asset_name": self.data_asset_name,
-            "partition_definition": self.partition_definition,
-        }
 
     @property
     def id(self) -> str:

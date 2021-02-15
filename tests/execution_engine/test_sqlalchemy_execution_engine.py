@@ -34,7 +34,7 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
     assert my_execution_engine.url == None
 
     my_execution_engine.get_batch_data_and_markers(
-        BatchSpec(
+        batch_spec=BatchSpec(
             table_name="main.table_1",
             sampling_method="_sample_using_limit",
             sampling_kwargs={"n": 5},
@@ -48,12 +48,12 @@ def test_instantiation_via_url(sa):
         os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
     )
     my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
-    assert my_execution_engine.connection_string == None
-    assert my_execution_engine.credentials == None
+    assert my_execution_engine.connection_string is None
+    assert my_execution_engine.credentials is None
     assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
 
     my_execution_engine.get_batch_data_and_markers(
-        BatchSpec(
+        batch_spec=BatchSpec(
             table_name="table_partitioned_by_date_column__A",
             sampling_method="_sample_using_limit",
             sampling_kwargs={"n": 5},
@@ -61,7 +61,7 @@ def test_instantiation_via_url(sa):
     )
 
 
-def test_instantiation_via_credentials(sa, test_backends):
+def test_instantiation_via_credentials(sa, test_backends, test_df):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
 
@@ -75,7 +75,7 @@ def test_instantiation_via_credentials(sa, test_backends):
             "database": "test_ci",
         }
     )
-    assert my_execution_engine.connection_string == None
+    assert my_execution_engine.connection_string is None
     assert my_execution_engine.credentials == {
         "username": "postgres",
         "password": "",
@@ -83,11 +83,11 @@ def test_instantiation_via_credentials(sa, test_backends):
         "port": "5432",
         "database": "test_ci",
     }
-    assert my_execution_engine.url == None
+    assert my_execution_engine.url is None
 
     # Note Abe 20201116: Let's add an actual test of get_batch_data_and_markers, which will require setting up test
     # fixtures
-    # my_execution_engine.get_batch_data_and_markers(BatchSpec(
+    # my_execution_engine.get_batch_data_and_markers(batch_spec=BatchSpec(
     #     table_name="main.table_1",
     #     sampling_method="_sample_using_limit",
     #     sampling_kwargs={
@@ -485,3 +485,18 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
             )
         )
         print(e)
+
+
+def test_get_batch_data_and_markers(sqlite_view_engine, test_df):
+    my_execution_engine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
+    test_df.to_sql("test_table_0", con=my_execution_engine.engine)
+
+    query: str = "SELECT * FROM test_table_0"
+    batch_data, batch_markers = my_execution_engine.get_batch_data_and_markers(
+        batch_spec=BatchSpec(
+            query=query,
+        )
+    )
+
+    assert batch_data.row_count() == 120
+    assert batch_markers.get("ge_load_time") is not None

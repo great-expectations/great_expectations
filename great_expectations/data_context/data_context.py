@@ -1484,7 +1484,6 @@ class BaseDataContext:
         This method attempts to return any number of batches, including an empty list.
         """
 
-        datasource_name: str
         if batch_request:
             if not isinstance(batch_request, BatchRequest):
                 raise TypeError(
@@ -1513,6 +1512,9 @@ class BaseDataContext:
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
+                filter_properties_dict(
+                    properties=partition_request_params, inplace=True
+                )
                 partition_request = PartitionRequest(partition_request_params)
             else:
                 # Raise a warning if partition_identifiers or kwargs exist

@@ -580,9 +580,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_compute_domain(
         self,
         domain_kwargs: Dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple["sa.sql.Selectable", dict, dict]:
+    ) -> Tuple[Select, dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -991,7 +991,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selectable_from_batch_spec(self, batch_spec):
+    def _build_selectable_from_batch_spec(self, batch_spec) -> Select:
         table_name: str = batch_spec["table_name"]
 
         if "splitter_method" in batch_spec:
@@ -1035,7 +1035,23 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:
-        selectable = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
+        batch_data: SqlAlchemyBatchData
+        batch_markers: BatchMarkers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+        query: str = batch_spec.get("query")
+        if query:
+            batch_data = SqlAlchemyBatchData(engine=self.engine, query=query)
+            return batch_data, batch_markers
+
+        selectable: Select = self._build_selectable_from_batch_spec(
+            batch_spec=batch_spec
+        )
+        temp_table_name: Optional[str]
         if "bigquery_temp_table" in batch_spec:
             temp_table_name = batch_spec.get("bigquery_temp_table")
         else:
@@ -1043,12 +1059,4 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_data = SqlAlchemyBatchData(
             engine=self.engine, selectable=selectable, temp_table_name=temp_table_name
         )
-        batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
-
         return batch_data, batch_markers

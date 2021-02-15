@@ -29,12 +29,18 @@ def test_instantiation_with_table_name(sqlite_view_engine):
     assert type(batch_data.record_set_name) == str
     assert batch_data.record_set_name == "great_expectations_sub_selection"
 
-    assert batch_data.use_quoted_name == False
+    assert batch_data.use_quoted_name is False
 
 
-def test_instantiation_with_query():
-    # Note Abe 20111119: Fill this in
-    pass
+def test_instantiation_with_query(sqlite_view_engine, test_df):
+    test_df.to_sql("test_table_0", con=sqlite_view_engine)
+
+    query: str = "SELECT * FROM test_table_0"
+    batch_data = SqlAlchemyBatchData(
+        engine=sqlite_view_engine,
+        query=query,
+    )
+    assert batch_data.row_count() == 120
 
 
 def test_instantiation_with_selectable():

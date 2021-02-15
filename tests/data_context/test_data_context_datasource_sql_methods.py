@@ -1,5 +1,5 @@
 import json
-from typing import List, Union
+from typing import List
 
 import pytest
 from ruamel.yaml import YAML
@@ -344,7 +344,7 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
 ):
     context = data_context_with_sql_datasource_for_testing_get_batch
 
-    batch_request: Union[dict, BatchRequest] = {
+    batch_request: dict = {
         "datasource_name": "my_sqlite_db",
         "data_connector_name": "daily",
         "data_asset_name": "table_partitioned_by_date_column__A",
@@ -363,3 +363,103 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
     assert batch.batch_definition["partition_definition"] == {"date": "2020-01-15"}
     assert isinstance(batch.data, SqlAlchemyBatchData)
     assert len(batch.data.head(fetch_all=True)) == 4
+
+
+def test_get_batch_with_query_in_configured_asset_batch_spec_passthrough(
+    data_context_with_sql_datasource_for_testing_get_batch,
+):
+    context = data_context_with_sql_datasource_for_testing_get_batch
+
+    print(
+        json.dumps(
+            context.datasources[
+                "my_sqlite_db_standard_datasource"
+            ].get_available_data_asset_names(),
+            indent=4,
+        )
+    )
+
+    batch: Batch
+
+    batch = context.get_batch(
+        batch_request=BatchRequest(
+            datasource_name="my_sqlite_db_standard_datasource",
+            data_connector_name="my_sqlite_db_configured_asset_data_connector",
+            data_asset_name="my_query_data_asset",
+        )
+    )
+
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "my_query_data_asset"
+    assert isinstance(batch.data, SqlAlchemyBatchData)
+    assert len(batch.data.head(fetch_all=True)) == 120
+    assert batch.data.row_count() == 120
+    assert batch.batch_markers.get("ge_load_time") is not None
+
+    batch = context.get_batch(
+        datasource_name="my_sqlite_db_standard_datasource",
+        data_connector_name="my_sqlite_db_configured_asset_data_connector",
+        data_asset_name="my_query_data_asset",
+    )
+
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "my_query_data_asset"
+    assert isinstance(batch.data, SqlAlchemyBatchData)
+    assert len(batch.data.head(fetch_all=True)) == 120
+    assert batch.data.row_count() == 120
+    assert batch.batch_markers.get("ge_load_time") is not None
+
+
+def test_get_batch_with_query_in_batch_request_batch_spec_passthrough(
+    data_context_with_sql_datasource_for_testing_get_batch,
+):
+    context = data_context_with_sql_datasource_for_testing_get_batch
+
+    print(
+        json.dumps(
+            context.datasources["my_sqlite_db"].get_available_data_asset_names(),
+            indent=4,
+        )
+    )
+
+    batch: Batch
+
+    batch = context.get_batch(
+        batch_request=BatchRequest(
+            datasource_name="my_sqlite_db",
+            data_connector_name="daily",
+            data_asset_name="table_partitioned_by_date_column__A",
+            batch_spec_passthrough={
+                "query": "SELECT * FROM table_partitioned_by_date_column__A"
+            },
+        )
+    )
+
+    assert batch.batch_spec is not None
+    assert (
+        batch.batch_definition["data_asset_name"]
+        == "table_partitioned_by_date_column__A"
+    )
+    assert isinstance(batch.data, SqlAlchemyBatchData)
+    assert len(batch.data.head(fetch_all=True)) == 120
+    assert batch.data.row_count() == 120
+    assert batch.batch_markers.get("ge_load_time") is not None
+
+    batch = context.get_batch(
+        datasource_name="my_sqlite_db",
+        data_connector_name="daily",
+        data_asset_name="table_partitioned_by_date_column__A",
+        batch_spec_passthrough={
+            "query": "SELECT * FROM table_partitioned_by_date_column__A"
+        },
+    )
+
+    assert batch.batch_spec is not None
+    assert (
+        batch.batch_definition["data_asset_name"]
+        == "table_partitioned_by_date_column__A"
+    )
+    assert isinstance(batch.data, SqlAlchemyBatchData)
+    assert len(batch.data.head(fetch_all=True)) == 120
+    assert batch.data.row_count() == 120
+    assert batch.batch_markers.get("ge_load_time") is not None

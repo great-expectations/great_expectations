@@ -83,7 +83,8 @@ def test_batch__str__method():
     "datasource_name": "my_datasource",
     "data_connector_name": "my_data_connector",
     "data_asset_name": "my_data_asset_name",
-    "partition_definition": {}
+    "partition_definition": {},
+    "batch_spec_passthrough": null
   },
   "batch_spec": "{'path': '/some/path/some.file'}",
   "batch_markers": "{'ge_load_time': 'FAKE_LOAD_TIME'}"

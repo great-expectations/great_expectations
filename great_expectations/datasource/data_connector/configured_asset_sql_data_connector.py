@@ -1,11 +1,16 @@
-from typing import Dict, List, Optional
+import copy
+from typing import Any, Callable, Dict, List, Optional, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     BatchSpec,
     PartitionDefinition,
 )
+from great_expectations.data_context.types.base import assetConfigSchema
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
@@ -15,8 +20,10 @@ from great_expectations.execution_engine import ExecutionEngine
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy.sql import Select
 except ImportError:
     sa = None
+    Select = None
 
 
 class ConfiguredAssetSqlDataConnector(DataConnector):
@@ -30,16 +37,21 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         data_assets (str): data_assets
     """
 
+    # TODO: <Alex>02/15/2021: We need to unify "data_asset" and "asset" (and "data_assets" and "assets", respectively) into a single entity under the "data_asset" name.  The variable "asset" was introduced in order to avoid confusion with the Legacy architecture.  However, it is important to reconcile the two in order to prevent their bifurcation from further incurring maintenance costs.</Alex>
     def __init__(
         self,
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        data_assets: Optional[Dict[str, dict]] = None,
+        data_assets: Optional[Dict[str, Union[dict, Asset]]] = None,
+        **kwargs,
     ):
         if data_assets is None:
             data_assets = {}
         self._data_assets = data_assets
+        assets: Optional[Dict[str, Union[dict, Asset]]] = kwargs.get("assets")
+        if assets:
+            self._build_assets_from_config(config=assets)
 
         super().__init__(
             name=name,
@@ -47,15 +59,40 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             execution_engine=execution_engine,
         )
 
+    # TODO: <Alex>02/15/2021: This needs to be refactored to be available at the top DataConnector level for all subclasses.  Also see the comment above unifying "data_assets" and "assets" above.</Alex>
+    def _build_assets_from_config(self, config: Dict[str, dict]):
+        for name, asset_config in config.items():
+            if asset_config is None:
+                asset_config = {}
+            asset_config.update({"name": name})
+            new_asset: Asset = self._build_asset_from_config(
+                config=asset_config,
+            )
+            self.add_data_asset(name=name, config=new_asset)
+
+    # TODO: <Alex>02/15/2021: This needs to be refactored to be available at the top DataConnector level for all subclasses.  Also see the comment above unifying "data_assets" and "assets" above.</Alex>
+    def _build_asset_from_config(self, config: dict):
+        runtime_environment: dict = {"data_connector": self}
+        config = assetConfigSchema.load(config)
+        config = assetConfigSchema.dump(config)
+        asset: Asset = instantiate_class_from_config(
+            config=config,
+            runtime_environment=runtime_environment,
+            config_defaults={},
+        )
+        if not asset:
+            raise ge_exceptions.ClassInstantiationError(
+                module_name="great_expectations.datasource.data_connector.asset",
+                package_name=None,
+                class_name=config["class_name"],
+            )
+        return asset
+
     @property
-    def data_assets(self) -> Dict[str, dict]:
+    def data_assets(self) -> Dict[str, Union[dict, Asset]]:
         return self._data_assets
 
-    def add_data_asset(
-        self,
-        name: str,
-        config: dict,
-    ):
+    def add_data_asset(self, name: str, config: Union[dict, Asset]):
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
         """
@@ -63,30 +100,49 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     def _get_partition_definition_list_from_data_asset_config(
         self,
-        data_asset_name,
-        data_asset_config,
-    ):
-        if "table_name" in data_asset_config:
-            table_name = data_asset_config["table_name"]
+        data_asset_name: str,
+        data_asset_config: Union[dict, Asset],
+    ) -> List[Dict[str, Any]]:
+        partition_definition_list: List[Dict[str, Any]] = []
+        if (
+            isinstance(data_asset_config, Asset)
+            and data_asset_config.batch_spec_passthrough
+        ):
+            query: str = data_asset_config.batch_spec_passthrough.get("query")
+            if query:
+                partition_definition_list.append(
+                    {"batch_spec_passthrough": data_asset_config.batch_spec_passthrough}
+                )
+            else:
+                partition_definition_list.append({})
         else:
-            table_name = data_asset_name
+            table_name: str
+            if "table_name" in data_asset_config:
+                table_name = data_asset_config["table_name"]
+            else:
+                table_name = data_asset_name
 
-        if "splitter_method" in data_asset_config:
-            splitter_fn = getattr(self, data_asset_config["splitter_method"])
-            split_query = splitter_fn(
-                table_name=table_name, **data_asset_config["splitter_kwargs"]
-            )
+            if "splitter_method" in data_asset_config:
+                splitter_fn: Callable = getattr(
+                    self, data_asset_config["splitter_method"]
+                )
+                split_query: Select = splitter_fn(
+                    table_name=table_name, **data_asset_config["splitter_kwargs"]
+                )
 
-            rows = self._execution_engine.engine.execute(split_query).fetchall()
+                rows: List[tuple] = self._execution_engine.engine.execute(
+                    split_query
+                ).fetchall()
 
-            # Zip up split parameters with column names
-            column_names = self._get_column_names_from_splitter_kwargs(
-                data_asset_config["splitter_kwargs"]
-            )
-            partition_definition_list = [dict(zip(column_names, row)) for row in rows]
-
-        else:
-            partition_definition_list = [{}]
+                # Zip up split parameters with column names
+                column_names: List[str] = self._get_column_names_from_splitter_kwargs(
+                    data_asset_config["splitter_kwargs"]
+                )
+                partition_definition_list.extend(
+                    [dict(zip(column_names, row)) for row in rows]
+                )
+            else:
+                partition_definition_list.append({})
 
         return partition_definition_list
 
@@ -97,8 +153,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             data_asset = self.data_assets[data_asset_name]
             partition_definition_list = (
                 self._get_partition_definition_list_from_data_asset_config(
-                    data_asset_name,
-                    data_asset,
+                    data_asset_name=data_asset_name,
+                    data_asset_config=data_asset,
                 )
             )
 
@@ -145,6 +201,20 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
 
+        if (
+            batch_request.batch_spec_passthrough
+            and batch_request.batch_spec_passthrough.get("query")
+        ):
+            return [
+                BatchDefinition(
+                    datasource_name=self.datasource_name,
+                    data_connector_name=self.name,
+                    data_asset_name=batch_request.data_asset_name,
+                    partition_definition=PartitionDefinition(),
+                    batch_spec_passthrough=batch_request.batch_spec_passthrough,
+                )
+            ]
+
         batch_definition_list: List[BatchDefinition] = []
 
         try:
@@ -155,12 +225,25 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         for partition_definition in sub_cache:
-            batch_definition: BatchDefinition = BatchDefinition(
-                datasource_name=self.datasource_name,
-                data_connector_name=self.name,
-                data_asset_name=batch_request.data_asset_name,
-                partition_definition=PartitionDefinition(partition_definition),
-            )
+            batch_definition: BatchDefinition
+            if "batch_spec_passthrough" in partition_definition:
+                batch_definition = BatchDefinition(
+                    datasource_name=self.datasource_name,
+                    data_connector_name=self.name,
+                    data_asset_name=batch_request.data_asset_name,
+                    partition_definition=PartitionDefinition(),
+                    batch_spec_passthrough=partition_definition[
+                        "batch_spec_passthrough"
+                    ],
+                )
+            else:
+                batch_definition = BatchDefinition(
+                    datasource_name=self.datasource_name,
+                    data_connector_name=self.name,
+                    data_asset_name=batch_request.data_asset_name,
+                    partition_definition=PartitionDefinition(partition_definition),
+                    batch_spec_passthrough=batch_request.batch_spec_passthrough,
+                )
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
@@ -168,14 +251,24 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
-    ) -> List[str]:
+    ) -> List[Dict[str, Any]]:
         return self._data_references_cache[data_asset_name]
 
     def _map_data_reference_to_batch_definition_list(
-        self, data_reference, data_asset_name: Optional[str] = None  #: Any,
+        self, data_reference: dict, data_asset_name: Optional[str] = None  #: Any,
     ) -> Optional[List[BatchDefinition]]:
         # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
         # allowing us to invoke `PartitionDefinition(data_reference)`
+        if "batch_spec_passthrough" in data_reference:
+            return [
+                BatchDefinition(
+                    datasource_name=self.datasource_name,
+                    data_connector_name=self.name,
+                    data_asset_name=data_asset_name,
+                    partition_definition=PartitionDefinition(),
+                    batch_spec_passthrough=data_reference["batch_spec_passthrough"],
+                )
+            ]
         return [
             BatchDefinition(
                 datasource_name=self.datasource_name,
@@ -204,6 +297,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         data_asset_name: str = batch_definition.data_asset_name
         if (
             data_asset_name in self.data_assets
+            and isinstance(self.data_assets[data_asset_name], dict)
             and self.data_assets[data_asset_name].get("batch_spec_passthrough")
             and isinstance(
                 self.data_assets[data_asset_name].get("batch_spec_passthrough"), dict
@@ -231,6 +325,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             dict built from batch_definition
         """
         data_asset_name: str = batch_definition.data_asset_name
+        if (
+            batch_definition.batch_spec_passthrough
+            and batch_definition.batch_spec_passthrough.get("query")
+        ):
+            return copy.deepcopy(batch_definition.batch_spec_passthrough)
         return {
             "table_name": data_asset_name,
             "partition_definition": batch_definition.partition_definition,
