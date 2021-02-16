@@ -470,7 +470,6 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
         .gitkeep
         my_checkpoint.yml
         titanic_checkpoint_0.yml
