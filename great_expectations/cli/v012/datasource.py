@@ -1,4 +1,5 @@
 import enum
+import json
 import logging
 import os
 import platform
@@ -10,8 +11,11 @@ import click
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
-from great_expectations.cli import toolkit
-from great_expectations.cli.util import (
+from great_expectations.cli.v012 import toolkit
+from great_expectations.cli.v012.cli_messages import NO_DATASOURCES_FOUND
+from great_expectations.cli.v012.docs import build_docs
+from great_expectations.cli.v012.mark import Mark as mark
+from great_expectations.cli.v012.util import (
     CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     cli_message,
     cli_message_dict,
@@ -162,6 +166,134 @@ def _build_datasource_intro_string(datasource_count):
     if datasource_count > 1:
         list_intro_string = f"{datasource_count} Datasources found:"
     return list_intro_string
+
+
+@datasource.command(name="profile")
+@click.argument("datasource", default=None, required=False)
+@click.option(
+    "--batch-kwargs-generator-name",
+    "-g",
+    default=None,
+    help="The name of the batch kwargs generator configured in the datasource. It will list data assets in the "
+    "datasource",
+)
+@click.option(
+    "--data-assets",
+    "-l",
+    default=None,
+    help="Comma-separated list of the names of data assets that should be profiled. Requires datasource specified.",
+)
+@click.option(
+    "--profile_all_data_assets",
+    "-A",
+    is_flag=True,
+    default=False,
+    help="Profile ALL data assets within the target data source. "
+    "If True, this will override --max_data_assets.",
+)
+@click.option(
+    "--assume-yes",
+    "--yes",
+    "-y",
+    is_flag=True,
+    default=False,
+    help="By default request confirmation unless you specify -y/--yes/--assume-yes flag to skip dialog",
+)
+@click.option(
+    "--directory",
+    "-d",
+    default=None,
+    help="The project's great_expectations directory.",
+)
+@click.option(
+    "--view/--no-view",
+    help="By default open in browser unless you specify the --no-view flag",
+    default=True,
+)
+@click.option(
+    "--additional-batch-kwargs",
+    default=None,
+    help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
+)
+@mark.cli_as_experimental
+def datasource_profile(
+    datasource,
+    batch_kwargs_generator_name,
+    data_assets,
+    profile_all_data_assets,
+    directory,
+    view,
+    additional_batch_kwargs,
+    assume_yes,
+):
+    """
+    Profile a datasource (Experimental)
+
+    If the optional data_assets and profile_all_data_assets arguments are not specified, the profiler will check
+    if the number of data assets in the datasource exceeds the internally defined limit. If it does, it will
+    prompt the user to either specify the list of data assets to profile or to profile all.
+    If the limit is not exceeded, the profiler will profile all data assets in the datasource.
+    """
+    context = toolkit.load_data_context_with_error_handling(directory)
+
+    try:
+        if additional_batch_kwargs is not None:
+            # TODO refactor out json load check in suite edit and add here
+            additional_batch_kwargs = json.loads(additional_batch_kwargs)
+            # TODO refactor batch load check in suite edit and add here
+
+        if datasource is None:
+            datasources = [
+                _datasource["name"] for _datasource in context.list_datasources()
+            ]
+            if not datasources:
+                cli_message(NO_DATASOURCES_FOUND)
+                send_usage_message(
+                    data_context=context, event="cli.datasource.profile", success=False
+                )
+                sys.exit(1)
+            elif len(datasources) > 1:
+                cli_message(
+                    "<red>Error: please specify the datasource to profile. "
+                    "Available datasources: " + ", ".join(datasources) + "</red>"
+                )
+                send_usage_message(
+                    data_context=context, event="cli.datasource.profile", success=False
+                )
+                sys.exit(1)
+            else:
+                profile_datasource(
+                    context,
+                    datasources[0],
+                    batch_kwargs_generator_name=batch_kwargs_generator_name,
+                    data_assets=data_assets,
+                    profile_all_data_assets=profile_all_data_assets,
+                    open_docs=view,
+                    additional_batch_kwargs=additional_batch_kwargs,
+                    skip_prompt_flag=assume_yes,
+                )
+                send_usage_message(
+                    data_context=context, event="cli.datasource.profile", success=True
+                )
+        else:
+            profile_datasource(
+                context,
+                datasource,
+                batch_kwargs_generator_name=batch_kwargs_generator_name,
+                data_assets=data_assets,
+                profile_all_data_assets=profile_all_data_assets,
+                open_docs=view,
+                additional_batch_kwargs=additional_batch_kwargs,
+                skip_prompt_flag=assume_yes,
+            )
+            send_usage_message(
+                data_context=context, event="cli.datasource.profile", success=True
+            )
+    except Exception as e:
+        send_usage_message(
+            data_context=context, event="cli.datasource.profile", success=False
+        )
+        raise e
 
 
 def add_datasource(context, choose_one_data_asset=False):
@@ -1301,6 +1433,187 @@ def skip_prompt_message(skip_flag, prompt_message_text) -> bool:
         return click.confirm(prompt_message_text, default=True)
 
     return skip_flag
+
+
+def profile_datasource(
+    context,
+    datasource_name,
+    batch_kwargs_generator_name=None,
+    data_assets=None,
+    profile_all_data_assets=False,
+    max_data_assets=20,
+    additional_batch_kwargs=None,
+    open_docs=False,
+    skip_prompt_flag=False,
+):
+    """"Profile a named datasource using the specified context"""
+    # Note we are explicitly not using a logger in all CLI output to have
+    # more control over console UI.
+    logging.getLogger("great_expectations.profile.basic_dataset_profiler").setLevel(
+        logging.INFO
+    )
+    msg_intro = "Profiling '{0:s}' will create expectations and documentation."
+
+    msg_confirm_ok_to_proceed = """Would you like to profile '{0:s}'?"""
+
+    msg_skipping = (
+        "Skipping profiling for now. You can always do this later "
+        "by running `<green>great_expectations datasource profile</green>`."
+    )
+
+    msg_some_data_assets_not_found = """Some of the data assets you specified were not found: {0:s}
+"""
+
+    msg_too_many_data_assets = """There are {0:d} data assets in {1:s}. Profiling all of them might take too long.
+"""
+
+    msg_error_multiple_generators_found = """<red>More than one batch kwargs generator found in datasource {0:s}.
+Specify the one you want the profiler to use in batch_kwargs_generator_name argument.</red>
+"""
+
+    msg_error_no_generators_found = """<red>No batch kwargs generators can list available data assets in datasource
+    {0:s}. The datasource might be empty or a batch kwargs generator not configured in the config file.</red>
+"""
+
+    msg_prompt_enter_data_asset_list = """Enter comma-separated list of data asset names (e.g., {0:s})
+"""
+
+    msg_options = """Choose how to proceed:
+  1. Specify a list of the data assets to profile
+  2. Exit and profile later
+  3. Profile ALL data assets (this might take a while)
+"""
+
+    msg_data_doc_intro = """
+<cyan>========== Data Docs ==========</cyan>
+
+Great Expectations is building Data Docs from the data you just profiled!"""
+
+    cli_message(msg_intro.format(datasource_name))
+
+    if data_assets:
+        data_assets = [item.strip() for item in data_assets.split(",")]
+
+    # Call the data context's profiling method to check if the arguments are valid
+    profiling_results = context.profile_datasource(
+        datasource_name,
+        batch_kwargs_generator_name=batch_kwargs_generator_name,
+        data_assets=data_assets,
+        profile_all_data_assets=profile_all_data_assets,
+        max_data_assets=max_data_assets,
+        dry_run=True,
+        additional_batch_kwargs=additional_batch_kwargs,
+    )
+
+    if (
+        profiling_results["success"] is True
+    ):  # data context is ready to profile - run profiling
+        if (
+            data_assets
+            or profile_all_data_assets
+            or skip_prompt_message(
+                skip_prompt_flag, msg_confirm_ok_to_proceed.format(datasource_name)
+            )
+        ):
+            profiling_results = context.profile_datasource(
+                datasource_name,
+                batch_kwargs_generator_name=batch_kwargs_generator_name,
+                data_assets=data_assets,
+                profile_all_data_assets=profile_all_data_assets,
+                max_data_assets=max_data_assets,
+                dry_run=False,
+                additional_batch_kwargs=additional_batch_kwargs,
+            )
+        else:
+            cli_message(msg_skipping)
+            return
+    else:  # we need to get arguments from user interactively
+        do_exit = False
+        while not do_exit:
+            if (
+                profiling_results["error"]["code"]
+                == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
+            ):
+                cli_message(
+                    msg_some_data_assets_not_found.format(
+                        ",".join(profiling_results["error"]["not_found_data_assets"])
+                    )
+                )
+            elif (
+                profiling_results["error"]["code"]
+                == DataContext.PROFILING_ERROR_CODE_TOO_MANY_DATA_ASSETS
+            ):
+                cli_message(
+                    msg_too_many_data_assets.format(
+                        profiling_results["error"]["num_data_assets"], datasource_name
+                    )
+                )
+            elif (
+                profiling_results["error"]["code"]
+                == DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+            ):
+                cli_message(msg_error_multiple_generators_found.format(datasource_name))
+                sys.exit(1)
+            elif (
+                profiling_results["error"]["code"]
+                == DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+            ):
+                cli_message(msg_error_no_generators_found.format(datasource_name))
+                sys.exit(1)
+            else:  # unknown error
+                raise ValueError(
+                    "Unknown profiling error code: "
+                    + profiling_results["error"]["code"]
+                )
+
+            option_selection = click.prompt(
+                msg_options, type=click.Choice(["1", "2", "3"]), show_choices=False
+            )
+
+            if option_selection == "1":
+                data_assets = click.prompt(
+                    msg_prompt_enter_data_asset_list.format(
+                        ", ".join(
+                            [
+                                data_asset[0]
+                                for data_asset in profiling_results["error"][
+                                    "data_assets"
+                                ]
+                            ][:3]
+                        )
+                    ),
+                    show_default=False,
+                )
+                if data_assets:
+                    data_assets = [item.strip() for item in data_assets.split(",")]
+            elif option_selection == "3":
+                profile_all_data_assets = True
+                data_assets = None
+            elif option_selection == "2":  # skip
+                cli_message(msg_skipping)
+                return
+            else:
+                raise ValueError("Unrecognized option: " + option_selection)
+
+            # after getting the arguments from the user, let's try to run profiling again
+            # (no dry run this time)
+            profiling_results = context.profile_datasource(
+                datasource_name,
+                batch_kwargs_generator_name=batch_kwargs_generator_name,
+                data_assets=data_assets,
+                profile_all_data_assets=profile_all_data_assets,
+                max_data_assets=max_data_assets,
+                dry_run=False,
+                additional_batch_kwargs=additional_batch_kwargs,
+            )
+
+            if profiling_results["success"]:  # data context is ready to profile
+                break
+
+    cli_message(msg_data_doc_intro.format(rtd_url_ge_version))
+    build_docs(context, view=open_docs, assume_yes=skip_prompt_flag)
+    if open_docs:  # This is mostly to keep tests from spawning windows
+        context.open_data_docs()
 
 
 msg_prompt_choose_datasource = """Configure a datasource:

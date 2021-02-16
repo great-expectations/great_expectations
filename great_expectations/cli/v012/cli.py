@@ -3,15 +3,15 @@ import logging
 import click
 
 from great_expectations import __version__ as ge_version
-from great_expectations.cli.checkpoint import checkpoint
-from great_expectations.cli.cli_logging import _set_up_logger
-from great_expectations.cli.datasource import datasource
-from great_expectations.cli.docs import docs
-from great_expectations.cli.init import init
-from great_expectations.cli.project import project
-from great_expectations.cli.store import store
-from great_expectations.cli.suite import suite
-from great_expectations.cli.validation_operator import validation_operator
+from great_expectations.cli.v012.checkpoint import checkpoint
+from great_expectations.cli.v012.cli_logging import _set_up_logger
+from great_expectations.cli.v012.datasource import datasource
+from great_expectations.cli.v012.docs import docs
+from great_expectations.cli.v012.init import init
+from great_expectations.cli.v012.project import project
+from great_expectations.cli.v012.store import store
+from great_expectations.cli.v012.suite import suite
+from great_expectations.cli.v012.validation_operator import validation_operator
 
 try:
     from colorama import init as init_colorama
@@ -33,7 +33,6 @@ except ImportError:
     default=False,
     help="Set great_expectations to use verbose output.",
 )
-# TODO: <Alex>ALEX -- Update this --help page to fit with the new design.</Alex>
 def cli(verbose):
     """
     Welcome to the great_expectations CLI!
