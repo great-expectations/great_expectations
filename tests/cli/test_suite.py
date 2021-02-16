@@ -1267,6 +1267,28 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
     )
 
 
+def test_suite_list_with_one_suite_using_config_param(caplog, empty_data_context):
+    project_dir = empty_data_context.root_directory
+    context = DataContext(project_dir)
+    config_file_path = os.path.join(project_dir, "great_expectations.yml")
+    assert os.path.exists(config_file_path)
+    context.create_expectation_suite("a.warning")
+    runner = CliRunner(mix_stderr=False)
+
+    result = runner.invoke(
+        cli,
+        f"--config {config_file_path} suite list",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert "1 Expectation Suite found" in result.output
+    assert "a.warning" in result.output
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
 def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)

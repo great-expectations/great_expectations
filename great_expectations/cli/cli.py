@@ -36,6 +36,7 @@ except ImportError:
 # TODO: <Alex>ALEX -- Update this --help page to fit with the new design.</Alex>
 @click.option(
     "--config",
+    "--config_file_location",
     "-c",
     "config_file_location",
     help="Path to great_expectations configuration file location (great_expectations.yml). Inferred if not provided.",

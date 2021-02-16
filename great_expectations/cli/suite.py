@@ -449,6 +449,7 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
     default=None,
     help="The project's great_expectations directory.",
 )
+@click.pass_context
 def suite_list(ctx, directory):
     """Lists available Expectation Suites."""
 
