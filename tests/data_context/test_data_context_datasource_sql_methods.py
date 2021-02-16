@@ -4,18 +4,20 @@ from typing import List
 import pytest
 from ruamel.yaml import YAML
 
+from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
 )
-from great_expectations.marshmallow__shade.exceptions import ValidationError
+from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 
 
 def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context: DataContext = data_context_with_sql_datasource_for_testing_get_batch
 
     print(
         json.dumps(
@@ -134,7 +136,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
 
 
 def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context: DataContext = data_context_with_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("my_expectations")
 
     print(
@@ -267,7 +269,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
 def test_get_validator_expectation_suite_options(
     data_context_with_sql_datasource_for_testing_get_batch,
 ):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context: DataContext = data_context_with_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("some_expectations")
 
     # Successful specification with an existing expectation_suite_name
@@ -280,7 +282,9 @@ def test_get_validator_expectation_suite_options(
     )
 
     # Successful specification with a fetched ExpectationSuite object
-    some_expectations = context.get_expectation_suite("some_expectations")
+    some_expectations: ExpectationSuite = context.get_expectation_suite(
+        "some_expectations"
+    )
     context.get_validator(
         datasource_name="my_sqlite_db",
         data_connector_name="daily",
@@ -290,7 +294,7 @@ def test_get_validator_expectation_suite_options(
     )
 
     # Successful specification with a fresh ExpectationSuite object
-    some_more_expectations = context.create_expectation_suite(
+    some_more_expectations: ExpectationSuite = context.create_expectation_suite(
         expectation_suite_name="some_more_expectations"
     )
     context.get_validator(
@@ -326,6 +330,7 @@ def test_get_validator_expectation_suite_options(
 
     # Failed specification: incorrectly typed expectation suite
     with pytest.raises(TypeError):
+        # noinspection PyTypeChecker
         context.get_validator(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
@@ -342,7 +347,7 @@ def test_get_validator_expectation_suite_options(
 def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
     sa, data_context_with_sql_datasource_for_testing_get_batch
 ):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context: DataContext = data_context_with_sql_datasource_for_testing_get_batch
 
     batch_request: dict = {
         "datasource_name": "my_sqlite_db",
@@ -368,7 +373,7 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
 def test_get_batch_with_query_in_configured_asset_batch_spec_passthrough(
     data_context_with_sql_datasource_for_testing_get_batch,
 ):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context: DataContext = data_context_with_sql_datasource_for_testing_get_batch
 
     print(
         json.dumps(
@@ -386,7 +391,7 @@ def test_get_batch_with_query_in_configured_asset_batch_spec_passthrough(
             datasource_name="my_sqlite_db_standard_datasource",
             data_connector_name="my_sqlite_db_configured_asset_data_connector",
             data_asset_name="my_query_data_asset",
-        )
+        ),
     )
 
     assert batch.batch_spec is not None
@@ -413,7 +418,7 @@ def test_get_batch_with_query_in_configured_asset_batch_spec_passthrough(
 def test_get_batch_with_query_in_batch_request_batch_spec_passthrough(
     data_context_with_sql_datasource_for_testing_get_batch,
 ):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context: DataContext = data_context_with_sql_datasource_for_testing_get_batch
 
     print(
         json.dumps(
@@ -432,7 +437,7 @@ def test_get_batch_with_query_in_batch_request_batch_spec_passthrough(
             batch_spec_passthrough={
                 "query": "SELECT * FROM table_partitioned_by_date_column__A"
             },
-        )
+        ),
     )
 
     assert batch.batch_spec is not None
@@ -463,3 +468,71 @@ def test_get_batch_with_query_in_batch_request_batch_spec_passthrough(
     assert len(batch.data.head(fetch_all=True)) == 120
     assert batch.data.row_count() == 120
     assert batch.batch_markers.get("ge_load_time") is not None
+
+
+def test_get_validator_with_query_in_configured_asset_batch_spec_passthrough(
+    data_context_with_sql_datasource_for_testing_get_batch,
+):
+    context: DataContext = data_context_with_sql_datasource_for_testing_get_batch
+    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        "my_expectations"
+    )
+
+    validator: Validator
+
+    validator = context.get_validator(
+        batch_request=BatchRequest(
+            datasource_name="my_sqlite_db_standard_datasource",
+            data_connector_name="my_sqlite_db_configured_asset_data_connector",
+            data_asset_name="my_query_data_asset",
+        ),
+        expectation_suite=my_expectation_suite,
+    )
+
+    assert len(validator.batches) == 1
+
+    validator = context.get_validator(
+        datasource_name="my_sqlite_db_standard_datasource",
+        data_connector_name="my_sqlite_db_configured_asset_data_connector",
+        data_asset_name="my_query_data_asset",
+        expectation_suite=my_expectation_suite,
+    )
+
+    assert len(validator.batches) == 1
+
+
+def test_get_validator_with_query_in_batch_request_batch_spec_passthrough(
+    data_context_with_sql_datasource_for_testing_get_batch,
+):
+    context: DataContext = data_context_with_sql_datasource_for_testing_get_batch
+    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        "my_expectations"
+    )
+
+    validator: Validator
+
+    validator = context.get_validator(
+        batch_request=BatchRequest(
+            datasource_name="my_sqlite_db",
+            data_connector_name="daily",
+            data_asset_name="table_partitioned_by_date_column__A",
+            batch_spec_passthrough={
+                "query": "SELECT * FROM table_partitioned_by_date_column__A"
+            },
+        ),
+        expectation_suite=my_expectation_suite,
+    )
+
+    assert len(validator.batches) == 1
+
+    validator = context.get_validator(
+        datasource_name="my_sqlite_db",
+        data_connector_name="daily",
+        data_asset_name="table_partitioned_by_date_column__A",
+        batch_spec_passthrough={
+            "query": "SELECT * FROM table_partitioned_by_date_column__A"
+        },
+        expectation_suite=my_expectation_suite,
+    )
+
+    assert len(validator.batches) == 1
