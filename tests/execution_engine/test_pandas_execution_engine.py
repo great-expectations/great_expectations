@@ -1,6 +1,7 @@
 import datetime
 import os
 import random
+from io import BytesIO
 from typing import List
 
 import boto3
@@ -376,9 +377,11 @@ def test_s3_files_compressed(s3, s3_bucket, test_df_small):
         "directory/B-2.csv.gz",
     ]
     for key in keys:
+        buf = BytesIO()
+        test_df_small.to_csv(buf, index=False, compression="gzip")
         s3.put_object(
             Bucket=s3_bucket,
-            Body=test_df_small.to_csv(index=False, compression="gzip"),
+            Body=buf,
             Key=key,
         )
     return s3_bucket, keys
