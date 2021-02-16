@@ -2,6 +2,7 @@ import hashlib
 import logging
 import pickle
 from urllib.parse import urlparse
+from typing import Optional
 
 import pandas as pd
 
@@ -63,6 +64,18 @@ class S3Url:
             return self._parsed.path.lstrip("/")
 
     @property
+    def suffix(self) -> Optional[str]:
+        """
+        Attempts to get a file suffix from the S3 key.
+        If can't find one returns `None`.
+        """
+        splits = self._parsed.path.rsplit(".", 1)
+        _suffix = splits[-1]
+        if len(_suffix) > 0 and len(splits) > 1:
+            return str(_suffix)
+        return None
+
+    @property
     def url(self):
         return self._parsed.geturl()
 
@@ -75,3 +88,4 @@ def hash_pandas_dataframe(df):
         obj = pickle.dumps(df, pickle.HIGHEST_PROTOCOL)
 
     return hashlib.md5(obj).hexdigest()
+
