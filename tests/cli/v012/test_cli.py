@@ -4,15 +4,14 @@ from click.testing import CliRunner
 from ruamel.yaml import YAML
 
 from great_expectations import __version__ as ge_version
-from great_expectations.cli import cli
+from great_expectations.cli.v012 import cli
 from great_expectations.exceptions import ConfigNotFoundError
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from tests.cli.v012.utils import assert_no_logging_messages_or_tracebacks
 
 yaml = YAML()
 yaml.default_flow_style = False
 
 
-# TODO: <Alex>ALEX -- Update this --help page test to fit with the new design.</Alex>
 def test_cli_command_entrance(caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, catch_exceptions=False)
@@ -98,6 +97,18 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
         )
         assert error_message in result.output
         result = runner.invoke(cli, ["datasource", "new"], catch_exceptions=False)
+        assert error_message in result.output
+
+        # datasource profile
+        result = runner.invoke(
+            cli,
+            ["datasource", "profile", "-d", "./", "--no-view"],
+            catch_exceptions=False,
+        )
+        assert error_message in result.output
+        result = runner.invoke(
+            cli, ["datasource", "profile", "--no-view"], catch_exceptions=False
+        )
         assert error_message in result.output
 
         # docs build
