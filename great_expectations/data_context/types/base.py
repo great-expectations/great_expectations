@@ -1650,8 +1650,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = config_version
         if self.config_version is None:
             class_name = class_name or "LegacyCheckpoint"
-            if validation_operator_name is None:
-                validation_operator_name = "action_list_operator"
             self.validation_operator_name = validation_operator_name
             if batches is not None and isinstance(batches, list):
                 self.batches = batches
