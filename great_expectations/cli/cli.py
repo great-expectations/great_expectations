@@ -34,7 +34,6 @@ except ImportError:
     help="Set great_expectations to use verbose output.",
 )
 # TODO: <Alex>ALEX -- Update this --help page to fit with the new design.</Alex>
-def cli(verbose):
 @click.option(
     "--config",
     "-c",

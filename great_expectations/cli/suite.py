@@ -452,7 +452,7 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
 def suite_list(ctx, directory):
     """Lists available Expectation Suites."""
 
-    # Use global config_file_location
+    # Use global config_file_location if provided and if directory not passed
     if ctx.obj["CONFIG_FILE_LOCATION"] is not None and directory is None:
         directory = os.path.dirname(ctx.obj["CONFIG_FILE_LOCATION"])
 
