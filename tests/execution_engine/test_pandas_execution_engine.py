@@ -1,7 +1,7 @@
 import datetime
 import os
 import random
-from io import BytesIO
+from pathlib import Path
 from typing import List
 
 import boto3
@@ -323,7 +323,21 @@ def test_df_small() -> pd.DataFrame:
 
 
 @pytest.fixture
-def test_s3_files(s3, s3_bucket, test_df_small):
+def test_df_small_csv_compressed(test_df_small, tmpdir) -> bytes:
+    path = Path(tmpdir) / "file.csv.gz"
+    test_df_small.to_csv(path, index=False, compression="gzip")
+    return path.read_bytes()
+
+
+@pytest.fixture
+def test_df_small_csv(test_df_small, tmpdir) -> bytes:
+    path = Path(tmpdir) / "file.csv"
+    test_df_small.to_csv(path, index=False)
+    return path.read_bytes()
+
+
+@pytest.fixture
+def test_s3_files(s3, s3_bucket, test_df_small_csv):
     keys: List[str] = [
         "path/A-100.csv",
         "path/A-101.csv",
@@ -331,7 +345,7 @@ def test_s3_files(s3, s3_bucket, test_df_small):
         "directory/B-2.csv",
     ]
     for key in keys:
-        s3.put_object(Bucket=s3_bucket, Body=test_df_small.to_csv(index=False), Key=key)
+        s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
     return s3_bucket, keys
 
 
@@ -369,20 +383,18 @@ def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
 
 
 @pytest.fixture
-def test_s3_files_compressed(s3, s3_bucket, test_df_small):
+def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed, tmpdir):
     keys: List[str] = [
         "path/A-100.csv.gz",
         "path/A-101.csv.gz",
         "directory/B-1.csv.gz",
         "directory/B-2.csv.gz",
     ]
+
     for key in keys:
-        buf = BytesIO()
-        test_df_small.to_csv(buf, index=False, compression="gzip")
-        buf.seek(0)
         s3.put_object(
             Bucket=s3_bucket,
-            Body=buf.read(),
+            Body=test_df_small_csv_compressed,
             Key=key,
         )
     return s3_bucket, keys
