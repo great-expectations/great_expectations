@@ -449,8 +449,13 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
     default=None,
     help="The project's great_expectations directory.",
 )
-def suite_list(directory):
+def suite_list(ctx, directory):
     """Lists available Expectation Suites."""
+
+    # Use global config_file_location
+    if ctx.obj["CONFIG_FILE_LOCATION"] is not None and directory is None:
+        directory = os.path.dirname(ctx.obj["CONFIG_FILE_LOCATION"])
+
     context = toolkit.load_data_context_with_error_handling(directory)
 
     try:
