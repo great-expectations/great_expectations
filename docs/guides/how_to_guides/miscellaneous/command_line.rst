@@ -39,7 +39,6 @@ This is a list of the most common commands you'll use in order of how much you'l
 * ``great_expectations datasource list``
 * ``great_expectations datasource profile``
 * ``great_expectations datasource delete``
-* ``great_expectations validation-operator run``
 * ``great_expectations init``
 
 You can get a list of Great Expectations commands available to you by typing ``great_expectations --help``.
@@ -472,99 +471,6 @@ validation operators configured in your project:
     $ great_expectations validation-operator list
     ... (YOUR VALIDATION OPERATORS)
 
-``great_expectations validation-operator run``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-There are two modes to run this command:
-
-1. Interactive (good for development):
-**************************************************************
-
-Specify the name of the validation operator using the ``--name`` argument and
-the name of the expectation suite using the ``--suite`` argument.
-
-The cli will help you specify the batch of data that you want to validate
-interactively.
-
-If you want to call a validation operator to validate one batch of data against
-one expectation suite, you can invoke this command:
-
-``great_expectations validation-operator run --name <VALIDATION_OPERATOR_NAME> --suite <SUITE_NAME>``
-
-Use the `--name` argument to specify the name of the validation operator you want to run. This has to be the name
-of one of the validation operators configured in your project. You can list the names by calling
-the ``great_expectations validation-operator list`` command or by examining the ``validation_operators`` section in your project's
-``great_expectations.yml`` config file.
-
-Use the `--suite` argument to specify the name of the expectation suite you want the validation operator to validate the
-batch of data against. This has to be the name of one of the expectation suites that exist in your project. You can look up the names by calling
-the `suite list` command.
-
-The command will help you specify the batch of data that you want the validation operator to validate interactively.
-
-.. code-block:: bash
-
-    $ great_expectations validation-operator --name action_list_operator --suite npi.warning
-
-    Let us help you specify the batch of data you want the validation operator to validate.
-
-    Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)
-    : data/npi_small.csv
-    Validation succeeded!
-
-2. Non-interactive (good for production):
-**************************************************************
-
-If you want run a validation operator non-interactively, use the `--validation_config_file` argument to specify the path of the validation configuration JSON file.
-
-``great_expectations validation-operator run ----validation_config_file <VALIDATION_CONFIG_FILE_PATH>``
-
-This file can be used to instruct a validation operator to validate multiple batches of data and use multiple expectation suites to validate each batch.
-
-.. note::
-    A validation operator can validate multiple batches of data and use multiple expectation suites to validate each batch.
-    For example, you might want to validate 3 source files, with 2 tiers of suites each, one for a warning suite and one for a critical stop-the-presses hard failure suite.
-
-This command exits with 0 if the validation operator ran and the "success" attribute in its return object is True.
-Otherwise, the command exits with 1.
-
-.. Tip:: This is an excellent way to use call Great Expectations from within your pipeline if your pipeline code can run shell commands.
-
-A validation config file specifies the name of the validation operator in your project and
-the list of batches of data that you want the operator to validate.
-Each batch is defined using ``batch_kwargs``.
-The ``expectation_suite_names`` attribute for each batch specifies the list of names of expectation suites that the validation
-operator should use to validate the batch.
-
-Here is an example validation config file:
-
-.. code-block:: json
-
-    {
-      "validation_operator_name": "action_list_operator",
-      "batches": [
-        {
-          "batch_kwargs": {
-            "path": "/Users/me/projects/my_project/data/data.csv",
-            "datasource": "my_filesystem_datasource",
-            "reader_method": "read_csv"
-          },
-          "expectation_suite_names": ["suite_one", "suite_two"]
-        },
-        {
-          "batch_kwargs": {
-            "query": "SELECT * FROM users WHERE status = 1",
-            "datasource": "my_redshift_datasource"
-          },
-          "expectation_suite_names": ["suite_three"]
-        }
-      ]
-    }
-
-.. code-block:: bash
-
-    $ great_expectations validation-operator run --validation_config_file my_val_config.json
-    Validation succeeded!
 
 
 great_expectations datasource

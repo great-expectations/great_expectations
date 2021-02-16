@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [DEPRECATION] Deprecate CLI command `validation-operator run`
 
 
 0.13.10
