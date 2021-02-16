@@ -383,7 +383,7 @@ def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
 
 
 @pytest.fixture
-def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed, tmpdir):
+def test_s3_files_compressed(s3, s3_bucket, test_df_small_csv_compressed):
     keys: List[str] = [
         "path/A-100.csv.gz",
         "path/A-101.csv.gz",
