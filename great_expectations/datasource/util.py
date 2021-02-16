@@ -1,8 +1,8 @@
 import hashlib
 import logging
 import pickle
-from urllib.parse import urlparse
 from typing import Optional
+from urllib.parse import urlparse
 
 import pandas as pd
 
@@ -89,3 +89,16 @@ def hash_pandas_dataframe(df):
 
     return hashlib.md5(obj).hexdigest()
 
+
+def sniff_s3_compression(s3_url: S3Url) -> str:
+    """Attempts to get read_csv compression from s3_url"""
+    suffix = s3_url.suffix
+    if suffix == "gz":
+        return "gzip"
+    if suffix == "zip":
+        return "zip"
+    if suffix == "bz2":
+        return "bz2"
+    if suffix == "xz":
+        return "xz"
+    return "infer"

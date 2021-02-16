@@ -379,9 +379,10 @@ def test_s3_files_compressed(s3, s3_bucket, test_df_small):
     for key in keys:
         buf = BytesIO()
         test_df_small.to_csv(buf, index=False, compression="gzip")
+        buf.seek(0)
         s3.put_object(
             Bucket=s3_bucket,
-            Body=buf,
+            Body=buf.read(),
             Key=key,
         )
     return s3_bucket, keys
@@ -392,10 +393,7 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     path = keys[0]
     full_path = f"s3a://{os.path.join(bucket, path)}"
 
-    batch_spec = S3BatchSpec(
-        path=full_path,
-        reader_method="read_csv",
-    )
+    batch_spec = S3BatchSpec(path=full_path, reader_method="read_csv")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
     assert df.shape == test_df_small.shape
 
