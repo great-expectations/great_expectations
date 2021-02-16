@@ -1,6 +1,7 @@
 trigger:
   - develop
   - main
+  - cli_wip # do not merge this line into develop
 
 resources:
   containers:
