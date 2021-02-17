@@ -36,3 +36,41 @@ def test_launch_jupyter_notebook_env_set_in_env(mock_subprocess):
 def test_load_data_context_with_error_handling_v1_config(v10_project_directory):
     with pytest.raises(UnsupportedConfigVersionError):
         DataContext(context_root_dir=v10_project_directory)
+
+
+def test_parse_cli_config_file_location():
+
+    input_path = "just_a_file.yml"
+    expected = {
+        "directory": "",
+        "filename": "just_a_file.yml",
+    }
+    assert toolkit.parse_cli_config_file_location(input_path) == expected
+
+    input_path = "/path/to/file/filename.yml"
+    expected = {
+        "directory": "/path/to/file",
+        "filename": "filename.yml",
+    }
+    assert toolkit.parse_cli_config_file_location(input_path) == expected
+
+    input_path = "/just/a/directory/ending/slash/"
+    expected = {
+        "directory": "/just/a/directory/ending/slash/",
+        "filename": None,
+    }
+    assert toolkit.parse_cli_config_file_location(input_path) == expected
+
+    input_path = "/just/a/directory/no/slash"
+    expected = {
+        "directory": "/just/a/directory/no/slash/",
+        "filename": None,
+    }
+    assert toolkit.parse_cli_config_file_location(input_path) == expected
+
+    input_path = None
+    expected = {
+        "directory": None,
+        "filename": None,
+    }
+    assert toolkit.parse_cli_config_file_location(input_path) == expected

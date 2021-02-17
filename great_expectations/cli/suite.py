@@ -447,7 +447,9 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
 def suite_list(ctx):
     """Lists available Expectation Suites."""
 
-    directory = toolkit.parse_cli_config_file_location(ctx=ctx).get("directory")
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
 
     try:

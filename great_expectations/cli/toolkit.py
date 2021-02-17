@@ -625,33 +625,34 @@ def confirm_proceed_or_exit(
     return True
 
 
-def parse_cli_config_file_location(
-    ctx,
-    config_file_location_key: str = "CONFIG_FILE_LOCATION",
-) -> dict:
+def parse_cli_config_file_location(config_file_location: str) -> dict:
     """
-    Parse CLI config file location into directory and filename.
+    Parse CLI yaml config file location into directory and filename.
+    Add a trailing slash to the directory if it did not already have one.
     Args:
-        ctx: click.Context object
-        config_file_location_key: key set in click.Context to store config_file_location
+        config_file_location: string of config_file_location
 
     Returns:
         {
             "directory": "directory/where/config/file/is/located",
             "filename": "great_expectations.yml" # or filename passed to CLI
-            "full_path": "directory/where/config/file/is/located/great_expectations.yml"
         }
     """
 
-    config_file_location = ctx.obj.get(config_file_location_key)
     if config_file_location is not None:
-        directory = os.path.dirname(config_file_location)
-        filename = os.path.basename(config_file_location)
-        full_path = config_file_location
+        # Check if file extension exists
+        file_extension = os.path.splitext(config_file_location)[1]
+        if file_extension == "":
+            filename = None
+            # Add trailing slash to directory if it doesn't exist
+            directory = os.path.join(config_file_location, "")
+        else:
+            filename = os.path.basename(config_file_location)
+            directory = os.path.dirname(config_file_location)
+
     else:
         # Return None if config_file_location is empty rather than default output of "" from os.path functions
         directory = None
         filename = None
-        full_path = None
 
-    return {"directory": directory, "filename": filename, "full_path": full_path}
+    return {"directory": directory, "filename": filename}
