@@ -4,6 +4,11 @@ import os
 import pandas as pd
 import pytest
 
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.types import (
     RuntimeDataBatchSpec,

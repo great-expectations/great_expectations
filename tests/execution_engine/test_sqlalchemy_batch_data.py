@@ -2,10 +2,9 @@ import pandas as pd
 import pytest
 
 try:
-    import sqlalchemy
+    sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
-
 
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
