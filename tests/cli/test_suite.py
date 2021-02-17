@@ -1229,24 +1229,6 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     )
 
 
-def test_suite_list_with_zero_suites(caplog, empty_data_context):
-    project_dir = empty_data_context.root_directory
-    runner = CliRunner(mix_stderr=False)
-
-    result = runner.invoke(
-        cli,
-        "suite list -d {}".format(project_dir),
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0
-    assert "No Expectation Suites found" in result.output
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
 def test_suite_list_with_zero_suites_using_config_param(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     config_file_path = os.path.join(project_dir, "great_expectations.yml")
@@ -1261,26 +1243,6 @@ def test_suite_list_with_zero_suites_using_config_param(caplog, empty_data_conte
     assert result.exit_code == 0
     assert "No Expectation Suites found" in result.output
 
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
-def test_suite_list_with_one_suite(caplog, empty_data_context):
-    project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
-    context.create_expectation_suite("a.warning")
-    runner = CliRunner(mix_stderr=False)
-
-    result = runner.invoke(
-        cli,
-        "suite list -d {}".format(project_dir),
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0
-    assert "1 Expectation Suite found" in result.output
-    assert "a.warning" in result.output
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
@@ -1303,33 +1265,6 @@ def test_suite_list_with_one_suite_using_config_param(caplog, empty_data_context
     assert result.exit_code == 0
     assert "1 Expectation Suite found" in result.output
     assert "a.warning" in result.output
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
-def test_suite_list_with_multiple_suites(caplog, empty_data_context):
-    project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
-    context.create_expectation_suite("a.warning")
-    context.create_expectation_suite("b.warning")
-    context.create_expectation_suite("c.warning")
-
-    runner = CliRunner(mix_stderr=False)
-
-    result = runner.invoke(
-        cli,
-        "suite list -d {}".format(project_dir),
-        catch_exceptions=False,
-    )
-    output = result.output
-    assert result.exit_code == 0
-    assert "3 Expectation Suites found:" in output
-    assert "a.warning" in output
-    assert "b.warning" in output
-    assert "c.warning" in output
-
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
@@ -1525,7 +1460,13 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "scaffold", "foop", "-d", root_dir],
+        [
+            "--config",
+            root_dir,
+            "suite",
+            "scaffold",
+            "foop",
+        ],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -1576,7 +1517,13 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "scaffold", "foop", "-d", root_dir],
+        [
+            "--config",
+            root_dir,
+            "suite",
+            "scaffold",
+            "foop",
+        ],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -1630,7 +1577,13 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "scaffold", suite_name, "-d", root_dir],
+        [
+            "--config",
+            root_dir,
+            "suite",
+            "scaffold",
+            suite_name,
+        ],
         input="1\n1\n",
         catch_exceptions=False,
     )
@@ -1686,7 +1639,7 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "scaffold", suite_name, "-d", root_dir, "--no-jupyter"],
+        ["--config", root_dir, "suite", "scaffold", suite_name, "--no-jupyter"],
         input="1\n1\n",
         catch_exceptions=False,
     )

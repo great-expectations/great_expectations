@@ -389,20 +389,18 @@ def suite_delete(suite, directory):
 @suite.command(name="scaffold")
 @click.argument("suite")
 @click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@click.option(
     "--jupyter/--no-jupyter",
     is_flag=True,
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
 @mark.cli_as_experimental
-def suite_scaffold(suite, directory, jupyter):
+@click.pass_context
+def suite_scaffold(ctx, suite, jupyter):
     """Scaffold a new Expectation Suite."""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     _suite_scaffold(suite, directory, jupyter)
 
 
