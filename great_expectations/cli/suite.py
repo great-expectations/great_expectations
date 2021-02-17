@@ -443,20 +443,11 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
 
 
 @suite.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @click.pass_context
-def suite_list(ctx, directory):
+def suite_list(ctx):
     """Lists available Expectation Suites."""
 
-    # Use global config_file_location if provided and if directory not passed
-    if ctx.obj["CONFIG_FILE_LOCATION"] is not None and directory is None:
-        directory = os.path.dirname(ctx.obj["CONFIG_FILE_LOCATION"])
-
+    directory = toolkit.parse_cli_config_file_location(ctx=ctx).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
 
     try:

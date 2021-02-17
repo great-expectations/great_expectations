@@ -1247,6 +1247,26 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
     )
 
 
+def test_suite_list_with_zero_suites_using_config_param(caplog, empty_data_context):
+    project_dir = empty_data_context.root_directory
+    config_file_path = os.path.join(project_dir, "great_expectations.yml")
+    assert os.path.exists(config_file_path)
+    runner = CliRunner(mix_stderr=False)
+
+    result = runner.invoke(
+        cli,
+        f"--config {config_file_path} suite list",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert "No Expectation Suites found" in result.output
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
 def test_suite_list_with_one_suite(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
@@ -1301,6 +1321,67 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     result = runner.invoke(
         cli,
         "suite list -d {}".format(project_dir),
+        catch_exceptions=False,
+    )
+    output = result.output
+    assert result.exit_code == 0
+    assert "3 Expectation Suites found:" in output
+    assert "a.warning" in output
+    assert "b.warning" in output
+    assert "c.warning" in output
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+def test_suite_list_with_multiple_suites_using_config_param(caplog, empty_data_context):
+    project_dir = empty_data_context.root_directory
+    context = DataContext(project_dir)
+    context.create_expectation_suite("a.warning")
+    context.create_expectation_suite("b.warning")
+    context.create_expectation_suite("c.warning")
+
+    config_file_path = os.path.join(project_dir, "great_expectations.yml")
+    assert os.path.exists(config_file_path)
+
+    runner = CliRunner(mix_stderr=False)
+
+    result = runner.invoke(
+        cli,
+        f"--config {config_file_path} suite list",
+        catch_exceptions=False,
+    )
+    output = result.output
+    assert result.exit_code == 0
+    assert "3 Expectation Suites found:" in output
+    assert "a.warning" in output
+    assert "b.warning" in output
+    assert "c.warning" in output
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+def test_suite_list_with_multiple_suites_using_config_param_directory(
+    caplog, empty_data_context
+):
+    project_dir = empty_data_context.root_directory
+    context = DataContext(project_dir)
+    context.create_expectation_suite("a.warning")
+    context.create_expectation_suite("b.warning")
+    context.create_expectation_suite("c.warning")
+
+    assert os.path.exists(project_dir)
+
+    runner = CliRunner(mix_stderr=False)
+
+    result = runner.invoke(
+        cli,
+        f"--config {project_dir} suite list",
         catch_exceptions=False,
     )
     output = result.output
