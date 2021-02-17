@@ -235,7 +235,7 @@ def test_suite_new_creates_empty_suite(
     csv = os.path.join(filesystem_csv_2, "f1.csv")
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo"],
+        ["--config", root_dir, "suite", "new", "--suite", "foo"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -323,7 +323,7 @@ def test_suite_new_empty_with_no_jupyter(
     csv = os.path.join(filesystem_csv_2, "f1.csv")
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo", "--no-jupyter"],
+        ["--config", root_dir, "suite", "new", "--suite", "foo", "--no-jupyter"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
