@@ -190,6 +190,7 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
     assert report == {
         "execution_engine": {
             "caching": True,
+            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
             "class_name": "PandasExecutionEngine",
             "discard_subset_failing_expectations": False,
             "boto3_options": {},
@@ -233,6 +234,7 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
     assert report == {
         "execution_engine": {
             "caching": True,
+            "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
             "class_name": "SparkDFExecutionEngine",
             "persist": True,
             "spark_config": {
