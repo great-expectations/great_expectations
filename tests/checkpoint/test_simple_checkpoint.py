@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
+from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
@@ -59,9 +60,9 @@ def slack_notification_action(webhook):
 
 @pytest.fixture
 def context_with_data_source_and_empty_suite(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     datasources = context.list_datasources()
     assert datasources[0]["class_name"] == "Datasource"
     assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
@@ -72,9 +73,9 @@ def context_with_data_source_and_empty_suite(
 
 @pytest.fixture
 def context_with_data_source_and_empty_suite_with_templates(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     datasources = context.list_datasources()
     assert datasources[0]["class_name"] == "Datasource"
     assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
@@ -110,7 +111,7 @@ def test_simple_checkpoint_default_properties_with_no_optional_arguments(
     store_validation_result_action,
     store_eval_parameter_action,
     update_data_docs_action,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
     """This demonstrates the simplest possible usage."""
     checkpoint_config = SimpleCheckpointConfigurator(
@@ -130,7 +131,7 @@ def test_simple_checkpoint_default_properties_with_no_optional_arguments(
     assert checkpoint_config.runtime_configuration == {}
     assert checkpoint_config.validations == []
 
-    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates.get_checkpoint(
+    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_minimal_simple_checkpoint"
     )
     checkpoint_config = checkpoint_from_store.config
@@ -163,7 +164,7 @@ def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_
     update_data_docs_action,
     slack_notification_action,
     webhook,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
     checkpoint_config = SimpleCheckpointConfigurator(
         "foo", empty_data_context, slack_webhook=webhook
@@ -176,7 +177,7 @@ def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_
     ]
     assert checkpoint_config.action_list == expected
 
-    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates.get_checkpoint(
+    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_slack"
     )
     checkpoint_config = checkpoint_from_store.config
@@ -227,7 +228,7 @@ def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specif
     empty_data_context,
     slack_notification_action,
     webhook,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
     """
     The underlying SlackNotificationAction and SlackRenderer default to
@@ -243,7 +244,7 @@ def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specif
     slack_notification_action["action"]["notify_with"] = None
     assert slack_notification_action in checkpoint_config.action_list
 
-    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates.get_checkpoint(
+    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_slack_and_notify_with_all"
     )
     checkpoint_config = checkpoint_from_store.config
@@ -336,7 +337,7 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_select
     store_validation_result_action,
     store_eval_parameter_action,
     update_data_docs_action,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
     # assert the fixture is adequate
     assert "local_site" in empty_data_context.get_site_names()
@@ -356,10 +357,10 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_select
     # assert the fixture is adequate
     assert (
         "local_site"
-        in titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates.get_site_names()
+        in titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_site_names()
     )
 
-    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates.get_checkpoint(
+    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_site_names"
     )
     checkpoint_config = checkpoint_from_store.config
@@ -680,7 +681,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
 
 
 def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
-    context_with_data_source_and_empty_suite_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     simple_checkpoint_defaults,
     one_validation,
     monkeypatch,
@@ -777,7 +778,7 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
     webhook,
     one_validation,
 ):
-    context = context_with_data_source_and_empty_suite
+    context: DataContext = context_with_data_source_and_empty_suite
     checkpoint_config = SimpleCheckpointConfigurator(
         "foo", context_with_data_source_and_empty_suite, slack_webhook=webhook
     ).build()
@@ -854,7 +855,7 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     simple_checkpoint_defaults,
     two_validations,
 ):
-    context = context_with_data_source_and_empty_suite
+    context: DataContext = context_with_data_source_and_empty_suite
     context.create_expectation_suite("two")
     assert len(context.list_expectation_suites()) == 2
 
