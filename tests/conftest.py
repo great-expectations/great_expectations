@@ -2251,9 +2251,13 @@ def empty_data_context(tmp_path_factory) -> DataContext:
 
 
 @pytest.fixture
-def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store(
+def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
+    monkeypatch,
 ):
+    # Reenable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -2261,7 +2265,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     os.makedirs(os.path.join(data_path), exist_ok=True)
     shutil.copy(
         file_relative_path(
-            __file__, "./test_fixtures/great_expectations_v013_no_datasource.yml"
+            __file__,
+            "./test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
         ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
@@ -2337,13 +2342,13 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 
 
 @pytest.fixture
-def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     # add simple template config
-    simple_checkpoint_template_config = CheckpointConfig(
+    simple_checkpoint_template_config: CheckpointConfig = CheckpointConfig(
         name="my_simple_template_checkpoint",
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
@@ -2380,8 +2385,10 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
             }
         },
     )
-    simple_checkpoint_template_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_template_config.name
+    simple_checkpoint_template_config_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=simple_checkpoint_template_config.name
+        )
     )
     context.checkpoint_store.set(
         key=simple_checkpoint_template_config_key,
@@ -2389,7 +2396,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     )
 
     # add nested template configs
-    nested_checkpoint_template_config_1 = CheckpointConfig(
+    nested_checkpoint_template_config_1: CheckpointConfig = CheckpointConfig(
         name="my_nested_checkpoint_template_1",
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template-$VAR",
@@ -2437,15 +2444,17 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
             }
         ],
     )
-    nested_checkpoint_template_config_1_key = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_1.name
+    nested_checkpoint_template_config_1_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=nested_checkpoint_template_config_1.name
+        )
     )
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_1_key,
         value=nested_checkpoint_template_config_1,
     )
 
-    nested_checkpoint_template_config_2 = CheckpointConfig(
+    nested_checkpoint_template_config_2: CheckpointConfig = CheckpointConfig(
         name="my_nested_checkpoint_template_2",
         config_version=1,
         template_name="my_nested_checkpoint_template_1",
@@ -2485,15 +2494,17 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
             "partial_unexpected_count": 20,
         },
     )
-    nested_checkpoint_template_config_2_key = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_2.name
+    nested_checkpoint_template_config_2_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=nested_checkpoint_template_config_2.name
+        )
     )
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_2_key,
         value=nested_checkpoint_template_config_2,
     )
 
-    nested_checkpoint_template_config_3 = CheckpointConfig(
+    nested_checkpoint_template_config_3: CheckpointConfig = CheckpointConfig(
         name="my_nested_checkpoint_template_3",
         config_version=1,
         template_name="my_nested_checkpoint_template_2",
@@ -2535,8 +2546,10 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
             "template_3_key": "bloopy!",
         },
     )
-    nested_checkpoint_template_config_3_key = ConfigurationIdentifier(
-        configuration_key=nested_checkpoint_template_config_3.name
+    nested_checkpoint_template_config_3_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=nested_checkpoint_template_config_3.name
+        )
     )
     context.checkpoint_store.set(
         key=nested_checkpoint_template_config_3_key,
@@ -2544,12 +2557,12 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     )
 
     # add minimal SimpleCheckpoint
-    simple_checkpoint_config = CheckpointConfig(
+    simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
         name="my_minimal_simple_checkpoint",
         class_name="SimpleCheckpoint",
         config_version=1,
     )
-    simple_checkpoint_config_key = ConfigurationIdentifier(
+    simple_checkpoint_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_config.name
     )
     context.checkpoint_store.set(
@@ -2558,14 +2571,16 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     )
 
     # add SimpleCheckpoint with slack webhook
-    simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
+    simple_checkpoint_with_slack_webhook_config: CheckpointConfig = CheckpointConfig(
         name="my_simple_checkpoint_with_slack",
         class_name="SimpleCheckpoint",
         config_version=1,
         slack_webhook="https://hooks.slack.com/foo/bar",
     )
-    simple_checkpoint_with_slack_webhook_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_with_slack_webhook_config.name
+    simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=simple_checkpoint_with_slack_webhook_config.name
+        )
     )
     context.checkpoint_store.set(
         key=simple_checkpoint_with_slack_webhook_config_key,
@@ -2573,14 +2588,14 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     )
 
     # add SimpleCheckpoint with slack webhook and notify_with
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config: CheckpointConfig = CheckpointConfig(
         name="my_simple_checkpoint_with_slack_and_notify_with_all",
         class_name="SimpleCheckpoint",
         config_version=1,
         slack_webhook="https://hooks.slack.com/foo/bar",
         notify_with="all",
     )
-    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
     )
     context.checkpoint_store.set(
@@ -2589,14 +2604,16 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_te
     )
 
     # add SimpleCheckpoint with site_names
-    simple_checkpoint_with_site_names_config = CheckpointConfig(
+    simple_checkpoint_with_site_names_config: CheckpointConfig = CheckpointConfig(
         name="my_simple_checkpoint_with_site_names",
         class_name="SimpleCheckpoint",
         config_version=1,
         site_names=["local_site"],
     )
-    simple_checkpoint_with_site_names_config_key = ConfigurationIdentifier(
-        configuration_key=simple_checkpoint_with_site_names_config.name
+    simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=simple_checkpoint_with_site_names_config.name
+        )
     )
     context.checkpoint_store.set(
         key=simple_checkpoint_with_site_names_config_key,
@@ -2660,6 +2677,32 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
+    return context
+
+
+@pytest.fixture
+def empty_context_with_checkpoint_v1_stats_enabled(
+    empty_data_context_stats_enabled, monkeypatch
+):
+    try:
+        monkeypatch.delenv("VAR")
+        monkeypatch.delenv("MY_PARAM")
+        monkeypatch.delenv("OLD_PARAM")
+    except:
+        pass
+
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context = empty_data_context_stats_enabled
+    root_dir = context.root_directory
+    fixture_name = "my_v1_checkpoint.yml"
+    fixture_path = file_relative_path(
+        __file__, f"./data_context/fixtures/contexts/{fixture_name}"
+    )
+    checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
+    shutil.copy(fixture_path, checkpoints_file)
     return context
 
 
