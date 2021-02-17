@@ -11,9 +11,14 @@ import pandas as pd
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.datasource.types import (
+    RuntimeDataBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
+)
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
     GreatExpectationsError,
+    InvalidBatchSpecError,
     InvalidConfigError,
 )
 from great_expectations.execution_engine import ExecutionEngine
@@ -580,9 +585,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_compute_domain(
         self,
         domain_kwargs: Dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple["sa.sql.Selectable", dict, dict]:
+    ) -> Tuple[Select, dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -991,7 +996,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selectable_from_batch_spec(self, batch_spec):
+    def _build_selectable_from_batch_spec(self, batch_spec) -> Select:
         table_name: str = batch_spec["table_name"]
 
         if "splitter_method" in batch_spec:
@@ -1035,7 +1040,32 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:
-        selectable = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
+        batch_data: SqlAlchemyBatchData
+        batch_markers: BatchMarkers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
+            # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
+            query: str = batch_spec.batch_data
+            if query:
+                batch_spec.batch_data = "SQLQuery"
+                batch_data = SqlAlchemyBatchData(engine=self.engine, query=query)
+                return batch_data, batch_markers
+
+        if not isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
+            raise InvalidBatchSpecError(
+                f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
+RuntimeDataBatchSpec (illegal type "{str(type(batch_spec))}" was received).
+                """
+            )
+        selectable: Select = self._build_selectable_from_batch_spec(
+            batch_spec=batch_spec
+        )
+        temp_table_name: Optional[str]
         if "bigquery_temp_table" in batch_spec:
             temp_table_name = batch_spec.get("bigquery_temp_table")
         else:
@@ -1043,12 +1073,4 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         batch_data = SqlAlchemyBatchData(
             engine=self.engine, selectable=selectable, temp_table_name=temp_table_name
         )
-        batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
-
         return batch_data, batch_markers

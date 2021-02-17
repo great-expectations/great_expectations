@@ -4,9 +4,9 @@ import random
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest, BatchSpec
+from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.datasource.types import SqlAlchemyDatasourceBatchSpec
 
 yaml = YAML()
 
@@ -539,7 +539,7 @@ def test_sampling_method__limit(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {},
@@ -562,7 +562,7 @@ def test_sampling_method__random(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {},
@@ -585,7 +585,7 @@ def test_sampling_method__mod(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {},
@@ -610,7 +610,7 @@ def test_sampling_method__a_list(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {},
@@ -635,7 +635,7 @@ def test_sampling_method__md5(
 
     # SQlite doesn't support MD5
     # batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-    #     batch_spec=BatchSpec({
+    #     batch_spec=SqlAlchemyDatasourceBatchSpec({
     #         "table_name": "table_partitioned_by_date_column__A",
     #         "partition_definition": {},
     #         "splitter_method": "_split_on_whole_table",
@@ -654,7 +654,7 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {},
@@ -671,7 +671,7 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
     assert len(batch_data.head(fetch_all=True)) == 12
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {},
@@ -682,7 +682,7 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
     assert len(batch_data.head(fetch_all=True)) == 120
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {},

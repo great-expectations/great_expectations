@@ -203,6 +203,11 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
+            if isinstance(batch_data, str):
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""SparkDFExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
+Please check your config."""
+                )
             batch_spec.batch_data = "SparkDataFrame"
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
