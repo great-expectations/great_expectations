@@ -85,10 +85,7 @@ def test_checkpoint_list_with_no_checkpoints_with_ge_config_v3(
     stdout = result.stdout
     assert result.exit_code == 0
     assert "No checkpoints found." in stdout
-    assert (
-        "Use the command `great_expectations --current-api checkpoint new` to create one"
-        in stdout
-    )
+    assert "Use the command `great_expectations checkpoint new` to create one" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
