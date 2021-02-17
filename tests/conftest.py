@@ -3879,27 +3879,6 @@ introspection:
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
-    config = yaml.load(
-        f"""
-class_name: Datasource
-
-execution_engine:
-    class_name: SqlAlchemyExecutionEngine
-    connection_string: sqlite:///{db_file}
-
-data_connectors:
-    my_sqlite_db_configured_asset_data_connector:
-        class_name: ConfiguredAssetSqlDataConnector
-
-        assets: {{}}
-""",
-    )
-
-    try:
-        context.add_datasource("my_sqlite_db_standard_datasource", **config)
-    except AttributeError:
-        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
-
     return context
 
 
