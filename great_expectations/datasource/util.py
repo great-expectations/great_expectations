@@ -22,6 +22,7 @@ except ImportError:
         "Unable to load pyspark; install optional spark dependency for support."
     )
 
+_SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
 # S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
 class S3Url:
@@ -92,13 +93,4 @@ def hash_pandas_dataframe(df):
 
 def sniff_s3_compression(s3_url: S3Url) -> str:
     """Attempts to get read_csv compression from s3_url"""
-    suffix = s3_url.suffix
-    if suffix == "gz":
-        return "gzip"
-    if suffix == "zip":
-        return "zip"
-    if suffix == "bz2":
-        return "bz2"
-    if suffix == "xz":
-        return "xz"
-    return "infer"
+    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix, "infer")
