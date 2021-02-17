@@ -494,6 +494,68 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
         )
 
 
+def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_pandas_execution_engine_error(
+    basic_pandas_datasource_v013,
+):
+    data_connector_name: str = "test_runtime_data_connector"
+    data_asset_name: str = "IN_MEMORY_DATA_ASSET"
+
+    batch_request: Union[dict, BatchRequest]
+
+    batch_request = {
+        "datasource_name": basic_pandas_datasource_v013.name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "batch_data": "SELECT * FROM my_table",
+        "partition_request": {
+            "partition_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+        },
+        "limit": None,
+    }
+    batch_request = BatchRequest(**batch_request)
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        # noinspection PyUnusedLocal
+        batch_list: List[
+            Batch
+        ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+
+def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and_spark_df_execution_engine_error(
+    basic_spark_datasource,
+):
+    data_connector_name: str = "test_runtime_data_connector"
+    data_asset_name: str = "IN_MEMORY_DATA_ASSET"
+
+    batch_request: Union[dict, BatchRequest]
+
+    batch_request = {
+        "datasource_name": basic_spark_datasource.name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "batch_data": "SELECT * FROM my_table",
+        "partition_request": {
+            "partition_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+        },
+        "limit": None,
+    }
+    batch_request = BatchRequest(**batch_request)
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        # noinspection PyUnusedLocal
+        batch_list: List[
+            Batch
+        ] = basic_spark_datasource.get_batch_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+
 def test_get_available_data_asset_names_with_configured_asset_filesystem_data_connector(
     basic_pandas_datasource_v013,
 ):

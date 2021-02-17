@@ -11,9 +11,14 @@ import pandas as pd
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.datasource.types import (
+    RuntimeDataBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
+)
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
     GreatExpectationsError,
+    InvalidBatchSpecError,
     InvalidConfigError,
 )
 from great_expectations.execution_engine import ExecutionEngine
@@ -1043,11 +1048,20 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
-        query: str = batch_spec.get("query")
-        if query:
-            batch_data = SqlAlchemyBatchData(engine=self.engine, query=query)
-            return batch_data, batch_markers
+        if isinstance(batch_spec, RuntimeDataBatchSpec):
+            # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
+            query: str = batch_spec.batch_data
+            if query:
+                batch_spec.batch_data = "SQLQuery"
+                batch_data = SqlAlchemyBatchData(engine=self.engine, query=query)
+                return batch_data, batch_markers
 
+        if not isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
+            raise InvalidBatchSpecError(
+                f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
+RuntimeDataBatchSpec (illegal type "{str(type(batch_spec))}" was received).
+                """
+            )
         selectable: Select = self._build_selectable_from_batch_spec(
             batch_spec=batch_spec
         )

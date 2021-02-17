@@ -11,7 +11,7 @@ from great_expectations.core.batch import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
-from great_expectations.datasource.types import PathBatchSpec
+from great_expectations.datasource.types import BatchSpec, PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -118,16 +118,18 @@ class BaseDatasource:
             batch_request=batch_request
         )
 
-        if batch_request["batch_data"] is None:
-            batches: List[Batch] = []
+        batch_definition: BatchDefinition
+        batch_data: Any = batch_request.batch_data
+        batch_spec: BatchSpec
+        batch_spec_passthrough: dict = batch_request.batch_spec_passthrough
+        batch_markers: BatchMarkers
+        batches: List[Batch] = []
+
+        if batch_data is None:
             for batch_definition in batch_definition_list:
-                if batch_request.batch_spec_passthrough:
-                    batch_definition.batch_spec_passthrough = (
-                        batch_request.batch_spec_passthrough
-                    )
-                batch_data: Any
+                if batch_spec_passthrough:
+                    batch_definition.batch_spec_passthrough = batch_spec_passthrough
                 batch_spec: PathBatchSpec
-                batch_markers: BatchMarkers
                 (
                     batch_data,
                     batch_spec,
@@ -143,19 +145,18 @@ class BaseDatasource:
                     batch_markers=batch_markers,
                 )
                 batches.append(new_batch)
-            return batches
-
         else:
             # This is a runtime batch_request
-
             if len(batch_definition_list) != 1:
                 raise ValueError(
                     "When batch_request includes batch_data, it must specify exactly one corresponding BatchDefinition"
                 )
 
             batch_definition = batch_definition_list[0]
-            batch_data = batch_request["batch_data"]
+            if batch_spec_passthrough:
+                batch_definition.batch_spec_passthrough = batch_spec_passthrough
 
+            typed_batch_data: Any
             # noinspection PyArgumentList
             (
                 typed_batch_data,
@@ -165,7 +166,6 @@ class BaseDatasource:
                 batch_definition=batch_definition,
                 batch_data=batch_data,
             )
-
             new_batch: Batch = Batch(
                 data=typed_batch_data,
                 batch_request=batch_request,
@@ -173,8 +173,9 @@ class BaseDatasource:
                 batch_spec=batch_spec,
                 batch_markers=batch_markers,
             )
+            batches.append(new_batch)
 
-            return [new_batch]
+        return batches
 
     def _build_data_connector_from_config(
         self,

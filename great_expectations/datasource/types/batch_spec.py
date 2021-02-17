@@ -1,5 +1,6 @@
 import logging
 from abc import ABCMeta
+from typing import Any
 
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
@@ -52,17 +53,13 @@ class S3BatchSpec(PathBatchSpec):
 
 
 class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
-    """This is an abstract class and should not be instantiated. It's relevant for testing whether
-    a subclass is allowed
-    """
+    @property
+    def schema(self):
+        return self.get("schema")
 
     @property
     def limit(self):
         return self.get("limit")
-
-    @property
-    def schema(self):
-        return self.get("schema")
 
 
 class RuntimeDataBatchSpec(BatchSpec):
@@ -77,9 +74,9 @@ class RuntimeDataBatchSpec(BatchSpec):
             )
 
     @property
-    def batch_data(self):
+    def batch_data(self) -> Any:
         return self.get("batch_data")
 
     @batch_data.setter
-    def batch_data(self, batch_data):
+    def batch_data(self, batch_data: Any):
         self["batch_data"] = batch_data

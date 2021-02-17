@@ -4,8 +4,11 @@ import os
 import pandas as pd
 import pytest
 
-from great_expectations.core.batch import Batch, BatchSpec
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.types import (
+    RuntimeDataBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
+)
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
@@ -34,7 +37,7 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
     assert my_execution_engine.url == None
 
     my_execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             table_name="main.table_1",
             sampling_method="_sample_using_limit",
             sampling_kwargs={"n": 5},
@@ -53,7 +56,7 @@ def test_instantiation_via_url(sa):
     assert my_execution_engine.url[-36:] == "test_cases_for_sql_data_connector.db"
 
     my_execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
+        batch_spec=SqlAlchemyDatasourceBatchSpec(
             table_name="table_partitioned_by_date_column__A",
             sampling_method="_sample_using_limit",
             sampling_kwargs={"n": 5},
@@ -487,14 +490,14 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
         print(e)
 
 
-def test_get_batch_data_and_markers(sqlite_view_engine, test_df):
+def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     my_execution_engine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
     test_df.to_sql("test_table_0", con=my_execution_engine.engine)
 
     query: str = "SELECT * FROM test_table_0"
     batch_data, batch_markers = my_execution_engine.get_batch_data_and_markers(
-        batch_spec=BatchSpec(
-            query=query,
+        batch_spec=RuntimeDataBatchSpec(
+            batch_data=query,
         )
     )
 
