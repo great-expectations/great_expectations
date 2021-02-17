@@ -195,7 +195,6 @@ def checkpoint_list(directory):
             "No checkpoints found.\n"
             "  - Use the command `great_expectations --current-api checkpoint new` to create one."
         )
-        # TODO: <Alex>ALEX How come the event for "no checkpoints found" is the same ("success") as when they are found?</Alex>
         send_usage_message(context, event="cli.checkpoint.list", success=True)
         sys.exit(0)
 
