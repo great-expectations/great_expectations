@@ -1,12 +1,13 @@
 import os
 import sys
-from typing import Dict
+from typing import Dict, List
 
 import click
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.util import cli_message, cli_message_list
@@ -16,9 +17,6 @@ from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
 from great_expectations.util import lint_code
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
-)
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -175,6 +173,8 @@ def _load_checkpoint_yml_template() -> dict:
     return template
 
 
+# TODO: <Alex>ALEX Remove --directory from here only when the "config" option is fully operational.</Alex>
+# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="list")
 @click.option(
     "--directory",
@@ -185,8 +185,11 @@ def _load_checkpoint_yml_template() -> dict:
 @mark.cli_as_experimental
 def checkpoint_list(directory):
     """List configured checkpoints. (Experimental)"""
-    context = toolkit.load_data_context_with_error_handling(directory)
-    checkpoints = context.list_checkpoints()
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+    checkpoints: List[str] = context.list_checkpoints()
     if not checkpoints:
         cli_message(
             "No checkpoints found.\n"
@@ -195,14 +198,16 @@ def checkpoint_list(directory):
         send_usage_message(context, event="cli.checkpoint.list", success=True)
         sys.exit(0)
 
-    number_found = len(checkpoints)
-    plural = "s" if number_found > 1 else ""
-    message = f"Found {number_found} checkpoint{plural}."
-    pretty_list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
+    number_found: int = len(checkpoints)
+    plural: str = "s" if number_found > 1 else ""
+    message: str = f"Found {number_found} checkpoint{plural}."
+    pretty_list: list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
     send_usage_message(context, event="cli.checkpoint.list", success=True)
 
 
+# TODO: <Alex>ALEX Remove --directory from here only when the "config" option is fully operational.</Alex>
+# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
 @click.option(
@@ -214,54 +219,55 @@ def checkpoint_list(directory):
 @mark.cli_as_experimental
 def checkpoint_run(checkpoint, directory):
     """Run a checkpoint. (Experimental)"""
-    usage_event = "cli.checkpoint.run"
-    context = toolkit.load_data_context_with_error_handling(
-        directory=directory, from_cli_upgrade_command=False
+    usage_event: str = "cli.checkpoint.run"
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
     )
 
-    ge_config_version = context.get_config().config_version
-    if ge_config_version >= 3:
-        cli_message(
-            f"""<red>The `checkpoint run` CLI command is not yet implemented for GE config versions >= 3.</red>"""
-        )
-        send_usage_message(context, usage_event, success=False)
-        sys.exit(1)
-
-    checkpoint: Checkpoint = toolkit.load_checkpoint(
-        context,
-        checkpoint,
-        usage_event,
+    checkpoint_obj: Checkpoint = toolkit.load_checkpoint(
+        context=context,
+        checkpoint_name=checkpoint,
+        usage_event=usage_event,
     )
 
     try:
-        results = checkpoint.run()
+        result: CheckpointResult = checkpoint_obj.run()
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context, usage_event, f"<red>{e}</red>"
+            context=context,
+            usage_event=usage_event,
+            message=f"<red>{e}</red>",
         )
+        return
 
-    if not results["success"]:
-        cli_message("Validation failed!")
-        send_usage_message(context, event=usage_event, success=True)
-        print_validation_operator_results_details(results)
+    if not result["success"]:
+        cli_message(string="Validation failed!")
+        send_usage_message(
+            data_context=context,
+            event=usage_event,
+            event_payload=None,
+            success=True,
+        )
+        print_validation_operator_results_details(result=result)
         sys.exit(1)
 
     cli_message("Validation succeeded!")
     send_usage_message(context, event=usage_event, success=True)
-    print_validation_operator_results_details(results)
+    print_validation_operator_results_details(result=result)
     sys.exit(0)
 
 
 def print_validation_operator_results_details(
-    results: ValidationOperatorResult,
+    result: CheckpointResult,
 ) -> None:
     max_suite_display_width = 40
     toolkit.cli_message(
         f"""
 {'Suite Name'.ljust(max_suite_display_width)}     Status     Expectations met"""
     )
-    for id, result in results.run_results.items():
-        vr = result["validation_result"]
+    for result_id, result_item in result.run_results.items():
+        vr = result_item["validation_result"]
         stats = vr.statistics
         passed = stats["successful_expectations"]
         evaluated = stats["evaluated_expectations"]
@@ -273,11 +279,11 @@ def print_validation_operator_results_details(
             status_slug = "<green>✔ Passed</green>"
         else:
             status_slug = "<red>✖ Failed</red>"
-        suite_name = str(vr.meta["expectation_suite_name"])
+        suite_name: str = str(vr.meta["expectation_suite_name"])
         if len(suite_name) > max_suite_display_width:
             suite_name = suite_name[0:max_suite_display_width]
             suite_name = suite_name[:-1] + "…"
-        status_line = f"- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}"
+        status_line: str = f"- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}"
         toolkit.cli_message(status_line)
 
 

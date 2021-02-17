@@ -1,10 +1,11 @@
 import os
 import shutil
 import subprocess
+from typing import List
 from unittest import mock
 
 import pytest
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -51,7 +52,7 @@ def titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled(
     titanic_expectation_suite,
 ):
     yaml = YAML()
-    context = titanic_data_context_stats_enabled_config_version_2
+    context: DataContext = titanic_data_context_stats_enabled_config_version_2
     context.save_expectation_suite(titanic_expectation_suite)
     # TODO context should save a checkpoint
     checkpoint_path = os.path.join(
@@ -70,10 +71,10 @@ def titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_list_with_no_checkpoints_with_ge_config_v2(
+def test_checkpoint_list_with_no_checkpoints_with_ge_config_v3(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
-    context = empty_data_context_stats_enabled
+    context: DataContext = empty_data_context_stats_enabled
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -102,23 +103,23 @@ def test_checkpoint_list_with_no_checkpoints_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_list_with_single_checkpoint_with_ge_config_v2(
+def test_checkpoint_list_with_single_checkpoint_with_ge_config_v3(
     mock_emit,
     caplog,
-    titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
+    empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    context = titanic_data_context_stats_enabled_config_version_2_with_checkpoint
-    root_dir = context.root_directory
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    root_dir: str = context.root_directory
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"checkpoint list -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 0
     assert "Found 1 checkpoint." in stdout
-    assert "my_checkpoint" in stdout
+    assert "my_v1_checkpoint" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -133,7 +134,53 @@ def test_checkpoint_list_with_single_checkpoint_with_ge_config_v2(
     assert_no_logging_messages_or_tracebacks(
         caplog,
         result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_list_with_eight_checkpoints_with_ge_config_v3(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    root_dir: str = context.root_directory
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"checkpoint list -d {root_dir}",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 0
+    assert "Found 8 checkpoints." in stdout
+    checkpoint_names_list: List[str] = [
+        "my_simple_checkpoint_with_slack_and_notify_with_all",
+        "my_nested_checkpoint_template_1",
+        "my_nested_checkpoint_template_3",
+        "my_nested_checkpoint_template_2",
+        "my_simple_checkpoint_with_site_names",
+        "my_minimal_simple_checkpoint",
+        "my_simple_checkpoint_with_slack",
+        "my_simple_template_checkpoint",
+    ]
+    assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.list", "event_payload": {}, "success": True}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        caplog,
+        result,
     )
 
 
@@ -143,7 +190,7 @@ def test_checkpoint_list_with_single_checkpoint_with_ge_config_v2(
 def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
-    context = titanic_data_context_stats_enabled_config_version_2
+    context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     assert context.list_expectation_suite_names() == []
     mock_emit.reset_mock()
@@ -183,7 +230,9 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
     caplog,
     titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
 ):
-    context = titanic_data_context_stats_enabled_config_version_2_with_checkpoint
+    context: DataContext = (
+        titanic_data_context_stats_enabled_config_version_2_with_checkpoint
+    )
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -224,7 +273,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
     titanic_data_context_stats_enabled_config_version_2,
     titanic_expectation_suite,
 ):
-    context = titanic_data_context_stats_enabled_config_version_2
+    context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
@@ -259,7 +308,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
     assert os.path.isfile(expected_checkpoint)
 
     # Newup a context for additional assertions
-    context = DataContext(root_dir)
+    context: DataContext = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
     with open(expected_checkpoint) as f:
@@ -321,7 +370,7 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     titanic_data_context_stats_enabled_config_version_2,
     titanic_expectation_suite,
 ):
-    context = titanic_data_context_stats_enabled_config_version_2
+    context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
@@ -356,7 +405,7 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     assert os.path.isfile(expected_checkpoint)
 
     # Newup a context for additional assertions
-    context = DataContext(root_dir)
+    context: DataContext = DataContext(root_dir)
     assert context.list_checkpoints() == ["passengers"]
 
     assert_no_logging_messages_or_tracebacks(
@@ -375,7 +424,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     titanic_data_context_stats_enabled_config_version_2,
     titanic_expectation_suite,
 ):
-    context = titanic_data_context_stats_enabled_config_version_2
+    context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     checkpoints_dir = os.path.join(
         root_dir, DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value
@@ -423,7 +472,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
 def test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
-    context = titanic_data_context_stats_enabled_config_version_2
+    context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
@@ -463,7 +512,9 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_
     caplog,
     titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
 ):
-    context = titanic_data_context_stats_enabled_config_version_2_with_checkpoint
+    context: DataContext = (
+        titanic_data_context_stats_enabled_config_version_2_with_checkpoint
+    )
     root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
@@ -500,7 +551,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_
 def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
-    context = titanic_data_context_stats_enabled_config_version_2
+    context: DataContext = titanic_data_context_stats_enabled_config_version_2
     suite = context.create_expectation_suite("bar")
     context.save_expectation_suite(suite)
     assert context.list_expectation_suite_names() == ["bar"]
@@ -571,7 +622,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
 def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
-    context = titanic_data_context_stats_enabled_config_version_2
+    context: DataContext = titanic_data_context_stats_enabled_config_version_2
     assert context.list_expectation_suite_names() == []
 
     root_dir = context.root_directory
@@ -636,7 +687,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
 def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
-    context = titanic_data_context_stats_enabled_config_version_2
+    context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
 
@@ -698,7 +749,9 @@ def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
 def test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
-    context = titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    context: DataContext = (
+        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    )
     root_dir = context.root_directory
     mock_emit.reset_mock()
 
@@ -740,7 +793,9 @@ def test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2(
 def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
-    context = titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    context: DataContext = (
+        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    )
     root_dir = context.root_directory
     # mangle the csv
     csv_path = os.path.join(context.root_directory, "..", "data", "Titanic.csv")
@@ -788,7 +843,9 @@ def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
 def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
-    context = titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    context: DataContext = (
+        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    )
     root_dir = context.root_directory
     assert context.list_checkpoints() == ["my_checkpoint"]
     mock_emit.reset_mock()
@@ -827,7 +884,9 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
 def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
-    context = titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    context: DataContext = (
+        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    )
     root_dir = context.root_directory
     assert context.list_checkpoints() == ["my_checkpoint"]
     script_path = os.path.join(
@@ -878,7 +937,9 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
 def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
-    context = titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    context: DataContext = (
+        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    )
     root_dir = context.root_directory
     mock_emit.reset_mock()
 
@@ -938,7 +999,9 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     - return a 0 status code
     - print a success message
     """
-    context = titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    context: DataContext = (
+        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    )
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -991,7 +1054,9 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     - return a 1 status code
     - print a failure message
     """
-    context = titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    context: DataContext = (
+        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    )
     root_dir = context.root_directory
     # mangle the csv
     csv_path = os.path.join(context.root_directory, "..", "data", "Titanic.csv")
@@ -1039,7 +1104,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
 def test_checkpoint_new_with_ge_config_3_raises_error(
     mock_emit, caplog, titanic_data_context_stats_enabled
 ):
-    context = titanic_data_context_stats_enabled
+    context: DataContext = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     mock_emit.reset_mock()
 
@@ -1079,7 +1144,7 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
 def test_checkpoint_run_with_ge_config_3_raises_error(
     mock_emit, caplog, titanic_data_context_stats_enabled
 ):
-    context = titanic_data_context_stats_enabled
+    context: DataContext = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     mock_emit.reset_mock()
 
@@ -1089,12 +1154,7 @@ def test_checkpoint_run_with_ge_config_3_raises_error(
         f"checkpoint run my_checkpoint -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 1
-    assert (
-        "The `checkpoint run` CLI command is not yet implemented for GE config versions >= 3."
-        in stdout
-    )
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1119,7 +1179,7 @@ def test_checkpoint_run_with_ge_config_3_raises_error(
 def test_checkpoint_script_with_ge_config_3_raises_error(
     mock_emit, caplog, titanic_data_context_stats_enabled
 ):
-    context = titanic_data_context_stats_enabled
+    context: DataContext = titanic_data_context_stats_enabled
     root_dir = context.root_directory
     mock_emit.reset_mock()
 
