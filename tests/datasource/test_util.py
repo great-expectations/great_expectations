@@ -1,7 +1,11 @@
 import pandas as pd
 import pytest
 
-from great_expectations.datasource.util import S3Url, hash_pandas_dataframe
+from great_expectations.datasource.util import (
+    S3Url,
+    hash_pandas_dataframe,
+    sniff_s3_compression,
+)
 
 
 def test_hash_pandas_dataframe_hashable_df():
@@ -35,3 +39,16 @@ def test_s3_suffix(url, expected):
         assert _suffix == expected
     else:
         assert _suffix is None
+
+
+@pytest.mark.parametrize(
+    "url,expected",
+    [
+        ("s3://bucket/hello/world.csv.gz", "gzip"),
+        ("s3://bucket/hello/world.csv", "infer"),
+        ("s3://bucket/hello/world.csv.xz", "xz"),
+        ("s3://bucket/hello/world", "infer"),
+    ],
+)
+def test_sniff_s3_compression(url, expected):
+    assert sniff_s3_compression(S3Url(url)) == expected
