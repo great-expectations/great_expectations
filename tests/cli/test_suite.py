@@ -1365,7 +1365,7 @@ def test_suite_delete_with_zero_suites(
 
     result = runner.invoke(
         cli,
-        f"suite delete not_a_suite -d {project_dir}",
+        f"--config {project_dir} suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1400,7 +1400,7 @@ def test_suite_delete_with_non_existent_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"suite delete not_a_suite -d {project_dir}",
+        f"--config {project_dir} suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1438,7 +1438,7 @@ def test_suite_delete_with_one_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite delete a.warning -d {}".format(project_dir),
+        f"--config {project_dir} suite delete a.warning",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

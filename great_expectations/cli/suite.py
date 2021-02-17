@@ -351,18 +351,16 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
 @suite.command(name="delete")
 @click.argument("suite")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @mark.cli_as_experimental
-def suite_delete(suite, directory):
+@click.pass_context
+def suite_delete(ctx, suite):
     """
     Delete an expectation suite from the expectation store.
     """
     usage_event = "cli.suite.delete"
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     suite_names = context.list_expectation_suite_names()
     if not suite_names:
