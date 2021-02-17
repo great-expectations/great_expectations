@@ -1413,7 +1413,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
             expectation_type="expect_column_min_to_be_between",
             kwargs={
                 "column": "live",
-                "min_value": {"$PARAMETER": "MIN_VAL_PARAM"},
+                "min_value": {"$PARAMETER": "MIN_VAL_PARAM * 2"},
                 "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
                 "result_format": "SUMMARY",
             },
@@ -1423,7 +1423,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
 
     # evaluation_parameters are usually stored at the ExpectationSuiteValidationResult
     # and passed along as a kwarg to the ValidationResultsTableContentBlockRenderer
-    evaluation_parameter = {"MIN_VAL_PARAM": 15, "MAX_VAL_PARAM": 20}
+    evaluation_parameter = {"MIN_VAL_PARAM": 10, "MAX_VAL_PARAM": 40}
     result = ValidationResultsTableContentBlockRenderer.render(
         [evr], evaluation_parameters=evaluation_parameter
     ).to_json_dict()
@@ -1474,7 +1474,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "template": "$column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
                             "params": {
                                 "column": "live",
-                                "min_value": {"$PARAMETER": "MIN_VAL_PARAM"},
+                                "min_value": {"$PARAMETER": "MIN_VAL_PARAM * 2"},
                                 "max_value": {"$PARAMETER": "MAX_VAL_PARAM"},
                                 "result_format": "SUMMARY",
                                 "parse_strings_as_datetimes": None,
@@ -1497,7 +1497,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "template": "\n - $eval_param = $eval_param_value (at time of validation).",
                             "params": {
                                 "eval_param": "MIN_VAL_PARAM",
-                                "eval_param_value": 15,
+                                "eval_param_value": 10,
                             },
                             "styling": {
                                 "default": {"classes": ["badge", "badge-secondary"]},
@@ -1513,7 +1513,7 @@ def test_ValidationResultsTableContentBlockRenderer_generate_expectation_row_hap
                             "template": "\n - $eval_param = $eval_param_value (at time of validation).",
                             "params": {
                                 "eval_param": "MAX_VAL_PARAM",
-                                "eval_param_value": 20,
+                                "eval_param_value": 40,
                             },
                             "styling": {
                                 "default": {"classes": ["badge", "badge-secondary"]},
