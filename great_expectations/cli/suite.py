@@ -52,18 +52,13 @@ Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"s
 """,
 )
 @click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@click.option(
     "--jupyter/--no-jupyter",
     is_flag=True,
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
+@click.pass_context
+def suite_edit(ctx, suite, datasource, jupyter, batch_kwargs):
     """
     Generate a Jupyter notebook for editing an existing Expectation Suite.
 
@@ -77,6 +72,9 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     _suite_edit(
         suite,
         datasource,

@@ -646,7 +646,15 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo", "-d", project_dir, "--batch-kwargs", "'{foobar}'"],
+        [
+            "--config",
+            project_dir,
+            "suite",
+            "edit",
+            "foo",
+            "--batch-kwargs",
+            "'{foobar}'",
+        ],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -683,7 +691,15 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     batch_kwargs = '{"table": "fake", "datasource": "source"}'
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo", "-d", project_dir, "--batch-kwargs", batch_kwargs],
+        [
+            "--config",
+            project_dir,
+            "suite",
+            "edit",
+            "foo",
+            "--batch-kwargs",
+            batch_kwargs,
+        ],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -717,7 +733,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite edit not_a_real_suite -d {}".format(project_dir),
+        f"--config {project_dir} suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -752,7 +768,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"suite edit foo -d {project_dir} --datasource not_real",
+        f"--config {project_dir} suite edit foo --datasource not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -824,11 +840,11 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     result = runner.invoke(
         cli,
         [
+            "--config",
+            root_dir,
             "suite",
             "edit",
             "foo_suite",
-            "-d",
-            root_dir,
         ],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
@@ -903,7 +919,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo_suite", "-d", root_dir],
+        ["--config", root_dir, "suite", "edit", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -996,11 +1012,11 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     result = runner.invoke(
         cli,
         [
+            "--config",
+            root_dir,
             "suite",
             "edit",
             "foo_suite",
-            "-d",
-            root_dir,
             "--batch-kwargs",
             batch_kwargs_arg_str,
         ],
@@ -1060,11 +1076,11 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     result = runner.invoke(
         cli,
         [
+            "--config",
+            project_dir,
             "suite",
             "edit",
             "foo",
-            "-d",
-            project_dir,
             "--batch-kwargs",
             json.dumps(batch_kwargs),
         ],
@@ -1114,11 +1130,11 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     result = runner.invoke(
         cli,
         [
+            "--config",
+            project_dir,
             "suite",
             "edit",
             "foo",
-            "-d",
-            project_dir,
             "--batch-kwargs",
             json.dumps(batch_kwargs),
             "--datasource",
@@ -1201,7 +1217,13 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "my_new_suite", "-d", root_dir],
+        [
+            "--config",
+            root_dir,
+            "suite",
+            "edit",
+            "my_new_suite",
+        ],
         input="{:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
