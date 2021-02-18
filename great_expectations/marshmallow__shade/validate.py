@@ -1,4 +1,5 @@
 """Validation classes for various types of data."""
+import os
 import re
 import typing
 from itertools import zip_longest
@@ -150,7 +151,8 @@ class Email(Validator):
         re.IGNORECASE | re.UNICODE,
     )
 
-    DOMAIN_WHITELIST = ("localhost",)
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    DOMAIN_WHITELIST = ("localhost", db_hostname)
 
     default_message = "Not a valid email address."
 
