@@ -41,12 +41,6 @@ except ImportError:
 
 @click.command()
 @click.option(
-    "--target-directory",
-    "-d",
-    default="./",
-    help="The root of the project directory where you want to initialize Great Expectations.",
-)
-@click.option(
     # Note this --no-view option is mostly here for tests
     "--view/--no-view",
     help="By default open in browser unless you specify the --no-view flag.",
@@ -57,7 +51,8 @@ except ImportError:
     help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
     default=True,
 )
-def init(target_directory, view, usage_stats):
+@click.pass_context
+def init(ctx, view, usage_stats):
     """
     Initialize a new Great Expectations project.
 
@@ -67,7 +62,10 @@ def init(target_directory, view, usage_stats):
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
-    target_directory = os.path.abspath(target_directory)
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
+    target_directory = os.path.abspath(directory)
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
 

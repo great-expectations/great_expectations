@@ -40,7 +40,7 @@ def test_cli_init_on_new_project(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
+        ["-c", project_dir, "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
         catch_exceptions=False,
     )
@@ -199,7 +199,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="\n1\n1\n{}\n\n\n\n2\n{}\nmy_suite\n\n\n\n\n".format(
                 data_folder_path, csv_path
             ),
@@ -280,7 +280,7 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
     runner = CliRunner(mix_stderr=False)
     _ = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
+        ["-c", project_dir, "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
         catch_exceptions=False,
     )
@@ -320,7 +320,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -352,7 +352,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -385,7 +385,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="Y\n\n",
             catch_exceptions=False,
         )
@@ -441,7 +441,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="\n2\n{}\nsink_me\n\n\n".format(data_path),
             catch_exceptions=False,
         )
@@ -475,7 +475,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
+        ["-c", project_dir, "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\nn\n".format(data_folder_path, data_path),
         catch_exceptions=False,
     )
@@ -535,7 +535,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
+        ["-c", project_dir, "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n{}\n\n\n\n".format(
             data_folder_path, data_path, data_path_2
         ),
