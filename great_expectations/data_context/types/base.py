@@ -1045,6 +1045,7 @@ class DataContextConfigDefaults(enum.Enum):
             "class_name": "CheckpointStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
+                "suppress_store_backend_id": True,
                 "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
