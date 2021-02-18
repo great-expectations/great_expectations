@@ -2249,7 +2249,7 @@ def empty_data_context(tmp_path_factory) -> DataContext:
 
 @pytest.fixture
 def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store(
-    tmp_path_factory, test_backends
+    tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -2331,7 +2331,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 
     context.test_yaml_config(name="my_datasource", yaml_config=datasource_config)
 
-    if is_library_loadable(library_name="sqlalchemy"):
+    if sa is not None:
         db_file = file_relative_path(
             __file__,
             "test_sets/test_cases_for_sql_data_connector.db",
