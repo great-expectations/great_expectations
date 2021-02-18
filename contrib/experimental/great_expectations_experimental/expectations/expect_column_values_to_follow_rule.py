@@ -183,12 +183,9 @@ class expect_column_values_to_follow_rule(ColumnMapExpectation):
     map_metric = "column_values.expect_column_values_to_follow_rule"
 
     success_keys = (
-        "min_len",
         "rule",
         "mostly",
     )
-
-    default_kwarg_values = {"min_len": 0}
 
     # This method defines a question Renderer
     # For more info on Renderers, see
