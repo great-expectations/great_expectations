@@ -12,14 +12,12 @@ def store():
 
 
 @store.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-def store_list(directory):
+@click.pass_context
+def store_list(ctx):
     """List known Stores."""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
 
     try:
