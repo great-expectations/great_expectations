@@ -1150,12 +1150,9 @@ You have selected a datasource that is a SQL database. How would you like to spe
             data_asset_name = "custom_sql_query"
 
         elif single_or_multiple_data_asset_selection == "3":  # list it all
-            msg_prompt_warning = fr"""Warning: If you have a large number of tables in your datasource, this may take a very long time. \m
-                    Would you like to continue?"""
-            confirmation = click.prompt(
-                msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
-            )
-            if confirmation == "y":
+            msg_prompt_warning = f"""Warning: If you have a large number of tables in your datasource, this may take a very long time.\nWould you like to proceed?"""
+            confirmation = click.confirm(msg_prompt_warning, default=True)
+            if confirmation:
                 # avoid this call until necessary
                 available_data_asset_names = (
                     temp_generator.get_available_data_asset_names()["names"]
