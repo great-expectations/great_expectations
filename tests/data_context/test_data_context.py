@@ -290,7 +290,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         class_name="SqlAlchemyDatasource",
         credentials={
             "drivername": "postgresql",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "65432",
             "username": "username_str",
             "password": "password_str",
@@ -343,7 +343,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
             },
             "credentials": {
                 "drivername": "postgresql",
-                "host": "localhost",
+                "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                 "port": "65432",
                 "username": "username_str",
                 "password": "***",
@@ -1641,33 +1641,6 @@ def test_get_checkpoint(empty_context_with_checkpoint):
         ],
         "validation_operator_name": "action_list_operator",
     }
-
-
-def test_get_checkpoint_default_validation_operator(empty_data_context):
-    yaml = YAML(typ="safe")
-    context = empty_data_context
-
-    checkpoint = {"batches": []}
-    checkpoint_file_path = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)
-
-    obs = context.get_checkpoint("foo")
-    assert isinstance(obs, Checkpoint)
-    assert isinstance(obs.config.to_json_dict(), dict)
-    expected = {
-        "module_name": "great_expectations.checkpoint",
-        "class_name": "LegacyCheckpoint",
-        "config_version": None,
-        "name": "foo",
-        "validation_operator_name": "action_list_operator",
-    }
-    assert obs.config.to_json_dict() == expected
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):

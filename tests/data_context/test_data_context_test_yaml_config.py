@@ -97,7 +97,7 @@ def test_checkpoint_store_with_filesystem_store_backend(
     expected_checkpoint_store_config = {
         "store_name": "my_checkpoint_store",
         "class_name": "CheckpointStore",
-        "module_name": "great_expectations.data_context.store.configuration_store",
+        "module_name": "great_expectations.data_context.store.checkpoint_store",
         "store_backend": {
             "module_name": "great_expectations.data_context.store",
             "class_name": "TupleFilesystemStoreBackend",
@@ -327,13 +327,14 @@ def test_golden_path_sql_datasource_configuration(
 
     context = ge.get_context()
 
-    yaml_config = """
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    yaml_config = f"""
 class_name: SimpleSqlalchemyDatasource
 credentials:
     drivername: postgresql
     username: postgres
     password: ""
-    host: localhost
+    host: {db_hostname}
     port: 5432
     database: test_ci
 
