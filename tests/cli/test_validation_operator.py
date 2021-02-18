@@ -27,10 +27,10 @@ def test_validation_operator_run_interactive_golden_path(
     result = runner.invoke(
         cli,
         [
+            "-c",
+            root_dir,
             "validation-operator",
             "run",
-            "-d",
-            root_dir,
             "--name",
             "default",
             "--suite",
@@ -65,10 +65,10 @@ def test_validation_operator_run_interactive_pass_non_existing_expectation_suite
     result = runner.invoke(
         cli,
         [
+            "-c",
+            root_dir,
             "validation-operator",
             "run",
-            "-d",
-            root_dir,
             "--name",
             "default",
             "--suite",
@@ -103,10 +103,10 @@ def test_validation_operator_run_interactive_pass_non_existing_operator_name(
     result = runner.invoke(
         cli,
         [
+            "-c",
+            root_dir,
             "validation-operator",
             "run",
-            "-d",
-            root_dir,
             "--name",
             "this_val_op_does_not_exist",
             "--suite",
@@ -157,10 +157,10 @@ def test_validation_operator_run_noninteractive_golden_path(
     result = runner.invoke(
         cli,
         [
+            "-c",
+            root_dir,
             "validation-operator",
             "run",
-            "-d",
-            root_dir,
             "--validation_config_file",
             validation_config_file_path,
         ],
@@ -195,10 +195,10 @@ def test_validation_operator_run_noninteractive_validation_config_file_does_not_
     result = runner.invoke(
         cli,
         [
+            "-c",
+            root_dir,
             "validation-operator",
             "run",
-            "-d",
-            root_dir,
             "--validation_config_file",
             validation_config_file_path,
         ],
@@ -251,10 +251,10 @@ def test_validation_operator_run_noninteractive_validation_config_file_does_is_m
     result = runner.invoke(
         cli,
         [
+            "-c",
+            root_dir,
             "validation-operator",
             "run",
-            "-d",
-            root_dir,
             "--validation_config_file",
             validation_config_file_path,
         ],
@@ -286,7 +286,7 @@ def test_validation_operator_list_with_zero_validation_operators(
 
     result = runner.invoke(
         cli,
-        "validation-operator list -d {}".format(project_dir),
+        f"-c {project_dir} validation-operator list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -314,7 +314,7 @@ def test_validation_operator_list_with_one_validation_operator(
 
     result = runner.invoke(
         cli,
-        "validation-operator list -d {}".format(project_dir),
+        f"-c {project_dir} validation-operator list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -372,7 +372,7 @@ def test_validation_operator_list_with_multiple_validation_operators(
 
     result = runner.invoke(
         cli,
-        "validation-operator list -d {}".format(project_dir),
+        f"-c {project_dir} validation-operator list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
