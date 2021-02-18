@@ -10,6 +10,8 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +94,7 @@ class DataConnector:
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
+        self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,
             batch_spec,
@@ -321,14 +324,24 @@ class DataConnector:
         batch_definition = batch_definition_list[0]
 
         # _execution_engine might be None for some tests
-        if self._execution_engine is None:
+        if batch_definition is None or self._execution_engine is None:
             return {}
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(
             batch_definition=batch_definition
         )
 
-        df = batch_data.head(n=5)
-        n_rows = batch_data.row_count()
+        # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
+        # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
+        # resolve metrics.
+        validator = Validator(execution_engine=batch_data.execution_engine)
+        df = validator.get_metric(
+            MetricConfiguration(
+                "table.head", {"batch_id": batch_definition.id}, {"n_rows": 5}
+            )
+        )
+        n_rows = validator.get_metric(
+            MetricConfiguration("table.row_count", {"batch_id": batch_definition.id})
+        )
 
         if pretty_print and df is not None:
             print(f"\n\t\tShowing 5 rows")

@@ -1,8 +1,11 @@
 import copy
+import cProfile
 import importlib
+import io
 import json
 import logging
 import os
+import pstats
 import time
 from collections import OrderedDict
 from functools import wraps
@@ -42,9 +45,26 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 
+def profile(func: Callable = None) -> Callable:
+    @wraps(func)
+    def profile_function_call(*args, **kwargs) -> Any:
+        pr: cProfile.Profile = cProfile.Profile()
+        pr.enable()
+        retval: Any = func(*args, **kwargs)
+        pr.disable()
+        s: io.StringIO = io.StringIO()
+        sortby: str = pstats.SortKey.CUMULATIVE  # "cumulative"
+        ps: pstats.Stats = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+
+    return profile_function_call
+
+
 def measure_execution_time(func: Callable = None) -> Callable:
     @wraps(func)
-    def compute_delta_t(*args, **kwargs) -> Callable:
+    def compute_delta_t(*args, **kwargs) -> Any:
         time_begin: int = int(round(time.time() * 1000))
         try:
             return func(*args, **kwargs)
@@ -93,6 +113,23 @@ def get_currently_executing_function() -> Callable:
 def get_currently_executing_function_call_arguments(
     include_module_name: bool = False, include_caller_names: bool = False, **kwargs
 ) -> dict:
+    """
+    :param include_module_name: bool If True, module name will be determined and included in output dictionary (default is False)
+    :param include_caller_names: bool If True, arguments, such as "self" and "cls", if present, will be included in output dictionary (default is False)
+    :param kwargs:
+    :return: dict Output dictionary, consisting of call arguments as attribute "name: value" pairs.
+
+    Example usage:
+    # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+    # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+    self._config = get_currently_executing_function_call_arguments(
+        include_module_name=True,
+        **{
+            "class_name": self.__class__.__name__,
+        },
+    )
+    filter_properties_dict(properties=self._config, inplace=True)
+    """
     cf: FrameType = currentframe()
     fb: FrameType = cf.f_back
     argvs: ArgInfo = getargvalues(fb)
