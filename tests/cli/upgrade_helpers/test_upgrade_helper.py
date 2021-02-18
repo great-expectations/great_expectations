@@ -36,7 +36,7 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["project", "upgrade", "-d", v10_project_directory],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -138,7 +138,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["project", "upgrade", "-d", v10_project_directory],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -244,7 +244,7 @@ def test_project_upgrade_with_manual_steps(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["project", "upgrade", "-d", v10_project_directory],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -355,7 +355,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["project", "upgrade", "-d", v10_project_directory],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -452,7 +452,7 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["project", "upgrade", "-d", v20_project_directory],
+        ["-c", v20_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
