@@ -5,7 +5,7 @@ from unittest import mock
 from click.testing import CliRunner
 
 from great_expectations import DataContext
-from great_expectations.cli import cli
+from great_expectations.cli.v012 import cli
 from great_expectations.core.expectation_suite import ExpectationSuite
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
