@@ -474,9 +474,10 @@ def _collect_postgres_credentials(default_credentials=None):
 
     credentials = {"drivername": "postgresql"}
 
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     credentials["host"] = click.prompt(
         "What is the host for the postgres connection?",
-        default=default_credentials.get("host", "localhost"),
+        default=default_credentials.get("host", db_hostname),
     ).strip()
     credentials["port"] = click.prompt(
         "What is the port for the postgres connection?",
@@ -635,9 +636,10 @@ def _collect_mysql_credentials(default_credentials=None):
 
     credentials = {"drivername": "mysql+pymysql"}
 
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     credentials["host"] = click.prompt(
         "What is the host for the MySQL connection?",
-        default=default_credentials.get("host", "localhost"),
+        default=default_credentials.get("host", db_hostname),
     ).strip()
     credentials["port"] = click.prompt(
         "What is the port for the MySQL connection?",
@@ -1150,12 +1152,9 @@ You have selected a datasource that is a SQL database. How would you like to spe
             data_asset_name = "custom_sql_query"
 
         elif single_or_multiple_data_asset_selection == "3":  # list it all
-            msg_prompt_warning = fr"""Warning: If you have a large number of tables in your datasource, this may take a very long time. \m
-                    Would you like to continue?"""
-            confirmation = click.prompt(
-                msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
-            )
-            if confirmation == "y":
+            msg_prompt_warning = f"""Warning: If you have a large number of tables in your datasource, this may take a very long time.\nWould you like to proceed?"""
+            confirmation = click.confirm(msg_prompt_warning, default=True)
+            if confirmation:
                 # avoid this call until necessary
                 available_data_asset_names = (
                     temp_generator.get_available_data_asset_names()["names"]
