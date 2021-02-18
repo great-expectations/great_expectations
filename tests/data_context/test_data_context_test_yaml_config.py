@@ -327,13 +327,14 @@ def test_golden_path_sql_datasource_configuration(
 
     context = ge.get_context()
 
-    yaml_config = """
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    yaml_config = f"""
 class_name: SimpleSqlalchemyDatasource
 credentials:
     drivername: postgresql
     username: postgres
     password: ""
-    host: localhost
+    host: {db_hostname}
     port: 5432
     database: test_ci
 
