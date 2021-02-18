@@ -66,7 +66,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
                 batch = context.get_batch(
                     batch_kwargs=batch_kwargs,
-                    expectation_suite_name=suite
+                    expectation_suite_name=expectation_suite_name
                 )
 
 
@@ -98,13 +98,14 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
         7. (Optional) Running validation, saving the suite and building Data Docs
 
-            If you'd like, you can validate the your data with the new suite, save your Expectation Suite and build Data Docs to take a closer look
+            If you'd like, you can validate your data with the new suite, save your Expectation Suite and build Data Docs to take a closer look
 
             .. code-block:: python
+
                 # We need to re-create our batch to link the batch with our new suite
                 batch = context.get_batch(
                 batch_kwargs=batch_kwargs,
-                expectation_suite_name=suite)
+                expectation_suite_name=expectation_suite_name)
 
                 # Running validation
                 results = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])
@@ -134,7 +135,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
             - ``primary_or_compound_key``: Takes a list of one or more columns. This allows you to specify one or more columns as a primary or compound key, and will add ``expect_column_values_to_be_unique`` or ``expect_compound_column_values_to_be_unique``
 
 
-            - ``table_expectations_only``: Takes a boolean. If True, this will only create table-level expectations (i.e. ignoring all columns. Table-level expectations include ``expect_table_row_count_to_equal`` and ``expect_table_columns_to_match_ordered_list``
+            - ``table_expectations_only``: Takes a boolean. If True, this will only create table-level expectations (i.e. ignoring all columns). Table-level expectations include ``expect_table_row_count_to_equal`` and ``expect_table_columns_to_match_ordered_list``
 
 
             - ``value_set_threshold``: Takes a string from the following ordered list - "none", "one", "two", "very_few", "few", "many", "very_many", "unique". When the profiler runs, each column is profiled for cardinality. This threshold determines the greatest cardinality for which to add ``expect_column_values_to_be_in_set``. For example, if ``value_set_threshold`` is set to "unique", it will add a value_set expectation for every included column. If set to "few", it will add a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or "few". The default value here is "many". For the purposes of comparing whether two tables are identical, it might make the most sense to set this to "unique".
@@ -175,7 +176,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
         The profiler is fairly rudimentary - if it detects that a column is numeric, it will create numeric expectations (e.g. ``expect_column_mean_to_be_between``). But if you are storing foreign keys or primary keys as integers, then you might not want numeric expectations on these columns. This is where the semantic_types dictionary comes in.
 
-        The available semantic types that can be specified in the UserConfigurableProfiler "numeric", "value_set", and "datetime". The expectations created for each of these types is below. You can pass in a dictionary where the keys are the semantic types, and the values are lists of columns of those semantic types.
+        The available semantic types that can be specified in the UserConfigurableProfiler are "numeric", "value_set", and "datetime". The expectations created for each of these types is below. You can pass in a dictionary where the keys are the semantic types, and the values are lists of columns of those semantic types.
 
         When you pass in a ``semantic_types_dict``, the profiler will still create table-level expectations, and will create certain expectations for all columns (around nullity and column proportions of unique values). It will then only create semantic-type-specific expectations for those columns specified in the semantic_types dict.
 
