@@ -682,11 +682,102 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
     assert context.list_expectation_suite_names() == []
 
     root_dir: str = context.root_directory
-    print(f"\n[ALEX_TEST] ROOT_DIR: {root_dir}")
     checkpoint_file_path: str = os.path.join(
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "no_suite.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+
+    _write_checkpoint_dict_to_file(config, checkpoint_file_path)
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"checkpoint run no_suite -d {root_dir}",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 1
+
+    assert "Exception occurred while running validation" in stdout
+    assert (
+        "of checkpoint 'no_suite': validation expectation_suite_name must be specified"
+        in stdout
+    )
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_on_non_existent_validations_with_ge_config_v3(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    monkeypatch,
+):
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert context.list_expectation_suite_names() == []
+
+    root_dir: str = context.root_directory
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "no_validations.yml",
     )
 
     checkpoint_yaml_config: str = f"""
@@ -719,13 +810,13 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"checkpoint run no_suite -d {root_dir}",
+        f"checkpoint run no_validations -d {root_dir}",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
     assert result.exit_code == 1
 
-    assert "Checkpoint 'no_suite does not contain any validations." in stdout
+    assert "Checkpoint 'no_validations does not contain any validations." in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -745,68 +836,6 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
     monkeypatch.delenv("VAR")
     monkeypatch.delenv("MY_PARAM")
     monkeypatch.delenv("OLD_PARAM")
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
-):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    root_dir = context.root_directory
-    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
-
-    suite = context.create_expectation_suite("iceberg")
-    context.save_expectation_suite(suite)
-    assert context.list_expectation_suite_names() == ["iceberg"]
-    mock_emit.reset_mock()
-
-    checkpoint_file_path = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "bad_operator.yml",
-    )
-    bad = {
-        "validation_operator_name": "foo",
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "path": csv_path,
-                    "datasource": "mydatasource",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": ["iceberg"],
-            },
-        ],
-    }
-    _write_checkpoint_dict_to_file(bad, checkpoint_file_path)
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"checkpoint run bad_operator -d {root_dir}",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 1
-
-    assert (
-        f"No validation operator `foo` was found in your project. Please verify this in your great_expectations.yml"
-        in stdout
-    )
-    usage_emits = mock_emit.call_args_list
-
-    assert mock_emit.call_count == 3
-    assert usage_emits[0][0][0]["success"] is True
-    assert usage_emits[1][0][0]["success"] is False
-    assert usage_emits[2][0][0]["success"] is False
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
-    )
 
 
 @mock.patch(
