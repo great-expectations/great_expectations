@@ -2338,6 +2338,8 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         """
 
     context.test_yaml_config(name="my_datasource", yaml_config=datasource_config)
+    # noinspection PyProtectedMember
+    context._save_project_config()
     return context
 
 
@@ -2620,6 +2622,8 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
         value=simple_checkpoint_with_site_names_config,
     )
 
+    # noinspection PyProtectedMember
+    context._save_project_config()
     return context
 
 
@@ -2703,6 +2707,8 @@ def empty_context_with_checkpoint_v1_stats_enabled(
     )
     checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
     shutil.copy(fixture_path, checkpoints_file)
+    # noinspection PyProtectedMember
+    context._save_project_config()
     return context
 
 

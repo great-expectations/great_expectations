@@ -7,15 +7,22 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner, Result
 from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from tests.cli.utils import (
     LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
+
+
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 @pytest.fixture
@@ -469,64 +476,24 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
+# TODO: <Alex>ALEX Delete "_with_ge_config_v3" when all done</Alex>
+def test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v3(
+    mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    root_dir = context.root_directory
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    root_dir: str = context.root_directory
+    mock_emit.reset_mock()
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"checkpoint run fake_checkpoint -d {root_dir}",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-
-    assert "Could not find checkpoint `fake_checkpoint`." in stdout
-    assert "Try running" in stdout
-    assert result.exit_code == 1
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_config_v2(
-    mock_emit,
-    caplog,
-    titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
-):
-    context: DataContext = (
-        titanic_data_context_stats_enabled_config_version_2_with_checkpoint
-    )
-    root_dir = context.root_directory
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"checkpoint run my_checkpoint -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 1
-
-    assert "expectation_suite suite_one not found" in stdout
+    assert "Could not find checkpoint `my_checkpoint`" in stdout
+    assert "Try running" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -541,29 +508,119 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
+def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_config_v3(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+    monkeypatch,
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    suite = context.create_expectation_suite("bar")
-    context.save_expectation_suite(suite)
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = (
+        titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    )
+    root_dir: str = context.root_directory
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"checkpoint run my_nested_checkpoint_template_1 -d {root_dir}",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 1
+
+    assert "expectation_suite suite_from_template_1 not found" in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_ge_config_v3(
+    mock_emit, caplog, titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates, monkeypatch
+):
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    suite: ExpectationSuite = context.create_expectation_suite(expectation_suite_name="bar")
+    context.save_expectation_suite(expectation_suite=suite)
     assert context.list_expectation_suite_names() == ["bar"]
     mock_emit.reset_mock()
 
-    root_dir = context.root_directory
-    checkpoint_file_path = os.path.join(
+    root_dir: str = context.root_directory
+    checkpoint_file_path: str = os.path.join(
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "bad_batch.yml",
     )
-    bad = {
+
+    bad_batch_checkpoint_yaml_config: str = f"""
+    name: bad_batch
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+          batch_spec_passthrough:
+            path: /totally/not/a/file.csv
+            reader_method: read_csv
+        expectation_suite_name: bar
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: CommentedMap = yaml.load(bad_batch_checkpoint_yaml_config)
+    bad: dict = dict(config)
+
+    awewful_bad: dict = {
         "batches": [
             {
                 "batch_kwargs": {
@@ -577,15 +634,16 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
     }
     _write_checkpoint_dict_to_file(bad, checkpoint_file_path)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"checkpoint run bad_batch -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    # TODO: <Alex>ALEX -- Investigate how to make Abe's suggestion a reality.</Alex>
     # Note: Abe : 2020/09: This was a better error message, but it should live in DataContext.get_batch, not a random CLI method.
     # assert "There was a problem loading a batch:" in stdout
     # assert (
@@ -612,8 +670,11 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
@@ -1128,41 +1189,6 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
         ),
         mock.call(
             {"event": "cli.checkpoint.new", "event_payload": {}, "success": False}
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_run_with_ge_config_3_raises_error(
-    mock_emit, caplog, titanic_data_context_stats_enabled
-):
-    context: DataContext = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
-    mock_emit.reset_mock()
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"checkpoint run my_checkpoint -d {root_dir}",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 1
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
         ),
     ]
 
