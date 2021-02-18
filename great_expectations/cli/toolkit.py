@@ -12,6 +12,7 @@ from ruamel.yaml.compat import StringIO
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.datasource import get_batch_kwargs
 from great_expectations.cli.docs import build_docs
@@ -348,17 +349,17 @@ def exit_with_failure_message_and_stats(
     sys.exit(1)
 
 
-def load_checkpoint(
+def run_checkpoint(
     context: DataContext,
     checkpoint_name: str,
     usage_event: str,
-) -> Union[Checkpoint, LegacyCheckpoint]:
-    """Load a checkpoint or raise helpful errors."""
+) -> CheckpointResult:
+    """Run a checkpoint or raise helpful errors."""
     try:
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
-            name=checkpoint_name
+        result: CheckpointResult = context.run_checkpoint(
+            checkpoint_name=checkpoint_name
         )
-        return checkpoint
+        return result
     except (
         ge_exceptions.CheckpointNotFoundError,
         ge_exceptions.InvalidCheckpointConfigError,
