@@ -38,6 +38,7 @@ except ImportError:
     "--config",
     "-c",
     "config_file_location",
+    default="./",
     help="Path to great_expectations configuration file location (great_expectations.yml). Inferred if not provided.",
 )
 @click.pass_context
