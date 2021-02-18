@@ -36,7 +36,6 @@ except ImportError:
 # TODO: <Alex>ALEX -- Update this --help page to fit with the new design.</Alex>
 @click.option(
     "--config",
-    "--config_file_location",
     "-c",
     "config_file_location",
     help="Path to great_expectations configuration file location (great_expectations.yml). Inferred if not provided.",
@@ -66,7 +65,7 @@ def cli(ctx, verbose, config_file_location):
         logger.setLevel(logging.DEBUG)
 
     ctx.ensure_object(dict)
-    ctx.obj['CONFIG_FILE_LOCATION'] = config_file_location
+    ctx.obj["CONFIG_FILE_LOCATION"] = config_file_location
 
 
 cli.add_command(datasource)
