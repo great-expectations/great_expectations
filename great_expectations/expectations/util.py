@@ -26,21 +26,25 @@ def render_evaluation_parameter_string(render_func):
                 eval_params = runtime_configuration.get("evaluation_parameters", {})
                 styling = runtime_configuration.get("styling")
                 for key, val in eval_params.items():
-                    if key in current_expectation_params:
-                        app_params = dict()
-                        app_params["eval_param"] = key
-                        app_params["eval_param_value"] = val
-                        to_append = RenderedStringTemplateContent(
-                            **{
-                                "content_block_type": "string_template",
-                                "string_template": {
-                                    "template": app_template_str,
-                                    "params": app_params,
-                                    "styling": styling,
-                                },
-                            }
-                        )
-                        rendered_string_template.append(to_append)
+                    # this needs to be more complicated?
+                    # the possibility that it is a substring?
+                    for param in current_expectation_params:
+                        # "key in param" condition allows for eval param values to be rendered if arithmetic is present
+                        if key == param or key in param:
+                            app_params = dict()
+                            app_params["eval_param"] = key
+                            app_params["eval_param_value"] = val
+                            to_append = RenderedStringTemplateContent(
+                                **{
+                                    "content_block_type": "string_template",
+                                    "string_template": {
+                                        "template": app_template_str,
+                                        "params": app_params,
+                                        "styling": styling,
+                                    },
+                                }
+                            )
+                            rendered_string_template.append(to_append)
             else:
                 raise GreatExpectationsError(
                     f"""GE was not able to render the value of evaluation parameters.

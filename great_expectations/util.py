@@ -115,6 +115,23 @@ def get_currently_executing_function() -> Callable:
 def get_currently_executing_function_call_arguments(
     include_module_name: bool = False, include_caller_names: bool = False, **kwargs
 ) -> dict:
+    """
+    :param include_module_name: bool If True, module name will be determined and included in output dictionary (default is False)
+    :param include_caller_names: bool If True, arguments, such as "self" and "cls", if present, will be included in output dictionary (default is False)
+    :param kwargs:
+    :return: dict Output dictionary, consisting of call arguments as attribute "name: value" pairs.
+
+    Example usage:
+    # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+    # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+    self._config = get_currently_executing_function_call_arguments(
+        include_module_name=True,
+        **{
+            "class_name": self.__class__.__name__,
+        },
+    )
+    filter_properties_dict(properties=self._config, inplace=True)
+    """
     cf: FrameType = currentframe()
     fb: FrameType = cf.f_back
     argvs: ArgInfo = getargvalues(fb)
