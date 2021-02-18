@@ -237,6 +237,10 @@ class Checkpoint:
         )
         run_name_template: Optional[str] = substituted_runtime_config.run_name_template
         validations: list = substituted_runtime_config.validations
+        if len(validations) == 0:
+            raise CheckpointError(
+                f"Checkpoint '{self.name} does not contain any validations."
+            )
         run_results = {}
 
         if run_name is None and run_name_template is not None:
