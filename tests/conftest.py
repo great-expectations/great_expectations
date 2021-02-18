@@ -2331,7 +2331,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 
     context.test_yaml_config(name="my_datasource", yaml_config=datasource_config)
 
-    if sa is not None:
+    if is_library_loadable(library_name="sqlalchemy") and sa is not None:
         db_file = file_relative_path(
             __file__,
             "test_sets/test_cases_for_sql_data_connector.db",
