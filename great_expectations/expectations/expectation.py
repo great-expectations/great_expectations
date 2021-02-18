@@ -1088,6 +1088,11 @@ class TableExpectation(Expectation, ABC):
 
         try:
             # Ensuring Proper interval has been provided
+
+            assert any(
+                [min_val, max_val]
+            ), "min_value and max_value cannot both be None"
+
             if parse_strings_as_datetimes:
                 assert min_val is None or is_parseable_date(
                     min_val
