@@ -58,7 +58,12 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "list", "-d", v10_project_directory],
+        [
+            "-c",
+            v10_project_directory,
+            "suite",
+            "list",
+        ],
         input="n\n",
         catch_exceptions=False,
     )
