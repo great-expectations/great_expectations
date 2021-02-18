@@ -35,7 +35,15 @@ def test_docs_build_view(
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["docs", "build", "-d", root_dir], input="\n", catch_exceptions=False
+        cli,
+        [
+            "-c",
+            root_dir,
+            "docs",
+            "build",
+        ],
+        input="\n",
+        catch_exceptions=False,
     )
     stdout = result.stdout
 
@@ -79,7 +87,13 @@ def test_docs_build_no_view(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["docs", "build", "--no-view", "-d", root_dir],
+        [
+            "-c",
+            root_dir,
+            "docs",
+            "build",
+            "--no-view",
+        ],
         input="\n",
         catch_exceptions=False,
     )
@@ -122,7 +136,14 @@ def test_docs_build_assume_yes(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["docs", "build", "--no-view", "--assume-yes", "-d", root_dir],
+        [
+            "-c",
+            root_dir,
+            "docs",
+            "build",
+            "--no-view",
+            "--assume-yes",
+        ],
         catch_exceptions=False,
     )
     stdout = result.stdout
