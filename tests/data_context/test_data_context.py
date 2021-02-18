@@ -290,7 +290,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         class_name="SqlAlchemyDatasource",
         credentials={
             "drivername": "postgresql",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "65432",
             "username": "username_str",
             "password": "password_str",
@@ -343,7 +343,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
             },
             "credentials": {
                 "drivername": "postgresql",
-                "host": "localhost",
+                "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                 "port": "65432",
                 "username": "username_str",
                 "password": "***",
