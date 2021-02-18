@@ -174,8 +174,6 @@ def build_gallery(
                     )
 
         # Use a brute-force approach: install all requirements for each module as we import it
-        # in order to ensure everything is able to be imported, but immediately uninstall again,
-        # and then *reinstall* to run diagnostics.
         for expectation_module in expectations_module.__all__:
             just_installed = set()
             if expectation_module in requirements_dict:
