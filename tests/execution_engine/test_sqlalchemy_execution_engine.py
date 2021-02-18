@@ -78,7 +78,7 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
             "drivername": "postgresql",
             "username": "postgres",
             "password": "",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "5432",
             "database": "test_ci",
         }
@@ -87,7 +87,7 @@ def test_instantiation_via_credentials(sa, test_backends, test_df):
     assert my_execution_engine.credentials == {
         "username": "postgres",
         "password": "",
-        "host": "localhost",
+        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "port": "5432",
         "database": "test_ci",
     }
