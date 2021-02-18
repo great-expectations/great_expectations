@@ -8,6 +8,11 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.datasource.types import SqlAlchemyDatasourceBatchSpec
 
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
 yaml = YAML()
 
 

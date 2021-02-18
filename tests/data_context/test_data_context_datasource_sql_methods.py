@@ -13,6 +13,11 @@ from great_expectations.marshmallow__shade.exceptions import ValidationError
 
 yaml = YAML()
 
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
 
 def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
     context = data_context_with_sql_datasource_for_testing_get_batch

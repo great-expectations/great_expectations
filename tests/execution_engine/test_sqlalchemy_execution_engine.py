@@ -4,11 +4,6 @@ import os
 import pandas as pd
 import pytest
 
-try:
-    sqlalchemy = pytest.importorskip("sqlalchemy")
-except ImportError:
-    sqlalchemy = None
-
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.types import (
     RuntimeDataBatchSpec,
@@ -31,6 +26,11 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 # Function to test for spark dataframe equality
 from tests.test_utils import _build_sa_engine
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
 
 
 def test_instantiation_via_connection_string(sa, test_db_connection_string):

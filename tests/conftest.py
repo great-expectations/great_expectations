@@ -34,7 +34,7 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.util import import_library_module
+from great_expectations.util import import_library_module, is_library_loadable
 
 from .test_utils import expectationSuiteValidationResultSchema, get_dataset
 
@@ -276,11 +276,8 @@ def no_usage_stats(monkeypatch):
 
 @pytest.fixture
 def sa(test_backends):
-    if (
-        "postgresql" not in test_backends
-        and "sqlite" not in test_backends
-        and "mysql" not in test_backends
-        and "mssql" not in test_backends
+    if not all(
+        [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
@@ -2252,7 +2249,7 @@ def empty_data_context(tmp_path_factory) -> DataContext:
 
 @pytest.fixture
 def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store(
-    tmp_path_factory,
+    tmp_path_factory, test_backends
 ):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -2334,29 +2331,30 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 
     context.test_yaml_config(name="my_datasource", yaml_config=datasource_config)
 
-    db_file = file_relative_path(
-        __file__,
-        "test_sets/test_cases_for_sql_data_connector.db",
-    )
-    datasource_config = f"""
-        class_name: Datasource
+    if is_library_loadable(library_name="sqlalchemy"):
+        db_file = file_relative_path(
+            __file__,
+            "test_sets/test_cases_for_sql_data_connector.db",
+        )
+        datasource_config = f"""
+            class_name: Datasource
 
-        execution_engine:
-            class_name: SqlAlchemyExecutionEngine
-            connection_string: sqlite:///{db_file}
+            execution_engine:
+                class_name: SqlAlchemyExecutionEngine
+                connection_string: sqlite:///{db_file}
 
-        data_connectors:
-            my_runtime_data_connector:
-                module_name: great_expectations.datasource.data_connector
-                class_name: RuntimeDataConnector
-                runtime_keys:
-                    - pipeline_stage_name
-                    - airflow_run_id
-        """
+            data_connectors:
+                my_runtime_data_connector:
+                    module_name: great_expectations.datasource.data_connector
+                    class_name: RuntimeDataConnector
+                    runtime_keys:
+                        - pipeline_stage_name
+                        - airflow_run_id
+            """
 
-    context.test_yaml_config(
-        name="my_runtime_sql_datasource", yaml_config=datasource_config
-    )
+        context.test_yaml_config(
+            name="my_runtime_sql_datasource", yaml_config=datasource_config
+        )
     return context
 
 
