@@ -7,7 +7,6 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner, Result
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -18,7 +17,6 @@ from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
-
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -524,9 +522,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = (
-        titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-    )
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     root_dir: str = context.root_directory
 
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -564,14 +560,19 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_ge_config_v3(
-    mock_emit, caplog, titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates, monkeypatch
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    monkeypatch,
 ):
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-    suite: ExpectationSuite = context.create_expectation_suite(expectation_suite_name="bar")
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="bar"
+    )
     context.save_expectation_suite(expectation_suite=suite)
     assert context.list_expectation_suite_names() == ["bar"]
     mock_emit.reset_mock()
@@ -583,7 +584,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
         "bad_batch.yml",
     )
 
-    bad_batch_checkpoint_yaml_config: str = f"""
+    checkpoint_yaml_config: str = f"""
     name: bad_batch
     config_version: 1
     class_name: Checkpoint
@@ -617,22 +618,9 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
             result_format: BASIC
             partial_unexpected_count: 20
     """
-    config: CommentedMap = yaml.load(bad_batch_checkpoint_yaml_config)
-    bad: dict = dict(config)
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
 
-    awewful_bad: dict = {
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "path": "/totally/not/a/file.csv",
-                    "datasource": "mydatasource",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": ["bar"],
-            },
-        ],
-    }
-    _write_checkpoint_dict_to_file(bad, checkpoint_file_path)
+    _write_checkpoint_dict_to_file(config, checkpoint_file_path)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
@@ -680,50 +668,64 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
+def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge_config_v3(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    monkeypatch,
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
-    root_dir = context.root_directory
-    checkpoint_file_path = os.path.join(
+    root_dir: str = context.root_directory
+    print(f"\n[ALEX_TEST] ROOT_DIR: {root_dir}")
+    checkpoint_file_path: str = os.path.join(
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "bad_batch.yml",
+        "no_suite.yml",
     )
-    bad = {
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "path": "/totally/not/a/file.csv",
-                    "datasource": "mydatasource",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": [],
-            },
-        ],
-    }
-    _write_checkpoint_dict_to_file(bad, checkpoint_file_path)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    checkpoint_yaml_config: str = f"""
+    name: my_base_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+        result_format:
+          result_format: BASIC
+          partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+
+    _write_checkpoint_dict_to_file(config, checkpoint_file_path)
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"checkpoint run bad_batch -d {root_dir}",
+        f"checkpoint run no_suite -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 1
 
-    assert (
-        "A batch has no suites associated with it. At least one suite is required."
-        in stdout
-    )
-    assert (
-        'Batch: {"path": "/totally/not/a/file.csv", "datasource": "mydatasource", "reader_method": "read_csv"}'
-        in stdout
-    )
-    assert "Please add at least one suite to checkpoint bad_batch" in stdout
+    assert "Checkpoint 'no_suite does not contain any validations." in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -738,8 +740,11 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
