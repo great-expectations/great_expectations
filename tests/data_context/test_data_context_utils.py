@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 import great_expectations.exceptions as gee
@@ -49,119 +51,124 @@ def test_password_masker_mask_db_url():
     """
     # PostgreSQL
     # default
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     assert (
         PasswordMasker.mask_db_url(
-            "postgresql://scott:tiger@localhost:65432/mydatabase"
+            f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase"
         )
-        == "postgresql://scott:***@localhost:65432/mydatabase"
+        == f"postgresql://scott:***@{db_hostname}:65432/mydatabase"
     )
     assert (
         PasswordMasker.mask_db_url(
-            "postgresql://scott:tiger@localhost:65432/mydatabase", use_urlparse=True
+            f"postgresql://scott:tiger@{db_hostname}:65432/mydatabase",
+            use_urlparse=True,
         )
-        == "postgresql://scott:***@localhost:65432/mydatabase"
+        == f"postgresql://scott:***@{db_hostname}:65432/mydatabase"
     )
     # missing port number, using urlparse
     assert (
         PasswordMasker.mask_db_url(
-            "postgresql://scott:tiger@localhost/mydatabase", use_urlparse=True
+            f"postgresql://scott:tiger@{db_hostname}/mydatabase", use_urlparse=True
         )
-        == "postgresql://scott:***@localhost/mydatabase"
+        == f"postgresql://scott:***@{db_hostname}/mydatabase"
     )
 
     # psycopg2
     assert (
         PasswordMasker.mask_db_url(
-            "postgresql+psycopg2://scott:tiger@localhost:65432/mydatabase"
+            f"postgresql+psycopg2://scott:tiger@{db_hostname}:65432/mydatabase"
         )
-        == "postgresql+psycopg2://scott:***@localhost:65432/mydatabase"
+        == f"postgresql+psycopg2://scott:***@{db_hostname}:65432/mydatabase"
     )
     assert (
         PasswordMasker.mask_db_url(
-            "postgresql+psycopg2://scott:tiger@localhost:65432/mydatabase",
+            f"postgresql+psycopg2://scott:tiger@{db_hostname}:65432/mydatabase",
             use_urlparse=True,
         )
-        == "postgresql+psycopg2://scott:***@localhost:65432/mydatabase"
+        == f"postgresql+psycopg2://scott:***@{db_hostname}:65432/mydatabase"
     )
 
     # pg8000 (if installed in test environment)
     try:
         assert (
             PasswordMasker.mask_db_url(
-                "postgresql+pg8000://scott:tiger@localhost:65432/mydatabase"
+                f"postgresql+pg8000://scott:tiger@{db_hostname}:65432/mydatabase"
             )
-            == "postgresql+pg8000://scott:***@localhost:65432/mydatabase"
+            == f"postgresql+pg8000://scott:***@{db_hostname}:65432/mydatabase"
         )
     except ModuleNotFoundError:
         pass
     assert (
         PasswordMasker.mask_db_url(
-            "postgresql+pg8000://scott:tiger@localhost:65432/mydatabase",
+            f"postgresql+pg8000://scott:tiger@{db_hostname}:65432/mydatabase",
             use_urlparse=True,
         )
-        == "postgresql+pg8000://scott:***@localhost:65432/mydatabase"
+        == f"postgresql+pg8000://scott:***@{db_hostname}:65432/mydatabase"
     )
 
     # MySQL
     # default (if installed in test environment)
     try:
         assert (
-            PasswordMasker.mask_db_url("mysql://scott:tiger@localhost:65432/foo")
-            == "mysql://scott:***@localhost:65432/foo"
+            PasswordMasker.mask_db_url(f"mysql://scott:tiger@{db_hostname}:65432/foo")
+            == f"mysql://scott:***@{db_hostname}:65432/foo"
         )
     except ModuleNotFoundError:
         pass
 
     assert (
         PasswordMasker.mask_db_url(
-            "mysql://scott:tiger@localhost:65432/foo", use_urlparse=True
+            f"mysql://scott:tiger@{db_hostname}:65432/foo", use_urlparse=True
         )
-        == "mysql://scott:***@localhost:65432/foo"
+        == f"mysql://scott:***@{db_hostname}:65432/foo"
     )
 
     # mysqlclient (a maintained fork of MySQL-Python) (if installed in test environment)
     try:
         assert (
             PasswordMasker.mask_db_url(
-                "mysql+mysqldb://scott:tiger@localhost:65432/foo"
+                f"mysql+mysqldb://scott:tiger@{db_hostname}:65432/foo"
             )
-            == "mysql+mysqldb://scott:***@localhost:65432/foo"
+            == f"mysql+mysqldb://scott:***@{db_hostname}:65432/foo"
         )
     except ModuleNotFoundError:
         pass
     assert (
         PasswordMasker.mask_db_url(
-            "mysql+mysqldb://scott:tiger@localhost:65432/foo", use_urlparse=True
+            f"mysql+mysqldb://scott:tiger@{db_hostname}:65432/foo", use_urlparse=True
         )
-        == "mysql+mysqldb://scott:***@localhost:65432/foo"
+        == f"mysql+mysqldb://scott:***@{db_hostname}:65432/foo"
     )
 
     # PyMySQL
     assert (
-        PasswordMasker.mask_db_url("mysql+pymysql://scott:tiger@localhost:65432/foo")
-        == "mysql+pymysql://scott:***@localhost:65432/foo"
+        PasswordMasker.mask_db_url(
+            f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo"
+        )
+        == f"mysql+pymysql://scott:***@{db_hostname}:65432/foo"
     )
     assert (
         PasswordMasker.mask_db_url(
-            "mysql+pymysql://scott:tiger@localhost:65432/foo", use_urlparse=True
+            f"mysql+pymysql://scott:tiger@{db_hostname}:65432/foo", use_urlparse=True
         )
-        == "mysql+pymysql://scott:***@localhost:65432/foo"
+        == f"mysql+pymysql://scott:***@{db_hostname}:65432/foo"
     )
 
     # Oracle (if installed in test environment)
+    url_host = os.getenv("GE_TEST_LOCALHOST_URL", "127.0.0.1")
     try:
         assert (
-            PasswordMasker.mask_db_url("oracle://scott:tiger@127.0.0.1:1521/sidname")
-            == "oracle://scott:***@127.0.0.1:1521/sidname"
+            PasswordMasker.mask_db_url(f"oracle://scott:tiger@{url_host}:1521/sidname")
+            == f"oracle://scott:***@{url_host}:1521/sidname"
         )
     except ModuleNotFoundError:
         pass
 
     assert (
         PasswordMasker.mask_db_url(
-            "oracle://scott:tiger@127.0.0.1:1521/sidname", use_urlparse=True
+            f"oracle://scott:tiger@{url_host}:1521/sidname", use_urlparse=True
         )
-        == "oracle://scott:***@127.0.0.1:1521/sidname"
+        == f"oracle://scott:***@{url_host}:1521/sidname"
     )
 
     try:
@@ -195,17 +202,17 @@ def test_password_masker_mask_db_url():
     try:
         assert (
             PasswordMasker.mask_db_url(
-                "mssql+pymssql://scott:tiger@hostname:12345/dbname"
+                f"mssql+pymssql://scott:tiger@{db_hostname}:12345/dbname"
             )
-            == "mssql+pymssql://scott:***@hostname:12345/dbname"
+            == f"mssql+pymssql://scott:***@{db_hostname}:12345/dbname"
         )
     except ModuleNotFoundError:
         pass
     assert (
         PasswordMasker.mask_db_url(
-            "mssql+pymssql://scott:tiger@hostname:12345/dbname", use_urlparse=True
+            f"mssql+pymssql://scott:tiger@{db_hostname}:12345/dbname", use_urlparse=True
         )
-        == "mssql+pymssql://scott:***@hostname:12345/dbname"
+        == f"mssql+pymssql://scott:***@{db_hostname}:12345/dbname"
     )
 
     # SQLite

@@ -474,9 +474,10 @@ def _collect_postgres_credentials(default_credentials=None):
 
     credentials = {"drivername": "postgresql"}
 
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     credentials["host"] = click.prompt(
         "What is the host for the postgres connection?",
-        default=default_credentials.get("host", "localhost"),
+        default=default_credentials.get("host", db_hostname),
     ).strip()
     credentials["port"] = click.prompt(
         "What is the port for the postgres connection?",
@@ -635,9 +636,10 @@ def _collect_mysql_credentials(default_credentials=None):
 
     credentials = {"drivername": "mysql+pymysql"}
 
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     credentials["host"] = click.prompt(
         "What is the host for the MySQL connection?",
-        default=default_credentials.get("host", "localhost"),
+        default=default_credentials.get("host", db_hostname),
     ).strip()
     credentials["port"] = click.prompt(
         "What is the port for the MySQL connection?",
