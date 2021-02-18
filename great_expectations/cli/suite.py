@@ -218,36 +218,12 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         raise e
 
 
+@mark.cli_as_deprecation
 @suite.command(name="demo")
-@click.option("--suite", "-es", default=None, help="Expectation suite name.")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@click.option(
-    "--view/--no-view",
-    help="By default open in browser unless you specify the --no-view flag",
-    default=True,
-)
-@mark.cli_as_beta
-def suite_demo(suite, directory, view):
-    """
-    Create a new demo Expectation Suite.
-
-    Great Expectations will choose a couple of columns and generate expectations
-    about them to demonstrate some examples of assertions you can make about
-    your data.
-    """
-    _suite_new(
-        suite=suite,
-        directory=directory,
-        empty=False,
-        jupyter=False,
-        view=view,
-        batch_kwargs=None,
-        usage_event="cli.suite.demo",
+def suite_demo():
+    """This command is not supported in the new API."""
+    print(
+        "This command is not supported in the new API. Please use `suite new` instead."
     )
 
 
@@ -296,7 +272,6 @@ def _suite_new(
     batch_kwargs,
     usage_event: str,
 ) -> None:
-    # TODO break this up into demo and new
     context = toolkit.load_data_context_with_error_handling(directory)
 
     datasource_name = None
