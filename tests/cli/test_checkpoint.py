@@ -79,7 +79,7 @@ def test_checkpoint_list_with_no_checkpoints_with_ge_config_v3(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint list -d {root_dir}",
+        f"-c {root_dir} checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -113,7 +113,7 @@ def test_checkpoint_list_with_single_checkpoint_with_ge_config_v3(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"checkpoint list -d {root_dir}",
+        f"-c {root_dir} checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -150,7 +150,7 @@ def test_checkpoint_list_with_eight_checkpoints_with_ge_config_v3(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"checkpoint list -d {root_dir}",
+        f"-c {root_dir} checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -198,7 +198,7 @@ def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint new foo not_a_suite -d {root_dir}",
+        f"-c {root_dir} checkpoint new foo not_a_suite",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -237,7 +237,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint new my_checkpoint suite -d {root_dir}",
+        f"-c {root_dir} checkpoint new my_checkpoint suite",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -283,7 +283,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint new passengers Titanic.warning -d {root_dir}",
+        f"-c {root_dir} checkpoint new passengers Titanic.warning",
         input="1\n1\n",
         catch_exceptions=False,
     )
@@ -380,7 +380,7 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint new passengers Titanic.warning -d {root_dir} --datasource mydatasource",
+        f"-c {root_dir} checkpoint new passengers Titanic.warning --datasource mydatasource",
         input="1\n1\n",
         catch_exceptions=False,
     )
@@ -439,7 +439,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint new passengers Titanic.warning -d {root_dir}",
+        f"-c {root_dir} checkpoint new passengers Titanic.warning",
         input="1\n1\n",
         catch_exceptions=False,
     )
@@ -478,7 +478,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint run fake_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint run fake_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -520,7 +520,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint run my_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -580,7 +580,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint run bad_batch -d {root_dir}",
+        f"-c {root_dir} checkpoint run bad_batch",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -648,7 +648,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint run bad_batch -d {root_dir}",
+        f"-c {root_dir} checkpoint run bad_batch",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -719,7 +719,7 @@ def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint run bad_operator -d {root_dir}",
+        f"-c {root_dir} checkpoint run bad_operator",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -758,7 +758,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint run my_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -807,7 +807,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint run my_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -853,7 +853,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint script not_a_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint script not_a_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -900,7 +900,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint script my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -946,7 +946,7 @@ def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint script my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -1006,7 +1006,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint script my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -1066,7 +1066,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint script my_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1111,7 +1111,7 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint new foo not_a_suite -d {root_dir}",
+        f"-c {root_dir} checkpoint new foo not_a_suite",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -1151,7 +1151,7 @@ def test_checkpoint_run_with_ge_config_3_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint run my_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1186,7 +1186,7 @@ def test_checkpoint_script_with_ge_config_3_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
+        f"-c {root_dir} checkpoint script my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
