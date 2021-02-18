@@ -7,7 +7,7 @@ Changelog
 
 develop
 -----------------
-
+* [BUGFIX] `expect_column_unique_value_count_to_be_between` renderer bug (duplicate "Distinct (%)") #2455
 
 0.13.10
 -----------------
