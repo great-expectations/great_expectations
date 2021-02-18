@@ -213,9 +213,9 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "Distinct (%)",
+                    "template": "Distinct (n)",
                     "tooltip": {
-                        "content": "expect_column_proportion_of_unique_values_to_be_between"
+                        "content": "expect_column_unique_value_count_to_be_between"
                     },
                 },
             }
@@ -223,7 +223,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         if not observed_value:
             return [template_string_object, "--"]
         else:
-            return [template_string_object, "%.1f%%" % (100 * observed_value)]
+            return [template_string_object, observed_value]
 
     def _validate(
         self,
