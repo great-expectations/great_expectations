@@ -289,7 +289,7 @@ class Checkpoint:
                 run_results.update(val_op_run_result.run_results)
             except CheckpointError as e:
                 raise CheckpointError(
-                    f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}"
+                    f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}."
                 )
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
