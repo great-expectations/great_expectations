@@ -9,7 +9,7 @@ from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 import pandas as pd
 from ruamel.yaml.compat import StringIO
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.datasource.types.batch_spec import (
     BatchSpec,
     PathBatchSpec,
@@ -38,6 +38,14 @@ class PandasBatchData(pd.DataFrame):
     # @property
     def row_count(self):
         return self.shape[0]
+
+    def __getitem__(self, key):
+        try:
+            return super().__getitem__(key)
+        except Exception as e:
+            raise ge_exceptions.ExecutionEngineError(
+                message=f'Error: The key "{key}" in PandasBatchData does not exist.'
+            )
 
 
 class PandasExecutionEngine(ExecutionEngine):
