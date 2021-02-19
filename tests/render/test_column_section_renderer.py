@@ -20,6 +20,7 @@ from great_expectations.render.renderer import (
     ValidationResultsColumnSectionRenderer,
 )
 from great_expectations.render.renderer.content_block import (
+    ProfilingColumnPropertiesTableContentBlockRenderer,
     ValidationResultsTableContentBlockRenderer,
 )
 
@@ -1571,3 +1572,189 @@ def test_ProfilingResultsOverviewSectionRenderer_empty_type_list():
         and block.header.string_template["template"] == "Variable types"
     ][0]
     assert ["unknown", "1"] in types_table
+
+
+# noinspection PyPep8Naming
+def test_ProfilingColumnPropertiesTableContentBlockRenderer():
+    ge_object = [
+        ExpectationValidationResult(
+            **{
+                "exception_info": {
+                    "raised_exception": False,
+                    "exception_message": None,
+                    "exception_traceback": None,
+                },
+                "result": {
+                    "element_count": 101766,
+                    "missing_count": 0,
+                    "missing_percent": 0.0,
+                    "unexpected_count": 0,
+                    "unexpected_percent": 0.0,
+                    "unexpected_percent_total": 0.0,
+                    "unexpected_percent_nonmissing": 0.0,
+                    "partial_unexpected_list": [],
+                    "partial_unexpected_index_list": [],
+                    "partial_unexpected_counts": [],
+                },
+                "success": True,
+                "expectation_config": ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_not_match_regex",
+                        "kwargs": {
+                            "column": "race",
+                            "regex": "^\\s+|\\s+$",
+                            "result_format": "SUMMARY",
+                        },
+                        "meta": {"BasicDatasetProfiler": {"confidence": "very low"}},
+                    }
+                ),
+                "meta": {},
+            },
+        ),
+        ExpectationValidationResult(
+            **{
+                "exception_info": {
+                    "raised_exception": False,
+                    "exception_message": None,
+                    "exception_traceback": None,
+                },
+                "result": {
+                    "observed_value": 3,
+                    "element_count": 101766,
+                    "missing_count": None,
+                    "missing_percent": None,
+                },
+                "success": True,
+                "expectation_config": ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_unique_value_count_to_be_between",
+                        "kwargs": {
+                            "column": "gender",
+                            "min_value": None,
+                            "max_value": None,
+                            "result_format": "SUMMARY",
+                        },
+                        "meta": {"BasicDatasetProfiler": {"confidence": "very low"}},
+                    }
+                ),
+                "meta": {},
+            },
+        ),
+        ExpectationValidationResult(
+            **{
+                "exception_info": {
+                    "raised_exception": False,
+                    "exception_message": None,
+                    "exception_traceback": None,
+                },
+                "result": {
+                    "observed_value": 2.947939390366134e-02,
+                    "element_count": 101766,
+                    "missing_count": None,
+                    "missing_percent": None,
+                },
+                "success": True,
+                "expectation_config": ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+                        "kwargs": {
+                            "column": "gender",
+                            "min_value": None,
+                            "max_value": None,
+                            "result_format": "SUMMARY",
+                        },
+                        "meta": {"BasicDatasetProfiler": {"confidence": "very low"}},
+                    }
+                ),
+                "meta": {},
+            },
+        ),
+        ExpectationValidationResult(
+            **{
+                "exception_info": {
+                    "raised_exception": False,
+                    "exception_message": None,
+                    "exception_traceback": None,
+                },
+                "result": {
+                    "element_count": 101766,
+                    "unexpected_count": 29008,
+                    "unexpected_percent": 23,
+                    "unexpected_percent_total": 0.0,
+                    "partial_unexpected_list": [],
+                },
+                "success": True,
+                "expectation_config": ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_not_be_null",
+                        "kwargs": {
+                            "column": "gender",
+                            "mostly": 0.5,
+                            "result_format": "SUMMARY",
+                        },
+                        "meta": {"BasicDatasetProfiler": {"confidence": "very low"}},
+                    }
+                ),
+                "meta": {},
+            },
+        ),
+    ]
+
+    expected_result_json_dict = {
+        "content_block_type": "table",
+        "table": [
+            ["Leading or trailing whitespace (n)", 0],
+            [
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Distinct (n)",
+                        "tooltip": {
+                            "content": "expect_column_unique_value_count_to_be_between"
+                        },
+                    },
+                },
+                3,
+            ],
+            [
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Distinct (%)",
+                        "tooltip": {
+                            "content": "expect_column_proportion_of_unique_values_to_be_between"
+                        },
+                    },
+                },
+                "2.9%",
+            ],
+            [
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (n)",
+                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
+                    },
+                },
+                29008,
+            ],
+            [
+                {
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": "Missing (%)",
+                        "tooltip": {"content": "expect_column_values_to_not_be_null"},
+                    },
+                },
+                "23.0%",
+            ],
+        ],
+        "header_row": [],
+    }
+    result_json_dict = (
+        ProfilingColumnPropertiesTableContentBlockRenderer()
+        .render(ge_object=ge_object)
+        .to_json_dict()
+    )
+
+    assert result_json_dict == expected_result_json_dict

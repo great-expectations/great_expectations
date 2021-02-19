@@ -8,7 +8,7 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 # Testing ordinary process of adding column row condition
 def test_add_column_row_condition():
-    e = ExecutionEngine()
+    e = PandasExecutionEngine()
 
     # Checking that adding a simple column row condition is functional
     new_domain_kwargs = e.add_column_row_condition({}, "a")
@@ -43,7 +43,7 @@ def test_add_column_row_condition():
 
 # Edge cases
 def test_add_column_row_condition_with_unsupported_conditions():
-    e = ExecutionEngine()
+    e = PandasExecutionEngine()
 
     # Ensuring that an attempt to filter nans within base class yields an error
     with pytest.raises(GreatExpectationsError) as error:
