@@ -79,15 +79,16 @@ def test_instantiation_with_selectable():
 
 # TODO: <Alex>ALEX Duplicate?</Alex>
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
-
     print(get_sqlite_temp_table_names(sqlite_view_engine))
     assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
     assert get_sqlite_temp_table_names(sqlite_view_engine) == {"test_temp_view"}
 
-    engine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
     # When the SqlAlchemyBatchData object is based on a table, a new temp table is NOT created, even if create_temp_table=True
     SqlAlchemyBatchData(
-        execution_engine=engine,
+        execution_engine=execution_engine,
         table_name="test_table",
         create_temp_table=True,
     )
@@ -97,7 +98,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
 
     # If create_temp_table=False, a new temp table should NOT be created
     SqlAlchemyBatchData(
-        execution_engine=engine,
+        execution_engine=execution_engine,
         selectable=selectable,
         create_temp_table=False,
     )
@@ -105,7 +106,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
 
     # If create_temp_table=True, a new temp table should be created
     SqlAlchemyBatchData(
-        execution_engine=engine,
+        execution_engine=execution_engine,
         selectable=selectable,
         create_temp_table=True,
     )
@@ -113,49 +114,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
 
     # If create_temp_table=True, a new temp table should be created
     SqlAlchemyBatchData(
-        execution_engine=engine,
-        selectable=selectable,
-        # create_temp_table defaults to True
-    )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 3
-
-
-# TODO: <Alex>ALEX Duplicate?</Alex>
-def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
-
-    print(get_sqlite_temp_table_names(sqlite_view_engine))
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
-    assert get_sqlite_temp_table_names(sqlite_view_engine) == {"test_temp_view"}
-
-    # When the SqlAlchemyBatchData object is based on a table, a new temp table is NOT created, even if create_temp_table=True
-    SqlAlchemyBatchData(
-        execution_engine=sqlite_view_engine,
-        table_name="test_table",
-        create_temp_table=True,
-    )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
-
-    selectable = sa.select("*").select_from(sa.text("test_table"))
-
-    # If create_temp_table=False, a new temp table should NOT be created
-    SqlAlchemyBatchData(
-        execution_engine=sqlite_view_engine,
-        selectable=selectable,
-        create_temp_table=False,
-    )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
-
-    # If create_temp_table=True, a new temp table should be created
-    SqlAlchemyBatchData(
-        execution_engine=sqlite_view_engine,
-        selectable=selectable,
-        create_temp_table=True,
-    )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
-
-    # If create_temp_table=True, a new temp table should be created
-    SqlAlchemyBatchData(
-        execution_engine=sqlite_view_engine,
+        execution_engine=execution_engine,
         selectable=selectable,
         # create_temp_table defaults to True
     )
