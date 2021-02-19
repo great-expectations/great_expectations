@@ -323,15 +323,13 @@ stages:
             displayName: 'pytest'
 
   - stage: deploy_gallery
-    condition: and(succeeded(), or(eq(variables.isDevelop, true), eq(variables.isDevelop, true)))
+    condition: and(succeeded(), or(eq(variables.isMain, true), eq(variables.isDevelop, true)))
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: [ required, lint, db_integration, usage_stats_integration ]
 
     jobs:
       - job: build_gallery
-        dependsOn: [ changes, test ]
-        condition: and(succeeded(), eq(dependencies.changes.outputs['CheckChanges.ExperimentalChanged'], true), eq(variables.isDevelop, true))
         variables:
           python.version: '3.7'
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
