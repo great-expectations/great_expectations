@@ -242,6 +242,7 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
             "@talagluck",
         ],
         "package": "experimental_expectations",
+        "requirements": ["uszipcode"],
     }
 
     # This is the id string of the Metric used by this Expectation.
@@ -347,4 +348,3 @@ if __name__ == "__main__":
     diagnostics_report = (
         ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode().run_diagnostics()
     )
-print(json.dumps(diagnostics_report, indent=2))

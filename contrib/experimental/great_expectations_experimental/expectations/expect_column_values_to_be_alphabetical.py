@@ -3,7 +3,6 @@ import operator
 from typing import Any, Dict, Optional, Tuple
 
 import pandas
-from pyspark.sql.functions import lag
 
 from great_expectations.core import ExpectationConfiguration
 

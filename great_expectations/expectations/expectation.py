@@ -7,6 +7,8 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
+import pandas as pd
+
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import (
@@ -747,7 +749,8 @@ class Expectation(metaclass=MetaExpectation):
         if gallery_examples != []:
             example_data, example_test = self._choose_example(gallery_examples)
 
-            test_batch = Batch(data=example_data)
+            # TODO: this should be creating a Batch using an engine
+            test_batch = Batch(data=pd.DataFrame(example_data))
 
             expectation_config = ExpectationConfiguration(
                 **{"expectation_type": snake_name, "kwargs": example_test}
