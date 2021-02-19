@@ -35,7 +35,8 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
 
     my_execution_engine.get_batch_data_and_markers(
         BatchSpec(
-            table_name="main.table_1",
+            table_name="table_1",
+            schema_name="main",
             sampling_method="_sample_using_limit",
             sampling_kwargs={"n": 5},
         )
@@ -70,7 +71,7 @@ def test_instantiation_via_credentials(sa, test_backends):
             "drivername": "postgresql",
             "username": "postgres",
             "password": "",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "5432",
             "database": "test_ci",
         }
@@ -79,7 +80,7 @@ def test_instantiation_via_credentials(sa, test_backends):
     assert my_execution_engine.credentials == {
         "username": "postgres",
         "password": "",
-        "host": "localhost",
+        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "port": "5432",
         "database": "test_ci",
     }

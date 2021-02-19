@@ -1,3 +1,4 @@
+from contextlib import ExitStack as does_not_raise
 from typing import List
 
 import boto3
@@ -14,6 +15,10 @@ from great_expectations.core.batch import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
+from great_expectations.datasource.data_connector.inferred_asset_s3_data_connector import (
+    INVALID_S3_CHARS,
+    _check_valid_s3_path,
+)
 
 yaml = YAML()
 
@@ -974,3 +979,16 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
                 "module_name": "great_expectations.datasource.data_connector"
             },
         )
+
+
+@pytest.mark.parametrize(
+    "path,expectation",
+    [("BUCKET/DIR/FILE.CSV", does_not_raise())]
+    + [
+        (f"BUCKET/DIR/FILE{c}CSV", pytest.raises(ge_exceptions.ParserError))
+        for c in INVALID_S3_CHARS
+    ],
+)
+def test_bad_s3_regex_paths(path, expectation):
+    with expectation:
+        _check_valid_s3_path(path)
