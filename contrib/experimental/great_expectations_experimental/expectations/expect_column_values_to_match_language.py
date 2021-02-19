@@ -1,10 +1,9 @@
 import json
-
-from polyglot.detect import Detector
 from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
+from polyglot.detect import Detector
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -16,15 +15,14 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,
     ExpectationConfiguration,
-    InvalidExpectationConfigurationError
+    InvalidExpectationConfigurationError,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
-    column_function_partial
+    column_function_partial,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -33,13 +31,15 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 
+
 def detect_language(val):
     return Detector(val, quiet=True).language.code
+
 
 class ColumnValuesDetectLanguage(ColumnMapMetricProvider):
     condition_metric_name = "column_values.value_language.equals"
     function_metric_name = "column_values.value_language"
-    
+
     condition_value_keys = ("language",)
 
     @column_function_partial(engine=PandasExecutionEngine)
@@ -51,7 +51,6 @@ class ColumnValuesDetectLanguage(ColumnMapMetricProvider):
         column_languages, _, _ = _metrics.get("column_values.value_language.map")
         return column_languages == language
 
-    
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, language, **kwargs):
         def is_language(val):
@@ -60,6 +59,7 @@ class ColumnValuesDetectLanguage(ColumnMapMetricProvider):
         language_udf = F.udf(is_language, sparktypes.BooleanType())
 
         return language_udf(column)
+
 
 class ExpectColumnValuesToMatchLanguage(ColumnMapExpectation):
     """Expect column entries to be strings in a given language.
@@ -161,7 +161,7 @@ class ExpectColumnValuesToMatchLanguage(ColumnMapExpectation):
         "tags": ["nlp", "language"],
         "contributors": ["@mielvds"],
         "package": "experimental_expectations",
-        "requirements": [],
+        "requirements": ["polyglot"],
     }
 
     map_metric = "column_values.match_language"
@@ -243,9 +243,7 @@ class ExpectColumnValuesToMatchLanguage(ColumnMapExpectation):
         )
 
         if not params.get("language"):
-            template_str = (
-                "values must match a language but none was specified."
-            )
+            template_str = "values must match a language but none was specified."
         else:
             template_str = "values must match this language: $language"
             if params["mostly"] is not None:
@@ -280,6 +278,7 @@ class ExpectColumnValuesToMatchLanguage(ColumnMapExpectation):
                 }
             )
         ]
+
 
 if __name__ == "__main__":
     diagnostics_report = ExpectColumnValuesToMatchLanguage().run_diagnostics()

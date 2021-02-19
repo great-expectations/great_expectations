@@ -1,9 +1,9 @@
 import json
-from edtf import parse_edtf
 from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
+from edtf import parse_edtf
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -21,7 +21,6 @@ from great_expectations.expectations.metrics.map_metric import (
     column_condition_partial,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -29,6 +28,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+
 
 class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
     condition_metric_name = "column_values.edtf_parseable"
@@ -49,6 +49,7 @@ class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
                 return False
 
         return column.map(is_parseable)
+
 
 class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
     """Expect column entries to be parsable using the [Extended Date/Time Format (EDTF) specification](https://www.loc.gov/standards/datetime/).
@@ -93,18 +94,18 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         {
             "data": {
                 "mostly_edtf": [
-                    "1979-08", # ISO8601 Date
-                    "2004-01-01T10:10:10+05:00", # ISO8601 Datetime
-                    "1979-08-28/1979-09-25", # Interval (start/end)
-                    "1979-08~", # Uncertain/Approximate dates
-                    "1979-08-uu", # Unspecified dates
-                    "1984-06-02?/2004-08-08~", # Extended intervals
-                    "y-12000", # Years exceeding four digits
-                    "asdwefefef", 
-                    "Octobre 12", 
-                    None, 
-                    None
-                    ],
+                    "1979-08",  # ISO8601 Date
+                    "2004-01-01T10:10:10+05:00",  # ISO8601 Datetime
+                    "1979-08-28/1979-09-25",  # Interval (start/end)
+                    "1979-08~",  # Uncertain/Approximate dates
+                    "1979-08-uu",  # Unspecified dates
+                    "1984-06-02?/2004-08-08~",  # Extended intervals
+                    "y-12000",  # Years exceeding four digits
+                    "asdwefefef",
+                    "Octobre 12",
+                    None,
+                    None,
+                ],
             },
             "tests": [
                 {
@@ -118,17 +119,17 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                         "unexpected_list": [2, -1],
                     },
                 }
-            ]
+            ],
         }
     ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["edtf", "datetime" , "glam"],
+        "tags": ["edtf", "datetime", "glam"],
         "contributors": ["@mielvds"],
         "package": "experimental_expectations",
-        "requirements": [],
+        "requirements": ["edtf"],
     }
 
     map_metric = "column_values.edtf_parsable"
@@ -203,6 +204,8 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                 }
             )
         ]
+
+
 if __name__ == "__main__":
     diagnostics_report = ExpectColumnValuesToBeEdtfParseable().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))

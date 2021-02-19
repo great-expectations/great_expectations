@@ -1,8 +1,8 @@
-from lxml import etree
 from typing import Optional
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from lxml import etree
 
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -16,9 +16,7 @@ from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -46,7 +44,7 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
             raise
         except:
             raise
-        
+
         def matches_xml_schema(val):
             try:
                 xml_doc = etree.fromstring(val)
@@ -78,6 +76,7 @@ class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
         matches_xml_schema_udf = F.udf(matches_xml_schema, sparktypes.BooleanType())
 
         return matches_xml_schema_udf(column)
+
 
 class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
     """Expect column entries to be XML documents matching a given [XMLSchema](https://en.wikipedia.org/wiki/XML_schema).
@@ -127,23 +126,15 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
-    examples = [
-        {
-            "data": {
-                
-            },
-            "tests": [
-            ]
-        }
-    ]
+    examples = [{"data": {}, "tests": []}]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["xml" , "glam"],
+        "tags": ["xml", "glam"],
         "contributors": ["@mielvds"],
         "package": "experimental_expectations",
-        "requirements": [],
+        "requirements": ["lxml"],
     }
 
     map_metric = "column_values.match_xml_schema"
@@ -192,7 +183,9 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
             template_str = "values must match a XML Schema but none was specified."
         else:
             params["formatted_xml"] = (
-                "<pre>" + etree.tostring(params.get("xml_schema"), pretty_print=True) + "</pre>" # TODO: 
+                "<pre>"
+                + etree.tostring(params.get("xml_schema"), pretty_print=True)
+                + "</pre>"  # TODO:
             )
             if params["mostly"] is not None:
                 params["mostly_pct"] = num_to_str(
