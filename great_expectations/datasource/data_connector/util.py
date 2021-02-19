@@ -19,7 +19,7 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.sorter import Sorter
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 
@@ -190,7 +190,27 @@ def _invert_regex_to_data_reference_template(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
-    """
+    """Create a string template based on a regex and corresponding list of group names.
+
+    For example:
+
+        filepath_template = _invert_regex_to_data_reference_template(
+            regex_pattern=r"^(.+)_(\d+)_(\d+)\.csv$",
+            group_names=["name", "timestamp", "price"],
+        )
+        filepath_template
+        >> "{name}_{timestamp}_{price}.csv"
+
+    Such templates are useful because they can be populated using string substitution:
+
+        filepath_template.format(**{
+            "name": "user_logs",
+            "timestamp": "20200101",
+            "price": "250",
+        })
+        >> "user_logs_20200101_250.csv"
+
+
     NOTE Abe 20201017: This method is almost certainly still brittle. I haven't exhaustively mapped the OPCODES in sre_constants
     """
     data_reference_template: str = ""
@@ -355,13 +375,3 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
         },
     )
     return sorter
-
-
-def fetch_batch_data_as_pandas_df(batch_data):
-    if isinstance(batch_data, pd.DataFrame):
-        return batch_data
-    if pyspark_sql and isinstance(batch_data, pyspark_sql.DataFrame):
-        return batch_data.toPandas()
-    if isinstance(batch_data, SqlAlchemyBatchData):
-        return batch_data.head(fetch_all=True)
-    raise ge_exceptions.DataConnectorError("Unknown batch_data type encountered.")

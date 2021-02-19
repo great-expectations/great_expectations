@@ -1,7 +1,6 @@
 import enum
 
 from .batch_kwargs import *
-from .batch_spec import *
 
 
 # noinspection SpellCheckingInspection
