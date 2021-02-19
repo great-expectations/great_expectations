@@ -86,8 +86,8 @@ Great Expectations generates and provides notebooks as interactive development e
 
 .. _tutorials__getting_started__customize_your_deployment__additional_datasources_and_generators:
 
-Additional Datasources and Generators
------------------------------------------
+Additional Datasources
+-----------------------
 
 Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up in `the public discussion forum <https://discuss.greatexpectations.io/>`_.
 
