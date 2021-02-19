@@ -395,12 +395,12 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
+        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-jupyter"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 2
+    assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
     mock_webbrowser.reset_mock()
     mock_subprocess.reset_mock()
@@ -480,11 +480,11 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
+        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-jupyter"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
-    assert mock_webbrowser.call_count == 2
+    assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
@@ -557,7 +557,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
+        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-jupyter"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -568,7 +568,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
     assert (
-        "Great Expectations will store these expectations in a new Expectation Suite 'foo_suite' here:"
+        "Great Expectations will create a new Expectation Suite 'foo_suite' and store it here:"
         in stdout
     )
 
@@ -770,18 +770,18 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "demo", "-d", root_dir],
+        ["suite", "new", "-d", root_dir, "--no-jupyter"],
         input="{:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
     stdout = result.stdout
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
     mock_webbrowser.reset_mock()
     assert result.exit_code == 0
     assert (
-        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+        "Great Expectations will create a new Expectation Suite 'my_new_suite' and store it here:"
         in stdout
     )
 
