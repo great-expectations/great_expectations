@@ -373,7 +373,7 @@ def run_checkpoint(
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
     except ge_exceptions.CheckpointError as e:
-        cli_message(string="Validation failed!")
+        cli_message(string="Exception occurred while running validation.")
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}.</red>")
 
 

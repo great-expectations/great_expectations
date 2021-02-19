@@ -1223,7 +1223,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     )
     stdout: str = result.stdout
     assert result.exit_code == 1
-    assert "Validation failed!" in stdout
+    assert "Exception occurred while running validation." in stdout
 
     assert mock_emit.call_count == 4
     assert all(
