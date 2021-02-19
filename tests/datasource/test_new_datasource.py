@@ -312,7 +312,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
 
     # TODO Abe 20201104: Make sure this is what we truly want to do.
     assert batch.batch_request == {}
-    assert isinstance(batch.data, pd.DataFrame)
+    assert isinstance(batch.data.dataframe, pd.DataFrame)
     assert batch.batch_definition == BatchDefinition(
         datasource_name="my_datasource",
         data_connector_name="my_filesystem_data_connector",
@@ -358,7 +358,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
         )
     )
     assert len(batch_list) == 1
-    assert isinstance(batch_list[0].data, pd.DataFrame)
+    assert isinstance(batch_list[0].data.dataframe, pd.DataFrame)
 
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
     batch: Batch = basic_pandas_datasource_v013.get_batch_from_batch_definition(
@@ -416,16 +416,12 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
     batch: Batch = batch_list[0]
 
     assert batch.batch_spec is not None
-    assert isinstance(batch.data, pd.DataFrame)
-    assert batch.data.shape[0] == 1313
+    assert isinstance(batch.data.dataframe, pd.DataFrame)
+    assert batch.data.dataframe.shape[0] == 1313
     assert (
         batch.batch_markers["pandas_data_fingerprint"]
         == "3aaabc12402f987ff006429a7756f5cf"
     )
-
-
-def test_get_batch_with_caching():
-    pass
 
 
 def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v013):
@@ -459,9 +455,9 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
 
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == data_asset_name
-    assert isinstance(batch.data, pd.DataFrame)
-    assert batch.data.shape == (2, 2)
-    assert batch.data["col2"].values[1] == 4
+    assert isinstance(batch.data.dataframe, pd.DataFrame)
+    assert batch.data.dataframe.shape == (2, 2)
+    assert batch.data.dataframe["col2"].values[1] == 4
     assert (
         batch.batch_markers["pandas_data_fingerprint"]
         == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"

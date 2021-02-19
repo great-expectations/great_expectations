@@ -4,11 +4,11 @@ import os
 import pandas as pd
 import pytest
 
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.datasource.types import (
+from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
@@ -43,7 +43,8 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
 
     my_execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
-            table_name="main.table_1",
+            table_name="table_1",
+            schema_name="main",
             sampling_method="_sample_using_limit",
             sampling_kwargs={"n": 5},
         )
