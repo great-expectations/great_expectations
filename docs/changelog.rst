@@ -7,7 +7,12 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Add support for BatchData as a core GE concept for all Execution Engines.
+ * NOTE: As part of our improvements to the underlying Batch API, we have refactored BatchSpec to be part of the "core" package in Great Expectations, consistent with its role coordinating communication about Batches between the Datasource and Execution Engine abstractions.
+* [ENHANCEMENT] Explicit support for schema_name in the SqlAlchemyBatchData
+* [FEATURE] Add "table.head" metric
 * [BUGFIX] `expect_column_unique_value_count_to_be_between` renderer bug (duplicate "Distinct (%)") #2455
+
 
 0.13.10
 -----------------

@@ -59,7 +59,7 @@ data_connectors:
     )
 
     report = my_data_connector.self_check()
-    print(json.dumps(report, indent=4))
+    # print(json.dumps(report, indent=4))
 
     report["execution_engine"].pop("connection_string")
 
@@ -702,7 +702,8 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(
         "example_unmatched_data_references": [],
         "example_data_reference": {
             "batch_spec": {
-                "table_name": "main.table_containing_id_spacers_for_D",
+                "schema_name": "main",
+                "table_name": "table_containing_id_spacers_for_D",
                 "partition_definition": {},
             },
             "n_rows": 30,
@@ -788,7 +789,8 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
         "example_data_reference": {
             "batch_spec": {
                 "partition_definition": {},
-                "table_name": "main.table_containing_id_spacers_for_D",
+                "schema_name": "main",
+                "table_name": "table_containing_id_spacers_for_D",
             },
             "n_rows": 30,
         },

@@ -424,7 +424,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 def _get_dialect_type_module(
     execution_engine,
 ):
-    if execution_engine.dialect is None:
+    if execution_engine.dialect_module is None:
         logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
@@ -432,10 +432,10 @@ def _get_dialect_type_module(
     try:
         # Redshift does not (yet) export types to top level; only recognize base SA types
         if isinstance(
-            execution_engine.sql_engine_dialect,
+            execution_engine.dialect_module,
             sqlalchemy_redshift.dialect.RedshiftDialect,
         ):
-            return execution_engine.dialect.sa
+            return execution_engine.dialect_module.sa
     except (TypeError, AttributeError):
         pass
 
@@ -443,7 +443,7 @@ def _get_dialect_type_module(
     try:
         if (
             isinstance(
-                execution_engine.sql_engine_dialect,
+                execution_engine.dialect_module,
                 pybigquery.sqlalchemy_bigquery.BigQueryDialect,
             )
             and bigquery_types_tuple is not None
@@ -452,7 +452,7 @@ def _get_dialect_type_module(
     except (TypeError, AttributeError):
         pass
 
-    return execution_engine.dialect
+    return execution_engine.dialect_module
 
 
 def _native_type_type_map(type_):

@@ -13,6 +13,7 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class BatchDefinition(SerializableDictDot):
@@ -472,5 +473,12 @@ class Batch(DictDot):
         }
         return json.dumps(json_dict, indent=2)
 
-    def head(self):
-        return self._data.head()
+    def head(self, n_rows=5, fetch_all=False):
+        # FIXME - we should use a Validator after resolving circularity
+        # Validator(self._data.execution_engine, batches=(self,)).get_metric(MetricConfiguration("table.head", {"batch_id": self.id}, {"n_rows": n_rows, "fetch_all": fetch_all}))
+        metric = MetricConfiguration(
+            "table.head",
+            {"batch_id": self.id},
+            {"n_rows": n_rows, "fetch_all": fetch_all},
+        )
+        return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
