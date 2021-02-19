@@ -14,7 +14,6 @@ from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
-from great_expectations.core.evaluation_parameters import build_evaluation_parameters
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -37,7 +36,6 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.registry import (
     get_expectation_impl,
-    get_metric_kwargs,
     get_metric_provider,
     list_registered_expectation_implementations,
 )
