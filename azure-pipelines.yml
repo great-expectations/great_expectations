@@ -374,7 +374,7 @@ stages:
               curl -X POST -d {} $GALLERY_BUILD_HOOK
             displayName: 'Trigger gallery build'
             env:
-              $GALLERY_BUILD_HOOK: $(GALLERY_UPDATE)
+              $GALLERY_BUILD_HOOK: $(gallerywebhook)
 
   - stage: deploy
     condition: and(succeeded(), eq(variables.isMain, true))
