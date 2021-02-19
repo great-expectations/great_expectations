@@ -84,6 +84,8 @@ stages:
               targetFolder: 'static/gallery/'
               filesAcl: 'public-read'
 
+          - bash: curl -X POST -d {} $(GALLERY_BUILD_HOOK)
+
       - job: deploy_experimental
         dependsOn: [changes, test]
         condition: and(succeeded(), eq(dependencies.changes.outputs['CheckChanges.ExperimentalChanged'], true), eq(variables.isDevelop, true))
