@@ -37,67 +37,24 @@ def test_instantiation_with_table_name(sqlite_view_engine):
     assert batch_data.use_quoted_name == False
 
 
-# REMOVING PENDING READD OF table.head metric
-# def test_head(sqlite_view_engine):
-#     # Create a larger table so that we can downsample meaningfully
-#     df = pd.DataFrame({"a": range(100)})
-#     df.to_sql("test_table_2", con=sqlite_view_engine)
-#
-#     engine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
-#     batch_data = SqlAlchemyBatchData(
-#         execution_engine=engine,
-#         table_name="test_table_2",
-#     )
-#     engine.load_batch_data("__", batch_data)
-#     validator = Validator(execution_engine=engine)
-#     df = validator.head()
-#     assert df.shape == (5, 2)
-#
-#     assert validator.head(fetch_all=True).shape == (100, 2)
-#     assert validator.head(n_rows=20).shape == (20, 2)
-#     assert validator.head(n_rows=20, fetch_all=True).shape == (100, 2)
-
-
-def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
-
-    print(get_sqlite_temp_table_names(sqlite_view_engine))
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
-    assert get_sqlite_temp_table_names(sqlite_view_engine) == {"test_temp_view"}
+def test_head(sqlite_view_engine):
+    # Create a larger table so that we can downsample meaningfully
+    df = pd.DataFrame({"a": range(100)})
+    df.to_sql("test_table_2", con=sqlite_view_engine)
 
     engine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
-    # When the SqlAlchemyBatchData object is based on a table, a new temp table is NOT created, even if create_temp_table=True
-    SqlAlchemyBatchData(
+    batch_data = SqlAlchemyBatchData(
         execution_engine=engine,
-        table_name="test_table",
-        create_temp_table=True,
+        table_name="test_table_2",
     )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
+    engine.load_batch_data("__", batch_data)
+    validator = Validator(execution_engine=engine)
+    df = validator.head()
+    assert df.shape == (5, 2)
 
-    selectable = sa.select("*").select_from(sa.text("test_table"))
-
-    # If create_temp_table=False, a new temp table should NOT be created
-    SqlAlchemyBatchData(
-        execution_engine=engine,
-        selectable=selectable,
-        create_temp_table=False,
-    )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
-
-    # If create_temp_table=True, a new temp table should be created
-    SqlAlchemyBatchData(
-        execution_engine=engine,
-        selectable=selectable,
-        create_temp_table=True,
-    )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
-
-    # If create_temp_table=True, a new temp table should be created
-    SqlAlchemyBatchData(
-        execution_engine=engine,
-        selectable=selectable,
-        # create_temp_table defaults to True
-    )
-    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 3
+    assert validator.head(fetch_all=True).shape == (100, 2)
+    assert validator.head(n_rows=20).shape == (20, 2)
+    assert validator.head(n_rows=20, fetch_all=True).shape == (100, 2)
 
 
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
