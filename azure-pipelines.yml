@@ -323,7 +323,7 @@ stages:
             displayName: 'pytest'
 
   - stage: deploy_gallery
-    condition: and(succeeded(),or(eq(variables.isDevelop, true), eq(variables.isDevelop, true))
+    condition: and(succeeded(), or(eq(variables.isDevelop, true), eq(variables.isDevelop, true)))
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: [ required, lint, db_integration, usage_stats_integration ]
