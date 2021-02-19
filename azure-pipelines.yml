@@ -369,7 +369,12 @@ stages:
               targetFolder: 'static/gallery/'
               filesAcl: 'public-read'
 
-          - bash: curl -X POST -d {} $(GALLERY_BUILD_HOOK)
+          - bash: |
+              echo "About to trigger webhook..."
+              curl -X POST -d {} $GALLERY_BUILD_HOOK
+            displayName: 'Trigger gallery build'
+            env:
+              $GALLERY_BUILD_HOOK: $(GALLERY_UPDATE)
 
   - stage: deploy
     condition: and(succeeded(), eq(variables.isMain, true))
