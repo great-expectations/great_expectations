@@ -327,13 +327,14 @@ def test_golden_path_sql_datasource_configuration(
 
     context = ge.get_context()
 
-    yaml_config = """
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    yaml_config = f"""
 class_name: SimpleSqlalchemyDatasource
 credentials:
     drivername: postgresql
     username: postgres
     password: ""
-    host: localhost
+    host: {db_hostname}
     port: 5432
     database: test_ci
 
@@ -470,7 +471,7 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
@@ -628,7 +629,7 @@ data_connectors:
 
     my_batch.head()
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1

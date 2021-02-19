@@ -7,11 +7,12 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.expectations.metrics.import_manager import (
     reflection,
+    sa,
     sparktypes,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
@@ -85,13 +86,17 @@ class ColumnTypes(TableMetricProvider):
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     insp = reflection.Inspector.from_engine(engine)
+
+    table_name = batch_data.source_table_name or batch_data.selectable.name
+    schema_name = batch_data.source_schema_name or batch_data.selectable.schema
+
     try:
         columns = insp.get_columns(
-            batch_data.selectable.name,
-            schema=batch_data.selectable.schema,
+            table_name,
+            schema=schema_name,
         )
 
-    except (KeyError, AttributeError):
+    except (KeyError, AttributeError, sa.exc.NoSuchTableError):
         # we will get a KeyError for temporary tables, since
         # reflection will not find the temporary schema
         columns = column_reflection_fallback(

@@ -35,8 +35,11 @@ from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.util import import_library_module
-
-from .test_utils import expectationSuiteValidationResultSchema, get_dataset
+from tests.test_utils import (
+    create_files_in_directory,
+    expectationSuiteValidationResultSchema,
+    get_dataset,
+)
 
 yaml = YAML()
 ###
@@ -144,32 +147,36 @@ def build_test_backends_list(metafunc):
             # Be sure to ensure that tests (and users!) understand that subtlety,
             # which can be important for distributional expectations, for example.
             ###
-            connection_string = "postgresql://postgres@localhost/test_ci"
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+            connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
             checker = LockingConnectionCheck(sa, connection_string)
             if checker.is_valid() is True:
                 test_backends += ["postgresql"]
             else:
                 raise ValueError(
-                    f"backend-specific tests are requested, but unable to connect to the database at "
-                    f"{connection_string}"
+                    f"backend-specific tests are requested, but unable "
+                    f"to connect to the database at {connection_string}"
                 )
         mysql = metafunc.config.getoption("--mysql")
         if sa and mysql:
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
             try:
-                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "mysql tests are requested, but unable to connect to the mysql database at "
-                    "'mysql+pymysql://root@localhost/test_ci'"
+                    f"'mysql+pymysql://root@{db_hostname}/test_ci'"
                 )
             test_backends += ["mysql"]
         mssql = metafunc.config.getoption("--mssql")
         if sa and mssql:
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
             try:
                 engine = sa.create_engine(
-                    "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+                    f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
                     # echo=True,
                 )
                 conn = engine.connect()
@@ -177,7 +184,8 @@ def build_test_backends_list(metafunc):
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "mssql tests are requested, but unable to connect to the mssql database at "
-                    "'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                    f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                 )
             test_backends += ["mssql"]
     return test_backends
@@ -209,7 +217,8 @@ def build_test_backends_list_cfe(metafunc):
             # Be sure to ensure that tests (and users!) understand that subtlety,
             # which can be important for distributional expectations, for example.
             ###
-            connection_string = "postgresql://postgres@localhost/test_ci"
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+            connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
             checker = LockingConnectionCheck(sa, connection_string)
             if checker.is_valid() is True:
                 test_backends += ["postgresql"]
@@ -221,20 +230,23 @@ def build_test_backends_list_cfe(metafunc):
         mysql = metafunc.config.getoption("--mysql")
         if sa and mysql:
             try:
-                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "mysql tests are requested, but unable to connect to the mysql database at "
-                    "'mysql+pymysql://root@localhost/test_ci'"
+                    f"'mysql+pymysql://root@{db_hostname}/test_ci'"
                 )
             test_backends += ["mysql"]
         mssql = metafunc.config.getoption("--mssql")
         if sa and mssql:
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
             try:
                 engine = sa.create_engine(
-                    "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+                    f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
                     # echo=True,
                 )
                 conn = engine.connect()
@@ -242,7 +254,8 @@ def build_test_backends_list_cfe(metafunc):
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "mssql tests are requested, but unable to connect to the mssql database at "
-                    "'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                    f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                 )
             test_backends += ["mssql"]
     return test_backends
@@ -2229,8 +2242,9 @@ def postgresql_engine(test_backend):
         try:
             import sqlalchemy as sa
 
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
             engine = sa.create_engine(
-                "postgresql://postgres@localhost/test_ci"
+                f"postgresql://postgres@{db_hostname}/test_ci"
             ).connect()
             yield engine
             engine.close()
@@ -3827,7 +3841,7 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
         drivername="postgresql",
         username="postgres",
         password="",
-        host="localhost",
+        host=os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         port="5432",
         database="test_ci",
     )
@@ -3898,6 +3912,62 @@ introspection:
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
+    return context
+
+
+@pytest.fixture
+def data_context_with_pandas_datasource_for_testing_get_batch(
+    empty_data_context_v3, tmp_path_factory
+):
+    context = empty_data_context_v3
+
+    base_directory: str = str(
+        tmp_path_factory.mktemp(
+            "data_context_with_pandas_datasource_for_testing_get_batch"
+        )
+    )
+
+    sample_file_names: List[str] = [
+        "test_dir_charlie/A/A-1.csv",
+        "test_dir_charlie/A/A-2.csv",
+        "test_dir_charlie/A/A-3.csv",
+        "test_dir_charlie/B/B-1.csv",
+        "test_dir_charlie/B/B-2.csv",
+        "test_dir_charlie/B/B-3.csv",
+        "test_dir_charlie/C/C-1.csv",
+        "test_dir_charlie/C/C-2.csv",
+        "test_dir_charlie/C/C-3.csv",
+        "test_dir_charlie/D/D-1.csv",
+        "test_dir_charlie/D/D-2.csv",
+        "test_dir_charlie/D/D-3.csv",
+    ]
+
+    create_files_in_directory(
+        directory=base_directory, file_name_list=sample_file_names
+    )
+
+    config = yaml.load(
+        f"""
+class_name: Datasource
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    my_filesystem_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: {base_directory}/test_dir_charlie
+        glob_directive: "*/*.csv"
+
+        default_regex:
+            pattern: (.+)/(.+)-(\\d+)\\.csv
+            group_names:
+                - subdirectory
+                - data_asset_name
+                - number
+""",
+    )
+
+    context.add_datasource("my_pandas_datasource", **config)
     return context
 
 
