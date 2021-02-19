@@ -2,8 +2,6 @@ import logging
 import random
 from typing import Any, List, Optional, Tuple
 
-# from great_expectations.validator.validator import Validator
-import great_expectations.validator
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
@@ -12,6 +10,9 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
+
+# from great_expectations.validator.validator import Validator
+from great_expectations.validator import validator
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -317,16 +318,21 @@ class DataConnector:
         if pretty_print:
             print(f"\n\t\tFetching batch data...")
 
-        batch_definition_list = self._map_data_reference_to_batch_definition_list(
+        batch_definition_list: List[
+            BatchDefinition
+        ] = self._map_data_reference_to_batch_definition_list(
             data_reference=example_data_reference,
             data_asset_name=data_asset_name,
         )
         assert len(batch_definition_list) == 1
-        batch_definition = batch_definition_list[0]
+        batch_definition: BatchDefinition = batch_definition_list[0]
 
         # _execution_engine might be None for some tests
         if batch_definition is None or self._execution_engine is None:
             return {}
+
+        batch_data: Any
+        batch_spec: BatchSpec
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(
             batch_definition=batch_definition
         )
@@ -334,15 +340,15 @@ class DataConnector:
         # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
-        validator_obj = validator.Validator(
+        validator_obj: validator.Validator = validator.Validator(
             execution_engine=batch_data.execution_engine
         )
-        df = validator_obj.get_metric(
+        df: Any = validator_obj.get_metric(
             MetricConfiguration(
                 "table.head", {"batch_id": batch_definition.id}, {"n_rows": 5}
             )
         )
-        n_rows = validator.get_metric(
+        n_rows: int = validator_obj.get_metric(
             MetricConfiguration("table.row_count", {"batch_id": batch_definition.id})
         )
 

@@ -23,9 +23,7 @@ from great_expectations.expectations.metrics import (
     ColumnValuesZScore,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
-
-# Function to test for spark dataframe equality
-from tests.test_utils import _build_sa_engine
+from tests.test_utils import _build_sa_engine, get_sqlite_temp_table_names
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -497,7 +495,9 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
 
 
 def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
-    my_execution_engine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
+    my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
     test_df.to_sql("test_table_0", con=my_execution_engine.engine)
 
     query: str = "SELECT * FROM test_table_0"
@@ -507,5 +507,5 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
         )
     )
 
-    assert batch_data.row_count() == 120
+    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 2
     assert batch_markers.get("ge_load_time") is not None

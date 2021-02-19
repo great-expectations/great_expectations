@@ -1,4 +1,3 @@
-import pandas as pd
 import pytest
 
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -16,9 +15,11 @@ from ..test_utils import get_sqlite_temp_table_names
 
 
 def test_instantiation_with_table_name(sqlite_view_engine):
-    engine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=engine,
+    execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
+    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+        execution_engine=execution_engine,
         table_name="test_table",
     )
 
@@ -40,11 +41,14 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
     test_df.to_sql("test_table_0", con=sqlite_view_engine)
 
     query: str = "SELECT * FROM test_table_0"
-    batch_data = SqlAlchemyBatchData(
-        engine=sqlite_view_engine,
+    # If create_temp_table=False, a new temp table should NOT be created
+    # noinspection PyUnusedLocal
+    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+        execution_engine=sqlite_view_engine,
         query=query,
+        create_temp_table=False,
     )
-    assert batch_data.row_count() == 120
+    assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
 
 
 def test_instantiation_with_selectable():
@@ -73,6 +77,7 @@ def test_instantiation_with_selectable():
 #     assert validator.head(n_rows=20, fetch_all=True).shape == (100, 2)
 
 
+# TODO: <Alex>ALEX Duplicate?</Alex>
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
 
     print(get_sqlite_temp_table_names(sqlite_view_engine))
@@ -115,6 +120,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 3
 
 
+# TODO: <Alex>ALEX Duplicate?</Alex>
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
 
     print(get_sqlite_temp_table_names(sqlite_view_engine))
