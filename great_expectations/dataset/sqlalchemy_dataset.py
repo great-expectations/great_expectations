@@ -1437,9 +1437,15 @@ WHERE
         total_count_query = sa.select([sa.func.count()]).select_from(self._table)
         total_count = self.engine.execute(total_count_query).fetchone()[0]
 
+        if total_count > 0:
+            unexpected_percent = 100.0 * unexpected_count / total_count
+        else:
+            # If no rows, then zero percent are unexpected.
+            unexpected_percent = 0
+
         return {
             "success": unexpected_count == 0,
-            "result": {"unexpected_percent": 100.0 * unexpected_count / total_count},
+            "result": {"unexpected_percent": unexpected_percent},
         }
 
     ###
