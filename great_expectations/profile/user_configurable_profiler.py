@@ -901,11 +901,6 @@ class UserConfigurableProfiler:
                 except TypeError:
                     pass
 
-                try:
-                    min_value = min_value + datetime.timedelta(days=-365)
-                except OverflowError:
-                    min_value = datetime.datetime.min
-
             dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_min_to_be_between",
@@ -925,11 +920,6 @@ class UserConfigurableProfiler:
                     max_value = parse(max_value)
                 except TypeError:
                     pass
-
-                try:
-                    max_value = max_value + datetime.timedelta(days=-365)
-                except OverflowError:
-                    max_value = datetime.datetime.max
 
             dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
