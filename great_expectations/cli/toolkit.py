@@ -373,7 +373,8 @@ def run_checkpoint(
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
     except ge_exceptions.CheckpointError as e:
-        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
+        cli_message(string="Validation failed!")
+        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}.</red>")
 
 
 def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:

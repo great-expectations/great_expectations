@@ -209,6 +209,7 @@ def modify_locale(func):
     @wraps(func)
     def locale_wrapper(*args, **kwargs):
         old_locale = locale.setlocale(locale.LC_TIME, None)
+        print(f"[ALEX_TEST] YOU_GARBAGE_0")
         print(old_locale)
         # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
         try:
@@ -551,7 +552,9 @@ def get_dataset(
                 # for real datetime support in tests makes this necessary
                 data = copy.deepcopy(data)
                 if "ts" in data:
+                    print(f"[ALEX_TEST] YOU_GARBAGE_1")
                     print(data)
+                    print(f"[ALEX_TEST] YOU_GARBAGE_2")
                     print(schema)
                 for col in schema:
                     type_ = schema[col]
@@ -712,7 +715,9 @@ def get_test_validator_with_data(
                 # for real datetime support in tests makes this necessary
                 data = copy.deepcopy(data)
                 if "ts" in data:
+                    print(f"[ALEX_TEST] YOU_GARBAGE_3")
                     print(data)
+                    print(f"[ALEX_TEST] YOU_GARBAGE_4")
                     print(schema)
                 for col in schema:
                     type_ = schema[col]
@@ -1348,6 +1353,7 @@ def safe_remove(path):
         try:
             os.remove(path)
         except OSError as e:
+            print(f"[ALEX_TEST] YOU_GARBAGE_5-FUCK!!!!!!!!!!!")
             print(e)
 
 
@@ -1651,6 +1657,7 @@ class LockingConnectionCheck:
                     conn.close()
                     self._is_valid = True
                 except (ImportError, self.sa.exc.SQLAlchemyError) as e:
+                    print(f"[ALEX_TEST] YOU_GARBAGE_6-AAAAAAAAAAAAAHHHHHH!!!!")
                     print(f"{str(e)}")
                     self._is_valid = False
             return self._is_valid
