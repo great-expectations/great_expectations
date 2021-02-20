@@ -347,3 +347,21 @@ def test_expect_compound_columns_to_be_unique(sa):
     assert dataset.expect_compound_columns_to_be_unique(
         ["col1", "col2", "col4"]
     ).success
+
+
+def test_expect_compound_columns_to_be_unique_with_no_rows(sa):
+    engine = sa.create_engine("sqlite://")
+
+    data = pd.DataFrame(
+        {
+            "col1": [],
+            "col2": [],
+            "col3": [],
+            "col4": [],
+        }
+    )
+
+    data.to_sql(name="test_sql_data", con=engine, index=False)
+    dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
+
+    assert dataset.expect_compound_columns_to_be_unique(["col1", "col2"]).success
