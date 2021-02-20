@@ -12,6 +12,7 @@ develop
 * [ENHANCEMENT] Explicit support for schema_name in the SqlAlchemyBatchData
 * [FEATURE] Add "table.head" metric
 * [BUGFIX] `expect_column_unique_value_count_to_be_between` renderer bug (duplicate "Distinct (%)") #2455
+* [BUGFIX] Fix divide by zero error in expect_compound_columns_to_be_unique #2454
 
 
 0.13.10
