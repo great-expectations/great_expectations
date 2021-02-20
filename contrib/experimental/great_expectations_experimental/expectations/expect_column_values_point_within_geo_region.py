@@ -84,7 +84,7 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
 # The main business logic for calculation lives here.
 class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     """This expectation will check a (longitude, latitude) tuple to see if it falls within a country input by the
-    user. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
+    user or a polygon specified by user input points. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
     that are in the Geopandas world database. Importantly, countries are defined by their iso_a3 country code, not their
     full name."""
 
