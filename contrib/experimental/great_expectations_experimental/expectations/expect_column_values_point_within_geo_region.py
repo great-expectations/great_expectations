@@ -40,7 +40,7 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.point_within_geo_region"
-    condition_value_keys = ("country_iso_a3",)
+    condition_value_keys = ("country_iso_a3", "polygon_points")
     world = geopandas.read_file(geopandas.datasets.get_path("naturalearth_lowres"))
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
@@ -109,12 +109,13 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
             },
             "tests": [
                 {
-                    "title": "positive_test_with_mostly",
+                    "title": "positive_test_with_mostly_iso_country_code",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "column": "mostly_points_within_geo_region_PER",
                         "country_iso_a3": "PER",
+                        "polygon_points": None,
                         "mostly": 0.5,
                     },
                     "out": {
@@ -124,12 +125,46 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     },
                 },
                 {
-                    "title": "negative_test_with_mostly",
+                    "title": "negative_test_with_mostly_iso_country_code",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "column": "mostly_points_within_geo_region_GBR",
                         "country_iso_a3": "PER",
+                        "polygon_points": None,
+                        "mostly": 0.9,
+                    },
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [2, 3],
+                        "unexpected_list": [(2.2426, 53.4808), (-3.435973, 55.378051)],
+                    },
+                },
+                {
+                    "title": "positive_test_with_mostly_input_points",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_points_within_geo_region_PER",
+                        "country_iso_a3": None,
+                        "polygon_points": [(-80.397, -5.267), (-73.534, -8.908), (-70.500, -17.582), (-81.490, -14.627)],
+                        "mostly": 0.5,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": [(-3.435973, 55.378051)],
+                    },
+                },
+                {
+                    "title": "negative_test_with_mostly_input_points",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_points_within_geo_region_GBR",
+                        "country_iso_a3": None,
+                        "polygon_points": [(-80.397, -5.267), (-73.534, -8.908), (-70.500, -17.582),
+                                           (-81.490, -14.627)],
                         "mostly": 0.9,
                     },
                     "out": {
@@ -163,6 +198,7 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
     success_keys = (
         "country_iso_a3",
+        "polygon_points",
         "mostly",
     )
 
