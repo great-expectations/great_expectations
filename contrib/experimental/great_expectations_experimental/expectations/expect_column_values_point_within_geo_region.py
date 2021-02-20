@@ -106,6 +106,13 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     (-3.435973, 55.378051),
                     None,
                 ],
+                "mostly_points_within_geo_region_US": [
+                    (-116.884380, 33.570321),
+                    (-117.063457, 32.699316),
+                    (-117.063457, 32.699316),
+                    (-117.721397, 33.598757),
+                    None,
+                ],
             },
             "tests": [
                 {
@@ -154,6 +161,23 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                         "success": True,
                         "unexpected_index_list": [3],
                         "unexpected_list": [(-3.435973, 55.378051)],
+                    },
+                },
+                {
+                    "title": "positive_test_with_mostly_input_points",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "mostly_points_within_geo_region_US",
+                        "country_iso_a3": None,
+                        "polygon_points": [(-117.012247, 32.580302), (-116.843551, 33.196490), (-117.063457, 32.699316),
+                                           (-121.426414, 36.346576), (-122.724666, 29.921319)],
+                        "mostly": 0.9,
+                    },
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [],
+                        "unexpected_list": [],
                     },
                 },
                 {
