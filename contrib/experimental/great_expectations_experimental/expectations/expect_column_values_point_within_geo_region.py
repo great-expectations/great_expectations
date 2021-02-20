@@ -1,7 +1,8 @@
 import json
 
 import geopandas
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
+
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -45,17 +46,27 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, country_iso_a3, **kwargs):
-        # Fetches polygon points from Geopandas library for the iso code
-        country_shapes = cls.world[["geometry", "iso_a3"]]
-        country_shapes = country_shapes[country_shapes["iso_a3"] == country_iso_a3]
-        country_shapes.reset_index(drop=True, inplace=True)
-        if country_shapes.empty:
-            raise Exception("This ISO country code is not supported.")
-        country_polygon = country_shapes["geometry"][0]
+    def _pandas(cls, column, country_iso_a3, polygon_points, **kwargs):
+
+        # Check if the parameter are None
+        if polygon_points is not None:
+            polygon = Polygon(polygon_points)
+
+        elif country_iso_a3 is not None:
+            country_shapes = cls.world[["geometry", "iso_a3"]]
+            country_shapes = country_shapes[country_shapes["iso_a3"] == country_iso_a3]
+            country_shapes.reset_index(drop=True, inplace=True)
+
+            if country_shapes.empty:
+                raise Exception("This ISO country code is not supported.")
+
+            polygon = country_shapes["geometry"][0]
+        else:
+            raise Exception("Specify country_iso_a3 or polygon_points")
 
         points = geopandas.GeoSeries(column.apply(Point))
-        return points.within(country_polygon)
+
+        return points.within(polygon)
 
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
