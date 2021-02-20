@@ -164,15 +164,15 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     },
                 },
                 {
-                    "title": "positive_test_with_mostly_input_points",
+                    "title": "positive_test_with_mostly_input_points_usa",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "column": "mostly_points_within_geo_region_US",
                         "country_iso_a3": None,
-                        "polygon_points": [(-117.012247, 32.580302), (-116.843551, 33.196490), (-117.063457, 32.699316),
+                        "polygon_points": [(-117.012247, 32.580302), (-109.352, 41.258),
                                            (-121.426414, 36.346576), (-122.724666, 29.921319)],
-                        "mostly": 0.9,
+                        "mostly": 1.0,
                     },
                     "out": {
                         "success": True,
