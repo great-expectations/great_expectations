@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import unittest
 from typing import List
 from unittest import mock
 
@@ -80,6 +81,7 @@ def titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled(
 def test_checkpoint_list_with_no_checkpoints(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = empty_data_context_stats_enabled
@@ -116,6 +118,7 @@ def test_checkpoint_list_with_single_checkpoint(
     caplog,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
@@ -156,6 +159,7 @@ def test_checkpoint_list_with_eight_checkpoints(
     caplog,
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
@@ -204,6 +208,7 @@ def test_checkpoint_list_with_eight_checkpoints(
 def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = titanic_data_context_stats_enabled_config_version_2
@@ -245,6 +250,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
     caplog,
     titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = (
@@ -290,6 +296,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
     titanic_data_context_stats_enabled_config_version_2,
     titanic_expectation_suite,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = titanic_data_context_stats_enabled_config_version_2
@@ -388,6 +395,7 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     titanic_data_context_stats_enabled_config_version_2,
     titanic_expectation_suite,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = titanic_data_context_stats_enabled_config_version_2
@@ -443,6 +451,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     titanic_data_context_stats_enabled_config_version_2,
     titanic_expectation_suite,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = titanic_data_context_stats_enabled_config_version_2
@@ -492,6 +501,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
 def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
@@ -533,6 +543,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     monkeypatch.setenv("VAR", "test")
@@ -582,6 +593,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     monkeypatch.setenv("VAR", "test")
@@ -665,8 +677,18 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     # assert "No such file or directory" in stdout
     assert ("No such file or directory" in stdout) or ("does not exist" in stdout)
 
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
+    assert mock_emit.call_count == 3
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "f6e1151b49fceb15ae3de4eb60f62be4"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
@@ -674,6 +696,8 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
             {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
         ),
     ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -694,6 +718,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     monkeypatch.setenv("VAR", "test")
@@ -790,6 +815,7 @@ def test_checkpoint_run_on_non_existent_validations(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     monkeypatch.setenv("VAR", "test")
@@ -844,7 +870,7 @@ def test_checkpoint_run_on_non_existent_validations(
     stdout: str = result.stdout
     assert result.exit_code == 1
 
-    assert "Checkpoint 'no_validations does not contain any validations." in stdout
+    assert "Checkpoint 'no_validations' does not contain any validations." in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -875,6 +901,7 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     monkeypatch.setenv("VAR", "test")
@@ -954,45 +981,52 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     )
 
     assert mock_emit.call_count == 5
-    assert all(
-        [
-            call_args in mock_emit.call_args_list
-            for call_args in [
-                mock.call(
-                    {
-                        "event_payload": {},
-                        "event": "data_context.build_data_docs",
-                        "success": True,
-                    }
-                ),
-                mock.call(
-                    {
-                        "event_payload": {
-                            "anonymized_batch_kwarg_keys": [],
-                            "anonymized_expectation_suite_name": "__not_found__",
-                            "anonymized_datasource_name": "__not_found__",
-                        },
-                        "event": "data_asset.validate",
-                        "success": True,
-                    }
-                ),
-                mock.call(
-                    {
-                        "event_payload": {},
-                        "event": "data_context.__init__",
-                        "success": True,
-                    }
-                ),
-                mock.call(
-                    {
-                        "event": "cli.checkpoint.run",
-                        "event_payload": {},
-                        "success": True,
-                    }
-                ),
-            ]
-        ]
-    )
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1014,6 +1048,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     titanic_expectation_suite,
     monkeypatch,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     monkeypatch.setenv("VAR", "test")
@@ -1090,45 +1125,52 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     assert "Validation failed!" in stdout
 
     assert mock_emit.call_count == 5
-    assert all(
-        [
-            call_args in mock_emit.call_args_list
-            for call_args in [
-                mock.call(
-                    {
-                        "event_payload": {},
-                        "event": "data_context.build_data_docs",
-                        "success": True,
-                    }
-                ),
-                mock.call(
-                    {
-                        "event_payload": {
-                            "anonymized_batch_kwarg_keys": [],
-                            "anonymized_expectation_suite_name": "__not_found__",
-                            "anonymized_datasource_name": "__not_found__",
-                        },
-                        "event": "data_asset.validate",
-                        "success": True,
-                    }
-                ),
-                mock.call(
-                    {
-                        "event_payload": {},
-                        "event": "data_context.__init__",
-                        "success": True,
-                    }
-                ),
-                mock.call(
-                    {
-                        "event": "cli.checkpoint.run",
-                        "event_payload": {},
-                        "success": True,
-                    }
-                ),
-            ]
-        ]
-    )
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "event": "data_asset.validate",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1150,6 +1192,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     titanic_expectation_suite,
     monkeypatch,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     monkeypatch.setenv("VAR", "test")
@@ -1226,38 +1269,45 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     assert "Exception occurred while running validation." in stdout
 
     assert mock_emit.call_count == 4
-    assert all(
-        [
-            call_args in mock_emit.call_args_list
-            for call_args in [
-                mock.call(
-                    {
-                        "event_payload": {
-                            "anonymized_batch_kwarg_keys": [],
-                            "anonymized_expectation_suite_name": "__not_found__",
-                            "anonymized_datasource_name": "__not_found__",
-                        },
-                        "event": "data_asset.validate",
-                        "success": False,
-                    }
-                ),
-                mock.call(
-                    {
-                        "event_payload": {},
-                        "event": "data_context.__init__",
-                        "success": True,
-                    }
-                ),
-                mock.call(
-                    {
-                        "event": "cli.checkpoint.run",
-                        "event_payload": {},
-                        "success": False,
-                    }
-                ),
-            ]
-        ]
-    )
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {},
+                "success": False,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1275,6 +1325,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
 def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = (
@@ -1317,6 +1368,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
 def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = (
@@ -1371,6 +1423,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
 def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = (
@@ -1538,6 +1591,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
 def test_checkpoint_new_with_ge_config_3_raises_error(
     mock_emit, caplog, titanic_data_context_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = titanic_data_context_stats_enabled
@@ -1579,6 +1633,7 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
 def test_checkpoint_script_with_ge_config_3_raises_error(
     mock_emit, caplog, titanic_data_context_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
     context: DataContext = titanic_data_context_stats_enabled

@@ -238,7 +238,7 @@ class Checkpoint:
         validations: list = substituted_runtime_config.validations
         if len(validations) == 0:
             raise ge_exceptions.CheckpointError(
-                f"Checkpoint '{self.name} does not contain any validations."
+                f"Checkpoint '{self.name}' does not contain any validations."
             )
         run_results = {}
 
