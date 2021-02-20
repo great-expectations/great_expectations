@@ -200,10 +200,14 @@ def test_basic_checkpoint_config_validation(
     empty_data_context.create_expectation_suite(
         expectation_suite_name="my_expectation_suite"
     )
-    result: CheckpointResult = empty_data_context.run_checkpoint(
-        checkpoint_name=checkpoint.config.name,
-    )
-    assert len(result.list_validation_results()) == 0
+    with pytest.raises(
+        ge_exceptions.DataContextError,
+        match=r"Checkpoint 'my_checkpoint does not contain any validations.",
+    ):
+        # noinspection PyUnusedLocal
+        result: CheckpointResult = empty_data_context.run_checkpoint(
+            checkpoint_name=checkpoint.config.name,
+        )
 
 
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
@@ -766,6 +770,15 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
 
     assert len(data_context.list_checkpoints()) == 1
+
+    with pytest.raises(
+        ge_exceptions.DataContextError,
+        match=r"Checkpoint 'my_base_checkpoint does not contain any validations.",
+    ):
+        # noinspection PyUnusedLocal
+        result: CheckpointResult = data_context.run_checkpoint(
+            checkpoint_name=checkpoint.config.name,
+        )
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
 

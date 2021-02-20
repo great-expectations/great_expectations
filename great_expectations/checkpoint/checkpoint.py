@@ -16,7 +16,6 @@ from great_expectations.core.util import get_datetime_string_from_strftime_forma
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.util import substitute_all_config_variables
-from great_expectations.exceptions import CheckpointError
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -145,7 +144,7 @@ class Checkpoint:
                 template_config = checkpoint.config
 
                 if template_config.config_version != config.config_version:
-                    raise CheckpointError(
+                    raise ge_exceptions.CheckpointError(
                         f"Invalid template '{template_name}' (ver. {template_config.config_version}) for Checkpoint "
                         f"'{config}' (ver. {config.config_version}. Checkpoints can only use templates with the same config_version."
                     )
@@ -237,6 +236,10 @@ class Checkpoint:
         )
         run_name_template: Optional[str] = substituted_runtime_config.run_name_template
         validations: list = substituted_runtime_config.validations
+        if len(validations) == 0:
+            raise ge_exceptions.CheckpointError(
+                f"Checkpoint '{self.name}' does not contain any validations."
+            )
         run_results = {}
 
         if run_name is None and run_name_template is not None:
@@ -283,9 +286,12 @@ class Checkpoint:
                     )
                 )
                 run_results.update(val_op_run_result.run_results)
-            except CheckpointError as e:
-                raise CheckpointError(
-                    f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}"
+            except (
+                ge_exceptions.CheckpointError,
+                ge_exceptions.ExecutionEngineError,
+            ) as e:
+                raise ge_exceptions.CheckpointError(
+                    f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}."
                 )
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
