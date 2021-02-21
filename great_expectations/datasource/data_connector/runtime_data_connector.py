@@ -7,6 +7,11 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchRequestBase,
 )
+from great_expectations.core.batch_spec import (
+    BatchMarkers,
+    BatchSpec,
+    RuntimeDataBatchSpec,
+)
 from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionDefinitionSubset,
@@ -14,11 +19,6 @@ from great_expectations.core.id_dict import (
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
-)
-from great_expectations.datasource.types import (
-    BatchMarkers,
-    BatchSpec,
-    RuntimeDataBatchSpec,
 )
 from great_expectations.execution_engine import ExecutionEngine
 

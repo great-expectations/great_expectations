@@ -9,16 +9,12 @@ import pytest
 from moto import mock_s3
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetS3DataConnector,
-    InferredAssetS3DataConnector,
-)
-from great_expectations.datasource.types.batch_spec import (
+from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
+from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
@@ -270,7 +266,7 @@ def test_get_batch_data(test_df):
             batch_data=test_df,
         )
     )
-    assert split_df.shape == (120, 10)
+    assert split_df.dataframe.shape == (120, 10)
 
     # No dataset passed to RuntimeDataBatchSpec
     with pytest.raises(ge_exceptions.InvalidBatchSpecError):
@@ -283,7 +279,7 @@ def test_get_batch_with_split_on_whole_table(test_df):
             batch_data=test_df, splitter_method="_split_on_whole_table"
         )
     )
-    assert split_df.shape == (120, 10)
+    assert split_df.dataframe.shape == (120, 10)
 
 
 def test_get_batch_with_split_on_whole_table_filesystem(
@@ -296,7 +292,7 @@ def test_get_batch_with_split_on_whole_table_filesystem(
             splitter_method="_split_on_whole_table",
         )
     )
-    assert test_df.shape == (5, 2)
+    assert test_df.dataframe.shape == (5, 2)
 
 
 @mock_s3
@@ -340,7 +336,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             splitter_method="_split_on_whole_table",
         )
     )
-    assert test_df.shape == (2, 2)
+    assert test_df.dataframe.shape == (2, 2)
 
 
 @mock_s3
@@ -372,7 +368,7 @@ def test_get_batch_with_split_on_whole_table_s3():
             splitter_method="_split_on_whole_table",
         )
     )
-    assert test_df.shape == (2, 2)
+    assert test_df.dataframe.shape == (2, 2)
 
     # if S3 was not configured
     execution_engine_no_s3 = PandasExecutionEngine()
@@ -398,8 +394,8 @@ def test_get_batch_with_split_on_column_value(test_df):
             },
         )
     )
-    assert split_df.shape == (12, 10)
-    assert (split_df.batch_id == 2).all()
+    assert split_df.dataframe.shape == (12, 10)
+    assert (split_df.dataframe.batch_id == 2).all()
 
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
@@ -411,7 +407,7 @@ def test_get_batch_with_split_on_column_value(test_df):
             },
         )
     )
-    assert (split_df).shape == (3, 10)
+    assert (split_df).dataframe.shape == (3, 10)
 
 
 def test_get_batch_with_split_on_converted_datetime(test_df):
@@ -425,7 +421,7 @@ def test_get_batch_with_split_on_converted_datetime(test_df):
             },
         )
     )
-    assert (split_df).shape == (3, 10)
+    assert (split_df).dataframe.shape == (3, 10)
 
 
 def test_get_batch_with_split_on_divided_integer(test_df):
@@ -440,9 +436,9 @@ def test_get_batch_with_split_on_divided_integer(test_df):
             },
         )
     )
-    assert split_df.shape == (10, 10)
-    assert split_df.id.min() == 50
-    assert split_df.id.max() == 59
+    assert split_df.dataframe.shape == (10, 10)
+    assert split_df.dataframe.id.min() == 50
+    assert split_df.dataframe.id.max() == 59
 
 
 def test_get_batch_with_split_on_mod_integer(test_df):
@@ -457,9 +453,9 @@ def test_get_batch_with_split_on_mod_integer(test_df):
             },
         )
     )
-    assert split_df.shape == (12, 10)
-    assert split_df.id.min() == 5
-    assert split_df.id.max() == 115
+    assert split_df.dataframe.shape == (12, 10)
+    assert split_df.dataframe.id.min() == 5
+    assert split_df.dataframe.id.max() == 115
 
 
 def test_get_batch_with_split_on_multi_column_values(test_df):
@@ -477,8 +473,8 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
             },
         )
     )
-    assert split_df.shape == (4, 10)
-    assert (split_df.date == datetime.date(2020, 1, 5)).all()
+    assert split_df.dataframe.shape == (4, 10)
+    assert (split_df.dataframe.date == datetime.date(2020, 1, 5)).all()
 
     with pytest.raises(ValueError):
         split_df = PandasExecutionEngine().get_batch_data(
@@ -528,7 +524,7 @@ def test_get_batch_with_split_on_hashed_column(test_df):
             },
         )
     )
-    assert split_df.shape == (8, 10)
+    assert split_df.dataframe.shape == (8, 10)
 
 
 ### Sampling methods ###
@@ -539,7 +535,7 @@ def test_sample_using_random(test_df):
     sampled_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(batch_data=test_df, sampling_method="_sample_using_random")
     )
-    assert sampled_df.shape == (13, 10)
+    assert sampled_df.dataframe.shape == (13, 10)
 
 
 def test_sample_using_mod(test_df):
@@ -554,7 +550,7 @@ def test_sample_using_mod(test_df):
             },
         )
     )
-    assert sampled_df.shape == (24, 10)
+    assert sampled_df.dataframe.shape == (24, 10)
 
 
 def test_sample_using_a_list(test_df):
@@ -568,7 +564,7 @@ def test_sample_using_a_list(test_df):
             },
         )
     )
-    assert sampled_df.shape == (4, 10)
+    assert sampled_df.dataframe.shape == (4, 10)
 
 
 def test_sample_using_md5(test_df):
@@ -591,8 +587,8 @@ def test_sample_using_md5(test_df):
             sampling_kwargs={"column_name": "date", "hash_function_name": "md5"},
         )
     )
-    assert sampled_df.shape == (10, 10)
-    assert sampled_df.date.isin(
+    assert sampled_df.dataframe.shape == (10, 10)
+    assert sampled_df.dataframe.date.isin(
         [
             datetime.date(2020, 1, 15),
             datetime.date(2020, 1, 29),
@@ -619,6 +615,6 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
             },
         )
     )
-    assert split_df.shape == (2, 10)
-    assert split_df.id.min() == 54
-    assert split_df.id.max() == 59
+    assert split_df.dataframe.shape == (2, 10)
+    assert split_df.dataframe.id.min() == 54
+    assert split_df.dataframe.id.max() == 59

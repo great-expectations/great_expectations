@@ -1,4 +1,5 @@
 import copy
+import os
 from typing import Dict, Optional
 
 import pytest
@@ -666,7 +667,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     store_backend_defaults = DatabaseStoreBackendDefaults(
         default_credentials={
             "drivername": "postgresql",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "65432",
             "username": "ge_tutorials",
             "password": "ge_tutorials",
@@ -702,7 +703,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
                     "drivername": "postgresql",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "65432",
                     "username": "ge_tutorials",
                     "password": "ge_tutorials",
@@ -716,7 +717,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
                     "drivername": "postgresql",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "65432",
                     "username": "ge_tutorials",
                     "password": "ge_tutorials",
@@ -730,7 +731,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
                     "drivername": "postgresql",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "65432",
                     "username": "ge_tutorials",
                     "password": "ge_tutorials",
@@ -783,7 +784,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
     store_backend_defaults = DatabaseStoreBackendDefaults(
         default_credentials={
             "drivername": "postgresql",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "65432",
             "username": "ge_tutorials",
             "password": "ge_tutorials",
