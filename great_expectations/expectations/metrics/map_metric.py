@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import numpy as np
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.metric_exceptions import (
@@ -145,7 +146,7 @@ def column_function_partial(
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
                 column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect
+                dialect = execution_engine.dialect_module
                 column_function = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -284,20 +285,26 @@ def column_condition_partial(
                 ) = execution_engine.get_compute_domain(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
-                if filter_column_isnull:
-                    df = df[df[accessor_domain_kwargs["column"]].notnull()]
+                # TODO: <Alex>Is this the correct place for and type of Exception to raise if domain data is not attributable?</Alex>
+                try:
+                    if filter_column_isnull:
+                        df = df[df[accessor_domain_kwargs["column"]].notnull()]
 
-                meets_expectation_series = metric_fn(
-                    cls,
-                    df[accessor_domain_kwargs["column"]],
-                    **metric_value_kwargs,
-                    _metrics=metrics,
-                )
-                return (
-                    ~meets_expectation_series,
-                    compute_domain_kwargs,
-                    accessor_domain_kwargs,
-                )
+                    meets_expectation_series = metric_fn(
+                        cls,
+                        df[accessor_domain_kwargs["column"]],
+                        **metric_value_kwargs,
+                        _metrics=metrics,
+                    )
+                    return (
+                        ~meets_expectation_series,
+                        compute_domain_kwargs,
+                        accessor_domain_kwargs,
+                    )
+                except KeyError:
+                    raise ge_exceptions.ExecutionEngineError(
+                        message=f'Error: The column "{accessor_domain_kwargs["column"]}" in BatchData does not exist.'
+                    )
 
             return inner_func
 
@@ -343,7 +350,7 @@ def column_condition_partial(
                     metric_domain_kwargs, domain_type=domain_type
                 )
                 column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect
+                dialect = execution_engine.dialect_module
                 sqlalchemy_engine = execution_engine.engine
 
                 expected_condition = metric_fn(
@@ -755,7 +762,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         compute_domain_kwargs, domain_type="identity"
     )
     temp_table_name: str = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-    if execution_engine.engine.dialect.name.lower() == "mssql":
+    if execution_engine.dialect == "mssql":
         # mssql expects all temporary table names to have a prefix '#'
         temp_table_name = f"#{temp_table_name}"
 
