@@ -649,15 +649,10 @@ def parse_cli_config_file_location(
     if config_file_location is not None and config_file_location != "":
 
         # Check if running on Windows
-        if not windows is True:
+        if windows is not True:
             windows: bool = "windows" in platform.platform().lower()
 
         config_file_location_path = Path(config_file_location)
-        # TODO: Anthony - remove this or use it instead of platform.platform()
-        # if isinstance(config_file_location_path, PosixPath):
-        #     pure_path = PurePosixPath(config_file_location)
-        # elif isinstance(config_file_location_path, WindowsPath):
-        #     pure_path = PureWindowsPath(config_file_location)
 
         # If running on windows, use WindowsPath else PosixPath
         if windows:
@@ -672,28 +667,24 @@ def parse_cli_config_file_location(
         # If the file or directory exists, treat it appropriately
         # This handles files without extensions
         if config_file_location_path.is_file():
-            filename = fr"{str(pure_path.name)}"
-            directory = fr"{str(pure_path.parent)}"
+            filename: Optional[str] = fr"{str(pure_path.name)}"
+            directory: Optional[str] = fr"{str(pure_path.parent)}"
         elif config_file_location_path.is_dir():
-            filename = None
-            directory = config_file_location
+            filename: Optional[str] = None
+            directory: Optional[str] = config_file_location
 
         # If the file or directory does not exist, treat it as a directory unless
         #  there is a trailing extension
         else:
-            file_extension = pure_path.suffix
+            file_extension: str = pure_path.suffix
             if file_extension == "":
                 # treat as directory
-                filename = None
-                directory = config_file_location
+                filename: Optional[str] = None
+                directory: Optional[str] = config_file_location
             else:
                 # treat as file
-                filename = fr"{str(pure_path.name)}"
-                directory = fr"{str(pure_path.parent)}"
-
-        # Add trailing slash to directory
-        # if directory is not None:
-        #     directory = os.path.join(directory, "")
+                filename: Optional[str] = fr"{str(pure_path.name)}"
+                directory: Optional[str] = fr"{str(pure_path.parent)}"
 
     else:
         # Return None if config_file_location is empty rather than default output of ""
