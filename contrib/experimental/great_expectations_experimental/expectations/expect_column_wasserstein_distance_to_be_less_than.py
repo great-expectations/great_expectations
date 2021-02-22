@@ -48,6 +48,7 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
 
     metric_name = "column.custom.wasserstein"
     value_keys = ("raw_values", "partition")
+
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, raw_values=None, partition=None, **kwargs):
         if raw_values is not None:
