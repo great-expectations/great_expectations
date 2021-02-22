@@ -1323,7 +1323,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v3(
+def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
 ):
     # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
@@ -1363,7 +1363,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v3(
+def test_checkpoint_script_raises_error_if_python_file_exists(
     mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
 ):
     # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
@@ -1416,7 +1416,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v3(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_script_happy_path_generates_script_with_ge_config_v3(
+def test_checkpoint_script_happy_path_generates_script(
     mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
 ):
     # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
@@ -1466,7 +1466,7 @@ def test_checkpoint_script_happy_path_generates_script_with_ge_config_v3(
     )
 
 
-def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_config_v3(
+def test_checkpoint_script_happy_path_executable_successful_validation(
     caplog,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
@@ -1579,7 +1579,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     monkeypatch.delenv("OLD_PARAM")
 
 
-def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_config_v3(
+def test_checkpoint_script_happy_path_executable_failed_validation(
     caplog,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     titanic_expectation_suite,
@@ -1699,7 +1699,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     monkeypatch.delenv("OLD_PARAM")
 
 
-def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data_with_ge_config_v3(
+def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data(
     caplog,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     titanic_expectation_suite,
