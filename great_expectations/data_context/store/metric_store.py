@@ -8,7 +8,6 @@ from great_expectations.data_context.store.database_store_backend import (
 from great_expectations.data_context.store.store import Store
 from great_expectations.util import (
     filter_properties_dict,
-    get_currently_executing_function_call_arguments,
     load_class,
     verify_dynamic_loading_support,
 )
@@ -92,12 +91,12 @@ class EvaluationParameterStore(MetricStore):
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
-        self._config = get_currently_executing_function_call_arguments(
-            include_module_name=True,
-            **{
-                "class_name": self.__class__.__name__,
-            }
-        )
+        self._config = {
+            "store_backend": store_backend,
+            "store_name": store_name,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
         filter_properties_dict(properties=self._config, inplace=True)
 
     def get_bind_params(self, run_id):

@@ -2,6 +2,7 @@ import copy
 import datetime
 import hashlib
 import logging
+import pickle
 import random
 from functools import partial
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
@@ -10,33 +11,29 @@ import pandas as pd
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.datasource.types import (
+from great_expectations.core.batch_spec import (
+    BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.datasource.util import S3Url
+
+from ..core.util import S3Url
+from .pandas_batch_data import PandasBatchData
 
 try:
     import boto3
 except ImportError:
     boto3 = None
 
-from ..core.batch import BatchMarkers
-from ..core.id_dict import BatchSpec
-from ..datasource.util import hash_pandas_dataframe
+from great_expectations.core.batch import BatchMarkers
+
 from ..exceptions import BatchSpecError, GreatExpectationsError, ValidationError
 from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
-
-
-class PandasBatchData(pd.DataFrame):
-    # @property
-    def row_count(self):
-        return self.shape[0]
 
 
 class PandasExecutionEngine(ExecutionEngine):
@@ -103,6 +100,17 @@ Notes:
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
 
+    def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
+        if isinstance(batch_data, pd.DataFrame):
+            batch_data = PandasBatchData(self, batch_data)
+        elif isinstance(batch_data, PandasBatchData):
+            pass
+        else:
+            raise GreatExpectationsError(
+                "PandasExecutionEngine requires batch data that is either a DataFrame or a PandasBatchData object"
+            )
+        super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
+
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
@@ -115,20 +123,18 @@ Notes:
             }
         )
 
+        batch_data: PandasBatchData
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
-            batch_data = batch_spec.batch_data
+            if isinstance(batch_spec.batch_data, pd.DataFrame):
+                df = batch_spec.batch_data
+            elif isinstance(batch_spec.batch_data, PandasBatchData):
+                df = batch_spec.batch_data.dataframe
+            else:
+                raise ValueError(
+                    "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object."
+                )
             batch_spec.batch_data = "PandasDataFrame"
-
-        elif isinstance(batch_spec, PathBatchSpec):
-            reader_method: str = batch_spec.get("reader_method")
-            reader_options: dict = batch_spec.get("reader_options") or {}
-
-            path: str = batch_spec["path"]
-            reader_fn: Callable = self._get_reader_fn(reader_method, path)
-
-            batch_data = reader_fn(path, **reader_options)
-
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
@@ -136,19 +142,17 @@ Notes:
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
             s3_engine = self._s3
-            s3_url = S3Url(batch_spec.get("s3"))
-            reader_method: str = batch_spec.get("reader_method")
-            reader_options: dict = batch_spec.get("reader_options") or {}
-
+            s3_url = S3Url(batch_spec.path)
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options or {}
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
-
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
                     s3_url.bucket, s3_url.key
                 )
             )
             reader_fn = self._get_reader_fn(reader_method, s3_url.key)
-            batch_data = reader_fn(
+            df = reader_fn(
                 StringIO(
                     s3_object["Body"]
                     .read()
@@ -156,34 +160,36 @@ Notes:
                 ),
                 **reader_options,
             )
+        elif isinstance(batch_spec, PathBatchSpec):
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options
+            path: str = batch_spec.path
+            reader_fn: Callable = self._get_reader_fn(reader_method, path)
+            df = reader_fn(path, **reader_options)
         else:
             raise BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
 
-        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
-        if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
+        df = self._apply_splitting_and_sampling_methods(batch_spec, df)
+        if df.memory_usage().sum() < HASH_THRESHOLD:
+            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
-        typed_batch_data = self._get_typed_batch_data(batch_data)
+        typed_batch_data = PandasBatchData(execution_engine=self, dataframe=df)
 
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
             splitter_fn = getattr(self, batch_spec.get("splitter_method"))
-            splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+            splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
         if batch_spec.get("sampling_method"):
             sampling_fn = getattr(self, batch_spec.get("sampling_method"))
-            sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+            sampling_kwargs: dict = batch_spec.get("sampling_kwargs") or {}
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
-
-    def _get_typed_batch_data(self, batch_data):
-        typed_batch_data = PandasBatchData(batch_data)
-        return typed_batch_data
 
     @property
     def dataframe(self):
@@ -196,7 +202,7 @@ Notes:
                 "Batch has not been loaded - please run load_batch_data() to load a batch."
             )
 
-        return self.active_batch_data
+        return self.active_batch_data.dataframe
 
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
@@ -298,14 +304,14 @@ Notes:
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.active_batch_data_id is not None:
-                data = self.active_batch_data
+                data = self.active_batch_data.dataframe
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.loaded_batch_data_dict:
-                data = self.loaded_batch_data_dict[batch_id]
+                data = self.loaded_batch_data_dict[batch_id].dataframe
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
@@ -585,3 +591,13 @@ Notes:
             == hash_value
         )
         return df[matches]
+
+
+def hash_pandas_dataframe(df):
+    try:
+        obj = pd.util.hash_pandas_object(df, index=True).values
+    except TypeError:
+        # In case of facing unhashable objects (like dict), use pickle
+        obj = pickle.dumps(df, pickle.HIGHEST_PROTOCOL)
+
+    return hashlib.md5(obj).hexdigest()

@@ -7,6 +7,8 @@ from copy import deepcopy
 from inspect import isabstract
 from typing import Dict, List, Optional, Tuple
 
+import pandas as pd
+
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import (
@@ -747,7 +749,8 @@ class Expectation(metaclass=MetaExpectation):
         if gallery_examples != []:
             example_data, example_test = self._choose_example(gallery_examples)
 
-            test_batch = Batch(data=example_data)
+            # TODO: this should be creating a Batch using an engine
+            test_batch = Batch(data=pd.DataFrame(example_data))
 
             expectation_config = ExpectationConfiguration(
                 **{"expectation_type": snake_name, "kwargs": example_test}
@@ -1589,7 +1592,7 @@ def _format_map_output(
         missing_count = element_count - nonnull_count
 
     if element_count > 0:
-        unexpected_percent = unexpected_count / element_count * 100
+        unexpected_percent_total = unexpected_count / element_count * 100
 
         if not skip_missing:
             missing_percent = missing_count / element_count * 100
@@ -1597,16 +1600,18 @@ def _format_map_output(
                 unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
             else:
                 unexpected_percent_nonmissing = None
+        else:
+            unexpected_percent_nonmissing = unexpected_percent_total
 
     else:
         missing_percent = None
-        unexpected_percent = None
+        unexpected_percent_total = None
         unexpected_percent_nonmissing = None
 
     return_obj["result"] = {
         "element_count": element_count,
         "unexpected_count": unexpected_count,
-        "unexpected_percent": unexpected_percent,
+        "unexpected_percent": unexpected_percent_nonmissing,
         "partial_unexpected_list": unexpected_list[
             : result_format["partial_unexpected_count"]
         ],
@@ -1615,6 +1620,7 @@ def _format_map_output(
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
         return_obj["result"]["missing_percent"] = missing_percent
+        return_obj["result"]["unexpected_percent_total"] = unexpected_percent_total
         return_obj["result"][
             "unexpected_percent_nonmissing"
         ] = unexpected_percent_nonmissing

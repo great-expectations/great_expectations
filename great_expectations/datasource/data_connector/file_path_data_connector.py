@@ -6,7 +6,9 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     BatchRequestBase,
+    BatchSpec,
 )
+from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.partition_query import (
     PartitionQuery,
@@ -19,7 +21,6 @@ from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
-from great_expectations.datasource.types import PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -123,9 +124,6 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
-        batch_request = BatchRequest(
-            **batch_request.get_json_dict()
-        )  # Make sure that attributes are valid.
         batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request_base
@@ -237,7 +235,9 @@ class FilePathDataConnector(DataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
         return PathBatchSpec(batch_spec)
 
     def _generate_batch_spec_parameters_from_batch_definition(

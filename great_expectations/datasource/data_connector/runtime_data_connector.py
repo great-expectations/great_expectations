@@ -7,6 +7,11 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchRequestBase,
 )
+from great_expectations.core.batch_spec import (
+    BatchMarkers,
+    BatchSpec,
+    RuntimeDataBatchSpec,
+)
 from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionDefinitionSubset,
@@ -14,11 +19,6 @@ from great_expectations.core.id_dict import (
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
-)
-from great_expectations.datasource.types import (
-    BatchMarkers,
-    BatchSpec,
-    RuntimeDataBatchSpec,
 )
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -142,10 +142,6 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        batch_data: Any = batch_request.batch_data
-        batch_request = BatchRequest(
-            batch_data=batch_data, **batch_request.get_json_dict()
-        )  # Make sure that attributes are valid.
         batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request_base

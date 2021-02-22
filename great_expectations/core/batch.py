@@ -13,6 +13,7 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class BatchDefinition(SerializableDictDot):
@@ -245,6 +246,8 @@ class BatchRequestBase(DictDot):
             "data_asset_name": self.data_asset_name,
             "partition_request": partition_request,
         }
+        if self.batch_data:
+            json_dict["batch_data"] = str(type(self.batch_data))
         if self.batch_spec_passthrough is not None:
             json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
         if self.limit is not None:
@@ -340,42 +343,6 @@ class BatchRequest(BatchRequestBase):
 is illegal.
                 """
             )
-
-    def get_json_dict(self) -> dict:
-        partition_request: Optional[dict] = None
-        if self.partition_request is not None:
-            partition_request = copy.deepcopy(self.partition_request)
-            if partition_request.get("custom_filter_function") is not None:
-                partition_request["custom_filter_function"] = partition_request[
-                    "custom_filter_function"
-                ]
-        json_dict = {
-            "datasource_name": self.datasource_name,
-            "data_connector_name": self.data_connector_name,
-            "data_asset_name": self.data_asset_name,
-            "partition_request": partition_request,
-        }
-        if self.batch_spec_passthrough is not None:
-            json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
-        if self.limit is not None:
-            json_dict["limit"] = self.limit
-
-        return json_dict
-
-    def __str__(self):
-        return json.dumps(self.get_json_dict(), indent=2)
-
-    @property
-    def id(self) -> str:
-        return hashlib.md5(
-            json.dumps(self.get_json_dict(), sort_keys=True).encode("utf-8")
-        ).hexdigest()
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
-        return self.id == other.id
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
@@ -506,5 +473,12 @@ class Batch(DictDot):
         }
         return json.dumps(json_dict, indent=2)
 
-    def head(self):
-        return self._data.head()
+    def head(self, n_rows=5, fetch_all=False):
+        # FIXME - we should use a Validator after resolving circularity
+        # Validator(self._data.execution_engine, batches=(self,)).get_metric(MetricConfiguration("table.head", {"batch_id": self.id}, {"n_rows": n_rows, "fetch_all": fetch_all}))
+        metric = MetricConfiguration(
+            "table.head",
+            {"batch_id": self.id},
+            {"n_rows": n_rows, "fetch_all": fetch_all},
+        )
+        return self._data.execution_engine.resolve_metrics((metric,))[metric.id]

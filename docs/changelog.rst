@@ -5,15 +5,55 @@ Changelog
 #########
 
 
-Develop
+develop
 -----------------
+* [FEATURE] Add support for BatchData as a core GE concept for all Execution Engines.
+ * NOTE: As part of our improvements to the underlying Batch API, we have refactored BatchSpec to be part of the "core" package in Great Expectations, consistent with its role coordinating communication about Batches between the Datasource and Execution Engine abstractions.
+* [ENHANCEMENT] Explicit support for schema_name in the SqlAlchemyBatchData
+* [FEATURE] Add "table.head" metric
+* [BUGFIX] `expect_column_unique_value_count_to_be_between` renderer bug (duplicate "Distinct (%)") #2455
+* [BUGFIX] Fix divide by zero error in expect_compound_columns_to_be_unique #2454
+
+
+0.13.10
+-----------------
+* [ENHANCEMENT] Optimize tests #2421
+* [ENHANCEMENT] Add docstring for _invert_regex_to_data_reference_template #2428
+* [ENHANCEMENT] Added expectation to check if data is in alphabetical ordering #2407 (Thanks @sethdmay!)
+* [BUGFIX] Fixed a broken docs link #2433
+* [BUGFIX] Missing `markown_text.j2` jinja template #2422
+* [BUGFIX] parse_strings_as_datetimes error with user_configurable_profiler #2429
+* [BUGFIX] Update `suite edit` and `suite scaffold` notebook renderers to output functional validation cells #2432
+* [DOCS] Update how_to_create_custom_expectations_for_pandas.rst #2426 (Thanks @henriquejsfj!)
+* [DOCS] Correct regex escape for data connectors #2425 (Thanks @lukedyer-peak!)
+* [CONTRIB] Expectation: Matches benfords law with 80 percent confidence interval test #2406 (Thanks @vinodkri1!)
+
+
+0.13.9
+-----------------
+* [FEATURE] Add TupleAzureBlobStoreBackend (thanks @syahdeini) #1975
+* [FEATURE] Add get_metrics interface to Modular Expectations Validator API
+* [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for #1691 to @mgorsk1!) #2371
+* [ENHANCEMENT] Removed the logic that prints the "This configuration object was built using version..." warning when current version of Great Expectations is not the same as the one used to build the suite, since it was not actionable #2366
+* [ENHANCEMENT] Update Validator with more informative error message
+* [BUGFIX] Ensure that batch_spec_passthrough is handled correctly by properly refactoring build_batch_spec and _generate_batch_spec_parameters_from_batch_definition for all DataConnector classes
+* [BUGFIX] Display correct unexpected_percent in DataDocs - corrects the result object from map expectations to return the same "unexpected_percent" as is used to evaluate success (excluding null values from the denominator). The old value is now returned in a key called "unexpected_percent_total" (thanks @mlondschien) #1875
+* [BUGFIX] Add python=3.7 argument to conda env creation (thanks @scouvreur!) #2391
+* [BUGFIX] Fix issue with temporary table creation in MySQL #2389
+* [BUGFIX] Remove duplicate code in data_context.store.tuple_store_backend (Thanks @vanderGoes)
+* [BUGFIX] Fix issue where WarningAndFailureExpectationSuitesValidationOperator failing when warning suite fails
+* [DOCS] Update How to instantiate a Data Context on Databricks Spark cluster for 0.13+ #2379
 * [DOCS] How to load a Pandas DataFrame as a Batch #2327
+* [DOCS] Added annotations for Expectations not yet ported to the new Modular Expectations API.
+* [DOCS] How to load a Spark DataFrame as a Batch #2385
+* [MAINTENANCE] Add checkpoint store to store backend defaults #2378
 
 
 0.13.8
 -----------------
 * [FEATURE] New implementation of Checkpoints that uses dedicated CheckpointStore (based on the new ConfigurationStore mechanism) #2311, #2338
 * [BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract #2334
+* [BUGFIX] DataContext with multiple DataSources no longer scans all configurations #2250
 
 
 0.13.7
@@ -130,7 +170,6 @@ varundunga!)
 * BREAKING: **Renamed** Datasource to LegacyDatasource and introduced the new Datasource class. Because most installations rely on one PandasDatasource, SqlAlchemyDatasource, or SparkDFDatasource, most users will not be affected. However, if you have implemented highly customized Datasource class inheriting from the base class, you may need to update your inheritance.
 * BREAKING: The new Modular Expectations API will begin removing the ``parse_strings_as_datetimes`` and ``allow_cross_type_comparisons`` flags in expectations. Expectation Suites that use the flags will need to be updated to use the new Modular Expectations. In general, simply removing the flag will produce correct behavior; if you still want the exact same semantics, you should ensure your raw data already has typed datetime objects.
 * **NOTE:** Both the new Datasource API and the new Modular Expectations API are *experimental* and will change somewhat during the next several point releases. We are extremely excited for your feedback while we iterate rapidly, and continue to welcome new community contributions.
-
 
 0.12.10
 -----------------

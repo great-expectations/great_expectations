@@ -752,13 +752,12 @@ class BaseDataContext:
             if self.root_directory and default_checkpoints_exist(
                 directory_path=self.root_directory
             ):
-                logger.warning(
-                    f'Detected legacy config version ({config_version}) so will try to use default checkpoint store name.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
-                )
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
-            raise ge_exceptions.InvalidTopLevelConfigKeyError(
-                f'Attempted to access the "checkpoint_store_name" field with an invalid config version ({config_version}).\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
-            )
+            if self.root_directory:
+                error_message: str = f'Attempted to access the "checkpoint_store_name" field with a legacy config version ({config_version}) and no `checkpoints` directory.\n  To continue using legacy config version ({config_version}), please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
+            else:
+                error_message: str = f'Attempted to access the "checkpoint_store_name" field with a legacy config version ({config_version}) and no `checkpoints` directory.\n  To continue using legacy config version ({config_version}), please create a `checkpoints` directory in your Great Expectations project " f"directory.\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
+            raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
     def checkpoint_store(self):
@@ -1233,13 +1232,13 @@ class BaseDataContext:
     )
     def run_validation_operator(
         self,
-        validation_operator_name,
-        assets_to_validate,
-        run_id=None,
-        evaluation_parameters=None,
-        run_name=None,
-        run_time=None,
-        result_format={"result_format": "SUMMARY"},
+        validation_operator_name: str,
+        assets_to_validate: List,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
+        result_format: Optional[Union[str, dict]] = None,
         **kwargs,
     ):
         """
@@ -1257,6 +1256,8 @@ class BaseDataContext:
         Returns:
             ValidationOperatorResult
         """
+        result_format = result_format or {"result_format": "SUMMARY"}
+
         if not assets_to_validate:
             raise ge_exceptions.DataContextError(
                 "No batches of data were passed in. These are required"
@@ -1265,7 +1266,7 @@ class BaseDataContext:
         for batch in assets_to_validate:
             if not isinstance(batch, (tuple, DataAsset, Validator)):
                 raise ge_exceptions.DataContextError(
-                    "Batches are required to be of type DataAsset"
+                    "Batches are required to be of type DataAsset or Validator"
                 )
         try:
             validation_operator = self.validation_operators[validation_operator_name]
@@ -1490,8 +1491,6 @@ class BaseDataContext:
                     f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
                 )
             datasource_name = batch_request.datasource_name
-        else:
-            datasource_name = datasource_name
 
         datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
@@ -1508,39 +1507,33 @@ class BaseDataContext:
                     # Raise a warning if kwargs exist
                     pass
 
-                # Currently, the implementation of splitting and sampling is inconsistent between the
-                # Datasource and SimpleSqlalchemyDatasource classes.  The former communicates these
-                # directives to the underlying ExecutionEngine objects via "batch_spec_passthrough", which ultimately
-                # gets merged with "batch_spec" and processed by the configured ExecutionEngine object.  However,
-                # SimpleSqlalchemyDatasource uses "PartitionRequest" to relay the splitting and sampling
-                # directives to the SqlAlchemyExecutionEngine object.  The problem with this is that if the querying
-                # of partitions is implemented using the PartitionQuery class, it will not recognize the keys
-                # representing the splitting and sampling directives and raise an exception.  Additional work is needed
-                # to decouple the directives that go into PartitionQuery from the other PartitionRequest directives.
                 partition_request_params: dict = {
                     "partition_identifiers": partition_identifiers,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
+                partition_request = PartitionRequest(partition_request_params)
+            else:
+                # Raise a warning if partition_identifiers or kwargs exist
+                partition_request = PartitionRequest(partition_request)
+
+            if batch_spec_passthrough is None:
+                batch_spec_passthrough = {}
                 if sampling_method is not None:
                     sampling_params: dict = {
                         "sampling_method": sampling_method,
                     }
                     if sampling_kwargs is not None:
                         sampling_params["sampling_kwargs"] = sampling_kwargs
-                    partition_request_params.update(sampling_params)
+                    batch_spec_passthrough.update(sampling_params)
                 if splitter_method is not None:
                     splitter_params: dict = {
                         "splitter_method": splitter_method,
                     }
                     if splitter_kwargs is not None:
                         splitter_params["splitter_kwargs"] = splitter_kwargs
-                    partition_request_params.update(splitter_params)
-                partition_request = PartitionRequest(partition_request_params)
-            else:
-                # Raise a warning if partition_identifiers or kwargs exist
-                partition_request = PartitionRequest(partition_request)
+                    batch_spec_passthrough.update(splitter_params)
 
             batch_request: BatchRequest = BatchRequest(
                 datasource_name=datasource_name,

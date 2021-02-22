@@ -8,8 +8,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.core.batch import Batch
-from great_expectations.datasource.types.batch_spec import (
+from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -238,18 +237,26 @@ def test_basic_setup(spark_session):
         ],
         pd_df.columns.tolist(),
     )
-    batch_data = SparkDFExecutionEngine().get_batch_data(
-        batch_spec=RuntimeDataBatchSpec(
-            batch_data=df,
-            data_asset_name="DATA_ASSET",
+    batch_data = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            batch_spec=RuntimeDataBatchSpec(
+                batch_data=df,
+                data_asset_name="DATA_ASSET",
+            )
         )
+        .dataframe
     )
     assert batch_data is not None
 
 
 def test_get_batch_data(test_sparkdf):
-    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(batch_data=test_sparkdf, data_asset_name="DATA_ASSET")
+    test_sparkdf = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(batch_data=test_sparkdf, data_asset_name="DATA_ASSET")
+        )
+        .dataframe
     )
     assert test_sparkdf.count() == 120
     assert len(test_sparkdf.columns) == 10
@@ -258,12 +265,16 @@ def test_get_batch_data(test_sparkdf):
 def test_get_batch_empty_splitter(test_folder_connection_path_csv, spark_session):
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
-    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
-        PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
-            reader_options={"header": True},
-            splitter_method=None,
+    test_sparkdf = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            PathBatchSpec(
+                path=os.path.join(test_folder_connection_path_csv, "test.csv"),
+                reader_options={"header": True},
+                splitter_method=None,
+            )
         )
+        .dataframe
     )
     assert test_sparkdf.count() == 5
     assert len(test_sparkdf.columns) == 2
@@ -273,12 +284,16 @@ def test_get_batch_empty_splitter_tsv(test_folder_connection_path_tsv, spark_ses
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
     # reader_options are also needed to specify the separator (otherwise, comma will be used as the default separator)
-    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
-        PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_tsv, "test.tsv"),
-            reader_options={"header": True, "sep": "\t"},
-            splitter_method=None,
+    test_sparkdf = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            PathBatchSpec(
+                path=os.path.join(test_folder_connection_path_tsv, "test.tsv"),
+                reader_options={"header": True, "sep": "\t"},
+                splitter_method=None,
+            )
         )
+        .dataframe
     )
     assert test_sparkdf.count() == 5
     assert len(test_sparkdf.columns) == 2
@@ -289,11 +304,15 @@ def test_get_batch_empty_splitter_parquet(
 ):
     # Note: reader method and reader_options are not needed, because
     # SparkDFExecutionEngine automatically determines the file type as well as the schema of the Parquet file.
-    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
-        PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_parquet, "test.parquet"),
-            splitter_method=None,
+    test_sparkdf = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            PathBatchSpec(
+                path=os.path.join(test_folder_connection_path_parquet, "test.parquet"),
+                splitter_method=None,
+            )
         )
+        .dataframe
     )
     assert test_sparkdf.count() == 5
     assert len(test_sparkdf.columns) == 2
@@ -303,11 +322,15 @@ def test_get_batch_with_split_on_whole_table_filesystem(
     test_folder_connection_path_csv, spark_session
 ):
     # reader_method not configured because spark will configure own reader by default
-    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
-        PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
-            splitter_method="_split_on_whole_table",
+    test_sparkdf = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            PathBatchSpec(
+                path=os.path.join(test_folder_connection_path_csv, "test.csv"),
+                splitter_method="_split_on_whole_table",
+            )
         )
+        .dataframe
     )
     assert test_sparkdf.count() == 6
     assert len(test_sparkdf.columns) == 2
@@ -336,36 +359,44 @@ def test_get_batch_with_split_on_whole_table_s3(spark_session):
 
     test_sparkdf = spark_engine.get_batch_data(
         S3BatchSpec(
-            s3="s3://bucket/test/test.csv",
+            path="s3://bucket/test/test.csv",
             reader_method="csv",
             reader_options={"header": True},
             splitter_method="_split_on_whole_table",
         )
-    )
+    ).dataframe
     assert test_sparkdf.count() == 4
     assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_with_split_on_whole_table(test_sparkdf):
-    test_sparkdf = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf, splitter_method="_split_on_whole_table"
+    test_sparkdf = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf, splitter_method="_split_on_whole_table"
+            )
         )
+        .dataframe
     )
     assert test_sparkdf.count() == 120
     assert len(test_sparkdf.columns) == 10
 
 
 def test_get_batch_with_split_on_column_value(test_sparkdf):
-    split_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            splitter_method="_split_on_column_value",
-            splitter_kwargs={
-                "column_name": "batch_id",
-                "partition_definition": {"batch_id": 2},
-            },
+    split_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf,
+                splitter_method="_split_on_column_value",
+                splitter_kwargs={
+                    "column_name": "batch_id",
+                    "partition_definition": {"batch_id": 2},
+                },
+            )
         )
+        .dataframe
     )
     assert test_sparkdf.count() == 120
     assert len(test_sparkdf.columns) == 10
@@ -373,46 +404,58 @@ def test_get_batch_with_split_on_column_value(test_sparkdf):
     for val in collected:
         assert val.batch_id == 2
 
-    split_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            splitter_method="_split_on_column_value",
-            splitter_kwargs={
-                "column_name": "date",
-                "partition_definition": {"date": datetime.date(2020, 1, 30)},
-            },
+    split_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf,
+                splitter_method="_split_on_column_value",
+                splitter_kwargs={
+                    "column_name": "date",
+                    "partition_definition": {"date": datetime.date(2020, 1, 30)},
+                },
+            )
         )
+        .dataframe
     )
     assert split_df.count() == 3
     assert len(split_df.columns) == 10
 
 
 def test_get_batch_with_split_on_converted_datetime(test_sparkdf):
-    split_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            splitter_method="_split_on_converted_datetime",
-            splitter_kwargs={
-                "column_name": "timestamp",
-                "partition_definition": {"timestamp": "2020-01-03"},
-            },
+    split_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf,
+                splitter_method="_split_on_converted_datetime",
+                splitter_kwargs={
+                    "column_name": "timestamp",
+                    "partition_definition": {"timestamp": "2020-01-03"},
+                },
+            )
         )
+        .dataframe
     )
     assert split_df.count() == 2
     assert len(split_df.columns) == 10
 
 
 def test_get_batch_with_split_on_divided_integer(test_sparkdf):
-    split_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            splitter_method="_split_on_divided_integer",
-            splitter_kwargs={
-                "column_name": "id",
-                "divisor": 10,
-                "partition_definition": {"id": 5},
-            },
+    split_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf,
+                splitter_method="_split_on_divided_integer",
+                splitter_kwargs={
+                    "column_name": "id",
+                    "divisor": 10,
+                    "partition_definition": {"id": 5},
+                },
+            )
         )
+        .dataframe
     )
     assert split_df.count() == 10
     assert len(split_df.columns) == 10
@@ -423,16 +466,20 @@ def test_get_batch_with_split_on_divided_integer(test_sparkdf):
 
 
 def test_get_batch_with_split_on_mod_integer(test_sparkdf):
-    split_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            splitter_method="_split_on_mod_integer",
-            splitter_kwargs={
-                "column_name": "id",
-                "mod": 10,
-                "partition_definition": {"id": 5},
-            },
+    split_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf,
+                splitter_method="_split_on_mod_integer",
+                splitter_kwargs={
+                    "column_name": "id",
+                    "mod": 10,
+                    "partition_definition": {"id": 5},
+                },
+            )
         )
+        .dataframe
     )
 
     assert split_df.count() == 12
@@ -444,33 +491,14 @@ def test_get_batch_with_split_on_mod_integer(test_sparkdf):
 
 
 def test_get_batch_with_split_on_multi_column_values(test_sparkdf):
-    split_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            splitter_method="_split_on_multi_column_values",
-            splitter_kwargs={
-                "column_names": ["y", "m", "d"],
-                "partition_definition": {
-                    "y": 2020,
-                    "m": 1,
-                    "d": 5,
-                },
-            },
-        )
-    )
-    assert split_df.count() == 4
-    assert len(split_df.columns) == 10
-    collected = split_df.collect()
-    for val in collected:
-        assert val.date == datetime.date(2020, 1, 5)
-
-    with pytest.raises(ValueError):
-        split_df = SparkDFExecutionEngine().get_batch_data(
+    split_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_sparkdf,
                 splitter_method="_split_on_multi_column_values",
                 splitter_kwargs={
-                    "column_names": ["I", "dont", "exist"],
+                    "column_names": ["y", "m", "d"],
                     "partition_definition": {
                         "y": 2020,
                         "m": 1,
@@ -479,42 +507,77 @@ def test_get_batch_with_split_on_multi_column_values(test_sparkdf):
                 },
             )
         )
+        .dataframe
+    )
+    assert split_df.count() == 4
+    assert len(split_df.columns) == 10
+    collected = split_df.collect()
+    for val in collected:
+        assert val.date == datetime.date(2020, 1, 5)
+
+    with pytest.raises(ValueError):
+        split_df = (
+            SparkDFExecutionEngine()
+            .get_batch_data(
+                RuntimeDataBatchSpec(
+                    batch_data=test_sparkdf,
+                    splitter_method="_split_on_multi_column_values",
+                    splitter_kwargs={
+                        "column_names": ["I", "dont", "exist"],
+                        "partition_definition": {
+                            "y": 2020,
+                            "m": 1,
+                            "d": 5,
+                        },
+                    },
+                )
+            )
+            .dataframe
+        )
 
 
 def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
     test_sparkdf,
 ):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
-        split_df = SparkDFExecutionEngine().get_batch_data(
+        split_df = (
+            SparkDFExecutionEngine()
+            .get_batch_data(
+                RuntimeDataBatchSpec(
+                    batch_data=test_sparkdf,
+                    splitter_method="_split_on_hashed_column",
+                    splitter_kwargs={
+                        "column_name": "favorite_color",
+                        "hash_digits": 1,
+                        "hash_function_name": "I_wont_work",
+                        "partition_definition": {
+                            "hash_value": "a",
+                        },
+                    },
+                )
+            )
+            .dataframe
+        )
+
+
+def test_get_batch_with_split_on_hashed_column(test_sparkdf):
+    split_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_sparkdf,
                 splitter_method="_split_on_hashed_column",
                 splitter_kwargs={
                     "column_name": "favorite_color",
                     "hash_digits": 1,
-                    "hash_function_name": "I_wont_work",
+                    "hash_function_name": "sha256",
                     "partition_definition": {
                         "hash_value": "a",
                     },
                 },
             )
         )
-
-
-def test_get_batch_with_split_on_hashed_column(test_sparkdf):
-    split_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            splitter_method="_split_on_hashed_column",
-            splitter_kwargs={
-                "column_name": "favorite_color",
-                "hash_digits": 1,
-                "hash_function_name": "sha256",
-                "partition_definition": {
-                    "hash_value": "a",
-                },
-            },
-        )
+        .dataframe
     )
     assert split_df.count() == 8
     assert len(split_df.columns) == 10
@@ -522,18 +585,26 @@ def test_get_batch_with_split_on_hashed_column(test_sparkdf):
 
 # ### Sampling methods ###
 def test_get_batch_empty_sampler(test_sparkdf):
-    sampled_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(batch_data=test_sparkdf, sampling_method=None)
+    sampled_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(batch_data=test_sparkdf, sampling_method=None)
+        )
+        .dataframe
     )
     assert sampled_df.count() == 120
     assert len(sampled_df.columns) == 10
 
 
 def test_sample_using_random(test_sparkdf):
-    sampled_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf, sampling_method="_sample_using_random"
+    sampled_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf, sampling_method="_sample_using_random"
+            )
         )
+        .dataframe
     )
     # The test dataframe contains 10 columns and 120 rows.
     assert len(sampled_df.columns) == 10
@@ -544,31 +615,39 @@ def test_sample_using_random(test_sparkdf):
 
 
 def test_sample_using_mod(test_sparkdf):
-    sampled_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            sampling_method="_sample_using_mod",
-            sampling_kwargs={
-                "column_name": "id",
-                "mod": 5,
-                "value": 4,
-            },
+    sampled_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf,
+                sampling_method="_sample_using_mod",
+                sampling_kwargs={
+                    "column_name": "id",
+                    "mod": 5,
+                    "value": 4,
+                },
+            )
         )
+        .dataframe
     )
     assert sampled_df.count() == 24
     assert len(sampled_df.columns) == 10
 
 
 def test_sample_using_a_list(test_sparkdf):
-    sampled_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            sampling_method="_sample_using_a_list",
-            sampling_kwargs={
-                "column_name": "id",
-                "value_list": [3, 5, 7, 11],
-            },
+    sampled_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf,
+                sampling_method="_sample_using_a_list",
+                sampling_kwargs={
+                    "column_name": "id",
+                    "value_list": [3, 5, 7, 11],
+                },
+            )
         )
+        .dataframe
     )
     assert sampled_df.count() == 4
     assert len(sampled_df.columns) == 10
@@ -576,28 +655,36 @@ def test_sample_using_a_list(test_sparkdf):
 
 def test_sample_using_md5_wrong_hash_function_name(test_sparkdf):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
-        sampled_df = SparkDFExecutionEngine().get_batch_data(
+        sampled_df = (
+            SparkDFExecutionEngine()
+            .get_batch_data(
+                RuntimeDataBatchSpec(
+                    batch_data=test_sparkdf,
+                    sampling_method="_sample_using_hash",
+                    sampling_kwargs={
+                        "column_name": "date",
+                        "hash_function_name": "I_wont_work",
+                    },
+                )
+            )
+            .dataframe
+        )
+
+
+def test_sample_using_md5(test_sparkdf):
+    sampled_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_sparkdf,
                 sampling_method="_sample_using_hash",
                 sampling_kwargs={
                     "column_name": "date",
-                    "hash_function_name": "I_wont_work",
+                    "hash_function_name": "md5",
                 },
             )
         )
-
-
-def test_sample_using_md5(test_sparkdf):
-    sampled_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            sampling_method="_sample_using_hash",
-            sampling_kwargs={
-                "column_name": "date",
-                "hash_function_name": "md5",
-            },
-        )
+        .dataframe
     )
     assert sampled_df.count() == 10
     assert len(sampled_df.columns) == 10
@@ -608,23 +695,27 @@ def test_sample_using_md5(test_sparkdf):
 
 
 def test_split_on_multi_column_values_and_sample_using_random(test_sparkdf):
-    returned_df = SparkDFExecutionEngine().get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf,
-            splitter_method="_split_on_multi_column_values",
-            splitter_kwargs={
-                "column_names": ["y", "m", "d"],
-                "partition_definition": {
-                    "y": 2020,
-                    "m": 1,
-                    "d": 5,
+    returned_df = (
+        SparkDFExecutionEngine()
+        .get_batch_data(
+            RuntimeDataBatchSpec(
+                batch_data=test_sparkdf,
+                splitter_method="_split_on_multi_column_values",
+                splitter_kwargs={
+                    "column_names": ["y", "m", "d"],
+                    "partition_definition": {
+                        "y": 2020,
+                        "m": 1,
+                        "d": 5,
+                    },
                 },
-            },
-            sampling_method="_sample_using_random",
-            sampling_kwargs={
-                "p": 0.5,
-            },
+                sampling_method="_sample_using_random",
+                sampling_kwargs={
+                    "p": 0.5,
+                },
+            )
         )
+        .dataframe
     )
 
     # The test dataframe contains 10 columns and 120 rows.
@@ -715,32 +806,12 @@ def dataframes_equal(first_table, second_table):
     return True
 
 
-# Builds a Spark Execution Engine
-def _build_spark_engine(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in df.to_records(index=False)
-        ],
-        df.columns.tolist(),
-    )
-    batch = Batch(data=df)
-    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
-    return engine
-
-
 # Ensuring that, given aggregate metrics, they can be properly bundled together
 def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     import datetime
 
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+        spark_session, pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
     )
 
     desired_metric_1 = MetricConfiguration(
@@ -825,31 +896,10 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     assert found_message
 
 
-# Ensuring functionality of compute_domain when no domain kwargs are given
-def test_get_compute_domain_with_no_domain_kwargs(spark_session):
-    engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    )
-    df = engine.dataframe
-
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={}, domain_type="table"
-    )
-
-    # Ensuring that with no domain nothing happens to the data itself
-    assert dataframes_equal(
-        data, df
-    ), "Data does not match after getting compute domain"
-    assert compute_kwargs == {}, "Compute domain kwargs should be existent"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
-
 # Testing for only untested use case - multicolumn
 def test_get_compute_domain_with_column_pair(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        spark_session, pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
     df = engine.dataframe
 
@@ -887,7 +937,8 @@ def test_get_compute_domain_with_column_pair(spark_session):
 # Testing for only untested use case - multicolumn
 def test_get_compute_domain_with_multicolumn(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]})
+        spark_session,
+        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]}),
     )
     df = engine.dataframe
 
@@ -922,107 +973,10 @@ def test_get_compute_domain_with_multicolumn(spark_session):
     assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
-# Testing whether compute domain is properly calculated, but this time obtaining a column
-def test_get_compute_domain_with_column_domain(spark_session):
-    engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    )
-    df = engine.dataframe
-
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column": "a"}, domain_type="column"
-    )
-
-    # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
-    assert dataframes_equal(
-        data, df
-    ), "Data does not match after getting compute domain"
-    assert compute_kwargs == {}, "Compute domain kwargs should be empty"
-    assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
-
-
-# Using an unmeetable row condition to see if empty dataset will result in errors
-def test_get_compute_domain_with_row_condition(spark_session):
-    engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    )
-    df = engine.dataframe
-    expected_df = df.where("b > 2")
-
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
-
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"row_condition": "b > 2", "condition_parser": "spark"},
-        domain_type="identity",
-    )
-
-    # Ensuring data has been properly queried
-    assert dataframes_equal(
-        data, expected_df
-    ), "Data does not match after getting compute domain"
-
-    # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
-
-# What happens when we filter such that no value meets the condition?
-def test_get_compute_domain_with_unmeetable_row_condition(spark_session):
-    engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    )
-    df = engine.dataframe
-    expected_df = df.where("b > 24")
-
-    # Loading batch data
-    engine.load_batch_data(batch_data=df, batch_id="1234")
-
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={
-            "row_condition": "b > 24",
-            "condition_parser": "spark",
-        },
-        domain_type="identity",
-    )
-    # Ensuring data has been properly queried
-    assert dataframes_equal(
-        data, expected_df
-    ), "Data does not match after getting compute domain"
-
-    # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
-    # Ensuring errors for column and column_ pair domains are caught
-    with pytest.raises(GreatExpectationsError) as e:
-        data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-            domain_kwargs={
-                "row_condition": "b > 24",
-                "condition_parser": "spark",
-            },
-            domain_type="column",
-        )
-    with pytest.raises(GreatExpectationsError) as g:
-        data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-            domain_kwargs={
-                "row_condition": "b > 24",
-                "condition_parser": "spark",
-            },
-            domain_type="column_pair",
-        )
-
-
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
 def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        spark_session, pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
     df = engine.dataframe
 
@@ -1075,7 +1029,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session)
 
 def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+        spark_session, pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
     )
     df = engine.dataframe
 
@@ -1096,7 +1050,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
 def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
+        spark_session, pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]})
     )
 
     desired_metric_1 = MetricConfiguration(
@@ -1135,13 +1089,11 @@ def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
 
 # Making sure dataframe property is functional
 def test_dataframe_property_given_loaded_batch(spark_session):
-    from pyspark.sql import SparkSession
 
     engine = SparkDFExecutionEngine()
 
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
-    spark = SparkSession.builder.getOrCreate()
-    df = spark.createDataFrame(df)
+    df = spark_session.createDataFrame(df)
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")

@@ -6,11 +6,9 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, BatchSpec
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.core.id_dict import PartitionDefinition
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import RuntimeDataConnector
-from great_expectations.datasource.new_datasource import Datasource
-from great_expectations.datasource.types import RuntimeDataBatchSpec
 
 yaml = YAML()
 

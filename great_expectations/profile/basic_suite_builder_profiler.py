@@ -497,11 +497,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     match_type="domain",
                 )
                 try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+                try:
                     min_value = min_value + datetime.timedelta(days=-365)
                 except OverflowError:
                     min_value = datetime.datetime.min
-                except TypeError:
-                    min_value = parse(min_value) + datetime.timedelta(days=-365)
 
         if (
             not excluded_expectations
@@ -522,11 +525,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     match_type="domain",
                 )
                 try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
+
+                try:
                     max_value = max_value + datetime.timedelta(days=365)
                 except OverflowError:
                     max_value = datetime.datetime.max
-                except TypeError:
-                    max_value = parse(max_value) + datetime.timedelta(days=365)
 
         if (
             not excluded_expectations

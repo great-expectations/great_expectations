@@ -4,13 +4,13 @@ from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
-from great_expectations.datasource.types import PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -242,11 +242,12 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+        batch_spec: PathBatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
 
-        if batch_definition.data_asset_name in self.assets:
-            batch_spec.update(
-                self.assets[batch_definition.data_asset_name].batch_spec_passthrough
-            )
+        data_asset_name: str = batch_definition.data_asset_name
+        if data_asset_name in self.assets:
+            batch_spec.update(self.assets[data_asset_name].batch_spec_passthrough)
 
-        return PathBatchSpec(batch_spec)
+        return batch_spec
