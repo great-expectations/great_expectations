@@ -1,5 +1,6 @@
 import copy
 import logging
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any, Dict, Iterable, Tuple, Union
 
@@ -8,15 +9,13 @@ from ruamel.yaml import YAML
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
-from great_expectations.util import (
-    filter_properties_dict,
-    get_currently_executing_function_call_arguments,
-)
+from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
+import pandas as pd
 
 
 class NoOpDict:
@@ -26,8 +25,24 @@ class NoOpDict:
     def __setitem__(self, key, value):
         return None
 
+    def update(self, value):
+        return None
 
-class ExecutionEngine:
+
+class BatchData:
+    def __init__(self, execution_engine):
+        self._execution_engine = execution_engine
+
+    @property
+    def execution_engine(self):
+        return self._execution_engine
+
+    def head(self, *args, **kwargs):
+        # CONFLICT ON PURPOSE. REMOVE.
+        return pd.DataFrame({})
+
+
+class ExecutionEngine(ABC):
     recognized_batch_spec_defaults = set()
 
     def __init__(
@@ -73,13 +88,16 @@ class ExecutionEngine:
 
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values, and
         # set the instance "_config" variable equal to the resulting dictionary.
-        self._config = get_currently_executing_function_call_arguments(
-            **{"class_name": self.__class__.__name__}
-        )
-        filter_properties_dict(
-            properties=self._config,
-            inplace=True,
-        )
+        self._config = {
+            "name": name,
+            "caching": caching,
+            "batch_spec_defaults": batch_spec_defaults,
+            "batch_data_dict": batch_data_dict,
+            "validator": validator,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def configure_validator(self, validator):
         """Optionally configure the validator as appropriate for the execution engine."""
@@ -117,6 +135,10 @@ class ExecutionEngine:
     def config(self) -> dict:
         return self._config
 
+    @property
+    def dialect(self):
+        return None
+
     def get_batch_data(
         self,
         batch_spec: BatchSpec,
@@ -133,11 +155,15 @@ class ExecutionEngine:
         batch_data, _ = self.get_batch_data_and_markers(batch_spec)
         return batch_data
 
+    @abstractmethod
+    def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
+        raise NotImplementedError
+
     def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
         """
         Loads the specified batch_data into the execution engine
         """
-        self._batch_data_dict[batch_id] = self._get_typed_batch_data(batch_data)
+        self._batch_data_dict[batch_id] = batch_data
         self._active_batch_data_id = batch_id
 
     def _load_batch_data_from_dict(self, batch_data_dict):
@@ -146,11 +172,6 @@ class ExecutionEngine:
         """
         for batch_id, batch_data in batch_data_dict.items():
             self.load_batch_data(batch_id, batch_data)
-
-    # Note: Abe 20201117 : This method should raise NotImplementedError, and the
-    # _get_typed_batch_data methods in child classes should actually do type checking and type conversion.
-    def _get_typed_batch_data(self, batch_data):
-        return batch_data
 
     def resolve_metrics(
         self,
@@ -171,6 +192,7 @@ class ExecutionEngine:
         """
         if metrics is None:
             metrics = dict()
+
         resolved_metrics = dict()
 
         metric_fn_bundle = []
@@ -311,11 +333,6 @@ class ExecutionEngine:
         new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
         new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
         return new_domain_kwargs
-
-    def get_batch_data_and_markers(
-        self, batch_spec: BatchSpec
-    ) -> Tuple[Any, BatchMarkers]:
-        raise NotImplementedError
 
 
 class MetricPartialFunctionTypes(Enum):
