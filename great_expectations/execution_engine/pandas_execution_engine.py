@@ -17,9 +17,8 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-
-from ..core.util import S3Url, sniff_s3_compression
-from .pandas_batch_data import PandasBatchData
+from great_expectations.core.util import S3Url, sniff_s3_compression
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 
 try:
     import boto3
