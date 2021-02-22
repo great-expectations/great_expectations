@@ -5,10 +5,10 @@ import logging
 import pickle
 import random
 from functools import partial
+from io import BytesIO
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
-from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import (
@@ -17,9 +17,8 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-
-from ..core.util import S3Url
-from .pandas_batch_data import PandasBatchData
+from great_expectations.core.util import S3Url, sniff_s3_compression
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 
 try:
     import boto3
@@ -145,6 +144,8 @@ Notes:
             s3_url = S3Url(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+            if "compression" not in reader_options.keys():
+                reader_options["compression"] = sniff_s3_compression(s3_url)
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
@@ -152,14 +153,9 @@ Notes:
                 )
             )
             reader_fn = self._get_reader_fn(reader_method, s3_url.key)
-            df = reader_fn(
-                StringIO(
-                    s3_object["Body"]
-                    .read()
-                    .decode(s3_object.get("ContentEncoding", "utf-8"))
-                ),
-                **reader_options,
-            )
+            buf = BytesIO(s3_object["Body"].read())
+            buf.seek(0)
+            df = reader_fn(buf, **reader_options)
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options
