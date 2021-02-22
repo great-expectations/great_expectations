@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from scipy import stats as stats
+import scipy.stats as stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -43,29 +43,18 @@ from great_expectations.render.util import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnWassersteinDistance(ColumnMetricProvider):
-    """MetricProvider Class for Wasserstein Distance MetricProvider"""
+class ColumnSkew(ColumnMetricProvider):
+    """MetricProvider Class for Aggregate Mean MetricProvider"""
 
-    metric_name = "column.custom.wasserstein"
-    value_keys = ("raw_values", "partition")
+    metric_name = "column.custom.skew"
+    value_keys = ("abs",)
+
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, raw_values=None, partition=None, **kwargs):
-        if raw_values is not None:
-            w_value = stats.wasserstein_distance(
-                raw_values,
-                column,
-            )
-        elif partition is not None:
-            w_value = stats.wasserstein_distance(
-                partition["values"],
-                column,
-                partition["weights"],
-            )
-        else:
-            raise ValueError("raw_values and partition object cannot both be None!")
-
-        return w_value
-
+    def _pandas(cls, column, abs=False, **kwargs):
+        if abs:
+            return np.abs(stats.skew(column))
+        return stats.skew(column)
+    #
     # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     # def _sqlalchemy(
     #     cls,
@@ -160,28 +149,83 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.custom.wasserstein",)
-    success_keys = (
-        "min_value",
-        "strict_min",
-        "max_value",
-        "strict_max",
-        "raw_values",
-        "partition",
-    )
+class ExpectColumnSkewToBeBetween(ColumnExpectation):
+    """Expect column skew to be between. Currently tests against Gamma and Beta distributions"""
 
+    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
+    examples = [
+        {
+            "data": {
+                "a": [5.27071512, 7.05981507, 8.46671693, 10.20629973, 6.15519149,
+                      7.11709362, 5.31915535, 6.56441299, 5.69143401, 5.0389317,
+                      6.48222587, 5.62433534, 5.46219467, 5.74686441, 6.05413964,
+                      7.09435276, 6.43876861, 6.05301145, 6.12727457, 6.80603351],  # sampled from Gamma(1, 5)
+                "b": [81.11265955, 76.7836479, 85.25019592, 93.93285666, 83.63587009,
+                      81.88712944, 80.37321975, 86.786491, 80.05277435, 70.36302516,
+                      79.4907302, 84.1288281, 87.79298488, 78.02771047, 80.63975023,
+                      88.59461893, 84.05632481, 84.54128192, 78.74152549, 83.60684806],  # sampled from Beta(50, 10)
+                "c": [95.74648827, 80.4031074, 85.41863916, 93.98001949, 97.84607818,
+                      89.01205412, 89.55045229, 97.32734707, 93.94199505, 88.19992377,
+                      98.3336087, 97.66984436, 97.39464709, 95.55637873, 96.10980996,
+                      90.18004343, 96.2019293, 89.19519753, 94.01807868, 93.23978285],  # sampled from Beta(20, 2)
+            },
+            "tests": [
+                {
+                    "title": "positive_test_positive_skew",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "a", "min_value": 0.25, "max_value": 10},
+                    "out": {"success": True, "observed_value": 1.6974323016687487},
+                },
+                {
+                    "title": "negative_test_no_skew",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "b", "min_value": 0.25, "max_value": 10},
+                    "out": {"success": False, "observed_value": -0.07638895580386174},
+                },
+                {
+                    "title": "positive_test_negative_skew",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "c", "min_value": -10, "max_value": -0.5},
+                    "out": {"success": True, "observed_value": -0.9979514313860596},
+                },
+                {
+                    "title": "negative_test_abs_skew",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "c", "abs": True, "min_value": 0, "max_value": 0.5},
+                    "out": {"success": False, "observed_value": 0.9979514313860596},
+                },
+                {
+                    "title": "positive_test_abs_skew",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "c", "abs": True, "min_value": 0.5, "max_value": 10},
+                    "out": {"success": True, "observed_value": 0.9979514313860596},
+                },
+            ],
+        },
+    ]
+
+    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",
-        "package": "great_expectations_experimental",
-        "tags": [],
-        "contributors": [
-            "rexboyce",
-            "abegong",
-            "lodeous",
+        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "tags": [  # Tags for this Expectation in the gallery
+            #         "experimental"
         ],
+        "contributors": [  # Github handles for all contributors to this Expectation.
+            "@lodeous",
+            "@rexboyce",
+            "@bragleg",
+        ],
+        "package": "experimental_expectations",
     }
+
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    metric_dependencies = ("column.custom.skew",)
+    success_keys = ("min_value", "strict_min", "max_value", "strict_max", "abs")
 
     # Default values
     default_kwarg_values = {
@@ -189,68 +233,25 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
         "max_value": None,
         "strict_min": None,
         "strict_max": None,
-        "raw_values": None,
-        "partition": None,
+        "abs": False,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
     }
 
-    examples = [
-        {
-            "data": {"a": [0, 1, 3], "b": [3, 4, 5]},
-            "tests": [
-                {
-                    "title": "test_raw_values",
-                    "exact_match_out": False,
-                    "in": {"column": "a", "raw_values": [5, 6, 8], "max_value": 6},
-                    "out": {"success": True, "observed_value": 5},
-                    "include_in_gallery": True,
-                },
-                {
-                    "title": "test_raw_values_strict",
-                    "exact_match_out": False,
-                    "in": {
-                        "column": "a",
-                        "raw_values": [5, 6, 8],
-                        "max_value": 5,
-                        "strict_max": True,
-                    },
-                    "out": {"success": False, "observed_value": 5},
-                    "include_in_gallery": True,
-                },
-                {
-                    "title": "test_partition",
-                    "exact_match_out": False,
-                    "in": {
-                        "column": "b",
-                        "partition": {
-                            "values": [1, 2, 4],
-                            "weights": [0.5, 0.25, 0.25],
-                        },
-                        "max_value": 5,
-                        "strict_max": True,
-                    },
-                    "out": {"success": True, "observed_value": 2},
-                    "include_in_gallery": True,
-                },
-            ],
-        },
-    ]
-
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
+    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    #     """
+    #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+    #     neccessary configuration arguments have been provided for the validation of the expectation.
+    #
+    #     Args:
+    #         configuration (OPTIONAL[ExpectationConfiguration]): \
+    #             An optional Expectation Configuration entry that will be used to configure the expectation
+    #     Returns:
+    #         True if the configuration has been validated successfully. Otherwise, raises an exception
+    #     """
+    #     super().validate_configuration(configuration)
+    #     self.validate_metric_value_between_configuration(configuration=configuration)
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")
@@ -318,14 +319,14 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
     #     ]
 
     def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict,
-        runtime_configuration: dict = None,
-        execution_engine: ExecutionEngine = None,
+            self,
+            configuration: ExpectationConfiguration,
+            metrics: Dict,
+            runtime_configuration: dict = None,
+            execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
-            metric_name="column.custom.wasserstein",
+            metric_name="column.custom.skew",
             configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
@@ -334,5 +335,5 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnWassersteinDistanceToBeLessThan().self_check()
+    self_check_report = ExpectColumnSkewToBeBetween().run_diagnostics()
     print(json.dumps(self_check_report, indent=2))
