@@ -1,7 +1,5 @@
 import json
 
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
-
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import (
@@ -18,6 +16,7 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.registry import (
     _registered_expectations,
     _registered_metrics,
@@ -53,13 +52,12 @@ class ColumnValuesAreAscii(ColumnMapMetricProvider):
         column_ascii_check = column.apply(check_if_ascii)
         return column_ascii_check
 
+    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
+    #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    #     def _sqlalchemy(cls, column, _dialect, **kwargs):
+    #         return column.in_([3])
 
-# This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
-#     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-#     def _sqlalchemy(cls, column, _dialect, **kwargs):
-#         return column.in_([3])
-
-# This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
+    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
         def is_ascii(val):
