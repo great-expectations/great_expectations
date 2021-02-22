@@ -15,7 +15,7 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
+        cli, ["-c", project_root_dir, "datasource", "list"], catch_exceptions=False
     )
 
     stdout = result.output.strip()
@@ -58,7 +58,14 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
+        cli,
+        [
+            "-c",
+            project_root_dir,
+            "datasource",
+            "list",
+        ],
+        catch_exceptions=False,
     )
     expected_output = """
 1 Datasource found:[0m
@@ -88,7 +95,12 @@ def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["datasource", "new", "-d", project_root_dir],
+        [
+            "-c",
+            project_root_dir,
+            "datasource",
+            "new",
+        ],
         input="1\n1\n%s\nmynewsource\n" % str(filesystem_csv_2),
         catch_exceptions=False,
     )

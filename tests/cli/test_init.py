@@ -41,7 +41,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", root_dir],
+        ["-c", root_dir, "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
         catch_exceptions=False,
     )
@@ -68,7 +68,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", root_dir], input="Y\nn\n", catch_exceptions=False
+            cli, ["-c", root_dir, "init"], input="Y\nn\n", catch_exceptions=False
         )
     stdout = result.stdout
 
@@ -117,7 +117,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", root_dir],
+        ["-c", root_dir, "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(
             data_folder_path, data_path, catch_exceptions=False
         ),
@@ -138,7 +138,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", root_dir], input="n\n", catch_exceptions=False
+            cli, ["-c", root_dir, "init"], input="n\n", catch_exceptions=False
         )
     stdout = result.stdout
     assert mock_webbrowser.call_count == 1
@@ -216,7 +216,6 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
     notebooks/

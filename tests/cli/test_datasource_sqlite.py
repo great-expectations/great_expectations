@@ -16,7 +16,14 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
+        cli,
+        [
+            "-c",
+            project_root_dir,
+            "datasource",
+            "list",
+        ],
+        catch_exceptions=False,
     )
 
     stdout = result.output.strip()
@@ -30,7 +37,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
+        cli, ["-c", project_root_dir, "datasource", "list"], catch_exceptions=False
     )
     url = str(empty_sqlite_db.engine.url)
     expected_output = """\
@@ -160,7 +167,12 @@ def test_cli_datasorce_new_connection_string(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["datasource", "new", "-d", project_root_dir],
+        [
+            "-c",
+            project_root_dir,
+            "datasource",
+            "new",
+        ],
         input="2\n6\nmynewsource\n{}\n\n".format(str(empty_sqlite_db.url)),
         catch_exceptions=False,
     )

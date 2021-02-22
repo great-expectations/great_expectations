@@ -19,7 +19,12 @@ def test_snowflake_user_password_credentials_exit(empty_data_context):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["datasource", "new", "-d", project_root_dir],
+        [
+            "-c",
+            project_root_dir,
+            "datasource",
+            "new",
+        ],
         catch_exceptions=False,
         input="2\n4\nmy_snowflake_db\n1\nuser\nABCD.us-east-1\ndefault_db\ndefault_schema\nxsmall\npublic\npassword\nn\n",
     )

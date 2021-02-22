@@ -34,7 +34,15 @@ except ImportError:
     help="Set great_expectations to use verbose output.",
 )
 # TODO: <Alex>ALEX -- Update this --help page to fit with the new design.</Alex>
-def cli(verbose):
+@click.option(
+    "--config",
+    "-c",
+    "config_file_location",
+    default="./",
+    help="Path to great_expectations configuration file location (great_expectations.yml). Inferred if not provided.",
+)
+@click.pass_context
+def cli(ctx, verbose, config_file_location):
     """
     Welcome to the great_expectations CLI!
 
@@ -57,6 +65,9 @@ def cli(verbose):
         # more control over console UI.
         logger.setLevel(logging.DEBUG)
 
+    ctx.ensure_object(dict)
+    ctx.obj["CONFIG_FILE_LOCATION"] = config_file_location
+
 
 cli.add_command(datasource)
 cli.add_command(docs)
@@ -69,7 +80,7 @@ cli.add_command(checkpoint)
 
 
 def main():
-    cli()
+    cli(obj={})
 
 
 if __name__ == "__main__":

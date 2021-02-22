@@ -75,19 +75,17 @@ def checkpoint():
 @click.argument("checkpoint")
 @click.argument("suite")
 @click.option("--datasource", default=None)
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @click.option("--legacy/--non-legacy", default=True)
 @mark.cli_as_experimental
-def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
+@click.pass_context
+def checkpoint_new(ctx, checkpoint, suite, datasource, legacy):
     """Create a new checkpoint for easy deployments. (Experimental)"""
     if legacy:
         suite_name = suite
         usage_event = "cli.checkpoint.new"
+        directory = toolkit.parse_cli_config_file_location(
+            config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        ).get("directory")
         context = toolkit.load_data_context_with_error_handling(directory)
         ge_config_version = context.get_config().config_version
         if ge_config_version >= 3:
@@ -172,18 +170,15 @@ def _load_checkpoint_yml_template() -> dict:
     return template
 
 
-# TODO: <Alex>ALEX Remove --directory from here only when the "config" option is fully operational.</Alex>
 # TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @mark.cli_as_experimental
-def checkpoint_list(directory):
+@click.pass_context
+def checkpoint_list(ctx):
     """List configured checkpoints. (Experimental)"""
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context: DataContext = toolkit.load_data_context_with_error_handling(
         directory=directory,
         from_cli_upgrade_command=False,
@@ -205,21 +200,18 @@ def checkpoint_list(directory):
     send_usage_message(context, event="cli.checkpoint.list", success=True)
 
 
-# TODO: <Alex>ALEX Remove --directory from here only when the "config" option is fully operational.</Alex>
 # TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @mark.cli_as_experimental
-def checkpoint_run(checkpoint, directory):
+@click.pass_context
+def checkpoint_run(ctx, checkpoint):
     """Run a checkpoint. (Experimental)"""
     usage_event: str = "cli.checkpoint.run"
 
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context: DataContext = toolkit.load_data_context_with_error_handling(
         directory=directory,
         from_cli_upgrade_command=False,
@@ -287,14 +279,9 @@ def print_validation_operator_results_details(
 
 @checkpoint.command(name="script")
 @click.argument("checkpoint")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @mark.cli_as_experimental
-def checkpoint_script(checkpoint, directory):
+@click.pass_context
+def checkpoint_script(ctx, checkpoint):
     """
     Create a python script to run a checkpoint. (Experimental)
 
@@ -305,6 +292,9 @@ def checkpoint_script(checkpoint, directory):
     """
     usage_event: str = "cli.checkpoint.script"
 
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context: DataContext = toolkit.load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=False
     )
