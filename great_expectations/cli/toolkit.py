@@ -355,11 +355,51 @@ def run_checkpoint(
     usage_event: str,
 ) -> CheckpointResult:
     """Run a checkpoint or raise helpful errors."""
+    failure_message: str = "Exception occurred while running validation."
+    validate_checkpoint(
+        context=context,
+        checkpoint_name=checkpoint_name,
+        usage_event=usage_event,
+        failure_message=failure_message,
+    )
     try:
         result: CheckpointResult = context.run_checkpoint(
             checkpoint_name=checkpoint_name
         )
         return result
+    except ge_exceptions.CheckpointError as e:
+        cli_message(string=failure_message)
+        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}.</red>")
+
+
+def validate_checkpoint(
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+    failure_message: Optional[str] = None,
+):
+    try:
+        # noinspection PyUnusedLocal
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = load_checkpoint(
+            context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
+        )
+    except ge_exceptions.CheckpointError as e:
+        if failure_message:
+            cli_message(string=failure_message)
+        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
+
+
+def load_checkpoint(
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+) -> Union[Checkpoint, LegacyCheckpoint]:
+    """Load a checkpoint or raise helpful errors."""
+    try:
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+            name=checkpoint_name
+        )
+        return checkpoint
     except (
         ge_exceptions.CheckpointNotFoundError,
         ge_exceptions.InvalidCheckpointConfigError,
@@ -372,9 +412,6 @@ def run_checkpoint(
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
-    except ge_exceptions.CheckpointError as e:
-        cli_message(string="Exception occurred while running validation.")
-        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}.</red>")
 
 
 def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:

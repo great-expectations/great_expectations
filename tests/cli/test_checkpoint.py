@@ -25,6 +25,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
+# TODO: <Alex>ALEX Delete?</Alex>
 @pytest.fixture
 def titanic_checkpoint(
     titanic_data_context_stats_enabled_config_version_2, titanic_expectation_suite
@@ -52,6 +53,7 @@ def titanic_checkpoint(
     }
 
 
+# TODO: <Alex>ALEX Delete?</Alex>
 @pytest.fixture
 def titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled(
     titanic_data_context_stats_enabled_config_version_2,
@@ -1208,7 +1210,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
 
     root_dir: str = context.root_directory
 
-    # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
     csv_path: str = os.path.join(
         root_dir, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
@@ -1322,20 +1323,18 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v3(
+    mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
 ):
     # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
-    context: DataContext = (
-        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
-    )
-    root_dir = context.root_directory
-    assert context.list_checkpoints() == ["my_checkpoint"]
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    root_dir: str = context.root_directory
+    assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"checkpoint script not_a_checkpoint -d {root_dir}",
         catch_exceptions=False,
@@ -1358,40 +1357,38 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v3(
+    mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
 ):
     # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
-    context: DataContext = (
-        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
-    )
-    root_dir = context.root_directory
-    assert context.list_checkpoints() == ["my_checkpoint"]
-    script_path = os.path.join(
-        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py"
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    root_dir: str = context.root_directory
+    assert context.list_checkpoints() == ["my_v1_checkpoint"]
+
+    script_path: str = os.path.join(
+        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     with open(script_path, "w") as f:
         f.write("script here")
     assert os.path.isfile(script_path)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
+        f"checkpoint script my_v1_checkpoint -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert (
-        "Warning! A script named run_my_checkpoint.py already exists and this command will not overwrite it."
+        "Warning! A script named run_my_v1_checkpoint.py already exists and this command will not overwrite it."
         in stdout
     )
     assert result.exit_code == 1
@@ -1413,42 +1410,39 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+def test_checkpoint_script_happy_path_generates_script_with_ge_config_v3(
+    mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
 ):
     # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
-    context: DataContext = (
-        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
-    )
-    root_dir = context.root_directory
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    root_dir: str = context.root_directory
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
+        f"checkpoint script my_v1_checkpoint -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 0
     assert (
-        "A python script was created that runs the checkpoint named: `my_checkpoint`"
+        "A python script was created that runs the checkpoint named: `my_v1_checkpoint`"
         in stdout
     )
     assert (
-        "The script is located in `great_expectations/uncommitted/run_my_checkpoint.py`"
+        "The script is located in `great_expectations/uncommitted/run_my_v1_checkpoint.py`"
         in stdout
     )
     assert (
-        "The script can be run with `python great_expectations/uncommitted/run_my_checkpoint.py`"
+        "The script can be run with `python great_expectations/uncommitted/run_my_v1_checkpoint.py`"
         in stdout
     )
 
@@ -1461,20 +1455,21 @@ def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
             {"event": "cli.checkpoint.script", "event_payload": {}, "success": True}
         ),
     ]
-    expected_script = os.path.join(
-        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py"
+    expected_script: str = os.path.join(
+        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     assert os.path.isfile(expected_script)
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
 
-def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_config_v2(
-    caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_config_v3(
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    monkeypatch,
 ):
     """
     We call the "checkpoint script" command on a project with a checkpoint.
@@ -1487,32 +1482,83 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     - return a 0 status code
     - print a success message
     """
-    context: DataContext = (
-        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="users.delivery"
     )
-    root_dir = context.root_directory
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    context.save_expectation_suite(expectation_suite=suite)
+    assert context.list_expectation_suite_names() == ["users.delivery"]
+
+    root_dir: str = context.root_directory
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+        expectation_suite_name: users.delivery
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
+        f"checkpoint script my_fancy_checkpoint -d {root_dir}",
         catch_exceptions=False,
     )
+    stdout: str = result.stdout
     assert result.exit_code == 0
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
-    script_path = os.path.abspath(
-        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
+    script_path: str = os.path.abspath(
+        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_fancy_checkpoint.py")
     )
     assert os.path.isfile(script_path)
 
     # In travis on osx, python may not execute from the build dir
-    cmdstring = f"python {script_path}"
+    cmdstring: str = f"python {script_path}"
     if os.environ.get("TRAVIS_OS_NAME") == "osx":
-        build_dir = os.environ.get("TRAVIS_BUILD_DIR")
+        build_dir: str = os.environ.get("TRAVIS_BUILD_DIR")
         print(os.listdir(build_dir))
         cmdstring = f"python3 {script_path}"
     print("about to run: " + cmdstring)
@@ -1520,15 +1566,24 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     print(os.listdir(os.curdir))
     print(os.listdir(os.path.abspath(os.path.join(root_dir, ".."))))
 
+    status: int
+    output: str
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
 
     assert status == 0
     assert "Validation succeeded!" in output
 
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
 
-def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_config_v2(
-    caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+
+def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_config_v3(
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_expectation_suite,
+    monkeypatch,
 ):
     """
     We call the "checkpoint script" command on a project with a checkpoint.
@@ -1541,37 +1596,90 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     - return a 1 status code
     - print a failure message
     """
-    context: DataContext = (
-        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
-    )
-    root_dir = context.root_directory
-    # mangle the csv
-    csv_path = os.path.join(context.root_directory, "..", "data", "Titanic.csv")
-    with open(csv_path, "w") as f:
-        f.write("foo,bar\n1,2\n")
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    root_dir: str = context.root_directory
+
+    # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
+    csv_path: str = os.path.join(
+        root_dir, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
+    df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
+    df = df.sample(frac=0.5, replace=True, random_state=1)
+    df.to_csv(path_or_buf=csv_path)
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
+        f"checkpoint script my_fancy_checkpoint -d {root_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
-    script_path = os.path.abspath(
-        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
+    script_path: str = os.path.abspath(
+        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_fancy_checkpoint.py")
     )
     assert os.path.isfile(script_path)
 
     # In travis on osx, python may not execute from the build dir
-    cmdstring = f"python {script_path}"
+    cmdstring: str = f"python {script_path}"
     if os.environ.get("TRAVIS_OS_NAME") == "osx":
-        build_dir = os.environ.get("TRAVIS_BUILD_DIR")
+        build_dir: str = os.environ.get("TRAVIS_BUILD_DIR")
         print(os.listdir(build_dir))
         cmdstring = f"python3 {script_path}"
     print("about to run: " + cmdstring)
@@ -1579,10 +1687,138 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     print(os.listdir(os.curdir))
     print(os.listdir(os.path.abspath(os.path.join(root_dir, ".."))))
 
+    status: int
+    output: str
     status, output = subprocess.getstatusoutput(cmdstring)
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
     assert "Validation failed!" in output
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
+
+def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data_with_ge_config_v3(
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_expectation_suite,
+    monkeypatch,
+):
+    """
+    We call the "checkpoint script" command on a project with a checkpoint.
+
+    The command should:
+    - create the script (note output is tested in other tests)
+
+    When run the script should:
+    - execute
+    - return a 1 status code
+    - print a failure message
+    """
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    root_dir: str = context.root_directory
+
+    csv_path: str = os.path.join(
+        root_dir, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
+    # mangle the csv
+    with open(csv_path, "w") as f:
+        f.write("foo,bar\n1,2\n")
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"checkpoint script my_fancy_checkpoint -d {root_dir}",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+    script_path: str = os.path.abspath(
+        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_fancy_checkpoint.py")
+    )
+    assert os.path.isfile(script_path)
+
+    # In travis on osx, python may not execute from the build dir
+    cmdstring: str = f"python {script_path}"
+    if os.environ.get("TRAVIS_OS_NAME") == "osx":
+        build_dir: str = os.environ.get("TRAVIS_BUILD_DIR")
+        print(os.listdir(build_dir))
+        cmdstring = f"python3 {script_path}"
+    print("about to run: " + cmdstring)
+    print(os.curdir)
+    print(os.listdir(os.curdir))
+    print(os.listdir(os.path.abspath(os.path.join(root_dir, ".."))))
+
+    status: int
+    output: str
+    status, output = subprocess.getstatusoutput(cmdstring)
+    print(f"\n\nScript exited with code: {status} and output:\n{output}")
+    assert status == 1
+    assert (
+        'ExecutionEngineError: Error: The column "Name" in BatchData does not exist.'
+        in output
+    )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
@@ -1617,48 +1853,6 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
         ),
         mock.call(
             {"event": "cli.checkpoint.new", "event_payload": {}, "success": False}
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_script_with_ge_config_3_raises_error(
-    mock_emit, caplog, titanic_data_context_stats_enabled
-):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
-    context: DataContext = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 1
-    assert (
-        "The `checkpoint script` CLI command is not yet implemented for GE config versions >= 3."
-        in stdout
-    )
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {"event": "cli.checkpoint.script", "event_payload": {}, "success": False}
         ),
     ]
 
