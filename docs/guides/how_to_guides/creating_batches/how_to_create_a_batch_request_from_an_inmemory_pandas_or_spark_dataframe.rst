@@ -1,7 +1,7 @@
-.. _how_to_guides__creating_batches__how_to_create_a_batch_request_from_an_inmemory_pandas_dataframe:
+.. _how_to_guides__creating_batches__how_to_create_a_batch_request_from_an_inmemory_pandas_or_spark_dataframe:
 
-How to create a Batch Request from an in-memory Pandas DataFrame
-================================================================
+How to create a Batch Request from an in-memory Pandas or Spark DataFrame
+=========================================================================
 
 TODO: insert text
 

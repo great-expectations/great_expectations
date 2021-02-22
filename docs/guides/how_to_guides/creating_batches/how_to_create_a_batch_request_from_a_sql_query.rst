@@ -1,7 +1,7 @@
 .. _how_to_guides__creating_batches__how_to_create_a_batch_request_from_a_sql_query:
 
-How to create a Batch Request from a file on filesystem
-========================================================
+How to create a Batch Request from a SQL query
+===============================================
 
 TODO: insert text
 
@@ -16,7 +16,7 @@ Steps
 
 #. **Create a BatchRequest.**
 
-    TODO: insert text
+    TODO: insert text ("by now you configured a RuntimeDataConnector with configuration that looks like this:"
 
     .. code-block:: yaml
 
@@ -45,15 +45,11 @@ Steps
             datasource_name="my_pandas_datasource",
             data_connector_name="my_runtime_data_connector",
             batch_spec_passthrough= {
-                "path": PATH
+                "sql": "select whatever you want from wherever you want"
             },
             data_asset_name="my_data_asset",
         )
 
-
-    .. admonition:: Note:
-
-        - The snippet in the example above uses a Pandas Datasource (that has a PandasExecutionEngine). If your Datasource is a Spark Datasource, the code snippet for creating a BatchRequest will be the same.
 
     .. admonition:: Note:
 

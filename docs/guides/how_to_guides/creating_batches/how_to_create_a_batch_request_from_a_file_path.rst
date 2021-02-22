@@ -1,9 +1,9 @@
-.. _how_to_guides__creating_batches__how_to_create_a_batch_request_from_a_file_on_filesystem:
+.. _how_to_guides__creating_batches__how_to_create_a_batch_request_from_a_file_path:
 
-How to create a Batch Request from a file on filesystem
-========================================================
+How to create a Batch Request from a file path
+================================================
 
-TODO: insert text
+TODO: insert text explaining when you would want to do this - a known path of a file on the filesystem or in a cloud storage, such as S3 or GCS
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -54,6 +54,17 @@ Steps
     .. admonition:: Note:
 
         - The snippet in the example above uses a Pandas Datasource (that has a PandasExecutionEngine). If your Datasource is a Spark Datasource, the code snippet for creating a BatchRequest will be the same.
+
+    .. admonition:: Note:
+
+        - If the file is on S3, ...
+
+            .. code-block:: python
+
+                batch_spec_passthrough= {
+                    "path": "s3a://s3_path"
+                },
+
 
     .. admonition:: Note:
 
