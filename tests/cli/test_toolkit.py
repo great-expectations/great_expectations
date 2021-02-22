@@ -76,7 +76,6 @@ def test_parse_cli_config_file_location_posix_paths():
             },
         },
     ]
-
     relative_path_fixtures = [
         {
             "input_path": "relative/path/to/file.yml",
@@ -113,6 +112,68 @@ def test_parse_cli_config_file_location_posix_paths():
             )
             == fixture["expected"]
         )
+
+
+def test_parse_cli_config_file_location_posix_paths_existing_files_with_no_extension(
+    tmp_path_factory,
+):
+    # Create files and re-run assertions
+
+    filename_no_extension_fixtures = [
+        {
+            "input_path": "relative/path/to/file/no_extension",
+            "windows": False,
+            "expected": {
+                "directory": "relative/path/to/file",
+                "filename": "no_extension",
+            },
+        },
+        {
+            "input_path": "/absolute/path/to/file/no_extension",
+            "windows": False,
+            "expected": {
+                "directory": "/absolute/path/to/file",
+                "filename": "no_extension",
+            },
+        },
+        {
+            "input_path": "no_extension",
+            "windows": False,
+            "expected": {
+                "directory": None,
+                "filename": "no_extension",
+            },
+        },
+    ]
+
+    # create no-extension files
+
+    root_dir = tmp_path_factory.mktemp("posix")
+    root_dir = str(root_dir)
+    for fixture in filename_no_extension_fixtures:
+        expected_dir = fixture.get("expected").get("directory")
+
+        # Make non-absolute path
+        if expected_dir is not None and expected_dir.startswith("/"):
+            expected_dir = expected_dir[1:]
+
+        expected_filename = fixture.get("expected").get("filename")
+        if expected_dir:
+            test_directory = os.path.join(root_dir, expected_dir)
+            os.makedirs(test_directory, exist_ok=True)
+            if expected_filename:
+                expected_filepath = os.path.join(test_directory, expected_filename)
+                with open(expected_filepath, "w") as fp:
+                    pass
+
+                output = toolkit.parse_cli_config_file_location(
+                    expected_filepath, windows=fixture.get("windows")
+                )
+
+                assert output == {
+                    "directory": os.path.join(root_dir, expected_dir),
+                    "filename": expected_filename,
+                }
 
 
 def test_parse_cli_config_file_location_empty_paths():
