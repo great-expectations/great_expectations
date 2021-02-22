@@ -222,7 +222,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 @suite.command(name="demo")
 def suite_demo():
     """This command is not supported in the new API."""
-    print(
+    cli_message(
         "This command is not supported in the new API. Please use `suite new` instead."
     )
 
