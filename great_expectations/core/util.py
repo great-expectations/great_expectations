@@ -31,6 +31,9 @@ except ImportError:
     )
 
 
+_SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
+
+
 def nested_update(d, u):
     """update d with items from u, recursively and joining elements"""
     for k, v in u.items():
@@ -381,5 +384,22 @@ class S3Url:
             return self._parsed.path.lstrip("/")
 
     @property
+    def suffix(self) -> Optional[str]:
+        """
+        Attempts to get a file suffix from the S3 key.
+        If can't find one returns `None`.
+        """
+        splits = self._parsed.path.rsplit(".", 1)
+        _suffix = splits[-1]
+        if len(_suffix) > 0 and len(splits) > 1:
+            return str(_suffix)
+        return None
+
+    @property
     def url(self):
         return self._parsed.geturl()
+
+
+def sniff_s3_compression(s3_url: S3Url) -> str:
+    """Attempts to get read_csv compression from s3_url"""
+    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix, "infer")
