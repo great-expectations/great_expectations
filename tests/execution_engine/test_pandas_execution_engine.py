@@ -13,6 +13,7 @@ from moto import mock_s3
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.id_dict import PartitionDefinition
+from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 from great_expectations.datasource.types.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
@@ -387,7 +388,9 @@ def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
         )
 
 
-def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector(test_s3_files, test_df_small):
+def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector(
+    test_s3_files, test_df_small
+):
     bucket, _keys = test_s3_files
     expected_df = test_df_small
 
