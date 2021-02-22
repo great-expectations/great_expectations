@@ -7,7 +7,6 @@ from great_expectations.datasource import (
     SparkDFDatasource,
     SqlAlchemyDatasource,
 )
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 @pytest.fixture(scope="module")
