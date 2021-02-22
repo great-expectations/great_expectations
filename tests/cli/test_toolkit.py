@@ -38,39 +38,204 @@ def test_load_data_context_with_error_handling_v1_config(v10_project_directory):
         DataContext(context_root_dir=v10_project_directory)
 
 
-def test_parse_cli_config_file_location():
+def test_parse_cli_config_file_location_posix_paths():
 
-    input_path = "just_a_file.yml"
-    expected = {
-        "directory": "",
-        "filename": "just_a_file.yml",
-    }
-    assert toolkit.parse_cli_config_file_location(input_path) == expected
+    filename_fixtures = [
+        {
+            "input_path": "just_a_file.yml",
+            "windows": False,
+            "expected": {
+                "directory": ".",
+                "filename": "just_a_file.yml",
+            },
+        },
+    ]
+    absolute_path_fixtures = [
+        {
+            "input_path": "/path/to/file/filename.yml",
+            "windows": False,
+            "expected": {
+                "directory": "/path/to/file",
+                "filename": "filename.yml",
+            },
+        },
+        {
+            "input_path": "/absolute/directory/ending/slash/",
+            "windows": False,
+            "expected": {
+                "directory": "/absolute/directory/ending/slash/",
+                "filename": None,
+            },
+        },
+        {
+            "input_path": "/absolute/directory/ending/no/slash",
+            "windows": False,
+            "expected": {
+                "directory": "/absolute/directory/ending/no/slash",
+                "filename": None,
+            },
+        },
+    ]
 
-    input_path = "/path/to/file/filename.yml"
-    expected = {
-        "directory": "/path/to/file",
-        "filename": "filename.yml",
-    }
-    assert toolkit.parse_cli_config_file_location(input_path) == expected
+    relative_path_fixtures = [
+        {
+            "input_path": "relative/path/to/file.yml",
+            "windows": False,
+            "expected": {
+                "directory": "relative/path/to",
+                "filename": "file.yml",
+            },
+        },
+        {
+            "input_path": "relative/path/to/directory/slash/",
+            "windows": False,
+            "expected": {
+                "directory": "relative/path/to/directory/slash/",
+                "filename": None,
+            },
+        },
+        {
+            "input_path": "relative/path/to/directory/no_slash",
+            "windows": False,
+            "expected": {
+                "directory": "relative/path/to/directory/no_slash",
+                "filename": None,
+            },
+        },
+    ]
 
-    input_path = "/just/a/directory/ending/slash/"
-    expected = {
-        "directory": "/just/a/directory/ending/slash/",
-        "filename": None,
-    }
-    assert toolkit.parse_cli_config_file_location(input_path) == expected
+    fixtures = filename_fixtures + absolute_path_fixtures + relative_path_fixtures
 
-    input_path = "/just/a/directory/no/slash"
-    expected = {
-        "directory": "/just/a/directory/no/slash/",
-        "filename": None,
-    }
-    assert toolkit.parse_cli_config_file_location(input_path) == expected
+    for fixture in fixtures:
+        assert (
+            toolkit.parse_cli_config_file_location(
+                fixture["input_path"], windows=fixture.get("windows")
+            )
+            == fixture["expected"]
+        )
 
-    input_path = None
-    expected = {
-        "directory": None,
-        "filename": None,
-    }
-    assert toolkit.parse_cli_config_file_location(input_path) == expected
+
+def test_parse_cli_config_file_location_empty_paths():
+
+    posix_fixtures = [
+        {
+            "input_path": None,
+            "windows": False,
+            "expected": {
+                "directory": None,
+                "filename": None,
+            },
+        },
+        {
+            "input_path": "",
+            "windows": False,
+            "expected": {
+                "directory": None,
+                "filename": None,
+            },
+        },
+    ]
+    windows_fixtures = [
+        {
+            "input_path": None,
+            "windows": True,
+            "expected": {
+                "directory": None,
+                "filename": None,
+            },
+        },
+        {
+            "input_path": "",
+            "windows": True,
+            "expected": {
+                "directory": None,
+                "filename": None,
+            },
+        },
+    ]
+
+    fixtures = posix_fixtures + windows_fixtures
+
+    for fixture in fixtures:
+        assert (
+            toolkit.parse_cli_config_file_location(
+                fixture["input_path"], windows=fixture.get("windows")
+            )
+            == fixture["expected"]
+        )
+
+
+def test_parse_cli_config_file_location_windows_paths():
+
+    filename_fixtures = [
+        {
+            "input_path": "just_a_file.yml",
+            "windows": True,
+            "expected": {
+                "directory": ".",
+                "filename": "just_a_file.yml",
+            },
+        },
+    ]
+    absolute_path_fixtures = [
+        {
+            "input_path": r"C:\absolute\windows\path\to\file.yml",
+            "windows": True,
+            "expected": {
+                "directory": r"C:\absolute\windows\path\to",
+                "filename": "file.yml",
+            },
+        },
+        {
+            "input_path": r"C:\absolute\windows\directory\ending\slash\\",
+            "windows": True,
+            "expected": {
+                "directory": r"C:\absolute\windows\directory\ending\slash\\",
+                "filename": None,
+            },
+        },
+        {
+            "input_path": r"C:\absolute\windows\directory\ending\no_slash",
+            "windows": True,
+            "expected": {
+                "directory": r"C:\absolute\windows\directory\ending\no_slash",
+                "filename": None,
+            },
+        },
+    ]
+    relative_path_fixtures = [
+        {
+            "input_path": r"relative\windows\path\to\file.yml",
+            "windows": True,
+            "expected": {
+                "directory": r"relative\windows\path\to",
+                "filename": "file.yml",
+            },
+        },
+        # Double slash at end of raw string to escape slash
+        {
+            "input_path": r"relative\windows\path\to\directory\slash\\",
+            "windows": True,
+            "expected": {
+                "directory": r"relative\windows\path\to\directory\slash\\",
+                "filename": None,
+            },
+        },
+        {
+            "input_path": r"relative\windows\path\to\directory\no_slash",
+            "windows": True,
+            "expected": {
+                "directory": r"relative\windows\path\to\directory\no_slash",
+                "filename": None,
+            },
+        },
+    ]
+    fixtures = filename_fixtures + absolute_path_fixtures + relative_path_fixtures
+
+    for fixture in fixtures:
+        assert (
+            toolkit.parse_cli_config_file_location(
+                fixture["input_path"], windows=fixture.get("windows")
+            )
+            == fixture["expected"]
+        )

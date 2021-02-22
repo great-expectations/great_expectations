@@ -1,8 +1,10 @@
 import datetime
 import os
+import platform
 import subprocess
 import sys
 import warnings
+from pathlib import Path, PosixPath, PurePosixPath, PureWindowsPath, WindowsPath
 from typing import Optional, Union
 
 import click
@@ -625,12 +627,15 @@ def confirm_proceed_or_exit(
     return True
 
 
-def parse_cli_config_file_location(config_file_location: str) -> dict:
+def parse_cli_config_file_location(
+    config_file_location: str, windows: bool = None
+) -> dict:
     """
-    Parse CLI yaml config file location into directory and filename.
-    Add a trailing slash to the directory if it did not already have one.
+    Parse CLI yaml config file or directory location into directory and filename.
+    Automatically detects whether running on windows.
     Args:
         config_file_location: string of config_file_location
+        windows: set True to force handling of paths for windows, mainly for testing.
 
     Returns:
         {
@@ -639,19 +644,57 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         }
     """
 
-    if config_file_location is not None:
-        # Check if file extension exists
-        file_extension = os.path.splitext(config_file_location)[1]
-        if file_extension == "":
-            filename = None
-            # Add trailing slash to directory if it doesn't exist
-            directory = os.path.join(config_file_location, "")
+    if config_file_location is not None and config_file_location != "":
+
+        # Check if running on Windows
+        if not windows is True:
+            windows: bool = "windows" in platform.platform().lower()
+
+        config_file_location_path = Path(config_file_location)
+        # TODO: Anthony - remove this or use it instead of platform.platform()
+        # if isinstance(config_file_location_path, PosixPath):
+        #     pure_path = PurePosixPath(config_file_location)
+        # elif isinstance(config_file_location_path, WindowsPath):
+        #     pure_path = PureWindowsPath(config_file_location)
+
+        # If running on windows, use WindowsPath else PosixPath
+        if windows:
+            pure_path: Union[PurePosixPath, PureWindowsPath] = PureWindowsPath(
+                config_file_location
+            )
         else:
-            filename = os.path.basename(config_file_location)
-            directory = os.path.dirname(config_file_location)
+            pure_path: Union[PurePosixPath, PureWindowsPath] = PurePosixPath(
+                config_file_location
+            )
+
+        # If the file or directory exists, treat it appropriately
+        # This handles files without extensions
+        if config_file_location_path.is_file():
+            filename = fr"{str(pure_path.name)}"
+            directory = fr"{str(pure_path.parent)}"
+        elif config_file_location_path.is_dir():
+            filename = None
+            directory = config_file_location
+
+        # If the file or directory does not exist, treat it as a directory unless
+        #  there is a trailing extension
+        else:
+            file_extension = pure_path.suffix
+            if file_extension == "":
+                # treat as directory
+                filename = None
+                directory = config_file_location
+            else:
+                # treat as file
+                filename = fr"{str(pure_path.name)}"
+                directory = fr"{str(pure_path.parent)}"
+
+        # Add trailing slash to directory
+        # if directory is not None:
+        #     directory = os.path.join(directory, "")
 
     else:
-        # Return None if config_file_location is empty rather than default output of "" from os.path functions
+        # Return None if config_file_location is empty rather than default output of ""
         directory = None
         filename = None
 
