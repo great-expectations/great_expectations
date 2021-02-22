@@ -52,7 +52,8 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
    [36mclass_name:[0m CheckpointStore[0m
    [36mstore_backend:[0m[0m
      [36mclass_name:[0m TupleFilesystemStoreBackend[0m
-     [36mbase_directory:[0m checkpoints/[0m"""
+     [36mbase_directory:[0m checkpoints/[0m
+     [36msuppress_store_backend_id:[0m True[0m"""
 
     result = runner.invoke(
         cli,
@@ -92,7 +93,8 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
    [36mclass_name:[0m CheckpointStore[0m
    [36mstore_backend:[0m[0m
      [36mclass_name:[0m TupleFilesystemStoreBackend[0m
-     [36mbase_directory:[0m checkpoints/[0m"""
+     [36mbase_directory:[0m checkpoints/[0m
+     [36msuppress_store_backend_id:[0m True[0m"""
 
     result = runner.invoke(
         cli,

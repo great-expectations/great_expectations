@@ -18,12 +18,6 @@ def docs():
 
 @docs.command(name="build")
 @click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@click.option(
     "--site-name",
     "-s",
     help="The site for which to generate documentation. See data_docs section in great_expectations.yml",
@@ -41,22 +35,24 @@ def docs():
     help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
     default=False,
 )
-def docs_build(directory, site_name, view=True, assume_yes=False):
+@click.pass_context
+def docs_build(ctx, site_name, view=True, assume_yes=False):
     """ Build Data Docs for a project."""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
     send_usage_message(data_context=context, event="cli.docs.build", success=True)
 
 
 @docs.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-def docs_list(directory):
+@click.pass_context
+def docs_list(ctx):
     """List known Data Docs Sites."""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
 
     docs_sites_url_dicts = context.get_docs_sites_urls()
@@ -80,7 +76,6 @@ def docs_list(directory):
 
 
 @docs.command(name="clean")
-@click.option("--directory", "-d", default=None, help="Clean data docs")
 @click.option(
     "--site-name",
     "-s",
@@ -92,8 +87,12 @@ def docs_list(directory):
     is_flag=True,
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
-def clean_data_docs(directory, site_name=None, all=None):
+@click.pass_context
+def clean_data_docs(ctx, site_name=None, all=None):
     """Delete data docs"""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     failed = True
     if site_name is None and all is None:

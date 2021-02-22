@@ -52,18 +52,13 @@ Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"s
 """,
 )
 @click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@click.option(
     "--jupyter/--no-jupyter",
     is_flag=True,
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
+@click.pass_context
+def suite_edit(ctx, suite, datasource, jupyter, batch_kwargs):
     """
     Generate a Jupyter notebook for editing an existing Expectation Suite.
 
@@ -77,6 +72,9 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     _suite_edit(
         suite,
         datasource,
@@ -230,12 +228,6 @@ def suite_demo():
 @suite.command(name="new")
 @click.option("--suite", "-es", default=None, help="Expectation suite name.")
 @click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@click.option(
     "--jupyter/--no-jupyter",
     is_flag=True,
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
@@ -246,12 +238,16 @@ def suite_demo():
     default=None,
     help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
 )
-def suite_new(suite, directory, jupyter, batch_kwargs):
+@click.pass_context
+def suite_new(ctx, suite, jupyter, batch_kwargs):
     """
     Create a new empty Expectation Suite.
 
     Edit in jupyter notebooks, or skip with the --no-jupyter flag
     """
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     _suite_new(
         suite=suite,
         directory=directory,
@@ -330,18 +326,16 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
 @suite.command(name="delete")
 @click.argument("suite")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @mark.cli_as_experimental
-def suite_delete(suite, directory):
+@click.pass_context
+def suite_delete(ctx, suite):
     """
     Delete an expectation suite from the expectation store.
     """
     usage_event = "cli.suite.delete"
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     suite_names = context.list_expectation_suite_names()
     if not suite_names:
@@ -364,20 +358,18 @@ def suite_delete(suite, directory):
 @suite.command(name="scaffold")
 @click.argument("suite")
 @click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@click.option(
     "--jupyter/--no-jupyter",
     is_flag=True,
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
 @mark.cli_as_experimental
-def suite_scaffold(suite, directory, jupyter):
+@click.pass_context
+def suite_scaffold(ctx, suite, jupyter):
     """Scaffold a new Expectation Suite."""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     _suite_scaffold(suite, directory, jupyter)
 
 
@@ -418,14 +410,13 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
 
 
 @suite.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-def suite_list(directory):
+@click.pass_context
+def suite_list(ctx):
     """Lists available Expectation Suites."""
+
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
 
     try:

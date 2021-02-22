@@ -39,9 +39,12 @@ def test_cli_command_entrance(caplog):
   - great_expectations docs build : compile documentation from expectations
 
 Options:
-  --version      Show the version and exit.
-  -v, --verbose  Set great_expectations to use verbose output.
-  --help         Show this message and exit.
+  --version          Show the version and exit.
+  -v, --verbose      Set great_expectations to use verbose output.
+  -c, --config TEXT  Path to great_expectations configuration file location
+                     (great_expectations.yml). Inferred if not provided.
+
+  --help             Show this message and exit.
 
 Commands:
   checkpoint           Checkpoint operations
@@ -86,7 +89,7 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # datasource list
         result = runner.invoke(
-            cli, ["datasource", "list", "-d", "./"], catch_exceptions=False
+            cli, ["-c", "./", "datasource", "list"], catch_exceptions=False
         )
         assert error_message in result.output
         result = runner.invoke(cli, ["datasource", "list"], catch_exceptions=False)
@@ -94,7 +97,7 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # datasource new
         result = runner.invoke(
-            cli, ["datasource", "new", "-d", "./"], catch_exceptions=False
+            cli, ["-c", "./", "datasource", "new"], catch_exceptions=False
         )
         assert error_message in result.output
         result = runner.invoke(cli, ["datasource", "new"], catch_exceptions=False)
@@ -102,7 +105,7 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # docs build
         result = runner.invoke(
-            cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False
+            cli, ["-c", "./", "docs", "build", "--no-view"], catch_exceptions=False
         )
         assert error_message in result.output
         result = runner.invoke(
@@ -116,7 +119,7 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # project check-config
         result = runner.invoke(
-            cli, ["project", "check-config", "-d", "./"], catch_exceptions=False
+            cli, ["-c", "./", "project", "check-config"], catch_exceptions=False
         )
         assert error_message in result.output
         result = runner.invoke(cli, ["project", "check-config"], catch_exceptions=False)
@@ -124,7 +127,7 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # suite new
         result = runner.invoke(
-            cli, ["suite", "new", "-d", "./"], catch_exceptions=False
+            cli, ["-c", "./", "suite", "new"], catch_exceptions=False
         )
         assert error_message in result.output
         result = runner.invoke(cli, ["suite", "new"], catch_exceptions=False)
@@ -132,7 +135,7 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # suite edit
         result = runner.invoke(
-            cli, ["suite", "edit", "FAKE", "-d", "./"], catch_exceptions=False
+            cli, ["-c", "./", "suite", "edit", "FAKE"], catch_exceptions=False
         )
         assert error_message in result.output
         result = runner.invoke(cli, ["suite", "edit", "FAKE"], catch_exceptions=False)
@@ -140,13 +143,13 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # expectation suite delete
         result = runner.invoke(
-            cli, ["suite", "delete", "deleteme", "-d", "FAKE"], catch_exceptions=False
+            cli, ["-c", "FAKE", "suite", "delete", "deleteme"], catch_exceptions=False
         )
         assert error_message in result.output
         # expectation create new
         # suite new
         result = runner.invoke(
-            cli, ["suite", "new", "-d", "./"], catch_exceptions=False
+            cli, ["-c", "./", "suite", "new"], catch_exceptions=False
         )
         assert error_message in result.output
         result = runner.invoke(
@@ -162,17 +165,24 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
         # create new before delete again
         # datasource new
         result = runner.invoke(
-            cli, ["datasource", "new", "-d", "./"], catch_exceptions=False
+            cli, ["-c", "./", "datasource", "new"], catch_exceptions=False
         )
 
         # data_docs clean
         result = runner.invoke(
-            cli, ["docs", "clean", "-d", "FAKE"], catch_exceptions=False
+            cli,
+            [
+                "-c",
+                "FAKE",
+                "docs",
+                "clean",
+            ],
+            catch_exceptions=False,
         )
         assert error_message in result.output
         # build docs before deleting again
         result = runner.invoke(
-            cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False
+            cli, ["-c", "./", "docs", "build", "--no-view"], catch_exceptions=False
         )
         assert error_message in result.output
         result = runner.invoke(cli, ["docs", "clean"], catch_exceptions=False)
@@ -180,7 +190,7 @@ def test_cli_config_not_found_raises_error_for_all_commands(tmp_path_factory):
 
         # leave with docs built
         result = runner.invoke(
-            cli, ["docs", "build", "-d", "./", "--no-view"], catch_exceptions=False
+            cli, ["-c", "./", "docs", "build", "--no-view"], catch_exceptions=False
         )
         assert error_message in result.output
         result = runner.invoke(

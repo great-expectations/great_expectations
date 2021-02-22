@@ -30,15 +30,13 @@ def validation_operator():
 
 
 @validation_operator.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @mark.cli_as_experimental
-def validation_operator_list(directory):
+@click.pass_context
+def validation_operator_list(ctx):
     """List known Validation Operators."""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:
@@ -97,19 +95,14 @@ def validation_operator_list(directory):
     default=None,
     help="""Run name. If not specified, a timestamp-based run id will be automatically generated. """,
 )
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @mark.cli_as_deprecation(
     """<yellow>In the next major release this command will be deprecated.
 Please consider using either:
   - `checkpoint new` if you wish to configure a new checkpoint interactively
   - `checkpoint run` if you wish to run a saved checkpoint</yellow>"""
 )
-def validation_operator_run(name, run_name, validation_config_file, suite, directory):
+@click.pass_context
+def validation_operator_run(ctx, name, run_name, validation_config_file, suite):
     # Note though the long lines here aren't pythonic, they look best if Click does the line wraps.
     """
     Run a validation operator against some data.
@@ -137,7 +130,9 @@ def validation_operator_run(name, run_name, validation_config_file, suite, direc
     To learn more about validation operators, go here:
     https://great-expectations.readthedocs.io/en/latest/features/validation.html#validation-operators
     """
-
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     try:
         context = DataContext(directory)
     except ge_exceptions.ConfigNotFoundError as err:

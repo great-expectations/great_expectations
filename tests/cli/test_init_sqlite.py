@@ -60,7 +60,7 @@ def test_cli_init_on_new_project(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
+        ["-c", project_dir, "init"],
         input="\n\n2\n6\ntitanic\n{url}\n\n\n1\n{schema}\n{table}\nwarning\n\n\n\n".format(
             url=engine.url, schema=default_schema, table=default_table
         ),
@@ -123,7 +123,6 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
         warning.json
@@ -224,7 +223,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
+        ["-c", project_dir, "init"],
         input="\n\n2\n6\ntitanic\n{url}\n\n\n1\n{schema}\n{table}\nwarning\n\n\n\n".format(
             url=engine_url_with_added_whitespace,
             schema=default_schema,
@@ -328,7 +327,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="\n\n2\n6\nsqlite\n{url}\n\n\n1\n{schema}\n{table}\nmy_suite\n\n\n\n".format(
                 url=url, schema=default_schema, table=default_table
             ),
@@ -432,7 +431,7 @@ def initialized_sqlite_project(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
+        ["-c", project_dir, "init"],
         input="\n\n2\n6\ntitanic\n{url}\n\n\n1\n{schema}\n{table}\nwarning\n\n\n\n".format(
             url=engine.url, schema=default_schema, table=default_table
         ),
@@ -491,7 +490,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -524,7 +523,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -557,7 +556,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="\n\n",
             catch_exceptions=False,
         )
@@ -626,7 +625,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["-c", project_dir, "init"],
             input="\n1\n{schema}\n{table}\nsink_me\n\n\n\n".format(
                 os.path.join(project_dir, "data/Titanic.csv"),
                 schema=default_schema,

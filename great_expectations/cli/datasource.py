@@ -75,14 +75,12 @@ def datasource():
 
 
 @datasource.command(name="new")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-def datasource_new(directory):
+@click.pass_context
+def datasource_new(ctx):
     """Add a new datasource to the data context."""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     datasource_name, data_source_type = add_datasource(context)
 
@@ -101,15 +99,13 @@ def datasource_new(directory):
 
 
 @datasource.command(name="delete")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @click.argument("datasource")
-def delete_datasource(directory, datasource):
+@click.pass_context
+def delete_datasource(ctx, datasource):
     """Delete the datasource specified as an argument"""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     try:
         context.delete_datasource(datasource)
@@ -131,14 +127,12 @@ def delete_datasource(directory, datasource):
 
 
 @datasource.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-def datasource_list(directory):
+@click.pass_context
+def datasource_list(ctx):
     """List known datasources."""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     datasources = context.list_datasources()
     datasource_count = len(datasources)

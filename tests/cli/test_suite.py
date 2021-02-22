@@ -67,7 +67,7 @@ def test_suite_new_creates_empty_suite(
     csv = os.path.join(filesystem_csv_2, "f1.csv")
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo"],
+        ["--config", root_dir, "suite", "new", "--suite", "foo"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -155,7 +155,7 @@ def test_suite_new_empty_with_no_jupyter(
     csv = os.path.join(filesystem_csv_2, "f1.csv")
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo", "--no-jupyter"],
+        ["--config", root_dir, "suite", "new", "--suite", "foo", "--no-jupyter"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -239,7 +239,15 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo", "-d", project_dir, "--batch-kwargs", "'{foobar}'"],
+        [
+            "--config",
+            project_dir,
+            "suite",
+            "edit",
+            "foo",
+            "--batch-kwargs",
+            "'{foobar}'",
+        ],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -276,7 +284,15 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     batch_kwargs = '{"table": "fake", "datasource": "source"}'
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo", "-d", project_dir, "--batch-kwargs", batch_kwargs],
+        [
+            "--config",
+            project_dir,
+            "suite",
+            "edit",
+            "foo",
+            "--batch-kwargs",
+            batch_kwargs,
+        ],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -310,7 +326,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite edit not_a_real_suite -d {}".format(project_dir),
+        f"--config {project_dir} suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -345,7 +361,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"suite edit foo -d {project_dir} --datasource not_real",
+        f"--config {project_dir} suite edit foo --datasource not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -417,11 +433,11 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     result = runner.invoke(
         cli,
         [
+            "--config",
+            root_dir,
             "suite",
             "edit",
             "foo_suite",
-            "-d",
-            root_dir,
         ],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
@@ -496,7 +512,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "foo_suite", "-d", root_dir],
+        ["--config", root_dir, "suite", "edit", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -589,11 +605,11 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     result = runner.invoke(
         cli,
         [
+            "--config",
+            root_dir,
             "suite",
             "edit",
             "foo_suite",
-            "-d",
-            root_dir,
             "--batch-kwargs",
             batch_kwargs_arg_str,
         ],
@@ -653,11 +669,11 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     result = runner.invoke(
         cli,
         [
+            "--config",
+            project_dir,
             "suite",
             "edit",
             "foo",
-            "-d",
-            project_dir,
             "--batch-kwargs",
             json.dumps(batch_kwargs),
         ],
@@ -707,11 +723,11 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     result = runner.invoke(
         cli,
         [
+            "--config",
+            project_dir,
             "suite",
             "edit",
             "foo",
-            "-d",
-            project_dir,
             "--batch-kwargs",
             json.dumps(batch_kwargs),
             "--datasource",
@@ -794,7 +810,13 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "edit", "my_new_suite", "-d", root_dir],
+        [
+            "--config",
+            root_dir,
+            "suite",
+            "edit",
+            "my_new_suite",
+        ],
         input="{:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
@@ -822,13 +844,15 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     )
 
 
-def test_suite_list_with_zero_suites(caplog, empty_data_context):
+def test_suite_list_with_zero_suites_using_config_param(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
+    config_file_path = os.path.join(project_dir, "great_expectations.yml")
+    assert os.path.exists(config_file_path)
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"--config {config_file_path} suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -840,15 +864,17 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
     )
 
 
-def test_suite_list_with_one_suite(caplog, empty_data_context):
+def test_suite_list_with_one_suite_using_config_param(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
+    config_file_path = os.path.join(project_dir, "great_expectations.yml")
+    assert os.path.exists(config_file_path)
     context.create_expectation_suite("a.warning")
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"--config {config_file_path} suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -860,18 +886,52 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
     )
 
 
-def test_suite_list_with_multiple_suites(caplog, empty_data_context):
+def test_suite_list_with_multiple_suites_using_config_param(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("a.warning")
     context.create_expectation_suite("b.warning")
     context.create_expectation_suite("c.warning")
 
+    config_file_path = os.path.join(project_dir, "great_expectations.yml")
+    assert os.path.exists(config_file_path)
+
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"--config {config_file_path} suite list",
+        catch_exceptions=False,
+    )
+    output = result.output
+    assert result.exit_code == 0
+    assert "3 Expectation Suites found:" in output
+    assert "a.warning" in output
+    assert "b.warning" in output
+    assert "c.warning" in output
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+def test_suite_list_with_multiple_suites_using_config_param_directory(
+    caplog, empty_data_context
+):
+    project_dir = empty_data_context.root_directory
+    context = DataContext(project_dir)
+    context.create_expectation_suite("a.warning")
+    context.create_expectation_suite("b.warning")
+    context.create_expectation_suite("c.warning")
+
+    assert os.path.exists(project_dir)
+
+    runner = CliRunner(mix_stderr=False)
+
+    result = runner.invoke(
+        cli,
+        f"--config {project_dir} suite list",
         catch_exceptions=False,
     )
     output = result.output
@@ -898,7 +958,7 @@ def test_suite_delete_with_zero_suites(
 
     result = runner.invoke(
         cli,
-        f"suite delete not_a_suite -d {project_dir}",
+        f"--config {project_dir} suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -933,7 +993,7 @@ def test_suite_delete_with_non_existent_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"suite delete not_a_suite -d {project_dir}",
+        f"--config {project_dir} suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -971,7 +1031,7 @@ def test_suite_delete_with_one_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite delete a.warning -d {}".format(project_dir),
+        f"--config {project_dir} suite delete a.warning",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1015,7 +1075,13 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "scaffold", "foop", "-d", root_dir],
+        [
+            "--config",
+            root_dir,
+            "suite",
+            "scaffold",
+            "foop",
+        ],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -1066,7 +1132,13 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "scaffold", "foop", "-d", root_dir],
+        [
+            "--config",
+            root_dir,
+            "suite",
+            "scaffold",
+            "foop",
+        ],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -1120,7 +1192,13 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "scaffold", suite_name, "-d", root_dir],
+        [
+            "--config",
+            root_dir,
+            "suite",
+            "scaffold",
+            suite_name,
+        ],
         input="1\n1\n",
         catch_exceptions=False,
     )
@@ -1176,7 +1254,7 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "scaffold", suite_name, "-d", root_dir, "--no-jupyter"],
+        ["--config", root_dir, "suite", "scaffold", suite_name, "--no-jupyter"],
         input="1\n1\n",
         catch_exceptions=False,
     )
