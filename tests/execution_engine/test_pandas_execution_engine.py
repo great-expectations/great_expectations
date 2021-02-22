@@ -7,9 +7,12 @@ from typing import List
 import boto3
 import pandas as pd
 import pytest
+from botocore.errorfactory import ClientError
 from moto import mock_s3
 
 import great_expectations.exceptions.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.datasource.types.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
@@ -343,6 +346,8 @@ def test_s3_files(s3, s3_bucket, test_df_small_csv):
         "path/A-101.csv",
         "directory/B-1.csv",
         "directory/B-2.csv",
+        "alpha-1.csv",
+        "alpha-2.csv",
     ]
     for key in keys:
         s3.put_object(Bucket=s3_bucket, Body=test_df_small_csv, Key=key)
@@ -379,6 +384,55 @@ def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine_no_s3.get_batch_data(
             batch_spec=batch_with_split_on_whole_table_s3
+        )
+
+
+def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector(test_s3_files, test_df_small):
+    bucket, _keys = test_s3_files
+    expected_df = test_df_small
+
+    my_data_connector = ConfiguredAssetS3DataConnector(
+        name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE_NAME",
+        default_regex={
+            "pattern": "alpha-(.*)\\.csv",
+            "group_names": ["index"],
+        },
+        bucket=bucket,
+        prefix="",
+        assets={"alpha": {}},
+    )
+    batch_def = BatchDefinition(
+        datasource_name="FAKE_DATASOURCE_NAME",
+        data_asset_name="alpha",
+        data_connector_name="my_data_connector",
+        partition_definition=PartitionDefinition(index=1),
+        batch_spec_passthrough={
+            "reader_method": "read_csv",
+            "splitter_method": "_split_on_whole_table",
+        },
+    )
+    test_df = PandasExecutionEngine().get_batch_data(
+        batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def)
+    )
+    assert test_df.dataframe.shape == expected_df.shape
+
+    # if key does not exist
+    batch_def_no_key = BatchDefinition(
+        datasource_name="FAKE_DATASOURCE_NAME",
+        data_asset_name="alpha",
+        data_connector_name="my_data_connector",
+        partition_definition=PartitionDefinition(index=9),
+        batch_spec_passthrough={
+            "reader_method": "read_csv",
+            "splitter_method": "_split_on_whole_table",
+        },
+    )
+    with pytest.raises(ClientError):
+        PandasExecutionEngine().get_batch_data(
+            batch_spec=my_data_connector.build_batch_spec(
+                batch_definition=batch_def_no_key
+            )
         )
 
 
