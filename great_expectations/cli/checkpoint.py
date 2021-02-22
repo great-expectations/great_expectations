@@ -217,14 +217,12 @@ def checkpoint_run(ctx, checkpoint):
         from_cli_upgrade_command=False,
     )
 
-    checkpoint_obj: Checkpoint = toolkit.load_checkpoint(
-        context=context,
-        checkpoint_name=checkpoint,
-        usage_event=usage_event,
-    )
-
     try:
-        result: CheckpointResult = checkpoint_obj.run()
+        result: CheckpointResult = toolkit.run_checkpoint(
+            context=context,
+            checkpoint_name=checkpoint,
+            usage_event=usage_event,
+        )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
             context=context,

@@ -10,7 +10,7 @@ from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 import pandas as pd
 from ruamel.yaml.compat import StringIO
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import (
     BatchSpec,
     PathBatchSpec,

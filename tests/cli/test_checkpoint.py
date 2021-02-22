@@ -1,21 +1,28 @@
 import os
 import shutil
 import subprocess
+import unittest
 from typing import List
 from unittest import mock
 
+import pandas as pd
 import pytest
 from click.testing import CliRunner, Result
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from tests.cli.utils import (
     LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
+
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 @pytest.fixture
@@ -71,9 +78,12 @@ def titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_list_with_no_checkpoints_with_ge_config_v3(
+def test_checkpoint_list_with_no_checkpoints(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = empty_data_context_stats_enabled
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
@@ -103,13 +113,17 @@ def test_checkpoint_list_with_no_checkpoints_with_ge_config_v3(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_list_with_single_checkpoint_with_ge_config_v3(
+def test_checkpoint_list_with_single_checkpoint(
     mock_emit,
     caplog,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
     root_dir: str = context.root_directory
+
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
@@ -140,13 +154,17 @@ def test_checkpoint_list_with_single_checkpoint_with_ge_config_v3(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_list_with_eight_checkpoints_with_ge_config_v3(
+def test_checkpoint_list_with_eight_checkpoints(
     mock_emit,
     caplog,
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     root_dir: str = context.root_directory
+
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
@@ -190,10 +208,12 @@ def test_checkpoint_list_with_eight_checkpoints_with_ge_config_v3(
 def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     assert context.list_expectation_suite_names() == []
-    mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -230,6 +250,9 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
     caplog,
     titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = (
         titanic_data_context_stats_enabled_config_version_2_with_checkpoint
     )
@@ -273,12 +296,14 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
     titanic_data_context_stats_enabled_config_version_2,
     titanic_expectation_suite,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
-    mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -370,12 +395,14 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     titanic_data_context_stats_enabled_config_version_2,
     titanic_expectation_suite,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
-    mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -424,6 +451,9 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     titanic_data_context_stats_enabled_config_version_2,
     titanic_expectation_suite,
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     checkpoints_dir = os.path.join(
@@ -434,7 +464,6 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
 
     context.save_expectation_suite(titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
-    mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -469,64 +498,25 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
+def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
+    mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    root_dir = context.root_directory
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"-c {root_dir} checkpoint run fake_checkpoint",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    root_dir: str = context.root_directory
 
-    assert "Could not find checkpoint `fake_checkpoint`." in stdout
-    assert "Try running" in stdout
-    assert result.exit_code == 1
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_config_v2(
-    mock_emit,
-    caplog,
-    titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
-):
-    context: DataContext = (
-        titanic_data_context_stats_enabled_config_version_2_with_checkpoint
-    )
-    root_dir = context.root_directory
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"-c {root_dir} checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 1
-
-    assert "expectation_suite suite_one not found" in stdout
+    assert "Could not find checkpoint `my_checkpoint`" in stdout
+    assert "Try running" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -541,51 +531,139 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
+def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+    monkeypatch,
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    suite = context.create_expectation_suite("bar")
-    context.save_expectation_suite(suite)
-    assert context.list_expectation_suite_names() == ["bar"]
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
-    root_dir = context.root_directory
-    checkpoint_file_path = os.path.join(
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    root_dir: str = context.root_directory
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"-c {root_dir} checkpoint run my_nested_checkpoint_template_1",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 1
+
+    assert "expectation_suite suite_from_template_1 not found" in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    monkeypatch,
+):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    root_dir: str = context.root_directory
+
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="bar"
+    )
+    context.save_expectation_suite(expectation_suite=suite)
+    assert context.list_expectation_suite_names() == ["bar"]
+
+    checkpoint_file_path: str = os.path.join(
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         "bad_batch.yml",
     )
-    bad = {
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "path": "/totally/not/a/file.csv",
-                    "datasource": "mydatasource",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": ["bar"],
-            },
-        ],
-    }
-    _write_checkpoint_dict_to_file(bad, checkpoint_file_path)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    checkpoint_yaml_config: str = f"""
+    name: bad_batch
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+          batch_spec_passthrough:
+            path: /totally/not/a/file.csv
+            reader_method: read_csv
+        expectation_suite_name: bar
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"-c {root_dir} checkpoint run bad_batch",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    # TODO: <Alex>ALEX -- Investigate how to make Abe's suggestion a reality.</Alex>
     # Note: Abe : 2020/09: This was a better error message, but it should live in DataContext.get_batch, not a random CLI method.
     # assert "There was a problem loading a batch:" in stdout
     # assert (
@@ -599,8 +677,18 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
     # assert "No such file or directory" in stdout
     assert ("No such file or directory" in stdout) or ("does not exist" in stdout)
 
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
+    assert mock_emit.call_count == 3
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "f6e1151b49fceb15ae3de4eb60f62be4"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
@@ -608,61 +696,95 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
             {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
         ),
     ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
+def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    monkeypatch,
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
-    root_dir = context.root_directory
-    checkpoint_file_path = os.path.join(
+    root_dir: str = context.root_directory
+
+    checkpoint_file_path: str = os.path.join(
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "bad_batch.yml",
+        "no_suite.yml",
     )
-    bad = {
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "path": "/totally/not/a/file.csv",
-                    "datasource": "mydatasource",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": [],
-            },
-        ],
-    }
-    _write_checkpoint_dict_to_file(bad, checkpoint_file_path)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} checkpoint run bad_batch",
+        f"-c {root_dir} checkpoint run no_suite",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    assert "Exception occurred while running validation" in stdout
     assert (
-        "A batch has no suites associated with it. At least one suite is required."
+        "of checkpoint 'no_suite': validation expectation_suite_name must be specified"
         in stdout
     )
-    assert (
-        'Batch: {"path": "/totally/not/a/file.csv", "datasource": "mydatasource", "reader_method": "read_csv"}'
-        in stdout
-    )
-    assert "Please add at least one suite to checkpoint bad_batch" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -677,164 +799,524 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
+def test_checkpoint_run_on_non_existent_validations(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    monkeypatch,
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    root_dir = context.root_directory
-    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
-
-    suite = context.create_expectation_suite("iceberg")
-    context.save_expectation_suite(suite)
-    assert context.list_expectation_suite_names() == ["iceberg"]
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
-    checkpoint_file_path = os.path.join(
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert context.list_expectation_suite_names() == []
+
+    root_dir: str = context.root_directory
+
+    checkpoint_file_path: str = os.path.join(
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "bad_operator.yml",
+        "no_validations.yml",
     )
-    bad = {
-        "validation_operator_name": "foo",
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "path": csv_path,
-                    "datasource": "mydatasource",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": ["iceberg"],
-            },
-        ],
-    }
-    _write_checkpoint_dict_to_file(bad, checkpoint_file_path)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    checkpoint_yaml_config: str = f"""
+    name: my_base_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+        result_format:
+          result_format: BASIC
+          partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} checkpoint run bad_operator",
+        f"-c {root_dir} checkpoint run no_validations",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 1
 
-    assert (
-        f"No validation operator `foo` was found in your project. Please verify this in your great_expectations.yml"
-        in stdout
-    )
-    usage_emits = mock_emit.call_args_list
+    assert "Checkpoint 'no_validations' does not contain any validations." in stdout
 
-    assert mock_emit.call_count == 3
-    assert usage_emits[0][0][0]["success"] is True
-    assert usage_emits[1][0][0]["success"] is False
-    assert usage_emits[2][0][0]["success"] is False
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
+        ),
+    ]
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+def test_checkpoint_run_happy_path_with_successful_validation(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    monkeypatch,
 ):
-    context: DataContext = (
-        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
-    )
-    root_dir = context.root_directory
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="users.delivery"
+    )
+    context.save_expectation_suite(expectation_suite=suite)
+    assert context.list_expectation_suite_names() == ["users.delivery"]
+
+    root_dir: str = context.root_directory
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+        expectation_suite_name: users.delivery
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} checkpoint run my_checkpoint",
+        f"-c {root_dir} checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 0
-    assert "Validation succeeded!" in stdout
+
+    assert all(
+        [
+            msg in stdout
+            for msg in [
+                "Validation succeeded!",
+                "users.delivery",
+                "Passed",
+                "100 %",
+            ]
+        ]
+    )
 
     assert mock_emit.call_count == 5
-    usage_emits = mock_emit.call_args_list
-    assert usage_emits[0] == mock.call(
-        {"event_payload": {}, "event": "data_context.__init__", "success": True}
-    )
-    assert usage_emits[1][0][0]["event"] == "data_asset.validate"
-    assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
-    assert usage_emits[2][0][0]["success"] is True
-
-    assert usage_emits[4] == mock.call(
-        {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
-    )
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
-    mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
+def test_checkpoint_run_happy_path_with_failed_validation(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_expectation_suite,
+    monkeypatch,
 ):
-    context: DataContext = (
-        titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
-    )
-    root_dir = context.root_directory
-    # mangle the csv
-    csv_path = os.path.join(context.root_directory, "..", "data", "Titanic.csv")
-    with open(csv_path, "w") as f:
-        f.write("foo,bar\n1,2\n")
-
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
     mock_emit.reset_mock()
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    root_dir: str = context.root_directory
+
+    # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
+    csv_path: str = os.path.join(
+        root_dir, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
+    df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
+    df = df.sample(frac=0.5, replace=True, random_state=1)
+    df.to_csv(path_or_buf=csv_path)
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} checkpoint run my_checkpoint",
+        f"checkpoint run my_fancy_checkpoint -d {root_dir}",
         catch_exceptions=False,
     )
-    stdout = result.stdout
-    print(stdout)
+    stdout: str = result.stdout
     assert result.exit_code == 1
     assert "Validation failed!" in stdout
 
     assert mock_emit.call_count == 5
-    usage_emits = mock_emit.call_args_list
-    assert usage_emits[0] == mock.call(
-        {"event_payload": {}, "event": "data_context.__init__", "success": True}
-    )
-    assert usage_emits[1][0][0]["event"] == "data_asset.validate"
-    assert usage_emits[1][0][0]["success"] is True
 
-    assert usage_emits[2][0][0]["event"] == "data_context.build_data_docs"
-    assert usage_emits[2][0][0]["success"] is True
-
-    assert usage_emits[4] == mock.call(
-        {"event": "cli.checkpoint.run", "event_payload": {}, "success": True}
-    )
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "event": "data_asset.validate",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
+    mock_emit,
+    caplog,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_expectation_suite,
+    monkeypatch,
+):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    root_dir: str = context.root_directory
+
+    # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
+    csv_path: str = os.path.join(
+        root_dir, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
+    # mangle the csv
+    with open(csv_path, "w") as f:
+        f.write("foo,bar\n1,2\n")
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"-c {root_dir} checkpoint run my_fancy_checkpoint",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 1
+    assert "Exception occurred while running validation." in stdout
+
+    assert mock_emit.call_count == 4
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {},
+                "success": False,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+    monkeypatch.delenv("VAR")
+    monkeypatch.delenv("MY_PARAM")
+    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
@@ -843,12 +1325,14 @@ def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
 def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = (
         titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
     )
     root_dir = context.root_directory
     assert context.list_checkpoints() == ["my_checkpoint"]
-    mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -884,6 +1368,9 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
 def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = (
         titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
     )
@@ -895,7 +1382,6 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     with open(script_path, "w") as f:
         f.write("script here")
     assert os.path.isfile(script_path)
-    mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -937,11 +1423,13 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
 def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = (
         titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
     )
     root_dir = context.root_directory
-    mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -1009,7 +1497,6 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
         f"-c {root_dir} checkpoint script my_checkpoint",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1104,9 +1591,11 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
 def test_checkpoint_new_with_ge_config_3_raises_error(
     mock_emit, caplog, titanic_data_context_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = titanic_data_context_stats_enabled
     root_dir = context.root_directory
-    mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -1141,47 +1630,14 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_with_ge_config_3_raises_error(
-    mock_emit, caplog, titanic_data_context_stats_enabled
-):
-    context: DataContext = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
-    mock_emit.reset_mock()
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"-c {root_dir} checkpoint run my_checkpoint",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 1
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
 def test_checkpoint_script_with_ge_config_3_raises_error(
     mock_emit, caplog, titanic_data_context_stats_enabled
 ):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
     context: DataContext = titanic_data_context_stats_enabled
     root_dir = context.root_directory
-    mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -1213,7 +1669,7 @@ def test_checkpoint_script_with_ge_config_3_raises_error(
     )
 
 
-def _write_checkpoint_dict_to_file(bad, checkpoint_file_path):
-    yaml = YAML()
+def _write_checkpoint_dict_to_file(config, checkpoint_file_path):
+    yaml_obj: YAML = YAML()
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(bad, f)
+        yaml_obj.dump(config, f)
