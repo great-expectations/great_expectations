@@ -375,7 +375,7 @@ def test_get_batch_with_split_on_whole_table_s3(
     df = PandasExecutionEngine().get_batch_data(
         batch_spec=batch_with_split_on_whole_table_s3
     )
-    assert test_df_small.shape == df.shape
+    assert df.dataframe.shape == test_df_small.shape
 
 
 def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
@@ -464,7 +464,7 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_csv")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
-    assert df.shape == test_df_small.shape
+    assert df.dataframe.shape == test_df_small.shape
 
 
 def test_get_batch_with_split_on_column_value(test_df):
