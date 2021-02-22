@@ -897,11 +897,9 @@ class UserConfigurableProfiler:
 
             if min_value is not None:
                 try:
-                    min_value = min_value
-                except OverflowError:
-                    min_value = datetime.datetime.min
-                except TypeError:
                     min_value = parse(min_value)
+                except TypeError:
+                    pass
 
             dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
@@ -919,11 +917,9 @@ class UserConfigurableProfiler:
             ).result["observed_value"]
             if max_value is not None:
                 try:
-                    max_value = max_value
-                except OverflowError:
-                    max_value = datetime.datetime.max
-                except TypeError:
                     max_value = parse(max_value)
+                except TypeError:
+                    pass
 
             dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(

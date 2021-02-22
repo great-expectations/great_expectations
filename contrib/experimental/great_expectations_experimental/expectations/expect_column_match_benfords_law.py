@@ -266,9 +266,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
+        "tags": ["experimental"],  # Tags for this Expectation in the gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@shekark642",
             "@vinodkri1",  # Don't forget to add your github handle here!

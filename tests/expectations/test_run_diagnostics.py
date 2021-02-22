@@ -1,7 +1,10 @@
 import json
 
+import pandas as pd
+
 from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,
@@ -340,7 +343,7 @@ def test_expectation__get_renderers():
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
-    my_batch = Batch(data=example_data)
+    my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
         **{"expectation_type": expectation_name, "kwargs": example_test}
@@ -382,7 +385,7 @@ def test_expectation__get_renderers():
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
-    my_batch = Batch(data=example_data)
+    my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
         **{"expectation_type": expectation_name, "kwargs": example_test}
@@ -423,7 +426,7 @@ def test_expectation__get_renderers():
     supported_renderers = my_expectation._get_supported_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    my_batch = Batch(data=example_data)
+    my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
         **{"expectation_type": expectation_name, "kwargs": example_test}
@@ -466,7 +469,7 @@ def test_expectation__get_execution_engine_dict(
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
-    my_batch = Batch(data=example_data)
+    my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
         **{"expectation_type": expectation_name, "kwargs": example_test}

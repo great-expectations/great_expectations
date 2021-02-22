@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import pytest
 from freezegun import freeze_time
@@ -24,7 +25,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
                     "drivername": "postgresql",
                     "username": "postgres",
                     "password": "",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "5432",
                     "database": "test_ci",
                 },
