@@ -1,5 +1,7 @@
 import json
+
 from scipy import stats
+
 # !!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import (
@@ -42,17 +44,17 @@ class ColumnValuesNotOutliers(ColumnMapMetricProvider):
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, method='iqr', multiplier=1.5, **kwargs):
-        if method == 'iqr':
+    def _pandas(cls, column, method="iqr", multiplier=1.5, **kwargs):
+        if method == "iqr":
             iqr = stats.iqr(column)
             median = column.median()
             return (column - median).abs() < multiplier * iqr
-        elif method == 'std':
+        elif method == "std":
             std = column.std()
             mean = column.mean()
             return (column - mean).abs() < multiplier * std
         else:
-            raise NotImplementedError(f'method {method} has not been implemented')
+            raise NotImplementedError(f"method {method} has not been implemented")
 
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
@@ -70,37 +72,109 @@ class ColumnValuesNotOutliers(ColumnMapMetricProvider):
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
     """
-        Expect Column Values to not be outliers. User is asked to specify the column, method and multiplier. Currently
-        standard deviation (std) and inter-quantile range (iqr) are supported.
+    Expect Column Values to not be outliers. User is asked to specify the column, method and multiplier. Currently
+    standard deviation (std) and inter-quantile range (iqr) are supported.
     """
+
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
             "data": {
-                "a": [0.88546138, 1.3061609, -0.32247349, 0.97258135, 0.98273209,
-                      -0.10502805, 0.63429027, -0.520042, -0.15674414, 0.94144714,
-                      -0.88228603, -0.60380027, -0.11121819, 0.74895147, 0.42992403,
-                      0.65493905, 1.35901276, 0.49965162, 2., 3.],  # drawn from Normal(0,1)
-                'b': [1.46104728, 1.33568658, 1.39303305, 1.34369635, 2.07627429,
-                      3.22523841, 1.2514533, 2.44427933, 2.12703316, 3.29557985,
-                      1.04298411, 1.3659108, 4.18867559, 2.85009897, 1.58180929,
-                      1.47433799, 1.10678471, 4.73338285, 5., 10.],  # drawn from Gamma(1,1)
-                'c': [78.09208927, 79.08947083, 78.15403075, 91.01199697,
-                      86.87351353, 93.31079309, 92.41605866, 85.95186289,
-                      85.57633936, 82.9214903, 78.67996655, 83.65076874,
-                      76.51547517, 75.95991938, 73.56762212, 98.82595865,
-                      88.0945241, 75.38697834, 115., 0.],  # drawn from Beta(11, 2)
-                'd': [0.15131528, -0.32290392, 0.33894553, 0.41806171, 0.09906698,
-                      0.32659221, -0.07283207, 0.72584037, 0.07496465, -0.28889126,
-                      3.57416451, 3.44258958, 3.11353884, 2.82008269, 3.68115642,
-                      3.23682442, 2.70231677, 3.21949992, 4.06638354, 4.77655811],
+                "a": [
+                    0.88546138,
+                    1.3061609,
+                    -0.32247349,
+                    0.97258135,
+                    0.98273209,
+                    -0.10502805,
+                    0.63429027,
+                    -0.520042,
+                    -0.15674414,
+                    0.94144714,
+                    -0.88228603,
+                    -0.60380027,
+                    -0.11121819,
+                    0.74895147,
+                    0.42992403,
+                    0.65493905,
+                    1.35901276,
+                    0.49965162,
+                    2.0,
+                    3.0,
+                ],  # drawn from Normal(0,1)
+                "b": [
+                    1.46104728,
+                    1.33568658,
+                    1.39303305,
+                    1.34369635,
+                    2.07627429,
+                    3.22523841,
+                    1.2514533,
+                    2.44427933,
+                    2.12703316,
+                    3.29557985,
+                    1.04298411,
+                    1.3659108,
+                    4.18867559,
+                    2.85009897,
+                    1.58180929,
+                    1.47433799,
+                    1.10678471,
+                    4.73338285,
+                    5.0,
+                    10.0,
+                ],  # drawn from Gamma(1,1)
+                "c": [
+                    78.09208927,
+                    79.08947083,
+                    78.15403075,
+                    91.01199697,
+                    86.87351353,
+                    93.31079309,
+                    92.41605866,
+                    85.95186289,
+                    85.57633936,
+                    82.9214903,
+                    78.67996655,
+                    83.65076874,
+                    76.51547517,
+                    75.95991938,
+                    73.56762212,
+                    98.82595865,
+                    88.0945241,
+                    75.38697834,
+                    115.0,
+                    0.0,
+                ],  # drawn from Beta(11, 2)
+                "d": [
+                    0.15131528,
+                    -0.32290392,
+                    0.33894553,
+                    0.41806171,
+                    0.09906698,
+                    0.32659221,
+                    -0.07283207,
+                    0.72584037,
+                    0.07496465,
+                    -0.28889126,
+                    3.57416451,
+                    3.44258958,
+                    3.11353884,
+                    2.82008269,
+                    3.68115642,
+                    3.23682442,
+                    2.70231677,
+                    3.21949992,
+                    4.06638354,
+                    4.77655811,
+                ],
             },
             "tests": [
                 {
                     "title": "positive_test_std",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "a", 'method': 'std', 'multiplier': 3},
+                    "in": {"column": "a", "method": "std", "multiplier": 3},
                     "out": {
                         "success": True,
                     },
@@ -109,7 +183,7 @@ class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
                     "title": "negative_test_iqr",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "a", 'method': 'iqr', 'multiplier': 1.5},
+                    "in": {"column": "a", "method": "iqr", "multiplier": 1.5},
                     "out": {
                         "success": False,
                         "unexpected_index_list": [19],
@@ -120,18 +194,28 @@ class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
                     "title": "negative_test_iqr_mostly",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "b", 'mostly': 0.9, 'method': 'iqr', 'multiplier': 1.5},
+                    "in": {
+                        "column": "b",
+                        "mostly": 0.9,
+                        "method": "iqr",
+                        "multiplier": 1.5,
+                    },
                     "out": {
                         "success": False,
                         "unexpected_index_list": [17, 18, 19],
-                        "unexpected_list": [4.73338285, 5., 10.],
+                        "unexpected_list": [4.73338285, 5.0, 10.0],
                     },
                 },
                 {
                     "title": "positive_test_std_mostly",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "b", 'mostly': 0.9, 'method': 'std', 'multiplier': 3},
+                    "in": {
+                        "column": "b",
+                        "mostly": 0.9,
+                        "method": "std",
+                        "multiplier": 3,
+                    },
                     "out": {
                         "success": True,
                     },
@@ -140,7 +224,7 @@ class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
                     "title": "negative_test_std",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "c", 'method': 'std', 'multiplier': 3},
+                    "in": {"column": "c", "method": "std", "multiplier": 3},
                     "out": {
                         "success": False,
                         "unexpected_index_list": [19],
@@ -151,7 +235,7 @@ class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
                     "title": "positive_test_iqr",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "d", 'method': 'iqr', 'multiplier': 1.5},
+                    "in": {"column": "d", "method": "iqr", "multiplier": 1.5},
                     "out": {
                         "success": True,
                     },
@@ -167,9 +251,9 @@ class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
             #         "experimental"
         ],
         "contributors": [  # Github handles for all contributors to this Expectation.
-            '@rexboyce',
-            '@lodeous',
-            '@bragleg',
+            "@rexboyce",
+            "@lodeous",
+            "@bragleg",
         ],
         "package": "experimental_expectations",
     }
