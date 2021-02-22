@@ -574,7 +574,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
             index: -1
     validations:
       - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
-      - expectation_suite_name: users.error  # runs the locally-specified_action_list (?UNION THE TOP LEVEL?) against the top-level batch_request
+      - expectation_suite_name: users.error  # runs the locally-specified action_list union the top level action-list against the top-level batch_request
         action_list:
         - name: quarantine_failed_data
           action:
