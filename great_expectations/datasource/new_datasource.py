@@ -9,9 +9,9 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchRequest,
 )
+from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
-from great_expectations.datasource.types import PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
