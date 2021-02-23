@@ -145,7 +145,7 @@ def column_function_partial(
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
                 column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect
+                dialect = execution_engine.dialect_module
                 column_function = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -343,7 +343,7 @@ def column_condition_partial(
                     metric_domain_kwargs, domain_type=domain_type
                 )
                 column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect
+                dialect = execution_engine.dialect_module
                 sqlalchemy_engine = execution_engine.engine
 
                 expected_condition = metric_fn(
@@ -755,7 +755,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         compute_domain_kwargs, domain_type="identity"
     )
     temp_table_name: str = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-    if execution_engine.engine.dialect.name.lower() == "mssql":
+    if execution_engine.dialect == "mssql":
         # mssql expects all temporary table names to have a prefix '#'
         temp_table_name = f"#{temp_table_name}"
 

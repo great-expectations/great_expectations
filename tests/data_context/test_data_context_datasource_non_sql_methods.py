@@ -84,8 +84,8 @@ data_connectors:
         "letter": "A",
         "number": "101",
     }
-    assert isinstance(batch.data, pd.DataFrame)
-    assert batch.data.shape == (2, 3)
+    assert isinstance(batch.data.dataframe, pd.DataFrame)
+    assert batch.data.dataframe.shape == (2, 3)
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets(
@@ -167,5 +167,5 @@ data_connectors:
         "timestamp": "19120414",
         "size": "1313",
     }
-    assert isinstance(batch.data, pd.DataFrame)
-    assert batch.data.shape == (1313, 7)
+    assert isinstance(batch.data.dataframe, pd.DataFrame)
+    assert batch.data.dataframe.shape == (1313, 7)

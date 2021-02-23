@@ -149,7 +149,7 @@ class ExpectColumnValuesAreInLanguage(ColumnMapExpectation):
         "tags": ["nlp", "hackathon"],
         "contributors": ["@victorwyee"],
         "package": "experimental_expectations",
-        "requirements": [],
+        "requirements": ["langid>=1.1.6"],
     }
 
     # This is the id string of the Metric used by this Expectation.
