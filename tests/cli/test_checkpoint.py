@@ -581,10 +581,6 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
         click_result=result,
     )
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
-
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -706,10 +702,6 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         click_result=result,
     )
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
-
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -803,10 +795,6 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         click_result=result,
     )
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
-
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -888,10 +876,6 @@ def test_checkpoint_run_on_non_existent_validations(
         my_caplog=caplog,
         click_result=result,
     )
-
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
@@ -1035,10 +1019,6 @@ def test_checkpoint_run_happy_path_with_successful_validation(
         click_result=result,
     )
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
-
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -1179,10 +1159,6 @@ def test_checkpoint_run_happy_path_with_failed_validation(
         click_result=result,
     )
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
-
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
@@ -1314,10 +1290,6 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
         my_caplog=caplog,
         click_result=result,
     )
-
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(
@@ -1574,10 +1546,6 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     assert status == 0
     assert "Validation succeeded!" in output
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
-
 
 def test_checkpoint_script_happy_path_executable_failed_validation(
     caplog,
@@ -1693,10 +1661,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
     assert "Validation failed!" in output
-
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
 
 
 def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data(
@@ -1815,10 +1779,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
         'ExecutionEngineError: Error: The column "Name" in BatchData does not exist.'
         in output
     )
-
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
 
 
 @mock.patch(

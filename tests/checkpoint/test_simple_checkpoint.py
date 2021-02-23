@@ -793,9 +793,6 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
         substituted_runtime_config.action_list == expected_runtime_kwargs["action_list"]
     )
 
-    monkeypatch.delenv("GE_ENVIRONMENT")
-    monkeypatch.delenv("MY_PARAM")
-
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_checkpoint_loaded_from_store(
     context_with_data_source_and_empty_suite,

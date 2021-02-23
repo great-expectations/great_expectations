@@ -323,10 +323,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
-
 
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -449,10 +445,6 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     assert len(result.list_validation_results()) == 2
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
-
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
 
 
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
@@ -686,8 +678,6 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
 
-    monkeypatch.delenv("GE_ENVIRONMENT")
-
 
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -889,10 +879,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     assert len(result.list_validation_results()) == 2
     assert len(data_context.validations_store.list_keys()) == 4
     assert result.success
-
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
 
 
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
@@ -1269,11 +1255,6 @@ def test_newstyle_checkpoint_config_substitution_simple(
         == expected_substituted_checkpoint_config_template_and_runtime_kwargs.to_json_dict()
     )
 
-    monkeypatch.delenv("GE_ENVIRONMENT")
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
-
 
 def test_newstyle_checkpoint_config_substitution_nested(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
@@ -1557,8 +1538,3 @@ def test_newstyle_checkpoint_config_substitution_nested(
         substituted_config_template_and_runtime_kwargs.to_json_dict()
         == expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict()
     )
-
-    monkeypatch.delenv("GE_ENVIRONMENT")
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
