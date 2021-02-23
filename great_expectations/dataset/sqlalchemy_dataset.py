@@ -719,7 +719,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 ).label("null_count"),
             ]
         ).select_from(self._table)
-        count_results = dict(self.engine.execute(count_query).fetchone())
+        response = self.engine.execute(
+            count_query.compile(compile_kwargs={"literal_binds": True})
+        )
+        count_results = dict(response.fetchone())
         element_count = int(count_results.get("element_count") or 0)
         null_count = int(count_results.get("null_count") or 0)
         return element_count - null_count
