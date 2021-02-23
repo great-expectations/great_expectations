@@ -53,30 +53,6 @@ def titanic_checkpoint(
     }
 
 
-# TODO: <Alex>ALEX Delete?</Alex>
-@pytest.fixture
-def titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled(
-    titanic_data_context_stats_enabled_config_version_2,
-    titanic_checkpoint,
-    titanic_expectation_suite,
-):
-    yaml = YAML()
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    context.save_expectation_suite(titanic_expectation_suite)
-    # TODO context should save a checkpoint
-    checkpoint_path = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "my_checkpoint.yml",
-    )
-    with open(checkpoint_path, "w") as f:
-        yaml.dump(titanic_checkpoint, f)
-    assert os.path.isfile(checkpoint_path)
-    assert context.list_expectation_suite_names() == ["Titanic.warning"]
-    assert context.list_checkpoints() == ["my_checkpoint"]
-    return context
-
-
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -206,7 +182,7 @@ def test_checkpoint_list_with_eight_checkpoints(
 
 @pytest.mark.xfail(
     reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
+    run=False,
     strict=True,
 )
 @mock.patch(
@@ -251,7 +227,7 @@ def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
 
 @pytest.mark.xfail(
     reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
+    run=False,
     strict=True,
 )
 @mock.patch(
