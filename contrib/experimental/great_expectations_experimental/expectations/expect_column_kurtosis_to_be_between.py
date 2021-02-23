@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from scipy import stats as stats
+import scipy.stats as stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -43,29 +43,14 @@ from great_expectations.render.util import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnWassersteinDistance(ColumnMetricProvider):
-    """MetricProvider Class for Wasserstein Distance MetricProvider"""
+class ColumnKurtosis(ColumnMetricProvider):
+    """MetricProvider Class for Aggregate Mean MetricProvider"""
 
-    metric_name = "column.custom.wasserstein"
-    value_keys = ("raw_values", "partition")
+    metric_name = "column.custom.kurtosis"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
-    def _pandas(cls, column, raw_values=None, partition=None, **kwargs):
-        if raw_values is not None:
-            w_value = stats.wasserstein_distance(
-                raw_values,
-                column,
-            )
-        elif partition is not None:
-            w_value = stats.wasserstein_distance(
-                partition["values"],
-                column,
-                partition["weights"],
-            )
-        else:
-            raise ValueError("raw_values and partition object cannot both be None!")
-
-        return w_value
+    def _pandas(cls, column, **kwargs):
+        return stats.kurtosis(column)
 
     # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     # def _sqlalchemy(
@@ -161,28 +146,152 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
-    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
-    metric_dependencies = ("column.custom.wasserstein",)
-    success_keys = (
-        "min_value",
-        "strict_min",
-        "max_value",
-        "strict_max",
-        "raw_values",
-        "partition",
-    )
+class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
+    """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t) """
 
+    # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
+    examples = [
+        {
+            "data": {
+                "a": [
+                    -0.53292763,
+                    -0.55002926,
+                    -0.4438279,
+                    0.86457185,
+                    -0.36594115,
+                    0.49479845,
+                    -0.37942164,
+                    0.56196101,
+                    -0.87087446,
+                    0.85122858,
+                    0.50477797,
+                    0.32140045,
+                    0.67719681,
+                    -0.79750033,
+                    0.98015015,
+                    0.71092908,
+                    0.91318651,
+                    0.84821723,
+                    0.61791531,
+                    0.27199073,
+                ],  # drawn from uniform(-1, 1)
+                "b": [
+                    48.22849061,
+                    47.6051427,
+                    52.26539002,
+                    48.72580962,
+                    58.13226495,
+                    50.00527448,
+                    48.20014488,
+                    40.18917266,
+                    48.11166781,
+                    54.24920618,
+                    49.5333056,
+                    47.88284549,
+                    52.22758066,
+                    45.52656677,
+                    53.80837621,
+                    47.64331079,
+                    52.68390491,
+                    57.65771134,
+                    43.21413456,
+                    61.01975259,
+                ],  # drawn from normal(50, 5)
+                "c": [
+                    1.18456751,
+                    1.62172915,
+                    1.30161324,
+                    1.23598756,
+                    1.60049289,
+                    1.07977883,
+                    3.41474486,
+                    1.72798224,
+                    3.32432957,
+                    2.18657412,
+                    1.28335401,
+                    1.71629046,
+                    2.99812684,
+                    1.65621709,
+                    1.23124982,
+                    1.32011043,
+                    1.89228139,
+                    1.55614664,
+                    1.99860176,
+                    1.06292023,
+                ],  # drawn from gamma(1,1)
+                "d": [
+                    -1.13752893e00,
+                    2.92873190e00,
+                    -1.72513718e00,
+                    5.69411070e-02,
+                    -4.18521597e-01,
+                    -1.59507748e00,
+                    -4.13968768e00,
+                    1.84869478e-02,
+                    3.58256016e00,
+                    -9.51684014e-02,
+                    1.82473847e-01,
+                    2.54814625e-01,
+                    -1.40049841e-01,
+                    -2.13430996e00,
+                    2.17116735e01,
+                    5.72282900e-01,
+                    -4.68429437e-01,
+                    7.16024818e-01,
+                    -2.33349034e00,
+                    -6.24536666e00,
+                ],  # drawn from student-t(2)
+            },
+            "tests": [
+                {
+                    "title": "positive_test_neg_kurtosis",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "a", "min_value": -np.inf, "max_value": 0},
+                    "out": {"success": True, "observed_value": -1.3313434082203324},
+                },
+                {
+                    "title": "negative_test_no_kurtosis",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "b", "min_value": 1, "max_value": None},
+                    "out": {"success": False, "observed_value": -0.09728207073685091},
+                },
+                {
+                    "title": "positive_test_small_kurtosis",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "c", "min_value": -1, "max_value": 1},
+                    "out": {"success": True, "observed_value": 0.6023057552879445},
+                },
+                {
+                    "title": "negative_test_large_kurtosis",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "d", "min_value": -1, "max_value": 1},
+                    "out": {"success": False, "observed_value": 10.0205745719473},
+                },
+            ],
+        },
+    ]
+
+    # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",
-        "package": "great_expectations_experimental",
-        "tags": [],
-        "contributors": [
-            "rexboyce",
-            "abegong",
-            "lodeous",
+        "maturity": "experimental",  # "experimental", "beta", or "production"
+        "tags": [  # Tags for this Expectation in the gallery
+            #         "experimental"
         ],
+        "contributors": [  # Github handles for all contributors to this Expectation.
+            "@lodeous",
+            "@bragleg",
+            "@rexboyce",
+        ],
+        "package": "experimental_expectations",
     }
+
+    # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
+    metric_dependencies = ("column.custom.kurtosis",)
+    success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
     default_kwarg_values = {
@@ -190,68 +299,24 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
         "max_value": None,
         "strict_min": None,
         "strict_max": None,
-        "raw_values": None,
-        "partition": None,
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
     }
 
-    examples = [
-        {
-            "data": {"a": [0, 1, 3], "b": [3, 4, 5]},
-            "tests": [
-                {
-                    "title": "test_raw_values",
-                    "exact_match_out": False,
-                    "in": {"column": "a", "raw_values": [5, 6, 8], "max_value": 6},
-                    "out": {"success": True, "observed_value": 5},
-                    "include_in_gallery": True,
-                },
-                {
-                    "title": "test_raw_values_strict",
-                    "exact_match_out": False,
-                    "in": {
-                        "column": "a",
-                        "raw_values": [5, 6, 8],
-                        "max_value": 5,
-                        "strict_max": True,
-                    },
-                    "out": {"success": False, "observed_value": 5},
-                    "include_in_gallery": True,
-                },
-                {
-                    "title": "test_partition",
-                    "exact_match_out": False,
-                    "in": {
-                        "column": "b",
-                        "partition": {
-                            "values": [1, 2, 4],
-                            "weights": [0.5, 0.25, 0.25],
-                        },
-                        "max_value": 5,
-                        "strict_max": True,
-                    },
-                    "out": {"success": True, "observed_value": 2},
-                    "include_in_gallery": True,
-                },
-            ],
-        },
-    ]
-
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
-
-        Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            True if the configuration has been validated successfully. Otherwise, raises an exception
-        """
-        super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
+    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    #     """
+    #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+    #     neccessary configuration arguments have been provided for the validation of the expectation.
+    #
+    #     Args:
+    #         configuration (OPTIONAL[ExpectationConfiguration]): \
+    #             An optional Expectation Configuration entry that will be used to configure the expectation
+    #     Returns:
+    #         True if the configuration has been validated successfully. Otherwise, raises an exception
+    #     """
+    #     super().validate_configuration(configuration)
+    #     self.validate_metric_value_between_configuration(configuration=configuration)
 
     # @classmethod
     # @renderer(renderer_type="renderer.prescriptive")
@@ -326,7 +391,7 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
-            metric_name="column.custom.wasserstein",
+            metric_name="column.custom.kurtosis",
             configuration=configuration,
             metrics=metrics,
             runtime_configuration=runtime_configuration,
@@ -335,5 +400,5 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnWassersteinDistanceToBeLessThan().self_check()
+    self_check_report = ExpectColumnKurtosisToBeBetween().run_diagnostics()
     print(json.dumps(self_check_report, indent=2))
