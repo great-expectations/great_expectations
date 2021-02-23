@@ -209,6 +209,10 @@ def test_basic_checkpoint_config_validation(
             checkpoint_name=checkpoint.config.name,
         )
 
+    empty_data_context.delete_checkpoint(name="my_erroneous_checkpoint")
+    empty_data_context.delete_checkpoint(name="my_checkpoint")
+    assert len(empty_data_context.list_checkpoints()) == 0
+
 
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -322,6 +326,9 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     assert len(result.list_validation_results()) == 1
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success
+
+    data_context.delete_checkpoint(name="my_fancy_checkpoint")
+    assert len(data_context.list_checkpoints()) == 0
 
 
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
@@ -446,6 +453,9 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
 
+    data_context.delete_checkpoint(name="my_fancy_checkpoint")
+    assert len(data_context.list_checkpoints()) == 0
+
 
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -542,6 +552,9 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     assert len(result.list_validation_results()) == 1
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success
+
+    data_context.delete_checkpoint(name="airflow_checkpoint")
+    assert len(data_context.list_checkpoints()) == 0
 
 
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
@@ -677,6 +690,9 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     assert len(result.list_validation_results()) == 2
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
+
+    data_context.delete_checkpoint(name="airflow_users_node_3")
+    assert len(data_context.list_checkpoints()) == 0
 
 
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
@@ -879,6 +895,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     assert len(result.list_validation_results()) == 2
     assert len(data_context.validations_store.list_keys()) == 4
     assert result.success
+
+    data_context.delete_checkpoint(name="my_base_checkpoint")
+    data_context.delete_checkpoint(name="my_fancy_checkpoint")
+    assert len(data_context.list_checkpoints()) == 0
 
 
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
