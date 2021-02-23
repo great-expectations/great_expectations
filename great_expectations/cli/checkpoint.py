@@ -6,7 +6,6 @@ import click
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
-from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
 from great_expectations.cli.mark import Mark as mark
@@ -177,7 +176,7 @@ def _load_checkpoint_yml_template() -> dict:
 @click.pass_context
 def checkpoint_list(ctx):
     """List configured checkpoints. (Experimental)"""
-    directory = toolkit.parse_cli_config_file_location(
+    directory: str = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
     ).get("directory")
     context: DataContext = toolkit.load_data_context_with_error_handling(
@@ -209,7 +208,8 @@ def checkpoint_list(ctx):
 def checkpoint_run(ctx, checkpoint):
     """Run a checkpoint. (Experimental)"""
     usage_event: str = "cli.checkpoint.run"
-    directory = toolkit.parse_cli_config_file_location(
+
+    directory: str = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
     ).get("directory")
     context: DataContext = toolkit.load_data_context_with_error_handling(
@@ -290,24 +290,21 @@ def checkpoint_script(ctx, checkpoint):
 
     This script is provided for those who wish to run checkpoints via python.
     """
-    directory = toolkit.parse_cli_config_file_location(
+    usage_event: str = "cli.checkpoint.script"
+
+    directory: str = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
     ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
-    usage_event = "cli.checkpoint.script"
-    ge_config_version = context.get_config().config_version
-    if ge_config_version >= 3:
-        cli_message(
-            f"""<red>The `checkpoint script` CLI command is not yet implemented for GE config versions >= 3.</red>"""
-        )
-        send_usage_message(context, usage_event, success=False)
-        sys.exit(1)
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory, from_cli_upgrade_command=False
+    )
 
-    # Attempt to load the checkpoint and deal with errors
-    _ = toolkit.load_checkpoint(context, checkpoint, usage_event)
+    toolkit.validate_checkpoint(
+        context=context, checkpoint_name=checkpoint, usage_event=usage_event
+    )
 
-    script_name = f"run_{checkpoint}.py"
-    script_path = os.path.join(
+    script_name: str = f"run_{checkpoint}.py"
+    script_path: str = os.path.join(
         context.root_directory, context.GE_UNCOMMITTED_DIR, script_name
     )
 
@@ -319,7 +316,11 @@ def checkpoint_script(ctx, checkpoint):
   - Existing file path: {script_path}""",
         )
 
-    _write_checkpoint_script_to_disk(context.root_directory, checkpoint, script_path)
+    _write_checkpoint_script_to_disk(
+        context_directory=context.root_directory,
+        checkpoint_name=checkpoint,
+        script_path=script_path,
+    )
     cli_message(
         f"""<green>A python script was created that runs the checkpoint named: `{checkpoint}`</green>
   - The script is located in `great_expectations/uncommitted/run_{checkpoint}.py`
@@ -328,17 +329,17 @@ def checkpoint_script(ctx, checkpoint):
     send_usage_message(context, event=usage_event, success=True)
 
 
+def _write_checkpoint_script_to_disk(
+    context_directory: str, checkpoint_name: str, script_path: str
+) -> None:
+    script_full_path: str = os.path.abspath(os.path.join(script_path))
+    template: str = _load_script_template().format(checkpoint_name, context_directory)
+    linted_code: str = lint_code(code=template)
+    with open(script_full_path, "w") as f:
+        f.write(linted_code)
+
+
 def _load_script_template() -> str:
     with open(file_relative_path(__file__, "checkpoint_script_template.py")) as f:
         template = f.read()
     return template
-
-
-def _write_checkpoint_script_to_disk(
-    context_directory: str, checkpoint_name: str, script_path: str
-) -> None:
-    script_full_path = os.path.abspath(os.path.join(script_path))
-    template = _load_script_template().format(checkpoint_name, context_directory)
-    linted_code = lint_code(template)
-    with open(script_full_path, "w") as f:
-        f.write(linted_code)
