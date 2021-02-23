@@ -1,6 +1,7 @@
 import os
 from collections import OrderedDict
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -9,6 +10,11 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
@@ -20,6 +26,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
         [
             "-c",
             project_root_dir,
+            "--new-api",
             "datasource",
             "list",
         ],
@@ -37,7 +44,9 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["-c", project_root_dir, "datasource", "list"], catch_exceptions=False
+        cli,
+        ["-c", project_root_dir, "--new-api", "datasource", "list"],
+        catch_exceptions=False,
     )
     url = str(empty_sqlite_db.engine.url)
     expected_output = """\
@@ -157,6 +166,11 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     return context
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_cli_datasorce_new_connection_string(
     empty_data_context, empty_sqlite_db, caplog
 ):
@@ -170,6 +184,7 @@ def test_cli_datasorce_new_connection_string(
         [
             "-c",
             project_root_dir,
+            "--new-api",
             "datasource",
             "new",
         ],

@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 
+import pytest
 from click.testing import CliRunner
 from freezegun import freeze_time
 from moto import mock_s3
@@ -22,6 +23,11 @@ except ImportError:
     from unittest import mock
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     # test great_expectations project upgrade command with project with config_version 2
 
@@ -36,7 +42,7 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "project", "upgrade"],
+        ["-c", v10_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -51,6 +57,11 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplog):
     # test if cli detects out of date project and asks to run upgrade helper
     # decline upgrade and ensure config version was not modified
@@ -61,6 +72,7 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
         [
             "-c",
             v10_project_directory,
+            "--new-api",
             "suite",
             "list",
         ],
@@ -131,6 +143,11 @@ great_expectations/
     assert obs_project_tree_str == expected_project_tree_str
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @freeze_time("09/26/2019 13:42:41")
 def test_basic_project_upgrade(v10_project_directory, caplog):
     # test project upgrade that requires no manual steps
@@ -138,7 +155,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "project", "upgrade"],
+        ["-c", v10_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -225,6 +242,11 @@ great_expectations/
     assert obs_upgrade_log_dict == expected_upgrade_log_dict
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @freeze_time("09/26/2019 13:42:41")
 def test_project_upgrade_with_manual_steps(
     v10_project_directory, caplog, sa, postgresql_engine
@@ -244,7 +266,7 @@ def test_project_upgrade_with_manual_steps(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "project", "upgrade"],
+        ["-c", v10_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -338,6 +360,11 @@ great_expectations/
     assert obs_upgrade_log_dict == expected_upgrade_log_dict
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @freeze_time("09/26/2019 13:42:41")
 @mock_s3
 def test_project_upgrade_with_exception(v10_project_directory, caplog):
@@ -355,7 +382,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "project", "upgrade"],
+        ["-c", v10_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -445,6 +472,11 @@ great_expectations/
     assert obs_upgrade_log_dict == expected_upgrade_log_dict
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @freeze_time("01/19/2021 13:26:39")
 def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
     # test project upgrade that requires no manual steps
@@ -452,7 +484,7 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["-c", v20_project_directory, "project", "upgrade"],
+        ["-c", v20_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )

@@ -16,7 +16,7 @@ from tests.cli.utils import (
 
 def test_suite_help_output(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["suite"], catch_exceptions=False)
+    result = runner.invoke(cli, ["--new-api", "suite"], catch_exceptions=False)
     assert result.exit_code == 0
     assert (
         """Commands:
@@ -36,7 +36,7 @@ def test_suite_help_output(caplog):
 
 def test_suite_demo_deprecation_message(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["suite", "demo"], catch_exceptions=False)
+    result = runner.invoke(cli, ["--new-api", "suite", "demo"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "This command is not supported in the new API." in result.stdout
     assert_no_logging_messages_or_tracebacks(
@@ -45,6 +45,11 @@ def test_suite_demo_deprecation_message(caplog):
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_creates_empty_suite(
@@ -68,7 +73,7 @@ def test_suite_new_creates_empty_suite(
     csv = os.path.join(filesystem_csv_2, "f1.csv")
     result = runner.invoke(
         cli,
-        ["--config", root_dir, "suite", "new", "--suite", "foo"],
+        ["--config", root_dir, "--new-api", "suite", "new", "--suite", "foo"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -131,6 +136,11 @@ def test_suite_new_creates_empty_suite(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_empty_with_no_jupyter(
@@ -156,7 +166,16 @@ def test_suite_new_empty_with_no_jupyter(
     csv = os.path.join(filesystem_csv_2, "f1.csv")
     result = runner.invoke(
         cli,
-        ["--config", root_dir, "suite", "new", "--suite", "foo", "--no-jupyter"],
+        [
+            "--config",
+            root_dir,
+            "--new-api",
+            "suite",
+            "new",
+            "--suite",
+            "foo",
+            "--no-jupyter",
+        ],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -214,7 +233,7 @@ def test_suite_new_empty_with_no_jupyter(
 def test_suite_edit_without_suite_name_raises_error():
     """This is really only testing click missing arguments"""
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, "suite edit", catch_exceptions=False)
+    result = runner.invoke(cli, "--new-api suite edit", catch_exceptions=False)
     assert result.exit_code == 2
     assert (
         'Error: Missing argument "SUITE".' in result.stderr
@@ -222,6 +241,11 @@ def test_suite_edit_without_suite_name_raises_error():
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
@@ -264,6 +288,11 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error(
@@ -310,6 +339,11 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_suite_name_raises_error(
@@ -327,7 +361,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"--config {project_dir} suite edit not_a_real_suite",
+        f"--config {project_dir} --new-api suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -343,6 +377,11 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
@@ -362,7 +401,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"--config {project_dir} suite edit foo --datasource not_real",
+        f"--config {project_dir} --new-api suite edit foo --datasource not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -417,7 +456,16 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-jupyter"],
+        [
+            "--new-api",
+            "suite",
+            "new",
+            "-d",
+            root_dir,
+            "--suite",
+            "foo_suite",
+            "--no-jupyter",
+        ],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -507,7 +555,16 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-jupyter"],
+        [
+            "--new-api",
+            "suite",
+            "new",
+            "-d",
+            root_dir,
+            "--suite",
+            "foo_suite",
+            "--no-jupyter",
+        ],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -523,7 +580,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["--config", root_dir, "suite", "edit", "foo_suite"],
+        ["--config", root_dir, "--new-api", "suite", "edit", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -589,7 +646,16 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo_suite", "--no-jupyter"],
+        [
+            "--new-api",
+            "suite",
+            "new",
+            "-d",
+            root_dir,
+            "--suite",
+            "foo_suite",
+            "--no-jupyter",
+        ],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -655,6 +721,11 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error(
@@ -710,6 +781,11 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs(
@@ -807,7 +883,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["suite", "new", "-d", root_dir, "--no-jupyter"],
+        ["--new-api", "suite", "new", "-d", root_dir, "--no-jupyter"],
         input="{:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
@@ -865,6 +941,11 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_suite_list_with_zero_suites_using_config_param(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     config_file_path = os.path.join(project_dir, "great_expectations.yml")
@@ -873,7 +954,7 @@ def test_suite_list_with_zero_suites_using_config_param(caplog, empty_data_conte
 
     result = runner.invoke(
         cli,
-        f"--config {config_file_path} suite list",
+        f"--config {config_file_path} --new-api suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -885,6 +966,11 @@ def test_suite_list_with_zero_suites_using_config_param(caplog, empty_data_conte
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_suite_list_with_one_suite_using_config_param(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
@@ -895,7 +981,7 @@ def test_suite_list_with_one_suite_using_config_param(caplog, empty_data_context
 
     result = runner.invoke(
         cli,
-        f"--config {config_file_path} suite list",
+        f"--config {config_file_path} --new-api suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -907,6 +993,11 @@ def test_suite_list_with_one_suite_using_config_param(caplog, empty_data_context
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_suite_list_with_multiple_suites_using_config_param(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
@@ -921,7 +1012,7 @@ def test_suite_list_with_multiple_suites_using_config_param(caplog, empty_data_c
 
     result = runner.invoke(
         cli,
-        f"--config {config_file_path} suite list",
+        f"--config {config_file_path} --new-api suite list",
         catch_exceptions=False,
     )
     output = result.output
@@ -937,6 +1028,11 @@ def test_suite_list_with_multiple_suites_using_config_param(caplog, empty_data_c
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_suite_list_with_multiple_suites_using_config_param_directory(
     caplog, empty_data_context
 ):
@@ -952,7 +1048,7 @@ def test_suite_list_with_multiple_suites_using_config_param_directory(
 
     result = runner.invoke(
         cli,
-        f"--config {project_dir} suite list",
+        f"--config {project_dir} --new-api suite list",
         catch_exceptions=False,
     )
     output = result.output
@@ -968,6 +1064,11 @@ def test_suite_list_with_multiple_suites_using_config_param_directory(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -979,7 +1080,7 @@ def test_suite_delete_with_zero_suites(
 
     result = runner.invoke(
         cli,
-        f"--config {project_dir} suite delete not_a_suite",
+        f"--config {project_dir} --new-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -999,6 +1100,11 @@ def test_suite_delete_with_zero_suites(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1014,7 +1120,7 @@ def test_suite_delete_with_non_existent_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"--config {project_dir} suite delete not_a_suite",
+        f"--config {project_dir} --new-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1033,6 +1139,11 @@ def test_suite_delete_with_non_existent_suite(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1052,7 +1163,7 @@ def test_suite_delete_with_one_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"--config {project_dir} suite delete a.warning",
+        f"--config {project_dir} --new-api suite delete a.warning",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1075,6 +1186,11 @@ def test_suite_delete_with_one_suite(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1099,6 +1215,7 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
         [
             "--config",
             root_dir,
+            "--new-api",
             "suite",
             "scaffold",
             "foop",
@@ -1129,6 +1246,11 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1156,6 +1278,7 @@ def test_suite_scaffold_on_existing_suite_raises_error(
         [
             "--config",
             root_dir,
+            "--new-api",
             "suite",
             "scaffold",
             "foop",
@@ -1186,6 +1309,11 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1216,6 +1344,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
         [
             "--config",
             root_dir,
+            "--new-api",
             "suite",
             "scaffold",
             suite_name,
@@ -1247,6 +1376,11 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1275,7 +1409,15 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["--config", root_dir, "suite", "scaffold", suite_name, "--no-jupyter"],
+        [
+            "--config",
+            root_dir,
+            "--new-api",
+            "suite",
+            "scaffold",
+            suite_name,
+            "--no-jupyter",
+        ],
         input="1\n1\n",
         catch_exceptions=False,
     )

@@ -6,9 +6,13 @@ import click
 
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
-from great_expectations.cli.datasource import get_batch_kwargs
+from great_expectations.cli.batch_kwargs import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.util import cli_message, cli_message_list
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_list,
+    display_not_implemented_message_and_exit,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
     send_usage_message,
@@ -72,8 +76,10 @@ def suite_edit(ctx, suite, datasource, jupyter, batch_kwargs):
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
+    display_not_implemented_message_and_exit()
+
     directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     _suite_edit(
         suite,
@@ -245,8 +251,10 @@ def suite_new(ctx, suite, jupyter, batch_kwargs):
 
     Edit in jupyter notebooks, or skip with the --no-jupyter flag
     """
+    display_not_implemented_message_and_exit()
+
     directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     _suite_new(
         suite=suite,
@@ -332,9 +340,10 @@ def suite_delete(ctx, suite):
     """
     Delete an expectation suite from the expectation store.
     """
+    display_not_implemented_message_and_exit()
     usage_event = "cli.suite.delete"
     directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     suite_names = context.list_expectation_suite_names()
@@ -367,8 +376,9 @@ def suite_delete(ctx, suite):
 @click.pass_context
 def suite_scaffold(ctx, suite, jupyter):
     """Scaffold a new Expectation Suite."""
+    display_not_implemented_message_and_exit()
     directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     _suite_scaffold(suite, directory, jupyter)
 
@@ -413,9 +423,10 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
 @click.pass_context
 def suite_list(ctx):
     """Lists available Expectation Suites."""
+    display_not_implemented_message_and_exit()
 
     directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
 

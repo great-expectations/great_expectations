@@ -9,8 +9,11 @@ from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
 from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.util import cli_message, cli_message_list
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_list,
+    display_not_implemented_message_and_exit,
+)
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
@@ -80,11 +83,13 @@ def checkpoint():
 @click.pass_context
 def checkpoint_new(ctx, checkpoint, suite, datasource, legacy):
     """Create a new checkpoint for easy deployments. (Experimental)"""
+    display_not_implemented_message_and_exit()
+
     if legacy:
         suite_name = suite
         usage_event = "cli.checkpoint.new"
         directory = toolkit.parse_cli_config_file_location(
-            config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+            config_file_location=ctx.obj.config_file_location
         ).get("directory")
         context = toolkit.load_data_context_with_error_handling(directory)
         ge_config_version = context.get_config().config_version
@@ -177,7 +182,7 @@ def _load_checkpoint_yml_template() -> dict:
 def checkpoint_list(ctx):
     """List configured checkpoints. (Experimental)"""
     directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     context: DataContext = toolkit.load_data_context_with_error_handling(
         directory=directory,
@@ -210,7 +215,7 @@ def checkpoint_delete(ctx, checkpoint):
     usage_event: str = "cli.checkpoint.delete"
 
     directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     context: DataContext = toolkit.load_data_context_with_error_handling(
         directory=directory,
@@ -242,10 +247,11 @@ def checkpoint_delete(ctx, checkpoint):
 @click.pass_context
 def checkpoint_run(ctx, checkpoint):
     """Run a checkpoint. (Experimental)"""
+    display_not_implemented_message_and_exit()
     usage_event: str = "cli.checkpoint.run"
 
     directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     context: DataContext = toolkit.load_data_context_with_error_handling(
         directory=directory,
@@ -287,7 +293,7 @@ def print_validation_operator_results_details(
     result: CheckpointResult,
 ) -> None:
     max_suite_display_width = 40
-    toolkit.cli_message(
+    cli_message(
         f"""
 {'Suite Name'.ljust(max_suite_display_width)}     Status     Expectations met"""
     )
@@ -309,7 +315,7 @@ def print_validation_operator_results_details(
             suite_name = suite_name[0:max_suite_display_width]
             suite_name = suite_name[:-1] + "…"
         status_line: str = f"- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}"
-        toolkit.cli_message(status_line)
+        cli_message(status_line)
 
 
 @checkpoint.command(name="script")
@@ -326,10 +332,10 @@ def checkpoint_script(ctx, checkpoint):
     This script is provided for those who wish to run checkpoints via python.
     """
     usage_event: str = "cli.checkpoint.script"
-
     directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
+
     context: DataContext = toolkit.load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=False
     )

@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -8,6 +9,11 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
@@ -15,7 +21,9 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
-        cli, ["-c", project_root_dir, "datasource", "list"], catch_exceptions=False
+        cli,
+        ["--new-api", "-c", project_root_dir, "datasource", "list"],
+        catch_exceptions=False,
     )
 
     stdout = result.output.strip()
@@ -60,6 +68,7 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
     result = runner.invoke(
         cli,
         [
+            "--new-api",
             "-c",
             project_root_dir,
             "datasource",
@@ -87,6 +96,15 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+def cli_command_not_implemented(stdout):
+    assert "This command is not yet implemented for the modern API" in stdout
+
+
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
@@ -98,6 +116,7 @@ def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
         [
             "-c",
             project_root_dir,
+            "--new-api",
             "datasource",
             "new",
         ],

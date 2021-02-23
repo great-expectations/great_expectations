@@ -11,52 +11,54 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 yaml = YAML()
 yaml.default_flow_style = False
 
-
 # TODO: <Alex>ALEX -- Update this --help page test to fit with the new design.</Alex>
-def test_cli_command_entrance(caplog):
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, catch_exceptions=False)
-    assert result.exit_code == 0
-    print(result.output)
-    assert (
-        result.output
-        == """Usage: cli [OPTIONS] COMMAND [ARGS]...
+TOP_LEVEL_HELP = """Usage: great_expectations [OPTIONS] COMMAND [ARGS]...
 
   Welcome to the great_expectations CLI!
 
   Most commands follow this format: great_expectations <NOUN> <VERB>
 
-  The nouns are: datasource, docs, project, suite, validation-operator
-
-  Most nouns accept the following verbs: new, list, edit
-
-  In particular, the CLI supports the following special commands:
-
-  - great_expectations init : create a new great_expectations project
-
-  - great_expectations datasource profile : profile a datasource
-
-  - great_expectations docs build : compile documentation from expectations
+  The nouns are: checkpoint, datasource, docs, init, project, store, suite,
+  validation-operator. Most nouns accept the following verbs: new, list, edit
 
 Options:
-  --version          Show the version and exit.
-  -v, --verbose      Set great_expectations to use verbose output.
-  -c, --config TEXT  Path to great_expectations configuration file location
-                     (great_expectations.yml). Inferred if not provided.
+  --version                 Show the version and exit.
+  --legacy-api / --new-api  Default to legacy APIs (before 0.13). Use --new-api
+                            for new APIs (after version 0.13)
 
-  --help             Show this message and exit.
+  -v, --verbose             Set great_expectations to use verbose output.
+  -c, --config TEXT         Path to great_expectations configuration file
+                            location (great_expectations.yml). Inferred if not
+                            provided.
+
+  --help                    Show this message and exit.
 
 Commands:
-  checkpoint           Checkpoint operations
-  datasource           Datasource operations
-  docs                 Data Docs operations
-  init                 Initialize a new Great Expectations project.
-  project              Project operations
-  store                Store operations
-  suite                Expectation Suite operations
-  validation-operator  Validation Operator operations
+  checkpoint  Checkpoint operations
+  datasource  Datasource operations
+  docs        Data Docs operations
+  init        Initialize a new Great Expectations project.
+  project     Project operations
+  store       Store operations
+  suite       Expectation Suite operations
 """
-    )
+
+
+def test_cli_command_entrance(caplog):
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, catch_exceptions=False)
+    print(result.output)
+    assert result.exit_code == 0
+    assert result.output == TOP_LEVEL_HELP
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_cli_top_level_help(caplog):
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(cli, "--new-api --help", catch_exceptions=False)
+    print(result.output)
+    assert result.exit_code == 0
+    assert result.output == TOP_LEVEL_HELP
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 

@@ -19,6 +19,11 @@ except ImportError:
     from unittest import mock
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @freeze_time("09/26/2019 13:42:41")
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @mock.patch(
@@ -40,7 +45,7 @@ def test_cli_init_on_new_project(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["-c", project_dir, "init"],
+        ["-c", project_dir, "--new-api", "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
         catch_exceptions=False,
     )
@@ -169,6 +174,11 @@ def test_cli_init_on_new_project(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
     mock_webbrowser,
@@ -198,7 +208,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     ):
         result = runner.invoke(
             cli,
-            ["-c", project_dir, "init"],
+            ["-c", project_dir, "--new-api", "init"],
             input="\n1\n1\n{}\n\n\n\n2\n{}\nmy_suite\n\n\n\n\n".format(
                 data_folder_path, csv_path
             ),
@@ -279,7 +289,7 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
     runner = CliRunner(mix_stderr=False)
     _ = runner.invoke(
         cli,
-        ["-c", project_dir, "init"],
+        ["-c", project_dir, "--new-api", "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
         catch_exceptions=False,
     )
@@ -297,6 +307,11 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
     return project_dir
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser, caplog, initialized_project, filesystem_csv_2
@@ -319,7 +334,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     ):
         result = runner.invoke(
             cli,
-            ["-c", project_dir, "init"],
+            ["-c", project_dir, "--new-api", "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -337,6 +352,11 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
     mock_webbrowser,
@@ -351,7 +371,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     ):
         result = runner.invoke(
             cli,
-            ["-c", project_dir, "init"],
+            ["-c", project_dir, "--new-api", "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -370,6 +390,11 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
     mock_webbrowser,
@@ -384,7 +409,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     ):
         result = runner.invoke(
             cli,
-            ["-c", project_dir, "init"],
+            ["-c", project_dir, "--new-api", "init"],
             input="Y\n\n",
             catch_exceptions=False,
         )
@@ -409,6 +434,11 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_browser,
@@ -440,7 +470,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     ):
         result = runner.invoke(
             cli,
-            ["-c", project_dir, "init"],
+            ["-c", project_dir, "--new-api", "init"],
             input="\n2\n{}\nsink_me\n\n\n".format(data_path),
             catch_exceptions=False,
         )
@@ -461,6 +491,11 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     caplog, tmp_path_factory
 ):
@@ -474,7 +509,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["-c", project_dir, "init"],
+        ["-c", project_dir, "--new-api", "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\nn\n".format(data_folder_path, data_path),
         catch_exceptions=False,
     )
@@ -516,6 +551,11 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file(
@@ -534,7 +574,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["-c", project_dir, "init"],
+        ["-c", project_dir, "--new-api", "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n{}\n\n\n\n".format(
             data_folder_path, data_path, data_path_2
         ),

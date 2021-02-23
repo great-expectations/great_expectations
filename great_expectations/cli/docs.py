@@ -1,12 +1,14 @@
-import os
 import sys
 
 import click
-import requests
 
 from great_expectations.cli import toolkit
-from great_expectations.cli.cli_logging import logger
-from great_expectations.cli.util import cli_message, cli_message_list
+from great_expectations.cli.build_docs import build_docs
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_list,
+    display_not_implemented_message_and_exit,
+)
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 
@@ -38,8 +40,9 @@ def docs():
 @click.pass_context
 def docs_build(ctx, site_name, view=True, assume_yes=False):
     """ Build Data Docs for a project."""
+    display_not_implemented_message_and_exit()
     directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
@@ -50,8 +53,9 @@ def docs_build(ctx, site_name, view=True, assume_yes=False):
 @click.pass_context
 def docs_list(ctx):
     """List known Data Docs Sites."""
+    display_not_implemented_message_and_exit()
     directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
 
@@ -90,8 +94,9 @@ def docs_list(ctx):
 @click.pass_context
 def clean_data_docs(ctx, site_name=None, all=None):
     """Delete data docs"""
+    display_not_implemented_message_and_exit()
     directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     failed = True
@@ -120,33 +125,3 @@ def _build_intro_string(docs_sites_strings):
     elif doc_string_count > 1:
         list_intro_string = f"{doc_string_count} Data Docs sites configured:"
     return list_intro_string
-
-
-def build_docs(context, site_name=None, view=True, assume_yes=False):
-    """Build documentation in a context"""
-    logger.debug("Starting cli.datasource.build_docs")
-
-    if site_name is not None:
-        site_names = [site_name]
-    else:
-        site_names = None
-    index_page_locator_infos = context.build_data_docs(
-        site_names=site_names, dry_run=True
-    )
-
-    msg = "\nThe following Data Docs sites will be built:\n\n"
-    for site_name, index_page_locator_info in index_page_locator_infos.items():
-        msg += " - <cyan>{}:</cyan> ".format(site_name)
-        msg += "{}\n".format(index_page_locator_info)
-
-    cli_message(msg)
-    if not assume_yes:
-        toolkit.confirm_proceed_or_exit()
-
-    cli_message("\nBuilding Data Docs...\n")
-    context.build_data_docs(site_names=site_names)
-
-    cli_message("Done building Data Docs")
-
-    if view:
-        context.open_data_docs(site_name=site_name, only_if_exists=True)

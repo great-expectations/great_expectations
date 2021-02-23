@@ -7,16 +7,20 @@ from great_expectations.exceptions import InvalidConfigurationYamlError
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_store_list_with_zero_stores(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context._project_config.stores = {}
     context._save_project_config()
     runner = CliRunner(mix_stderr=False)
-
     result = runner.invoke(
         cli,
-        f"-c {project_dir} store list".format(project_dir),
+        f"-c {project_dir} --new-api store list".format(project_dir),
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -28,6 +32,11 @@ def test_store_list_with_zero_stores(caplog, empty_data_context):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_store_list_with_two_stores(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
@@ -57,7 +66,7 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        f"-c {project_dir} store list",
+        f"-c {project_dir} --new-api store list",
         catch_exceptions=False,
     )
 
@@ -67,6 +76,11 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_store_list_with_four_stores(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
@@ -98,7 +112,7 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        f"-c {project_dir} store list",
+        f"-c {project_dir} --new-api store list",
         catch_exceptions=False,
     )
     print(result.output)

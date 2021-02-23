@@ -14,6 +14,11 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
     mock_webbrowser,
@@ -41,7 +46,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["-c", root_dir, "init"],
+        ["-c", root_dir, "--new-api", "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
         catch_exceptions=False,
     )
@@ -68,7 +73,10 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["-c", root_dir, "init"], input="Y\nn\n", catch_exceptions=False
+            cli,
+            ["--new-api", "-c", root_dir, "init"],
+            input="Y\nn\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -90,6 +98,11 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     mock_webbrowser,
@@ -138,7 +151,10 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["-c", root_dir, "init"], input="n\n", catch_exceptions=False
+            cli,
+            ["-c", root_dir, "--new-api", "init"],
+            input="n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
     assert mock_webbrowser.call_count == 1
@@ -151,6 +167,11 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_connection_string_non_working_db_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
     mock_webbrowser, caplog, tmp_path_factory, sa
@@ -162,7 +183,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        ["init"],
+        ["--new-api", "init"],
         input="\n\n2\n6\nmy_db\nsqlite:////not_a_real.db\n\nn\n",
         catch_exceptions=False,
     )

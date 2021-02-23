@@ -1,7 +1,11 @@
 import click
 
 from great_expectations.cli import toolkit
-from great_expectations.cli.util import cli_message, cli_message_dict
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_dict,
+    display_not_implemented_message_and_exit,
+)
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 
@@ -15,8 +19,9 @@ def store():
 @click.pass_context
 def store_list(ctx):
     """List known Stores."""
+    display_not_implemented_message_and_exit()
     directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+        config_file_location=ctx.obj.config_file_location
     ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
 

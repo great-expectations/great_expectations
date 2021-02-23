@@ -15,11 +15,11 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.cli.batch_kwargs import get_batch_kwargs
+from great_expectations.cli.build_docs import build_docs
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
-from great_expectations.cli.datasource import get_batch_kwargs
-from great_expectations.cli.docs import build_docs
+from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
-from great_expectations.cli.util import cli_colorize_string, cli_message
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
@@ -32,6 +32,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.datasource import Datasource
 from great_expectations.profile import BasicSuiteBuilderProfiler
+
+try:
+    from termcolor import colored
+except ImportError:
+    pass
+
 
 EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "

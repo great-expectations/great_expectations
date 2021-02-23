@@ -11,6 +11,11 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DatasourceKeyPairAuthBadPassphraseError
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_snowflake_user_password_credentials_exit(empty_data_context):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
@@ -22,6 +27,7 @@ def test_snowflake_user_password_credentials_exit(empty_data_context):
         [
             "-c",
             project_root_dir,
+            "--new-api",
             "datasource",
             "new",
         ],

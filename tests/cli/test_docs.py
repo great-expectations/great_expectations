@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -17,12 +18,17 @@ except ImportError:
 
 def test_docs_help_output(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["docs"], catch_exceptions=False)
+    result = runner.invoke(cli, ["--new-api", "docs"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "build  Build Data Docs for a project." in result.stdout
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_view(
     mock_webbrowser,
@@ -39,6 +45,7 @@ def test_docs_build_view(
         [
             "-c",
             root_dir,
+            "--new-api",
             "docs",
             "build",
         ],
@@ -74,6 +81,11 @@ def test_docs_build_view(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_no_view(
     mock_webbrowser,
@@ -90,6 +102,7 @@ def test_docs_build_no_view(
         [
             "-c",
             root_dir,
+            "--new-api",
             "docs",
             "build",
             "--no-view",
@@ -126,6 +139,11 @@ def test_docs_build_no_view(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_docs_build_assume_yes(
     caplog, site_builder_data_context_v013_with_html_store_titanic_random
 ):
@@ -139,6 +157,7 @@ def test_docs_build_assume_yes(
         [
             "-c",
             root_dir,
+            "--new-api",
             "docs",
             "build",
             "--no-view",
