@@ -54,6 +54,7 @@ class ColumnSkew(ColumnMetricProvider):
         if abs:
             return np.abs(stats.skew(column))
         return stats.skew(column)
+
     #
     # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     # def _sqlalchemy(
@@ -156,18 +157,72 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
     examples = [
         {
             "data": {
-                "a": [5.27071512, 7.05981507, 8.46671693, 10.20629973, 6.15519149,
-                      7.11709362, 5.31915535, 6.56441299, 5.69143401, 5.0389317,
-                      6.48222587, 5.62433534, 5.46219467, 5.74686441, 6.05413964,
-                      7.09435276, 6.43876861, 6.05301145, 6.12727457, 6.80603351],  # sampled from Gamma(1, 5)
-                "b": [81.11265955, 76.7836479, 85.25019592, 93.93285666, 83.63587009,
-                      81.88712944, 80.37321975, 86.786491, 80.05277435, 70.36302516,
-                      79.4907302, 84.1288281, 87.79298488, 78.02771047, 80.63975023,
-                      88.59461893, 84.05632481, 84.54128192, 78.74152549, 83.60684806],  # sampled from Beta(50, 10)
-                "c": [95.74648827, 80.4031074, 85.41863916, 93.98001949, 97.84607818,
-                      89.01205412, 89.55045229, 97.32734707, 93.94199505, 88.19992377,
-                      98.3336087, 97.66984436, 97.39464709, 95.55637873, 96.10980996,
-                      90.18004343, 96.2019293, 89.19519753, 94.01807868, 93.23978285],  # sampled from Beta(20, 2)
+                "a": [
+                    5.27071512,
+                    7.05981507,
+                    8.46671693,
+                    10.20629973,
+                    6.15519149,
+                    7.11709362,
+                    5.31915535,
+                    6.56441299,
+                    5.69143401,
+                    5.0389317,
+                    6.48222587,
+                    5.62433534,
+                    5.46219467,
+                    5.74686441,
+                    6.05413964,
+                    7.09435276,
+                    6.43876861,
+                    6.05301145,
+                    6.12727457,
+                    6.80603351,
+                ],  # sampled from Gamma(1, 5)
+                "b": [
+                    81.11265955,
+                    76.7836479,
+                    85.25019592,
+                    93.93285666,
+                    83.63587009,
+                    81.88712944,
+                    80.37321975,
+                    86.786491,
+                    80.05277435,
+                    70.36302516,
+                    79.4907302,
+                    84.1288281,
+                    87.79298488,
+                    78.02771047,
+                    80.63975023,
+                    88.59461893,
+                    84.05632481,
+                    84.54128192,
+                    78.74152549,
+                    83.60684806,
+                ],  # sampled from Beta(50, 10)
+                "c": [
+                    95.74648827,
+                    80.4031074,
+                    85.41863916,
+                    93.98001949,
+                    97.84607818,
+                    89.01205412,
+                    89.55045229,
+                    97.32734707,
+                    93.94199505,
+                    88.19992377,
+                    98.3336087,
+                    97.66984436,
+                    97.39464709,
+                    95.55637873,
+                    96.10980996,
+                    90.18004343,
+                    96.2019293,
+                    89.19519753,
+                    94.01807868,
+                    93.23978285,
+                ],  # sampled from Beta(20, 2)
             },
             "tests": [
                 {
@@ -195,14 +250,24 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "title": "negative_test_abs_skew",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "c", "abs": True, "min_value": 0, "max_value": 0.5},
+                    "in": {
+                        "column": "c",
+                        "abs": True,
+                        "min_value": 0,
+                        "max_value": 0.5,
+                    },
                     "out": {"success": False, "observed_value": 0.9979514313860596},
                 },
                 {
                     "title": "positive_test_abs_skew",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "c", "abs": True, "min_value": 0.5, "max_value": 10},
+                    "in": {
+                        "column": "c",
+                        "abs": True,
+                        "min_value": 0.5,
+                        "max_value": 10,
+                    },
                     "out": {"success": True, "observed_value": 0.9979514313860596},
                 },
             ],
@@ -319,11 +384,11 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
     #     ]
 
     def _validate(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
         return self._validate_metric_value_between(
             metric_name="column.custom.skew",
