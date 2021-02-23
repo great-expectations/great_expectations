@@ -552,7 +552,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
         elif self.engine.dialect.name.lower() == "ibm_db_sa":
             self.dialect = import_library_module(
-                module_name="ibm_db_sa.ibm_db"
+                module_name="ibm_db_sa"
             )
         else:
             self.dialect = None
@@ -608,7 +608,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # reflection will not find the temporary schema
             self.columns = self.column_reflection_fallback()
 
-        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
+        # Use fallback because for mssql and IBM_Db2, reflection doesn't
+        # throw an error but returns an empty list
         if len(self.columns) == 0:
             self.columns = self.column_reflection_fallback()
 
@@ -1309,7 +1310,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
         else:
-            stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS ( {custom_sql} )'.format(
+            # IBM Db2 can't handle quotes around table_name
+            # IBM Db2 requires parenthesis around custom_sql
+            stmt = 'CREATE TEMPORARY TABLE {table_name} AS ( {custom_sql} )'.format(
                 table_name=table_name, custom_sql=custom_sql
             )
 
@@ -1343,7 +1346,10 @@ WHERE
             ]
         else:
             query: Select = sa.select([sa.text("*")]).select_from(self._table).limit(1)
-            col_names: list = self.engine.execute(query).keys()
+            # IBM Db2 can't process '.limit(1)' without compilation
+            response = self.engine.execute(
+                query.compile(compile_kwargs={"literal_binds": True}))
+            col_names: list = response.keys()
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
         return col_info_dict_list
 
