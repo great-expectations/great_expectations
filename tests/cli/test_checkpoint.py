@@ -204,6 +204,11 @@ def test_checkpoint_list_with_eight_checkpoints(
     )
 
 
+@pytest.mark.xfail(
+    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -244,6 +249,11 @@ def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
     )
 
 
+@pytest.mark.xfail(
+    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -289,6 +299,11 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
     )
 
 
+@pytest.mark.xfail(
+    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -388,6 +403,11 @@ batches:
     )
 
 
+@pytest.mark.xfail(
+    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -444,6 +464,11 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     )
 
 
+@pytest.mark.xfail(
+    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
+    run=True,
+    strict=True,
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
