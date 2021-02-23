@@ -201,6 +201,41 @@ def checkpoint_list(ctx):
 
 
 # TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
+@checkpoint.command(name="delete")
+@click.argument("checkpoint")
+@mark.cli_as_experimental
+@click.pass_context
+def checkpoint_delete(ctx, checkpoint):
+    """Delete a checkpoint. (Experimental)"""
+    usage_event: str = "cli.checkpoint.delete"
+
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.get("CONFIG_FILE_LOCATION")
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+
+    try:
+        toolkit.delete_checkpoint(
+            context=context,
+            checkpoint_name=checkpoint,
+            usage_event=usage_event,
+        )
+    except Exception as e:
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event,
+            message=f"<red>{e}</red>",
+        )
+        return
+
+    cli_message(f'Checkpoint "{checkpoint}" deleted.')
+    sys.exit(0)
+
+
+# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
 @mark.cli_as_experimental
