@@ -1,6 +1,7 @@
 trigger:
   - develop
   - main
+  - cli_wip # TODO: <Alex>Reject this line and other changes from cli_wip before merging into develop.</Alex>
 
 resources:
   containers:
@@ -64,7 +65,7 @@ stages:
       - job: compatibility_matrix
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
-          GE_pytest_opts: '--no-sqlalchemy --no-spark'
+          GE_pytest_opts: '--no-sqlalchemy --no-spark --ignore-glob=v012'
         strategy:
           matrix:
             Python36-Pandas023:
@@ -125,7 +126,7 @@ stages:
 
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
-          GE_pytest_opts: ''
+          GE_pytest_opts: '--ignore-glob=v012'
 
         strategy:
           matrix:
@@ -256,7 +257,7 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore-glob=v012
             displayName: 'pytest'
 
       - job: mssql
@@ -286,7 +287,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore-glob=v012
             displayName: 'pytest'
 
   - stage: deploy
