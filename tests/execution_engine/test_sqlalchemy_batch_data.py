@@ -118,4 +118,4 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
         }
     )
     res = engine.get_batch_data_and_markers(batch_spec=my_batch_spec)
-    assert len(res) == 1
+    assert len(res) == 2
