@@ -56,6 +56,138 @@ def titanic_checkpoint(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+def test_checkpoint_delete_with_non_existent_checkpoint(
+    mock_emit, caplog, empty_data_context_stats_enabled
+):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
+    context: DataContext = empty_data_context_stats_enabled
+    root_dir: str = context.root_directory
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"-c {root_dir} checkpoint delete my_checkpoint",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 1
+    assert "Could not find checkpoint `my_checkpoint`." in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.delete", "event_payload": {}, "success": False}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_delete_with_single_checkpoint_confirm_success(
+    mock_emit,
+    caplog,
+    empty_context_with_checkpoint_v1_stats_enabled,
+):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    root_dir: str = context.root_directory
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"-c {root_dir} checkpoint delete my_v1_checkpoint",
+        input="\n",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 0
+    assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event": "cli.checkpoint.delete", "event_payload": {}, "success": True}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        caplog,
+        result,
+    )
+
+    result = runner.invoke(
+        cli,
+        f"-c {root_dir} checkpoint list",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "No checkpoints found." in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_delete_with_single_checkpoint_cancel_success(
+    mock_emit,
+    caplog,
+    empty_context_with_checkpoint_v1_stats_enabled,
+):
+    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
+    mock_emit.reset_mock()
+
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    root_dir: str = context.root_directory
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"-c {root_dir} checkpoint delete my_v1_checkpoint",
+        input="n\n",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 0
+    assert 'The checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
+
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        caplog,
+        result,
+    )
+
+    result = runner.invoke(
+        cli,
+        f"-c {root_dir} checkpoint list",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "Found 1 checkpoint." in stdout
+    assert "my_v1_checkpoint" in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_list_with_no_checkpoints(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
@@ -63,14 +195,14 @@ def test_checkpoint_list_with_no_checkpoints(
     mock_emit.reset_mock()
 
     context: DataContext = empty_data_context_stats_enabled
-    root_dir = context.root_directory
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    root_dir: str = context.root_directory
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"-c {root_dir} checkpoint list",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
     assert result.exit_code == 0
     assert "No checkpoints found." in stdout
     assert "Use the command `great_expectations checkpoint new` to create one" in stdout
@@ -206,7 +338,7 @@ def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
     )
     stdout = result.stdout
     assert result.exit_code == 1
-    assert "Could not find a suite named `not_a_suite`" in stdout
+    assert "Could not find a suite named `not_a_suite`." in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -518,7 +650,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     )
     stdout: str = result.stdout
     assert result.exit_code == 1
-    assert "Could not find checkpoint `my_checkpoint`" in stdout
+    assert "Could not find checkpoint `my_checkpoint`." in stdout
     assert "Try running" in stdout
 
     assert mock_emit.call_count == 2

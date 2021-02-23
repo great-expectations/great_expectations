@@ -351,6 +351,33 @@ def exit_with_failure_message_and_stats(
     sys.exit(1)
 
 
+def delete_checkpoint(
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+):
+    """Delete a checkpoint or raise helpful errors."""
+    failure_message: str = "Exception occurred while deleting checkpoint."
+    validate_checkpoint(
+        context=context,
+        checkpoint_name=checkpoint_name,
+        usage_event=usage_event,
+        failure_message=failure_message,
+    )
+    confirm_prompt: str = f"""\nAre you sure you want to delete the checkpoint "{checkpoint_name}" (this action is
+irreversible)?"
+    """
+    continuation_message: str = (
+        f'The checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
+    )
+    confirm_proceed_or_exit(
+        confirm_prompt=confirm_prompt,
+        continuation_message=continuation_message,
+    )
+    context.delete_checkpoint(name=checkpoint_name)
+    send_usage_message(context, event=usage_event, success=True)
+
+
 def run_checkpoint(
     context: DataContext,
     checkpoint_name: str,
