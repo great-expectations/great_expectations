@@ -72,7 +72,10 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     )
     stdout = result.stdout
     assert result.exit_code == 1
-    assert "Could not find checkpoint `my_checkpoint`." in stdout
+    assert (
+        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
+        in stdout
+    )
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -650,7 +653,10 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     )
     stdout: str = result.stdout
     assert result.exit_code == 1
-    assert "Could not find checkpoint `my_checkpoint`." in stdout
+    assert (
+        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
+        in stdout
+    )
     assert "Try running" in stdout
 
     assert mock_emit.call_count == 2
@@ -907,7 +913,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     stdout: str = result.stdout
     assert result.exit_code == 1
 
-    assert "Exception occurred while running validation" in stdout
+    assert "Exception occurred while running checkpoint" in stdout
     assert (
         "of checkpoint 'no_suite': validation expectation_suite_name must be specified"
         in stdout
@@ -1376,7 +1382,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     )
     stdout: str = result.stdout
     assert result.exit_code == 1
-    assert "Exception occurred while running validation." in stdout
+    assert "Exception occurred while running checkpoint." in stdout
 
     assert mock_emit.call_count == 4
 
@@ -1445,7 +1451,10 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
         catch_exceptions=False,
     )
     stdout = result.stdout
-    assert "Could not find checkpoint `not_a_checkpoint`." in stdout
+    assert (
+        "Could not find checkpoint `not_a_checkpoint` (or its configuration is invalid)."
+        in stdout
+    )
     assert "Try running" in stdout
     assert result.exit_code == 1
 

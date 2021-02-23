@@ -357,12 +357,10 @@ def delete_checkpoint(
     usage_event: str,
 ):
     """Delete a checkpoint or raise helpful errors."""
-    failure_message: str = "Exception occurred while deleting checkpoint."
     validate_checkpoint(
         context=context,
         checkpoint_name=checkpoint_name,
         usage_event=usage_event,
-        failure_message=failure_message,
     )
     confirm_prompt: str = f"""\nAre you sure you want to delete the checkpoint "{checkpoint_name}" (this action is
 irreversible)?"
@@ -384,7 +382,7 @@ def run_checkpoint(
     usage_event: str,
 ) -> CheckpointResult:
     """Run a checkpoint or raise helpful errors."""
-    failure_message: str = "Exception occurred while running validation."
+    failure_message: str = "Exception occurred while running checkpoint."
     validate_checkpoint(
         context=context,
         checkpoint_name=checkpoint_name,
@@ -437,7 +435,7 @@ def load_checkpoint(
             context,
             usage_event,
             f"""\
-<red>Could not find checkpoint `{checkpoint_name}`.</red> Try running:
+<red>Could not find checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
