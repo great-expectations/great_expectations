@@ -125,6 +125,17 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
+
+        min_val = None
+        max_val = None
+        if "min_value" in configuration.kwargs:
+            min_val = configuration.kwargs["min_value"]
+        if "max_value" in configuration.kwargs:
+            max_val = configuration.kwargs["max_value"]
+        assert (
+            min_val is not None or max_val is not None
+        ), "min_value and max_value cannot both be None"
+
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     # NOTE: This method is a pretty good example of good usage of `params`.
