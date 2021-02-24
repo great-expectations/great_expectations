@@ -247,7 +247,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
                     "title": "positive_test_neg_kurtosis",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "a", "min_value": -np.inf, "max_value": 0},
+                    "in": {"column": "a", "min_value": -1000, "max_value": 0},
                     "out": {"success": True, "observed_value": -1.3313434082203324},
                 },
                 {
