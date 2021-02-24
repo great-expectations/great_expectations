@@ -9,7 +9,6 @@ import click
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
 
-from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.cli.v012.cli_messages import SECTION_SEPARATOR
@@ -20,8 +19,11 @@ from great_expectations.cli.v012.util import cli_colorize_string, cli_message
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message as send_usage_stats_message,
+)
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -623,3 +625,20 @@ def confirm_proceed_or_exit(
         else:
             return False
     return True
+
+
+def send_usage_message(
+    data_context: DataContext,
+    event: str,
+    event_payload: Optional[dict] = None,
+    success: bool = False,
+):
+    if event_payload is None:
+        event_payload = {}
+    event_payload.update({"cli_version": "v012"})
+    send_usage_stats_message(
+        data_context=data_context,
+        event=event,
+        event_payload=event_payload,
+        success=success,
+    )

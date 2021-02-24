@@ -8,7 +8,6 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.cli.toolkit import load_data_context_with_error_handling
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
 
@@ -28,7 +27,7 @@ def project_check_config(ctx):
     ).get("directory")
     is_config_ok, error_message, context = do_config_check(directory)
     if context:
-        send_usage_message(
+        toolkit.send_usage_message(
             data_context=context, event="cli.project.check_config", success=True
         )
     if not is_config_ok:

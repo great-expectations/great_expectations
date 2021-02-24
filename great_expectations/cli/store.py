@@ -6,7 +6,6 @@ from great_expectations.cli.pretty_printing import (
     cli_message_dict,
     display_not_implemented_message_and_exit,
 )
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 
 @click.group()
@@ -30,7 +29,7 @@ def store_list(ctx):
 
         if len(stores) == 0:
             cli_message("No Stores found")
-            send_usage_message(
+            toolkit.send_usage_message(
                 data_context=context, event="cli.store.list", success=True
             )
             return
@@ -45,7 +44,11 @@ def store_list(ctx):
             cli_message("")
             cli_message_dict(store)
 
-        send_usage_message(data_context=context, event="cli.store.list", success=True)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.store.list", success=True
+        )
     except Exception as e:
-        send_usage_message(data_context=context, event="cli.store.list", success=False)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.store.list", success=False
+        )
         raise e
