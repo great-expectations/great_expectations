@@ -317,7 +317,7 @@ def test_checkpoint_list_with_eight_checkpoints(
 
 @pytest.mark.xfail(
     reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=False,
+    run=True,
     strict=True,
 )
 @mock.patch(
@@ -362,7 +362,7 @@ def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
 
 @pytest.mark.xfail(
     reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=False,
+    run=True,
     strict=True,
 )
 @mock.patch(
@@ -1925,7 +1925,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
 
 @pytest.mark.xfail(
     reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=False,
+    run=True,
     strict=True,
 )
 @mock.patch(

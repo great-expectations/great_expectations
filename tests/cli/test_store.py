@@ -3,7 +3,6 @@ from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from great_expectations.exceptions import InvalidConfigurationYamlError
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -115,7 +114,6 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
         f"-c {project_dir} --new-api store list",
         catch_exceptions=False,
     )
-    print(result.output)
     assert result.exit_code == 0
     assert result.output.strip() == expected_result
 
