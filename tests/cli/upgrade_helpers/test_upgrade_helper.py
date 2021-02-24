@@ -62,7 +62,7 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
             "-c",
             v10_project_directory,
             "--new-api",
-            "suite",
+            "checkpoint",
             "list",
         ],
         input="n\n",
