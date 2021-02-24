@@ -633,11 +633,6 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -680,11 +675,6 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -731,11 +721,6 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -857,11 +842,6 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -955,11 +935,6 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1042,11 +1017,6 @@ def test_checkpoint_run_on_non_existent_validations(
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1189,11 +1159,6 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1334,11 +1299,6 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1964,8 +1924,8 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
 
 
 @pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
+    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
+    run=False,
     strict=True,
 )
 @mock.patch(

@@ -247,7 +247,6 @@ def checkpoint_delete(ctx, checkpoint):
 @click.pass_context
 def checkpoint_run(ctx, checkpoint):
     """Run a checkpoint. (Experimental)"""
-    display_not_implemented_message_and_exit()
     usage_event: str = "cli.checkpoint.run"
 
     directory: str = toolkit.parse_cli_config_file_location(

@@ -6,10 +6,7 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
-from great_expectations.cli.pretty_printing import (
-    cli_message,
-    display_not_implemented_message_and_exit,
-)
+from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.cli.toolkit import load_data_context_with_error_handling
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
@@ -25,7 +22,6 @@ def project():
 @click.pass_context
 def project_check_config(ctx):
     """Check a config for validity and help with migrations."""
-    display_not_implemented_message_and_exit()
     cli_message("Checking your config files for validity...\n")
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
@@ -47,7 +43,6 @@ def project_check_config(ctx):
 @click.pass_context
 def project_upgrade(ctx):
     """Upgrade a project after installing the next Great Expectations major version."""
-    display_not_implemented_message_and_exit()
     cli_message("\nChecking project...")
     cli_message(SECTION_SEPARATOR)
     directory = toolkit.parse_cli_config_file_location(
