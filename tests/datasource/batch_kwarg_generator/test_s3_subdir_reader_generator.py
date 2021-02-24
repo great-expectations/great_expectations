@@ -12,7 +12,7 @@ from great_expectations.datasource.batch_kwargs_generator import (
 )
 from great_expectations.exceptions import BatchKwargsError
 
-port = 5555
+port = 5554
 url_host = os.getenv("GE_TEST_LOCALHOST_URL", "localhost")
 endpoint_uri = f"http://{url_host}:%s/" % port
 os.environ["AWS_ACCESS_KEY_ID"] = "dummy_key"
