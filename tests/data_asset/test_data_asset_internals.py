@@ -52,7 +52,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
             ExpectationConfiguration(
                 expectation_type="expect_compound_columns_to_be_unique",
                 kwargs={"column_list": ["y", "z"]},
-                ),
+            ),
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
