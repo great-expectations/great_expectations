@@ -278,6 +278,7 @@ def pytest_generate_tests(metafunc):
                             + ":"
                             + test["title"]
                         )
+
     metafunc.parametrize("test_case", parametrized_tests, ids=ids)
 
 
@@ -287,6 +288,7 @@ def test_case_runner_cfe(test_case):
 
     # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
     # test_case["batch"]._initialize_expectations()
+
     evaluate_json_test_cfe(
         validator=test_case["validator_with_data"],
         expectation_type=test_case["expectation_type"],
