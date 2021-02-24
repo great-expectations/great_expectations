@@ -802,7 +802,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
-        return sa.select("*").select_from(sa.text(table_name)).where(split_clause)
+        return (
+            sa.select("*")
+            .select_from(
+                sa.table(table_name, schema=batch_spec.get("schema_name", None))
+            )
+            .where(split_clause)
+        )
 
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
