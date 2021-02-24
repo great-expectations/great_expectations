@@ -30,6 +30,8 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         "y", [1, 2, 4], catch_exceptions=True, include_config=True
     )
     df.expect_column_values_to_match_regex("z", "ello")
+    df.expect_compound_columns_to_be_unique(column_list=["x", "y"])
+    df.expect_compound_columns_to_be_unique(column_list=["y", "z"])
 
     ### First test set ###
 
@@ -42,6 +44,14 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_match_regex",
                 kwargs={"column": "z", "regex": "ello"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["x", "y"]},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["y", "z"]},
             ),
         ],
         expectation_suite_name="default",
@@ -71,6 +81,14 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_match_regex",
                 kwargs={"column": "z", "regex": "ello"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["x", "y"]},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["y", "z"]},
             ),
         ],
         expectation_suite_name="default",
@@ -102,6 +120,14 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
                 expectation_type="expect_column_values_to_match_regex",
                 kwargs={"column": "z", "regex": "ello", "result_format": "BASIC"},
             ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["x", "y"], "result_format": "BASIC"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["y", "z"], "result_format": "BASIC"},
+            ),
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
@@ -112,7 +138,6 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         discard_include_config_kwargs=False,
         discard_catch_exceptions_kwargs=False,
     )
-
     df.save_expectation_suite(
         directory_name + "/temp3.json",
         discard_result_format_kwargs=False,
