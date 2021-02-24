@@ -125,51 +125,18 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
 
         min_val = None
         max_val = None
-
-        # Setting these values if they are available
         if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
-
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
+        assert (
+            min_val is not None or max_val is not None
+        ), "min_value and max_value cannot both be None"
 
-        try:
-            # Ensuring Proper interval has been provided
-            assert (
-                min_val is not None or max_val is not None
-            ), "min_value and max_value cannot both be None"
-            assert min_val is None or isinstance(
-                min_val, (float, int, dict)
-            ), "Provided min threshold must be a number"
-            if isinstance(min_val, dict):
-                assert (
-                    "$PARAMETER" in min_val
-                ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
-
-            assert max_val is None or isinstance(
-                max_val, (float, int, dict)
-            ), "Provided max threshold must be a number"
-            if isinstance(max_val, dict):
-                assert "$PARAMETER" in max_val, (
-                    "Evaluation Parameter dict for max_value "
-                    "kwarg "
-                    'must have "$PARAMETER" key'
-                )
-
-        except AssertionError as e:
-            raise InvalidExpectationConfigurationError(str(e))
-
-        if min_val is not None and max_val is not None and min_val > max_val:
-            raise InvalidExpectationConfigurationError(
-                "Minimum Threshold cannot be larger than Maximum Threshold"
-            )
-
-        return True
+        self.validate_metric_value_between_configuration(configuration=configuration)
 
     # NOTE: This method is a pretty good example of good usage of `params`.
     @classmethod
