@@ -2,8 +2,7 @@ import json
 import os
 import shutil
 
-import pytest
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 from freezegun import freeze_time
 from moto import mock_s3
 
@@ -23,11 +22,6 @@ except ImportError:
     from unittest import mock
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     # test great_expectations project upgrade command with project with config_version 2
 
@@ -39,14 +33,14 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
         os.path.join(v10_project_directory, "great_expectations.yml"),
     )
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         ["-c", v10_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
 
     assert "Checking project..." in stdout
     assert "Your project is up-to-date - no further upgrade is necessary." in stdout
@@ -57,17 +51,12 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplog):
     # test if cli detects out of date project and asks to run upgrade helper
     # decline upgrade and ensure config version was not modified
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         [
             "-c",
@@ -79,7 +68,7 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
         input="n\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
 
     assert (
         "Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3."
@@ -99,14 +88,17 @@ def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplo
         "36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
         in stdout
     )
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
     # make sure config version unchanged
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1
+        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1.0
     )
 
-    expected_project_tree_str = """\
+    expected_project_tree_str: str = """\
 great_expectations/
     .gitignore
     great_expectations.yml
@@ -139,27 +131,22 @@ great_expectations/
                     20200430T191246.763896Z/
                         c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
-    obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
+    obs_project_tree_str: str = gen_directory_tree_str(startpath=v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @freeze_time("09/26/2019 13:42:41")
 def test_basic_project_upgrade(v10_project_directory, caplog):
     # test project upgrade that requires no manual steps
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         ["-c", v10_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
 
     with open(
         file_relative_path(
@@ -167,13 +154,13 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
             "../../test_fixtures/upgrade_helper/test_basic_project_upgrade_expected_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout: str = f.read()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
         assert stdout == expected_stdout
 
-    expected_project_tree_str = """\
+    expected_project_tree_str: str = """\
 great_expectations/
     .gitignore
     great_expectations.yml
@@ -214,11 +201,11 @@ great_expectations/
                         20200430T191246.763896Z/
                             c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
-    obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
+    obs_project_tree_str: str = gen_directory_tree_str(startpath=v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 3
+        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 3.0
     )
 
     with open(
@@ -227,26 +214,21 @@ great_expectations/
             "../../test_fixtures/upgrade_helper/UpgradeHelperV11_basic_upgrade_log.json",
         )
     ) as f:
-        expected_upgrade_log_dict = json.load(f)
-        expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
+        expected_upgrade_log_dict: dict = json.load(f)
+        expected_upgrade_log_str: str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
-        expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
+        expected_upgrade_log_dict: dict = json.loads(expected_upgrade_log_str)
 
     with open(
         f"{v10_project_directory}/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json"
     ) as f:
-        obs_upgrade_log_dict = json.load(f)
+        obs_upgrade_log_dict: dict = json.load(f)
 
     assert obs_upgrade_log_dict == expected_upgrade_log_dict
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @freeze_time("09/26/2019 13:42:41")
 def test_project_upgrade_with_manual_steps(
     v10_project_directory, caplog, sa, postgresql_engine
@@ -263,14 +245,14 @@ def test_project_upgrade_with_manual_steps(
         os.path.join(v10_project_directory, "great_expectations.yml"),
     )
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         ["-c", v10_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
 
     with open(
         file_relative_path(
@@ -278,13 +260,13 @@ def test_project_upgrade_with_manual_steps(
             "../../test_fixtures/upgrade_helper/test_project_upgrade_with_manual_steps_expected_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout: str = f.read()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
         assert stdout == expected_stdout
 
-    pycache_dir_path = os.path.join(
+    pycache_dir_path: str = os.path.join(
         v10_project_directory, "plugins", "custom_store_backends", "__pycache__"
     )
     try:
@@ -292,7 +274,7 @@ def test_project_upgrade_with_manual_steps(
     except FileNotFoundError:
         pass
 
-    expected_project_tree_str = """\
+    expected_project_tree_str: str = """\
 great_expectations/
     .gitignore
     great_expectations.yml
@@ -332,11 +314,11 @@ great_expectations/
                         20200430T191246.763896Z/
                             c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
-    obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
+    obs_project_tree_str: str = gen_directory_tree_str(startpath=v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1
+        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1.0
     )
 
     with open(
@@ -345,8 +327,8 @@ great_expectations/
             "../../test_fixtures/upgrade_helper/UpgradeHelperV11_manual_steps_upgrade_log.json",
         )
     ) as f:
-        expected_upgrade_log_dict = json.load(f)
-        expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
+        expected_upgrade_log_dict: dict = json.load(f)
+        expected_upgrade_log_str: str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
@@ -355,16 +337,11 @@ great_expectations/
     with open(
         f"{v10_project_directory}/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json"
     ) as f:
-        obs_upgrade_log_dict = json.load(f)
+        obs_upgrade_log_dict: dict = json.load(f)
 
     assert obs_upgrade_log_dict == expected_upgrade_log_dict
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @freeze_time("09/26/2019 13:42:41")
 @mock_s3
 def test_project_upgrade_with_exception(v10_project_directory, caplog):
@@ -379,14 +356,14 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
         os.path.join(v10_project_directory, "great_expectations.yml"),
     )
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         ["-c", v10_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
 
     with open(
         file_relative_path(
@@ -394,13 +371,13 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
             "../../test_fixtures/upgrade_helper/test_project_upgrade_with_exception_expected_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout: str = f.read()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
         assert stdout == expected_stdout
 
-    expected_project_tree_str = """\
+    expected_project_tree_str: str = """\
 great_expectations/
     .gitignore
     great_expectations.yml
@@ -440,11 +417,11 @@ great_expectations/
                         20200430T191246.763896Z/
                             c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
-    obs_project_tree_str = gen_directory_tree_str(v10_project_directory)
+    obs_project_tree_str: str = gen_directory_tree_str(startpath=v10_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number not incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1
+        DataContext.get_ge_config_version(context_root_dir=v10_project_directory) == 1.0
     )
 
     with open(
@@ -453,8 +430,8 @@ great_expectations/
             "../../test_fixtures/upgrade_helper/UpgradeHelperV11_basic_upgrade_with_exception_log.json",
         )
     ) as f:
-        expected_upgrade_log_dict = json.load(f)
-        expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
+        expected_upgrade_log_dict: dict = json.load(f)
+        expected_upgrade_log_str: str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
             "GE_PROJECT_DIR", v10_project_directory
         )
@@ -466,29 +443,24 @@ great_expectations/
     with open(
         f"{v10_project_directory}/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json"
     ) as f:
-        obs_upgrade_log_dict = json.load(f)
+        obs_upgrade_log_dict: dict = json.load(f)
         obs_upgrade_log_dict["exceptions"][0]["exception_message"] = ""
 
     assert obs_upgrade_log_dict == expected_upgrade_log_dict
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @freeze_time("01/19/2021 13:26:39")
 def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
     # test project upgrade that requires no manual steps
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         ["-c", v20_project_directory, "--new-api", "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    stdout: str = result.stdout
 
     with open(
         file_relative_path(
@@ -496,13 +468,13 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
             "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_expected_stdout.fixture",
         )
     ) as f:
-        expected_stdout = f.read()
+        expected_stdout: str = f.read()
         expected_stdout = expected_stdout.replace(
             "GE_PROJECT_DIR", v20_project_directory
         )
         assert stdout == expected_stdout
 
-    expected_project_tree_str = """\
+    expected_project_tree_str: str = """\
 great_expectations/
     .gitignore
     great_expectations.yml
@@ -550,11 +522,11 @@ great_expectations/
                     20200430T191246.763896Z/
                         c3b4c5df224fef4b1a056a0f3b93aba5.json
 """
-    obs_project_tree_str = gen_directory_tree_str(v20_project_directory)
+    obs_project_tree_str: str = gen_directory_tree_str(startpath=v20_project_directory)
     assert obs_project_tree_str == expected_project_tree_str
     # make sure config number incremented
     assert (
-        DataContext.get_ge_config_version(context_root_dir=v20_project_directory) == 3
+        DataContext.get_ge_config_version(context_root_dir=v20_project_directory) == 3.0
     )
 
     with open(
@@ -563,8 +535,8 @@ great_expectations/
             "../../test_fixtures/upgrade_helper/UpgradeHelperV13_basic_upgrade_log.json",
         )
     ) as f:
-        expected_upgrade_log_dict = json.load(f)
-        expected_upgrade_log_str = json.dumps(expected_upgrade_log_dict)
+        expected_upgrade_log_dict: dict = json.load(f)
+        expected_upgrade_log_str: str = json.dumps(expected_upgrade_log_dict)
         expected_upgrade_log_str = expected_upgrade_log_str.replace(
             "GE_PROJECT_DIR", v20_project_directory
         )
@@ -573,6 +545,6 @@ great_expectations/
     with open(
         f"{v20_project_directory}/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json"
     ) as f:
-        obs_upgrade_log_dict = json.load(f)
+        obs_upgrade_log_dict: dict = json.load(f)
 
     assert obs_upgrade_log_dict == expected_upgrade_log_dict
