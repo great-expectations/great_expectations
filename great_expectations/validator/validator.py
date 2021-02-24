@@ -697,6 +697,14 @@ class Validator:
         """Getter for active batch id"""
         return self.execution_engine.active_batch_data_id
 
+    @active_batch_id.setter
+    def active_batch_id(self, batch_id):
+        self.execution_engine.active_batch_data_id = batch_id
+
+    @property
+    def loaded_batch_ids(self):
+        return self.execution_engine.loaded_batch_data_ids
+
     @property
     def active_batch_markers(self):
         """Getter for active batch's batch markers"""

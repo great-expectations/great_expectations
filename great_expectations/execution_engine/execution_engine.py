@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterable, Tuple, Union
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchMarkers, BatchSpec
-from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.exceptions import ExecutionEngineError, GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -83,8 +83,8 @@ class ExecutionEngine(ABC):
         self._batch_data_dict = {}
         if batch_data_dict is None:
             batch_data_dict = {}
-        self._load_batch_data_from_dict(batch_data_dict)
         self._active_batch_data_id = None
+        self._load_batch_data_from_dict(batch_data_dict)
 
         # Gather the call arguments of the present function (and add the "class_name"), filter out the Falsy values, and
         # set the instance "_config" variable equal to the resulting dictionary.
@@ -118,6 +118,15 @@ class ExecutionEngine(ABC):
         else:
             return None
 
+    @active_batch_data_id.setter
+    def active_batch_data_id(self, batch_id):
+        if batch_id in self.loaded_batch_data_dict.keys():
+            self._active_batch_data_id = batch_id
+        else:
+            raise ExecutionEngineError(
+                f"Unable to set active_batch_data_id to {batch_id}. The may data may not be loaded."
+            )
+
     @property
     def active_batch_data(self):
         """The data from the currently-active batch."""
@@ -130,6 +139,10 @@ class ExecutionEngine(ABC):
     def loaded_batch_data_dict(self):
         """The current dictionary of batches."""
         return self._batch_data_dict
+
+    @property
+    def loaded_batch_data_ids(self):
+        return list(self.loaded_batch_data_dict.keys())
 
     @property
     def config(self) -> dict:

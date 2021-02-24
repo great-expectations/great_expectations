@@ -97,6 +97,18 @@ class BaseDatasource:
             )
         return batch_list[0]
 
+    def get_batch_definition_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> List[BatchDefinition]:
+        self._validate_batch_request(batch_request=batch_request)
+
+        data_connector: DataConnector = self.data_connectors[
+            batch_request.data_connector_name
+        ]
+        return data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
+
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
