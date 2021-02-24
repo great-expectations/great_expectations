@@ -278,7 +278,6 @@ def pytest_generate_tests(metafunc):
                             + ":"
                             + test["title"]
                         )
-
     metafunc.parametrize("test_case", parametrized_tests, ids=ids)
 
 
