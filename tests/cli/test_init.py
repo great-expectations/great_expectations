@@ -3,7 +3,7 @@ import shutil
 from unittest import mock
 
 import pytest
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -115,22 +115,21 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     The user just checked an existing project out of source control and does
     not yet have an uncommitted directory.
     """
-    root_dir = tmp_path_factory.mktemp("hiya")
-    root_dir = str(root_dir)
+    root_dir: str = str(tmp_path_factory.mktemp("hiya"))
     os.makedirs(os.path.join(root_dir, "data"))
-    data_folder_path = os.path.join(root_dir, "data")
-    data_path = os.path.join(root_dir, "data", "Titanic.csv")
-    fixture_path = file_relative_path(
+    data_folder_path: str = os.path.join(root_dir, "data")
+    data_path: str = os.path.join(root_dir, "data", "Titanic.csv")
+    fixture_path: str = file_relative_path(
         __file__, os.path.join("..", "test_sets", "Titanic.csv")
     )
     shutil.copy(fixture_path, data_path)
 
     # Create a new project from scratch that we will use for the test in the next step
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        ["-c", root_dir, "init"],
+        ["-c", root_dir, "--new-api", "init"],
         input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(
             data_folder_path, data_path, catch_exceptions=False
         ),
