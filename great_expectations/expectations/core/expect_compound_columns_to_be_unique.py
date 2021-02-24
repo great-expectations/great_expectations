@@ -25,12 +25,8 @@ class ExpectCompoundColumnsToBeUnique(TableExpectation):
     }
 
     metric_dependencies = tuple()
-    domain_keys = (
-        "column_list",
-    )
-    success_keys = (
-        "ignore_row_if",
-    )
+    domain_keys = ("column_list",)
+    success_keys = ("ignore_row_if",)
     default_kwarg_values = {
         "ignore_row_if": "all_values_are_missing",
         "result_format": "BASIC",
