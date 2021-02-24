@@ -32,7 +32,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
     df.expect_column_values_to_match_regex("z", "ello")
     df.expect_compound_columns_to_be_unique(column_list=["x", "y"])
     df.expect_compound_columns_to_be_unique(column_list=["y", "z"])
-    #
+
     ### First test set ###
 
     output_config = ExpectationSuite(
