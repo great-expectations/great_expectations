@@ -10,18 +10,18 @@ Changelog
 * [FEATURE] Add "table.head" metric
 * [FEATURE] Add support for BatchData as a core GE concept for all Execution Engines. #2395
  * NOTE: As part of our improvements to the underlying Batch API, we have refactored BatchSpec to be part of the "core" package in Great Expectations, consistent with its role coordinating communication about Batches between the Datasource and Execution Engine abstractions.
-* [ENHANCEMENT] Explicit support for schema_name in the SqlAlchemyBatchData #2465 Issue #2340
+* [ENHANCEMENT] Explicit support for schema_name in the SqlAlchemyBatchData #2465. Issue #2340
 * [ENHANCEMENT] Data docs can now be built skipping the index page using the python API #2224
-* [ENHANCEMENT] Evaluation parameter runtime values rendering in data docs if arithmetic is present #2447 issue #2215
+* [ENHANCEMENT] Evaluation parameter runtime values rendering in data docs if arithmetic is present #2447. Issue #2215
 * [ENHANCEMENT] When connecting to new Datasource, CLI prompt is consistent with rest of GE #2434
 * [ENHANCEMENT] Adds basic test for bad s3 paths generated from regex #2427 (Thanks @lukedyer-peak!)
 * [ENHANCEMENT] Updated UserConfigurableProfiler date parsing error handling #2459
 * [ENHANCEMENT] Clarification of self_check error messages #2304
 * [ENHANCEMENT] Allows gzipped files and other encodings to be read from S3 #2440 (Thanks @luke321321!)
-* [BUGFIX] `expect_column_unique_value_count_to_be_between` renderer bug (duplicate "Distinct (%)") #2455 issue #2423
+* [BUGFIX] `expect_column_unique_value_count_to_be_between` renderer bug (duplicate "Distinct (%)") #2455. Issue #2423
 * [BUGFIX] Fix S3 Test issue by pinning `moto` version < 2.0.0 #2470
-* [BUGFIX] Check for datetime-parseable strings in validate_metric_value_between_configuration #2419 issue #2340 (Thanks @victorwyee!)
-* [BUGFIX] `expect_compound_columns_to_be_unique` ExpectationConfig added #2471 issue #2464
+* [BUGFIX] Check for datetime-parseable strings in validate_metric_value_between_configuration #2419. Issue #2340 (Thanks @victorwyee!)
+* [BUGFIX] `expect_compound_columns_to_be_unique` ExpectationConfig added #2471 Issue #2464
 * [BUGFIX] In basic profiler, handle date parsing and overflow exceptions separately #2431 (Thanks @peterdhansen!)
 * [BUGFIX] Fix sqlalchemy column comparisons when comparison was done between different datatypes #2443 (Thanks @peterdhansen!)
 * [BUGFIX] Fix divide by zero error in expect_compound_columns_to_be_unique #2454 (Thanks @jdimatteo!)
