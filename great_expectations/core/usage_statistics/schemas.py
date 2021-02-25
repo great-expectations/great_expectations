@@ -304,24 +304,37 @@ save_or_edit_expectation_suite_payload_schema = {
         "anonymized_expectation_suite_name": {
             "$ref": "#/definitions/anonymized_string"
         },
-        "cli_version": {"type": "string", "maxLength": 256},
     },
-    "required": ["anonymized_expectation_suite_name", "cli_versioon"],
+    "required": ["anonymized_expectation_suite_name"],
     "additionalProperties": False,
 }
 
-cli_basic_payload = {
+cli_suite_edit_expectation_suite_payload_schema = {
+    "$schema": "https://json-schema.org/draft-04/schema",
+    "definitions": {"anonymized_string": anonymized_string_schema},
+    "type": "object",
+    "properties": {
+        "anonymized_expectation_suite_name": {
+            "$ref": "#/definitions/anonymized_string"
+        },
+        "cli_version": {"type": "string", "maxLength": 256},
+    },
+    "required": ["anonymized_expectation_suite_name", "cli_version"],
+    "additionalProperties": False,
+}
+
+cli_basic_payload_schema = {
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
         "cli_version": {"type": "string", "maxLength": 256},
     },
-    "required": ["cli_versioon"],
+    "required": ["cli_version"],
     "additionalProperties": False,
 }
 
 
-cli_new_ds_choice_payload = {
+cli_new_ds_choice_payload_schema = {
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
@@ -329,7 +342,7 @@ cli_new_ds_choice_payload = {
         "db": {"type": "string", "maxLength": 256},
         "cli_version": {"type": "string", "maxLength": 256},
     },
-    "required": ["type", "cli_versioon"],
+    "required": ["type", "cli_version"],
     "additionalProperties": False,
 }
 
@@ -361,8 +374,9 @@ usage_statistics_record_schema = {
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
-        "cli_basic_payload": cli_basic_payload,
-        "cli_new_ds_choice_payload": cli_new_ds_choice_payload,
+        "cli_suite_edit_expectation_suite_payload": cli_suite_edit_expectation_suite_payload_schema,
+        "cli_basic_payload": cli_basic_payload_schema,
+        "cli_new_ds_choice_payload": cli_new_ds_choice_payload_schema,
         "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
     },
     "type": "object",
@@ -386,11 +400,18 @@ usage_statistics_record_schema = {
         {
             "type": "object",
             "properties": {
-                "event": {
-                    "enum": ["data_context.save_expectation_suite", "cli.suite.edit"]
-                },
+                "event": {"enum": ["data_context.save_expectation_suite"]},
                 "event_payload": {
                     "$ref": "#/definitions/save_or_edit_expectation_suite_payload"
+                },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["cli.suite.edit"]},
+                "event_payload": {
+                    "$ref": "#/definitions/cli_suite_edit_expectation_suite_payload"
                 },
             },
         },
@@ -462,18 +483,15 @@ usage_statistics_record_schema = {
                         "cli.docs.clean",
                         "cli.docs.list",
                         "cli.init.create",
-                        "cli.new_ds_choice",
                         "cli.project.check_config",
                         "cli.store.list",
                         "cli.suite.delete",
                         "cli.suite.demo",
-                        "cli.suite.edit",
                         "cli.suite.list",
                         "cli.suite.new",
                         "cli.suite.scaffold",
                         "cli.validation_operator.list",
                         "cli.validation_operator.run",
-                        "cli.project.check_config",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/cli_basic_payload"},
