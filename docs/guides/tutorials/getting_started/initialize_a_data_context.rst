@@ -41,8 +41,10 @@ Clone the `ge_tutorials <https://github.com/superconductive/ge_tutorials>`_ repo
    cd ge_tutorials
    
 
-**What you find in the ge_tutorials repository**
-The repository you cloned contains several directories with final versions for our tutorials. The final version for this tutorial is located in the **getting_started_tutorial_final_stable_api** folder. You can use the final version as a reference or to explore a complete deploy of Great Expectations, but you do *not* need it for this tutorial.
+What you find in the ge_tutorials repository
+---------------------------------------------
+
+The repository you cloned contains several directories with final versions for our tutorials. The **final version** for this tutorial is located in the ``getting_started_tutorial_final_stable_api/`` folder. You can use the final version as a reference or to explore a complete deploy of Great Expectations, but **you do not need it for this tutorial**.
 
 
 
