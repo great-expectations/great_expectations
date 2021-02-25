@@ -5,15 +5,24 @@ import numpy as np
 from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.dataset import PandasDataset
+from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
     ProfilerTypeMapping,
     profiler_data_types_with_mapping,
     profiler_semantic_types,
 )
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -92,8 +101,21 @@ class UserConfigurableProfiler:
                         "few". The default value is "many". For the purposes of comparing whether two tables are identical,
                         it might make the most sense to set this to "unique"
         """
-        self.dataset = dataset
         self.column_info = {}
+        self.dataset = dataset
+        assert isinstance(self.dataset, (Dataset, Validator, Batch))
+
+        if isinstance(self.dataset, Batch):
+            self.dataset = Validator(
+                execution_engine=self.dataset.data.execution_engine,
+                batches=[self.dataset],
+            )
+        if isinstance(dataset, Validator):
+            self.all_table_columns = dataset.get_metric(
+                MetricConfiguration("table.columns", dict())
+            )
+        else:
+            self.all_table_columns = self.dataset.get_table_columns()
 
         self.semantic_types_dict = semantic_types_dict
         assert isinstance(self.semantic_types_dict, (dict, type(None)))
@@ -123,19 +145,19 @@ class UserConfigurableProfiler:
         assert isinstance(self.primary_or_compound_key, list)
 
         if self.table_expectations_only:
-            self.ignored_columns = self.dataset.get_table_columns()
+            self.ignored_columns = self.all_table_columns
 
         if self.primary_or_compound_key:
             for column in self.primary_or_compound_key:
-                if column not in dataset.get_table_columns():
+                if column not in self.all_table_columns:
                     raise ValueError(
-                        f"Column {column} not found. Please ensure that this column is in the dataset if"
-                        f"you would like to use it as a primary_or_compound_key."
+                        f"Column {column} not found. Please ensure that this column is in the {type(dataset).__name__} "
+                        f"if you would like to use it as a primary_or_compound_key."
                     )
 
         included_columns = [
             column_name
-            for column_name in dataset.get_table_columns()
+            for column_name in self.all_table_columns
             if column_name not in self.ignored_columns
         ]
 
@@ -297,7 +319,7 @@ class UserConfigurableProfiler:
         ]
         if selected_columns:
             for column in selected_columns:
-                if column not in dataset.get_table_columns():
+                if column not in self.all_table_columns:
                     raise ProfilerError(f"Column {column} does not exist.")
                 elif column in self.ignored_columns:
                     raise ValueError(
@@ -545,7 +567,7 @@ class UserConfigurableProfiler:
         Returns:
             An expectation suite with column description metadata
         """
-        columns = dataset.get_table_columns()
+        columns = self.all_table_columns
         expectation_suite = dataset.get_expectation_suite(
             suppress_warnings=True, discard_failed_expectations=False
         )
@@ -770,14 +792,31 @@ class UserConfigurableProfiler:
                 )
 
         # quantile values
+        # if (
+        #     "expect_column_quantile_values_to_be_between"
+        #     not in self.excluded_expectations
+        # ) and isinstance(dataset, Dataset):
         if (
             "expect_column_quantile_values_to_be_between"
             not in self.excluded_expectations
         ):
             if isinstance(dataset, PandasDataset):
-                allow_relative_error = "lower"
-            else:
-                allow_relative_error = dataset.attempt_allowing_relative_error()
+                if isinstance(dataset, PandasDataset):
+                    allow_relative_error = "lower"
+                else:
+                    allow_relative_error = dataset.attempt_allowing_relative_error()
+            elif isinstance(dataset, Validator):
+                if isinstance(dataset.execution_engine, PandasExecutionEngine):
+                    allow_relative_error = "lower"
+                if isinstance(dataset.execution_engine, SparkDFExecutionEngine):
+                    allow_relative_error = 0.0
+                if isinstance(dataset.execution_engine, SqlAlchemyExecutionEngine):
+                    allow_relative_error = (
+                        attempt_allowing_relative_error(
+                            dataset.execution_engine.drivername
+                        )
+                        or True
+                    )
 
             quantile_result = dataset.expect_column_quantile_values_to_be_between(
                 column,
@@ -1031,7 +1070,7 @@ class UserConfigurableProfiler:
             "expect_table_columns_to_match_ordered_list"
             not in self.excluded_expectations
         ):
-            columns = dataset.get_table_columns()
+            columns = self.all_table_columns
             dataset.expect_table_columns_to_match_ordered_list(columns)
 
         if "expect_table_row_count_to_be_between" not in self.excluded_expectations:
