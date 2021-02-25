@@ -16,6 +16,7 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.registry import (
     _registered_expectations,
     _registered_metrics,
@@ -51,16 +52,20 @@ class ColumnValuesAreAscii(ColumnMapMetricProvider):
         column_ascii_check = column.apply(check_if_ascii)
         return column_ascii_check
 
+    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
+    #     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    #     def _sqlalchemy(cls, column, _dialect, **kwargs):
+    #         return column.in_([3])
 
-# This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
-#     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-#     def _sqlalchemy(cls, column, _dialect, **kwargs):
-#         return column.in_([3])
+    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        def is_ascii(val):
+            return str(val).isascii()
 
-# This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-#     @column_condition_partial(engine=SparkDFExecutionEngine)
-#     def _spark(cls, column, **kwargs):
-#         return column.isin([3])
+        is_ascii_udf = F.udf(is_ascii, sparktypes.BooleanType())
+
+        return is_ascii_udf(column)
 
 
 # This class defines the Expectation itself
@@ -122,6 +127,14 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
                     "ಹಲೋ ",
                 ],
             },
+            "schemas": {
+                "spark": {
+                    "mostly_ascii": "StringType",
+                    "mostly_numbers": "StringType",
+                    "mostly_characters": "StringType",
+                    "not_ascii": "StringType",
+                }
+            },
             "tests": [
                 {
                     "title": "positive_test_with_mostly_ascii",
@@ -181,6 +194,9 @@ class ExpectColumnValuesToBeAscii(ColumnMapExpectation):
             "@jsteinberg4",
             "@vraimondi04",
             "@talagluck",
+            "@lodeous",
+            "@rexboyce",
+            "@bragleg",
         ],
         "package": "experimental_expectations",
     }
