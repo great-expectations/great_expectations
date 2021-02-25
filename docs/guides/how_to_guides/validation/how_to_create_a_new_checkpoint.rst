@@ -66,7 +66,7 @@ Steps
 
             config = """
             name: my_checkpoint
-            config_version: 1
+            config_version: 1.0
             class_name: SimpleCheckpoint
             validations:
               - batch_request:
