@@ -247,7 +247,8 @@ class MetaSqlAlchemyDataset(Dataset):
                     ignore_values_condition=ignore_values_condition,
                 )
 
-            count_results: dict = dict(self.engine.execute(count_query).fetchone())
+            query_compiled = count_query.compile(compile_kwargs={"literal_binds": True})
+            count_results: dict = dict(self.engine.execute(query_compiled).fetchone())
 
             # Handle case of empty table gracefully:
             if (
