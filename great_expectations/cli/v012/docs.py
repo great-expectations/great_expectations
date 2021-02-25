@@ -7,7 +7,6 @@ import requests
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_logging import logger
 from great_expectations.cli.v012.util import cli_message, cli_message_list
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 
 @click.group()
@@ -45,7 +44,9 @@ def docs_build(directory, site_name, view=True, assume_yes=False):
     """ Build Data Docs for a project."""
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
-    send_usage_message(data_context=context, event="cli.docs.build", success=True)
+    toolkit.send_usage_message(
+        data_context=context, event="cli.docs.build", success=True
+    )
 
 
 @docs.command(name="list")
@@ -76,7 +77,9 @@ def docs_list(directory):
         list_intro_string = _build_intro_string(docs_sites_strings)
         cli_message_list(docs_sites_strings, list_intro_string)
 
-    send_usage_message(data_context=context, event="cli.docs.list", success=True)
+    toolkit.send_usage_message(
+        data_context=context, event="cli.docs.list", success=True
+    )
 
 
 @docs.command(name="clean")
@@ -107,11 +110,15 @@ def clean_data_docs(directory, site_name=None, all=None):
     context.clean_data_docs(site_name=site_name)
     failed = False
     if not failed and context is not None:
-        send_usage_message(data_context=context, event="cli.docs.clean", success=True)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.docs.clean", success=True
+        )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
 
     if failed and context is not None:
-        send_usage_message(data_context=context, event="cli.docs.clean", success=False)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.docs.clean", success=False
+        )
 
 
 def _build_intro_string(docs_sites_strings):

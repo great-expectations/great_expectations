@@ -14,7 +14,7 @@ from great_expectations.cli.pretty_printing import (
     cli_message_list,
     display_not_implemented_message_and_exit,
 )
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
@@ -97,7 +97,7 @@ def checkpoint_new(ctx, checkpoint, suite, datasource, legacy):
             cli_message(
                 f"""<red>The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3.</red>"""
             )
-            send_usage_message(context, usage_event, success=False)
+            toolkit.send_usage_message(context, usage_event, success=False)
             sys.exit(1)
 
         _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
@@ -106,7 +106,7 @@ def checkpoint_new(ctx, checkpoint, suite, datasource, legacy):
         )
         datasource = toolkit.select_datasource(context, datasource_name=datasource)
         if datasource is None:
-            send_usage_message(context, usage_event, success=False)
+            toolkit.send_usage_message(context, usage_event, success=False)
             sys.exit(1)
         _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
 
@@ -128,7 +128,7 @@ def checkpoint_new(ctx, checkpoint, suite, datasource, legacy):
             f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
       - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
         )
-        send_usage_message(context, usage_event, success=True)
+        toolkit.send_usage_message(context, usage_event, success=True)
     # TODO: <Rob>Rob</Rob> Add flow for new style checkpoints
     else:
         pass
@@ -194,7 +194,7 @@ def checkpoint_list(ctx):
             "No checkpoints found.\n"
             "  - Use the command `great_expectations checkpoint new` to create one."
         )
-        send_usage_message(context, event="cli.checkpoint.list", success=True)
+        toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
         sys.exit(0)
 
     number_found: int = len(checkpoints)
@@ -202,7 +202,7 @@ def checkpoint_list(ctx):
     message: str = f"Found {number_found} checkpoint{plural}."
     pretty_list: list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
-    send_usage_message(context, event="cli.checkpoint.list", success=True)
+    toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
 
 
 # TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
@@ -228,6 +228,7 @@ def checkpoint_delete(ctx, checkpoint):
             checkpoint_name=checkpoint,
             usage_event=usage_event,
         )
+        toolkit.send_usage_message(context, event="cli.checkpoint.delete", success=True)
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
             context=context,
@@ -273,17 +274,12 @@ def checkpoint_run(ctx, checkpoint):
 
     if not result["success"]:
         cli_message(string="Validation failed!")
-        send_usage_message(
-            data_context=context,
-            event=usage_event,
-            event_payload=None,
-            success=True,
-        )
+        toolkit.send_usage_message(context, event=usage_event, success=True)
         print_validation_operator_results_details(result=result)
         sys.exit(1)
 
     cli_message("Validation succeeded!")
-    send_usage_message(context, event=usage_event, success=True)
+    toolkit.send_usage_message(context, event=usage_event, success=True)
     print_validation_operator_results_details(result=result)
     sys.exit(0)
 
@@ -366,7 +362,7 @@ def checkpoint_script(ctx, checkpoint):
   - The script is located in `great_expectations/uncommitted/run_{checkpoint}.py`
   - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
     )
-    send_usage_message(context, event=usage_event, success=True)
+    toolkit.send_usage_message(context, event=usage_event, success=True)
 
 
 def _write_checkpoint_script_to_disk(

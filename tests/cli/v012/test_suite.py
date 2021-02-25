@@ -1316,7 +1316,13 @@ def test_suite_delete_with_zero_suites(
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"cli_version": "v012"},
+                "success": False,
+            }
+        ),
     ]
 
     assert_no_logging_messages_or_tracebacks(
@@ -1351,7 +1357,13 @@ def test_suite_delete_with_non_existent_suite(
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"cli_version": "v012"},
+                "success": False,
+            }
+        ),
     ]
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1392,7 +1404,13 @@ def test_suite_delete_with_one_suite(
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": True}),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"cli_version": "v012"},
+                "success": True,
+            }
+        ),
     ]
 
     assert_no_logging_messages_or_tracebacks(
@@ -1439,7 +1457,11 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": False}
+            {
+                "event": "cli.suite.scaffold",
+                "event_payload": {"cli_version": "v012"},
+                "success": False,
+            }
         ),
     ]
 
@@ -1490,7 +1512,11 @@ def test_suite_scaffold_on_existing_suite_raises_error(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": False}
+            {
+                "event": "cli.suite.scaffold",
+                "event_payload": {"cli_version": "v012"},
+                "success": False,
+            }
         ),
     ]
 
@@ -1545,7 +1571,11 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": True}
+            {
+                "event": "cli.suite.scaffold",
+                "event_payload": {"cli_version": "v012"},
+                "success": True,
+            }
         ),
     ]
     assert_no_logging_messages_or_tracebacks(
@@ -1602,7 +1632,11 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": True}
+            {
+                "event": "cli.suite.scaffold",
+                "event_payload": {"cli_version": "v012"},
+                "success": True,
+            }
         ),
     ]
 

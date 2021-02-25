@@ -22,7 +22,6 @@ from great_expectations.cli.v012.util import (
     verify_library_dependent_modules,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
 from great_expectations.datasource import (
     PandasDatasource,
@@ -94,11 +93,11 @@ def datasource_new(directory):
         cli_message(
             "A new datasource '{}' was added to your project.".format(datasource_name)
         )
-        send_usage_message(
+        toolkit.send_usage_message(
             data_context=context, event="cli.datasource.new", success=True
         )
     else:  # no datasource was created
-        send_usage_message(
+        toolkit.send_usage_message(
             data_context=context, event="cli.datasource.new", success=False
         )
         sys.exit(1)
@@ -157,7 +156,9 @@ def datasource_list(directory):
         cli_message("")
         cli_message_dict(datasource)
 
-    send_usage_message(data_context=context, event="cli.datasource.list", success=True)
+    toolkit.send_usage_message(
+        data_context=context, event="cli.datasource.list", success=True
+    )
 
 
 def _build_datasource_intro_string(datasource_count):
@@ -248,7 +249,7 @@ def datasource_profile(
             ]
             if not datasources:
                 cli_message(NO_DATASOURCES_FOUND)
-                send_usage_message(
+                toolkit.send_usage_message(
                     data_context=context, event="cli.datasource.profile", success=False
                 )
                 sys.exit(1)
@@ -257,7 +258,7 @@ def datasource_profile(
                     "<red>Error: please specify the datasource to profile. "
                     "Available datasources: " + ", ".join(datasources) + "</red>"
                 )
-                send_usage_message(
+                toolkit.send_usage_message(
                     data_context=context, event="cli.datasource.profile", success=False
                 )
                 sys.exit(1)
@@ -272,7 +273,7 @@ def datasource_profile(
                     additional_batch_kwargs=additional_batch_kwargs,
                     skip_prompt_flag=assume_yes,
                 )
-                send_usage_message(
+                toolkit.send_usage_message(
                     data_context=context, event="cli.datasource.profile", success=True
                 )
         else:
@@ -286,11 +287,11 @@ def datasource_profile(
                 additional_batch_kwargs=additional_batch_kwargs,
                 skip_prompt_flag=assume_yes,
             )
-            send_usage_message(
+            toolkit.send_usage_message(
                 data_context=context, event="cli.datasource.profile", success=True
             )
     except Exception as e:
-        send_usage_message(
+        toolkit.send_usage_message(
             data_context=context, event="cli.datasource.profile", success=False
         )
         raise e
@@ -358,11 +359,11 @@ What are you processing your files with?
 def _add_pandas_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    send_usage_message(
+    toolkit.send_usage_message(
         data_context=context,
         event="cli.new_ds_choice",
-        success=True,
         event_payload={"type": "pandas"},
+        success=True,
     )
 
     if passthrough_generator_only:
@@ -449,11 +450,11 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
 
     selected_database = list(SupportedDatabases)[selected_database]
 
-    send_usage_message(
+    toolkit.send_usage_message(
         data_context=context,
         event="cli.new_ds_choice",
-        success=True,
         event_payload={"type": "sqlalchemy", "db": selected_database.name},
+        success=True,
     )
 
     datasource_name = "my_{}_db".format(selected_database.value.lower())
@@ -844,11 +845,11 @@ def _collect_redshift_credentials(default_credentials=None):
 def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    send_usage_message(
+    toolkit.send_usage_message(
         data_context=context,
         event="cli.new_ds_choice",
-        success=True,
         event_payload={"type": "spark"},
+        success=True,
     )
 
     if not _verify_pyspark_dependent_modules():
