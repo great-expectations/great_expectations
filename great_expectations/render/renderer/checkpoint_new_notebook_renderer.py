@@ -13,15 +13,17 @@ class CheckpointNewNotebookRenderer(SuiteEditNotebookRenderer):
         self.checkpoint_name = checkpoint_name
         self._notebook = None
 
-    def add_header(self):
+    def _add_header(self):
         self.add_markdown_cell(
             f"""# Create Your Checkpoint
 Use this notebook to create your checkpoint:
+
 **Checkpoint Name**: `{self.checkpoint_name}`
+
 We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!"""
         )
 
-    def add_imports(self):
+    def _add_imports(self):
         self.add_code_cell(
             """import great_expectations as ge
 context = ge.get_context()
@@ -29,7 +31,7 @@ context = ge.get_context()
             lint=True,
         )
 
-    def add_example_configuration(self):
+    def _add_example_configuration(self):
         self.add_markdown_cell(
             """# Example Configuration
 **If you are new to Great Expectations or the Checkpoint feature**, you should probably start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.
@@ -66,7 +68,7 @@ validations:
             lint=True,
         )
 
-    def add_optional_list_your_config(self):
+    def _add_optional_list_your_config(self):
         self.add_markdown_cell(
             """# List Your Configuration (Optional)
 The following cells show examples for listing your current configuration.
@@ -81,7 +83,7 @@ list_of_existing_datasources_by_name""",
         )
         self.add_code_cell("context.list_expectation_suite_names()")
 
-    def add_sample_checkpoint_config(self):
+    def _add_sample_checkpoint_config(self):
         self.add_markdown_cell(
             """# Sample Checkpoint Config
 
@@ -109,11 +111,9 @@ Please also see the docs linked below for instructions on how to implement other
             first_expectation_suite_name = (
                 first_expectation_suite.expectation_suite_name
             )
-
-            self.add_code_cell(
-                (
-                    'sample_yaml = """'
-                    f"""name: {self.checkpoint_name}
+            sample_yaml_str = 'sample_yaml = """'
+            sample_yaml_str += f"""
+name: {self.checkpoint_name}
 config_version: 1.0
 class_name: SimpleCheckpoint
 validations:
@@ -125,9 +125,11 @@ validations:
         index: -1
     expectation_suite_name: {first_expectation_suite_name}
 """
-                    "print(sample_yaml)"
-                    '"""'
-                ),
+            sample_yaml_str += '"""'
+            sample_yaml_str += "\nprint(sample_yaml)"
+
+            self.add_code_cell(
+                sample_yaml_str,
                 lint=True,
             )
         except:
@@ -136,7 +138,7 @@ validations:
                 "Sorry, we were unable to create a sample configuration. Perhaps you don't have a Datasource or Expectation Suite configured."
             )
 
-    def add_test_and_save_your_checkpoint_configuration(self):
+    def _add_test_and_save_your_checkpoint_configuration(self):
         self.add_markdown_cell(
             """# Test the Checkpoint Configuration
 Here we will test your Checkpoint configuration to make sure it is valid.
@@ -146,6 +148,9 @@ Note that if it is valid, it will be automatically saved to your Checkpoint Stor
 This test_yaml_config() function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.
 
 If you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters."""
+        )
+        self.add_code_cell(
+            f'checkpoint_name = "{self.checkpoint_name}" # From your CLI command, feel free to change this.'
         )
         self.add_code_cell(
             "my_checkpoint_config = sample_yaml # Change `sample_yaml` to your custom Checkpoint config if you wish"
@@ -158,7 +163,7 @@ If you instead wish to use python instead of yaml to configure your Checkpoint, 
             lint=True,
         )
 
-    def add_review_checkpoint(self):
+    def _add_review_checkpoint(self):
         self.add_markdown_cell(
             """# Review Checkpoint
 
@@ -168,7 +173,7 @@ You can run the following cell to print out the full yaml configuration. For exa
             "print(my_checkpoint.get_substituted_config().to_yaml_str())", lint=True
         )
 
-    def add_optional_run_checkpoint(self):
+    def _add_optional_run_checkpoint(self):
         self.add_markdown_cell(
             """# Run Checkpoint (Optional)
 
@@ -178,7 +183,7 @@ You may wish to run the checkpoint now to see a sample of it's output. If so run
             "context.run_checkpoint(checkpoint_name=checkpoint_name)", lint=True
         )
 
-    def add_optional_open_data_docs(self):
+    def _add_optional_open_data_docs(self):
         self.add_markdown_cell(
             """# Open Data Docs (Optional)
 You may also wish to open up Data Docs to review the results of the Checkpoint run if you ran the above cell."""
@@ -187,15 +192,15 @@ You may also wish to open up Data Docs to review the results of the Checkpoint r
 
     def render(self) -> nbformat.NotebookNode:
         self._notebook: nbformat.NotebookNode = nbformat.v4.new_notebook()
-        self.add_header()
-        self.add_imports()
-        self.add_example_configuration()
-        self.add_optional_list_your_config()
-        self.add_sample_checkpoint_config()
-        self.add_test_and_save_your_checkpoint_configuration()
-        self.add_review_checkpoint()
-        self.add_optional_run_checkpoint()
-        self.add_optional_open_data_docs()
+        self._add_header()
+        self._add_imports()
+        self._add_example_configuration()
+        self._add_optional_list_your_config()
+        self._add_sample_checkpoint_config()
+        self._add_test_and_save_your_checkpoint_configuration()
+        self._add_review_checkpoint()
+        self._add_optional_run_checkpoint()
+        self._add_optional_open_data_docs()
 
         return self._notebook
 
