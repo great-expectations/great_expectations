@@ -304,8 +304,9 @@ save_or_edit_expectation_suite_payload_schema = {
         "anonymized_expectation_suite_name": {
             "$ref": "#/definitions/anonymized_string"
         },
+        "cli_version": {"type": "string", "maxLength": 256},
     },
-    "required": ["anonymized_expectation_suite_name"],
+    "required": ["anonymized_expectation_suite_name", "cli_versioon"],
     "additionalProperties": False,
 }
 
@@ -360,6 +361,7 @@ usage_statistics_record_schema = {
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
+        "cli_basic_payload": cli_basic_payload,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload,
         "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
     },
