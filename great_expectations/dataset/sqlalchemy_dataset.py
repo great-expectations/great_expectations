@@ -1347,6 +1347,21 @@ WHERE
                 {"name": col_name, "type": getattr(type_module, col_type.upper())()}
                 for col_name, col_type in col_info_tuples_list
             ]
+
+        elif self.sql_engine_dialect.name.lower() == "ibm_db_sa":
+            # Get column names and types from the database
+            # https://www.ibm.com/support/knowledgecenter/en/SSEPGG_10.5.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0054907.html
+            col_info_query: TextClause = sa.text(
+                f"""
+                    SELECT COLNAME, TYPENAME 
+                    FROM SYSIBMADM.ADMINTEMPCOLUMNS 
+                    WHERE TABNAME = '{self._table.name.upper()}'"""
+            )
+            col_info_tuples_list = self.engine.execute(col_info_query).fetchall()
+            col_info_dict_list = [
+                {"name": col_name, "type": getattr(self._get_dialect_type_module(), col_type.upper())()}
+                for col_name, col_type in col_info_tuples_list
+            ]
         else:
             query: Select = sa.select([sa.text("*")]).select_from(self._table).limit(1)
             # IBM Db2 can't process '.limit(1)' without compilation
