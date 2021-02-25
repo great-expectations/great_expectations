@@ -18,6 +18,9 @@ from great_expectations.core.usage_statistics.usage_statistics import send_usage
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
+from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
+    CheckpointNewNotebookRenderer,
+)
 from great_expectations.util import lint_code
 
 try:
@@ -75,74 +78,76 @@ def checkpoint():
 
 
 @checkpoint.command(name="new")
-@click.argument("checkpoint")
-@click.argument("suite")
-@click.option("--datasource", default=None)
-@click.option("--legacy/--non-legacy", default=True)
+@click.argument("name")
+@click.option(
+    "--jupyter/--no-jupyter",
+    is_flag=True,
+    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
+    default=True,
+)
 @mark.cli_as_experimental
 @click.pass_context
-def checkpoint_new(ctx, checkpoint, suite, datasource, legacy):
-    """Create a new checkpoint for easy deployments. (Experimental)"""
-    display_not_implemented_message_and_exit()
+def checkpoint_new(ctx, name, jupyter):
+    """Create a new checkpoint for easy deployments. (Experimental)
 
-    if legacy:
-        suite_name = suite
-        usage_event = "cli.checkpoint.new"
-        directory = toolkit.parse_cli_config_file_location(
-            config_file_location=ctx.obj.config_file_location
-        ).get("directory")
-        context = toolkit.load_data_context_with_error_handling(directory)
-        ge_config_version = context.get_config().config_version
-        if ge_config_version >= 3:
+    NAME is the name of the checkpoint to create.
+    """
+    _checkpoint_new(ctx=ctx, checkpoint_name=name, jupyter=jupyter)
+
+
+def _checkpoint_new(ctx, checkpoint_name, jupyter):
+
+    usage_event: str = "cli.checkpoint.new"
+
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+
+    try:
+        _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event)
+
+        # Create notebook on disk
+        notebook_name = f"create_{checkpoint_name}.ipynb"
+        notebook_file_path = _get_notebook_path(context, notebook_name)
+        checkpoint_new_notebook_renderer = CheckpointNewNotebookRenderer(
+            context=context, checkpoint_name=checkpoint_name
+        )
+        checkpoint_new_notebook_renderer.render_to_disk(
+            notebook_file_path=notebook_file_path
+        )
+
+        if not jupyter:
             cli_message(
-                f"""<red>The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3.</red>"""
+                f"To continue editing this suite, run <green>jupyter notebook {notebook_file_path}</green>"
             )
-            send_usage_message(context, usage_event, success=False)
-            sys.exit(1)
 
-        _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
-        suite: ExpectationSuite = toolkit.load_expectation_suite(
-            context, suite_name, usage_event
-        )
-        datasource = toolkit.select_datasource(context, datasource_name=datasource)
-        if datasource is None:
-            send_usage_message(context, usage_event, success=False)
-            sys.exit(1)
-        _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
+        send_usage_message(context, event=usage_event, success=True)
 
-        _ = context.add_checkpoint(
-            name=checkpoint,
-            **{
-                "class_name": "LegacyCheckpoint",
-                "validation_operator_name": "action_list_operator",
-                "batches": [
-                    {
-                        "batch_kwargs": dict(batch_kwargs),
-                        "expectation_suite_names": [suite.expectation_suite_name],
-                    }
-                ],
-            },
-        )
+        if jupyter:
+            toolkit.launch_jupyter_notebook(notebook_file_path)
 
-        cli_message(
-            f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
-      - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
+    except Exception as e:
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event,
+            message=f"<red>{e}</red>",
         )
-        send_usage_message(context, usage_event, success=True)
-    # TODO: <Rob>Rob</Rob> Add flow for new style checkpoints
-    else:
-        pass
+        return
 
 
 def _verify_checkpoint_does_not_exist(
-    context: DataContext, checkpoint: str, usage_event: str
+    context: DataContext, checkpoint_name: str, usage_event: str
 ) -> None:
     try:
-        if checkpoint in context.list_checkpoints():
+        if checkpoint_name in context.list_checkpoints():
             toolkit.exit_with_failure_message_and_stats(
                 context,
                 usage_event,
-                f"A checkpoint named `{checkpoint}` already exists. Please choose a new name.",
+                f"A checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
             )
     except InvalidTopLevelConfigKeyError as e:
         toolkit.exit_with_failure_message_and_stats(
@@ -150,29 +155,12 @@ def _verify_checkpoint_does_not_exist(
         )
 
 
-def _write_checkpoint_to_disk(
-    context: DataContext, checkpoint: Dict, checkpoint_name: str
-) -> str:
-    # TODO this should be the responsibility of the DataContext
-    checkpoint_dir = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+def _get_notebook_path(context, notebook_name):
+    return os.path.abspath(
+        os.path.join(
+            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+        )
     )
-    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
-    os.makedirs(checkpoint_dir, exist_ok=True)
-    with open(checkpoint_file, "w") as f:
-        yaml.dump(checkpoint, f)
-    return checkpoint_file
-
-
-def _load_checkpoint_yml_template() -> dict:
-    # TODO this should be the responsibility of the DataContext
-    template_file = file_relative_path(
-        __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
-    )
-    with open(template_file) as f:
-        template = yaml.load(f)
-    return template
 
 
 # TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
