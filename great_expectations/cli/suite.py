@@ -99,7 +99,7 @@ def _suite_edit(
     usage_event,
     suppress_usage_message=False,
 ):
-    # actually_toolkit.send_usage_message flag is for the situation where _suite_edit is called by _suite_new().
+    # suppress_usage_message flag is for the situation where _suite_edit is called by _suite_new().
     # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
     batch_kwargs_json = batch_kwargs
     batch_kwargs = None
