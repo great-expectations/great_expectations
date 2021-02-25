@@ -404,7 +404,7 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
 
 
 def send_usage_message(
-    data_context: "DataContext",
+    data_context,
     event: str,
     event_payload: Optional[dict] = None,
     success: Optional[bool] = None,

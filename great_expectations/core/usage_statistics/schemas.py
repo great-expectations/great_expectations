@@ -309,14 +309,26 @@ save_or_edit_expectation_suite_payload_schema = {
     "additionalProperties": False,
 }
 
+cli_basic_payload = {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "cli_version": {"type": "string", "maxLength": 256},
+    },
+    "required": ["cli_versioon"],
+    "additionalProperties": False,
+}
+
+
 cli_new_ds_choice_payload = {
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
         "type": {"type": "string", "maxLength": 256},
         "db": {"type": "string", "maxLength": 256},
+        "cli_version": {"type": "string", "maxLength": 256},
     },
-    "required": ["type"],
+    "required": ["type", "cli_versioon"],
     "additionalProperties": False,
 }
 
@@ -426,25 +438,43 @@ usage_statistics_record_schema = {
                     "enum": [
                         "data_context.build_data_docs",
                         "data_context.open_data_docs",
-                        "cli.suite.demo",
-                        "cli.suite.list",
-                        "cli.suite.new",
-                        "cli.suite.scaffold",
-                        "cli.store.list",
-                        "cli.project.check_config",
+                    ],
+                },
+                "event_payload": {"$ref": "#/definitions/empty_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": [
+                        "cli.checkpoint.delete",
                         "cli.checkpoint.list",
+                        "cli.checkpoint.new",
+                        "cli.checkpoint.run",
+                        "cli.checkpoint.script",
                         "cli.datasource.list",
                         "cli.datasource.new",
                         "cli.datasource.profile",
-                        "cli.validation_operator.list",
-                        "cli.validation_operator.run",
                         "cli.docs.build",
                         "cli.docs.clean",
                         "cli.docs.list",
                         "cli.init.create",
+                        "cli.new_ds_choice",
+                        "cli.project.check_config",
+                        "cli.store.list",
+                        "cli.suite.delete",
+                        "cli.suite.demo",
+                        "cli.suite.edit",
+                        "cli.suite.list",
+                        "cli.suite.new",
+                        "cli.suite.scaffold",
+                        "cli.validation_operator.list",
+                        "cli.validation_operator.run",
+                        "cli.project.check_config",
                     ],
                 },
-                "event_payload": {"$ref": "#/definitions/empty_payload"},
+                "event_payload": {"$ref": "#/definitions/cli_basic_payload"},
             },
         },
     ],
