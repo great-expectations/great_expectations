@@ -95,6 +95,7 @@ def test_cli_init_on_new_project(
     .gitignore
     great_expectations.yml
     checkpoints/
+        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
         Titanic/
@@ -171,7 +172,10 @@ def test_cli_init_on_new_project(
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
-    mock_webbrowser, capsys, caplog, initialized_project,
+    mock_webbrowser,
+    capsys,
+    caplog,
+    initialized_project,
 ):
     project_dir = initialized_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -315,7 +319,10 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+            cli,
+            ["init", "-d", project_dir],
+            input="n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -333,7 +340,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
-    mock_webbrowser, caplog, initialized_project,
+    mock_webbrowser,
+    caplog,
+    initialized_project,
 ):
     project_dir = initialized_project
 
@@ -342,7 +351,10 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+            cli,
+            ["init", "-d", project_dir],
+            input="n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -361,7 +373,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
-    mock_webbrowser, caplog, initialized_project,
+    mock_webbrowser,
+    caplog,
+    initialized_project,
 ):
     project_dir = initialized_project
 
@@ -370,7 +384,10 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="Y\n\n", catch_exceptions=False,
+            cli,
+            ["init", "-d", project_dir],
+            input="Y\n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -395,7 +412,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
-    mock_browser, caplog, initialized_project,
+    mock_browser,
+    caplog,
+    initialized_project,
 ):
     project_dir = initialized_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -475,8 +494,8 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
         "- Please check the file and try again or select a different data file."
         in stdout
     )
-    assert (
-        "- Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
+    assert ("- Error: File is not a recognized excel file" in stdout) or (
+        "Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
         in stdout
     )
     assert "Try again? [Y/n]:" in stdout
@@ -544,8 +563,8 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         "- Please check the file and try again or select a different data file."
         in stdout
     )
-    assert (
-        "- Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
+    assert ("- Error: File is not a recognized excel file" in stdout) or (
+        "Error: Unsupported format, or corrupt file: Expected BOF record; found b'PRODUCTI'"
         in stdout
     )
     assert "Try again? [Y/n]:" in stdout
@@ -584,6 +603,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     .gitignore
     great_expectations.yml
     checkpoints/
+        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
         Titanic/

@@ -7,14 +7,13 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
 from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
-from great_expectations.core.evaluation_parameters import build_evaluation_parameters
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -32,6 +31,8 @@ from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
 )
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     get_metric_provider,
@@ -154,10 +155,10 @@ class Validator:
             return self.validate_expectation(name)
         elif (
             self._expose_dataframe_methods
-            and isinstance(self.active_batch.data, pd.DataFrame)
+            and isinstance(self.active_batch.data, PandasBatchData)
             and hasattr(pd.DataFrame, name)
         ):
-            return getattr(self.active_batch.data, name)
+            return getattr(self.active_batch.data.dataframe, name)
         else:
             raise AttributeError(
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
@@ -271,12 +272,62 @@ class Validator:
         """Returns the execution engine being used by the validator at the given time"""
         return self._execution_engine
 
+    def head(self, n_rows=5, domain_kwargs=None, fetch_all=False):
+        if domain_kwargs is None:
+            domain_kwargs = {"batch_id": self.execution_engine.active_batch_data_id}
+        return self.get_metric(
+            MetricConfiguration(
+                "table.head", domain_kwargs, {"n_rows": n_rows, "fetch_all": fetch_all}
+            )
+        )
+
     def list_available_expectation_types(self):
         """ Returns a list of all expectations available to the validator"""
         keys = dir(self)
         return [
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
+
+    def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
+        """Return a dictionary with the requested metrics"""
+        graph = ValidationGraph()
+        resolved_metrics = {}
+        for metric_name, metric_configuration in metrics.items():
+            provider_cls, _ = get_metric_provider(
+                metric_configuration.metric_name, self.execution_engine
+            )
+            for key in provider_cls.domain_keys:
+                if (
+                    key not in metric_configuration.metric_domain_kwargs
+                    and key in provider_cls.default_kwarg_values
+                ):
+                    metric_configuration.metric_domain_kwargs[
+                        key
+                    ] = provider_cls.default_kwarg_values[key]
+            for key in provider_cls.value_keys:
+                if (
+                    key not in metric_configuration.metric_value_kwargs
+                    and key in provider_cls.default_kwarg_values
+                ):
+                    metric_configuration.metric_value_kwargs[
+                        key
+                    ] = provider_cls.default_kwarg_values[key]
+            self.build_metric_dependency_graph(
+                graph,
+                child_node=metric_configuration,
+                configuration=None,
+                execution_engine=self._execution_engine,
+                runtime_configuration=None,
+            )
+        self.resolve_validation_graph(graph, resolved_metrics)
+        return {
+            metric_name: resolved_metrics[metric_configuration.id]
+            for (metric_name, metric_configuration) in metrics.items()
+        }
+
+    def get_metric(self, metric: MetricConfiguration) -> Any:
+        """return the value of the requested metric."""
+        return self.get_metrics({"_": metric})["_"]
 
     def build_metric_dependency_graph(
         self,
@@ -303,10 +354,20 @@ class Validator:
         child_node.metric_dependencies = metric_dependencies
 
         if parent_node:
-            graph.add(MetricEdge(parent_node, child_node,))
+            graph.add(
+                MetricEdge(
+                    parent_node,
+                    child_node,
+                )
+            )
 
         if len(metric_dependencies) == 0:
-            graph.add(MetricEdge(child_node, None,))
+            graph.add(
+                MetricEdge(
+                    child_node,
+                    None,
+                )
+            )
 
         else:
             for metric_dependency in metric_dependencies.values():
@@ -481,7 +542,9 @@ class Validator:
         )
 
     def _initialize_expectations(
-        self, expectation_suite=None, expectation_suite_name=None
+        self,
+        expectation_suite: ExpectationSuite = None,
+        expectation_suite_name: str = None,
     ):
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
@@ -505,6 +568,14 @@ class Validator:
         Returns:
             None
         """
+        # Checking type of expectation_suite.
+        # Check for expectation_suite_name is already done by ExpectationSuiteIdentifier
+        if expectation_suite and not isinstance(expectation_suite, ExpectationSuite):
+            raise TypeError(
+                "expectation_suite must be of type ExpectationSuite, not {}".format(
+                    type(expectation_suite)
+                )
+            )
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
                 expectation_suite = expectationSuiteSchema.load(expectation_suite)
@@ -1035,8 +1106,8 @@ class Validator:
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_evaluation_parameters = data_context.evaluation_parameter_store.get_bind_params(
-                    run_id
+                runtime_evaluation_parameters = (
+                    data_context.evaluation_parameter_store.get_bind_params(run_id)
                 )
             else:
                 runtime_evaluation_parameters = {}
@@ -1059,18 +1130,6 @@ class Validator:
             suite_ge_version = expectation_suite.meta.get(
                 "great_expectations_version"
             ) or expectation_suite.meta.get("great_expectations.__version__")
-
-            if suite_ge_version:
-                if suite_ge_version != ge_version:
-                    warnings.warn(
-                        "WARNING: This configuration object was built using version %s of great_expectations, but "
-                        "is currently being validated by version %s."
-                        % (suite_ge_version, ge_version,)
-                    )
-            else:
-                warnings.warn(
-                    "WARNING: No great_expectations version found in configuration object."
-                )
 
             # Group expectations by column
             columns = {}

@@ -34,21 +34,22 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         base_directory: str,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
-        glob_directive: str = "*",
+        glob_directive: Optional[str] = "*",
         sorters: Optional[list] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
-       Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
-       and sorters for filtering and sorting data_references.
+        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
+        and sorters for filtering and sorting data_references.
 
-       Args:
-           name (str): name of InferredAssetFilesystemDataConnector
-           datasource_name (str): Name of datasource that this DataConnector is connected to
-           base_directory(str): base_directory for DataConnector to begin reading files
-           execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
-           default_regex (dict): Optional dict the filter and organize the data_references.
-           sorters (list): Optional list if you want to sort the data_references
-       """
+        Args:
+            name (str): name of InferredAssetFilesystemDataConnector
+            datasource_name (str): Name of datasource that this DataConnector is connected to
+            base_directory(str): base_directory for DataConnector to begin reading files
+            execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
+            default_regex (dict): Optional dict the filter and organize the data_references.
+            sorters (list): Optional list if you want to sort the data_references
+        """
         logger.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
 
         super().__init__(
@@ -57,6 +58,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         self._base_directory = base_directory

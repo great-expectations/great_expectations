@@ -849,8 +849,8 @@ class DataAsset:
             # So, we load them in reverse order
 
             if data_context is not None:
-                runtime_evaluation_parameters = data_context.evaluation_parameter_store.get_bind_params(
-                    run_id
+                runtime_evaluation_parameters = (
+                    data_context.evaluation_parameter_store.get_bind_params(run_id)
                 )
             else:
                 runtime_evaluation_parameters = {}
@@ -873,18 +873,6 @@ class DataAsset:
             suite_ge_version = expectation_suite.meta.get(
                 "great_expectations_version"
             ) or expectation_suite.meta.get("great_expectations.__version__")
-
-            if suite_ge_version:
-                if suite_ge_version != ge_version:
-                    warnings.warn(
-                        "WARNING: This configuration object was built using version %s of great_expectations, but "
-                        "is currently being validated by version %s."
-                        % (suite_ge_version, ge_version,)
-                    )
-            else:
-                warnings.warn(
-                    "WARNING: No great_expectations version found in configuration object."
-                )
 
             ###
             # This is an early example of what will become part of the ValidationOperator
@@ -1107,7 +1095,6 @@ class DataAsset:
         This function handles the logic for mapping those fields for column_map_expectations.
         """
         # NB: unexpected_count parameter is explicit some implementing classes may limit the length of unexpected_list
-
         # Retain support for string-only output formats:
         result_format = parse_result_format(result_format)
 
@@ -1120,17 +1107,18 @@ class DataAsset:
         missing_count = element_count - nonnull_count
 
         if element_count > 0:
-            unexpected_percent = unexpected_count / element_count * 100
             missing_percent = missing_count / element_count * 100
 
             if nonnull_count > 0:
+                unexpected_percent_total = unexpected_count / element_count * 100
                 unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
             else:
+                unexpected_percent_total = None
                 unexpected_percent_nonmissing = None
 
         else:
             missing_percent = None
-            unexpected_percent = None
+            unexpected_percent_total = None
             unexpected_percent_nonmissing = None
 
         return_obj["result"] = {
@@ -1138,7 +1126,8 @@ class DataAsset:
             "missing_count": missing_count,
             "missing_percent": missing_percent,
             "unexpected_count": unexpected_count,
-            "unexpected_percent": unexpected_percent,
+            "unexpected_percent": unexpected_percent_nonmissing,
+            "unexpected_percent_total": unexpected_percent_total,
             "unexpected_percent_nonmissing": unexpected_percent_nonmissing,
             "partial_unexpected_list": unexpected_list[
                 : result_format["partial_unexpected_count"]

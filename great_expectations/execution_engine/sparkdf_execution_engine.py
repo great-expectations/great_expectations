@@ -5,14 +5,17 @@ import logging
 import uuid
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
-from great_expectations.core.batch import BatchMarkers, BatchSpec
-from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.types.batch_spec import (
+from great_expectations.core.batch import BatchMarkers
+from great_expectations.core.batch_spec import (
+    BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
-    S3BatchSpec,
 )
+from great_expectations.core.id_dict import IDDict
 from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.execution_engine.util import (
+    get_or_create_spark_session as get_or_create_spark_session_v013,
+)
 
 from ..exceptions import (
     BatchKwargsError,
@@ -24,6 +27,7 @@ from ..exceptions import (
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
 from .execution_engine import ExecutionEngine, MetricDomainTypes
+from .sparkdf_batch_data import SparkDFBatchData
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +45,6 @@ try:
         StructType,
     )
 
-    class SparkDFBatchData(DataFrame):
-        def __init__(self, df):
-            super(self.__class__, self).__init__(df._jdf, df.sql_ctx)
-
-        def row_count(self):
-            return self.count()
-
 
 except ImportError:
     pyspark = None
@@ -62,8 +59,6 @@ except ImportError:
     DateType = (None,)
     BooleanType = (None,)
 
-    SparkDFBatchData = None
-
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
@@ -71,75 +66,75 @@ except ImportError:
 
 class SparkDFExecutionEngine(ExecutionEngine):
     """
-This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+    This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: validation_engine_pyspark_self_managed
-    title: Validation Engine - pyspark - Self-Managed
-    icon:
-    short_description: Use Spark DataFrame to validate data
-    description: Use Spark DataFrame to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Production
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Moderate
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
-        documentation_completeness: Complete
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_pyspark_self_managed
+        title: Validation Engine - pyspark - Self-Managed
+        icon:
+        short_description: Use Spark DataFrame to validate data
+        description: Use Spark DataFrame to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Production
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Moderate
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+            documentation_completeness: Complete
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
-    id: validation_engine_databricks
-    title: Validation Engine - Databricks
-    icon:
-    short_description: Use Spark DataFrame in a Databricks cluster to validate data
-    description: Use Spark DataFrame in a Databricks cluster to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Beta
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Low (dbfs-specific handling)
-        unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Minimal (we've tested a bit, know others have used it)
-        documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_databricks
+        title: Validation Engine - Databricks
+        icon:
+        short_description: Use Spark DataFrame in a Databricks cluster to validate data
+        description: Use Spark DataFrame in a Databricks cluster to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Low (dbfs-specific handling)
+            unit_test_coverage: N/A -> implementation not different
+            integration_infrastructure_test_coverage: Minimal (we've tested a bit, know others have used it)
+            documentation_completeness: Moderate (need docs on managing project configuration via dbfs/etc.)
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
-    id: validation_engine_emr_spark
-    title: Validation Engine - EMR - Spark
-    icon:
-    short_description: Use Spark DataFrame in an EMR cluster to validate data
-    description: Use Spark DataFrame in an EMR cluster to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Experimental
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
-        unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Unknown
-        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_emr_spark
+        title: Validation Engine - EMR - Spark
+        icon:
+        short_description: Use Spark DataFrame in an EMR cluster to validate data
+        description: Use Spark DataFrame in an EMR cluster to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Experimental
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Low (need to provide guidance on "known good" paths, and we know there are many "knobs" to tune that we have not explored/tested)
+            unit_test_coverage: N/A -> implementation not different
+            integration_infrastructure_test_coverage: Unknown
+            documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
-    id: validation_engine_spark_other
-    title: Validation Engine - Spark - Other
-    icon:
-    short_description: Use Spark DataFrame to validate data
-    description: Use Spark DataFrame to validate data
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
-    maturity: Experimental
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Other (we haven't tested possibility, known glue deployment)
-        unit_test_coverage: N/A -> implementation not different
-        integration_infrastructure_test_coverage: Unknown
-        documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
-        bug_risk: Low/Moderate
-        expectation_completeness: Moderate
+        id: validation_engine_spark_other
+        title: Validation Engine - Spark - Other
+        icon:
+        short_description: Use Spark DataFrame to validate data
+        description: Use Spark DataFrame to validate data
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_batches/how_to_load_a_spark_dataframe_as_a_batch.html
+        maturity: Experimental
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Other (we haven't tested possibility, known glue deployment)
+            unit_test_coverage: N/A -> implementation not different
+            integration_infrastructure_test_coverage: Unknown
+            documentation_completeness: Low (must install specific/latest version but do not have docs to that effect or of known useful paths)
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     recognized_batch_definition_keys = {"limit"}
@@ -161,17 +156,12 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
         elif len(spark_config) > 0:
             try:
-                # We need to stop the old session to reconfigure it
-                logger.info("Stopping existing spark context to reconfigure.")
-                spark = SparkSession.builder.getOrCreate()
-                spark.sparkContext.stop()
                 builder = SparkSession.builder
-                app_name: Optional[str] = spark_config.get("spark.app.name")
+                app_name: Optional[str] = spark_config.pop("spark.app.name", None)
                 if app_name:
                     builder.appName(app_name)
                 for k, v in spark_config.items():
-                    if k != "spark.app.name":
-                        builder.config(k, v)
+                    builder.config(k, v)
                 self.spark = builder.getOrCreate()
             except AttributeError:
                 logger.error(
@@ -181,19 +171,15 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         elif spark is not None:
             self.spark = spark
         else:
-            try:
-                # We need to stop the old session to reconfigure it
-                self.spark = SparkSession.builder.getOrCreate()
-            except AttributeError:
-                logger.error(
-                    "Unable to load spark context; install optional spark dependency for support."
-                )
-                self.spark = None
+            self.spark = get_or_create_spark_session_v013()
 
         super().__init__(*args, **kwargs)
 
         self._config.update(
-            {"persist": self._persist, "spark_config": self._spark_config,}
+            {
+                "persist": self._persist,
+                "spark_config": self._spark_config,
+            }
         )
 
     @property
@@ -204,7 +190,18 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
                 "Batch has not been loaded - please run load_batch() to load a batch."
             )
 
-        return self.active_batch_data
+        return self.active_batch_data.dataframe
+
+    def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
+        if isinstance(batch_data, DataFrame):
+            batch_data = SparkDFBatchData(self, batch_data)
+        elif isinstance(batch_data, SparkDFBatchData):
+            pass
+        else:
+            raise GreatExpectationsError(
+                "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"
+            )
+        super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
@@ -221,15 +218,19 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         )
 
         if isinstance(batch_spec, RuntimeDataBatchSpec):
+            # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
-        elif isinstance(batch_spec, (PathBatchSpec, S3BatchSpec)):
-            reader_method: str = batch_spec.get("reader_method")
-            reader_options: dict = batch_spec.get("reader_options") or {}
-            path: str = batch_spec.get("path") or batch_spec.get("s3")
+            batch_spec.batch_data = "SparkDataFrame"
+        elif isinstance(batch_spec, PathBatchSpec):
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options
+            path: str = batch_spec.path
             try:
                 reader_options = self.spark.read.options(**reader_options)
                 reader_fn: Callable = self._get_reader_fn(
-                    reader=reader_options, reader_method=reader_method, path=path,
+                    reader=reader_options,
+                    reader_method=reader_method,
+                    path=path,
                 )
                 batch_data = reader_fn(path)
             except AttributeError:
@@ -246,7 +247,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
             )
 
         batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
-        typed_batch_data = SparkDFBatchData(batch_data)
+        typed_batch_data = SparkDFBatchData(execution_engine=self, dataframe=batch_data)
 
         return typed_batch_data, batch_markers
 
@@ -348,14 +349,14 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.active_batch_data:
-                data = self.active_batch_data
+                data = self.active_batch_data.dataframe
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.loaded_batch_data_dict:
-                data = self.loaded_batch_data_dict[batch_id]
+                data = self.loaded_batch_data_dict[batch_id].dataframe
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
@@ -504,7 +505,8 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return new_domain_kwargs
 
     def resolve_metric_bundle(
-        self, metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
+        self,
+        metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Callable, dict]],
     ) -> dict:
         """For each metric name in the given metric_fn_bundle, finds the domain of the metric and calculates it using a
         metric function from the given provider class.
@@ -515,7 +517,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
                 Returns:
                     A dictionary of the collected metrics over their respective domains
-                """
+        """
 
         resolved_metrics = dict()
         aggregates: Dict[Tuple, dict] = dict()
@@ -570,12 +572,16 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
         return self.dataframe.limit(n).toPandas()
 
     @staticmethod
-    def _split_on_whole_table(df,):
+    def _split_on_whole_table(
+        df,
+    ):
         return df
 
     @staticmethod
     def _split_on_column_value(
-        df, column_name: str, partition_definition: dict,
+        df,
+        column_name: str,
+        partition_definition: dict,
     ):
         return df.filter(F.col(column_name) == partition_definition[column_name])
 
@@ -598,7 +604,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @staticmethod
     def _split_on_divided_integer(
-        df, column_name: str, divisor: int, partition_definition: dict,
+        df,
+        column_name: str,
+        divisor: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_divisor = partition_definition[column_name]
@@ -613,7 +622,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @staticmethod
     def _split_on_mod_integer(
-        df, column_name: str, mod: int, partition_definition: dict,
+        df,
+        column_name: str,
+        mod: int,
+        partition_definition: dict,
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_mod_value = partition_definition[column_name]
@@ -626,7 +638,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @staticmethod
     def _split_on_multi_column_values(
-        df, column_names: list, partition_definition: dict,
+        df,
+        column_names: list,
+        partition_definition: dict,
     ):
         """Split on the joint values in the named columns"""
         for column_name in column_names:
@@ -675,8 +689,7 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
     ### Sampling methods ###
     @staticmethod
     def _sample_using_random(df, p: float = 0.1, seed: int = 1):
-        """Take a random sample of rows, retaining proportion p
-        """
+        """Take a random sample of rows, retaining proportion p"""
         res = (
             df.withColumn("rand", F.rand(seed=seed))
             .filter(F.col("rand") < p)
@@ -686,7 +699,10 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @staticmethod
     def _sample_using_mod(
-        df, column_name: str, mod: int, value: int,
+        df,
+        column_name: str,
+        mod: int,
+        value: int,
     ):
         """Take the mod of named column, and only keep rows that match the given value"""
         res = (
@@ -698,7 +714,9 @@ This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     @staticmethod
     def _sample_using_a_list(
-        df, column_name: str, value_list: list,
+        df,
+        column_name: str,
+        value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
         return df.where(F.col(column_name).isin(value_list))

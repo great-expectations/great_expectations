@@ -145,7 +145,7 @@ def column_function_partial(
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
                 column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect
+                dialect = execution_engine.dialect_module
                 column_function = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -343,7 +343,7 @@ def column_condition_partial(
                     metric_domain_kwargs, domain_type=domain_type
                 )
                 column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect
+                dialect = execution_engine.dialect_module
                 sqlalchemy_engine = execution_engine.engine
 
                 expected_condition = metric_fn(
@@ -424,8 +424,10 @@ def column_condition_partial(
                 )
                 if partial_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN:
                     if filter_column_isnull:
-                        compute_domain_kwargs = execution_engine.add_column_row_condition(
-                            compute_domain_kwargs, column_name=column_name
+                        compute_domain_kwargs = (
+                            execution_engine.add_column_row_condition(
+                                compute_domain_kwargs, column_name=column_name
+                            )
                         )
                     unexpected_condition = ~expected_condition
                 else:
@@ -518,9 +520,11 @@ def _pandas_column_map_series_and_domain_values(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics["unexpected_condition"]
-    (map_series, compute_domain_kwargs_2, accessor_domain_kwargs_2,) = metrics[
-        "metric_partial_fn"
-    ]
+    (
+        map_series,
+        compute_domain_kwargs_2,
+        accessor_domain_kwargs_2,
+    ) = metrics["metric_partial_fn"]
     assert (
         compute_domain_kwargs == compute_domain_kwargs_2
     ), "map_series and condition must have the same compute domain"
@@ -722,7 +726,12 @@ def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
         "unexpected_condition"
     )
     return (
-        sa.func.sum(sa.case([(unexpected_condition, 1)], else_=0,)),
+        sa.func.sum(
+            sa.case(
+                [(unexpected_condition, 1)],
+                else_=0,
+            )
+        ),
         compute_domain_kwargs,
         accessor_domain_kwargs,
     )
@@ -746,7 +755,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         compute_domain_kwargs, domain_type="identity"
     )
     temp_table_name: str = f"ge_tmp_{str(uuid.uuid4())[:8]}"
-    if execution_engine.engine.dialect.name.lower() == "mssql":
+    if execution_engine.dialect == "mssql":
         # mssql expects all temporary table names to have a prefix '#'
         temp_table_name = f"#{temp_table_name}"
 
@@ -760,7 +769,15 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         temp_table_obj.create(execution_engine.engine, checkfirst=True)
 
         count_case_statement: List[sa.sql.elements.Label] = [
-            sa.case([(unexpected_condition, 1,)], else_=0,).label("condition")
+            sa.case(
+                [
+                    (
+                        unexpected_condition,
+                        1,
+                    )
+                ],
+                else_=0,
+            ).label("condition")
         ]
         inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
             count_case_statement,
@@ -768,12 +785,22 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         )
         execution_engine.engine.execute(inner_case_query)
 
-    unexpected_count_query: sa.Select = sa.select(
-        [sa.func.sum(sa.column("condition")).label("unexpected_count"),]
-    ).select_from(temp_table_obj).alias("UnexpectedCountSubquery")
+    unexpected_count_query: sa.Select = (
+        sa.select(
+            [
+                sa.func.sum(sa.column("condition")).label("unexpected_count"),
+            ]
+        )
+        .select_from(temp_table_obj)
+        .alias("UnexpectedCountSubquery")
+    )
 
     unexpected_count = execution_engine.engine.execute(
-        sa.select([unexpected_count_query.c.unexpected_count,])
+        sa.select(
+            [
+                unexpected_count_query.c.unexpected_count,
+            ]
+        )
     ).scalar()
 
     return convert_to_json_serializable(unexpected_count)
@@ -1342,6 +1369,16 @@ class MapMetricProvider(MetricProvider):
                     metric.metric_domain_kwargs,
                     base_metric_value_kwargs,
                 )
+
+        try:
+            _ = get_metric_provider(metric_name + ".map", execution_engine)
+            dependencies["metric_map_fn"] = MetricConfiguration(
+                metric_name + ".map",
+                metric.metric_domain_kwargs,
+                metric.metric_value_kwargs,
+            )
+        except MetricProviderError:
+            pass
 
         return dependencies
 

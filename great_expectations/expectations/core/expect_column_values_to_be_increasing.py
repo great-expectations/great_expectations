@@ -2,6 +2,7 @@ import logging
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
@@ -68,6 +69,15 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
 
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     map_metric = "column_values.increasing"
     success_keys = ("strictly", "mostly", "parse_strings_as_datetimes")
     default_kwarg_values = {
@@ -86,6 +96,7 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

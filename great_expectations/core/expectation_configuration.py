@@ -135,6 +135,18 @@ class ExpectationConfiguration(SerializableDictDot):
                 "catch_exceptions": False,
             },
         },
+        "expect_compound_columns_to_be_unique": {
+            "domain_kwargs": ["column_list", "row_condition", "condition_parser"],
+            "success_kwargs": ["ignore_row_if"],
+            "default_kwarg_values": {
+                "row_condition": None,
+                "condition_parser": "pandas",
+                "ignore_row_if": "all_values_are_missing",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+            },
+        },
         "expect_column_values_to_be_null": {
             "domain_kwargs": ["column", "row_condition", "condition_parser"],
             "success_kwargs": ["mostly"],
@@ -804,7 +816,10 @@ class ExpectationConfiguration(SerializableDictDot):
             )
 
         (evaluation_args, substituted_parameters,) = build_evaluation_parameters(
-            self._kwargs, evaluation_parameters, interactive_evaluation, data_context,
+            self._kwargs,
+            evaluation_parameters,
+            interactive_evaluation,
+            data_context,
         )
 
         self._raw_kwargs = self._kwargs
@@ -1098,7 +1113,8 @@ class ExpectationConfiguration(SerializableDictDot):
 
             if not urn.get("metric_kwargs"):
                 nested_update(
-                    dependencies, {urn["expectation_suite_name"]: [urn["metric_name"]]},
+                    dependencies,
+                    {urn["expectation_suite_name"]: [urn["metric_name"]]},
                 )
             else:
                 nested_update(
@@ -1121,15 +1137,21 @@ class ExpectationConfiguration(SerializableDictDot):
         return get_expectation_impl(self.expectation_type)
 
     def validate(
-        self, validator, runtime_configuration=None,
+        self,
+        validator,
+        runtime_configuration=None,
     ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).validate(
-            validator=validator, runtime_configuration=runtime_configuration,
+            validator=validator,
+            runtime_configuration=runtime_configuration,
         )
 
     def metrics_validate(
-        self, metrics: Dict, runtime_configuration: dict = None, execution_engine=None,
+        self,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine=None,
     ):
         expectation_impl = self._get_expectation_impl()
         return expectation_impl(self).metrics_validate(

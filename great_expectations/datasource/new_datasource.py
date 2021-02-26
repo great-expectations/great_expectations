@@ -9,9 +9,9 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchRequest,
 )
+from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
-from great_expectations.datasource.types import PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -57,7 +57,9 @@ class BaseDatasource:
         self._data_connectors = {}
 
     def get_batch_from_batch_definition(
-        self, batch_definition: BatchDefinition, batch_data: Any = None,
+        self,
+        batch_definition: BatchDefinition,
+        batch_data: Any = None,
     ) -> Batch:
         """
         Note: this method should *not* be used when getting a Batch from a BatchRequest, since it does not capture BatchRequest metadata.
@@ -143,7 +145,7 @@ class BaseDatasource:
             return batches
 
         else:
-            # This is a runtime batchrequest
+            # This is a runtime batch_request
 
             if len(batch_definition_list) != 1:
                 raise ValueError(
@@ -159,7 +161,8 @@ class BaseDatasource:
                 batch_spec,
                 batch_markers,
             ) = data_connector.get_batch_data_and_metadata(
-                batch_definition=batch_definition, batch_data=batch_data,
+                batch_definition=batch_definition,
+                batch_data=batch_data,
             )
 
             new_batch: Batch = Batch(
@@ -173,7 +176,9 @@ class BaseDatasource:
             return [new_batch]
 
     def _build_data_connector_from_config(
-        self, name: str, config: Dict[str, Any],
+        self,
+        name: str,
+        config: Dict[str, Any],
     ) -> DataConnector:
         """Build a DataConnector using the provided configuration and return the newly-built DataConnector."""
         new_data_connector: DataConnector = instantiate_class_from_config(
@@ -240,21 +245,25 @@ class BaseDatasource:
         data_connector: DataConnector = self.data_connectors[
             batch_request.data_connector_name
         ]
-        batch_definition_list = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
+        batch_definition_list = (
+            data_connector.get_batch_definition_list_from_batch_request(
+                batch_request=batch_request
+            )
         )
 
         return batch_definition_list
 
     def self_check(self, pretty_print=True, max_examples=3):
         # Provide visibility into parameters that ExecutionEngine was instantiated with.
-        report_object = {"execution_engine": self.execution_engine.config}
+        report_object: dict = {"execution_engine": self.execution_engine.config}
 
         if pretty_print:
-            print(f"Execution engine: {self.execution_engine.__class__.__name__}")
+            print(
+                f"\nExecutionEngine class name: {self.execution_engine.__class__.__name__}"
+            )
 
         if pretty_print:
-            print(f"Data connectors:")
+            print(f"Data Connectors:")
 
         data_connector_list = list(self.data_connectors.keys())
         data_connector_list.sort()
@@ -344,9 +353,11 @@ class Datasource(BaseDatasource):
         self._init_data_connectors(data_connector_configs=data_connectors)
 
     def _init_data_connectors(
-        self, data_connector_configs: Dict[str, Dict[str, Any]],
+        self,
+        data_connector_configs: Dict[str, Dict[str, Any]],
     ):
         for name, config in data_connector_configs.items():
             self._build_data_connector_from_config(
-                name=name, config=config,
+                name=name,
+                config=config,
             )

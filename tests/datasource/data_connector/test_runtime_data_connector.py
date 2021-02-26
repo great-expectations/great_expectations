@@ -6,19 +6,17 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, BatchSpec
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.core.id_dict import PartitionDefinition
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import RuntimeDataConnector
-from great_expectations.datasource.new_datasource import Datasource
-from great_expectations.datasource.types import RuntimeDataBatchSpec
 
 yaml = YAML()
 
 
 def test_self_check(basic_datasource):
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     assert test_runtime_data_connector.self_check() == {
         "class_name": "RuntimeDataConnector",
@@ -39,9 +37,9 @@ def test_self_check(basic_datasource):
 def test_error_checking(basic_datasource):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     # Test for an unknown execution environment
     with pytest.raises(ValueError):
@@ -117,7 +115,9 @@ def test_error_checking(basic_datasource):
         )
 
 
-def test_partition_request_and_runtime_keys_success_all_keys_present(basic_datasource,):
+def test_partition_request_and_runtime_keys_success_all_keys_present(
+    basic_datasource,
+):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict
@@ -125,14 +125,14 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(basic_datas
     partition_request = {
         "partition_identifiers": {
             "pipeline_stage_name": "core_processing",
-            "run_id": 1234567890,
+            "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
         }
     }
 
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     # Verify that all keys in partition_request are acceptable as runtime_keys (using batch count).
     batch_request: dict = {
@@ -154,7 +154,9 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(basic_datas
     assert len(batch_definition_list) == 1
 
 
-def test_partition_request_and_runtime_keys_error_illegal_keys(basic_datasource,):
+def test_partition_request_and_runtime_keys_error_illegal_keys(
+    basic_datasource,
+):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict
@@ -162,15 +164,15 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_datasource,
     partition_request = {
         "partition_identifiers": {
             "pipeline_stage_name": "core_processing",
-            "run_id": 1234567890,
+            "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
             "custom_key_1": "custom_value_1",
         }
     }
 
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
     # are not accepted.  In this test, all legal keys plus a single illegal key are present.
@@ -194,9 +196,9 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_datasource,
 
     partition_request = {"partition_identifiers": {"unknown_key": "some_value"}}
 
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
     # are not accepted.  In this test, a single illegal key is present.
@@ -220,9 +222,9 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(basic_datasource,
 
 
 def test_get_available_data_asset_names(basic_datasource):
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     expected_available_data_asset_names: List[str] = ["IN_MEMORY_DATA_ASSET"]
 
@@ -233,14 +235,20 @@ def test_get_available_data_asset_names(basic_datasource):
     assert available_data_asset_names == expected_available_data_asset_names
 
 
-def test_get_batch_definition_list_from_batch_request_length_one(basic_datasource,):
+def test_get_batch_definition_list_from_batch_request_length_one(
+    basic_datasource,
+):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request: dict = {"partition_identifiers": {"run_id": 1234567890,}}
+    partition_request: dict = {
+        "partition_identifiers": {
+            "airflow_run_id": 1234567890,
+        }
+    }
 
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
@@ -272,14 +280,20 @@ def test_get_batch_definition_list_from_batch_request_length_one(basic_datasourc
     assert batch_definition_list == expected_batch_definition_list
 
 
-def test_get_batch_definition_list_from_batch_request_length_zero(basic_datasource,):
+def test_get_batch_definition_list_from_batch_request_length_zero(
+    basic_datasource,
+):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    partition_request: dict = {"partition_identifiers": {"run_id": 1234567890,}}
+    partition_request: dict = {
+        "partition_identifiers": {
+            "airflow_run_id": 1234567890,
+        }
+    }
 
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
@@ -301,9 +315,9 @@ def test_get_batch_definition_list_from_batch_request_length_zero(basic_datasour
 
 
 def test__get_data_reference_list(basic_datasource):
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     expected_data_reference_list: List[str] = [""]
 
@@ -315,14 +329,19 @@ def test__get_data_reference_list(basic_datasource):
     assert data_reference_list == expected_data_reference_list
 
 
-def test__generate_batch_spec_parameters_from_batch_definition(basic_datasource,):
+def test__generate_batch_spec_parameters_from_batch_definition(
+    basic_datasource,
+):
     partition_request: dict = {
-        "partition_identifiers": {"custom_key_0": "staging", "run_id": 1234567890,}
+        "partition_identifiers": {
+            "custom_key_0": "staging",
+            "airflow_run_id": 1234567890,
+        }
     }
 
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     expected_batch_spec_parameters: dict = {}
 
@@ -343,12 +362,15 @@ def test__generate_batch_spec_parameters_from_batch_definition(basic_datasource,
 
 def test__build_batch_spec(basic_datasource):
     partition_request: dict = {
-        "partition_identifiers": {"custom_key_0": "staging", "run_id": 1234567890,}
+        "partition_identifiers": {
+            "custom_key_0": "staging",
+            "airflow_run_id": 1234567890,
+        }
     }
 
-    test_runtime_data_connector: RuntimeDataConnector = basic_datasource.data_connectors[
-        "test_runtime_data_connector"
-    ]
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     # noinspection PyProtectedMember
     batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(

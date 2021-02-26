@@ -8,6 +8,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
@@ -27,17 +28,17 @@ def _build_spark_engine(df, spark_session):
         ],
         df.columns.tolist(),
     )
-    engine = SparkDFExecutionEngine(batch_data_dict={"my_id": df})
+    engine = SparkDFExecutionEngine()
+    engine.load_batch_data("my_id", SparkDFBatchData(engine, df))
     return engine
 
 
 def _build_sa_engine(df, sa):
     eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng, index=False)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={"my_id": batch_data}
-    )
+    engine = SqlAlchemyExecutionEngine(engine=eng)
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name="test")
+    engine.load_batch_data("my_id", batch_data)
     return engine
 
 
@@ -181,7 +182,9 @@ def test_map_of_type_sa(sa):
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     df.to_sql("test", eng, index=False)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=eng, table_name="test", source_table_name="test"
+    )
     engine = SqlAlchemyExecutionEngine(
         engine=eng, batch_data_dict={"my_id": batch_data}
     )
@@ -460,7 +463,10 @@ def test_z_score_under_threshold_pd():
         metric_name="column_values.z_score.map",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
-        metric_dependencies={"column.standard_deviation": stdev, "column.mean": mean,},
+        metric_dependencies={
+            "column.standard_deviation": stdev,
+            "column.mean": mean,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics

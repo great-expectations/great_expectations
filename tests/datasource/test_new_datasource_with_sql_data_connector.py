@@ -59,12 +59,15 @@ data_connectors:
     )
 
     report = my_data_connector.self_check()
-    print(json.dumps(report, indent=4))
+    # print(json.dumps(report, indent=4))
 
     report["execution_engine"].pop("connection_string")
 
     assert report == {
-        "execution_engine": {"class_name": "SqlAlchemyExecutionEngine"},
+        "execution_engine": {
+            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
+            "class_name": "SqlAlchemyExecutionEngine",
+        },
         "data_connectors": {
             "count": 1,
             "my_sqlite_db": {
@@ -265,12 +268,18 @@ tables:
             "view_that_should_be_partitioned_by_random_hash__H",
             "view_with_fk_reference_from_F",
         ],
-        "hourly": ["table_partitioned_by_timestamp_column__B",],
-        "daily": ["table_partitioned_by_date_column__A__daily",],
+        "hourly": [
+            "table_partitioned_by_timestamp_column__B",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A__daily",
+        ],
         "weekly": [
             "some_string__table_partitioned_by_date_column__A__some_other_string",
         ],
-        "by_id_dozens": ["table_partitioned_by_date_column__A",],
+        "by_id_dozens": [
+            "table_partitioned_by_date_column__A",
+        ],
     }
 
     # Here we should test getting another batch
@@ -305,10 +314,18 @@ tables:
     )
     print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
     assert my_sql_datasource.get_available_data_asset_names() == {
-        "whole_table": ["table_partitioned_by_date_column__A",],
-        "daily": ["table_partitioned_by_date_column__A",],
-        "weekly": ["table_partitioned_by_date_column__A",],
-        "by_id_dozens": ["table_partitioned_by_date_column__A",],
+        "whole_table": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "weekly": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "by_id_dozens": [
+            "table_partitioned_by_date_column__A",
+        ],
     }
 
     # Here we should test getting another batch
@@ -685,7 +702,8 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(
         "example_unmatched_data_references": [],
         "example_data_reference": {
             "batch_spec": {
-                "table_name": "main.table_containing_id_spacers_for_D",
+                "schema_name": "main",
+                "table_name": "table_containing_id_spacers_for_D",
                 "partition_definition": {},
             },
             "n_rows": 30,
@@ -771,7 +789,8 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
         "example_data_reference": {
             "batch_spec": {
                 "partition_definition": {},
-                "table_name": "main.table_containing_id_spacers_for_D",
+                "schema_name": "main",
+                "table_name": "table_containing_id_spacers_for_D",
             },
             "n_rows": 30,
         },

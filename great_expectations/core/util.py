@@ -1,15 +1,37 @@
+import datetime
+import decimal
 import logging
+import sys
+from collections import OrderedDict
 from collections.abc import Mapping
+from typing import Any, Optional, Union
+from urllib.parse import urlparse
 
-# Updated from the stack overflow version below to concatenate lists
-# https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+import numpy as np
+import pandas as pd
 from IPython import get_ipython
 
+from great_expectations import exceptions as ge_exceptions
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
 
+# Updated from the stack overflow version below to concatenate lists
+# https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
+
+
 logger = logging.getLogger(__name__)
+
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+    )
+
+
+_SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
 
 def nested_update(d, u):
@@ -53,12 +75,6 @@ def convert_to_json_serializable(data):
     Warning:
         test_obj may also be converted in place.
     """
-    import datetime
-    import decimal
-    import sys
-
-    import numpy as np
-    import pandas as pd
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
@@ -137,11 +153,17 @@ def convert_to_json_serializable(data):
     elif isinstance(data, pd.DataFrame):
         return convert_to_json_serializable(data.to_dict(orient="records"))
 
+    elif pyspark and isinstance(data, pyspark.sql.DataFrame):
+        # using StackOverflow suggestion for converting pyspark df into dictionary
+        # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
+        return convert_to_json_serializable(
+            dict(zip(data.schema.names, zip(*data.collect())))
+        )
+
     elif isinstance(data, decimal.Decimal):
-        if not (-1e-55 < decimal.Decimal.from_float(float(data)) - data < 1e-55):
+        if requires_lossy_conversion(data):
             logger.warning(
-                "Using lossy conversion for decimal %s to float object to support serialization."
-                % str(data)
+                f"Using lossy conversion for decimal {data} to float object to support serialization."
             )
         return float(data)
 
@@ -165,11 +187,6 @@ def ensure_json_serializable(data):
     Warning:
         test_obj may also be converted in place.
     """
-    import datetime
-    import decimal
-
-    import numpy as np
-    import pandas as pd
 
     if isinstance(data, SerializableDictDot):
         return
@@ -241,6 +258,14 @@ def ensure_json_serializable(data):
             for idx, val in data.iteritems()
         ]
         return
+
+    elif pyspark and isinstance(data, pyspark.sql.DataFrame):
+        # using StackOverflow suggestion for converting pyspark df into dictionary
+        # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
+        return ensure_json_serializable(
+            dict(zip(data.schema.names, zip(*data.collect())))
+        )
+
     elif isinstance(data, pd.DataFrame):
         return ensure_json_serializable(data.to_dict(orient="records"))
 
@@ -255,3 +280,126 @@ def ensure_json_serializable(data):
             "%s is of type %s which cannot be serialized to json"
             % (str(data), type(data).__name__)
         )
+
+
+def requires_lossy_conversion(d):
+    return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
+
+
+def substitute_all_strftime_format_strings(
+    data: Union[dict, list, str, Any], datetime_obj: Optional[datetime.datetime] = None
+) -> Union[str, Any]:
+    """
+    This utility function will iterate over input data and for all strings, replace any strftime format
+    elements using either the provided datetime_obj or the current datetime
+    """
+
+    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
+    if isinstance(data, dict) or isinstance(data, OrderedDict):
+        return {
+            k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
+            for k, v in data.items()
+        }
+    elif isinstance(data, list):
+        return [
+            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj)
+            for el in data
+        ]
+    elif isinstance(data, str):
+        return get_datetime_string_from_strftime_format(data, datetime_obj=datetime_obj)
+    else:
+        return data
+
+
+def get_datetime_string_from_strftime_format(
+    format_str: str, datetime_obj: Optional[datetime.datetime] = None
+) -> str:
+    """
+    This utility function takes a string with strftime format elements and substitutes those elements using
+    either the provided datetime_obj or current datetime
+    """
+    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
+    return datetime_obj.strftime(format_str)
+
+
+def parse_string_to_datetime(
+    datetime_string: str, datetime_format_string: str
+) -> datetime.date:
+    if not isinstance(datetime_string, str):
+        raise ge_exceptions.SorterError(
+            f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
+            """
+        )
+    if datetime_format_string and not isinstance(datetime_format_string, str):
+        raise ge_exceptions.SorterError(
+            f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
+"{str(type(datetime_format_string))}").
+            """
+        )
+    return datetime.datetime.strptime(datetime_string, datetime_format_string).date()
+
+
+def datetime_to_int(dt: datetime.date) -> int:
+    return int(dt.strftime("%Y%m%d%H%M%S"))
+
+
+# S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
+class S3Url:
+    """
+    >>> s = S3Url("s3://bucket/hello/world")
+    >>> s.bucket
+    'bucket'
+    >>> s.key
+    'hello/world'
+    >>> s.url
+    's3://bucket/hello/world'
+
+    >>> s = S3Url("s3://bucket/hello/world?qwe1=3#ddd")
+    >>> s.bucket
+    'bucket'
+    >>> s.key
+    'hello/world?qwe1=3#ddd'
+    >>> s.url
+    's3://bucket/hello/world?qwe1=3#ddd'
+
+    >>> s = S3Url("s3://bucket/hello/world#foo?bar=2")
+    >>> s.key
+    'hello/world#foo?bar=2'
+    >>> s.url
+    's3://bucket/hello/world#foo?bar=2'
+    """
+
+    def __init__(self, url):
+        self._parsed = urlparse(url, allow_fragments=False)
+
+    @property
+    def bucket(self):
+        return self._parsed.netloc
+
+    @property
+    def key(self):
+        if self._parsed.query:
+            return self._parsed.path.lstrip("/") + "?" + self._parsed.query
+        else:
+            return self._parsed.path.lstrip("/")
+
+    @property
+    def suffix(self) -> Optional[str]:
+        """
+        Attempts to get a file suffix from the S3 key.
+        If can't find one returns `None`.
+        """
+        splits = self._parsed.path.rsplit(".", 1)
+        _suffix = splits[-1]
+        if len(_suffix) > 0 and len(splits) > 1:
+            return str(_suffix)
+        return None
+
+    @property
+    def url(self):
+        return self._parsed.geturl()
+
+
+def sniff_s3_compression(s3_url: S3Url) -> str:
+    """Attempts to get read_csv compression from s3_url"""
+    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix, "infer")

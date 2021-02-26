@@ -1,7 +1,7 @@
 # Utility methods for dealing with Dataset objects
 
 import logging
-from typing import Any, Dict, List, Union
+from typing import Any, List
 
 import numpy as np
 
@@ -17,6 +17,48 @@ except ImportError:
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
     DefaultDialect = None
     WithinGroup = None
+
+
+# noinspection PyPep8Naming
+def get_or_create_spark_session(
+    name: str = "default_great_expectations_spark_dataframe_execution_engine",
+):
+    # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
+    # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
+    # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
+    # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+    try:
+        from pyspark import SparkContext
+        from pyspark.sql import SparkSession
+
+        from great_expectations.execution_engine import SparkDFExecutionEngine
+    except ImportError:
+        SparkContext = None
+        SparkSession = None
+        SparkDFExecutionEngine = None
+        # TODO: review logging more detail here
+        logger.debug(
+            "Unable to load pyspark; install optional spark dependency for support."
+        )
+
+    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+        spark_config={
+            "spark.app.name": name,
+            "spark.sql.catalogImplementation": "hive",
+            "spark.executor.memory": "450m",
+        },
+    )
+    sess: SparkSession = execution_engine.spark
+    sc: SparkContext = sess.sparkContext
+    # Calling "sc.stop()" after all tests have run is not easy under "pytest".
+    # Thus, will make sure that during testing, SparkContext is not stopped.
+    # noinspection PyProtectedMember
+    sc_stopped: bool = sc._jsc.sc().isStopped()
+    if sc_stopped:
+        raise ValueError("SparkContext stopped unexpectedly.")
+
+    return sess
 
 
 def is_valid_partition_object(partition_object):
@@ -124,12 +166,16 @@ def build_continuous_partition_object(
     hist_metric_configuration = MetricConfiguration(
         "column.histogram",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={"bins": tuple(bins),},
+        metric_value_kwargs={
+            "bins": tuple(bins),
+        },
     )
     nonnull_configuration = MetricConfiguration(
         "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={"bins": tuple(bins),},
+        metric_value_kwargs={
+            "bins": tuple(bins),
+        },
     )
     metrics = execution_engine.resolve_metrics(
         (hist_metric_configuration, nonnull_configuration)
@@ -170,10 +216,13 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
     counts_configuration = MetricConfiguration(
         "column.partition",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={"sort": sort,},
+        metric_value_kwargs={
+            "sort": sort,
+        },
     )
     nonnull_configuration = MetricConfiguration(
-        "column_values.nonnull.count", metric_domain_kwargs=domain_kwargs,
+        "column_values.nonnull.count",
+        metric_domain_kwargs=domain_kwargs,
     )
     metrics = execution_engine.resolve_metrics(
         (counts_configuration, nonnull_configuration)
@@ -505,7 +554,8 @@ def get_approximate_percentile_disc_sql(selects: List, sql_engine_dialect: Any) 
 
 
 def check_sql_engine_dialect(
-    actual_sql_engine_dialect: Any, candidate_sql_engine_dialect: Any,
+    actual_sql_engine_dialect: Any,
+    candidate_sql_engine_dialect: Any,
 ) -> bool:
     try:
         # noinspection PyTypeChecker

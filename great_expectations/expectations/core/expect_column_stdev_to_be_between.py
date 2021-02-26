@@ -1,18 +1,9 @@
 from typing import Dict, Optional
 
-import pandas as pd
-
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.batch import Batch
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    Expectation,
-    TableExpectation,
-    renderer,
-)
-from great_expectations.expectations.registry import extract_metrics
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -83,6 +74,15 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
 
             """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     metric_dependencies = ("column.standard_deviation",)
     success_keys = (
         "min_value",
@@ -116,6 +116,7 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

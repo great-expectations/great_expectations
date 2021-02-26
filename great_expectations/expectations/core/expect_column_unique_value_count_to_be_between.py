@@ -6,6 +6,7 @@ import pandas as pd
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
@@ -15,15 +16,7 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import (
-    ColumnExpectation,
-    ColumnMapExpectation,
-    Expectation,
-    InvalidExpectationConfigurationError,
-    TableExpectation,
-    _format_map_output,
-)
-from ..registry import extract_metrics
+from ..expectation import ColumnExpectation
 
 
 class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
@@ -80,6 +73,15 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
 
             """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.distinct_values.count",)
     success_keys = (
@@ -116,6 +118,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,
@@ -210,9 +213,9 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
             **{
                 "content_block_type": "string_template",
                 "string_template": {
-                    "template": "Distinct (%)",
+                    "template": "Distinct (n)",
                     "tooltip": {
-                        "content": "expect_column_proportion_of_unique_values_to_be_between"
+                        "content": "expect_column_unique_value_count_to_be_between"
                     },
                 },
             }
@@ -220,7 +223,7 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         if not observed_value:
             return [template_string_object, "--"]
         else:
-            return [template_string_object, "%.1f%%" % (100 * observed_value)]
+            return [template_string_object, observed_value]
 
     def _validate(
         self,

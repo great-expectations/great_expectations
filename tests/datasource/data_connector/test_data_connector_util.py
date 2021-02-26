@@ -5,7 +5,6 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     PartitionDefinition,
-    PartitionRequest,
 )
 
 # noinspection PyProtectedMember
@@ -13,8 +12,8 @@ from great_expectations.datasource.data_connector.util import (
     _invert_regex_to_data_reference_template,
     batch_definition_matches_batch_request,
     build_sorters_from_config,
-    convert_batch_request_to_data_reference_string_using_regex,
-    convert_data_reference_string_to_batch_request_using_regex,
+    convert_data_reference_string_to_partition_definition_using_regex,
+    convert_partition_definition_to_data_reference_string_using_regex,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
@@ -85,9 +84,10 @@ def test_batch_definition_matches_batch_request():
         data_asset_name="TestFiles",
         partition_request={"partition_identifiers": 1},
     )
-    batch_definition_matches_batch_request(
-        my_batch_definition, my_batch_request
-    ) is False
+    assert (
+        batch_definition_matches_batch_request(my_batch_definition, my_batch_request)
+        is False
+    )
 
     # partition_identifiers do not match batch_definition.partition_definition
     my_batch_request = BatchRequest(
@@ -96,9 +96,10 @@ def test_batch_definition_matches_batch_request():
         data_asset_name="TestFiles",
         partition_request={"partition_identifiers": {"i": "wont_work"}},
     )
-    batch_definition_matches_batch_request(
-        my_batch_definition, my_batch_request
-    ) is False
+    assert (
+        batch_definition_matches_batch_request(my_batch_definition, my_batch_request)
+        is False
+    )
 
 
 def test_map_data_reference_string_to_batch_definition_list_using_regex():
@@ -106,13 +107,15 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
     data_reference = "alex_20200809_1000.csv"
     regex_pattern = r"^(.+)_____________\.csv$"
     group_names = ["name", "timestamp", "price"]
-    returned_batch_def_list = map_data_reference_string_to_batch_definition_list_using_regex(
-        datasource_name="test_datasource",
-        data_connector_name="test_data_connector",
-        data_asset_name=None,
-        data_reference=data_reference,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    returned_batch_def_list = (
+        map_data_reference_string_to_batch_definition_list_using_regex(
+            datasource_name="test_datasource",
+            data_connector_name="test_data_connector",
+            data_asset_name=None,
+            data_reference=data_reference,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
     assert returned_batch_def_list is None
 
@@ -120,13 +123,15 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
     data_reference = "alex_20200809_1000.csv"
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
-    returned_batch_def_list = map_data_reference_string_to_batch_definition_list_using_regex(
-        datasource_name="test_datasource",
-        data_connector_name="test_data_connector",
-        data_asset_name=None,
-        data_reference=data_reference,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    returned_batch_def_list = (
+        map_data_reference_string_to_batch_definition_list_using_regex(
+            datasource_name="test_datasource",
+            data_connector_name="test_data_connector",
+            data_asset_name=None,
+            data_reference=data_reference,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
     assert returned_batch_def_list == [
         BatchDefinition(
@@ -134,19 +139,25 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
             data_connector_name="test_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
             partition_definition=PartitionDefinition(
-                {"name": "alex", "timestamp": "20200809", "price": "1000",}
+                {
+                    "name": "alex",
+                    "timestamp": "20200809",
+                    "price": "1000",
+                }
             ),
         )
     ]
 
     # data_asset_name configured
-    returned_batch_def_list = map_data_reference_string_to_batch_definition_list_using_regex(
-        datasource_name="test_datasource",
-        data_connector_name="test_data_connector",
-        data_asset_name="test_data_asset",
-        data_reference=data_reference,
-        regex_pattern=regex_pattern,
-        group_names=group_names,
+    returned_batch_def_list = (
+        map_data_reference_string_to_batch_definition_list_using_regex(
+            datasource_name="test_datasource",
+            data_connector_name="test_data_connector",
+            data_asset_name="test_data_asset",
+            data_reference=data_reference,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+        )
     )
     assert returned_batch_def_list == [
         BatchDefinition(
@@ -154,46 +165,53 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
             data_connector_name="test_data_connector",
             data_asset_name="test_data_asset",
             partition_definition=PartitionDefinition(
-                {"name": "alex", "timestamp": "20200809", "price": "1000",}
+                {
+                    "name": "alex",
+                    "timestamp": "20200809",
+                    "price": "1000",
+                }
             ),
         )
     ]
 
 
-def test_convert_data_reference_string_to_batch_request_using_regex():
+def test_convert_data_reference_string_to_partition_definition_using_regex():
     data_reference = "alex_20200809_1000.csv"
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
-    assert convert_data_reference_string_to_batch_request_using_regex(
+    assert convert_data_reference_string_to_partition_definition_using_regex(
         data_reference=data_reference, regex_pattern=pattern, group_names=group_names
-    ) == BatchRequest(
-        datasource_name=None,
-        data_connector_name=None,
-        data_asset_name="DEFAULT_ASSET_NAME",
-        partition_request=PartitionDefinition(
-            {"name": "alex", "timestamp": "20200809", "price": "1000",}
+    ) == (
+        "DEFAULT_ASSET_NAME",
+        PartitionDefinition(
+            {
+                "name": "alex",
+                "timestamp": "20200809",
+                "price": "1000",
+            }
         ),
     )
 
     data_reference = "eugene_20200810_1500.csv"
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
-    assert convert_data_reference_string_to_batch_request_using_regex(
+    assert convert_data_reference_string_to_partition_definition_using_regex(
         data_reference=data_reference, regex_pattern=pattern, group_names=group_names
-    ) == BatchRequest(
-        datasource_name=None,
-        data_connector_name=None,
-        data_asset_name="DEFAULT_ASSET_NAME",
-        partition_request=PartitionDefinition(
-            {"name": "eugene", "timestamp": "20200810", "price": "1500",}
+    ) == (
+        "DEFAULT_ASSET_NAME",
+        PartitionDefinition(
+            {
+                "name": "eugene",
+                "timestamp": "20200810",
+                "price": "1500",
+            }
         ),
     )
-
     data_reference = "DOESNT_MATCH_CAPTURING_GROUPS.csv"
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
     assert (
-        convert_data_reference_string_to_batch_request_using_regex(
+        convert_data_reference_string_to_partition_definition_using_regex(
             data_reference=data_reference,
             regex_pattern=pattern,
             group_names=group_names,
@@ -205,17 +223,13 @@ def test_convert_data_reference_string_to_batch_request_using_regex():
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
     assert (
-        convert_data_reference_string_to_batch_request_using_regex(
+        convert_data_reference_string_to_partition_definition_using_regex(
             data_reference=data_reference,
             regex_pattern=pattern,
             group_names=group_names,
         )
         is None
     )
-
-    # TODO ABE 20201017 : Future case to handle
-    # with pytest.raises(ValueError):
-    #    regex_partitioner._convert_data_reference_to_batch_request("NOT_THE_RIGHT_DIR/eugene_20200810_1500.csv")
 
 
 def test_map_batch_definition_to_data_reference_string_using_regex():
@@ -224,6 +238,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
     group_names = ["name", "timestamp", "price"]
     regex_pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     with pytest.raises(TypeError):
+        # noinspection PyUnusedLocal,PyTypeChecker
         my_data_reference = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=my_batch_definition,
             regex_pattern=regex_pattern,
@@ -268,17 +283,21 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
     assert my_data_reference == "eugene_20200809_1500.csv"
 
 
-def test_convert_batch_request_to_data_reference_string_using_regex():
+def test_convert_partition_definition_to_data_reference_string_using_regex():
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
-    batch_request = BatchRequest(
-        partition_request=PartitionRequest(
-            **{"name": "alex", "timestamp": "20200809", "price": "1000",}
-        )
+    partition_definition = PartitionDefinition(
+        **{
+            "name": "alex",
+            "timestamp": "20200809",
+            "price": "1000",
+        }
     )
     assert (
-        convert_batch_request_to_data_reference_string_using_regex(
-            batch_request=batch_request, regex_pattern=pattern, group_names=group_names
+        convert_partition_definition_to_data_reference_string_using_regex(
+            partition_definition=partition_definition,
+            regex_pattern=pattern,
+            group_names=group_names,
         )
         == "alex_20200809_1000.csv"
     )
@@ -286,14 +305,18 @@ def test_convert_batch_request_to_data_reference_string_using_regex():
     # Test an example with an uncaptured regex group (should return a WildcardDataReference)
     pattern = r"^(.+)_(\d+)_\d+\.csv$"
     group_names = ["name", "timestamp"]
-    batch_request = BatchRequest(
-        partition_request=PartitionRequest(
-            **{"name": "alex", "timestamp": "20200809", "price": "1000",}
-        )
+    partition_definition = PartitionDefinition(
+        **{
+            "name": "alex",
+            "timestamp": "20200809",
+            "price": "1000",
+        }
     )
     assert (
-        convert_batch_request_to_data_reference_string_using_regex(
-            batch_request=batch_request, regex_pattern=pattern, group_names=group_names
+        convert_partition_definition_to_data_reference_string_using_regex(
+            partition_definition=partition_definition,
+            regex_pattern=pattern,
+            group_names=group_names,
         )
         == "alex_20200809_*.csv"
     )
@@ -301,14 +324,18 @@ def test_convert_batch_request_to_data_reference_string_using_regex():
     # Test an example with an uncaptured regex group (should return a WildcardDataReference)
     pattern = r"^.+_(\d+)_(\d+)\.csv$"
     group_names = ["timestamp", "price"]
-    batch_request = BatchRequest(
-        partition_request=PartitionRequest(
-            **{"name": "alex", "timestamp": "20200809", "price": "1000",}
-        )
+    partition_definition = PartitionDefinition(
+        **{
+            "name": "alex",
+            "timestamp": "20200809",
+            "price": "1000",
+        }
     )
     assert (
-        convert_batch_request_to_data_reference_string_using_regex(
-            batch_request=batch_request, regex_pattern=pattern, group_names=group_names
+        convert_partition_definition_to_data_reference_string_using_regex(
+            partition_definition=partition_definition,
+            regex_pattern=pattern,
+            group_names=group_names,
         )
         == "*_20200809_1000.csv"
     )
@@ -397,7 +424,11 @@ def test__invert_regex_to_data_reference_template():
 
 def test_build_sorters_from_config_good_config():
     sorters_config = [
-        {"orderby": "desc", "class_name": "NumericSorter", "name": "price",}
+        {
+            "orderby": "desc",
+            "class_name": "NumericSorter",
+            "name": "price",
+        }
     ]
     sorters = build_sorters_from_config(sorters_config)
     assert sorters.__repr__() == str(
@@ -413,13 +444,23 @@ def test_build_sorters_from_config_good_config():
 
 def test_build_sorters_from_config_bad_config():
     # 1. class_name is bad
-    sorters_config = [{"orderby": "desc", "class_name": "IDontExist", "name": "price",}]
+    sorters_config = [
+        {
+            "orderby": "desc",
+            "class_name": "IDontExist",
+            "name": "price",
+        }
+    ]
     with pytest.raises(ge_exceptions.PluginClassNotFoundError):
         build_sorters_from_config(sorters_config)
 
     # 2. orderby : not a real order
     sorters_config = [
-        {"orderby": "not_a_real_order", "class_name": "NumericSorter", "name": "price",}
+        {
+            "orderby": "not_a_real_order",
+            "class_name": "NumericSorter",
+            "name": "price",
+        }
     ]
     with pytest.raises(ge_exceptions.SorterError):
         build_sorters_from_config(sorters_config)

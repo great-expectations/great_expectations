@@ -1,6 +1,6 @@
 .. _which_data_connector_to_use:
 
-How to choose which ``DataConnector`` to use:
+How to choose which ``DataConnector`` to use
 ==============================================
 
 Great Expectations provides two types of ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk, but also S3 object stores, etc:
@@ -38,7 +38,7 @@ This config...
             class_name: InferredAssetFilesystemDataConnector
             base_directory: my_data/
             default_regex:
-                pattern: (.*)/.*-(\d+).csv
+                pattern: (.*)/.*-(\d+)\.csv
                 group_names:
                     - data_asset_name
                     - id
@@ -106,22 +106,22 @@ Then this config...
             base_directory: my_messier_data/
             assets:
                 A:
-                    pattern: (.+A)-(\\d+)\\.csv
+                    pattern: (.+A)-(\d+)\.csv
                     group_names:
                         - name
                         - id
                 B:
-                    pattern: (.+B)-(\\d+)\\.txt
+                    pattern: (.+B)-(\d+)\.txt
                     group_names:
                         - name
                         - val
                 C:
-                    pattern: (.+C)-(\\d+)\\.csv
+                    pattern: (.+C)-(\d+)\.csv
                     group_names:
                         - name
                         - id
                 D:
-                    pattern: (.+D)-(\\d+)\\.csv
+                    pattern: (.+D)-(\d+)\.csv
                     group_names:
                         - name
                         - id

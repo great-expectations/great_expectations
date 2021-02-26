@@ -7,11 +7,13 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
+from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from tests.test_utils import create_files_in_directory
 
 
 def test_empty_store(empty_data_context):
+    # noinspection PyUnusedLocal
     my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
@@ -27,8 +29,8 @@ store_backend:
 
 
 def test_config_with_yaml_error(empty_data_context):
-
     with pytest.raises(Exception):
+        # noinspection PyUnusedLocal
         my_expectation_store = empty_data_context.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
@@ -41,23 +43,103 @@ EGREGIOUS FORMATTING ERROR
         )
 
 
-def test_filesystem_store(empty_data_context):
+def test_expectations_store_with_filesystem_store_backend(empty_data_context):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
         f_.write("\n")
     with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:
         f_.write("\n")
 
+    # noinspection PyUnusedLocal
     my_expectation_store = empty_data_context.test_yaml_config(
         yaml_config=f"""
-module_name: great_expectations.data_context.store.expectations_store
+module_name: great_expectations.data_context.store
 class_name: ExpectationsStore
 store_backend:
-
     module_name: "great_expectations.data_context.store"
     class_name: TupleFilesystemStoreBackend
     base_directory: {tmp_dir}
 """
+    )
+
+
+def test_checkpoint_store_with_filesystem_store_backend(
+    empty_data_context, tmp_path_factory
+):
+    tmp_dir: str = str(
+        tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
+    )
+
+    yaml_config: str = f"""
+    store_name: my_checkpoint_store
+    class_name: CheckpointStore
+    module_name: great_expectations.data_context.store
+    store_backend:
+        class_name: TupleFilesystemStoreBackend
+        module_name: "great_expectations.data_context.store"
+        base_directory: {tmp_dir}/checkpoints
+    """
+
+    my_checkpoint_store: CheckpointStore = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        return_mode="instantiated_class",
+    )
+
+    report_object: dict = empty_data_context.test_yaml_config(
+        yaml_config=yaml_config,
+        return_mode="report_object",
+    )
+
+    assert my_checkpoint_store.config == report_object["config"]
+
+    expected_checkpoint_store_config: dict
+
+    expected_checkpoint_store_config = {
+        "store_name": "my_checkpoint_store",
+        "class_name": "CheckpointStore",
+        "module_name": "great_expectations.data_context.store.checkpoint_store",
+        "store_backend": {
+            "module_name": "great_expectations.data_context.store",
+            "class_name": "TupleFilesystemStoreBackend",
+            "base_directory": f"{tmp_dir}/checkpoints",
+            "suppress_store_backend_id": True,
+            "filepath_template": "{0}.yml",
+        },
+        "overwrite_existing": False,
+        "runtime_environment": {
+            "root_directory": f"{empty_data_context.root_directory}",
+        },
+    }
+    assert my_checkpoint_store.config == expected_checkpoint_store_config
+
+    checkpoint_store_name: str = my_checkpoint_store.config["store_name"]
+    empty_data_context.get_config()["checkpoint_store_name"] = checkpoint_store_name
+
+    assert (
+        empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        == "my_checkpoint_store"
+    )
+    assert (
+        empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        == my_checkpoint_store.config["store_name"]
+    )
+
+    expected_checkpoint_store_config = {
+        "store_name": "my_checkpoint_store",
+        "class_name": "CheckpointStore",
+        "module_name": "great_expectations.data_context.store",
+        "store_backend": {
+            "class_name": "TupleFilesystemStoreBackend",
+            "module_name": "great_expectations.data_context.store",
+            "base_directory": f"{tmp_dir}/checkpoints",
+            "suppress_store_backend_id": True,
+        },
+    }
+    assert (
+        empty_data_context.get_config_with_variables_substituted().stores[
+            empty_data_context.get_config_with_variables_substituted().checkpoint_store_name
+        ]
+        == expected_checkpoint_store_config
     )
 
 
@@ -139,8 +221,7 @@ data_connectors:
 
 
 def test_error_states(empty_data_context):
-
-    first_config = """
+    first_config: str = """
 class_name: Datasource
 
 execution_engine:
@@ -156,7 +237,8 @@ execution_engine:
     # Set shorten_tracebacks=True and verify that no error is thrown, even though the config is the same as before.
     # Note: a more thorough test could also verify that the traceback is indeed short.
     empty_data_context.test_yaml_config(
-        yaml_config=first_config, shorten_tracebacks=True,
+        yaml_config=first_config,
+        shorten_tracebacks=True,
     )
 
     # For good measure, do it again, with a different config and a different type of error
@@ -245,13 +327,14 @@ def test_golden_path_sql_datasource_configuration(
 
     context = ge.get_context()
 
-    yaml_config = """
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    yaml_config = f"""
 class_name: SimpleSqlalchemyDatasource
 credentials:
     drivername: postgresql
     username: postgres
     password: ""
-    host: localhost
+    host: {db_hostname}
     port: 5432
     database: test_ci
 
@@ -263,17 +346,25 @@ introspection:
 """
     # noinspection PyUnusedLocal
     report_object = context.test_yaml_config(
-        name="my_datasource", yaml_config=yaml_config, return_mode="report_object",
+        name="my_datasource",
+        yaml_config=yaml_config,
+        return_mode="report_object",
     )
     print(json.dumps(report_object, indent=2))
     print(context.datasources)
 
-    my_batch = context.get_batch("my_datasource", "whole_table_with_limits", "test_df",)
+    my_batch = context.get_batch(
+        "my_datasource",
+        "whole_table_with_limits",
+        "test_df",
+    )
     # assert len(my_batch.data.fetchall()) == 10
 
     with pytest.raises(KeyError):
         my_batch = context.get_batch(
-            "my_datasource", "whole_table_with_limits", "DOES_NOT_EXIST",
+            "my_datasource",
+            "whole_table_with_limits",
+            "DOES_NOT_EXIST",
         )
 
     my_validator = context.get_validator(
@@ -292,6 +383,7 @@ introspection:
     # )
     # assert my_evr.success
 
+    # TODO: <Alex>ALEX</Alex>
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
     # assert my_evr.success
 
@@ -365,7 +457,9 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"number": "2",},
+        partition_identifiers={
+            "number": "2",
+        },
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -377,7 +471,7 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
@@ -419,6 +513,7 @@ data_connectors:
     )
     assert my_evr.success
 
+    # TODO: <Alex>ALEX</Alex>
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
     # assert my_evr.success
 
@@ -518,7 +613,9 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={"number": "2",},
+        partition_identifiers={
+            "number": "2",
+        },
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -532,7 +629,7 @@ data_connectors:
 
     my_batch.head()
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1

@@ -2,9 +2,16 @@ import logging
 import random
 from typing import Any, List, Optional, Tuple
 
-from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchMarkers,
+    BatchRequest,
+    BatchRequestBase,
+)
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -72,10 +79,9 @@ class DataConnector:
         self._data_context_root_directory = data_context_root_directory
 
     def get_batch_data_and_metadata(
-        self, batch_definition: BatchDefinition,
-    ) -> Tuple[
-        Any, BatchSpec, BatchMarkers,  # batch_data
-    ]:
+        self,
+        batch_definition: BatchDefinition,
+    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
         """
         Uses batch_definition to retrieve batch_data and batch_markers by building a batch_spec from batch_definition,
         then using execution_engine to return batch_data and batch_markers
@@ -88,6 +94,7 @@ class DataConnector:
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
+        self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,
             batch_spec,
@@ -104,8 +111,10 @@ class DataConnector:
             BatchSpec object built from BatchDefinition
 
         """
-        batch_spec_params: dict = self._generate_batch_spec_parameters_from_batch_definition(
-            batch_definition=batch_definition
+        batch_spec_params: dict = (
+            self._generate_batch_spec_parameters_from_batch_definition(
+                batch_definition=batch_definition
+            )
         )
         batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
         if isinstance(batch_spec_passthrough, dict):
@@ -113,7 +122,9 @@ class DataConnector:
         batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
         return batch_spec
 
-    def _refresh_data_references_cache(self,):
+    def _refresh_data_references_cache(
+        self,
+    ):
         raise NotImplementedError
 
     def _get_data_reference_list(
@@ -152,7 +163,8 @@ class DataConnector:
         raise NotImplementedError
 
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequest,
+        self,
+        batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
         raise NotImplementedError
 
@@ -213,8 +225,10 @@ class DataConnector:
             )
 
         for asset_name in asset_names[:max_examples]:
-            data_reference_list = self._get_data_reference_list_from_cache_by_data_asset_name(
-                data_asset_name=asset_name
+            data_reference_list = (
+                self._get_data_reference_list_from_cache_by_data_asset_name(
+                    data_asset_name=asset_name
+                )
             )
             len_batch_definition_list = len(data_reference_list)
             example_data_references = data_reference_list[:max_examples]
@@ -255,11 +269,13 @@ class DataConnector:
                 print(f"\t\tNo references available.")
             return report_obj
 
-        for data_asset_name, data_asset_return_obj in available_references:
+        data_asset_name: Optional[str] = None
+        for tmp_data_asset_name, data_asset_return_obj in available_references:
             if data_asset_return_obj["batch_definition_count"] > 0:
                 example_data_reference = random.choice(
                     data_asset_return_obj["example_data_references"]
                 )
+                data_asset_name = tmp_data_asset_name
                 break
 
         if example_data_reference is not None:
@@ -267,6 +283,10 @@ class DataConnector:
                 print(f"\t\tReference chosen: {example_data_reference}")
 
             # ...and fetch it.
+            if data_asset_name is None:
+                raise ValueError(
+                    "The data_asset_name for the chosen example data reference cannot be null."
+                )
             report_obj["example_data_reference"] = self._self_check_fetch_batch(
                 pretty_print=pretty_print,
                 example_data_reference=example_data_reference,
@@ -278,7 +298,10 @@ class DataConnector:
         return report_obj
 
     def _self_check_fetch_batch(
-        self, pretty_print: bool, example_data_reference: Any, data_asset_name: str,
+        self,
+        pretty_print: bool,
+        example_data_reference: Any,
+        data_asset_name: str,
     ):
         """
         Helper function for self_check() to retrieve batch using example_data_reference and data_asset_name,
@@ -294,18 +317,31 @@ class DataConnector:
             print(f"\n\t\tFetching batch data...")
 
         batch_definition_list = self._map_data_reference_to_batch_definition_list(
-            data_reference=example_data_reference, data_asset_name=data_asset_name,
+            data_reference=example_data_reference,
+            data_asset_name=data_asset_name,
         )
         assert len(batch_definition_list) == 1
         batch_definition = batch_definition_list[0]
 
         # _execution_engine might be None for some tests
-        if self._execution_engine is None:
+        if batch_definition is None or self._execution_engine is None:
             return {}
-        batch_data, batch_spec, _ = self.get_batch_data_and_metadata(batch_definition)
+        batch_data, batch_spec, _ = self.get_batch_data_and_metadata(
+            batch_definition=batch_definition
+        )
 
-        df = batch_data.head(n=5)
-        n_rows = batch_data.row_count()
+        # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
+        # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
+        # resolve metrics.
+        validator = Validator(execution_engine=batch_data.execution_engine)
+        df = validator.get_metric(
+            MetricConfiguration(
+                "table.head", {"batch_id": batch_definition.id}, {"n_rows": 5}
+            )
+        )
+        n_rows = validator.get_metric(
+            MetricConfiguration("table.row_count", {"batch_id": batch_definition.id})
+        )
 
         if pretty_print and df is not None:
             print(f"\n\t\tShowing 5 rows")
@@ -316,7 +352,7 @@ class DataConnector:
             "n_rows": n_rows,
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
+    def _validate_batch_request(self, batch_request: BatchRequestBase):
         """
         Validate batch_request by checking:
             1. if configured datasource_name matches batch_request's datasource_name
@@ -326,21 +362,16 @@ class DataConnector:
             batch_request (BatchRequest): batch_request to validate
 
         """
-        if not (
-            batch_request.datasource_name is None
-            or batch_request.datasource_name == self.datasource_name
-        ):
+        if batch_request.datasource_name != self.datasource_name:
+
             raise ValueError(
-                f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not
+                f"""datasource_name in BatchRequestBase: "{batch_request.datasource_name}" does not
 match DataConnector datasource_name: "{self.datasource_name}".
                 """
             )
-        if not (
-            batch_request.data_connector_name is None
-            or batch_request.data_connector_name == self.name
-        ):
+        if batch_request.data_connector_name != self.name:
             raise ValueError(
-                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match
+                f"""data_connector_name in BatchRequestBase: "{batch_request.data_connector_name}" does not match
 DataConnector name: "{self.name}".
                 """
             )

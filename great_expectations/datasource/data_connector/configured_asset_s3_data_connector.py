@@ -7,6 +7,8 @@ try:
 except ImportError:
     boto3 = None
 
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
@@ -42,10 +44,10 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: str = "",
-        delimiter: str = "/",
-        max_keys: int = 1000,
-        boto3_options: dict = None,
+        prefix: Optional[str] = "",
+        delimiter: Optional[str] = "/",
+        max_keys: Optional[int] = 1000,
+        boto3_options: Optional[dict] = None,
     ):
         """
         ConfiguredAssetDataConnector for connecting to S3.
@@ -88,6 +90,21 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
                 "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
             )
 
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+        batch_spec: PathBatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+        return S3BatchSpec(batch_spec)
+
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
         query_options: dict = {
             "Bucket": self._bucket,
@@ -117,7 +134,9 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         return path_list
 
     def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None,
+        self,
+        path: str,
+        data_asset_name: Optional[str] = None,
     ) -> str:
         # data_assert_name isn't used in this method.
         # It's only kept for compatibility with parent methods.

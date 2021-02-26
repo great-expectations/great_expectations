@@ -2,12 +2,15 @@ import logging
 import os
 from typing import List, Optional
 
+from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
+from great_expectations.exceptions.exceptions import ParserError
+
 try:
     import boto3
 except ImportError:
     boto3 = None
 
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector import (
     InferredAssetFilePathDataConnector,
 )
@@ -15,6 +18,8 @@ from great_expectations.datasource.data_connector.util import list_s3_keys
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
+
+INVALID_S3_CHARS = ["*"]
 
 
 class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
@@ -38,10 +43,11 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: str = "",
-        delimiter: str = "/",
-        max_keys: int = 1000,
-        boto3_options: dict = None,
+        prefix: Optional[str] = "",
+        delimiter: Optional[str] = "/",
+        max_keys: Optional[int] = 1000,
+        boto3_options: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         InferredAssetS3DataConnector for connecting to S3.
@@ -57,7 +63,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             boto3_options (dict): optional boto3 options
-      """
+        """
         logger.debug(f'Constructing InferredAssetS3DataConnector "{name}".')
 
         super().__init__(
@@ -66,6 +72,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         self._bucket = bucket
@@ -82,6 +89,21 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             raise ImportError(
                 "Unable to load boto3 (it is required for InferredAssetS3DataConnector)."
             )
+
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+        batch_spec: PathBatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+        return S3BatchSpec(batch_spec)
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
@@ -110,8 +132,26 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         return path_list
 
     def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None,
+        self,
+        path: str,
+        data_asset_name: Optional[str] = None,
     ) -> str:
         # data_assert_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
+        _check_valid_s3_path(path)
         return f"s3a://{os.path.join(self._bucket, path)}"
+
+
+def _check_valid_s3_path(
+    path: str,
+) -> None:
+    """Performs a basic check for validity of the S3 path"""
+    bad_chars = [c for c in INVALID_S3_CHARS if c in path]
+    if len(bad_chars) > 0:
+        msg = (
+            f"The parsed S3 path={path} contains the invalid characters {bad_chars}."
+            "Please make sure your regex is correct and characters are escaped."
+        )
+        if "*" in bad_chars:
+            msg += "Note: `*` is internally used to replace the regex for `.`."
+        raise ParserError(msg)

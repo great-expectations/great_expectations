@@ -493,11 +493,22 @@ Notes:
         return self[column].median()
 
     def get_column_quantiles(self, column, quantiles, allow_relative_error=False):
-        if allow_relative_error is not False:
+        interpolation_options = ("linear", "lower", "higher", "midpoint", "nearest")
+
+        if not allow_relative_error:
+            allow_relative_error = "nearest"
+
+        if allow_relative_error not in interpolation_options:
             raise ValueError(
-                "PandasDataset does not support relative error in column quantiles."
+                f"If specified for pandas, allow_relative_error must be one an allowed value for the 'interpolation'"
+                f"parameter of .quantile() (one of {interpolation_options})"
             )
-        return self[column].quantile(quantiles, interpolation="nearest").tolist()
+
+        return (
+            self[column]
+            .quantile(quantiles, interpolation=allow_relative_error)
+            .tolist()
+        )
 
     def get_column_stdev(self, column):
         return self[column].std()
@@ -1869,7 +1880,8 @@ Notes:
             "expect_select_column_values_to_be_unique_within_record instead."
         )
         warnings.warn(
-            deprecation_warning, DeprecationWarning,
+            deprecation_warning,
+            DeprecationWarning,
         )
 
         return self.expect_select_column_values_to_be_unique_within_record(

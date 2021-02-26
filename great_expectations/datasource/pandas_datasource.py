@@ -9,10 +9,11 @@ from io import BytesIO
 import pandas as pd
 
 from great_expectations.core.batch import Batch, BatchMarkers
-from great_expectations.datasource.util import S3Url, hash_pandas_dataframe
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.types import ClassConfig
 
+from ..core.util import S3Url
+from ..execution_engine.pandas_execution_engine import hash_pandas_dataframe
 from ..types.configurations import classConfigSchema
 from .datasource import LegacyDatasource
 
@@ -145,7 +146,11 @@ class PandasDatasource(LegacyDatasource):
 
     # TODO: move to data connector
     def process_batch_parameters(
-        self, reader_method=None, reader_options=None, limit=None, dataset_options=None,
+        self,
+        reader_method=None,
+        reader_options=None,
+        limit=None,
+        dataset_options=None,
     ):
         # Note that we do not pass limit up, since even that will be handled by PandasDatasource
         batch_kwargs = super().process_batch_parameters(dataset_options=dataset_options)
@@ -244,7 +249,7 @@ class PandasDatasource(LegacyDatasource):
 
         else:
             raise BatchKwargsError(
-                "Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
+                "Invalid batch_kwargs: path, s3, or dataset is required for a PandasDatasource",
                 batch_kwargs,
             )
 

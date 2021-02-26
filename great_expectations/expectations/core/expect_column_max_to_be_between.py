@@ -10,6 +10,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.types import RenderedStringTemplateContent
@@ -26,8 +27,7 @@ except ImportError:
 
 
 from ...render.renderer.renderer import renderer
-from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
-from ..registry import extract_metrics
+from ..expectation import ColumnExpectation
 
 
 class ExpectColumnMaxToBeBetween(ColumnExpectation):
@@ -91,6 +91,15 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
 
            """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.max",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
@@ -124,6 +133,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

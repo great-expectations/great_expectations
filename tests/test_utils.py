@@ -1,12 +1,13 @@
 import copy
 import locale
+import logging
 import os
 import random
 import string
 import threading
 import uuid
 from functools import wraps
-from typing import List, Optional, Union
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -21,17 +22,38 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.core.batch import Batch
+from great_expectations.data_context.store import CheckpointStore, StoreBackend
+from great_expectations.data_context.store.util import (
+    build_checkpoint_store_using_store_backend,
+    delete_checkpoint_config_from_store_backend,
+    delete_config_from_store_backend,
+    load_checkpoint_config_from_store_backend,
+    load_config_from_store_backend,
+    save_checkpoint_config_to_store_backend,
+    save_config_to_store_backend,
+)
+from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
+from great_expectations.data_context.util import build_store_from_config
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
+)
+from great_expectations.datasource.util import (
+    get_or_create_spark_session as get_or_create_spark_session_v012,
 )
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.execution_engine.util import (
+    get_or_create_spark_session as get_or_create_spark_session_v013,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
@@ -40,6 +62,8 @@ expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
 expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
+
+logger = logging.getLogger(__name__)
 
 try:
     from sqlalchemy import create_engine
@@ -236,8 +260,7 @@ def get_dataset(
     table_name=None,
     sqlite_db_path=None,
 ):
-    """Utility to create datasets for json-formatted tests.
-    """
+    """Utility to create datasets for json-formatted tests."""
     df = pd.DataFrame(data)
     if dataset_type == "PandasDataset":
         if schemas and "pandas" in schemas:
@@ -333,8 +356,9 @@ def get_dataset(
             return None
 
         # Create a new database
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         engine = connection_manager.get_engine(
-            "postgresql://postgres@localhost/test_ci"
+            f"postgresql://postgres@{db_hostname}/test_ci"
         )
         sql_dtypes = {}
         if (
@@ -394,7 +418,10 @@ def get_dataset(
         if not create_engine:
             return None
 
-        engine = connection_manager.get_engine("mysql+pymysql://root@localhost/test_ci")
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        engine = connection_manager.get_engine(
+            f"mysql+pymysql://root@{db_hostname}/test_ci"
+        )
 
         sql_dtypes = {}
         if (
@@ -443,17 +470,25 @@ def get_dataset(
             if_exists="replace",
         )
 
-        # Build a SqlAlchemyDataset using that database
+        # Will - 20210126
+        # For mysql we want our tests to know when a temp_table is referred to more than once in the
+        # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
+        # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
+        # rather than referring the table by name.
+        custom_sql = "SELECT * FROM " + table_name
         return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
+            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mssql":
         if not create_engine:
             return None
 
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         engine = connection_manager.get_engine(
-            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+            "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            # echo=True,
         )
 
         # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
@@ -528,7 +563,7 @@ def get_dataset(
             "DataType": sparktypes.DataType,
             "NullType": sparktypes.NullType,
         }
-        spark = SparkSession.builder.getOrCreate()
+        spark = get_or_create_spark_session_v012()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -626,8 +661,7 @@ def get_test_validator_with_data(
     table_name=None,
     sqlite_db_path=None,
 ):
-    """Utility to create datasets for json-formatted tests.
-    """
+    """Utility to create datasets for json-formatted tests."""
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
@@ -690,7 +724,7 @@ def get_test_validator_with_data(
             "NullType": sparktypes.NullType,
         }
 
-        spark = SparkSession.builder.getOrCreate()
+        spark = get_or_create_spark_session_v013()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -822,10 +856,11 @@ def _build_spark_validator_with_data(df, spark):
 def _build_sa_engine(df, sa):
     eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    engine = SqlAlchemyExecutionEngine(engine=eng)
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name="test")
     batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
+    engine.load_batch_data(
+        batch_id=batch.batch_definition.to_id(), batch_data=batch_data
     )
     return engine
 
@@ -857,6 +892,7 @@ def _build_sa_validator_with_data(
         "mysql": MYSQL_TYPES,
         "mssql": MSSQL_TYPES,
     }
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         if sqlite_db_path is not None:
             engine = create_engine(f"sqlite:////{sqlite_db_path}")
@@ -864,13 +900,14 @@ def _build_sa_validator_with_data(
             engine = create_engine("sqlite://")
     elif sa_engine_name == "postgresql":
         engine = connection_manager.get_engine(
-            "postgresql://postgres@localhost/test_ci"
+            f"postgresql://postgres@{db_hostname}/test_ci"
         )
     elif sa_engine_name == "mysql":
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
     elif sa_engine_name == "mssql":
         engine = create_engine(
-            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+            "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
     else:
@@ -925,13 +962,29 @@ def _build_sa_validator_with_data(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
     df.to_sql(
-        name=table_name, con=engine, index=False, dtype=sql_dtypes, if_exists="replace",
+        name=table_name,
+        con=engine,
+        index=False,
+        dtype=sql_dtypes,
+        if_exists="replace",
     )
 
-    batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+    # Will - 20210126
+    # For mysql we want our tests to know when a temp_table is referred to more than once in the
+    # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
+    # Here we instantiate a SqlAlchemyBatchData with a query, which causes a temp_table to be created.
+    if sa_engine_name == "mysql":
+        query = "SELECT * FROM " + table_name
+        batch_data = SqlAlchemyBatchData(execution_engine=engine, query=query)
+    else:
+        batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
+
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+    batch = Batch(data=batch_data)
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
@@ -1028,7 +1081,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             # "expect_column_values_to_match_regex",
             # "expect_column_values_to_not_match_regex",
             # "expect_column_values_to_match_regex_list",
-            "expect_column_values_to_not_match_regex_list",
+            # "expect_column_values_to_not_match_regex_list",
             # "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
@@ -1218,7 +1271,7 @@ def check_json_test_result(test, result, data_asset=None):
             elif key == "unexpected_index_list":
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
                     pass
-                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDataFrame)):
+                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
                     pass
                 else:
                     assert result["result"]["unexpected_index_list"] == value
@@ -1384,7 +1437,12 @@ def create_files_in_directory(
 
 
 def create_fake_data_frame():
-    return pd.DataFrame({"x": range(10), "y": list("ABCDEFGHIJ"),})
+    return pd.DataFrame(
+        {
+            "x": range(10),
+            "y": list("ABCDEFGHIJ"),
+        }
+    )
 
 
 def validate_uuid4(uuid_string: str) -> bool:
@@ -1415,3 +1473,207 @@ def validate_uuid4(uuid_string: str) -> bool:
     # valid uuid4. This is bad for validation purposes.
 
     return val.hex == uuid_string.replace("-", "")
+
+
+def get_sqlite_temp_table_names(engine):
+    result = engine.execute(
+        """
+SELECT
+    name
+FROM
+    sqlite_temp_master
+"""
+    )
+    rows = result.fetchall()
+    return {row[0] for row in rows}
+
+
+def build_in_memory_store_backend(
+    module_name: str = "great_expectations.data_context.store",
+    class_name: str = "InMemoryStoreBackend",
+    **kwargs,
+) -> StoreBackend:
+    logger.debug("Starting data_context/store/util.py#build_in_memory_store_backend")
+    store_backend_config: dict = {"module_name": module_name, "class_name": class_name}
+    store_backend_config.update(**kwargs)
+    return build_store_from_config(
+        store_config=store_backend_config,
+        module_name=module_name,
+        runtime_environment=None,
+    )
+
+
+def build_tuple_filesystem_store_backend(
+    base_directory: str,
+    *,
+    module_name: str = "great_expectations.data_context.store",
+    class_name: str = "TupleFilesystemStoreBackend",
+    **kwargs,
+) -> StoreBackend:
+    logger.debug(
+        f"""Starting data_context/store/util.py#build_tuple_filesystem_store_backend using base_directory:
+"{base_directory}"""
+    )
+    store_backend_config: dict = {
+        "module_name": module_name,
+        "class_name": class_name,
+        "base_directory": base_directory,
+    }
+    store_backend_config.update(**kwargs)
+    return build_store_from_config(
+        store_config=store_backend_config,
+        module_name=module_name,
+        runtime_environment=None,
+    )
+
+
+def build_tuple_s3_store_backend(
+    bucket: str,
+    *,
+    module_name: str = "great_expectations.data_context.store",
+    class_name: str = "TupleS3StoreBackend",
+    **kwargs,
+) -> StoreBackend:
+    logger.debug(
+        f"""Starting data_context/store/util.py#build_tuple_s3_store_backend using bucket: {bucket}
+        """
+    )
+    store_backend_config: dict = {
+        "module_name": module_name,
+        "class_name": class_name,
+        "bucket": bucket,
+    }
+    store_backend_config.update(**kwargs)
+    return build_store_from_config(
+        store_config=store_backend_config,
+        module_name=module_name,
+        runtime_environment=None,
+    )
+
+
+def build_checkpoint_store_using_filesystem(
+    store_name: str,
+    base_directory: str,
+    overwrite_existing: bool = False,
+) -> CheckpointStore:
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    return build_checkpoint_store_using_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        overwrite_existing=overwrite_existing,
+    )
+
+
+def save_checkpoint_config_to_filesystem(
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
+    checkpoint_configuration: CheckpointConfig,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    save_checkpoint_config_to_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        checkpoint_name=checkpoint_name,
+        checkpoint_configuration=checkpoint_configuration,
+    )
+
+
+def load_checkpoint_config_from_filesystem(
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
+) -> CheckpointConfig:
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    return load_checkpoint_config_from_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        checkpoint_name=checkpoint_name,
+    )
+
+
+def delete_checkpoint_config_from_filesystem(
+    store_name: str,
+    base_directory: str,
+    checkpoint_name: str,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    delete_checkpoint_config_from_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        checkpoint_name=checkpoint_name,
+    )
+
+
+def save_config_to_filesystem(
+    configuration_store_class_name: str,
+    configuration_store_module_name: str,
+    store_name: str,
+    base_directory: str,
+    configuration_key: str,
+    configuration: BaseYamlConfig,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    save_config_to_store_backend(
+        class_name=configuration_store_class_name,
+        module_name=configuration_store_module_name,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        configuration_key=configuration_key,
+        configuration=configuration,
+    )
+
+
+def load_config_from_filesystem(
+    configuration_store_class_name: str,
+    configuration_store_module_name: str,
+    store_name: str,
+    base_directory: str,
+    configuration_key: str,
+) -> BaseYamlConfig:
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    return load_config_from_store_backend(
+        class_name=configuration_store_class_name,
+        module_name=configuration_store_module_name,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        configuration_key=configuration_key,
+    )
+
+
+def delete_config_from_filesystem(
+    configuration_store_class_name: str,
+    configuration_store_module_name: str,
+    store_name: str,
+    base_directory: str,
+    configuration_key: str,
+):
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    delete_config_from_store_backend(
+        class_name=configuration_store_class_name,
+        module_name=configuration_store_module_name,
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        configuration_key=configuration_key,
+    )

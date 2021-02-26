@@ -1,0 +1,11 @@
+# A lot of Great Expectations' codebase and tests are tied to specific databases, cloud providers, etc.
+# In this file, comments on each row indicate which tests that package is used for.
+# To run tests for smaller subsets of infrastructure, please look at other requirements-dev-*.txt files.
+# Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
+
+black==20.8b1  # lint
+freezegun>=0.3.15  # all_tests
+pypd==1.1.0  # all_tests
+pytest>=5.3.5,<6.0.0  # all_tests
+pytest-cov>=2.8.1  # all_tests
+requirements-parser>=0.2.0  # all_tests

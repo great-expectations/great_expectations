@@ -9,6 +9,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...core.batch import Batch
 from ...data_asset.util import parse_result_format
@@ -26,7 +27,6 @@ from ..expectation import (
     InvalidExpectationConfigurationError,
     _format_map_output,
 )
-from ..registry import extract_metrics, get_metric_kwargs
 
 try:
     import sqlalchemy as sa
@@ -84,6 +84,16 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
 
     """
 
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
+
     map_metric = "column_values.not_match_regex"
     success_keys = (
         "regex",
@@ -118,6 +128,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
         configuration=None,

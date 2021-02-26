@@ -32,7 +32,12 @@ def custom_dataset(sa):
             )
 
             mode = self.engine.execute(mode_query).scalar()
-            return {"success": mode == 0, "result": {"observed_value": mode,}}
+            return {
+                "success": mode == 0,
+                "result": {
+                    "observed_value": mode,
+                },
+            }
 
         @MetaSqlAlchemyDataset.column_aggregate_expectation
         def broken_aggregate_expectation(self, column):
@@ -336,8 +341,27 @@ def test_expect_compound_columns_to_be_unique(sa):
         ["col1", "col2", "col3"]
     ).success
     assert not dataset.expect_compound_columns_to_be_unique(
-        ["col1", "col2", "col4"], ignore_row_if="any_value_is_missing",
+        ["col1", "col2", "col4"],
+        ignore_row_if="any_value_is_missing",
     ).success
     assert dataset.expect_compound_columns_to_be_unique(
         ["col1", "col2", "col4"]
     ).success
+
+
+def test_expect_compound_columns_to_be_unique_with_no_rows(sa):
+    engine = sa.create_engine("sqlite://")
+
+    data = pd.DataFrame(
+        {
+            "col1": [],
+            "col2": [],
+            "col3": [],
+            "col4": [],
+        }
+    )
+
+    data.to_sql(name="test_sql_data", con=engine, index=False)
+    dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
+
+    assert dataset.expect_compound_columns_to_be_unique(["col1", "col2"]).success

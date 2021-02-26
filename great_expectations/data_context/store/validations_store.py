@@ -14,76 +14,79 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    verify_dynamic_loading_support,
+)
 
 
 class ValidationsStore(Store):
     """
-A ValidationsStore manages Validation Results to ensure they are accessible via a Data Context for review and rendering into Data Docs.
+    A ValidationsStore manages Validation Results to ensure they are accessible via a Data Context for review and rendering into Data Docs.
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: validations_store_filesystem
-    title: Validations Store - Filesystem
-    icon:
-    short_description: Filesystem
-    description: Use a locally-mounted filesystem to store validation results.
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.html
-    maturity: Production
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: N/A
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: validations_store_filesystem
+        title: Validations Store - Filesystem
+        icon:
+        short_description: Filesystem
+        description: Use a locally-mounted filesystem to store validation results.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.html
+        maturity: Production
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: N/A
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: validations_store_s3
-    title: Validations Store - S3
-    icon:
-    short_description: S3
-    description: Use an Amazon Web Services S3 bucket to store validation results.
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_s3.html
-    maturity: Beta
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Complete
-        bug_risk: Low
+        id: validations_store_s3
+        title: Validations Store - S3
+        icon:
+        short_description: S3
+        description: Use an Amazon Web Services S3 bucket to store validation results.
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_s3.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Complete
+            bug_risk: Low
 
-    id: validations_store_gcs
-    title: Validations Store - GCS
-    icon:
-    short_description:
-    description: # What it does  <br /> Store validation results in a Google Cloud Storage bucket. You may optionally specify a key to use. <br /> <br /> See the GCS Store backend [module docs](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/store/tuple_store_backend/index.html#great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend) for more information."
-    how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.html
-    maturity: Beta
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Partial
-        bug_risk: Low
+        id: validations_store_gcs
+        title: Validations Store - GCS
+        icon:
+        short_description:
+        description: # What it does  <br /> Store validation results in a Google Cloud Storage bucket. You may optionally specify a key to use. <br /> <br /> See the GCS Store backend [module docs](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/store/tuple_store_backend/index.html#great_expectations.data_context.store.tuple_store_backend.TupleGCSStoreBackend) for more information."
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.html
+        maturity: Beta
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Partial
+            bug_risk: Low
 
-    id: validations_store_azure_blob_storage
-    title: Validations Store - Azure
-    icon:
-    short_description: Azure Blob Storage
-    description: Use Microsoft Azure Blob Storage to store validation results.
-    how_to_guide_url:
-    maturity: N/A
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Minimal
-        unit_test_coverage: Minimal
-        integration_infrastructure_test_coverage: Minimal
-        documentation_completeness: Minimal
-        bug_risk: Moderate
+        id: validations_store_azure_blob_storage
+        title: Validations Store - Azure
+        icon:
+        short_description: Azure Blob Storage
+        description: Use Microsoft Azure Blob Storage to store validation results.
+        how_to_guide_url:
+        maturity: N/A
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Minimal
+            unit_test_coverage: Minimal
+            integration_infrastructure_test_coverage: Minimal
+            documentation_completeness: Minimal
+            bug_risk: Moderate
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     _key_class = ValidationResultIdentifier
@@ -130,6 +133,17 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
             runtime_environment=runtime_environment,
             store_name=store_name,
         )
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = {
+            "store_backend": store_backend,
+            "runtime_environment": runtime_environment,
+            "store_name": store_name,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
+        filter_properties_dict(properties=self._config, inplace=True)
 
     def serialize(self, key, value):
         return self._expectationSuiteValidationResultSchema.dumps(value)
@@ -182,9 +196,15 @@ A ValidationsStore manages Validation Results to ensure they are accessible via 
             print(
                 f"Attempting to retrieve the test value associated with key: {test_key}..."
             )
-        test_value = self.get(key=test_key,)
+        test_value = self.get(
+            key=test_key,
+        )
         if pretty_print:
             print("\tTest value successfully retreived.")
             print()
 
         return return_obj
+
+    @property
+    def config(self) -> dict:
+        return self._config

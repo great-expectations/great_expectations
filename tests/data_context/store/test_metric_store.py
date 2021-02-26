@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 import tests.test_utils as test_utils
@@ -14,7 +16,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
                     "drivername": "postgresql",
                     "username": "postgres",
                     "password": "",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "5432",
                     "database": "test_ci",
                 },
@@ -39,7 +41,9 @@ def param_store(request, test_backends):
 
     return instantiate_class_from_config(
         config=request.param,
-        config_defaults={"module_name": "great_expectations.data_context.store",},
+        config_defaults={
+            "module_name": "great_expectations.data_context.store",
+        },
         runtime_environment={},
     )
 
@@ -48,7 +52,9 @@ def param_store(request, test_backends):
     params=[
         {
             "class_name": "MetricStore",
-            "store_backend": {"class_name": "InMemoryStoreBackend",},
+            "store_backend": {
+                "class_name": "InMemoryStoreBackend",
+            },
         },
         {
             "class_name": "MetricStore",
@@ -69,7 +75,9 @@ def in_memory_param_store(request, test_backends):
 
     return instantiate_class_from_config(
         config=request.param,
-        config_defaults={"module_name": "great_expectations.data_context.store",},
+        config_defaults={
+            "module_name": "great_expectations.data_context.store",
+        },
         runtime_environment={},
     )
 

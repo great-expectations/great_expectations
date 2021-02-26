@@ -1,4 +1,4 @@
-import logging
+import numpy as np
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -12,9 +12,6 @@ from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-
-logger = logging.getLogger(__name__)
-import numpy as np
 
 
 class ColumnValuesInSet(ColumnMapMetricProvider):

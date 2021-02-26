@@ -119,7 +119,8 @@ def test_expect_file_line_regex_match_count_to_equal():
     )
 
     assert not fail_trial.success
-    assert fail_trial.result["unexpected_percent"] == (3 / 9 * 100)
+    assert fail_trial.result["unexpected_percent"] == (3 / 7 * 100)
+    assert fail_trial.result["unexpected_percent_total"] == (3 / 9 * 100)
     assert fail_trial.result["missing_percent"] == (2 / 9 * 100)
     assert fail_trial.result["unexpected_percent_nonmissing"] == (3 / 7 * 100)
 
@@ -207,7 +208,7 @@ def test_expect_file_size_to_be_between():
     assert not bad_range.success
 
     # Test file size in range
-    lower, upper = (70000, 71000) if platform.system() != "Windows" else (71000, 72000)
+    lower, upper = (70000, 72000)
     good_range = titanic_file.expect_file_size_to_be_between(lower, upper)
     assert good_range.success
 
@@ -236,8 +237,8 @@ def test_expect_file_to_have_valid_table_header():
     invalid_header_dat = ge.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/same_column_names.csv")
     )
-    invalid_header_dat_expectation = invalid_header_dat.expect_file_to_have_valid_table_header(
-        regex=r"\|", skip=2
+    invalid_header_dat_expectation = (
+        invalid_header_dat.expect_file_to_have_valid_table_header(regex=r"\|", skip=2)
     )
     assert not invalid_header_dat_expectation.success
 
@@ -245,8 +246,8 @@ def test_expect_file_to_have_valid_table_header():
     valid_header_dat = ge.data_asset.FileDataAsset(
         file_relative_path(__file__, "../test_sets/Titanic.csv")
     )
-    valid_header_dat_expectation = valid_header_dat.expect_file_to_have_valid_table_header(
-        regex=","
+    valid_header_dat_expectation = (
+        valid_header_dat.expect_file_to_have_valid_table_header(regex=",")
     )
     assert valid_header_dat_expectation.success
 

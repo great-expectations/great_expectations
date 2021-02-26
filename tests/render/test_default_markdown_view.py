@@ -6,10 +6,14 @@ import pytest
 
 import great_expectations as ge
 import great_expectations.render as render
+from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
-from great_expectations.render.renderer import ValidationResultsPageRenderer
+from great_expectations.render.renderer import (
+    ExpectationSuitePageRenderer,
+    ValidationResultsPageRenderer,
+)
 from great_expectations.render.types import (
     RenderedDocumentContent,
     RenderedHeaderContent,
@@ -40,13 +44,54 @@ def validation_operator_result():
         return validation_operator_result
 
 
+@pytest.fixture()
+def expectation_suite_to_render_with_notes():
+    expectation_suite = ExpectationSuite(
+        expectation_suite_name="default",
+        meta={"great_expectations_version": "0.13.0-test"},
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist",
+                kwargs={"column": "infinities"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist", kwargs={"column": "nulls"}
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_to_exist", kwargs={"column": "naturals"}
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_distinct_values_to_be_in_set",
+                kwargs={"column": "irrationals", "value_set": ["*", "1st", "2nd"]},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_unique",
+                kwargs={"column": "testings"},
+                meta={
+                    "notes": {
+                        "content": [
+                            "Example notes about this expectation. **Markdown** `Supported`.",
+                            "Second example note **with** *Markdown*",
+                        ],
+                        "format": "markdown",
+                    }
+                },
+            ),
+        ],
+    )
+    return expectation_suite
+
+
 def test_render_section_page():
     section = RenderedSectionContent(
         **{
             "section_name": None,
             "content_blocks": [
                 RenderedHeaderContent(
-                    **{"content_block_type": "header", "header": "Overview",}
+                    **{
+                        "content_block_type": "header",
+                        "header": "Overview",
+                    }
                 ),
                 RenderedTableContent(
                     **{
@@ -99,15 +144,16 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
     Returns: None
 
     """
-
     validation_operator_result = ValidationOperatorResult(**validation_operator_result)
 
     validation_results_page_renderer = ValidationResultsPageRenderer(
         run_info_at_end=True
     )
 
-    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
-        validation_operator_result=validation_operator_result
+    rendered_document_content_list = (
+        validation_results_page_renderer.render_validation_operator_result(
+            validation_operator_result=validation_operator_result
+        )
     )
 
     md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)
@@ -116,71 +162,28 @@ def test_snapshot_render_section_page_with_fixture_data(validation_operator_resu
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
 
-    print(md_str)
-
     assert (
         md_str
         == """
 # Validation Results
-
-
-
-
 ## Overview
 ### **Expectation Suite:** **basic.warning**
 **Data asset:** **None**
 **Status:**  **Failed**
-
-
-
-
-
 ### Statistics
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 Evaluated Expectations  | 11
 Successful Expectations  | 9
 Unsuccessful Expectations  | 2
 Success Percent  | ≈81.82%
-
-
-
-
-
 ## Table-Level Expectations
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ❌  | Must have greater than or equal to **27000** and less than or equal to **33000** rows.  | 30
 ✅  | Must have exactly **3** columns.  | 3
 ✅  | Must have these columns in this order: **Team**, ** "Payroll (millions)"**, ** "Wins"**  | ['Team', ' "Payroll (millions)"', ' "Wins"']
-
-
-
-
-
 ##  "Payroll (millions)"
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
@@ -189,10 +192,6 @@ Success Percent  | ≈81.82%
 ✅  | mean must be greater than or equal to **97.01899999999998** and less than or equal to **99.01899999999998**.  | ≈98.019
 ❌  | median must be greater than or equal to **84000.75** and less than or equal to **86000.75**.  | 85.75
 ✅  | quantiles must be within the following value ranges.
-
-
-
-
  | Quantile | Min Value | Max Value |
  | ------------  | ------------  | ------------ |
 0.05  | 54.37  | 56.37
@@ -201,10 +200,6 @@ Median  | 82.31  | 84.31
 Q3  | 116.62  | 118.62
 0.95  | 173.54  | 175.54
   |
-
-
-
-
  | Quantile | Value |
  | ------------  | ------------ |
 0.05  | 55.37
@@ -212,143 +207,49 @@ Q1  | 75.48
 Median  | 83.31
 Q3  | 117.62
 0.95  | 174.54
-
-
-
-
-
-
 ## Team
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
 ✅  | values must always be greater than or equal to **1** characters long.  | 0% unexpected
-
-
-
-
-
-
-
 ### Info
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
 Run Time  | 2020-07-27T17:19:32.959193+00:00
-
-
-
-
-
 ### Batch Markers
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 **ge_load_time**  | **20200727T171932.954810Z**
 **pandas_data_fingerprint**  | **8c46fdaf0bd356fd58b7bcd9b2e6012d**
-
-
-
-
-
 ### Batch Kwargs
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 **PandasInMemoryDF**  | **True**
 **datasource**  | **getest**
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
-
-
-
-
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
 # Validation Results
-
-
-
-
 ## Overview
 ### **Expectation Suite:** **basic.warning**
 **Data asset:** **None**
 **Status:**  **Failed**
-
-
-
-
-
 ### Statistics
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 Evaluated Expectations  | 11
 Successful Expectations  | 9
 Unsuccessful Expectations  | 2
 Success Percent  | ≈81.82%
-
-
-
-
-
 ## Table-Level Expectations
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ❌  | Must have greater than or equal to **27000** and less than or equal to **33000** rows.  | 30
 ✅  | Must have exactly **3** columns.  | 3
 ✅  | Must have these columns in this order: **Team**, ** "Payroll (millions)"**, ** "Wins"**  | ['Team', ' "Payroll (millions)"', ' "Wins"']
-
-
-
-
-
 ##  "Payroll (millions)"
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
@@ -357,10 +258,6 @@ Success Percent  | ≈81.82%
 ✅  | mean must be greater than or equal to **97.01899999999998** and less than or equal to **99.01899999999998**.  | ≈98.019
 ❌  | median must be greater than or equal to **84000.75** and less than or equal to **86000.75**.  | 85.75
 ✅  | quantiles must be within the following value ranges.
-
-
-
-
  | Quantile | Min Value | Max Value |
  | ------------  | ------------  | ------------ |
 0.05  | 54.37  | 56.37
@@ -369,10 +266,6 @@ Median  | 82.31  | 84.31
 Q3  | 116.62  | 118.62
 0.95  | 173.54  | 175.54
   |
-
-
-
-
  | Quantile | Value |
  | ------------  | ------------ |
 0.05  | 55.37
@@ -380,81 +273,28 @@ Q1  | 75.48
 Median  | 83.31
 Q3  | 117.62
 0.95  | 174.54
-
-
-
-
-
-
 ## Team
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
 ✅  | values must always be greater than or equal to **1** characters long.  | 0% unexpected
-
-
-
-
-
-
-
 ### Info
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
 Run Time  | 2020-07-27T17:19:32.959193+00:00
-
-
-
-
-
 ### Batch Markers
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 **ge_load_time**  | **20200727T171932.954810Z**
 **pandas_data_fingerprint**  | **8c46fdaf0bd356fd58b7bcd9b2e6012d**
-
-
-
-
-
 ### Batch Kwargs
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 **PandasInMemoryDF**  | **True**
 **datasource**  | **getest**
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
-
-
-
-
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
 """.replace(
@@ -480,8 +320,10 @@ def test_render_section_page_with_fixture_data_multiple_validations(
         run_info_at_end=True
     )
 
-    rendered_document_content_list = validation_results_page_renderer.render_validation_operator_result(
-        validation_operator_result=validation_operator_result
+    rendered_document_content_list = (
+        validation_results_page_renderer.render_validation_operator_result(
+            validation_operator_result=validation_operator_result
+        )
     )
 
     md_str_list = DefaultMarkdownPageView().render(rendered_document_content_list)
@@ -490,71 +332,30 @@ def test_render_section_page_with_fixture_data_multiple_validations(
 
     md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
 
-    print(md_str)
+    # print(md_str)
 
     assert (
         md_str
         == """
 # Validation Results
-
-
-
-
 ## Overview
 ### **Expectation Suite:** **basic.warning**
 **Dataasset:** **None**
 **Status:**  **Failed**
-
-
-
-
-
 ### Statistics
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 Evaluated Expectations  | 11
 Successful Expectations  | 9
 Unsuccessful Expectations  | 2
 Success Percent  | ≈81.82%
-
-
-
-
-
 ## Table-Level Expectations
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ❌  | Must have greater than or equal to **27000** and less than or equal to **33000** rows.  | 30
 ✅  | Must have exactly **3** columns.  | 3
 ✅  | Must have these columns in this order: **Team**, ** "Payroll (millions)"**, ** "Wins"**  | ['Team', ' "Payroll (millions)"', ' "Wins"']
-
-
-
-
-
 ##  "Payroll (millions)"
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
@@ -563,10 +364,6 @@ Success Percent  | ≈81.82%
 ✅  | mean must be greater than or equal to **97.01899999999998** and less than or equal to **99.01899999999998**.  | ≈98.019
 ❌  | median must be greater than or equal to **84000.75** and less than or equal to **86000.75**.  | 85.75
 ✅  | quantiles must be within the following value ranges.
-
-
-
-
  | Quantile | Min Value | Max Value |
  | ------------  | ------------  | ------------ |
 0.05  | 54.37  | 56.37
@@ -575,10 +372,6 @@ Median  | 82.31  | 84.31
 Q3  | 116.62  | 118.62
 0.95  | 173.54  | 175.54
   |
-
-
-
-
  | Quantile | Value |
  | ------------  | ------------ |
 0.05  | 55.37
@@ -586,143 +379,49 @@ Q1  | 75.48
 Median  | 83.31
 Q3  | 117.62
 0.95  | 174.54
-
-
-
-
-
-
 ## Team
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
 ✅  | values must always be greater than or equal to **1** characters long.  | 0% unexpected
-
-
-
-
-
-
-
 ### Info
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
 Run Time  | 2020-07-27T17:19:32.959193+00:00
-
-
-
-
-
 ### Batch Markers
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 **ge_load_time**  | **20200727T171932.954810Z**
 **pandas_data_fingerprint**  | **8c46fdaf0bd356fd58b7bcd9b2e6012d**
-
-
-
-
-
 ### Batch Kwargs
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 **PandasInMemoryDF**  | **True**
 **datasource**  | **getest**
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
-
-
-
-
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
 # Validation Results
-
-
-
-
 ## Overview
 ### **Expectation Suite:** **basic.warning**
 **Dataasset:** **None**
 **Status:**  **Failed**
-
-
-
-
-
 ### Statistics
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 Evaluated Expectations  | 11
 Successful Expectations  | 9
 Unsuccessful Expectations  | 2
 Success Percent  | ≈81.82%
-
-
-
-
-
 ## Table-Level Expectations
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ❌  | Must have greater than or equal to **27000** and less than or equal to **33000** rows.  | 30
 ✅  | Must have exactly **3** columns.  | 3
 ✅  | Must have these columns in this order: **Team**, ** "Payroll (millions)"**, ** "Wins"**  | ['Team', ' "Payroll (millions)"', ' "Wins"']
-
-
-
-
-
 ##  "Payroll (millions)"
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
@@ -731,10 +430,6 @@ Success Percent  | ≈81.82%
 ✅  | mean must be greater than or equal to **97.01899999999998** and less than or equal to **99.01899999999998**.  | ≈98.019
 ❌  | median must be greater than or equal to **84000.75** and less than or equal to **86000.75**.  | 85.75
 ✅  | quantiles must be within the following value ranges.
-
-
-
-
  | Quantile | Min Value | Max Value |
  | ------------  | ------------  | ------------ |
 0.05  | 54.37  | 56.37
@@ -743,10 +438,6 @@ Median  | 82.31  | 84.31
 Q3  | 116.62  | 118.62
 0.95  | 173.54  | 175.54
   |
-
-
-
-
  | Quantile | Value |
  | ------------  | ------------ |
 0.05  | 55.37
@@ -754,84 +445,80 @@ Q1  | 75.48
 Median  | 83.31
 Q3  | 117.62
 0.95  | 174.54
-
-
-
-
-
-
 ## Team
-
-
-
-
-
-
-
-
  | Status | Expectation | Observed Value |
  | ------------  | ------------  | ------------ |
 ✅  | values must never be null.  | 100% not null
 ✅  | values must always be greater than or equal to **1** characters long.  | 0% unexpected
-
-
-
-
-
-
-
 ### Info
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 Great Expectations Version  | 0.11.8+4.g4ab34df3.dirty
 Run Name  | getest run
 Run Time  | 2020-07-27T17:19:32.959193+00:00
-
-
-
-
-
 ### Batch Markers
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 **ge_load_time**  | **20200727T171932.954810Z**
 **pandas_data_fingerprint**  | **8c46fdaf0bd356fd58b7bcd9b2e6012d**
-
-
-
-
-
 ### Batch Kwargs
-
-
-
-
-
-
  |  |  |
  | ------------  | ------------ |
 **PandasInMemoryDF**  | **True**
 **datasource**  | **getest**
 **ge_batch_id**  | **56615f40-d02d-11ea-b6ea-acde48001122**
-
-
-
-
 -----------------------------------------------------------
 Powered by [Great Expectations](https://greatexpectations.io/)
 """.replace(
+            " ", ""
+        )
+        .replace("\t", "")
+        .replace("\n", "")
+    )
+
+
+def test_render_expectation_suite_for_Markdown(expectation_suite_to_render_with_notes):
+    expectation_suite_page_renderer = ExpectationSuitePageRenderer()
+    rendered_document_content_list = expectation_suite_page_renderer.render(
+        expectation_suite_to_render_with_notes
+    )
+    md_str = DefaultMarkdownPageView().render(rendered_document_content_list)
+    md_str = " ".join(md_str)
+    md_str = md_str.replace(" ", "").replace("\t", "").replace("\n", "")
+    assert (
+        md_str
+        == """
+   # Validation Results
+## Overview
+### Info
+ |  |  |
+ | ------------  | ------------ |
+Expectation Suite Name  | default
+Great Expectations Version  | 0.13.0-test
+### Notes
+    This Expectation suite currently contains 5 total Expectations across 5 columns.
+## infinities
+  * is a required field.
+  * ***
+## irrationals
+  * distinct values must belong to this set: \* **1st** **2nd**.
+  * ***
+## naturals
+  * is a required field.
+  * ***
+## nulls
+  * is a required field.
+  * ***
+## testings
+  * values must be unique.
+    #### Notes:
+      Example notes about this expectation. **Markdown** `Supported`.
+
+      Second example note **with** *Markdown*
+  * ***
+-----------------------------------------------------------
+Powered by [Great Expectations](https://greatexpectations.io/)
+    """.replace(
             " ", ""
         )
         .replace("\t", "")

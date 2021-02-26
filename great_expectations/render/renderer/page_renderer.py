@@ -76,7 +76,11 @@ class ValidationResultsPageRenderer(Renderer):
         ]
 
     # TODO: deprecate dual batch api support in 0.14
-    def render(self, validation_results: ExpectationSuiteValidationResult):
+    def render(
+        self,
+        validation_results: ExpectationSuiteValidationResult,
+        evaluation_parameters=None,
+    ):
         run_id = validation_results.meta["run_id"]
         if isinstance(run_id, str):
             try:
@@ -120,7 +124,6 @@ class ValidationResultsPageRenderer(Renderer):
             columns[column].append(evr)
 
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
-
         overview_content_blocks = [
             self._render_validation_header(validation_results),
             self._render_validation_statistics(validation_results=validation_results),
@@ -196,15 +199,18 @@ class ValidationResultsPageRenderer(Renderer):
         if "Table-Level Expectations" in columns:
             sections += [
                 self._column_section_renderer.render(
-                    validation_results=columns["Table-Level Expectations"]
+                    validation_results=columns["Table-Level Expectations"],
+                    evaluation_parameters=validation_results.evaluation_parameters,
                 )
             ]
 
         sections += [
-            self._column_section_renderer.render(validation_results=columns[column],)
+            self._column_section_renderer.render(
+                validation_results=columns[column],
+                evaluation_parameters=validation_results.evaluation_parameters,
+            )
             for column in ordered_columns
         ]
-
         if self.run_info_at_end:
             sections += [
                 RenderedSectionContent(
@@ -266,9 +272,11 @@ class ValidationResultsPageRenderer(Renderer):
             os.path.join(*expectation_suite_path_components) + ".html"
         )
         # TODO: deprecate dual batch api support in 0.14
-        batch_kwargs = validation_results.meta.get(
-            "batch_kwargs", {}
-        ) or validation_results.meta.get("batch_spec", {})
+        batch_kwargs = (
+            validation_results.meta.get("batch_kwargs", {})
+            or validation_results.meta.get("batch_spec", {})
+            or {}
+        )
         data_asset_name = batch_kwargs.get("data_asset_name")
 
         if success:
@@ -281,6 +289,7 @@ class ValidationResultsPageRenderer(Renderer):
             html_success_icon = (
                 '<i class="fas fa-times text-danger" aria-hidden="true"></i>'
             )
+
         return RenderedHeaderContent(
             **{
                 "content_block_type": "header",
@@ -383,7 +392,6 @@ class ValidationResultsPageRenderer(Renderer):
     @classmethod
     def _render_nested_table_from_dict(cls, input_dict, header=None, sub_table=False):
         table_rows = []
-
         for kwarg, value in input_dict.items():
             if not isinstance(value, (dict, OrderedDict)):
                 table_row = [
@@ -397,7 +405,11 @@ class ValidationResultsPageRenderer(Renderer):
                                     "default": {"styles": {"word-break": "break-all"}},
                                 },
                             },
-                            "styling": {"parent": {"classes": ["pr-3"],}},
+                            "styling": {
+                                "parent": {
+                                    "classes": ["pr-3"],
+                                }
+                            },
                         }
                     ),
                     RenderedStringTemplateContent(
@@ -410,7 +422,11 @@ class ValidationResultsPageRenderer(Renderer):
                                     "default": {"styles": {"word-break": "break-all"}},
                                 },
                             },
-                            "styling": {"parent": {"classes": [],}},
+                            "styling": {
+                                "parent": {
+                                    "classes": [],
+                                }
+                            },
                         }
                     ),
                 ]
@@ -426,7 +442,11 @@ class ValidationResultsPageRenderer(Renderer):
                                     "default": {"styles": {"word-break": "break-all"}},
                                 },
                             },
-                            "styling": {"parent": {"classes": ["pr-3"],}},
+                            "styling": {
+                                "parent": {
+                                    "classes": ["pr-3"],
+                                }
+                            },
                         }
                     ),
                     cls._render_nested_table_from_dict(value, sub_table=True),
@@ -689,7 +709,10 @@ class ExpectationSuitePageRenderer(Renderer):
             # "This Expectation suite was first generated by {BasicDatasetProfiler} on {date}, using version {xxx} of Great Expectations.",
             # "{name}, {name}, and {name} have also contributed additions and revisions.",
             "This Expectation suite currently contains %d total Expectations across %d columns."
-            % (total_expectations, total_columns,),
+            % (
+                total_expectations,
+                total_columns,
+            ),
         ]
 
         if "notes" in expectations.meta:

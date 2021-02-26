@@ -118,14 +118,12 @@ def test_validate_using_data_context(
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies_compiled
         is False
     )
-    with pytest.warns(
-        Warning, match=r"This configuration object was built using version"
-    ):
-        res = ge.validate(
-            dataset,
-            expectation_suite_name="my_dag_node.default",
-            data_context=data_context_parameterized_expectation_suite,
-        )
+
+    res = ge.validate(
+        dataset,
+        expectation_suite_name="my_dag_node.default",
+        data_context=data_context_parameterized_expectation_suite,
+    )
 
     # Since the handling of evaluation parameters is no longer happening without an action,
     # the context should still be not compiles after validation.
@@ -143,14 +141,11 @@ def test_validate_using_data_context_path(
     dataset, data_context_parameterized_expectation_suite
 ):
     data_context_path = data_context_parameterized_expectation_suite.root_directory
-    with pytest.warns(
-        Warning, match=r"This configuration object was built using version"
-    ):
-        res = ge.validate(
-            dataset,
-            expectation_suite_name="my_dag_node.default",
-            data_context=data_context_path,
-        )
+    res = ge.validate(
+        dataset,
+        expectation_suite_name="my_dag_node.default",
+        data_context=data_context_path,
+    )
 
     # We should have now found the right suite with expectations to evaluate
     assert res.success is False
@@ -284,44 +279,54 @@ def test_filter_properties_dict():
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         d0_end: dict = filter_properties_dict(
-            properties=d0_begin, keep_fields=["c"], delete_fields=["a", "e"],
+            properties=d0_begin,
+            keep_fields=["c"],
+            delete_fields=["a", "e"],
         )
-    d0_end: dict = filter_properties_dict(properties=d0_begin,)
+    d0_end: dict = filter_properties_dict(
+        properties=d0_begin,
+    )
     d0_end_expected = copy.deepcopy(d0_begin)
     d0_end_expected.pop("b")
     assert d0_end == d0_end_expected
 
     d1_begin: dict = copy.deepcopy(source_dict)
     d1_end: dict = filter_properties_dict(
-        properties=d1_begin, clean_empty=False,
+        properties=d1_begin,
+        clean_empty=False,
     )
     d1_end_expected = copy.deepcopy(d1_begin)
     assert d1_end == d1_end_expected
 
     d2_begin: dict = copy.deepcopy(source_dict)
     d2_end: dict = filter_properties_dict(
-        properties=d2_begin, keep_fields=["b"],
+        properties=d2_begin,
+        keep_fields=["b"],
     )
     d2_end_expected = {"b": None}
     assert d2_end == d2_end_expected
 
     d3_begin: dict = copy.deepcopy(source_dict)
     d3_end: dict = filter_properties_dict(
-        properties=d3_begin, keep_fields=["a", "e"],
+        properties=d3_begin,
+        keep_fields=["a", "e"],
     )
     d3_end_expected = {"a": 0, "e": 9.8e1}
     assert d3_end == d3_end_expected
 
     d4_begin: dict = copy.deepcopy(source_dict)
     d4_end: dict = filter_properties_dict(
-        properties=d4_begin, delete_fields=["a", "e"],
+        properties=d4_begin,
+        delete_fields=["a", "e"],
     )
     d4_end_expected = {"c": "xyz_0", "d": 1}
     assert d4_end == d4_end_expected
 
     d5_begin: dict = copy.deepcopy(source_dict)
     filter_properties_dict(
-        properties=d5_begin, delete_fields=["a", "e"], inplace=True,
+        properties=d5_begin,
+        delete_fields=["a", "e"],
+        inplace=True,
     )
     d5_end = copy.deepcopy(d5_begin)
     d5_end_expected = {"c": "xyz_0", "d": 1}

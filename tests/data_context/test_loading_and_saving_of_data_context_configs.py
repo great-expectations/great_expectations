@@ -14,7 +14,7 @@ def test_add_store_immediately_adds_to_config(empty_data_context):
     context = empty_data_context
     config_filename = context.root_directory + "/great_expectations.yml"
 
-    assert not "my_new_store" in read_config_from_file(config_filename)
+    assert "my_new_store" not in read_config_from_file(config_filename)
     context.add_store(
         "my_new_store",
         {
@@ -32,7 +32,11 @@ def test_add_datasource(empty_data_context):
     # Config can't be instantiated
     with pytest.raises(TypeError):
         context.add_datasource(
-            "my_new_datasource", **{"some": "broken", "config": "yikes",}
+            "my_new_datasource",
+            **{
+                "some": "broken",
+                "config": "yikes",
+            },
         )
     assert "my_new_datasource" not in context.datasources
     assert "my_new_datasource" not in read_config_from_file(config_filename)

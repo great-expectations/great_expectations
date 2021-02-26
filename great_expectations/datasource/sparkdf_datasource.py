@@ -2,8 +2,11 @@ import datetime
 import logging
 import uuid
 import warnings
-from typing import Optional
+from typing import Optional, Union
 
+from great_expectations.datasource.util import (
+    get_or_create_spark_session as get_or_create_spark_session_v012,
+)
 from great_expectations.types import ClassConfig
 
 from ..core.batch import Batch, BatchMarkers
@@ -26,31 +29,31 @@ except ImportError:
 
 class SparkDFDatasource(LegacyDatasource):
     """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
-    filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.
+        filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.
 
-    Accepted Batch Kwargs:
-        - PathBatchKwargs ("path" or "s3" keys)
-        - InMemoryBatchKwargs ("dataset" key)
-        - QueryBatchKwargs ("query" key)
+        Accepted Batch Kwargs:
+            - PathBatchKwargs ("path" or "s3" keys)
+            - InMemoryBatchKwargs ("dataset" key)
+            - QueryBatchKwargs ("query" key)
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: datasource_hdfs_spark
-        title: Datasource - HDFS
-        icon:
-        short_description: HDFS
-        description: Use HDFS as an external datasource in conjunction with Spark.
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Unknown
-            unit_test_coverage: Minimal (none)
-            integration_infrastructure_test_coverage: Minimal (none)
-            documentation_completeness:  Minimal (none)
-            bug_risk: Unknown
+        id: datasource_hdfs_spark
+            title: Datasource - HDFS
+            icon:
+            short_description: HDFS
+            description: Use HDFS as an external datasource in conjunction with Spark.
+            how_to_guide_url:
+            maturity: Experimental
+            maturity_details:
+                api_stability: Stable
+                implementation_completeness: Unknown
+                unit_test_coverage: Minimal (none)
+                integration_infrastructure_test_coverage: Minimal (none)
+                documentation_completeness:  Minimal (none)
+                bug_risk: Unknown
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     recognized_batch_parameters = {
@@ -136,20 +139,15 @@ class SparkDFDatasource(LegacyDatasource):
             **configuration_with_defaults
         )
 
-        spark_config = configuration_with_defaults["spark_config"]
+        spark_config: dict = configuration_with_defaults["spark_config"]
         if len(spark_config) > 0:
             try:
-                # We need to stop the old session to reconfigure it
-                logger.info("Stopping existing spark context to reconfigure.")
-                spark = SparkSession.builder.getOrCreate()
-                spark.sparkContext.stop()
                 builder = SparkSession.builder
-                app_name: Optional[str] = spark_config.get("spark.app.name")
+                app_name: Optional[str] = spark_config.pop("spark.app.name", None)
                 if app_name:
                     builder.appName(app_name)
                 for k, v in spark_config.items():
-                    if k != "spark.app.name":
-                        builder.config(k, v)
+                    builder.config(k, v)
                 self.spark = builder.getOrCreate()
             except AttributeError:
                 logger.error(
@@ -157,14 +155,7 @@ class SparkDFDatasource(LegacyDatasource):
                 )
                 self.spark = None
         else:
-            try:
-                # We need to stop the old session to reconfigure it
-                self.spark = SparkSession.builder.getOrCreate()
-            except AttributeError:
-                logger.error(
-                    "Unable to load spark context; install optional spark dependency for support."
-                )
-                self.spark = None
+            self.spark = get_or_create_spark_session_v012()
 
         self._build_generators()
 
@@ -172,7 +163,8 @@ class SparkDFDatasource(LegacyDatasource):
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None
     ):
         batch_kwargs = super().process_batch_parameters(
-            limit=limit, dataset_options=dataset_options,
+            limit=limit,
+            dataset_options=dataset_options,
         )
 
         # Apply globally-configured reader options first

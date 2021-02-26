@@ -813,6 +813,7 @@ def test_validate():
                     "missing_percent": 0.0,
                     "partial_unexpected_counts": [{"count": 1, "value": "*"}],
                     "partial_unexpected_list": ["*"],
+                    "unexpected_percent_total": 0.07616146230007616,
                     "unexpected_percent_nonmissing": 0.07616146230007616,
                     "missing_count": 0,
                     "unexpected_index_list": [456],
@@ -984,14 +985,23 @@ def test_stats_mixed_expectations():
     assert expected == actual
 
 
+def test_generate_library_json_from_registered_expectations():
+    library_json = ge.util.generate_library_json_from_registered_expectations()
+    assert len(library_json) > 50
+
+
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_csv(script_path + "/test_sets/Titanic.csv",)
+        df = ge.read_csv(
+            script_path + "/test_sets/Titanic.csv",
+        )
 
     def test_read_json(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_json(script_path + "/test_sets/test_json_data_file.json",)
+        df = ge.read_json(
+            script_path + "/test_sets/test_json_data_file.json",
+        )
         assert df["x"][0] == "i"
         assert isinstance(df, PandasDataset)
         assert sorted(list(df.keys())) == ["x", "y", "z"]
@@ -1006,7 +1016,9 @@ class TestIO(unittest.TestCase):
 
     def test_read_excel(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_excel(script_path + "/test_sets/Titanic_multi_sheet.xlsx",)
+        df = ge.read_excel(
+            script_path + "/test_sets/Titanic_multi_sheet.xlsx",
+        )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
@@ -1077,7 +1089,9 @@ class TestIO(unittest.TestCase):
 
     def test_read_pickle(self):
         script_path = os.path.dirname(os.path.realpath(__file__))
-        df = ge.read_pickle(script_path + "/test_sets/Titanic.pkl",)
+        df = ge.read_pickle(
+            script_path + "/test_sets/Titanic.pkl",
+        )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 

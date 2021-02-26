@@ -1,3 +1,4 @@
+from contextlib import ExitStack as does_not_raise
 from typing import List
 
 import boto3
@@ -14,6 +15,10 @@ from great_expectations.core.batch import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
+from great_expectations.datasource.data_connector.inferred_asset_s3_data_connector import (
+    INVALID_S3_CHARS,
+    _check_valid_s3_path,
+)
 
 yaml = YAML()
 
@@ -96,7 +101,10 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check():
         datasource_name="FAKE_DATASOURCE_NAME",
         default_regex={
             "pattern": r"(.+)-(\d+)\.csv",
-            "group_names": ["data_asset_name", "number",],
+            "group_names": [
+                "data_asset_name",
+                "number",
+            ],
         },
         bucket=bucket,
         prefix="",
@@ -208,18 +216,9 @@ def test_complex_regex_example_with_implicit_data_asset_names():
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
-                    data_connector_name="my_data_connector", data_asset_name="alpha",
-                )
-            )
-        )
-        == 3
-    )
-
-    assert (
-        len(
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
-                    data_connector_name="my_data_connector", data_asset_name="beta",
+                    datasource_name="FAKE_DATASOURCE_NAME",
+                    data_connector_name="my_data_connector",
+                    data_asset_name="beta",
                 )
             )
         )
@@ -232,7 +231,10 @@ def test_complex_regex_example_with_implicit_data_asset_names():
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
             partition_request={
-                "partition_identifiers": {"year_dir": "2020", "month_dir": "03",}
+                "partition_identifiers": {
+                    "year_dir": "2020",
+                    "month_dir": "03",
+                }
             },
         )
     ) == [
@@ -240,7 +242,10 @@ def test_complex_regex_example_with_implicit_data_asset_names():
             datasource_name="FAKE_DATASOURCE_NAME",
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
-            partition_definition=PartitionDefinition(year_dir="2020", month_dir="03",),
+            partition_definition=PartitionDefinition(
+                year_dir="2020",
+                month_dir="03",
+            ),
         )
     ]
 
@@ -776,11 +781,13 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
-    sorted_batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
-            datasource_name="test_environment",
-            data_connector_name="my_inferred_asset_filesystem_data_connector",
-            data_asset_name="some_bucket",
+    sorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="my_inferred_asset_filesystem_data_connector",
+                data_asset_name="some_bucket",
+            )
         )
     )
 
@@ -972,3 +979,16 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
                 "module_name": "great_expectations.datasource.data_connector"
             },
         )
+
+
+@pytest.mark.parametrize(
+    "path,expectation",
+    [("BUCKET/DIR/FILE.CSV", does_not_raise())]
+    + [
+        (f"BUCKET/DIR/FILE{c}CSV", pytest.raises(ge_exceptions.ParserError))
+        for c in INVALID_S3_CHARS
+    ],
+)
+def test_bad_s3_regex_paths(path, expectation):
+    with expectation:
+        _check_valid_s3_path(path)
