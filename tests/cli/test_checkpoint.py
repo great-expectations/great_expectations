@@ -328,6 +328,10 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
+    """
+    What does this test and why?
+    The `checkpoint new` CLI flow should raise an error if the checkpoint name being created already exists in your checkpoint store.
+    """
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -369,7 +373,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
+def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint_with_ge_config_v3(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
@@ -378,6 +382,12 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     titanic_expectation_suite,
 ):
+    """
+    What does this test and why?
+    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the checkpoint.
+    This test builds that notebook and runs it to generate a checkpoint and then tests the resulting configuration in the checkpoint file.
+    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the checkpoint configuration.
+    """
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -429,7 +439,6 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
     )
     assert os.path.isfile(expected_notebook_path)
 
-    # TODO: <ANTHONY>Break up this running of notebook and creating of notebook into two separate tests</ANTHONY>
     with open(expected_notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
