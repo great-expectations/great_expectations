@@ -20,11 +20,11 @@ except ImportError:
 class CLIState:
     def __init__(
         self,
-        legacy_api: bool = False,
+        v2_api: bool = False,
         config_file_location: Optional[str] = None,
         data_context: DataContext = None,
     ):
-        self.legacy_api = legacy_api
+        self.v2_api = v2_api
         self.config_file_location = config_file_location
         self._data_context = data_context
 
@@ -38,13 +38,13 @@ class CLIState:
         self._data_context = data_context
 
     def __repr__(self):
-        return f"CLIState(legacy_api={self.legacy_api}, config_file_location={self.config_file_location})"
+        return f"CLIState(v2_api={self.v2_api}, config_file_location={self.config_file_location})"
 
 
 class CLI(click.MultiCommand):
     def list_commands(self, ctx):
         # note that if --help is called this method is invoked before any flags
-        # are parsed.or context set.
+        # are parsed or context set.
 
         return [
             "checkpoint",
@@ -61,7 +61,7 @@ class CLI(click.MultiCommand):
         module_name = name.replace("-", "_")
         legacy_module = ""
 
-        if self.is_legacy(ctx):
+        if self.is_v2_api(ctx):
             legacy_module += ".v012"
         try:
             requested_module = f"great_expectations.cli{legacy_module}.{module_name}"
@@ -86,31 +86,27 @@ class CLI(click.MultiCommand):
         print(f"ctx.find_root().protected_args: {ctx.find_root().protected_args}")
 
     @staticmethod
-    def is_legacy(ctx):
-        """Determine if legacy api is requested by searching context params."""
+    def is_v2_api(ctx):
+        """Determine if v2 api is requested by searching context params."""
         if ctx.params:
-            return (
-                ctx.params
-                and "legacy_api" in ctx.params.keys()
-                and ctx.params["legacy_api"]
-            )
+            return ctx.params and "v2_api" in ctx.params.keys() and ctx.params["v2_api"]
 
         root_ctx_params = ctx.find_root().params
         return (
             root_ctx_params
-            and "legacy_api" in root_ctx_params.keys()
-            and root_ctx_params["legacy_api"]
+            and "v2_api" in root_ctx_params.keys()
+            and root_ctx_params["v2_api"]
         )
 
 
 @click.group(cls=CLI, name="great_expectations")
 @click.version_option(version=ge_version)
 @click.option(
-    "--legacy-api/--new-api",
-    "legacy_api",
+    "--v2-api/--v3-api",
+    "v2_api",
     is_flag=True,
     default=True,
-    help="Default to legacy APIs (before 0.13). Use --new-api for new APIs (after version 0.13)",
+    help="Default to v2 (Batch Kwargs) API. Use --v3-api for v3 (Batch Request) API",
 )
 @click.option(
     "--verbose",
@@ -128,7 +124,7 @@ class CLI(click.MultiCommand):
     help="Path to great_expectations configuration file location (great_expectations.yml). Inferred if not provided.",
 )
 @click.pass_context
-def cli(ctx, legacy_api, verbose, config_file_location):
+def cli(ctx, v2_api, verbose, config_file_location):
     """
     Welcome to the great_expectations CLI!
 
@@ -142,12 +138,12 @@ def cli(ctx, legacy_api, verbose, config_file_location):
         # Note we are explicitly not using a logger in all CLI output to have
         # more control over console UI.
         logger.setLevel(logging.DEBUG)
-    ctx.obj = CLIState(legacy_api=legacy_api, config_file_location=config_file_location)
+    ctx.obj = CLIState(v2_api=v2_api, config_file_location=config_file_location)
 
-    if legacy_api:
-        cli_message("<yellow>Using legacy APIs (pre-0.13)</yellow>")
+    if v2_api:
+        cli_message("<yellow>Using v2 (Batch Kwargs) API</yellow>")
     else:
-        cli_message("<green>Using new APIs (0.13.x)</green>")
+        cli_message("<green>Using v3 (Batch Request) API</green>")
 
 
 def main():

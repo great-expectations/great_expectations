@@ -17,7 +17,7 @@ def test_store_list_with_zero_stores(caplog, empty_data_context, monkeypatch):
     monkeypatch.chdir(os.path.dirname(project_dir))
     result = runner.invoke(
         cli,
-        f"--new-api store list".format(project_dir),
+        f"--v3-api store list".format(project_dir),
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -64,7 +64,7 @@ def test_store_list_with_two_stores(caplog, empty_data_context, monkeypatch):
 
     result = runner.invoke(
         cli,
-        f"--new-api store list",
+        f"--v3-api store list",
         catch_exceptions=False,
     )
 
@@ -111,7 +111,7 @@ def test_store_list_with_four_stores(caplog, empty_data_context, monkeypatch):
 
     result = runner.invoke(
         cli,
-        f"--new-api store list",
+        f"--v3-api store list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

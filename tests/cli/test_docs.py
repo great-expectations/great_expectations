@@ -18,7 +18,7 @@ except ImportError:
 
 def test_docs_help_output(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["--new-api", "docs"], catch_exceptions=False)
+    result = runner.invoke(cli, ["--v3-api", "docs"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "build  Build Data Docs for a project." in result.stdout
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -44,7 +44,7 @@ def test_docs_build_view(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "docs",
             "build",
         ],
@@ -100,7 +100,7 @@ def test_docs_build_no_view(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "docs",
             "build",
             "--no-view",
@@ -151,7 +151,7 @@ def test_docs_build_assume_yes(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "docs",
             "build",
             "--no-view",

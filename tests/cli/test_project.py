@@ -17,7 +17,7 @@ def test_project_check_on_missing_ge_dir_guides_user_to_fix(
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["--new-api", "project", "check-config"],
+        ["--v3-api", "project", "check-config"],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -36,7 +36,7 @@ def test_project_check_on_valid_project_says_so(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--new-api", "project", "check-config"],
+        ["--v3-api", "project", "check-config"],
         catch_exceptions=False,
     )
     assert "Checking your config files for validity" in result.output
@@ -60,7 +60,7 @@ def test_project_check_on_project_with_missing_config_file_guides_user(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--new-api", "project", "check-config"],
+        ["--v3-api", "project", "check-config"],
         catch_exceptions=False,
     )
     assert result.exit_code == 1

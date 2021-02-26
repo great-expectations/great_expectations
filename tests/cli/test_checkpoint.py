@@ -66,7 +66,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint delete my_checkpoint",
+        f"--v3-api checkpoint delete my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -107,7 +107,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint delete my_v1_checkpoint",
+        f"--v3-api checkpoint delete my_v1_checkpoint",
         input="\n",
         catch_exceptions=False,
     )
@@ -136,7 +136,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
 
     result = runner.invoke(
         cli,
-        f"--new-api checkpoint list",
+        f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -158,7 +158,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint delete my_v1_checkpoint",
+        f"--v3-api checkpoint delete my_v1_checkpoint",
         input="n\n",
         catch_exceptions=False,
     )
@@ -180,7 +180,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
 
     result = runner.invoke(
         cli,
-        f"--new-api checkpoint list",
+        f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -200,7 +200,7 @@ def test_checkpoint_list_with_no_checkpoints(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint list",
+        f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -239,7 +239,7 @@ def test_checkpoint_list_with_single_checkpoint(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint list",
+        f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -281,7 +281,7 @@ def test_checkpoint_list_with_eight_checkpoints(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint list",
+        f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -337,7 +337,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"--new-api checkpoint new my_minimal_simple_checkpoint",
+        f"--v3-api checkpoint new my_minimal_simple_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -398,7 +398,8 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint_with_ge_c
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"--new-api checkpoint new passengers",
+        f"--v3-api checkpoint new passengers",
+        input="1\n1\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -505,7 +506,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint run my_checkpoint",
+        f"--v3-api checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -554,7 +555,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint run my_nested_checkpoint_template_1",
+        f"--v3-api checkpoint run my_nested_checkpoint_template_1",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -652,7 +653,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint run bad_batch",
+        f"--v3-api checkpoint run bad_batch",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -765,7 +766,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint run no_suite",
+        f"--v3-api checkpoint run no_suite",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -851,7 +852,7 @@ def test_checkpoint_run_on_non_existent_validations(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint run no_validations",
+        f"--v3-api checkpoint run no_validations",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -945,7 +946,7 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint run my_fancy_checkpoint",
+        f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1092,7 +1093,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint run my_fancy_checkpoint",
+        f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1227,7 +1228,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint run my_fancy_checkpoint",
+        f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1294,7 +1295,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint script not_a_checkpoint",
+        f"--v3-api checkpoint script not_a_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -1346,7 +1347,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint script my_v1_checkpoint",
+        f"--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1392,7 +1393,7 @@ def test_checkpoint_script_happy_path_generates_script(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint script my_v1_checkpoint",
+        f"--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1507,7 +1508,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint script my_fancy_checkpoint",
+        f"--v3-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1628,7 +1629,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint script my_fancy_checkpoint",
+        f"--v3-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1746,7 +1747,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--new-api checkpoint script my_fancy_checkpoint",
+        f"--v3-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1803,7 +1804,7 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--new-api checkpoint new foo not_a_suite",
+        f"--v3-api checkpoint new foo not_a_suite",
         catch_exceptions=False,
     )
     stdout = result.stdout

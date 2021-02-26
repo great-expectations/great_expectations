@@ -25,7 +25,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkey
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "datasource",
             "list",
         ],
@@ -45,7 +45,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkey
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--new-api", "datasource", "list"],
+        ["--v3-api", "datasource", "list"],
         catch_exceptions=False,
     )
     url = str(empty_sqlite_db.engine.url)
@@ -183,7 +183,7 @@ def test_cli_datasorce_new_connection_string(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "datasource",
             "new",
         ],

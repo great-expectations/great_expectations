@@ -30,7 +30,7 @@ def _library_not_loaded_test(
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(basedir)
     result = runner.invoke(
-        cli, ["--new-api", "init", "--no-view"], input=cli_input, catch_exceptions=False
+        cli, ["--v3-api", "init", "--no-view"], input=cli_input, catch_exceptions=False
     )
     stdout = result.output
     print(stdout)
@@ -126,7 +126,7 @@ def test_init_install_sqlalchemy(caplog, tmp_path_factory, monkeypatch):
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(basedir)
     result = runner.invoke(
-        cli, ["--new-api", "init", "--no-view"], input=cli_input, catch_exceptions=False
+        cli, ["--v3-api", "init", "--no-view"], input=cli_input, catch_exceptions=False
     )
     stdout = result.output
 
@@ -272,7 +272,7 @@ def test_cli_init_spark_without_library_installed_instructs_user(
     monkeypatch.chdir(basedir)
     result = runner.invoke(
         cli,
-        ["--new-api", "init", "--no-view"],
+        ["--v3-api", "init", "--no-view"],
         input="\n\n1\n2\nn\n",
         catch_exceptions=False,
     )
