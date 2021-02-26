@@ -1,3 +1,5 @@
+from typing import Dict
+
 import nbformat
 
 from great_expectations import DataContext
@@ -13,10 +15,15 @@ class CheckpointNewNotebookRenderer(SuiteEditNotebookRenderer):
         self.checkpoint_name = checkpoint_name
         self._notebook = None
 
-    def _find_datasource_with_asset(self):
+    def _find_datasource_with_asset(self) -> Dict[str, str]:
+        """
+        Find a datasource with a configured asset.
+
+        Useful to pre-populate a working sample checkpoint for notebook users.
+        """
         datasource_candidate = None
         for datasource in self.context.list_datasources():
-            for data_connector_name in datasource.get("data_connectors"):
+            for data_connector_name in datasource.get("data_connectors", []):
                 data_connector = datasource["data_connectors"][data_connector_name]
                 if "assets" in data_connector:
                     datasource_candidate = {

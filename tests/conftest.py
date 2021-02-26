@@ -2356,7 +2356,9 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     - airflow_run_id
         """
 
-    context.test_yaml_config(name="my_datasource", yaml_config=datasource_config)
+    context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
     # noinspection PyProtectedMember
     context._save_project_config()
     return context
