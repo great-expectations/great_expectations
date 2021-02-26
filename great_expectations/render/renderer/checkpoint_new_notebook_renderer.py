@@ -144,7 +144,7 @@ validations:
       data_connector_name: {first_data_connector_name}
       data_asset_name: {first_asset_name}
       partition_request:
-        index: 0
+        index: -1
     expectation_suite_name: {first_expectation_suite_name}
 """
             sample_yaml_str += '"""'

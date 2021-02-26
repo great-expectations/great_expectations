@@ -482,7 +482,7 @@ validations:
       data_connector_name: my_special_data_connector
       data_asset_name: users
       partition_request:
-        index: 0
+        index: -1
     expectation_suite_name: Titanic.warning
 profilers: []
 """
