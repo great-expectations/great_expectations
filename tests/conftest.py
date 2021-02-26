@@ -2302,7 +2302,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     context = ge.data_context.DataContext(context_path)
     assert context.root_directory == context_path
-    piss = str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv"))
 
     datasource_config = f"""
         class_name: Datasource

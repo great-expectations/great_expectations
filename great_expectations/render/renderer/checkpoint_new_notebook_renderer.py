@@ -201,7 +201,8 @@ You may wish to run the checkpoint now to see a sample of it's output. If so run
             """# Open Data Docs (Optional)
 You may also wish to open up Data Docs to review the results of the Checkpoint run if you ran the above cell."""
         )
-        self.add_code_cell("context.open_data_docs()", lint=True)
+        # TODO: <ANTHONY>We should mock the datadocs call or skip running that cell within the notebook (rather than commenting it out in the notebook)</ANTHONY>
+        self.add_code_cell("# context.open_data_docs()", lint=True)
 
     def render(self) -> nbformat.NotebookNode:
         self._notebook: nbformat.NotebookNode = nbformat.v4.new_notebook()

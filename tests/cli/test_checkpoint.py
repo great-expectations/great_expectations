@@ -322,26 +322,25 @@ def test_checkpoint_list_with_eight_checkpoints(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
+def test_checkpoint_new_raises_error_on_existing_checkpoint(
     mock_emit,
     caplog,
     monkeypatch,
-    titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    context: DataContext = (
-        titanic_data_context_stats_enabled_config_version_2_with_checkpoint
-    )
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"--new-api checkpoint new my_checkpoint",
+        f"--new-api checkpoint new my_minimal_simple_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
+    print(stdout)
     assert result.exit_code == 1
     assert (
-        "A checkpoint named `my_checkpoint` already exists. Please choose a new name."
+        "A checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
         in stdout
     )
 
@@ -362,7 +361,6 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
     assert_no_logging_messages_or_tracebacks(
         caplog,
         result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
 
@@ -393,7 +391,6 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
     result = runner.invoke(
         cli,
         f"--new-api checkpoint new passengers",
-        input="1\n1\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -441,17 +438,17 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
 
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     # Run notebook
+    # TODO: <ANTHONY>We should mock the datadocs call or skip running that cell within the notebook (rather than commenting it out in the notebook)</ANTHONY>
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     expected_checkpoint_path = os.path.join(root_dir, "checkpoints", "passengers.yml")
     assert os.path.isfile(expected_checkpoint_path)
 
-    # assert_no_logging_messages_or_tracebacks(
-    #     my_caplog=caplog,
-    #     click_result=result,
-    #     allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
-    # )
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
 
 
 @mock.patch(
