@@ -578,6 +578,8 @@ class StoreEvaluationParametersAction(ValidationAction):
     Evaluation parameters allow expectations to refer to statistics/metrics computed
     in the process of validating other prior expectations.
 
+    Read more about evaluation parameters here: https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
+
     **Configuration**
 
     .. code-block:: yaml
