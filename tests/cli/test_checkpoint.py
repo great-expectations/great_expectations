@@ -375,8 +375,6 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
     mock_emit,
     caplog,
     monkeypatch,
-    # titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    # empty_context_with_checkpoint_v1_stats_enabled,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     titanic_expectation_suite,
 ):
@@ -431,7 +429,6 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
     )
     assert os.path.isfile(expected_notebook_path)
 
-    # TODO: <ANTHONY>Run the notebook and check for checkpoint creation after</ANTHONY>
     # TODO: <ANTHONY>Break up this running of notebook and creating of notebook into two separate tests</ANTHONY>
     with open(expected_notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
@@ -442,8 +439,45 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
+    # Ensure the checkpoint file was created
     expected_checkpoint_path = os.path.join(root_dir, "checkpoints", "passengers.yml")
     assert os.path.isfile(expected_checkpoint_path)
+
+    # Ensure the checkpoint configuration in the file is as expected
+    with open(expected_checkpoint_path) as f:
+        checkpoint_config = f.read()
+    expected_checkpoint_config: str = """name: passengers
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: SimpleCheckpoint
+run_name_template:
+expectation_suite_name:
+batch_request:
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names: []
+evaluation_parameters: {}
+runtime_configuration: {}
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_special_data_connector
+      data_asset_name: users
+      partition_request:
+        index: 0
+    expectation_suite_name: Titanic.warning
+profilers: []
+"""
+    assert checkpoint_config == expected_checkpoint_config
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
