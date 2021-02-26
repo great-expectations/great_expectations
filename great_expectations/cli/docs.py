@@ -2,6 +2,7 @@ import sys
 
 import click
 
+from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.build_docs import build_docs
 from great_expectations.cli.pretty_printing import (
@@ -9,13 +10,21 @@ from great_expectations.cli.pretty_printing import (
     cli_message_list,
     display_not_implemented_message_and_exit,
 )
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 
 
 @click.group()
-def docs():
+@click.pass_context
+def docs(ctx):
     """Data Docs operations"""
-    pass
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+    # TODO consider moving this all the way up in to the CLIState constructor
+    ctx.obj.data_context = context
 
 
 @docs.command(name="build")
@@ -41,12 +50,11 @@ def docs():
 def docs_build(ctx, site_name, view=True, assume_yes=False):
     """ Build Data Docs for a project."""
     display_not_implemented_message_and_exit()
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = ctx.obj.data_context
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
-    send_usage_message(data_context=context, event="cli.docs.build", success=True)
+    toolkit.send_usage_message(
+        data_context=context, event="cli.docs.build", success=True
+    )
 
 
 @docs.command(name="list")
@@ -54,10 +62,7 @@ def docs_build(ctx, site_name, view=True, assume_yes=False):
 def docs_list(ctx):
     """List known Data Docs Sites."""
     display_not_implemented_message_and_exit()
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = ctx.obj.data_context
 
     docs_sites_url_dicts = context.get_docs_sites_urls()
     docs_sites_strings = [
@@ -76,7 +81,9 @@ def docs_list(ctx):
         list_intro_string = _build_intro_string(docs_sites_strings)
         cli_message_list(docs_sites_strings, list_intro_string)
 
-    send_usage_message(data_context=context, event="cli.docs.list", success=True)
+    toolkit.send_usage_message(
+        data_context=context, event="cli.docs.list", success=True
+    )
 
 
 @docs.command(name="clean")
@@ -95,10 +102,7 @@ def docs_list(ctx):
 def clean_data_docs(ctx, site_name=None, all=None):
     """Delete data docs"""
     display_not_implemented_message_and_exit()
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = ctx.obj.data_context
     failed = True
     if site_name is None and all is None:
         cli_message(
@@ -111,11 +115,15 @@ def clean_data_docs(ctx, site_name=None, all=None):
     context.clean_data_docs(site_name=site_name)
     failed = False
     if not failed and context is not None:
-        send_usage_message(data_context=context, event="cli.docs.clean", success=True)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.docs.clean", success=True
+        )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
 
     if failed and context is not None:
-        send_usage_message(data_context=context, event="cli.docs.clean", success=False)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.docs.clean", success=False
+        )
 
 
 def _build_intro_string(docs_sites_strings):

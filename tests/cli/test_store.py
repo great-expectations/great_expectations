@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from click.testing import CliRunner
 
@@ -6,20 +8,16 @@ from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
-def test_store_list_with_zero_stores(caplog, empty_data_context):
+def test_store_list_with_zero_stores(caplog, empty_data_context, monkeypatch):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context._project_config.stores = {}
     context._save_project_config()
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(project_dir))
     result = runner.invoke(
         cli,
-        f"-c {project_dir} --new-api store list".format(project_dir),
+        f"--new-api store list".format(project_dir),
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -36,7 +34,7 @@ def test_store_list_with_zero_stores(caplog, empty_data_context):
     run=True,
     strict=True,
 )
-def test_store_list_with_two_stores(caplog, empty_data_context):
+def test_store_list_with_two_stores(caplog, empty_data_context, monkeypatch):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     del context._project_config.stores["validations_store"]
@@ -46,6 +44,7 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
     context._save_project_config()
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(project_dir))
 
     expected_result = """\
 2 Stores found:[0m
@@ -65,7 +64,7 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        f"-c {project_dir} --new-api store list",
+        f"--new-api store list",
         catch_exceptions=False,
     )
 
@@ -80,9 +79,10 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
     run=True,
     strict=True,
 )
-def test_store_list_with_four_stores(caplog, empty_data_context):
+def test_store_list_with_four_stores(caplog, empty_data_context, monkeypatch):
     project_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(project_dir))
 
     expected_result = """\
 4 Stores found:[0m
@@ -111,7 +111,7 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        f"-c {project_dir} --new-api store list",
+        f"--new-api store list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

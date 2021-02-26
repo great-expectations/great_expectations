@@ -16,7 +16,6 @@ from great_expectations.cli.pretty_printing import (
     display_not_implemented_message_and_exit,
 )
 from great_expectations.cli.util import verify_library_dependent_modules
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import DatasourceConfigSchema
 from great_expectations.datasource import (
     PandasDatasource,
@@ -60,9 +59,18 @@ class SupportedDatabases(enum.Enum):
 
 
 @click.group()
-def datasource():
+@click.pass_context
+def datasource(ctx):
     """Datasource operations"""
-    pass
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+    # TODO consider moving this all the way up in to the CLIState constructor
+    ctx.obj.data_context = context
 
 
 @datasource.command(name="new")
@@ -70,21 +78,18 @@ def datasource():
 def datasource_new(ctx):
     """Add a new datasource to the data context."""
     display_not_implemented_message_and_exit()
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = ctx.obj.data_context
     datasource_name, data_source_type = add_datasource(context)
 
     if datasource_name:
         cli_message(
             "A new datasource '{}' was added to your project.".format(datasource_name)
         )
-        send_usage_message(
+        toolkit.send_usage_message(
             data_context=context, event="cli.datasource.new", success=True
         )
     else:  # no datasource was created
-        send_usage_message(
+        toolkit.send_usage_message(
             data_context=context, event="cli.datasource.new", success=False
         )
         sys.exit(1)
@@ -95,10 +100,7 @@ def datasource_new(ctx):
 @click.pass_context
 def delete_datasource(ctx, datasource):
     """Delete the datasource specified as an argument"""
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = ctx.obj.data_context
     try:
         context.delete_datasource(datasource)
     except ValueError:
@@ -123,10 +125,7 @@ def delete_datasource(ctx, datasource):
 def datasource_list(ctx):
     """List known datasources."""
     display_not_implemented_message_and_exit()
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = ctx.obj.data_context
     datasources = context.list_datasources()
     datasource_count = len(datasources)
 
@@ -140,7 +139,9 @@ def datasource_list(ctx):
         cli_message("")
         cli_message_dict(datasource)
 
-    send_usage_message(data_context=context, event="cli.datasource.list", success=True)
+    toolkit.send_usage_message(
+        data_context=context, event="cli.datasource.list", success=True
+    )
 
 
 def _build_datasource_intro_string(datasource_count):
@@ -213,11 +214,11 @@ What are you processing your files with?
 def _add_pandas_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    send_usage_message(
+    toolkit.send_usage_message(
         data_context=context,
         event="cli.new_ds_choice",
-        success=True,
         event_payload={"type": "pandas"},
+        success=True,
     )
 
     if passthrough_generator_only:
@@ -304,11 +305,11 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
 
     selected_database = list(SupportedDatabases)[selected_database]
 
-    send_usage_message(
+    toolkit.send_usage_message(
         data_context=context,
         event="cli.new_ds_choice",
-        success=True,
         event_payload={"type": "sqlalchemy", "db": selected_database.name},
+        success=True,
     )
 
     datasource_name = "my_{}_db".format(selected_database.value.lower())
@@ -701,11 +702,11 @@ def _collect_redshift_credentials(default_credentials=None):
 def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
-    send_usage_message(
+    toolkit.send_usage_message(
         data_context=context,
         event="cli.new_ds_choice",
-        success=True,
         event_payload={"type": "spark"},
+        success=True,
     )
 
     if not _verify_pyspark_dependent_modules():

@@ -34,8 +34,9 @@ def test_suite_help_output(caplog):
     )
 
 
-def test_suite_demo_deprecation_message(caplog):
+def test_suite_demo_deprecation_message(caplog, monkeypatch, empty_data_context):
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
     result = runner.invoke(cli, ["--new-api", "suite", "demo"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "This command is not supported in the new API." in result.stdout
@@ -56,6 +57,7 @@ def test_suite_new_creates_empty_suite(
     mock_webbroser,
     mock_subprocess,
     caplog,
+    monkeypatch,
     data_context_parameterized_expectation_suite,
     filesystem_csv_2,
 ):
@@ -65,15 +67,16 @@ def test_suite_new_creates_empty_suite(
     - open jupyter
     - NOT open data docs
     """
-    project_root_dir = data_context_parameterized_expectation_suite.root_directory
+    context = data_context_parameterized_expectation_suite
+    project_root_dir = context.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
     root_dir = project_root_dir
-    os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--config", root_dir, "--new-api", "suite", "new", "--suite", "foo"],
+        ["--new-api", "suite", "new", "--suite", "foo"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -147,6 +150,7 @@ def test_suite_new_empty_with_no_jupyter(
     mock_webbroser,
     mock_subprocess,
     caplog,
+    monkeypatch,
     data_context_parameterized_expectation_suite,
     filesystem_csv_2,
 ):
@@ -156,19 +160,15 @@ def test_suite_new_empty_with_no_jupyter(
     - NOT open jupyter
     - NOT open data docs
     """
-    os.mkdir(
-        os.path.join(
-            data_context_parameterized_expectation_suite.root_directory, "uncommitted"
-        )
-    )
-    root_dir = data_context_parameterized_expectation_suite.root_directory
+    context = data_context_parameterized_expectation_suite
+    os.mkdir(os.path.join(context.root_directory, "uncommitted"))
+    root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
     csv = os.path.join(filesystem_csv_2, "f1.csv")
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            root_dir,
             "--new-api",
             "suite",
             "new",
@@ -230,9 +230,10 @@ def test_suite_new_empty_with_no_jupyter(
     )
 
 
-def test_suite_edit_without_suite_name_raises_error():
+def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_context):
     """This is really only testing click missing arguments"""
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
     result = runner.invoke(cli, "--new-api suite edit", catch_exceptions=False)
     assert result.exit_code == 2
     assert (
@@ -249,7 +250,7 @@ def test_suite_edit_without_suite_name_raises_error():
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
-    mock_webbrowser, mock_subprocess, caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
 ):
     """
     The command should:
@@ -262,11 +263,11 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     context.create_expectation_suite("foo")
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            project_dir,
+            "--new-api",
             "suite",
             "edit",
             "foo",
@@ -296,7 +297,7 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error(
-    mock_webbrowser, mock_subprocess, caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
 ):
     """
     The command should:
@@ -312,11 +313,11 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
 
     runner = CliRunner(mix_stderr=False)
     batch_kwargs = '{"table": "fake", "datasource": "source"}'
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            project_dir,
+            "--new-api",
             "suite",
             "edit",
             "foo",
@@ -347,7 +348,7 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_suite_name_raises_error(
-    mock_webbrowser, mock_subprocess, caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
 ):
     """
     The command should:
@@ -355,13 +356,14 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     - NOT open Data Docs
     - NOT open jupyter
     """
-    project_dir = empty_data_context.root_directory
-    assert not empty_data_context.list_expectation_suites()
+    context = empty_data_context
+    assert not context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--config {project_dir} --new-api suite edit not_a_real_suite",
+        f"--new-api suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -385,7 +387,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
-    mock_webbrowser, mock_subprocess, caplog, empty_data_context
+    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
 ):
     """
     The command should:
@@ -399,9 +401,10 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     assert context.list_expectation_suites()[0].expectation_suite_name == "foo"
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--config {project_dir} --new-api suite edit foo --datasource not_real",
+        f"--new-api suite edit foo --datasource not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -430,6 +433,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_webbrowser,
     mock_subprocess,
     caplog,
+    monkeypatch,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
@@ -449,19 +453,16 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
-    os.chdir(root_dir)
+    context = site_builder_data_context_v013_with_html_store_titanic_random
+    root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
             "--new-api",
             "suite",
             "new",
-            "-d",
-            root_dir,
             "--suite",
             "foo_suite",
             "--no-jupyter",
@@ -484,11 +485,11 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            root_dir,
+            "--new-api",
             "suite",
             "edit",
             "foo_suite",
@@ -532,6 +533,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_webbrowser,
     mock_subprocess,
     caplog,
+    monkeypatch,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
@@ -548,19 +550,16 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - NOT open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
-    os.chdir(root_dir)
+    context = site_builder_data_context_v013_with_html_store_titanic_random
+    root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
             "--new-api",
             "suite",
             "new",
-            "-d",
-            root_dir,
             "--suite",
             "foo_suite",
             "--no-jupyter",
@@ -578,9 +577,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert isinstance(suite, ExpectationSuite)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--config", root_dir, "--new-api", "suite", "edit", "foo_suite"],
+        ["--new-api", "suite", "edit", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -619,6 +619,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     mock_webbrowser,
     mock_subprocess,
     caplog,
+    monkeypatch,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
@@ -640,18 +641,16 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    context = site_builder_data_context_v013_with_html_store_titanic_random
+    root_dir = context.root_directory
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
             "--new-api",
             "suite",
             "new",
-            "-d",
-            root_dir,
             "--suite",
             "foo_suite",
             "--no-jupyter",
@@ -684,11 +683,11 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     batch_kwargs_arg_str = json.dumps(batch_kwargs)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            root_dir,
+            "--new-api",
             "suite",
             "edit",
             "foo_suite",
@@ -732,6 +731,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     mock_webbrowser,
     mock_subprocess,
     caplog,
+    monkeypatch,
     titanic_data_context,
 ):
     """
@@ -753,11 +753,11 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
 
     runner = CliRunner(mix_stderr=False)
     batch_kwargs = {"path": "../data/Titanic.csv"}
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            project_dir,
+            "--new-api",
             "suite",
             "edit",
             "foo",
@@ -792,6 +792,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     mock_webbrowser,
     mock_subprocess,
     caplog,
+    monkeypatch,
     titanic_data_context,
 ):
     """
@@ -812,11 +813,11 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
 
     runner = CliRunner(mix_stderr=False)
     batch_kwargs = {"path": os.path.join(project_dir, "../", "data", "Titanic.csv")}
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            project_dir,
+            "--new-api",
             "suite",
             "edit",
             "foo",
@@ -854,7 +855,12 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations(
-    mock_webbrowser, mock_subprocess, caplog, empty_data_context, filesystem_csv_2
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    empty_data_context,
+    filesystem_csv_2,
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify the batch
@@ -875,15 +881,15 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
         class_name="PandasDatasource",
     )
 
-    not_so_empty_data_context = empty_data_context
-    project_root_dir = not_so_empty_data_context.root_directory
+    context = empty_data_context
+    project_root_dir = context.root_directory
 
     root_dir = project_root_dir
-    os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--new-api", "suite", "new", "-d", root_dir, "--no-jupyter"],
+        ["--new-api", "suite", "new", "--no-jupyter"],
         input="{:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
@@ -905,11 +911,11 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     context.save_expectation_suite(suite)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            root_dir,
+            "--new-api",
             "suite",
             "edit",
             "my_new_suite",
@@ -946,15 +952,16 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     run=True,
     strict=True,
 )
-def test_suite_list_with_zero_suites_using_config_param(caplog, empty_data_context):
-    project_dir = empty_data_context.root_directory
-    config_file_path = os.path.join(project_dir, "great_expectations.yml")
+def test_suite_list_with_zero_suites(caplog, monkeypatch, empty_data_context):
+    context = empty_data_context
+    config_file_path = os.path.join(context.root_directory, "great_expectations.yml")
     assert os.path.exists(config_file_path)
     runner = CliRunner(mix_stderr=False)
 
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--config {config_file_path} --new-api suite list",
+        f"--new-api suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -971,7 +978,7 @@ def test_suite_list_with_zero_suites_using_config_param(caplog, empty_data_conte
     run=True,
     strict=True,
 )
-def test_suite_list_with_one_suite_using_config_param(caplog, empty_data_context):
+def test_suite_list_with_one_suite(caplog, monkeypatch, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     config_file_path = os.path.join(project_dir, "great_expectations.yml")
@@ -979,9 +986,10 @@ def test_suite_list_with_one_suite_using_config_param(caplog, empty_data_context
     context.create_expectation_suite("a.warning")
     runner = CliRunner(mix_stderr=False)
 
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--config {config_file_path} --new-api suite list",
+        f"--new-api suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -998,7 +1006,7 @@ def test_suite_list_with_one_suite_using_config_param(caplog, empty_data_context
     run=True,
     strict=True,
 )
-def test_suite_list_with_multiple_suites_using_config_param(caplog, empty_data_context):
+def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
     context.create_expectation_suite("a.warning")
@@ -1010,45 +1018,10 @@ def test_suite_list_with_multiple_suites_using_config_param(caplog, empty_data_c
 
     runner = CliRunner(mix_stderr=False)
 
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--config {config_file_path} --new-api suite list",
-        catch_exceptions=False,
-    )
-    output = result.output
-    assert result.exit_code == 0
-    assert "3 Expectation Suites found:" in output
-    assert "a.warning" in output
-    assert "b.warning" in output
-    assert "c.warning" in output
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
-def test_suite_list_with_multiple_suites_using_config_param_directory(
-    caplog, empty_data_context
-):
-    project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
-    context.create_expectation_suite("a.warning")
-    context.create_expectation_suite("b.warning")
-    context.create_expectation_suite("c.warning")
-
-    assert os.path.exists(project_dir)
-
-    runner = CliRunner(mix_stderr=False)
-
-    result = runner.invoke(
-        cli,
-        f"--config {project_dir} --new-api suite list",
+        f"--new-api suite list",
         catch_exceptions=False,
     )
     output = result.output
@@ -1073,14 +1046,15 @@ def test_suite_list_with_multiple_suites_using_config_param_directory(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_delete_with_zero_suites(
-    mock_emit, caplog, empty_data_context_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    project_dir = empty_data_context_stats_enabled.root_directory
+    context = empty_data_context_stats_enabled
     runner = CliRunner(mix_stderr=False)
 
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--config {project_dir} --new-api suite delete not_a_suite",
+        f"--new-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1109,18 +1083,18 @@ def test_suite_delete_with_zero_suites(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_delete_with_non_existent_suite(
-    mock_emit, caplog, empty_data_context_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context = empty_data_context_stats_enabled
-    project_dir = context.root_directory
     suite = context.create_expectation_suite("foo")
     context.save_expectation_suite(suite)
     mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--config {project_dir} --new-api suite delete not_a_suite",
+        f"--new-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1148,7 +1122,7 @@ def test_suite_delete_with_non_existent_suite(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_delete_with_one_suite(
-    mock_emit, caplog, empty_data_context_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     project_dir = empty_data_context_stats_enabled.root_directory
     context = DataContext(project_dir)
@@ -1161,9 +1135,10 @@ def test_suite_delete_with_one_suite(
     assert os.path.isfile(suite_path)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--config {project_dir} --new-api suite delete a.warning",
+        f"--new-api suite delete a.warning",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1196,7 +1171,7 @@ def test_suite_delete_with_one_suite(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_on_context_with_no_datasource_raises_error(
-    mock_subprocess, mock_emit, caplog, empty_data_context_stats_enabled
+    mock_subprocess, mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold" command on a context with no datasource
@@ -1207,14 +1182,11 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     - send a scaffold fail message
     """
     context = empty_data_context_stats_enabled
-    root_dir = context.root_directory
-
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            root_dir,
             "--new-api",
             "suite",
             "scaffold",
@@ -1255,7 +1227,7 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_scaffold_on_existing_suite_raises_error(
-    mock_emit, caplog, empty_data_context_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold" command with an existing suite
@@ -1266,18 +1238,16 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     - send a scaffold fail message
     """
     context = empty_data_context_stats_enabled
-    root_dir = context.root_directory
     suite = context.create_expectation_suite("foop")
     context.save_expectation_suite(suite)
     assert context.list_expectation_suite_names() == ["foop"]
     mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            root_dir,
             "--new-api",
             "suite",
             "scaffold",
@@ -1319,7 +1289,7 @@ def test_suite_scaffold_on_existing_suite_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_creates_notebook_and_opens_jupyter(
-    mock_subprocess, mock_emit, caplog, titanic_data_context_stats_enabled
+    mock_subprocess, mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold" command
@@ -1331,19 +1301,19 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
     - send a scaffold success message
     """
     context = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
     suite_name = "foop"
     expected_notebook_path = os.path.join(
-        root_dir, context.GE_EDIT_NOTEBOOK_DIR, f"scaffold_{suite_name}.ipynb"
+        context.root_directory,
+        context.GE_EDIT_NOTEBOOK_DIR,
+        f"scaffold_{suite_name}.ipynb",
     )
     assert not os.path.isfile(expected_notebook_path)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            root_dir,
             "--new-api",
             "suite",
             "scaffold",
@@ -1352,7 +1322,6 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
         input="1\n1\n",
         catch_exceptions=False,
     )
-    stdout = result.output
     assert result.exit_code == 0
     assert os.path.isfile(expected_notebook_path)
 
@@ -1386,7 +1355,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
-    mock_subprocess, mock_emit, caplog, titanic_data_context_stats_enabled
+    mock_subprocess, mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled
 ):
     """
     We call the "suite scaffold --no-jupyter"
@@ -1399,19 +1368,19 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
     - send a scaffold success message
     """
     context = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
     suite_name = "foop"
     expected_notebook_path = os.path.join(
-        root_dir, context.GE_EDIT_NOTEBOOK_DIR, f"scaffold_{suite_name}.ipynb"
+        context.root_directory,
+        context.GE_EDIT_NOTEBOOK_DIR,
+        f"scaffold_{suite_name}.ipynb",
     )
     assert not os.path.isfile(expected_notebook_path)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "--config",
-            root_dir,
             "--new-api",
             "suite",
             "scaffold",

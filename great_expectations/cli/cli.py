@@ -4,6 +4,7 @@ from typing import Optional
 
 import click
 
+from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
@@ -18,10 +19,23 @@ except ImportError:
 
 class CLIState:
     def __init__(
-        self, legacy_api: bool = False, config_file_location: Optional[str] = None
+        self,
+        legacy_api: bool = False,
+        config_file_location: Optional[str] = None,
+        data_context: DataContext = None,
     ):
         self.legacy_api = legacy_api
         self.config_file_location = config_file_location
+        self._data_context = data_context
+
+    @property
+    def data_context(self):
+        return self._data_context
+
+    @data_context.setter
+    def data_context(self, data_context):
+        assert isinstance(data_context, DataContext)
+        self._data_context = data_context
 
     def __repr__(self):
         return f"CLIState(legacy_api={self.legacy_api}, config_file_location={self.config_file_location})"
@@ -110,7 +124,7 @@ class CLI(click.MultiCommand):
     "--config",
     "-c",
     "config_file_location",
-    default="./",
+    default=None,
     help="Path to great_expectations configuration file location (great_expectations.yml). Inferred if not provided.",
 )
 @click.pass_context
@@ -128,7 +142,6 @@ def cli(ctx, legacy_api, verbose, config_file_location):
         # Note we are explicitly not using a logger in all CLI output to have
         # more control over console UI.
         logger.setLevel(logging.DEBUG)
-    # TODO make sure this works
     ctx.obj = CLIState(legacy_api=legacy_api, config_file_location=config_file_location)
 
     if legacy_api:

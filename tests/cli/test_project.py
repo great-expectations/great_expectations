@@ -9,12 +9,15 @@ from tests.cli.utils import (
 )
 
 
-def test_project_check_on_missing_ge_dir_guides_user_to_fix(caplog, tmp_path_factory):
+def test_project_check_on_missing_ge_dir_guides_user_to_fix(
+    caplog, monkeypatch, tmp_path_factory
+):
     project_dir = str(tmp_path_factory.mktemp("empty_dir"))
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["-c", project_dir, "--new-api", "project", "check-config"],
+        ["--new-api", "project", "check-config"],
         catch_exceptions=False,
     )
     stdout = result.output
@@ -25,12 +28,15 @@ def test_project_check_on_missing_ge_dir_guides_user_to_fix(caplog, tmp_path_fac
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_project_check_on_valid_project_says_so(caplog, titanic_data_context):
-    project_dir = titanic_data_context.root_directory
+def test_project_check_on_valid_project_says_so(
+    caplog, monkeypatch, titanic_data_context
+):
+    context = titanic_data_context
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["-c", project_dir, "--new-api", "project", "check-config"],
+        ["--new-api", "project", "check-config"],
         catch_exceptions=False,
     )
     assert "Checking your config files for validity" in result.output
@@ -44,16 +50,17 @@ def test_project_check_on_valid_project_says_so(caplog, titanic_data_context):
 
 
 def test_project_check_on_project_with_missing_config_file_guides_user(
-    caplog, titanic_data_context
+    caplog, monkeypatch, titanic_data_context
 ):
-    project_dir = titanic_data_context.root_directory
+    context = titanic_data_context
     # Remove the config file.
-    os.remove(os.path.join(project_dir, "great_expectations.yml"))
+    os.remove(os.path.join(context.root_directory, "great_expectations.yml"))
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["-c", project_dir, "--new-api", "project", "check-config"],
+        ["--new-api", "project", "check-config"],
         catch_exceptions=False,
     )
     assert result.exit_code == 1

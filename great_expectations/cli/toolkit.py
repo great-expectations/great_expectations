@@ -11,7 +11,6 @@ import click
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
 
-from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -23,8 +22,11 @@ from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message as send_usage_stats_message,
+)
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -379,7 +381,6 @@ irreversible)?"
         continuation_message=continuation_message,
     )
     context.delete_checkpoint(name=checkpoint_name)
-    send_usage_message(context, event=usage_event, success=True)
 
 
 def run_checkpoint(
@@ -760,3 +761,20 @@ def parse_cli_config_file_location(
         filename = None
 
     return {"directory": directory, "filename": filename}
+
+
+def send_usage_message(
+    data_context: DataContext,
+    event: str,
+    event_payload: Optional[dict] = None,
+    success: bool = False,
+):
+    if event_payload is None:
+        event_payload = {}
+    event_payload.update({"cli_version": "v013"})
+    send_usage_stats_message(
+        data_context=data_context,
+        event=event,
+        event_payload=event_payload,
+        success=success,
+    )

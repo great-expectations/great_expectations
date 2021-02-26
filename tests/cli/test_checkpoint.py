@@ -59,17 +59,14 @@ def titanic_checkpoint(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_delete_with_non_existent_checkpoint(
-    mock_emit, caplog, empty_data_context_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = empty_data_context_stats_enabled
-    root_dir: str = context.root_directory
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint delete my_checkpoint",
+        f"--new-api checkpoint delete my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -85,7 +82,11 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.delete", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.delete",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
 
@@ -98,18 +99,15 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
 def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     mock_emit,
     caplog,
+    monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    root_dir: str = context.root_directory
-
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint delete my_v1_checkpoint",
+        f"--new-api checkpoint delete my_v1_checkpoint",
         input="\n",
         catch_exceptions=False,
     )
@@ -123,7 +121,11 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.delete", "event_payload": {}, "success": True}
+            {
+                "event": "cli.checkpoint.delete",
+                "event_payload": {"cli_version": "v013"},
+                "success": True,
+            }
         ),
     ]
 
@@ -134,7 +136,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
 
     result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint list",
+        f"--new-api checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -148,18 +150,15 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
 def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     mock_emit,
     caplog,
+    monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    root_dir: str = context.root_directory
-
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint delete my_v1_checkpoint",
+        f"--new-api checkpoint delete my_v1_checkpoint",
         input="n\n",
         catch_exceptions=False,
     )
@@ -181,7 +180,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
 
     result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint list",
+        f"--new-api checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -194,17 +193,14 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_list_with_no_checkpoints(
-    mock_emit, caplog, empty_data_context_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = empty_data_context_stats_enabled
-    root_dir: str = context.root_directory
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint list",
+        f"--new-api checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -218,7 +214,11 @@ def test_checkpoint_list_with_no_checkpoints(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.list", "event_payload": {}, "success": True}
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {"cli_version": "v013"},
+                "success": True,
+            }
         ),
     ]
 
@@ -231,18 +231,15 @@ def test_checkpoint_list_with_no_checkpoints(
 def test_checkpoint_list_with_single_checkpoint(
     mock_emit,
     caplog,
+    monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    root_dir: str = context.root_directory
-
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint list",
+        f"--new-api checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -256,7 +253,11 @@ def test_checkpoint_list_with_single_checkpoint(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.list", "event_payload": {}, "success": True}
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {"cli_version": "v013"},
+                "success": True,
+            }
         ),
     ]
 
@@ -272,18 +273,15 @@ def test_checkpoint_list_with_single_checkpoint(
 def test_checkpoint_list_with_eight_checkpoints(
     mock_emit,
     caplog,
+    monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-    root_dir: str = context.root_directory
-
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint list",
+        f"--new-api checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -307,7 +305,11 @@ def test_checkpoint_list_with_eight_checkpoints(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.list", "event_payload": {}, "success": True}
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {"cli_version": "v013"},
+                "success": True,
+            }
         ),
     ]
 
@@ -323,17 +325,17 @@ def test_checkpoint_list_with_eight_checkpoints(
 def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
     mock_emit,
     caplog,
+    monkeypatch,
     titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
 ):
-
     context: DataContext = (
         titanic_data_context_stats_enabled_config_version_2_with_checkpoint
     )
-    root_dir: str = context.root_directory
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint new my_checkpoint",
+        f"--new-api checkpoint new my_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -349,7 +351,11 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.new", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.new",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
 
@@ -370,16 +376,15 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
     mock_subprocess,
     mock_emit,
     caplog,
+    monkeypatch,
     # titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     # empty_context_with_checkpoint_v1_stats_enabled,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     titanic_expectation_suite,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    root_dir = context.root_directory
+    root_dir: str = context.root_directory
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
@@ -387,8 +392,8 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint new passengers",
-        input="",
+        f"--new-api checkpoint new passengers",
+        input="1\n1\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -413,7 +418,11 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.new", "event_payload": {}, "success": True}
+            {
+                "event": "cli.checkpoint.new",
+                "event_payload": {"cli_version": "v013"},
+                "success": True,
+            }
         ),
     ]
     assert mock_subprocess.call_count == 1
@@ -449,18 +458,14 @@ def test_checkpoint_new_happy_path_generates_a_notebook_with_ge_config_v3(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
-    mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    root_dir: str = context.root_directory
-
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint run my_checkpoint",
+        f"--new-api checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -477,7 +482,11 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
 
@@ -493,23 +502,19 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     mock_emit,
     caplog,
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-    root_dir: str = context.root_directory
-
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint run my_nested_checkpoint_template_1",
+        f"--new-api checkpoint run my_nested_checkpoint_template_1",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -523,7 +528,11 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
 
@@ -539,18 +548,14 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
 def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     mock_emit,
     caplog,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    root_dir: str = context.root_directory
 
     suite: ExpectationSuite = context.create_expectation_suite(
         expectation_suite_name="bar"
@@ -603,10 +608,11 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
 
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint run bad_batch",
+        f"--new-api checkpoint run bad_batch",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -632,7 +638,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         mock.call(
             {
                 "event_payload": {
-                    "anonymized_expectation_suite_name": "f6e1151b49fceb15ae3de4eb60f62be4"
+                    "anonymized_expectation_suite_name": "f6e1151b49fceb15ae3de4eb60f62be4",
                 },
                 "event": "data_context.save_expectation_suite",
                 "success": True,
@@ -642,7 +648,11 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
@@ -660,20 +670,15 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
 def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     mock_emit,
     caplog,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
-
-    root_dir: str = context.root_directory
 
     checkpoint_file_path: str = os.path.join(
         context.root_directory,
@@ -717,9 +722,10 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint run no_suite",
+        f"--new-api checkpoint run no_suite",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -737,7 +743,11 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
 
@@ -753,20 +763,15 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
 def test_checkpoint_run_on_non_existent_validations(
     mock_emit,
     caplog,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
-
-    root_dir: str = context.root_directory
 
     checkpoint_file_path: str = os.path.join(
         context.root_directory,
@@ -803,9 +808,10 @@ def test_checkpoint_run_on_non_existent_validations(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint run no_validations",
+        f"--new-api checkpoint run no_validations",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -819,7 +825,11 @@ def test_checkpoint_run_on_non_existent_validations(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.run", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
 
@@ -835,12 +845,9 @@ def test_checkpoint_run_on_non_existent_validations(
 def test_checkpoint_run_happy_path_with_successful_validation(
     mock_emit,
     caplog,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
@@ -851,8 +858,6 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     )
     context.save_expectation_suite(expectation_suite=suite)
     assert context.list_expectation_suite_names() == ["users.delivery"]
-
-    root_dir: str = context.root_directory
 
     checkpoint_file_path: str = os.path.join(
         context.root_directory,
@@ -897,9 +902,10 @@ def test_checkpoint_run_happy_path_with_successful_validation(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint run my_fancy_checkpoint",
+        f"--new-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -923,7 +929,7 @@ def test_checkpoint_run_happy_path_with_successful_validation(
         mock.call(
             {
                 "event_payload": {
-                    "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff"
+                    "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff",
                 },
                 "event": "data_context.save_expectation_suite",
                 "success": True,
@@ -949,15 +955,15 @@ def test_checkpoint_run_happy_path_with_successful_validation(
         ),
         mock.call(
             {
-                "event_payload": {},
                 "event": "data_context.build_data_docs",
+                "event_payload": {},
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "cli.checkpoint.run",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v013"},
                 "success": True,
             }
         ),
@@ -977,13 +983,10 @@ def test_checkpoint_run_happy_path_with_successful_validation(
 def test_checkpoint_run_happy_path_with_failed_validation(
     mock_emit,
     caplog,
+    monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     titanic_expectation_suite,
-    monkeypatch,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
@@ -995,11 +998,9 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    root_dir: str = context.root_directory
-
     # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
     csv_path: str = os.path.join(
-        root_dir, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
     df = df.sample(frac=0.5, replace=True, random_state=1)
@@ -1048,9 +1049,10 @@ def test_checkpoint_run_happy_path_with_failed_validation(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint run my_fancy_checkpoint",
+        f"--new-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1063,7 +1065,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
         mock.call(
             {
                 "event_payload": {
-                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138"
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
                 },
                 "event": "data_context.save_expectation_suite",
                 "success": True,
@@ -1078,26 +1080,26 @@ def test_checkpoint_run_happy_path_with_failed_validation(
         ),
         mock.call(
             {
+                "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
                     "anonymized_expectation_suite_name": "__not_found__",
                     "anonymized_datasource_name": "__not_found__",
                 },
-                "event": "data_asset.validate",
                 "success": True,
             }
         ),
         mock.call(
             {
-                "event_payload": {},
                 "event": "data_context.build_data_docs",
+                "event_payload": {},
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "cli.checkpoint.run",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v013"},
                 "success": True,
             }
         ),
@@ -1117,13 +1119,10 @@ def test_checkpoint_run_happy_path_with_failed_validation(
 def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     mock_emit,
     caplog,
+    monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     titanic_expectation_suite,
-    monkeypatch,
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
@@ -1135,10 +1134,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    root_dir: str = context.root_directory
-
     csv_path: str = os.path.join(
-        root_dir, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
     with open(csv_path, "w") as f:
@@ -1187,9 +1184,10 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint run my_fancy_checkpoint",
+        f"--new-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1202,7 +1200,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
         mock.call(
             {
                 "event_payload": {
-                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138"
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
                 },
                 "event": "data_context.save_expectation_suite",
                 "success": True,
@@ -1210,8 +1208,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
         ),
         mock.call(
             {
-                "event_payload": {},
                 "event": "data_context.__init__",
+                "event_payload": {},
                 "success": True,
             }
         ),
@@ -1229,7 +1227,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
         mock.call(
             {
                 "event": "cli.checkpoint.run",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v013"},
                 "success": False,
             }
         ),
@@ -1247,19 +1245,16 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_script_raises_error_if_checkpoint_not_found(
-    mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    root_dir: str = context.root_directory
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint script not_a_checkpoint",
+        f"--new-api checkpoint script not_a_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -1276,7 +1271,11 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.script", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.script",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
 
@@ -1290,26 +1289,24 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_script_raises_error_if_python_file_exists(
-    mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    root_dir: str = context.root_directory
+
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
     script_path: str = os.path.join(
-        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
+        context.root_directory, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     with open(script_path, "w") as f:
         f.write("script here")
     assert os.path.isfile(script_path)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint script my_v1_checkpoint",
+        f"--new-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1325,7 +1322,11 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.script", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.script",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
 
@@ -1343,18 +1344,15 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_script_happy_path_generates_script(
-    mock_emit, caplog, empty_context_with_checkpoint_v1_stats_enabled
+    mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
-    root_dir: str = context.root_directory
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint script my_v1_checkpoint",
+        f"--new-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1378,11 +1376,15 @@ def test_checkpoint_script_happy_path_generates_script(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.script", "event_payload": {}, "success": True}
+            {
+                "event": "cli.checkpoint.script",
+                "event_payload": {"cli_version": "v013"},
+                "success": True,
+            }
         ),
     ]
     expected_script: str = os.path.join(
-        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
+        context.root_directory, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     assert os.path.isfile(expected_script)
 
@@ -1394,8 +1396,8 @@ def test_checkpoint_script_happy_path_generates_script(
 
 def test_checkpoint_script_happy_path_executable_successful_validation(
     caplog,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
     We call the "checkpoint script" command on a project with a checkpoint.
@@ -1418,8 +1420,6 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     )
     context.save_expectation_suite(expectation_suite=suite)
     assert context.list_expectation_suite_names() == ["users.delivery"]
-
-    root_dir: str = context.root_directory
 
     checkpoint_file_path: str = os.path.join(
         context.root_directory,
@@ -1464,9 +1464,10 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint script my_fancy_checkpoint",
+        f"--new-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -1477,7 +1478,11 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     )
 
     script_path: str = os.path.abspath(
-        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_fancy_checkpoint.py")
+        os.path.join(
+            context.root_directory,
+            context.GE_UNCOMMITTED_DIR,
+            "run_my_fancy_checkpoint.py",
+        )
     )
     assert os.path.isfile(script_path)
 
@@ -1490,7 +1495,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     print("about to run: " + cmdstring)
     print(os.curdir)
     print(os.listdir(os.curdir))
-    print(os.listdir(os.path.abspath(os.path.join(root_dir, ".."))))
+    print(os.listdir(os.path.abspath(os.path.join(context.root_directory, ".."))))
 
     status: int
     output: str
@@ -1503,9 +1508,9 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
 
 def test_checkpoint_script_happy_path_executable_failed_validation(
     caplog,
+    monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     titanic_expectation_suite,
-    monkeypatch,
 ):
     """
     We call the "checkpoint script" command on a project with a checkpoint.
@@ -1529,11 +1534,9 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    root_dir: str = context.root_directory
-
     # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
     csv_path: str = os.path.join(
-        root_dir, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
     df = df.sample(frac=0.5, replace=True, random_state=1)
@@ -1582,9 +1585,10 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint script my_fancy_checkpoint",
+        f"--new-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1594,7 +1598,11 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     )
 
     script_path: str = os.path.abspath(
-        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_fancy_checkpoint.py")
+        os.path.join(
+            context.root_directory,
+            context.GE_UNCOMMITTED_DIR,
+            "run_my_fancy_checkpoint.py",
+        )
     )
     assert os.path.isfile(script_path)
 
@@ -1607,7 +1615,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     print("about to run: " + cmdstring)
     print(os.curdir)
     print(os.listdir(os.curdir))
-    print(os.listdir(os.path.abspath(os.path.join(root_dir, ".."))))
+    print(os.listdir(os.path.abspath(os.path.join(context.root_directory, ".."))))
 
     status: int
     output: str
@@ -1619,9 +1627,9 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
 
 def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data(
     caplog,
+    monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     titanic_expectation_suite,
-    monkeypatch,
 ):
     """
     We call the "checkpoint script" command on a project with a checkpoint.
@@ -1645,10 +1653,8 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     )
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
-    root_dir: str = context.root_directory
-
     csv_path: str = os.path.join(
-        root_dir, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     # mangle the csv
     with open(csv_path, "w") as f:
@@ -1697,9 +1703,10 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint script my_fancy_checkpoint",
+        f"--new-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1709,7 +1716,11 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     )
 
     script_path: str = os.path.abspath(
-        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_fancy_checkpoint.py")
+        os.path.join(
+            context.root_directory,
+            context.GE_UNCOMMITTED_DIR,
+            "run_my_fancy_checkpoint.py",
+        )
     )
     assert os.path.isfile(script_path)
 
@@ -1722,7 +1733,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     print("about to run: " + cmdstring)
     print(os.curdir)
     print(os.listdir(os.curdir))
-    print(os.listdir(os.path.abspath(os.path.join(root_dir, ".."))))
+    print(os.listdir(os.path.abspath(os.path.join(context.root_directory, ".."))))
 
     status: int
     output: str
@@ -1744,18 +1755,15 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_new_with_ge_config_3_raises_error(
-    mock_emit, caplog, titanic_data_context_stats_enabled
+    mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled
 ):
-    # TODO: <Alex>Verify whether or not this reset call is needed (delete it if it is superfluous).</Alex>
-    mock_emit.reset_mock()
-
     context: DataContext = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"-c {root_dir} --new-api checkpoint new foo not_a_suite",
+        f"--new-api checkpoint new foo not_a_suite",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -1771,7 +1779,11 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.checkpoint.new", "event_payload": {}, "success": False}
+            {
+                "event": "cli.checkpoint.new",
+                "event_payload": {"cli_version": "v013"},
+                "success": False,
+            }
         ),
     ]
 

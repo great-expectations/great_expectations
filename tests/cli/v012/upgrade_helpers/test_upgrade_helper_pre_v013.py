@@ -142,7 +142,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     with open(
         file_relative_path(
             __file__,
-            "../../../test_fixtures/upgrade_helper/test_basic_project_upgrade_expected_stdout.fixture",
+            "../../../test_fixtures/upgrade_helper/test_basic_project_upgrade_expected_v012_stdout.fixture",
         )
     ) as f:
         expected_stdout = f.read()
@@ -248,7 +248,7 @@ def test_project_upgrade_with_manual_steps(
     with open(
         file_relative_path(
             __file__,
-            "../../../test_fixtures/upgrade_helper/test_project_upgrade_with_manual_steps_expected_stdout.fixture",
+            "../../../test_fixtures/upgrade_helper/test_project_upgrade_with_manual_steps_expected_v012_stdout.fixture",
         )
     ) as f:
         expected_stdout = f.read()
@@ -359,7 +359,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
     with open(
         file_relative_path(
             __file__,
-            "../../../test_fixtures/upgrade_helper/test_project_upgrade_with_exception_expected_stdout.fixture",
+            "../../../test_fixtures/upgrade_helper/test_project_upgrade_with_exception_expected_v012_stdout.fixture",
         )
     ) as f:
         expected_stdout = f.read()
@@ -456,7 +456,7 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
     with open(
         file_relative_path(
             __file__,
-            "../../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_expected_stdout.fixture",
+            "../../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_expected_v012_stdout.fixture",
         )
     ) as f:
         expected_stdout = f.read()

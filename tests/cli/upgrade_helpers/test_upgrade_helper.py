@@ -51,16 +51,16 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     )
 
 
-def test_upgrade_helper_intervention_on_cli_command(v10_project_directory, caplog):
+def test_upgrade_helper_intervention_on_cli_command(
+    v10_project_directory, caplog, monkeypatch
+):
     # test if cli detects out of date project and asks to run upgrade helper
     # decline upgrade and ensure config version was not modified
-
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(v10_project_directory))
     result: Result = runner.invoke(
         cli,
         [
-            "-c",
-            v10_project_directory,
             "--new-api",
             "checkpoint",
             "list",

@@ -15,17 +15,16 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
     run=True,
     strict=True,
 )
-def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
+def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkeypatch):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "-c",
-            project_root_dir,
             "--new-api",
             "datasource",
             "list",
@@ -43,9 +42,10 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
     )
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["-c", project_root_dir, "--new-api", "datasource", "list"],
+        ["--new-api", "datasource", "list"],
         catch_exceptions=False,
     )
     url = str(empty_sqlite_db.engine.url)
@@ -172,23 +172,22 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     strict=True,
 )
 def test_cli_datasorce_new_connection_string(
-    empty_data_context, empty_sqlite_db, caplog
+    empty_data_context, empty_sqlite_db, caplog, monkeypatch
 ):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "-c",
-            project_root_dir,
             "--new-api",
             "datasource",
             "new",
         ],
-        input="2\n6\nmynewsource\n{}\n\n".format(str(empty_sqlite_db.url)),
+        input=f"2\n6\nmynewsource\n{empty_sqlite_db.url}\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
