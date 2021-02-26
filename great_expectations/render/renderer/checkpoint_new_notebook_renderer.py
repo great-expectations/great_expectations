@@ -75,6 +75,7 @@ Glad you asked! Checkpoints are very versatile. For example, you can validate ma
 name: my_checkpoint
 config_version: 1
 class_name: SimpleCheckpoint
+run_name_template: "%Y-%M-my-run-name-template"
 validations:
   - batch_request:
       datasource_name: my_datasource
@@ -136,6 +137,7 @@ Please also see the docs linked below for instructions on how to implement other
 name: {self.checkpoint_name}
 config_version: 1.0
 class_name: SimpleCheckpoint
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 validations:
   - batch_request:
       datasource_name: {first_datasource_name}
