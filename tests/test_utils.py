@@ -190,9 +190,6 @@ class SqlAlchemyConnectionManager:
             return self._connections[connection_string]
 
 
-connection_manager = SqlAlchemyConnectionManager()
-
-
 def modify_locale(func):
     @wraps(func)
     def locale_wrapper(*args, **kwargs):
@@ -294,9 +291,9 @@ def get_dataset(
 
         if sqlite_db_path is not None:
             # Create a new database
-            engine = connection_manager.get_engine(f"sqlite:////{sqlite_db_path}")
+            engine = create_engine(f"sqlite:////{sqlite_db_path}")
         else:
-            engine = connection_manager.get_engine("sqlite://")
+            engine = create_engine("sqlite://")
         # Add the data to the database as a new table
 
         sql_dtypes = {}
@@ -357,9 +354,7 @@ def get_dataset(
 
         # Create a new database
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-        engine = connection_manager.get_engine(
-            f"postgresql://postgres@{db_hostname}/test_ci"
-        )
+        engine = create_engine(f"postgresql://postgres@{db_hostname}/test_ci")
         sql_dtypes = {}
         if (
             schemas
@@ -419,9 +414,7 @@ def get_dataset(
             return None
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-        engine = connection_manager.get_engine(
-            f"mysql+pymysql://root@{db_hostname}/test_ci"
-        )
+        engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
 
         sql_dtypes = {}
         if (
@@ -485,7 +478,7 @@ def get_dataset(
             return None
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-        engine = connection_manager.get_engine(
+        engine = create_engine(
             f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
             "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
@@ -899,9 +892,7 @@ def _build_sa_validator_with_data(
         else:
             engine = create_engine("sqlite://")
     elif sa_engine_name == "postgresql":
-        engine = connection_manager.get_engine(
-            f"postgresql://postgres@{db_hostname}/test_ci"
-        )
+        engine = create_engine(f"postgresql://postgres@{db_hostname}/test_ci")
     elif sa_engine_name == "mysql":
         engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
     elif sa_engine_name == "mssql":

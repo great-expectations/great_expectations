@@ -3,10 +3,7 @@
 # To run tests for smaller subsets of infrastructure, please look at other requirements-dev-*.txt files.
 # Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
 
---requirement requirements.txt
---requirement requirements-dev-util.txt
---requirement requirements-dev-spark.txt
---requirement requirements-dev-sqlalchemy.txt
---requirement requirements-dev-test.txt
---requirement requirements-dev-build.txt
---requirement requirements-dev-publish.txt
+flake8==3.8.3  # lint
+isort==5.4.2  # lint
+pre-commit>=2.6.0  # lint
+pyupgrade==2.7.2  # lint
