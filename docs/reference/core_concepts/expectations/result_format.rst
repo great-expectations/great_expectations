@@ -270,7 +270,7 @@ The summary `result` includes:
             "partial_unexpected_list" : [A list of up to 20 values that violate the expectation] (also in `BASIC`)
             'missing_count': The number of missing values in the column
             'missing_percent': The total percent of missing values in the column
-            'partial_unexpected_counts': [{A list of objects with value and counts, showing the number of times each of the unexpected values occurs}]
+            'partial_unexpected_counts': [{A list of up to 20 objects, showing the most common unexpected values and the number of times they occur}]
             'partial_unexpected_index_list': [A list of up to 20 of the indices of the unexpected values in the column]
         }
     }
