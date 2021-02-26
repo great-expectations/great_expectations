@@ -14,15 +14,16 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
     run=True,
     strict=True,
 )
-def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
+def test_cli_datasource_list(caplog, monkeypatch, empty_data_context, filesystem_csv_2):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--new-api", "-c", project_root_dir, "datasource", "list"],
+        ["--new-api", "datasource", "list"],
         catch_exceptions=False,
     )
 
@@ -65,12 +66,11 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
     ]
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
             "--new-api",
-            "-c",
-            project_root_dir,
             "datasource",
             "list",
         ],
@@ -96,26 +96,21 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def cli_command_not_implemented(stdout):
-    assert "This command is not yet implemented for the modern API" in stdout
-
-
 @pytest.mark.xfail(
     reason="This command is not yet implemented for the modern API",
     run=True,
     strict=True,
 )
-def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
+def test_cli_datasorce_new(caplog, monkeypatch, empty_data_context, filesystem_csv_2):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "-c",
-            project_root_dir,
             "--new-api",
             "datasource",
             "new",

@@ -59,9 +59,18 @@ class SupportedDatabases(enum.Enum):
 
 
 @click.group()
-def datasource():
+@click.pass_context
+def datasource(ctx):
     """Datasource operations"""
-    pass
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+    # TODO consider moving this all the way up in to the CLIState constructor
+    ctx.obj.data_context = context
 
 
 @datasource.command(name="new")
@@ -69,10 +78,7 @@ def datasource():
 def datasource_new(ctx):
     """Add a new datasource to the data context."""
     display_not_implemented_message_and_exit()
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = ctx.obj.data_context
     datasource_name, data_source_type = add_datasource(context)
 
     if datasource_name:
@@ -94,10 +100,7 @@ def datasource_new(ctx):
 @click.pass_context
 def delete_datasource(ctx, datasource):
     """Delete the datasource specified as an argument"""
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = ctx.obj.data_context
     try:
         context.delete_datasource(datasource)
     except ValueError:
@@ -122,10 +125,7 @@ def delete_datasource(ctx, datasource):
 def datasource_list(ctx):
     """List known datasources."""
     display_not_implemented_message_and_exit()
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
+    context = ctx.obj.data_context
     datasources = context.list_datasources()
     datasource_count = len(datasources)
 

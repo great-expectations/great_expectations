@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -16,17 +17,16 @@ from great_expectations.exceptions import DatasourceKeyPairAuthBadPassphraseErro
     run=True,
     strict=True,
 )
-def test_snowflake_user_password_credentials_exit(empty_data_context):
+def test_snowflake_user_password_credentials_exit(empty_data_context, monkeypatch):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "-c",
-            project_root_dir,
             "--new-api",
             "datasource",
             "new",

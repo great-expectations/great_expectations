@@ -33,18 +33,17 @@ def test_docs_help_output(caplog):
 def test_docs_build_view(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    context = site_builder_data_context_v013_with_html_store_titanic_random
+    root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "-c",
-            root_dir,
             "--new-api",
             "docs",
             "build",
@@ -53,7 +52,7 @@ def test_docs_build_view(
         catch_exceptions=False,
     )
     stdout = result.stdout
-
+    print(result.output)
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert "Building" in stdout
@@ -90,18 +89,17 @@ def test_docs_build_view(
 def test_docs_build_no_view(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    context = site_builder_data_context_v013_with_html_store_titanic_random
+    root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "-c",
-            root_dir,
             "--new-api",
             "docs",
             "build",
@@ -111,7 +109,6 @@ def test_docs_build_no_view(
         catch_exceptions=False,
     )
     stdout = result.stdout
-
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 0
     assert "Building" in stdout
@@ -145,18 +142,15 @@ def test_docs_build_no_view(
     strict=True,
 )
 def test_docs_build_assume_yes(
-    caplog, site_builder_data_context_v013_with_html_store_titanic_random
+    caplog, monkeypatch, site_builder_data_context_v013_with_html_store_titanic_random
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    context = site_builder_data_context_v013_with_html_store_titanic_random
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         [
-            "-c",
-            root_dir,
             "--new-api",
             "docs",
             "build",

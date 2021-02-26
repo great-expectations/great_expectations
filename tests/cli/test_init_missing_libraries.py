@@ -13,7 +13,12 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
 def _library_not_loaded_test(
-    tmp_path_factory, cli_input, library_name, library_import_name, my_caplog
+    tmp_path_factory,
+    cli_input,
+    library_name,
+    library_import_name,
+    my_caplog,
+    monkeypatch,
 ):
     """
     This test requires that a library is NOT installed. It tests that:
@@ -22,15 +27,13 @@ def _library_not_loaded_test(
     - the config yml contains an empty dict in its datasource entry
     """
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
-    basedir = str(basedir)
-    os.chdir(basedir)
-
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(basedir)
     result = runner.invoke(
         cli, ["--new-api", "init", "--no-view"], input=cli_input, catch_exceptions=False
     )
     stdout = result.output
-
+    print(stdout)
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "Which database backend are you using" in stdout
@@ -109,7 +112,7 @@ great_expectations/
     is_library_loadable(library_name="sqlalchemy"),
     reason="requires sqlalchemy to NOT be installed",
 )
-def test_init_install_sqlalchemy(caplog, tmp_path_factory):
+def test_init_install_sqlalchemy(caplog, tmp_path_factory, monkeypatch):
     """WARNING: THIS TEST IS AWFUL AND WE HATE IT."""
     # This test is as much about changing the entire test environment with side effects as it is about actually testing
     # the observed behavior.
@@ -119,10 +122,9 @@ def test_init_install_sqlalchemy(caplog, tmp_path_factory):
     cli_input = "\n\n2\nn\n"
 
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
-    basedir = str(basedir)
-    os.chdir(basedir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(basedir)
     result = runner.invoke(
         cli, ["--new-api", "init", "--no-view"], input=cli_input, catch_exceptions=False
     )
@@ -151,10 +153,15 @@ but the package `{library_name}` containing this library is not installed.
     reason="requires pymysql to NOT be installed",
 )
 def test_cli_init_db_mysql_without_library_installed_instructs_user(
-    caplog, tmp_path_factory
+    caplog, tmp_path_factory, monkeypatch
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "\n\n2\n1\nmy_db\nn\n", "pymysql", "pymysql", caplog
+        tmp_path_factory,
+        "\n\n2\n1\nmy_db\nn\n",
+        "pymysql",
+        "pymysql",
+        caplog,
+        monkeypatch,
     )
 
 
@@ -168,7 +175,7 @@ def test_cli_init_db_mysql_without_library_installed_instructs_user(
     reason="requires pyodbc to NOT be installed",
 )
 def test_cli_init_db_mssql_without_library_installed_instructs_user(
-    caplog, tmp_path_factory
+    caplog, tmp_path_factory, monkeypatch
 ):
     # TODO: Update to reflect the CLI flow sequence (once it has been implemented) and re-enable.
     _library_not_loaded_test(
@@ -177,6 +184,7 @@ def test_cli_init_db_mssql_without_library_installed_instructs_user(
         "pyodbc",
         "pyodbc",
         caplog,
+        monkeypatch,
     )
 
 
@@ -190,11 +198,15 @@ def test_cli_init_db_mssql_without_library_installed_instructs_user(
     reason="requires psycopg2 to NOT be installed",
 )
 def test_cli_init_db_postgres_without_library_installed_instructs_user(
-    caplog,
-    tmp_path_factory,
+    caplog, tmp_path_factory, monkeypatch
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "\n\n2\n2\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
+        tmp_path_factory,
+        "\n\n2\n2\nmy_db\nn\n",
+        "psycopg2-binary",
+        "psycopg2",
+        caplog,
+        monkeypatch,
     )
 
 
@@ -208,11 +220,15 @@ def test_cli_init_db_postgres_without_library_installed_instructs_user(
     reason="requires psycopg2 to NOT be installed",
 )
 def test_cli_init_db_redshift_without_library_installed_instructs_user(
-    caplog,
-    tmp_path_factory,
+    caplog, tmp_path_factory, monkeypatch
 ):
     _library_not_loaded_test(
-        tmp_path_factory, "\n\n2\n3\nmy_db\nn\n", "psycopg2-binary", "psycopg2", caplog
+        tmp_path_factory,
+        "\n\n2\n3\nmy_db\nn\n",
+        "psycopg2-binary",
+        "psycopg2",
+        caplog,
+        monkeypatch,
     )
 
 
@@ -226,8 +242,7 @@ def test_cli_init_db_redshift_without_library_installed_instructs_user(
     reason="requires snowflake-sqlalchemy to NOT be installed",
 )
 def test_cli_init_db_snowflake_without_library_installed_instructs_user(
-    caplog,
-    tmp_path_factory,
+    caplog, tmp_path_factory, monkeypatch
 ):
     _library_not_loaded_test(
         tmp_path_factory,
@@ -235,6 +250,7 @@ def test_cli_init_db_snowflake_without_library_installed_instructs_user(
         "snowflake-sqlalchemy",
         "snowflake.sqlalchemy.snowdialect",
         caplog,
+        monkeypatch,
     )
 
 
@@ -248,13 +264,12 @@ def test_cli_init_db_snowflake_without_library_installed_instructs_user(
     reason="requires pyspark to NOT be installed",
 )
 def test_cli_init_spark_without_library_installed_instructs_user(
-    caplog, tmp_path_factory
+    caplog, tmp_path_factory, monkeypatch
 ):
     basedir = tmp_path_factory.mktemp("test_cli_init_diff")
-    basedir = str(basedir)
-    os.chdir(basedir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(basedir)
     result = runner.invoke(
         cli,
         ["--new-api", "init", "--no-view"],
@@ -262,7 +277,6 @@ def test_cli_init_spark_without_library_installed_instructs_user(
         catch_exceptions=False,
     )
     stdout = result.output
-
     assert "Always know what to expect from your data" in stdout
     assert "What data would you like Great Expectations to connect to" in stdout
     assert "What are you processing your files with" in stdout

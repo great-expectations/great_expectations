@@ -23,6 +23,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     tmp_path_factory,
 ):
     """
@@ -44,10 +45,11 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     # Create a new project from scratch that we will use for the test in the next step
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(root_dir)
     result = runner.invoke(
         cli,
-        ["-c", root_dir, "--new-api", "init"],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
+        ["--new-api", "init"],
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -69,12 +71,13 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 
     # Test the second invocation of init
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["--new-api", "-c", root_dir, "init"],
+            ["--new-api", "init"],
             input="Y\nn\n",
             catch_exceptions=False,
         )
@@ -107,6 +110,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     tmp_path_factory,
 ):
     """
@@ -127,12 +131,12 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     # Create a new project from scratch that we will use for the test in the next step
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(root_dir)
     result: Result = runner.invoke(
         cli,
-        ["-c", root_dir, "--new-api", "init"],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(
-            data_folder_path, data_path, catch_exceptions=False
-        ),
+        ["--new-api", "init"],
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
@@ -146,12 +150,13 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     # Now the test begins - rerun the init on an existing project
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(root_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["-c", root_dir, "--new-api", "init"],
+            ["--new-api", "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -173,13 +178,14 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_connection_string_non_working_db_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
-    mock_webbrowser, caplog, tmp_path_factory, sa
+    mock_webbrowser, caplog, monkeypatch, tmp_path_factory, sa
 ):
     root_dir = tmp_path_factory.mktemp("bad_con_string_test")
     root_dir = str(root_dir)
     os.chdir(root_dir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(root_dir)
     result = runner.invoke(
         cli,
         ["--new-api", "init"],
