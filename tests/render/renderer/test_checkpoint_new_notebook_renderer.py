@@ -101,9 +101,7 @@ def test_find_datasource_with_asset_on_context_with_a_full_datasource_and_one_wi
 
 
 @pytest.fixture
-def checkpoint_new_notebook_assets(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-):
+def checkpoint_new_notebook_assets():
     header = [
         {
             "cell_type": "markdown",
@@ -321,16 +319,7 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
 
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    assert context.list_checkpoints() == [
-        "my_simple_checkpoint_with_slack_and_notify_with_all",
-        "my_nested_checkpoint_template_1",
-        "my_nested_checkpoint_template_3",
-        "my_nested_checkpoint_template_2",
-        "my_simple_checkpoint_with_site_names",
-        "my_minimal_simple_checkpoint",
-        "my_simple_checkpoint_with_slack",
-        "my_simple_template_checkpoint",
-    ]
+    assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
@@ -379,16 +368,7 @@ def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    assert context.list_checkpoints() == [
-        "my_simple_checkpoint_with_slack_and_notify_with_all",
-        "my_nested_checkpoint_template_1",
-        "my_nested_checkpoint_template_3",
-        "my_nested_checkpoint_template_2",
-        "my_simple_checkpoint_with_site_names",
-        "my_minimal_simple_checkpoint",
-        "my_simple_checkpoint_with_slack",
-        "my_simple_template_checkpoint",
-    ]
+    assert context.list_checkpoints() == []
 
     # This config is bad because of a missing expectation suite
 

@@ -405,21 +405,9 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint_with_ge_c
     stdout = result.stdout
     assert result.exit_code == 0
     assert mock_emit.call_count == 3
-    # Get the anonymized_expectation_suite_name since we don't know what this will be before runtime
-    anonymized_expectation_suite_name = mock_emit.call_args_list[0].args[0][
-        "event_payload"
-    ]["anonymized_expectation_suite_name"]
 
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_expectation_suite_name": anonymized_expectation_suite_name
-                },
-                "event": "data_context.save_expectation_suite",
-                "success": True,
-            }
-        ),
+    # Skip the "data_context.save_expectation_suite" call
+    assert mock_emit.call_args_list[1:] == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
