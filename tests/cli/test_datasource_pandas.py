@@ -23,7 +23,7 @@ def test_cli_datasource_list(caplog, monkeypatch, empty_data_context, filesystem
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--new-api", "datasource", "list"],
+        ["--v3-api", "datasource", "list"],
         catch_exceptions=False,
     )
 
@@ -70,7 +70,7 @@ def test_cli_datasource_list(caplog, monkeypatch, empty_data_context, filesystem
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "datasource",
             "list",
         ],
@@ -111,7 +111,7 @@ def test_cli_datasorce_new(caplog, monkeypatch, empty_data_context, filesystem_c
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "datasource",
             "new",
         ],

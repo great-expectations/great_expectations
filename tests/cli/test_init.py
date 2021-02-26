@@ -48,7 +48,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     monkeypatch.chdir(root_dir)
     result = runner.invoke(
         cli,
-        ["--new-api", "init"],
+        ["--v3-api", "init"],
         input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
         catch_exceptions=False,
     )
@@ -77,7 +77,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     ):
         result = runner.invoke(
             cli,
-            ["--new-api", "init"],
+            ["--v3-api", "init"],
             input="Y\nn\n",
             catch_exceptions=False,
         )
@@ -134,7 +134,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     monkeypatch.chdir(root_dir)
     result: Result = runner.invoke(
         cli,
-        ["--new-api", "init"],
+        ["--v3-api", "init"],
         input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
         catch_exceptions=False,
     )
@@ -156,7 +156,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     ):
         result = runner.invoke(
             cli,
-            ["--new-api", "init"],
+            ["--v3-api", "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -188,7 +188,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     monkeypatch.chdir(root_dir)
     result = runner.invoke(
         cli,
-        ["--new-api", "init"],
+        ["--v3-api", "init"],
         input="\n\n2\n6\nmy_db\nsqlite:////not_a_real.db\n\nn\n",
         catch_exceptions=False,
     )

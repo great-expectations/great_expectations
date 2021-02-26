@@ -16,7 +16,7 @@ from tests.cli.utils import (
 
 def test_suite_help_output(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["--new-api", "suite"], catch_exceptions=False)
+    result = runner.invoke(cli, ["--v3-api", "suite"], catch_exceptions=False)
     assert result.exit_code == 0
     assert (
         """Commands:
@@ -37,7 +37,7 @@ def test_suite_help_output(caplog):
 def test_suite_demo_deprecation_message(caplog, monkeypatch, empty_data_context):
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
-    result = runner.invoke(cli, ["--new-api", "suite", "demo"], catch_exceptions=False)
+    result = runner.invoke(cli, ["--v3-api", "suite", "demo"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "This command is not supported in the new API." in result.stdout
     assert_no_logging_messages_or_tracebacks(
@@ -76,7 +76,7 @@ def test_suite_new_creates_empty_suite(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--new-api", "suite", "new", "--suite", "foo"],
+        ["--v3-api", "suite", "new", "--suite", "foo"],
         input=f"{csv}\n",
         catch_exceptions=False,
     )
@@ -169,7 +169,7 @@ def test_suite_new_empty_with_no_jupyter(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "new",
             "--suite",
@@ -234,7 +234,7 @@ def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_cont
     """This is really only testing click missing arguments"""
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
-    result = runner.invoke(cli, "--new-api suite edit", catch_exceptions=False)
+    result = runner.invoke(cli, "--v3-api suite edit", catch_exceptions=False)
     assert result.exit_code == 2
     assert (
         'Error: Missing argument "SUITE".' in result.stderr
@@ -267,7 +267,7 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "edit",
             "foo",
@@ -317,7 +317,7 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "edit",
             "foo",
@@ -363,7 +363,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--new-api suite edit not_a_real_suite",
+        f"--v3-api suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -404,7 +404,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--new-api suite edit foo --datasource not_real",
+        f"--v3-api suite edit foo --datasource not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -460,7 +460,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "new",
             "--suite",
@@ -489,7 +489,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "edit",
             "foo_suite",
@@ -557,7 +557,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "new",
             "--suite",
@@ -580,7 +580,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--new-api", "suite", "edit", "foo_suite"],
+        ["--v3-api", "suite", "edit", "foo_suite"],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
@@ -648,7 +648,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "new",
             "--suite",
@@ -687,7 +687,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "edit",
             "foo_suite",
@@ -757,7 +757,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "edit",
             "foo",
@@ -817,7 +817,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "edit",
             "foo",
@@ -889,7 +889,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--new-api", "suite", "new", "--no-jupyter"],
+        ["--v3-api", "suite", "new", "--no-jupyter"],
         input="{:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
         catch_exceptions=False,
     )
@@ -915,7 +915,7 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "edit",
             "my_new_suite",
@@ -961,7 +961,7 @@ def test_suite_list_with_zero_suites(caplog, monkeypatch, empty_data_context):
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--new-api suite list",
+        f"--v3-api suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -989,7 +989,7 @@ def test_suite_list_with_one_suite(caplog, monkeypatch, empty_data_context):
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--new-api suite list",
+        f"--v3-api suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1021,7 +1021,7 @@ def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--new-api suite list",
+        f"--v3-api suite list",
         catch_exceptions=False,
     )
     output = result.output
@@ -1054,7 +1054,7 @@ def test_suite_delete_with_zero_suites(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--new-api suite delete not_a_suite",
+        f"--v3-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1094,7 +1094,7 @@ def test_suite_delete_with_non_existent_suite(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--new-api suite delete not_a_suite",
+        f"--v3-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1138,7 +1138,7 @@ def test_suite_delete_with_one_suite(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        f"--new-api suite delete a.warning",
+        f"--v3-api suite delete a.warning",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1187,7 +1187,7 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "scaffold",
             "foop",
@@ -1248,7 +1248,7 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "scaffold",
             "foop",
@@ -1314,7 +1314,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "scaffold",
             suite_name,
@@ -1381,7 +1381,7 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "suite",
             "scaffold",
             suite_name,

@@ -27,7 +27,7 @@ def test_snowflake_user_password_credentials_exit(empty_data_context, monkeypatc
     result = runner.invoke(
         cli,
         [
-            "--new-api",
+            "--v3-api",
             "datasource",
             "new",
         ],

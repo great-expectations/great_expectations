@@ -31,7 +31,9 @@ def cli_colorize_string(string):
 
 
 def display_not_implemented_message_and_exit():
-    cli_message("<red>This command is not yet implemented for the modern API</red>")
+    cli_message(
+        "<red>This command is not yet implemented for the v3 (Batch Request) API</red>"
+    )
     sys.exit(1)
 
 
