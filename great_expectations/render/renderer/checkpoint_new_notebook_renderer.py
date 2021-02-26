@@ -65,8 +65,7 @@ Glad you asked! Checkpoints are very versatile. For example, you can validate ma
 
 - https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
 - https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
-- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html
-        """
+- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html"""
         )
         self.add_code_cell(
             (
