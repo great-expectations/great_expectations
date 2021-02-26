@@ -111,7 +111,7 @@ def _checkpoint_new(ctx, checkpoint_name, jupyter):
         _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event)
 
         # Create notebook on disk
-        notebook_name = f"create_{checkpoint_name}.ipynb"
+        notebook_name = f"edit_checkpoint_{checkpoint_name}.ipynb"
         notebook_file_path = _get_notebook_path(context, notebook_name)
         checkpoint_new_notebook_renderer = CheckpointNewNotebookRenderer(
             context=context, checkpoint_name=checkpoint_name
@@ -128,6 +128,10 @@ def _checkpoint_new(ctx, checkpoint_name, jupyter):
         send_usage_message(context, event=usage_event, success=True)
 
         if jupyter:
+            cli_message(
+                """<green>Because you requested to create a new checkpoint, we'll open a notebook for you now to edit it!
+If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
+            )
             toolkit.launch_jupyter_notebook(notebook_file_path)
 
     except Exception as e:

@@ -13,6 +13,20 @@ class CheckpointNewNotebookRenderer(SuiteEditNotebookRenderer):
         self.checkpoint_name = checkpoint_name
         self._notebook = None
 
+    def _find_datasource_with_asset(self):
+        datasource_candidate = None
+        for datasource in self.context.list_datasources():
+            for data_connector_name in datasource.get("data_connectors"):
+                data_connector = datasource["data_connectors"][data_connector_name]
+                if "assets" in data_connector:
+                    datasource_candidate = {
+                        "datasource_name": datasource["name"],
+                        "data_connector_name": data_connector_name,
+                        "asset_name": list(data_connector["assets"].keys())[0],
+                    }
+                    break
+        return datasource_candidate
+
     def _add_header(self):
         self.add_markdown_cell(
             f"""# Create Your Checkpoint
@@ -99,13 +113,12 @@ Please also see the docs linked below for instructions on how to implement other
 - https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html"""
         )
         try:
-            first_datasource = self.context.list_datasources()[0]
-            first_datasource_name = first_datasource["name"]
-            first_data_connector_name = list(first_datasource["data_connectors"])[0]
-            first_data_connector = first_datasource["data_connectors"][
-                first_data_connector_name
+            first_datasource_with_asset = self._find_datasource_with_asset()
+            first_datasource_name = first_datasource_with_asset["datasource_name"]
+            first_data_connector_name = first_datasource_with_asset[
+                "data_connector_name"
             ]
-            first_asset_name = list(first_data_connector["assets"])[0]
+            first_asset_name = first_datasource_with_asset["asset_name"]
 
             first_expectation_suite = self.context.list_expectation_suites()[0]
             first_expectation_suite_name = (
@@ -122,7 +135,7 @@ validations:
       data_connector_name: {first_data_connector_name}
       data_asset_name: {first_asset_name}
       partition_request:
-        index: -1
+        index: 0
     expectation_suite_name: {first_expectation_suite_name}
 """
             sample_yaml_str += '"""'
