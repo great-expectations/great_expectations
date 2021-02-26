@@ -1,7 +1,6 @@
 trigger:
   - develop
   - main
-  - "*-develop"
 
 resources:
   containers:
@@ -33,7 +32,6 @@ variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
-  PIP_CACHE_DIR: $(Pipeline.Workspace)/.pip
 
 stages:
   - stage: scope_check
@@ -65,7 +63,7 @@ stages:
   - stage: lint
     dependsOn: scope_check
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-latest'
 
     jobs:
       - job: lint
@@ -94,48 +92,48 @@ stages:
       - job: compatibility_matrix
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev.txt'
+          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
             Python36-Pandas023:
               python.version: '3.6'
-              pandas.constraint: '"pandas==0.23.4"'
+              pandas.version: '0.23.4'
             Python37-Pandas025:
               python.version: '3.7'
-              pandas.constraint: '"pandas==0.25.3"'
+              pandas.version: '0.25.3'
             Python38-PandasLatest:
               python.version: '3.8'
-              pandas.constraint: '"pandas>=1"'
+              pandas.version: 'latest'
 
+        # TODO: refactor steps into a task
         steps:
           - task: UsePythonVersion@0
             inputs:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - task: Cache@2
-            inputs:
-              key: 'python | "$(Agent.OS)" | requirements.txt | $(pandas.constraint) | requirements-dev.txt'
-              restoreKeys: |
-                python | "$(Agent.OS)" | requirements.txt | $(pandas.constraint)
-                python | "$(Agent.OS)" | requirements.txt
-                python | "$(Agent.OS)"
-                python
-              path: $(PIP_CACHE_DIR)
-            displayName: Cache pip packages
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
+
+          - bash: pip install  pandas
+            condition: eq(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas latest'
+
+          - bash: pip install  pandas==$(pandas.version)
+            condition: ne(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              python -m pip install --upgrade pip==20.2.4
-              pip install $(GE_pytest_pip_opts)
-              pip install $(pandas.constraint)
+              pip install  $(GE_pytest_pip_opts)
+              pip install  --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
-              pip install -e .
+              pip install  .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=great_expectations --cov-report=xml --cov-report=html tests/
+              pip install  pytest pytest-cov pytest-azurepipelines
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -156,16 +154,17 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt'
+          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
+          GE_pytest_opts: ''
 
         strategy:
           matrix:
-            Python37-spark-expectations:
+            Python36:
+              python.version: '3.6'
+              pandas.version: 'latest'
+            Python37:
               python.version: '3.7'
-              GE_pytest_opts: ''
-            Python38-spark-expectations:
-              python.version: '3.8'
-              GE_pytest_opts: ''
+              pandas.version: 'latest'
 
         steps:
           - task: UsePythonVersion@0
@@ -173,30 +172,31 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - task: Cache@2
-            inputs:
-              key: 'python | "$(Agent.OS)" | requirements.txt | requirements-dev.txt | requirements-dev-sqlalchemy.txt | requirements-dev-spark.txt'
-              restoreKeys: |
-                python | "$(Agent.OS)" | requirements.txt | requirements-dev.txt
-                python | "$(Agent.OS)" | requirements.txt
-                python | "$(Agent.OS)"
-                python
-              path: $(PIP_CACHE_DIR)
-            displayName: Cache pip packages
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
 
           - script: |
               sudo apt-get install -y pandoc
+              pip install pypandoc
             displayName: 'Install pandoc'
 
+          - bash: pip install  pandas
+            condition: eq(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas latest'
+
+          - bash: pip install  pandas==$(pandas.version)
+            condition: ne(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas - $(pandas.version)'
+
           - script: |
-              python -m pip install --upgrade pip==20.2.4
-              pip install pypandoc --requirement requirements.txt $(GE_pytest_pip_opts)
-              pip install  -e .
+              pip install --requirement requirements.txt
+              pip install $(GE_pytest_pip_opts)
+              pip install  .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html tests/
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -211,56 +211,10 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  - stage: integration
-    pool:
-      vmImage: 'ubuntu-20.04'
-
-    dependsOn: [required]
-
-    jobs:
-      - job: integration
-        variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev.txt'
-          GE_pytest_opts: ''
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - task: Cache@2
-            inputs:
-              key: 'python | "$(Agent.OS)" | requirements.txt | $(pandas.constraint) | requirements-dev.txt'
-              restoreKeys: |
-                python | "$(Agent.OS)" | requirements.txt | $(pandas.constraint)
-                python | "$(Agent.OS)" | requirements.txt
-                python | "$(Agent.OS)"
-                python
-              path: $(PIP_CACHE_DIR)
-            displayName: Cache pip packages
-
-          - script: |
-              python -m pip install --upgrade pip==20.2.4
-              pip install $(GE_pytest_pip_opts)
-              pip install -e .
-            displayName: 'Install dependencies'
-
-          - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=great_expectations --cov-report=xml --cov-report=html tests_integration/
-            displayName: 'pytest'
-
-          - task: PublishTestResults@2
-            condition: succeededOrFailed()
-            inputs:
-              testResultsFiles: '**/test-*.xml'
-              testRunTitle: 'Publish test results for Python $(python.version)'
-
   - stage: usage_stats_integration
     dependsOn: [scope_check, lint]
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-latest'
 
     jobs:
       - job: test_usage_stats_messages
@@ -278,8 +232,9 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-                pip install --requirement requirements.txt --requirement requirements-dev.txt
-                pip install -e .
+                pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
+                pip install --requirement requirements.txt
+                pip install .
             displayName: 'Install dependencies'
 
           - script: |
@@ -289,7 +244,7 @@ stages:
 
   - stage: db_integration
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-latest'
 
     dependsOn: [scope_check, lint]
 
@@ -326,14 +281,14 @@ stages:
 
           - script: |
               pip install --requirement requirements.txt
-              pip install --requirement requirements-dev.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html tests/
+              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
       - job: mssql
@@ -358,13 +313,13 @@ stages:
 
           - script: |
               pip install --requirement requirements.txt
-              pip install --requirement requirements-dev.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html tests/
+              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
   - stage: deploy_gallery

@@ -7,7 +7,6 @@ Changelog
 
 Develop
 -----------------
-* [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169 issue #2164
 * [ENHANCEMENT] Add support for spark 3 based spark_config
 
 
