@@ -41,10 +41,7 @@ from great_expectations.dataset.util import (
 from great_expectations.datasource.util import (
     get_or_create_spark_session as get_or_create_spark_session_v012,
 )
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
