@@ -17,12 +17,15 @@ def test_spark_config_datasource(spark_session_v012):
 
     # Test that our values were set
     conf = source.spark.sparkContext.getConf().getAll()
-    print(f"\n[ALEX_TEST] DATA_SOURCE_SPARK_CONF: {conf} ; TYPE: {str(type(conf))}")
     # assert ("spark.app.name", "great_expectations-ds-config") in conf
     assert any(
         [
             app_name_tuple in conf
             for app_name_tuple in [
+                (
+                    "spark.app.name",
+                    "great_expectations-ds-config",
+                ),
                 (
                     "spark.app.name",
                     "default_great_expectations_spark_dataframe_datasource",
@@ -54,14 +57,15 @@ def test_spark_config_execution_engine(spark_session):
 
     # Test that our values were set
     conf = execution_engine.spark.sparkContext.getConf().getAll()
-    print(
-        f"\n[ALEX_TEST] EXECUTION_ENGINE_SPARK_CONF: {conf} ; TYPE: {str(type(conf))}"
-    )
     # assert ("spark.app.name", "great_expectations-ee-config") in conf
     assert any(
         [
             app_name_tuple in conf
             for app_name_tuple in [
+                (
+                    "spark.app.name",
+                    "great_expectations-ee-config",
+                ),
                 (
                     "spark.app.name",
                     "default_great_expectations_spark_dataframe_execution_engine",
