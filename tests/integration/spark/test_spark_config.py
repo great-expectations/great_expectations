@@ -39,7 +39,22 @@ def test_spark_config_datasource(spark_session_v012):
     )
     assert ("spark.sql.catalogImplementation", "hive") in conf
     # assert ("spark.executor.memory", "768m") in conf
-    assert ("spark.executor.memory", "450m") in conf
+    # assert ("spark.executor.memory", "450m") in conf
+    assert any(
+        [
+            app_name_tuple in conf
+            for app_name_tuple in [
+                (
+                    "spark.executor.memory",
+                    "768m",
+                ),
+                (
+                    "spark.executor.memory",
+                    "450m",
+                ),
+            ]
+        ]
+    )
 
 
 def test_spark_config_execution_engine(spark_session):
@@ -79,4 +94,19 @@ def test_spark_config_execution_engine(spark_session):
     )
     assert ("spark.sql.catalogImplementation", "hive") in conf
     # assert ("spark.executor.memory", "512m") in conf
-    assert ("spark.executor.memory", "450m") in conf
+    # assert ("spark.executor.memory", "450m") in conf
+    assert any(
+        [
+            app_name_tuple in conf
+            for app_name_tuple in [
+                (
+                    "spark.executor.memory",
+                    "512m",
+                ),
+                (
+                    "spark.executor.memory",
+                    "450m",
+                ),
+            ]
+        ]
+    )
