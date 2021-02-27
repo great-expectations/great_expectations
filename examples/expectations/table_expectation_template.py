@@ -3,11 +3,6 @@ import json
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,
@@ -51,6 +46,9 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableColumnCount(TableMetricProvider):
+
+    # This is a built in metric - you do not have to implement it yourself. If you would like to use
+    # a metric that does not yet exist, you can use the template below to implement it!
     metric_name = "table.column_count"
 
     # Below are metric computations for different dialects (Pandas, SqlAlchemy, Spark)
