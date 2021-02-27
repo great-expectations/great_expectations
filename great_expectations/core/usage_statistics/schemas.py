@@ -320,7 +320,7 @@ cli_suite_edit_expectation_suite_payload_schema = {
         "cli_version": {"type": "string", "maxLength": 256},
     },
     "required": ["anonymized_expectation_suite_name"],
-    "additionalProperties": False,
+    "additionalProperties": True,
 }
 
 cli_basic_payload_schema = {
@@ -330,7 +330,7 @@ cli_basic_payload_schema = {
         "cli_version": {"type": "string", "maxLength": 256},
     },
     "required": [],
-    "additionalProperties": False,
+    "additionalProperties": True,
 }
 
 
@@ -343,7 +343,7 @@ cli_new_ds_choice_payload_schema = {
         "cli_version": {"type": "string", "maxLength": 256},
     },
     "required": ["type"],
-    "additionalProperties": False,
+    "additionalProperties": True,
 }
 
 
