@@ -72,4 +72,3 @@ def test_spark_config_execution_engine(spark_session):
     assert ("spark.sql.catalogImplementation", "hive") in conf
     # assert ("spark.executor.memory", "512m") in conf
     assert ("spark.executor.memory", "450m") in conf
-    execution_engine.spark.sparkContext.stop()
