@@ -29,7 +29,7 @@ def get_or_create_spark_session(
     source: SparkDFDatasource = SparkDFDatasource(
         name=name,
         spark_config={
-            "spark.app.name": "great_expectations",
+            "spark.app.name": name,
             "spark.sql.catalogImplementation": "hive",
             "spark.executor.memory": "450m",
         },
