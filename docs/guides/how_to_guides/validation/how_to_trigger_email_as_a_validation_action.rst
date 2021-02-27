@@ -125,7 +125,7 @@ Additional notes
 Additional resources
 --------------------
 
-- 
+- The EmailAction uses smtplib. You can get more informations about this module `here <https://docs.python.org/3/library/smtplib.html>`_.
 
 .. discourse::
-    :topic_identifier: 228
+    :topic_identifier: 234
