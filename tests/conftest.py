@@ -3811,6 +3811,8 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
     if "postgresql" not in test_backends:
         pytest.skip("skipping fixture because postgresql not selected")
 
+    import sqlalchemy as sa
+
     url = sa.engine.url.URL(
         drivername="postgresql",
         username="postgres",
