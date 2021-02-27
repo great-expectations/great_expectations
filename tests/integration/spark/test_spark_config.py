@@ -2,7 +2,7 @@ from great_expectations.datasource import SparkDFDatasource
 from great_expectations.execution_engine import SparkDFExecutionEngine
 
 
-def test_spark_config_datasource(spark_session):
+def test_spark_config_datasource(spark_session_v012):
     # The below-commented assertions are not true for all cases,
     # because other parameters may have changed the global spark configuration.
     # Without specifying any spark_config values we get defaults.
