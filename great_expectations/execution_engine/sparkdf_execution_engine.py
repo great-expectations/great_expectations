@@ -13,9 +13,7 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.exceptions import exceptions as ge_exceptions
-from great_expectations.execution_engine.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v013,
-)
+from great_expectations.execution_engine.util import get_or_create_spark_session
 
 from ..exceptions import (
     BatchKwargsError,
@@ -171,7 +169,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         elif spark is not None:
             self.spark = spark
         else:
-            self.spark = get_or_create_spark_session_v013()
+            self.spark = get_or_create_spark_session()
 
         super().__init__(*args, **kwargs)
 

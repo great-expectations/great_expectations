@@ -55,6 +55,9 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.execution_engine.util import (
     get_or_create_spark_session as get_or_create_spark_session_v013,
 )
+from great_expectations.expectations.self_check_util import (
+    build_spark_validator_with_data,
+)
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
 
@@ -806,44 +809,10 @@ def get_test_validator_with_data(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return _build_spark_validator_with_data(df=spark_df, spark=spark)
+        return build_spark_validator_with_data(df=spark_df, spark=spark)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
-
-
-def _build_spark_engine(df, spark_session):
-    if isinstance(df, pd.DataFrame):
-        df = spark_session.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
-    batch = Batch(data=df)
-    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
-    return engine
-
-
-def _build_spark_validator_with_data(df, spark):
-    if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
-    batch = Batch(data=df)
-
-    return Validator(execution_engine=SparkDFExecutionEngine(), batches=(batch,))
 
 
 def _build_sa_engine(df, sa):

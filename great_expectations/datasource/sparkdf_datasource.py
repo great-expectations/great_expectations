@@ -4,9 +4,7 @@ import uuid
 import warnings
 from typing import Optional, Union
 
-from great_expectations.datasource.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v012,
-)
+from great_expectations.datasource.util import get_or_create_spark_session
 from great_expectations.types import ClassConfig
 
 from ..core.batch import Batch, BatchMarkers
@@ -155,7 +153,7 @@ class SparkDFDatasource(LegacyDatasource):
                 )
                 self.spark = None
         else:
-            self.spark = get_or_create_spark_session_v012()
+            self.spark = get_or_create_spark_session()
 
         self._build_generators()
 

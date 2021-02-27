@@ -33,13 +33,8 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.new_datasource import Datasource
-from great_expectations.datasource.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v012,
-)
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v013,
-)
+from great_expectations.execution_engine.util import get_or_create_spark_session
 from great_expectations.util import import_library_module
 from tests.test_utils import (
     create_files_in_directory,
@@ -317,21 +312,14 @@ def sa(test_backends):
 
 @pytest.fixture
 def spark_session(test_backends):
-    if not any(
-        [
-            backend_name in test_backends
-            for backend_name in ["SparkDFDataset", "SparkDFExecutionEngine"]
-        ]
-    ):
+    if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
     try:
         import pyspark
         from pyspark.sql import SparkSession
 
-        if "SparkDFDataset" in test_backends:
-            return get_or_create_spark_session_v012()
-        return get_or_create_spark_session_v013()
+        return get_or_create_spark_session()
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 

@@ -14,23 +14,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import get_metric_provider
+from great_expectations.expectations.self_check_util import build_spark_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
-
-
-def _build_spark_engine(df, spark_session):
-    df = spark_session.createDataFrame(
-        [
-            tuple(
-                None if isinstance(x, (float, int)) and np.isnan(x) else x
-                for x in record.tolist()
-            )
-            for record in df.to_records(index=False)
-        ],
-        df.columns.tolist(),
-    )
-    engine = SparkDFExecutionEngine()
-    engine.load_batch_data("my_id", SparkDFBatchData(engine, df))
-    return engine
 
 
 def _build_sa_engine(df, sa):
@@ -125,7 +110,14 @@ def test_max_metric_sa(sa):
 
 
 def test_max_metric_spark(spark_session):
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 2, 1]},
+        ),
+        batch_id="my_id",
+    )
+
     partial_metric = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
@@ -200,7 +192,13 @@ def test_map_of_type_sa(sa):
 
 
 def test_map_value_set_spark(spark_session):
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), spark_session)
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 2, 3, 3, None]},
+        ),
+        batch_id="my_id",
+    )
 
     condition_metric = MetricConfiguration(
         metric_name="column_values.in_set.condition",
@@ -295,14 +293,15 @@ def test_map_unique_pd():
 
 
 def test_map_unique_spark(spark_session):
-    engine = _build_spark_engine(
-        pd.DataFrame(
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
             {
                 "a": [1, 2, 3, 3, 4, None],
                 "b": [None, "foo", "bar", "baz", "qux", "fish"],
-            }
+            },
         ),
-        spark_session,
+        batch_id="my_id",
     )
 
     condition_metric = MetricConfiguration(
@@ -496,7 +495,13 @@ def test_z_score_under_threshold_pd():
 
 
 def test_z_score_under_threshold_spark(spark_session):
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), spark_session)
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 2, 3, 3, None]},
+        ),
+        batch_id="my_id",
+    )
 
     mean = MetricConfiguration(
         metric_name="column.mean.aggregate_fn",
@@ -635,7 +640,13 @@ def test_column_pairs_in_set_metric_pd():
 
 
 def test_table_metric_spark(spark_session):
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 2, 1]},
+        ),
+        batch_id="my_id",
+    )
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count.aggregate_fn",
@@ -658,7 +669,13 @@ def test_table_metric_spark(spark_session):
 
 
 def test_median_metric_spark(spark_session):
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 3]}), spark_session)
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 2, 3]},
+        ),
+        batch_id="my_id",
+    )
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count.aggregate_fn",
@@ -688,7 +705,13 @@ def test_median_metric_spark(spark_session):
 
 
 def test_distinct_metric_spark(spark_session):
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}), spark_session)
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 2, 1, 2, 3, 3, None]},
+        ),
+        batch_id="my_id",
+    )
 
     desired_metric = MetricConfiguration(
         metric_name="column.value_counts",
@@ -871,8 +894,12 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
 def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     import datetime
 
-    engine = _build_spark_engine(
-        pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), spark_session
+    engine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]},
+        ),
+        batch_id="my_id",
     )
 
     desired_metric_1 = MetricConfiguration(

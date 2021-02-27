@@ -783,7 +783,7 @@ def get_test_validator_with_data(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return _build_spark_validator_with_data(df=spark_df)
+        return build_spark_validator_with_data(df=spark_df)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
@@ -806,7 +806,7 @@ def build_spark_engine(spark, df, batch_id):
     return engine
 
 
-def _build_spark_validator_with_data(df):
+def build_spark_validator_with_data(df):
     spark = get_or_create_spark_session_v013()
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -1766,12 +1766,12 @@ def generate_expectation_tests(
                 "PandasExecutionEngine"
             )
             == True,
-            include_sqlalchemy=expectation_execution_engines_dict.get(
-                "SqlAlchemyExecutionEngine"
-            )
-            == True,
             include_spark=expectation_execution_engines_dict.get(
                 "SparkDFExecutionEngine"
+            )
+            == True,
+            include_sqlalchemy=expectation_execution_engines_dict.get(
+                "SqlAlchemyExecutionEngine"
             )
             == True,
         )
