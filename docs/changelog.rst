@@ -7,10 +7,6 @@ Changelog
 
 Develop
 -----------------
-
-
-0.13.12
------------------
 * [FEATURE] Added EmailAction as a new Validation Action (Thanks @Cedric-Magnan!) #2479
 
 
