@@ -316,20 +316,6 @@ def sa(test_backends):
 
 
 @pytest.fixture
-def spark_session_v012(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
-    try:
-        import pyspark
-        from pyspark.sql import SparkSession
-
-        return get_or_create_spark_session_v012()
-    except ImportError:
-        raise ValueError("spark tests are requested, but pyspark is not installed")
-
-
-@pytest.fixture
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
@@ -339,6 +325,20 @@ def spark_session(test_backends):
         from pyspark.sql import SparkSession
 
         return get_or_create_spark_session_v013()
+    except ImportError:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
+
+
+@pytest.fixture
+def spark_session_v012(test_backends):
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
+    try:
+        import pyspark
+        from pyspark.sql import SparkSession
+
+        return get_or_create_spark_session_v012()
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
