@@ -1319,7 +1319,7 @@ def test_suite_delete_with_zero_suites(
         mock.call(
             {
                 "event": "cli.suite.delete",
-                "event_payload": {"cli_version": "v012"},
+                "event_payload": {},
                 "success": False,
             }
         ),
@@ -1360,7 +1360,7 @@ def test_suite_delete_with_non_existent_suite(
         mock.call(
             {
                 "event": "cli.suite.delete",
-                "event_payload": {"cli_version": "v012"},
+                "event_payload": {},
                 "success": False,
             }
         ),
@@ -1407,7 +1407,7 @@ def test_suite_delete_with_one_suite(
         mock.call(
             {
                 "event": "cli.suite.delete",
-                "event_payload": {"cli_version": "v012"},
+                "event_payload": {},
                 "success": True,
             }
         ),
@@ -1459,7 +1459,7 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
         mock.call(
             {
                 "event": "cli.suite.scaffold",
-                "event_payload": {"cli_version": "v012"},
+                "event_payload": {},
                 "success": False,
             }
         ),
@@ -1514,7 +1514,7 @@ def test_suite_scaffold_on_existing_suite_raises_error(
         mock.call(
             {
                 "event": "cli.suite.scaffold",
-                "event_payload": {"cli_version": "v012"},
+                "event_payload": {},
                 "success": False,
             }
         ),
@@ -1573,7 +1573,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
         mock.call(
             {
                 "event": "cli.suite.scaffold",
-                "event_payload": {"cli_version": "v012"},
+                "event_payload": {},
                 "success": True,
             }
         ),
@@ -1634,7 +1634,7 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
         mock.call(
             {
                 "event": "cli.suite.scaffold",
-                "event_payload": {"cli_version": "v012"},
+                "event_payload": {},
                 "success": True,
             }
         ),

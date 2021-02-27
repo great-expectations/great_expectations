@@ -1007,8 +1007,7 @@
         }
       },
       "required": [
-        "anonymized_expectation_suite_name",
-        "cli_version"
+        "anonymized_expectation_suite_name"
       ],
       "additionalProperties": false
     },
@@ -1021,9 +1020,7 @@
           "maxLength": 256
         }
       },
-      "required": [
-        "cli_version"
-      ],
+      "required": [],
       "additionalProperties": false
     },
     "cli_new_ds_choice_payload": {
@@ -1044,8 +1041,7 @@
         }
       },
       "required": [
-        "type",
-        "cli_version"
+        "type"
       ],
       "additionalProperties": false
     },

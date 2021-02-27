@@ -635,7 +635,6 @@ def send_usage_message(
 ):
     if event_payload is None:
         event_payload = {}
-    event_payload.update({"cli_version": "v012"})
     send_usage_stats_message(
         data_context=data_context,
         event=event,

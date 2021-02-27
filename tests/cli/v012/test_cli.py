@@ -66,7 +66,7 @@ def test_cli_command_invalid_command(
     assert ("'blarg'" in result.stderr) or ('"blarg"' in result.stderr)
 
 
-def test_cli_version(
+def test_cli_ge_version_exists(
     caplog,
 ):
     runner = CliRunner(mix_stderr=False)
