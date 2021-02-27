@@ -190,6 +190,9 @@ class SqlAlchemyConnectionManager:
             return self._connections[connection_string]
 
 
+connection_manager = SqlAlchemyConnectionManager()
+
+
 def modify_locale(func):
     @wraps(func)
     def locale_wrapper(*args, **kwargs):
@@ -354,7 +357,9 @@ def get_dataset(
 
         # Create a new database
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-        engine = create_engine(f"postgresql://postgres@{db_hostname}/test_ci")
+        engine = connection_manager.get_engine(
+            f"postgresql://postgres@{db_hostname}/test_ci"
+        )
         sql_dtypes = {}
         if (
             schemas
@@ -859,7 +864,9 @@ def _build_sa_validator_with_data(
         else:
             engine = create_engine("sqlite://")
     elif sa_engine_name == "postgresql":
-        engine = create_engine(f"postgresql://postgres@{db_hostname}/test_ci")
+        engine = connection_manager.get_engine(
+            f"postgresql://postgres@{db_hostname}/test_ci"
+        )
     elif sa_engine_name == "mysql":
         engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
     elif sa_engine_name == "mssql":
