@@ -805,11 +805,12 @@ def get_test_validator_with_data(
             spark_df = spark.createDataFrame(data_reshaped, columns)
 
         if table_name is None:
+            # noinspection PyUnusedLocal
             table_name = "test_data_" + "".join(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return build_spark_validator_with_data(df=spark_df, spark=spark)
+        return build_spark_validator_with_data(df=spark_df)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
