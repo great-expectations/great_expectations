@@ -202,7 +202,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-03-28T01:14:21.155Z",
             "data_context_id": "96c547fe-e809-4f2e-b122-0dc91bb7b3ad",
             "data_context_instance_id": "445a8ad1-2bd0-45ce-bb6b-d066afe996dd",
-            "ge_version": "0.11.9.manual_test",
+            "ge_version": "0.13.0.manual_test",
         },
     ],
     "data_asset.validate": [
@@ -317,7 +317,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:06:47.697Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
@@ -340,7 +340,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.checkpoint.script": [
@@ -362,7 +362,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.checkpoint.run": [
@@ -384,7 +384,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.checkpoint.list": [
@@ -406,7 +406,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.checkpoint.delete": [
@@ -428,7 +428,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.datasource.list": [
@@ -450,7 +450,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:01:06.628Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.datasource.new": [
@@ -472,7 +472,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:38:32.701Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.datasource.profile": [
@@ -494,7 +494,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T01:03:17.567Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.docs.build": [
@@ -516,7 +516,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:25:27.088Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.docs.clean": [
@@ -538,7 +538,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T00:36:50.979Z",
             "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
             "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.11.9+25.g3ca555c.dirty",
+            "ge_version": "0.13.0+25.g3ca555c.dirty",
         },
     ],
     "cli.docs.list": [
@@ -560,7 +560,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:20:37.828Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.new_ds_choice": [
@@ -583,7 +583,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-25T16:08:08.963Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
@@ -606,7 +606,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:42:34.068Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.store.list": [
@@ -628,7 +628,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-03T23:56:53.908Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.suite.demo": [
@@ -650,7 +650,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T00:40:41.401Z",
             "data_context_id": "2a948908-ec42-47f2-b972-c07bb0393de4",
             "data_context_instance_id": "e7e0916d-d527-437a-b89d-5eb8c36d408f",
-            "ge_version": "0.11.9+25.g3ca555c.dirty",
+            "ge_version": "0.13.0+25.g3ca555c.dirty",
         },
     ],
     "cli.suite.edit": [
@@ -677,7 +677,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-04T00:16:22.149Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.suite.list": [
@@ -699,7 +699,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-26T19:33:33.123Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.suite.new": [
@@ -718,7 +718,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-06-26T19:33:33.123Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
             "event": "cli.suite.new",
             "success": True,
             "event_payload": {"cli_version": "v013"},
@@ -743,7 +743,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T00:58:51.961Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.suite.delete": [
@@ -765,7 +765,7 @@ valid_usage_statistics_messages = {
             "event_time": "2020-08-05T00:58:51.961Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
+            "ge_version": "0.13.0.manual_testing",
         },
     ],
     "cli.validation_operator.list": [
