@@ -240,7 +240,6 @@ init_payload_schema = {
         "version_info",
         "anonymized_datasources",
         "anonymized_stores",
-        "anonymized_validation_operators",
         "anonymized_data_docs_sites",
         "anonymized_expectation_suites",
     ],
