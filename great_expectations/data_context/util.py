@@ -250,12 +250,15 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
 
 
 def substitute_template_from_secret_store(self, template_str):
-    if boto3 and template_str.startswith("arn:aws:secretsmanager"):
-        return substitute_template_from_aws_secret_manager(template_str)
-    elif secretmanager and GCP_SECRET_MANAGER_FAST_REGEX.match(template_str):
-        return substitute_template_from_gcp_secrets_manager(template_str)
-    elif SecretClient and AZURE_KEYVAULT_FAST_REGEX.match(template_str):
-        return substitute_template_from_azure_keyvault(template_str)
+    if not template_str.startswith("raw_value:"):
+        if boto3 and template_str.startswith("arn:aws:secretsmanager"):
+            return substitute_template_from_aws_secret_manager(template_str)
+        elif secretmanager and GCP_SECRET_MANAGER_FAST_REGEX.match(template_str):
+            return substitute_template_from_gcp_secrets_manager(template_str)
+        elif SecretClient and AZURE_KEYVAULT_FAST_REGEX.match(template_str):
+            return substitute_template_from_azure_keyvault(template_str)
+    else:
+        template_str = template_str[10:]
     return template_str
 
 
