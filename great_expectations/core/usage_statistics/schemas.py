@@ -324,7 +324,7 @@ cli_suite_edit_expectation_suite_payload_schema = {
 }
 
 cli_basic_payload_schema = {
-    "$schema": "https://json-schema.org/draft-04/schema",
+    "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
         "cli_version": {"type": "string", "maxLength": 256},
