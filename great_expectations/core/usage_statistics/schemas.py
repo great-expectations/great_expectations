@@ -128,7 +128,7 @@ empty_payload_schema = {
 
 anonymized_data_docs_site_schema = {
     "$schema": "http://json-schema.org/schema#",
-    "title": "anonymized-validation-operator",
+    "title": "anonymized-data-docs-site",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_class_info": anonymized_class_info_schema,
@@ -155,7 +155,7 @@ anonymized_data_docs_site_schema = {
 
 anonymized_expectation_suite_schema = {
     "$schema": "http://json-schema.org/schema#",
-    "title": "anonymized_expectation_suite_schema",
+    "title": "anonymized-expectation-suite-schema",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
         {
