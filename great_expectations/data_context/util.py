@@ -1,5 +1,7 @@
+import base64
 import copy
 import inspect
+import json
 import logging
 import os
 import re
@@ -7,6 +9,25 @@ import warnings
 from collections import OrderedDict
 from typing import Optional
 from urllib.parse import urlparse
+
+try:
+    from azure.identity import DefaultAzureCredential
+    from azure.keyvault.secrets import SecretClient
+except ImportError:
+    SecretClient = None
+    DefaultAzureCredential = None
+
+try:
+    import boto3
+    from botocore.exceptions import ClientError
+except ImportError:
+    boto3 = None
+    ClientError = None
+
+try:
+    from google.cloud import secretmanager
+except ImportError:
+    secretmanager = None
 
 import pyparsing as pp
 
@@ -26,6 +47,24 @@ except ImportError:
     sa = None
 
 logger = logging.getLogger(__name__)
+
+
+AWS_SECRET_MANAGER_SLOW_REGEX = re.compile(
+    r"^arn:aws:secretsmanager:([a-z\-0-9]*):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]*)"
+    r"(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
+)
+GCP_SECRET_MANAGER_FAST_REGEX = re.compile(r"^projects\/[a-z0-9\_\-]{6,30}\/secrets")
+GCP_SECRET_MANAGER_SLOW_REGEX = re.compile(
+    r"projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
+    r"(?:\/version\/([a-z0-9]+))?(?:\|([^\|]+))?$"
+)
+AZURE_KEYVAULT_FAST_REGEX = re.compile(
+    r"^https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net"
+)
+AZURE_KEYVAULT_SLOW_REGEX = re.compile(
+    r"^(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
+    r"(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
+)
 
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
@@ -205,7 +244,84 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
             )
 
     # 2. Replace the "$"'s that had been escaped
-    return template_str.replace(dollar_sign_escape_string, "$")
+    template_str = template_str.replace(dollar_sign_escape_string, "$")
+    template_str = substitute_template_from_secret_store(template_str)
+    return template_str
+
+
+def substitute_template_from_secret_store(self, template_str):
+    if boto3 and template_str.startswith("arn:aws:secretsmanager"):
+        return substitute_template_from_aws_secret_manager(template_str)
+    elif secretmanager and GCP_SECRET_MANAGER_FAST_REGEX.match(template_str):
+        return substitute_template_from_gcp_secrets_manager(template_str)
+    elif SecretClient and AZURE_KEYVAULT_FAST_REGEX.match(template_str):
+        return substitute_template_from_azure_keyvault(template_str)
+    return template_str
+
+
+def substitute_template_from_aws_secret_manager(template_str):
+    matches = AWS_SECRET_MANAGER_SLOW_REGEX.match(template_str)
+
+    region_name = matches.group(1)
+    secret_name = matches.group(3)
+    secret_version = matches.group(4)
+    secret_key = matches.group(5)
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(service_name="secretsmanager", region_name=region_name)
+
+    secret_response = client.get_secret_value(
+        SecretId=secret_name, VersionId=secret_version
+    )
+    # Decrypts secret using the associated KMS CMK.
+    # Depending on whether the secret is a string or binary, one of these fields will be populated.
+    if "SecretString" in secret_response:
+        secret = secret_response["SecretString"]
+    else:
+        secret = base64.b64decode(secret_response["SecretBinary"])
+    if secret_key:
+        secret = json.loads(secret)[secret_key]
+    return secret
+
+
+def substitute_template_from_gcp_secrets_manager(template_str):
+    client = secretmanager.SecretManagerServiceClient()
+    matches = GCP_SECRET_MANAGER_SLOW_REGEX.match(template_str)
+    project_id = matches.group(1)
+    secret_id = matches.group(2)
+    secret_version = matches.group(3)
+    secret_key = matches.group(4)
+    if not secret_version:
+        secret_version = "latest"
+    name = f"projects/{project_id}/secrets/{secret_id}/version/{secret_version}"
+    try:
+        secret = client.access_secret_version(name=name)._pb.payload.data.decode(
+            "utf-8"
+        )
+    except AttributeError:
+        secret = client.access_secret_version(name=name).payload.data.decode(
+            "utf-8"
+        )  # for google-cloud-secret-manager < 2.0.0
+    if secret_key:
+        secret = json.loads(secret)[secret_key]
+    return secret
+
+
+def substitute_template_from_azure_keyvault(template_str):
+    matches = AZURE_KEYVAULT_SLOW_REGEX.match(template_str)
+    keyvault_uri = matches.group(1)
+    secret_name = matches.group(2)
+    secret_version = matches.group(3)
+    secret_key = matches.group(4)
+    credential = DefaultAzureCredential()
+    client = SecretClient(vault_url=keyvault_uri, credential=credential)
+    secret = client.get_secret(secret_name=secret_name, secret_version=secret_version)[
+        "value"
+    ]
+    if secret_key:
+        secret = json.loads(secret)[secret_key]
+    return secret
 
 
 def substitute_all_config_variables(
