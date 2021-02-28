@@ -320,17 +320,16 @@ cli_suite_edit_expectation_suite_payload_schema = {
         "cli_version": {"type": "string", "maxLength": 256},
     },
     "required": ["anonymized_expectation_suite_name"],
-    "additionalProperties": True,
+    "additionalProperties": False,
 }
 
 cli_basic_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "https://json-schema.org/draft-04/schema",
     "type": "object",
     "properties": {
         "cli_version": {"type": "string", "maxLength": 256},
     },
-    "required": [],
-    "additionalProperties": True,
+    "additionalProperties": False,
 }
 
 
@@ -343,7 +342,7 @@ cli_new_ds_choice_payload_schema = {
         "cli_version": {"type": "string", "maxLength": 256},
     },
     "required": ["type"],
-    "additionalProperties": True,
+    "additionalProperties": False,
 }
 
 
