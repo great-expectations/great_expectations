@@ -50,19 +50,21 @@ logger = logging.getLogger(__name__)
 
 
 AWS_SECRET_MANAGER_SLOW_REGEX = re.compile(
-    r"^arn:aws:secretsmanager:([a-z\-0-9]*):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]*)"
+    r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]*):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]*)"
     r"(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
 )
-GCP_SECRET_MANAGER_FAST_REGEX = re.compile(r"^projects\/[a-z0-9\_\-]{6,30}\/secrets")
+GCP_SECRET_MANAGER_FAST_REGEX = re.compile(
+    r"^secret\|projects\/[a-z0-9\_\-]{6,30}\/secrets"
+)
 GCP_SECRET_MANAGER_SLOW_REGEX = re.compile(
-    r"projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
+    r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
     r"(?:\/version\/([a-z0-9]+))?(?:\|([^\|]+))?$"
 )
 AZURE_KEYVAULT_FAST_REGEX = re.compile(
-    r"^https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net"
+    r"^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net"
 )
 AZURE_KEYVAULT_SLOW_REGEX = re.compile(
-    r"^(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
+    r"^secret\|(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
     r"(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
 )
 
@@ -233,6 +235,9 @@ def substitute_config_variable(
 
         if config_variable_value is not None:
             if not isinstance(config_variable_value, str):
+                config_variable_value = substitute_template_from_secret_store(
+                    config_variable_value
+                )
                 return config_variable_value
             template_str = template_str.replace(m.group(), config_variable_value)
         else:
@@ -249,21 +254,32 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
     return template_str
 
 
-def substitute_template_from_secret_store(self, template_str):
-    if not template_str.startswith("raw_value:"):
-        if boto3 and template_str.startswith("arn:aws:secretsmanager"):
-            return substitute_template_from_aws_secret_manager(template_str)
-        elif secretmanager and GCP_SECRET_MANAGER_FAST_REGEX.match(template_str):
-            return substitute_template_from_gcp_secrets_manager(template_str)
-        elif SecretClient and AZURE_KEYVAULT_FAST_REGEX.match(template_str):
-            return substitute_template_from_azure_keyvault(template_str)
-    else:
-        template_str = template_str[10:]
-    return template_str
+def substitute_template_from_secret_store(value):
+    if value.startswith("secret|"):
+        if value.startswith("secret|arn:aws:secretsmanager"):
+            return substitute_template_from_aws_secrets_manager(value)
+        elif GCP_SECRET_MANAGER_FAST_REGEX.match(value):
+            return substitute_template_from_gcp_secret_manager(value)
+        elif AZURE_KEYVAULT_FAST_REGEX.match(value):
+            return substitute_template_from_azure_keyvault(value)
+    return value
 
 
-def substitute_template_from_aws_secret_manager(template_str):
-    matches = AWS_SECRET_MANAGER_SLOW_REGEX.match(template_str)
+def substitute_template_from_aws_secrets_manager(value):
+
+    if not boto3:
+        logger.error(
+            "boto3 is not installed, please install great_expectations with aws_secrets extra > "
+            "pip install great_expectations[aws_secrets]"
+        )
+        raise ImportError("Could not import boto3")
+
+    matches = AWS_SECRET_MANAGER_SLOW_REGEX.match(value)
+
+    if not matches:
+        raise ValueError(
+            f"Could not match the value with regex {AWS_SECRET_MANAGER_SLOW_REGEX}"
+        )
 
     region_name = matches.group(1)
     secret_name = matches.group(3)
@@ -282,15 +298,28 @@ def substitute_template_from_aws_secret_manager(template_str):
     if "SecretString" in secret_response:
         secret = secret_response["SecretString"]
     else:
-        secret = base64.b64decode(secret_response["SecretBinary"])
+        secret = base64.b64decode(secret_response["SecretBinary"]).decode("utf-8")
     if secret_key:
         secret = json.loads(secret)[secret_key]
     return secret
 
 
-def substitute_template_from_gcp_secrets_manager(template_str):
+def substitute_template_from_gcp_secret_manager(value):
+    if not secretmanager:
+        logger.error(
+            "secretmanager is not installed, please install great_expectations with gcp extra > "
+            "pip install great_expectations[gcp]"
+        )
+        raise ImportError("Could not import secretmanager from google.cloud")
+
     client = secretmanager.SecretManagerServiceClient()
-    matches = GCP_SECRET_MANAGER_SLOW_REGEX.match(template_str)
+    matches = GCP_SECRET_MANAGER_SLOW_REGEX.match(value)
+
+    if not matches:
+        raise ValueError(
+            f"Could not match the value with regex {GCP_SECRET_MANAGER_SLOW_REGEX}"
+        )
+
     project_id = matches.group(1)
     secret_id = matches.group(2)
     secret_version = matches.group(3)
@@ -311,17 +340,27 @@ def substitute_template_from_gcp_secrets_manager(template_str):
     return secret
 
 
-def substitute_template_from_azure_keyvault(template_str):
-    matches = AZURE_KEYVAULT_SLOW_REGEX.match(template_str)
+def substitute_template_from_azure_keyvault(value):
+    if not SecretClient:
+        logger.error(
+            "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
+            "pip install great_expectations[azure_secrets]"
+        )
+        raise ImportError("Could not import SecretClient from azure.keyvault.secrets")
+    matches = AZURE_KEYVAULT_SLOW_REGEX.match(value)
+
+    if not matches:
+        raise ValueError(
+            f"Could not match the value with regex {AZURE_KEYVAULT_SLOW_REGEX}"
+        )
+
     keyvault_uri = matches.group(1)
     secret_name = matches.group(2)
     secret_version = matches.group(3)
     secret_key = matches.group(4)
     credential = DefaultAzureCredential()
     client = SecretClient(vault_url=keyvault_uri, credential=credential)
-    secret = client.get_secret(secret_name=secret_name, secret_version=secret_version)[
-        "value"
-    ]
+    secret = client.get_secret(name=secret_name, version=secret_version).value
     if secret_key:
         secret = json.loads(secret)[secret_key]
     return secret
