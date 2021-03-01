@@ -255,7 +255,7 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
 
 
 def substitute_template_from_secret_store(value):
-    if value.startswith("secret|"):
+    if isinstance(value, str) and value.startswith("secret|"):
         if value.startswith("secret|arn:aws:secretsmanager"):
             return substitute_template_from_aws_secrets_manager(value)
         elif GCP_SECRET_MANAGER_FAST_REGEX.match(value):
