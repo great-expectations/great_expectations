@@ -1037,11 +1037,6 @@ def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )

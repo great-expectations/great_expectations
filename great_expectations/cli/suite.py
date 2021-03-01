@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from typing import List
 
 import click
 
@@ -238,8 +239,8 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 @click.pass_context
 def suite_demo(ctx):
     """This command is not supported in the new API."""
-    context = ctx.obj.data_context
-    usage_event = "cli.suite.delete"
+    context: DataContext = ctx.obj.data_context
+    usage_event: str = "cli.suite.demo"
     toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
     cli_message(
         "This command is not supported in the new API. Please use `suite new` instead."
@@ -363,23 +364,21 @@ def suite_delete(ctx, suite):
     """
     Delete an expectation suite from the expectation store.
     """
-    display_not_implemented_message_and_exit()
-    usage_event = "cli.suite.delete"
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context = toolkit.load_data_context_with_error_handling(directory)
-    suite_names = context.list_expectation_suite_names()
+    context: DataContext = ctx.obj.data_context
+    usage_event: str = "cli.suite.delete"
+    suite_names: List[str] = context.list_expectation_suite_names()
     if not suite_names:
         toolkit.exit_with_failure_message_and_stats(
-            context,
-            usage_event,
-            "</red>No expectation suites found in the project.</red>",
+            context=context,
+            usage_event=usage_event,
+            message="</red>No expectation suites found in the project.</red>",
         )
 
     if suite not in suite_names:
         toolkit.exit_with_failure_message_and_stats(
-            context, usage_event, f"No expectation suite named {suite} found."
+            context=context,
+            usage_event=usage_event,
+            message=f"No expectation suite named {suite} found."
         )
 
     context.delete_expectation_suite(suite)
