@@ -19,14 +19,18 @@ class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
         Useful to pre-populate a working sample checkpoint for notebook users.
         """
         datasource_candidate = None
-        for datasource in self.context.list_datasources():
-            for data_connector_name in datasource.get("data_connectors", []):
-                data_connector = datasource["data_connectors"][data_connector_name]
-                if "assets" in data_connector:
+        for datasource_name, datasource in self.context.datasources.items():
+            for (
+                data_connector_name,
+                data_connector,
+            ) in datasource.data_connectors.items():
+                if len(data_connector.get_available_data_asset_names()) > 0:
                     datasource_candidate = {
-                        "datasource_name": datasource["name"],
+                        "datasource_name": datasource_name,
                         "data_connector_name": data_connector_name,
-                        "asset_name": list(data_connector["assets"].keys())[0],
+                        "asset_name": list(
+                            data_connector.get_available_data_asset_names()
+                        )[0],
                     }
                     break
         return datasource_candidate
