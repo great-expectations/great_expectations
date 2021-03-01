@@ -574,8 +574,9 @@ def get_dataset(
         if not create_engine:
             return None
 
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         engine = create_engine(
-            "db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci",
+            f"db2+ibm_db://db2inst1:my_db_password@{db_hostname}/test_ci",
         )
         sql_dtypes = {}
         if (
@@ -1017,7 +1018,7 @@ def _build_sa_validator_with_data(
         )
     elif sa_engine_name == "ibm_db2":
         engine = create_engine(
-            "db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci"
+            "db2+ibm_db://db2inst1:my_db_password@{db_hostname}/test_ci"
         )
     else:
         engine = None

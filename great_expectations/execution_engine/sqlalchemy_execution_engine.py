@@ -224,7 +224,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "mssql",
             "snowflake",
             "mysql",
-            "ibm_db_sa"
+            "ibm_db_sa",
         ]:
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()

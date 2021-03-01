@@ -27,4 +27,3 @@ try:
 except Exception as e:
     print("FAILED AT CREATING A TABLESPACE TO ENABLE THE CREATION OF TABLES")
     print(e)
-

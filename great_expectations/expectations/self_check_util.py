@@ -541,6 +541,66 @@ def get_dataset(
             table_name, engine=engine, profiler=profiler, caching=caching
         )
 
+    elif dataset_type == "ibm_db2":
+        if not create_engine:
+            return None
+
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        engine = create_engine(
+            f"db2+ibm_db://db2inst1:my_db_password@{db_hostname}/test_ci",
+        )
+        sql_dtypes = {}
+        if (
+            schemas
+            and dataset_type in schemas
+            and isinstance(engine.dialect, ibmdb2types.dialect)
+        ):
+            schema = schemas[dataset_type]
+            sql_dtypes = {col: IBMDB2_TYPES[dtype] for (col, dtype) in schema.items()}
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=dataset_type, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+
+        # Build a SqlAlchemyDataset using that database
+        return SqlAlchemyDataset(
+            table_name, engine=engine, profiler=profiler, caching=caching
+        )
+
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
 
@@ -724,7 +784,7 @@ def _build_sa_validator_with_data(
         )
     elif sa_engine_name == "ibm_db2":
         engine = create_engine(
-            "db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci"
+            f"db2+ibm_db://db2inst1:my_db_password@{db_hostname}/test_ci"
         )
     else:
         engine = None
@@ -1584,14 +1644,14 @@ def build_test_backends_list(
         if include_ibm_db2:
             try:
                 engine = sa.create_engine(
-                    "db2+ibm_db://db2inst1:my_db_password@{db_hostname}:50000/test_ci"
+                    f"db2+ibm_db://db2inst1:my_db_password@{db_hostname}:50000/test_ci"
                 )
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "ibm_db2 tests are requested, but unable to connect to the IBM Db2 database at "
-                    "'db2+ibm_db://db2inst1:my_db_password@{db_hostname}:50000/test_ci'",
+                    f"'db2+ibm_db://db2inst1:my_db_password@{db_hostname}:50000/test_ci'",
                 )
             test_backends += ["ibm_db2"]
 

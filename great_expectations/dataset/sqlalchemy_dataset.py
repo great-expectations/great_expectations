@@ -78,6 +78,7 @@ except (ImportError, KeyError):
 
 try:
     import ibm_db_sa.ibm_db
+
     registry.register("db2", "ibm_db_sa.ibm_db", "DB2Dialect_ibm_db")
     registry.register("db2.ibm_db", "ibm_db_sa.ibm_db", "DB2Dialect_ibm_db")
 except (ImportError, KeyError):
@@ -552,13 +553,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 module_name="pyathena.sqlalchemy_athena"
             )
         elif self.engine.dialect.name.lower() == "ibm_db_sa":
-            self.dialect = import_library_module(
-                module_name="ibm_db_sa"
-            )
+            self.dialect = import_library_module(module_name="ibm_db_sa")
         else:
             self.dialect = None
 
-        if engine and engine.dialect.name.lower() in ["sqlite", "mssql", "snowflake", "ibm_db_sa"]:
+        if engine and engine.dialect.name.lower() in [
+            "sqlite",
+            "mssql",
+            "snowflake",
+            "ibm_db_sa",
+        ]:
             # sqlite/mssql/snowflake/IBM_Db2 temporary tables
             # only persist within a connection so override the engine
             self.engine = engine.connect()
@@ -1316,7 +1320,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             # IBM Db2 can't handle quotes around table_name
             # IBM Db2 requires parenthesis around custom_sql
-            stmt = 'CREATE TEMPORARY TABLE {table_name} AS ( {custom_sql} )'.format(
+            stmt = "CREATE TEMPORARY TABLE {table_name} AS ( {custom_sql} )".format(
                 table_name=table_name, custom_sql=custom_sql
             )
 
@@ -1354,20 +1358,26 @@ WHERE
             # https://www.ibm.com/support/knowledgecenter/en/SSEPGG_10.5.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0054907.html
             col_info_query: TextClause = sa.text(
                 f"""
-                    SELECT COLNAME, TYPENAME 
-                    FROM SYSIBMADM.ADMINTEMPCOLUMNS 
+                    SELECT COLNAME, TYPENAME
+                    FROM SYSIBMADM.ADMINTEMPCOLUMNS
                     WHERE TABNAME = '{self._table.name.upper()}'"""
             )
             col_info_tuples_list = self.engine.execute(col_info_query).fetchall()
             col_info_dict_list = [
-                {"name": col_name, "type": getattr(self._get_dialect_type_module(), col_type.upper())()}
+                {
+                    "name": col_name,
+                    "type": getattr(
+                        self._get_dialect_type_module(), col_type.upper()
+                    )(),
+                }
                 for col_name, col_type in col_info_tuples_list
             ]
         else:
             query: Select = sa.select([sa.text("*")]).select_from(self._table).limit(1)
             # IBM Db2 can't process '.limit(1)' without compilation
             response = self.engine.execute(
-                query.compile(compile_kwargs={"literal_binds": True}))
+                query.compile(compile_kwargs={"literal_binds": True})
+            )
             col_names: list = response.keys()
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
         return col_info_dict_list
@@ -1930,7 +1940,6 @@ WHERE
                     )
         except AttributeError:
             pass
-
 
         try:
             # Snowflake

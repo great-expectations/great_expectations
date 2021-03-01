@@ -619,15 +619,17 @@ def _collect_bigquery_credentials(default_credentials=None):
 
     return credentials
 
+
 def _collect_ibm_db2_credentials(default_credentials=None):
     if default_credentials is None:
         default_credentials = {}
 
     credentials = {"drivername": "db2+ibm_db"}
 
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     credentials["host"] = click.prompt(
         "What is the host for the IBM Db2 connection?",
-        default=default_credentials.get("host", "host.docker.internal"),
+        default=default_credentials.get("host", db_hostname),
     ).strip()
     credentials["port"] = click.prompt(
         "What is the port for the IBM Db2 connection?",
@@ -649,6 +651,7 @@ def _collect_ibm_db2_credentials(default_credentials=None):
     ).strip()
 
     return credentials
+
 
 def _collect_mysql_credentials(default_credentials=None):
     # We are insisting on pymysql driver when adding a MySQL datasource through the CLI

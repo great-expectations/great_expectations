@@ -126,6 +126,7 @@ def pytest_addoption(parser):
         help="If set, run aws integration tests",
     )
 
+
 def build_test_backends_list(metafunc):
     test_backends = ["PandasDataset"]
     no_spark = metafunc.config.getoption("--no-spark")
@@ -177,15 +178,18 @@ def build_test_backends_list(metafunc):
             test_backends += ["mysql"]
         ibm_db2 = metafunc.config.getoption("--ibm_db2")
         if sa and ibm_db2:
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
             try:
                 # db2+ibm_db://username:password@servername[:port]/database
-                engine = sa.create_engine("db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci")
+                engine = sa.create_engine(
+                    f"db2+ibm_db://db2inst1:my_db_password@{db_hostname}/test_ci"
+                )
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "IBM Db2 tests are requested, but unable to connect to the IBM Db2 instance at "
-                    "'db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci'"
+                    f"'db2+ibm_db://db2inst1:my_db_password@{db_hostname}/test_ci'"
                 )
             test_backends += ["ibm_db2"]
         mssql = metafunc.config.getoption("--mssql")
@@ -278,15 +282,18 @@ def build_test_backends_list_cfe(metafunc):
             test_backends += ["mssql"]
         ibm_db2 = metafunc.config.getoption("--ibm_db2")
         if sa and ibm_db2:
+            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
             try:
                 # db2+ibm_db://username:password@servername[:port]/database
-                engine = sa.create_engine("db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci")
+                engine = sa.create_engine(
+                    f"db2+ibm_db://db2inst1:my_db_password@{db_hostname}/test_ci"
+                )
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "IBM Db2 tests are requested, but unable to connect to the IBM Db2 instance at "
-                    "'db2+ibm_db://db2inst1:my_db_password@host.docker.internal/test_ci'"
+                    f"'db2+ibm_db://db2inst1:my_db_password@{db_hostname}/test_ci'"
                 )
             test_backends += ["ibm_db2"]
     return test_backends
@@ -2261,7 +2268,8 @@ def dataset_sample_data(test_backend):
         "ibm_db2": {
             "infinities": "DOUBLE_PRECISION",
             "nulls": "DOUBLE_PRECISION",
-            "naturals": "INTEGER"},
+            "naturals": "INTEGER",
+        },
         "spark": {
             "infinities": "FloatType",
             "nulls": "FloatType",
