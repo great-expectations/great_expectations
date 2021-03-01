@@ -41,16 +41,9 @@ class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
-        def matches_password_requirements(x, min_length, min_uppercase, min_lowercase, min_special, min_digits, max_consec_numbers, max_consec_letters):
+        def _pandas(cls, column, min_length, min_uppercase, min_lowercase, min_special, min_digits, max_consec_numbers, max_consec_letters, **kwargs):
+        def matches_password_requirements(x):
             x = str(x)
-            min_length = min_length or 8
-            min_uppercase = min_uppercase or 1
-            min_lowercase = min_lowercase or 1
-            min_special = min_special or 1
-            min_digits = min_digits or 1
-            max_consec_letters = max_consec_letters or 99
-            max_consec_numbers = max_consec_numbers or 99
             if len(x) < min_length:
                 return False
             uppercase_letters = 0
