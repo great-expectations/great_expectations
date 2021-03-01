@@ -36,7 +36,8 @@ from great_expectations.validator.validator import Validator
 class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.secure_password"
-    condition_value_keys = ()
+    condition_value_keys = ("min_length", "min_uppercase", "min_lowercase", "min_special", "min_digits",
+                            "max_consec_numbers", "max_consec_letters")
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
