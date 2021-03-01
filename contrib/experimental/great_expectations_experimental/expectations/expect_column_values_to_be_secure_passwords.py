@@ -84,6 +84,7 @@ class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
             return not (uppercase_letters < min_uppercase or lowercase_letters < min_lowercase or special_characters < min_special or num_digits < min_digits or max_numbers > max_consec_numbers or max_letters > max_consec_letters)
         return column.apply(lambda x: matches_password_requirements(x) if x else False)
 
+
 class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     """Expect column entries to be strings that match a given regular expression.
 
