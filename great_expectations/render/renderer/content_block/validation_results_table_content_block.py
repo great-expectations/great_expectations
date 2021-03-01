@@ -92,7 +92,9 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
                 renderer_type="renderer.diagnostic.status_icon",
             )
             status_cell = (
-                [status_icon_renderer[1](result=result)] if status_icon_renderer else []
+                [status_icon_renderer[1](result=result)]
+                if status_icon_renderer
+                else [getattr(cls, "_diagnostic_status_icon_renderer")(result=result)]
             )
             unexpected_statement = []
             unexpected_table = None
