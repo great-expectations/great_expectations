@@ -362,7 +362,6 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
 
 
 def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
-    # empty_context_with_checkpoint_v1_stats_enabled,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     checkpoint_new_notebook_assets,
 ):

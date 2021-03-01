@@ -341,7 +341,6 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
         catch_exceptions=False,
     )
     stdout = result.stdout
-    print(stdout)
     assert result.exit_code == 1
     assert (
         "A checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
@@ -373,7 +372,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint_with_ge_config_v3(
+def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
@@ -395,6 +394,9 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint_with_ge_c
     context.save_expectation_suite(titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
+    # Clear the "data_context.save_expectation_suite" call
+    mock_emit.reset_mock()
+
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
@@ -404,10 +406,9 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint_with_ge_c
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert mock_emit.call_count == 3
+    assert mock_emit.call_count == 2
 
-    # Skip the "data_context.save_expectation_suite" call
-    assert mock_emit.call_args_list[1:] == [
+    assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
