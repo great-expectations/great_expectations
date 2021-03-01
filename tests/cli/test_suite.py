@@ -3,7 +3,7 @@ import os
 from unittest import mock
 
 import pytest
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -947,23 +947,21 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 def test_suite_list_with_zero_suites(caplog, monkeypatch, empty_data_context):
-    context = empty_data_context
-    config_file_path = os.path.join(context.root_directory, "great_expectations.yml")
+    context: DataContext = empty_data_context
+    config_file_path: str = os.path.join(
+        context.root_directory, "great_expectations.yml"
+    )
     assert os.path.exists(config_file_path)
-    runner = CliRunner(mix_stderr=False)
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"--v3-api suite list",
         catch_exceptions=False,
     )
+
     assert result.exit_code == 0
     assert "No Expectation Suites found" in result.output
 
@@ -973,63 +971,58 @@ def test_suite_list_with_zero_suites(caplog, monkeypatch, empty_data_context):
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 def test_suite_list_with_one_suite(caplog, monkeypatch, empty_data_context):
-    project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
-    config_file_path = os.path.join(project_dir, "great_expectations.yml")
+    project_dir: str = empty_data_context.root_directory
+    context: DataContext = DataContext(context_root_dir=project_dir)
+    config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
     assert os.path.exists(config_file_path)
+
     context.create_expectation_suite("a.warning")
-    runner = CliRunner(mix_stderr=False)
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"--v3-api suite list",
         catch_exceptions=False,
     )
+
     assert result.exit_code == 0
     assert "1 Expectation Suite found" in result.output
     assert "a.warning" in result.output
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context):
-    project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
+    project_dir: str = empty_data_context.root_directory
+    context: DataContext = DataContext(context_root_dir=project_dir)
+
     context.create_expectation_suite("a.warning")
     context.create_expectation_suite("b.warning")
     context.create_expectation_suite("c.warning")
 
-    config_file_path = os.path.join(project_dir, "great_expectations.yml")
+    config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
     assert os.path.exists(config_file_path)
 
-    runner = CliRunner(mix_stderr=False)
-
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"--v3-api suite list",
         catch_exceptions=False,
     )
-    output = result.output
     assert result.exit_code == 0
-    assert "3 Expectation Suites found:" in output
-    assert "a.warning" in output
-    assert "b.warning" in output
-    assert "c.warning" in output
+
+    stdout: str = result.stdout
+
+    assert "3 Expectation Suites found:" in stdout
+    assert "a.warning" in stdout
+    assert "b.warning" in stdout
+    assert "c.warning" in stdout
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1043,11 +1036,11 @@ def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context
 def test_suite_delete_with_zero_suites(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context = empty_data_context_stats_enabled
-    runner = CliRunner(mix_stderr=False)
+    context: DataContext = empty_data_context_stats_enabled
+    runner: CliRunner = CliRunner(mix_stderr=False)
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete not_a_suite",
         catch_exceptions=False,
@@ -1060,7 +1053,13 @@ def test_suite_delete_with_zero_suites(
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"cli_version": "v3"},
+                "success": False,
+            }
+        ),
     ]
 
     assert_no_logging_messages_or_tracebacks(
@@ -1069,25 +1068,20 @@ def test_suite_delete_with_zero_suites(
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_delete_with_non_existent_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context = empty_data_context_stats_enabled
-    suite = context.create_expectation_suite("foo")
+    context: DataContext = empty_data_context_stats_enabled
+    suite: ExpectationSuite = context.create_expectation_suite("foo")
     context.save_expectation_suite(suite)
     mock_emit.reset_mock()
 
-    runner = CliRunner(mix_stderr=False)
+    runner: CliRunner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete not_a_suite",
         catch_exceptions=False,
@@ -1100,7 +1094,13 @@ def test_suite_delete_with_non_existent_suite(
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"cli_version": "v3"},
+                "success": False,
+            }
+        ),
     ]
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1108,30 +1108,25 @@ def test_suite_delete_with_non_existent_suite(
     )
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_delete_with_one_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    project_dir = empty_data_context_stats_enabled.root_directory
-    context = DataContext(project_dir)
-    suite = context.create_expectation_suite("a.warning")
+    project_dir: str = empty_data_context_stats_enabled.root_directory
+    context: DataContext = DataContext(context_root_dir=project_dir)
+    suite: ExpectationSuite = context.create_expectation_suite("a.warning")
     context.save_expectation_suite(suite)
     mock_emit.reset_mock()
 
-    suite_dir = os.path.join(project_dir, "expectations", "a")
-    suite_path = os.path.join(suite_dir, "warning.json")
+    suite_dir: str = os.path.join(project_dir, "expectations", "a")
+    suite_path: str = os.path.join(suite_dir, "warning.json")
     assert os.path.isfile(suite_path)
 
-    runner = CliRunner(mix_stderr=False)
+    runner: CliRunner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete a.warning",
         catch_exceptions=False,
@@ -1139,7 +1134,6 @@ def test_suite_delete_with_one_suite(
     assert result.exit_code == 0
     assert "Deleted the expectation suite named: a.warning" in result.output
 
-    # assert not os.path.isdir(suite_dir)
     assert not os.path.isfile(suite_path)
 
     assert mock_emit.call_count == 2
@@ -1147,7 +1141,13 @@ def test_suite_delete_with_one_suite(
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": True}),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"cli_version": "v3"},
+                "success": True,
+            }
+        ),
     ]
 
     assert_no_logging_messages_or_tracebacks(

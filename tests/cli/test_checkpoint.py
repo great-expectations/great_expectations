@@ -109,8 +109,9 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
 
     assert mock_emit.call_count == 2
@@ -160,8 +161,9 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
         input="n\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert 'The checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
 
     assert mock_emit.call_count == 1
@@ -201,8 +203,9 @@ def test_checkpoint_list_with_no_checkpoints(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "No checkpoints found." in stdout
     assert "Use the command `great_expectations checkpoint new` to create one" in stdout
 
@@ -240,8 +243,9 @@ def test_checkpoint_list_with_single_checkpoint(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "Found 1 checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
@@ -282,9 +286,11 @@ def test_checkpoint_list_with_eight_checkpoints(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "Found 8 checkpoints." in stdout
+
     checkpoint_names_list: List[str] = [
         "my_simple_checkpoint_with_slack_and_notify_with_all",
         "my_nested_checkpoint_template_1",
@@ -660,8 +666,9 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
         f"--v3-api checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
@@ -709,9 +716,9 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
         f"--v3-api checkpoint run my_nested_checkpoint_template_1",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    stdout: str = result.stdout
     assert "expectation_suite suite_from_template_1 not found" in stdout
 
     assert mock_emit.call_count == 2
@@ -807,8 +814,9 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         f"--v3-api checkpoint run bad_batch",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
 
     # TODO: <Alex>ALEX -- Investigate how to make Abe's suggestion a reality.</Alex>
     # Note: Abe : 2020/09: This was a better error message, but it should live in DataContext.get_batch, not a random CLI method.
@@ -920,9 +928,9 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         f"--v3-api checkpoint run no_suite",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    stdout: str = result.stdout
     assert "Exception occurred while running checkpoint" in stdout
     assert (
         "of checkpoint 'no_suite': validation expectation_suite_name must be specified"
@@ -1006,9 +1014,9 @@ def test_checkpoint_run_on_non_existent_validations(
         f"--v3-api checkpoint run no_validations",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    stdout: str = result.stdout
     assert "Checkpoint 'no_validations' does not contain any validations." in stdout
 
     assert mock_emit.call_count == 2
@@ -1100,9 +1108,9 @@ def test_checkpoint_run_happy_path_with_successful_validation(
         f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
 
+    stdout: str = result.stdout
     assert all(
         [
             msg in stdout
@@ -1247,8 +1255,9 @@ def test_checkpoint_run_happy_path_with_failed_validation(
         f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
     assert mock_emit.call_count == 5
@@ -1382,8 +1391,9 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
         f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert "Exception occurred while running checkpoint." in stdout
 
     assert mock_emit.call_count == 4
@@ -1501,12 +1511,13 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
         f"--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
+    assert result.exit_code == 1
+
     stdout: str = result.stdout
     assert (
         "Warning! A script named run_my_v1_checkpoint.py already exists and this command will not overwrite it."
         in stdout
     )
-    assert result.exit_code == 1
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1547,8 +1558,9 @@ def test_checkpoint_script_happy_path_generates_script(
         f"--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert (
         "A python script was created that runs the checkpoint named: `my_v1_checkpoint`"
         in stdout
@@ -1662,8 +1674,8 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
         f"--v3-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
