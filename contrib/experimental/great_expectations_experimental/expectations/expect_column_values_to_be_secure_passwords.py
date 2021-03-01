@@ -194,39 +194,39 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         else:
             return f'Less than {mostly} of all values in column "{column}" are secure passwords.'
 
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "mostly", "row_condition", "condition_parser"],
-        )
-        return [
-            RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
-            )
-        ]
+    # @classmethod
+    # @renderer(renderer_type="renderer.prescriptive")
+    # @render_evaluation_parameter_string
+    # def _prescriptive_renderer(
+    #     cls,
+    #     configuration=None,
+    #     result=None,
+    #     language=None,
+    #     runtime_configuration=None,
+    #     **kwargs,
+    # ):
+    #     runtime_configuration = runtime_configuration or {}
+    #     include_column_name = runtime_configuration.get("include_column_name", True)
+    #     include_column_name = (
+    #         include_column_name if include_column_name is not None else True
+    #     )
+    #     styling = runtime_configuration.get("styling")
+    #     params = substitute_none_for_missing(
+    #         configuration.kwargs,
+    #         ["column", "mostly", "row_condition", "condition_parser"],
+    #     )
+    #     return [
+    #         RenderedStringTemplateContent(
+    #             **{
+    #                 "content_block_type": "string_template",
+    #                 "string_template": {
+    #                     "template": template_str,
+    #                     "params": params,
+    #                     "styling": styling,
+    #                 },
+    #             }
+    #         )
+    #     ]
 
     examples = [
         {
