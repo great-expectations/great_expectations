@@ -187,10 +187,12 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     ):
         column = result.expectation_config.kwargs.get("column")
         #password = result.expectation_config.kwargs.get("password")
+        mostly = "{:.2%}".format(float(configuration.kwargs.get("mostly", 1)))
+        
         if result.success:
-            return f'All values in column "{column}" are secure passwords.'
+            return f'At least {mostly} of all values in column "{column}" are secure passwords.'
         else:
-            return f'Not all values in column "{column}" are secure passwords.'
+            return f'Less than {mostly} of all values in column "{column}" are secure passwords.'
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
