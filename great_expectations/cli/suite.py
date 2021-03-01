@@ -235,7 +235,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
 @mark.cli_as_deprecation
 @suite.command(name="demo")
-def suite_demo():
+def suite_demo(ctx):
     """This command is not supported in the new API."""
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
