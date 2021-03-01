@@ -161,6 +161,13 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": True,
+        "min_length": 8,
+        "min_uppercase": 1,
+        "min_lowercase": 1,
+        "min_special": 1,
+        "min_digits": 1,
+        "max_consec_numbers": 99,
+        "max_consec_letters": 99
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
