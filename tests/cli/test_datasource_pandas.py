@@ -136,3 +136,55 @@ def test_cli_datasorce_new(caplog, monkeypatch, empty_data_context, filesystem_c
     data_source_class = datasources["mynewsource"]["data_asset_type"]["class_name"]
     assert data_source_class == "PandasDataset"
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_cli_datasource_delete_on_project_with_one_datasource(
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert "my_datasource" in [ds["name"] for ds in context.list_datasources()]
+    assert len(context.list_datasources()) == 1
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        "--v3-api datasource delete my_datasource",
+        catch_exceptions=False,
+    )
+
+    stdout = result.output
+    assert result.exit_code == 0
+    assert "Using v3 (Batch Request) API" in stdout
+    assert "Datasource deleted successfully." in stdout
+
+    # reload context from disk to see if the datasource was in fact deleted
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+    assert len(context.list_datasources()) == 0
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_cli_datasource_delete_with_non_existent_datasource_raises_error(
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert "foo" not in [ds["name"] for ds in context.list_datasources()]
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        "--v3-api datasource delete foo",
+        catch_exceptions=False,
+    )
+
+    stdout = result.output
+    assert result.exit_code == 1
+    assert "Using v3 (Batch Request) API" in stdout
+    assert "Datasource foo could not be found." in stdout

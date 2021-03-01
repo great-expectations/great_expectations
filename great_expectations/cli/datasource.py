@@ -104,20 +104,13 @@ def delete_datasource(ctx, datasource):
     try:
         context.delete_datasource(datasource)
     except ValueError:
-        cli_message(
-            "<red>{}</red>".format(
-                "Datasource {} could not be found.".format(datasource)
-            )
-        )
+        cli_message(f"<red>Datasource {datasource} could not be found.</red>")
         sys.exit(1)
     try:
         context.get_datasource(datasource)
     except ValueError:
         cli_message("<green>{}</green>".format("Datasource deleted successfully."))
-        sys.exit(1)
-    else:
-        cli_message("<red>{}</red>".format("Datasource not deleted."))
-        sys.exit(1)
+        sys.exit(0)
 
 
 @datasource.command(name="list")

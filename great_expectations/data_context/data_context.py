@@ -972,7 +972,7 @@ class BaseDataContext:
                 del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
-                raise ValueError("Datasource {} not found".format(datasource_name))
+                raise ValueError(f"Datasource {datasource_name} not found")
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -3455,7 +3455,7 @@ class DataContext(BaseDataContext):
         return new_datasource
 
     def delete_datasource(self, name: str):
-        logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
+        logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
 
         super().delete_datasource(datasource_name=name)
         self._save_project_config()
