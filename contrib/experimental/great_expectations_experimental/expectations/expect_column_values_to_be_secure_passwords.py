@@ -139,9 +139,9 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     """
 
     library_metadata = {
-        "maturity": "production",
-        "package": "great_expectations",
-        "tags": ["core expectation", "column map expectation"],
+        "maturity": "experimental",
+        "tags": ["experimental", "column map expectation"],
+        "package": "experimental_expectations",
         "contributors": [
             "@spencerhardwick",
             "@aworld1",
