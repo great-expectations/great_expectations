@@ -235,7 +235,9 @@ class RuntimeDataConnector(DataConnector):
         batch_definition: BatchDefinition,
         batch_data: Any,
     ) -> RuntimeDataBatchSpec:
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
         batch_spec["batch_data"] = batch_data
         return RuntimeDataBatchSpec(batch_spec)
 
