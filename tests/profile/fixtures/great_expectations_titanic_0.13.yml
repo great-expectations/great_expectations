@@ -25,7 +25,17 @@ datasources:
         runtime_keys:
           - an_example_key
           - another_example_key
-
+  my_spark_datasource:
+    class_name: Datasource
+    execution_engine:
+      class_name: SparkDFExecutionEngine
+    data_connectors:
+      my_data_connector:
+        module_name: great_expectations.datasource.data_connector
+        class_name: RuntimeDataConnector
+        runtime_keys:
+          - an_example_key
+          - another_example_key
 config_variables_file_path: uncommitted/config_variables.yml
 
 # The plugins_directory will be added to your python path for custom modules

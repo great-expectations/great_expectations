@@ -28,3 +28,40 @@ def titanic_data_context_modular_api(tmp_path_factory, monkeypatch):
         titanic_csv_path, str(os.path.join(context_path, "../data/Titanic.csv"))
     )
     return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture()
+def possible_expectations_set():
+    return {
+        "expect_table_columns_to_match_ordered_list",
+        "expect_table_row_count_to_be_between",
+        "expect_column_values_to_be_in_type_list",
+        "expect_column_values_to_not_be_null",
+        "expect_column_values_to_be_null",
+        "expect_column_proportion_of_unique_values_to_be_between",
+        "expect_column_min_to_be_between",
+        "expect_column_max_to_be_between",
+        "expect_column_mean_to_be_between",
+        "expect_column_median_to_be_between",
+        "expect_column_quantile_values_to_be_between",
+        "expect_column_values_to_be_in_set",
+        "expect_column_values_to_be_between",
+        "expect_column_values_to_be_unique",
+        "expect_compound_columns_to_be_unique",
+    }
+
+
+def get_set_of_columns_and_expectations_from_suite(suite):
+    """
+    Args:
+        suite: An expectation suite
+
+    Returns:
+        A tuple containing a set of columns and a set of expectations found in a suite
+    """
+    columns = {
+        i.kwargs.get("column") for i in suite.expectations if i.kwargs.get("column")
+    }
+    expectations = {i.expectation_type for i in suite.expectations}
+
+    return columns, expectations

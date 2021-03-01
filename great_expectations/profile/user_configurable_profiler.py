@@ -56,7 +56,7 @@ class UserConfigurableProfiler:
 
     def __init__(
         self,
-        dataset,
+        profile_dataset,
         excluded_expectations: list = None,
         ignored_columns: list = None,
         not_null_only: bool = False,
@@ -71,7 +71,7 @@ class UserConfigurableProfiler:
                 instantiated, if config items change, a new profiler will be needed.
         Write an entry on how to use the profiler for the GE docs site
                 Args:
-                    dataset: A GE dataset object
+                    profile_dataset: A Great Expectations Dataset or Validator object
                     excluded_expectations: A list of expectations to not include in the suite
                     ignored_columns: A list of columns for which you would like to NOT create expectations
                     not_null_only: Boolean, default False. By default, each column is evaluated for nullity. If the column
@@ -102,20 +102,20 @@ class UserConfigurableProfiler:
                         it might make the most sense to set this to "unique"
         """
         self.column_info = {}
-        self.dataset = dataset
-        assert isinstance(self.dataset, (Dataset, Validator, Batch))
+        self.profile_dataset = profile_dataset
+        assert isinstance(self.profile_dataset, (Dataset, Validator, Batch))
 
-        if isinstance(self.dataset, Batch):
-            self.dataset = Validator(
-                execution_engine=self.dataset.data.execution_engine,
-                batches=[self.dataset],
+        if isinstance(self.profile_dataset, Batch):
+            self.profile_dataset = Validator(
+                execution_engine=self.profile_dataset.data.execution_engine,
+                batches=[self.profile_dataset],
             )
-        if isinstance(dataset, Validator):
-            self.all_table_columns = dataset.get_metric(
+        if isinstance(self.profile_dataset, Validator):
+            self.all_table_columns = profile_dataset.get_metric(
                 MetricConfiguration("table.columns", dict())
             )
         else:
-            self.all_table_columns = self.dataset.get_table_columns()
+            self.all_table_columns = self.profile_dataset.get_table_columns()
 
         self.semantic_types_dict = semantic_types_dict
         assert isinstance(self.semantic_types_dict, (dict, type(None)))
@@ -151,7 +151,7 @@ class UserConfigurableProfiler:
             for column in self.primary_or_compound_key:
                 if column not in self.all_table_columns:
                     raise ValueError(
-                        f"Column {column} not found. Please ensure that this column is in the {type(dataset).__name__} "
+                        f"Column {column} not found. Please ensure that this column is in the {type(profile_dataset).__name__} "
                         f"if you would like to use it as a primary_or_compound_key."
                     )
 
@@ -162,11 +162,11 @@ class UserConfigurableProfiler:
         ]
 
         for column_name in included_columns:
-            self._add_column_cardinality_to_column_info(dataset, column_name)
-            self._add_column_type_to_column_info(dataset, column_name)
+            self._add_column_cardinality_to_column_info(profile_dataset, column_name)
+            self._add_column_type_to_column_info(profile_dataset, column_name)
 
         if self.semantic_types_dict is not None:
-            self._validate_semantic_types_dict(self.dataset)
+            self._validate_semantic_types_dict(self.profile_dataset)
             for column_name in included_columns:
                 self._add_semantic_types_by_column_from_config_to_column_info(
                     column_name
@@ -188,9 +188,9 @@ class UserConfigurableProfiler:
             An expectation suite built either with or without a semantic_types dict
 
         """
-        if len(self.dataset.get_expectation_suite().expectations) > 0:
-            suite_name = self.dataset._expectation_suite.expectation_suite_name
-            self.dataset._expectation_suite = ExpectationSuite(suite_name)
+        if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
+            suite_name = self.profile_dataset._expectation_suite.expectation_suite_name
+            self.profile_dataset._expectation_suite = ExpectationSuite(suite_name)
 
         if self.semantic_types_dict:
             return self._build_expectation_suite_from_semantic_types_dict()
@@ -209,7 +209,7 @@ class UserConfigurableProfiler:
             raise ValueError(
                 "A config with a semantic_types dict must be included in order to use this profiler."
             )
-        self._build_expectations_table(self.dataset)
+        self._build_expectations_table(self.profile_dataset)
 
         if self.value_set_threshold:
             logger.info(
@@ -221,19 +221,25 @@ class UserConfigurableProfiler:
 
         if self.primary_or_compound_key:
             self._build_expectations_primary_or_compound_key(
-                self.dataset, self.primary_or_compound_key
+                self.profile_dataset, self.primary_or_compound_key
             )
 
         for column_name, column_info in self.column_info.items():
             semantic_types = column_info.get("semantic_types")
             for semantic_type in semantic_types:
                 semantic_type_fn = self.semantic_type_functions.get(semantic_type)
-                semantic_type_fn(dataset=self.dataset, column=column_name)
+                semantic_type_fn(
+                    profile_dataset=self.profile_dataset, column=column_name
+                )
 
         for column_name in self.column_info.keys():
-            self._build_expectations_for_all_column_types(self.dataset, column_name)
+            self._build_expectations_for_all_column_types(
+                self.profile_dataset, column_name
+            )
 
-        expectation_suite = self._build_column_description_metadata(self.dataset)
+        expectation_suite = self._build_column_description_metadata(
+            self.profile_dataset
+        )
         self._display_suite_by_column(suite=expectation_suite)
         return expectation_suite
 
@@ -247,22 +253,23 @@ class UserConfigurableProfiler:
         """
         if self.primary_or_compound_key:
             self._build_expectations_primary_or_compound_key(
-                dataset=self.dataset, column_list=self.primary_or_compound_key
+                profile_dataset=self.profile_dataset,
+                column_list=self.primary_or_compound_key,
             )
-        self._build_expectations_table(dataset=self.dataset)
+        self._build_expectations_table(profile_dataset=self.profile_dataset)
         for column_name, column_info in self.column_info.items():
             data_type = column_info.get("type")
             cardinality = column_info.get("cardinality")
 
             if data_type in ("FLOAT", "INT", "NUMERIC"):
                 self._build_expectations_numeric(
-                    dataset=self.dataset,
+                    profile_dataset=self.profile_dataset,
                     column=column_name,
                 )
 
             if data_type == "DATETIME":
                 self._build_expectations_datetime(
-                    dataset=self.dataset,
+                    profile_dataset=self.profile_dataset,
                     column=column_name,
                 )
 
@@ -271,25 +278,27 @@ class UserConfigurableProfiler:
                 >= OrderedProfilerCardinality[cardinality]
             ):
                 self._build_expectations_value_set(
-                    dataset=self.dataset, column=column_name
+                    profile_dataset=self.profile_dataset, column=column_name
                 )
 
             self._build_expectations_for_all_column_types(
-                dataset=self.dataset, column=column_name
+                profile_dataset=self.profile_dataset, column=column_name
             )
 
-        expectation_suite = self._build_column_description_metadata(self.dataset)
+        expectation_suite = self._build_column_description_metadata(
+            self.profile_dataset
+        )
         self._display_suite_by_column(
             suite=expectation_suite
         )  # include in the actual profiler
         return expectation_suite
 
-    def _validate_semantic_types_dict(self, dataset):
+    def _validate_semantic_types_dict(self, profile_dataset):
         """
         Validates a semantic_types dict to ensure correct formatting, that all semantic_types are recognized, and that
         the semantic_types align with the column data types
         Args:
-            dataset: A GE dataset
+            profile_dataset: A GE dataset
             config: A config dictionary
 
         Returns:
@@ -345,11 +354,11 @@ class UserConfigurableProfiler:
                     pass
         return self.semantic_types_dict
 
-    def _add_column_type_to_column_info(self, dataset, column_name):
+    def _add_column_type_to_column_info(self, profile_dataset, column_name):
         """
         Adds the data type of a column to the column_info dictionary on self
         Args:
-            dataset: A GE dataset
+            profile_dataset: A GE dataset
             column_name: The name of the column for which to retrieve the data type
 
         Returns:
@@ -367,12 +376,12 @@ class UserConfigurableProfiler:
             self.column_info[column_name] = column_info_entry
         column_type = column_info_entry.get("type")
         if not column_type:
-            column_type = self._get_column_type(dataset, column_name)
+            column_type = self._get_column_type(profile_dataset, column_name)
             column_info_entry["type"] = column_type
 
         return column_type
 
-    def _get_column_type(self, dataset, column):
+    def _get_column_type(self, profile_dataset, column):
         """
         Determines the data type of a column by evaluating the success of `expect_column_values_to_be_in_type_list`.
         In the case of type Decimal, this data type is returned as NUMERIC, which contains the type lists for both INTs
@@ -383,7 +392,7 @@ class UserConfigurableProfiler:
         during the init of the profiler do not persist.
 
         Args:
-            dataset: A GE dataset
+            profile_dataset: A GE dataset
             column: The column for which to get the data type
 
         Returns:
@@ -394,36 +403,36 @@ class UserConfigurableProfiler:
         try:
 
             if (
-                dataset.expect_column_values_to_be_in_type_list(
+                profile_dataset.expect_column_values_to_be_in_type_list(
                     column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
                 ).success
-                and dataset.expect_column_values_to_be_in_type_list(
+                and profile_dataset.expect_column_values_to_be_in_type_list(
                     column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
                 ).success
             ):
                 type_ = "NUMERIC"
 
-            elif dataset.expect_column_values_to_be_in_type_list(
+            elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
             ).success:
                 type_ = "INT"
 
-            elif dataset.expect_column_values_to_be_in_type_list(
+            elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES))
             ).success:
                 type_ = "FLOAT"
 
-            elif dataset.expect_column_values_to_be_in_type_list(
+            elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.STRING_TYPE_NAMES))
             ).success:
                 type_ = "STRING"
 
-            elif dataset.expect_column_values_to_be_in_type_list(
+            elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.BOOLEAN_TYPE_NAMES))
             ).success:
                 type_ = "BOOLEAN"
 
-            elif dataset.expect_column_values_to_be_in_type_list(
+            elif profile_dataset.expect_column_values_to_be_in_type_list(
                 column, type_list=sorted(list(ProfilerTypeMapping.DATETIME_TYPE_NAMES))
             ).success:
                 type_ = "DATETIME"
@@ -434,13 +443,13 @@ class UserConfigurableProfiler:
             type_ = "unknown"
 
         if type_ == "NUMERIC":
-            dataset.expect_column_values_to_be_in_type_list(
+            profile_dataset.expect_column_values_to_be_in_type_list(
                 column,
                 type_list=sorted(list(ProfilerTypeMapping.INT_TYPE_NAMES))
                 + sorted(list(ProfilerTypeMapping.FLOAT_TYPE_NAMES)),
             )
 
-        dataset._expectation_suite.remove_expectation(
+        profile_dataset._expectation_suite.remove_expectation(
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_be_in_type_list",
                 kwargs={"column": column},
@@ -448,11 +457,11 @@ class UserConfigurableProfiler:
         )
         return type_
 
-    def _add_column_cardinality_to_column_info(self, dataset, column_name):
+    def _add_column_cardinality_to_column_info(self, profile_dataset, column_name):
         """
         Adds the cardinality of a column to the column_info dictionary on self
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
             column_name: The name of the column for which to add cardinality
 
         Returns:
@@ -464,16 +473,18 @@ class UserConfigurableProfiler:
             self.column_info[column_name] = column_info_entry
         column_cardinality = column_info_entry.get("cardinality")
         if not column_cardinality:
-            column_cardinality = self._get_column_cardinality(dataset, column_name)
+            column_cardinality = self._get_column_cardinality(
+                profile_dataset, column_name
+            )
             column_info_entry["cardinality"] = column_cardinality
             # remove the expectations
-            dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_unique_value_count_to_be_between",
                     kwargs={"column": column_name},
                 )
             )
-            dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_proportion_of_unique_values_to_be_between",
                     kwargs={"column": column_name},
@@ -482,12 +493,12 @@ class UserConfigurableProfiler:
 
         return column_cardinality
 
-    def _get_column_cardinality(self, dataset, column):
+    def _get_column_cardinality(self, profile_dataset, column):
         """
         Determines the cardinality of a column using the get_basic_column_cardinality method from
         OrderedProfilerCardinality
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
             column: The column for which to get cardinality
 
         Returns:
@@ -497,11 +508,11 @@ class UserConfigurableProfiler:
         pct_unique = None
 
         try:
-            num_unique = dataset.expect_column_unique_value_count_to_be_between(
+            num_unique = profile_dataset.expect_column_unique_value_count_to_be_between(
                 column, None, None
             ).result["observed_value"]
             pct_unique = (
-                dataset.expect_column_proportion_of_unique_values_to_be_between(
+                profile_dataset.expect_column_proportion_of_unique_values_to_be_between(
                     column, None, None
                 ).result["observed_value"]
             )
@@ -558,17 +569,17 @@ class UserConfigurableProfiler:
 
         return semantic_types
 
-    def _build_column_description_metadata(self, dataset):
+    def _build_column_description_metadata(self, profile_dataset):
         """
         Adds column description metadata to the suite on a Dataset object
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
 
         Returns:
             An expectation suite with column description metadata
         """
         columns = self.all_table_columns
-        expectation_suite = dataset.get_expectation_suite(
+        expectation_suite = profile_dataset.get_expectation_suite(
             suppress_warnings=True, discard_failed_expectations=False
         )
 
@@ -654,11 +665,11 @@ class UserConfigurableProfiler:
 
         return True
 
-    def _build_expectations_value_set(self, dataset, column, **kwargs):
+    def _build_expectations_value_set(self, profile_dataset, column, **kwargs):
         """
         Adds a value_set expectation for a given column
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
             column: The column for which to add an expectation
             **kwargs:
 
@@ -666,11 +677,11 @@ class UserConfigurableProfiler:
             The GE Dataset
         """
         if "expect_column_values_to_be_in_set" not in self.excluded_expectations:
-            value_set = dataset.expect_column_distinct_values_to_be_in_set(
+            value_set = profile_dataset.expect_column_distinct_values_to_be_in_set(
                 column, value_set=None, result_format="SUMMARY"
             ).result["observed_value"]
 
-            dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_distinct_values_to_be_in_set",
                     kwargs={"column": column},
@@ -678,14 +689,16 @@ class UserConfigurableProfiler:
                 match_type="domain",
             )
 
-            dataset.expect_column_values_to_be_in_set(column, value_set=value_set)
-        return dataset
+            profile_dataset.expect_column_values_to_be_in_set(
+                column, value_set=value_set
+            )
+        return profile_dataset
 
-    def _build_expectations_numeric(self, dataset, column, **kwargs):
+    def _build_expectations_numeric(self, profile_dataset, column, **kwargs):
         """
         Adds a set of numeric expectations for a given column
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
             column: The column for which to add expectations
             **kwargs:
 
@@ -695,19 +708,19 @@ class UserConfigurableProfiler:
 
         # min
         if "expect_column_min_to_be_between" not in self.excluded_expectations:
-            observed_min = dataset.expect_column_min_to_be_between(
+            observed_min = profile_dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not self._is_nan(observed_min):
 
-                dataset.expect_column_min_to_be_between(
+                profile_dataset.expect_column_min_to_be_between(
                     column,
                     min_value=observed_min,
                     max_value=observed_min,
                 )
 
             else:
-                dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_min_to_be_between",
                         kwargs={"column": column},
@@ -720,18 +733,18 @@ class UserConfigurableProfiler:
 
         # max
         if "expect_column_max_to_be_between" not in self.excluded_expectations:
-            observed_max = dataset.expect_column_max_to_be_between(
+            observed_max = profile_dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not self._is_nan(observed_max):
-                dataset.expect_column_max_to_be_between(
+                profile_dataset.expect_column_max_to_be_between(
                     column,
                     min_value=observed_max,
                     max_value=observed_max,
                 )
 
             else:
-                dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_max_to_be_between",
                         kwargs={"column": column},
@@ -744,18 +757,18 @@ class UserConfigurableProfiler:
 
         # mean
         if "expect_column_mean_to_be_between" not in self.excluded_expectations:
-            observed_mean = dataset.expect_column_mean_to_be_between(
+            observed_mean = profile_dataset.expect_column_mean_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not self._is_nan(observed_mean):
-                dataset.expect_column_mean_to_be_between(
+                profile_dataset.expect_column_mean_to_be_between(
                     column,
                     min_value=observed_mean,
                     max_value=observed_mean,
                 )
 
             else:
-                dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_mean_to_be_between",
                         kwargs={"column": column},
@@ -768,19 +781,19 @@ class UserConfigurableProfiler:
 
         # median
         if "expect_column_median_to_be_between" not in self.excluded_expectations:
-            observed_median = dataset.expect_column_median_to_be_between(
+            observed_median = profile_dataset.expect_column_median_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if not self._is_nan(observed_median):
 
-                dataset.expect_column_median_to_be_between(
+                profile_dataset.expect_column_median_to_be_between(
                     column,
                     min_value=observed_median,
                     max_value=observed_median,
                 )
 
             else:
-                dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_median_to_be_between",
                         kwargs={"column": column},
@@ -791,53 +804,51 @@ class UserConfigurableProfiler:
                     f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
                 )
 
-        # quantile values
-        # if (
-        #     "expect_column_quantile_values_to_be_between"
-        #     not in self.excluded_expectations
-        # ) and isinstance(dataset, Dataset):
         if (
             "expect_column_quantile_values_to_be_between"
             not in self.excluded_expectations
         ):
-            if isinstance(dataset, PandasDataset):
-                if isinstance(dataset, PandasDataset):
+            if isinstance(profile_dataset, Dataset):
+                if isinstance(profile_dataset, PandasDataset):
                     allow_relative_error = "lower"
                 else:
-                    allow_relative_error = dataset.attempt_allowing_relative_error()
-            elif isinstance(dataset, Validator):
-                if isinstance(dataset.execution_engine, PandasExecutionEngine):
-                    allow_relative_error = "lower"
-                if isinstance(dataset.execution_engine, SparkDFExecutionEngine):
-                    allow_relative_error = 0.0
-                if isinstance(dataset.execution_engine, SqlAlchemyExecutionEngine):
                     allow_relative_error = (
-                        attempt_allowing_relative_error(
-                            dataset.execution_engine.drivername
-                        )
-                        or True
+                        profile_dataset.attempt_allowing_relative_error()
+                    )
+            elif isinstance(profile_dataset, Validator):
+                if isinstance(profile_dataset.execution_engine, PandasExecutionEngine):
+                    allow_relative_error = "lower"
+                if isinstance(profile_dataset.execution_engine, SparkDFExecutionEngine):
+                    allow_relative_error = 0.0
+                if isinstance(
+                    profile_dataset.execution_engine, SqlAlchemyExecutionEngine
+                ):
+                    allow_relative_error = attempt_allowing_relative_error(
+                        profile_dataset.execution_engine.engine.dialect
                     )
 
-            quantile_result = dataset.expect_column_quantile_values_to_be_between(
-                column,
-                quantile_ranges={
-                    "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                    "value_ranges": [
-                        [None, None],
-                        [None, None],
-                        [None, None],
-                        [None, None],
-                        [None, None],
-                    ],
-                },
-                allow_relative_error=allow_relative_error,
-                result_format="SUMMARY",
+            quantile_result = (
+                profile_dataset.expect_column_quantile_values_to_be_between(
+                    column,
+                    quantile_ranges={
+                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                        "value_ranges": [
+                            [None, None],
+                            [None, None],
+                            [None, None],
+                            [None, None],
+                            [None, None],
+                        ],
+                    },
+                    allow_relative_error=allow_relative_error,
+                    result_format="SUMMARY",
+                )
             )
             if quantile_result.exception_info and (
                 quantile_result.exception_info["exception_traceback"]
                 or quantile_result.exception_info["exception_message"]
             ):
-                dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_quantile_values_to_be_between",
                         kwargs={"column": column},
@@ -848,7 +859,7 @@ class UserConfigurableProfiler:
                 logger.debug(quantile_result.exception_info["exception_message"])
             else:
 
-                dataset.expect_column_quantile_values_to_be_between(
+                profile_dataset.expect_column_quantile_values_to_be_between(
                     column,
                     quantile_ranges={
                         "quantiles": quantile_result.result["observed_value"][
@@ -861,15 +872,15 @@ class UserConfigurableProfiler:
                     },
                     allow_relative_error=allow_relative_error,
                 )
-        return dataset
+        return profile_dataset
 
     def _build_expectations_primary_or_compound_key(
-        self, dataset, column_list, **kwargs
+        self, profile_dataset, column_list, **kwargs
     ):
         """
         Adds a uniqueness expectation for a given column or set of columns
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
             column_list: A list containing one or more columns for which to add a uniqueness expectation
             **kwargs:
 
@@ -881,7 +892,7 @@ class UserConfigurableProfiler:
             len(column_list) > 1
             and "expect_compound_columns_to_be_unique" not in self.excluded_expectations
         ):
-            dataset.expect_compound_columns_to_be_unique(column_list)
+            profile_dataset.expect_compound_columns_to_be_unique(column_list)
         elif len(column_list) < 1:
             raise ValueError(
                 "When specifying a primary or compound key, column_list must not be empty"
@@ -889,16 +900,16 @@ class UserConfigurableProfiler:
         else:
             [column] = column_list
             if "expect_column_values_to_be_unique" not in self.excluded_expectations:
-                dataset.expect_column_values_to_be_unique(column)
-        return dataset
+                profile_dataset.expect_column_values_to_be_unique(column)
+        return profile_dataset
 
-    def _build_expectations_string(self, dataset, column, **kwargs):
+    def _build_expectations_string(self, profile_dataset, column, **kwargs):
         """
         Adds a set of string expectations for a given column. Currently does not do anything.
         With the 0.12 API there isn't a quick way to introspect for value_lengths - if we did that, we could build a
         potentially useful value_lengths expectation here.
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
             column: The column for which to add expectations
             **kwargs:
 
@@ -912,13 +923,13 @@ class UserConfigurableProfiler:
         ):
 
             pass
-        return dataset
+        return profile_dataset
 
-    def _build_expectations_datetime(self, dataset, column, **kwargs):
+    def _build_expectations_datetime(self, profile_dataset, column, **kwargs):
         """
         Adds `expect_column_values_to_be_between` for a given column
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
             column: The column for which to add the expectation
             **kwargs:
 
@@ -927,11 +938,12 @@ class UserConfigurableProfiler:
         """
 
         if "expect_column_values_to_be_between" not in self.excluded_expectations:
-            min_value = dataset.expect_column_min_to_be_between(
+            min_value = profile_dataset.expect_column_min_to_be_between(
                 column,
                 min_value=None,
                 max_value=None,
                 result_format="SUMMARY",
+                parse_strings_as_datetimes=True,
             ).result["observed_value"]
 
             if min_value is not None:
@@ -940,7 +952,7 @@ class UserConfigurableProfiler:
                 except TypeError:
                     pass
 
-            dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_min_to_be_between",
                     kwargs={"column": column},
@@ -948,11 +960,12 @@ class UserConfigurableProfiler:
                 match_type="domain",
             )
 
-            max_value = dataset.expect_column_max_to_be_between(
+            max_value = profile_dataset.expect_column_max_to_be_between(
                 column,
                 min_value=None,
                 max_value=None,
                 result_format="SUMMARY",
+                parse_strings_as_datetimes=True,
             ).result["observed_value"]
             if max_value is not None:
                 try:
@@ -960,7 +973,7 @@ class UserConfigurableProfiler:
                 except TypeError:
                     pass
 
-            dataset._expectation_suite.remove_expectation(
+            profile_dataset._expectation_suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_max_to_be_between",
                     kwargs={"column": column},
@@ -968,21 +981,24 @@ class UserConfigurableProfiler:
                 match_type="domain",
             )
             if min_value is not None or max_value is not None:
-                dataset.expect_column_values_to_be_between(
+                profile_dataset.expect_column_values_to_be_between(
                     column,
                     min_value=min_value,
                     max_value=max_value,
+                    parse_strings_as_datetimes=True,
                 )
-        return dataset
+        return profile_dataset
 
-    def _build_expectations_for_all_column_types(self, dataset, column, **kwargs):
+    def _build_expectations_for_all_column_types(
+        self, profile_dataset, column, **kwargs
+    ):
         """
         Adds these expectations for all included columns irrespective of type. Includes:
             - `expect_column_values_to_not_be_null` (or `expect_column_values_to_be_null`)
             - `expect_column_proportion_of_unique_values_to_be_between`
             - `expect_column_values_to_be_in_type_list`
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
             column: The column for which to add the expectations
             **kwargs:
 
@@ -990,12 +1006,14 @@ class UserConfigurableProfiler:
             The GE Dataset
         """
         if "expect_column_values_to_not_be_null" not in self.excluded_expectations:
-            not_null_result = dataset.expect_column_values_to_not_be_null(column)
+            not_null_result = profile_dataset.expect_column_values_to_not_be_null(
+                column
+            )
             if not not_null_result.success:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
                 if unexpected_percent >= 50 and not self.not_null_only:
                     potential_mostly_value = unexpected_percent / 100.0
-                    dataset._expectation_suite.remove_expectation(
+                    profile_dataset._expectation_suite.remove_expectation(
                         ExpectationConfiguration(
                             expectation_type="expect_column_values_to_not_be_null",
                             kwargs={"column": column},
@@ -1006,13 +1024,13 @@ class UserConfigurableProfiler:
                         "expect_column_values_to_be_null"
                         not in self.excluded_expectations
                     ):
-                        dataset.expect_column_values_to_be_null(
+                        profile_dataset.expect_column_values_to_be_null(
                             column, mostly=potential_mostly_value
                         )
                 else:
                     potential_mostly_value = (100.0 - unexpected_percent) / 100.0
                     safe_mostly_value = round(max(0.001, potential_mostly_value), 3)
-                    dataset.expect_column_values_to_not_be_null(
+                    profile_dataset.expect_column_values_to_not_be_null(
                         column, mostly=safe_mostly_value
                     )
         if (
@@ -1020,17 +1038,17 @@ class UserConfigurableProfiler:
             not in self.excluded_expectations
         ):
             pct_unique = (
-                dataset.expect_column_proportion_of_unique_values_to_be_between(
+                profile_dataset.expect_column_proportion_of_unique_values_to_be_between(
                     column, None, None
                 ).result["observed_value"]
             )
 
             if not self._is_nan(pct_unique):
-                dataset.expect_column_proportion_of_unique_values_to_be_between(
+                profile_dataset.expect_column_proportion_of_unique_values_to_be_between(
                     column, min_value=pct_unique, max_value=pct_unique
                 )
             else:
-                dataset._expectation_suite.remove_expectation(
+                profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_proportion_of_unique_values_to_be_between",
                         kwargs={"column": column},
@@ -1046,7 +1064,7 @@ class UserConfigurableProfiler:
             col_type = self.column_info.get(column).get("type")
             if col_type != "UNKNOWN":
                 type_list = profiler_data_types_with_mapping.get(col_type)
-                dataset.expect_column_values_to_be_in_type_list(
+                profile_dataset.expect_column_values_to_be_in_type_list(
                     column, type_list=type_list
                 )
             else:
@@ -1055,11 +1073,11 @@ class UserConfigurableProfiler:
                     f"Skipping expect_column_values_to_be_in_type_list for this column."
                 )
 
-    def _build_expectations_table(self, dataset, **kwargs):
+    def _build_expectations_table(self, profile_dataset, **kwargs):
         """
         Adds two table level expectations to the dataset
         Args:
-            dataset: A GE Dataset
+            profile_dataset: A GE Dataset
             **kwargs:
 
         Returns:
@@ -1071,16 +1089,16 @@ class UserConfigurableProfiler:
             not in self.excluded_expectations
         ):
             columns = self.all_table_columns
-            dataset.expect_table_columns_to_match_ordered_list(columns)
+            profile_dataset.expect_table_columns_to_match_ordered_list(columns)
 
         if "expect_table_row_count_to_be_between" not in self.excluded_expectations:
-            row_count = dataset.expect_table_row_count_to_be_between(
+            row_count = profile_dataset.expect_table_row_count_to_be_between(
                 min_value=0, max_value=None
             ).result["observed_value"]
             min_value = max(0, int(row_count))
             max_value = int(row_count)
 
-            dataset.expect_table_row_count_to_be_between(
+            profile_dataset.expect_table_row_count_to_be_between(
                 min_value=min_value, max_value=max_value
             )
 

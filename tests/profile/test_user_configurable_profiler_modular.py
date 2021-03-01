@@ -1,10 +1,13 @@
+import datetime
+
+import dateutil
 import pandas as pd
 import pytest
+from pyspark import SparkContext, SQLContext
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.dataset import PandasDataset
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
     profiler_semantic_types,
@@ -12,6 +15,8 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
+from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
+from tests.test_utils import _build_sa_validator_with_data
 
 
 def get_pandas_runtime_validator(context, df):
@@ -39,6 +44,41 @@ def get_pandas_runtime_validator(context, df):
     return validator
 
 
+def get_spark_runtime_validator(context, df):
+    sc = SparkContext.getOrCreate()
+    sqlCtx = SQLContext(sc)
+    sdf = sqlCtx.createDataFrame(df)
+    batch_request = BatchRequest(
+        datasource_name="my_spark_datasource",
+        data_connector_name="my_data_connector",
+        batch_data=sdf,
+        data_asset_name="IN_MEMORY_DATA_ASSET",
+        partition_request={
+            "partition_identifiers": {
+                "an_example_key": "a",
+                "another_example_key": "b",
+            }
+        },
+    )
+
+    expectation_suite = context.create_expectation_suite(
+        "my_suite", overwrite_existing=True
+    )
+
+    validator = context.get_validator(
+        batch_request=batch_request, expectation_suite=expectation_suite
+    )
+
+    return validator
+
+
+def get_sqlalchemy_runtime_validator(df):
+
+    validator = _build_sa_validator_with_data(df, "postgresql")
+
+    return validator
+
+
 @pytest.fixture
 def titanic_validator(titanic_data_context_modular_api):
     """
@@ -51,7 +91,24 @@ def titanic_validator(titanic_data_context_modular_api):
 
 
 @pytest.fixture
-def taxi_validator(titanic_data_context_modular_api):
+def taxi_validator_pandas(titanic_data_context_modular_api):
+    """
+    What does this test do and why?
+    Ensures that all available expectation types work as expected
+    """
+
+    df = ge.read_csv(
+        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv"),
+        # parse_dates=['pickup_datetime', 'dropoff_datetime'],
+    )
+
+    # df = df[["pickup_datetime"]]
+    # df['dropoff_datetime'] = df["dropoff_datetime"].apply(lambda x: dateutil.parser.parse(x))
+    return get_pandas_runtime_validator(titanic_data_context_modular_api, df)
+
+
+@pytest.fixture
+def taxi_validator_spark(titanic_data_context_modular_api):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
@@ -59,7 +116,19 @@ def taxi_validator(titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv")
     )
-    return get_pandas_runtime_validator(titanic_data_context_modular_api, df)
+    return get_spark_runtime_validator(titanic_data_context_modular_api, df)
+
+
+@pytest.fixture
+def taxi_validator_sqlalchemy(titanic_data_context_modular_api):
+    """
+    What does this test do and why?
+    Ensures that all available expectation types work as expected
+    """
+    df = ge.read_csv(
+        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv")
+    )
+    return get_sqlalchemy_runtime_validator(df)
 
 
 @pytest.fixture
@@ -83,43 +152,6 @@ def cardinality_validator(titanic_data_context_modular_api):
         }
     )
     return get_pandas_runtime_validator(titanic_data_context_modular_api, df)
-
-
-@pytest.fixture()
-def possible_expectations_set():
-    return {
-        "expect_table_columns_to_match_ordered_list",
-        "expect_table_row_count_to_be_between",
-        "expect_column_values_to_be_in_type_list",
-        "expect_column_values_to_not_be_null",
-        "expect_column_values_to_be_null",
-        "expect_column_proportion_of_unique_values_to_be_between",
-        "expect_column_min_to_be_between",
-        "expect_column_max_to_be_between",
-        "expect_column_mean_to_be_between",
-        "expect_column_median_to_be_between",
-        "expect_column_quantile_values_to_be_between",
-        "expect_column_values_to_be_in_set",
-        "expect_column_values_to_be_between",
-        "expect_column_values_to_be_unique",
-        "expect_compound_columns_to_be_unique",
-    }
-
-
-def get_set_of_columns_and_expectations_from_suite(suite):
-    """
-    Args:
-        suite: An expectation suite
-
-    Returns:
-        A tuple containing a set of columns and a set of expectations found in a suite
-    """
-    columns = {
-        i.kwargs.get("column") for i in suite.expectations if i.kwargs.get("column")
-    }
-    expectations = {i.expectation_type for i in suite.expectations}
-
-    return columns, expectations
 
 
 def test_profiler_init_no_config(
@@ -483,12 +515,153 @@ def test_profiled_dataset_passes_own_validation(
     assert results["success"]
 
 
-def test_profiler_all_expectation_types(
-    titanic_data_context_modular_api, taxi_validator, possible_expectations_set
+def test_column_cardinality_functions(cardinality_validator):
+    profiler = UserConfigurableProfiler(cardinality_validator)
+    # assert profiler.column_info.get("col_none").get("cardinality") == "NONE"
+    assert profiler.column_info.get("col_one").get("cardinality") == "ONE"
+    assert profiler.column_info.get("col_two").get("cardinality") == "TWO"
+    assert profiler.column_info.get("col_very_few").get("cardinality") == "VERY_FEW"
+    assert profiler.column_info.get("col_few").get("cardinality") == "FEW"
+    assert profiler.column_info.get("col_many").get("cardinality") == "MANY"
+    assert profiler.column_info.get("col_very_many").get("cardinality") == "VERY_MANY"
+
+    cardinality_with_ten_num_and_no_pct = (
+        OrderedProfilerCardinality.get_basic_column_cardinality(num_unique=10)
+    )
+    assert cardinality_with_ten_num_and_no_pct.name == "VERY_FEW"
+
+    cardinality_with_unique_pct_and_no_num = (
+        OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=1.0)
+    )
+    assert cardinality_with_unique_pct_and_no_num.name == "UNIQUE"
+
+    cardinality_with_no_pct_and_no_num = (
+        OrderedProfilerCardinality.get_basic_column_cardinality()
+    )
+    assert cardinality_with_no_pct_and_no_num.name == "NONE"
+
+    cardinality_with_large_pct_and_no_num = (
+        OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=0.5)
+    )
+    assert cardinality_with_large_pct_and_no_num.name == "NONE"
+
+
+def test_profiler_all_expectation_types_pandas(
+    titanic_data_context_modular_api, taxi_validator_pandas, possible_expectations_set
 ):
     """
     What does this test do and why?
-    Ensures that all available expectation types work as expected
+    Ensures that all available expectation types work as expected for pandas
+    """
+    context = titanic_data_context_modular_api
+
+    ignored_columns = [
+        "pickup_location_id",
+        "dropoff_location_id",
+        "fare_amount",
+        "extra",
+        "mta_tax",
+        "tip_amount",
+        "tolls_amount",
+        "improvement_surcharge",
+        "congestion_surcharge",
+    ]
+    semantic_types = {
+        # TODO: Add test for datetime columns
+        "datetime": ["pickup_datetime", "dropoff_datetime"],
+        "numeric": ["total_amount", "passenger_count"],
+        "value_set": [
+            "payment_type",
+            "rate_code_id",
+            "store_and_fwd_flag",
+            "passenger_count",
+        ],
+        "boolean": ["store_and_fwd_flag"],
+    }
+
+    profiler = UserConfigurableProfiler(
+        taxi_validator_pandas,
+        semantic_types_dict=semantic_types,
+        ignored_columns=ignored_columns,
+        # TODO: Add primary_or_compound_key test
+        #  primary_or_compound_key=[
+        #     "vendor_id",
+        #     "pickup_datetime",
+        #     "dropoff_datetime",
+        #     "trip_distance",
+        #     "pickup_location_id",
+        #     "dropoff_location_id",
+        #  ],
+    )
+
+    assert profiler.column_info.get("rate_code_id")
+    suite = profiler.build_suite()
+    assert len(suite.expectations) == 45
+    (
+        columns_with_expectations,
+        expectations_from_suite,
+    ) = get_set_of_columns_and_expectations_from_suite(suite)
+
+    unexpected_expectations = {
+        "expect_column_values_to_be_unique",
+        "expect_column_values_to_be_null",
+        "expect_compound_columns_to_be_unique",
+    }
+    assert expectations_from_suite == {
+        i for i in possible_expectations_set if i not in unexpected_expectations
+    }
+
+    ignored_included_columns_overlap = [
+        i for i in columns_with_expectations if i in ignored_columns
+    ]
+    assert len(ignored_included_columns_overlap) == 0
+
+    results = context.run_validation_operator(
+        "action_list_operator", assets_to_validate=[taxi_validator_pandas]
+    )
+
+    assert results["success"]
+
+
+def test_something_new(
+    titanic_data_context_modular_api, taxi_validator_pandas, possible_expectations_set
+):
+    """
+    What does this test do and why?
+    Ensures that all available expectation types work as expected for pandas
+    """
+    context = titanic_data_context_modular_api
+
+    semantic_types = {
+        # TODO: Add test for datetime columns
+        "datetime": ["pickup_datetime", "dropoff_datetime"],
+    }
+
+    profiler = UserConfigurableProfiler(
+        taxi_validator_pandas,
+        semantic_types_dict=semantic_types,
+        # TODO: Add primary_or_compound_key test
+        #  primary_or_compound_key=[
+        #     "vendor_id",
+        #     "pickup_datetime",
+        #     "dropoff_datetime",
+        #     "trip_distance",
+        #     "pickup_location_id",
+        #     "dropoff_location_id",
+        #  ],
+    )
+
+    suite = profiler.build_suite()
+
+    print(suite)
+
+
+def test_profiler_all_expectation_types_spark(
+    titanic_data_context_modular_api, taxi_validator_spark, possible_expectations_set
+):
+    """
+    What does this test do and why?
+    Ensures that all available expectation types work as expected for spark
     """
     context = titanic_data_context_modular_api
 
@@ -517,7 +690,7 @@ def test_profiler_all_expectation_types(
     }
 
     profiler = UserConfigurableProfiler(
-        taxi_validator,
+        taxi_validator_spark,
         semantic_types_dict=semantic_types,
         ignored_columns=ignored_columns,
         # TODO: Add primary_or_compound_key test
@@ -555,38 +728,86 @@ def test_profiler_all_expectation_types(
     assert len(ignored_included_columns_overlap) == 0
 
     results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator]
+        "action_list_operator", assets_to_validate=[taxi_validator_spark]
     )
 
     assert results["success"]
 
 
-def test_column_cardinality_functions(cardinality_validator):
-    profiler = UserConfigurableProfiler(cardinality_validator)
-    # assert profiler.column_info.get("col_none").get("cardinality") == "NONE"
-    assert profiler.column_info.get("col_one").get("cardinality") == "ONE"
-    assert profiler.column_info.get("col_two").get("cardinality") == "TWO"
-    assert profiler.column_info.get("col_very_few").get("cardinality") == "VERY_FEW"
-    assert profiler.column_info.get("col_few").get("cardinality") == "FEW"
-    assert profiler.column_info.get("col_many").get("cardinality") == "MANY"
-    assert profiler.column_info.get("col_very_many").get("cardinality") == "VERY_MANY"
+def test_profiler_all_expectation_types_sqlalchemy(
+    titanic_data_context_modular_api,
+    taxi_validator_sqlalchemy,
+    possible_expectations_set,
+):
+    """
+    What does this test do and why?
+    Ensures that all available expectation types work as expected for spark
+    """
+    context = titanic_data_context_modular_api
 
-    cardinality_with_ten_num_and_no_pct = (
-        OrderedProfilerCardinality.get_basic_column_cardinality(num_unique=10)
-    )
-    assert cardinality_with_ten_num_and_no_pct.name == "VERY_FEW"
+    ignored_columns = [
+        "pickup_location_id",
+        "dropoff_location_id",
+        "fare_amount",
+        "extra",
+        "mta_tax",
+        "tip_amount",
+        "tolls_amount",
+        "improvement_surcharge",
+        "congestion_surcharge",
+    ]
+    semantic_types = {
+        "datetime": ["pickup_datetime", "dropoff_datetime"],
+        "numeric": ["total_amount", "passenger_count"],
+        "value_set": [
+            "payment_type",
+            "rate_code_id",
+            "store_and_fwd_flag",
+            "passenger_count",
+        ],
+        "boolean": ["store_and_fwd_flag"],
+    }
 
-    cardinality_with_unique_pct_and_no_num = (
-        OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=1.0)
+    profiler = UserConfigurableProfiler(
+        taxi_validator_sqlalchemy,
+        semantic_types_dict=semantic_types,
+        ignored_columns=ignored_columns,
+        # TODO: Add primary_or_compound_key test
+        #  primary_or_compound_key=[
+        #     "vendor_id",
+        #     "pickup_datetime",
+        #     "dropoff_datetime",
+        #     "trip_distance",
+        #     "pickup_location_id",
+        #     "dropoff_location_id",
+        #  ],
     )
-    assert cardinality_with_unique_pct_and_no_num.name == "UNIQUE"
 
-    cardinality_with_no_pct_and_no_num = (
-        OrderedProfilerCardinality.get_basic_column_cardinality()
-    )
-    assert cardinality_with_no_pct_and_no_num.name == "NONE"
+    assert profiler.column_info.get("rate_code_id")
+    suite = profiler.build_suite()
+    assert len(suite.expectations) == 43
+    (
+        columns_with_expectations,
+        expectations_from_suite,
+    ) = get_set_of_columns_and_expectations_from_suite(suite)
 
-    cardinality_with_large_pct_and_no_num = (
-        OrderedProfilerCardinality.get_basic_column_cardinality(pct_unique=0.5)
+    unexpected_expectations = {
+        "expect_column_values_to_be_unique",
+        "expect_column_values_to_be_null",
+        "expect_compound_columns_to_be_unique",
+        "expect_column_values_to_be_between",
+    }
+    assert expectations_from_suite == {
+        i for i in possible_expectations_set if i not in unexpected_expectations
+    }
+
+    ignored_included_columns_overlap = [
+        i for i in columns_with_expectations if i in ignored_columns
+    ]
+    assert len(ignored_included_columns_overlap) == 0
+
+    results = context.run_validation_operator(
+        "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
     )
-    assert cardinality_with_large_pct_and_no_num.name == "NONE"
+
+    assert results["success"]
