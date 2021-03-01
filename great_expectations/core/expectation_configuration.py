@@ -786,7 +786,12 @@ class ExpectationConfiguration(SerializableDictDot):
         },
         "expect_file_line_regex_match_count_to_be_between": {
             "domain_kwargs": [],
-            "success_kwargs": ["regex", "expected_min_count", "expected_max_count", "skip"],
+            "success_kwargs": [
+                "regex",
+                "expected_min_count",
+                "expected_max_count",
+                "skip",
+            ],
             "default_kwarg_values": {
                 "expected_min_count": 0,
                 "expected_max_count": None,
@@ -797,7 +802,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 "include_config": True,
                 "catch_exceptions": False,
                 "meta": None,
-                "_lines": None
+                "_lines": None,
             },
         },
         "expect_file_line_regex_match_count_to_equal": {
@@ -812,7 +817,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 "include_config": True,
                 "catch_exceptions": False,
                 "meta": None,
-                "_lines": None
+                "_lines": None,
             },
         },
         "expect_file_hash_to_equal": {
