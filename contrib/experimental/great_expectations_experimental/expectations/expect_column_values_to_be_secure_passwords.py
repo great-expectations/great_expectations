@@ -152,6 +152,14 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
 
     map_metric = "column_values.secure_password"
     success_keys = (
+        "min_length",
+        "min_uppercase",
+        "min_lowercase",
+        "min_special",
+        "min_digits",
+        "max_consec_numbers",
+        "max_consec_letters",
+        "mostly"
     )
 
     default_kwarg_values = {
