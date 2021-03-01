@@ -254,7 +254,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
                     "out": {
                         "success": False,
                         "unexpected_index_list": [0, 1, 2],
-                        "unexpected_list": [],
+                        "unexpected_list": ["AAAAAAAA", "asdf5hu!", "a!s4D"],
                     },
                 },
             ],
