@@ -94,7 +94,7 @@ def test_checkpoint_list_with_no_checkpoints_with_ge_config_v2(
         mock.call(
             {
                 "event": "cli.checkpoint.list",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": True,
             }
         ),
@@ -132,7 +132,7 @@ def test_checkpoint_list_with_single_checkpoint_with_ge_config_v2(
         mock.call(
             {
                 "event": "cli.checkpoint.list",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": True,
             }
         ),
@@ -174,7 +174,7 @@ def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
         mock.call(
             {
                 "event": "cli.checkpoint.new",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -218,7 +218,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
         mock.call(
             {
                 "event": "cli.checkpoint.new",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -266,7 +266,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
         mock.call(
             {
                 "event": "cli.checkpoint.new",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": True,
             }
         ),
@@ -367,7 +367,7 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
         mock.call(
             {
                 "event": "cli.checkpoint.new",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": True,
             }
         ),
@@ -433,7 +433,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
         mock.call(
             {
                 "event": "cli.checkpoint.new",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -474,7 +474,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v
         mock.call(
             {
                 "event": "cli.checkpoint.run",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -517,7 +517,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_
         mock.call(
             {
                 "event": "cli.checkpoint.run",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -592,7 +592,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
         mock.call(
             {
                 "event": "cli.checkpoint.run",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -661,7 +661,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
         mock.call(
             {
                 "event": "cli.checkpoint.run",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -770,7 +770,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2(
     assert usage_emits[4] == mock.call(
         {
             "event": "cli.checkpoint.run",
-            "event_payload": {},
+            "event_payload": {"cli_version": "v012"},
             "success": True,
         }
     )
@@ -822,7 +822,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
     assert usage_emits[4] == mock.call(
         {
             "event": "cli.checkpoint.run",
-            "event_payload": {},
+            "event_payload": {"cli_version": "v012"},
             "success": True,
         }
     )
@@ -864,7 +864,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
         mock.call(
             {
                 "event": "cli.checkpoint.script",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -915,7 +915,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
         mock.call(
             {
                 "event": "cli.checkpoint.script",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -971,7 +971,7 @@ def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
         mock.call(
             {
                 "event": "cli.checkpoint.script",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": True,
             }
         ),
@@ -1128,7 +1128,7 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
         mock.call(
             {
                 "event": "cli.checkpoint.new",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -1172,7 +1172,7 @@ def test_checkpoint_run_with_ge_config_3_raises_error(
         mock.call(
             {
                 "event": "cli.checkpoint.run",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
@@ -1216,7 +1216,7 @@ def test_checkpoint_script_with_ge_config_3_raises_error(
         mock.call(
             {
                 "event": "cli.checkpoint.script",
-                "event_payload": {},
+                "event_payload": {"cli_version": "v012"},
                 "success": False,
             }
         ),
