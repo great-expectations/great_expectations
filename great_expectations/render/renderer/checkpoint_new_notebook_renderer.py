@@ -3,17 +3,14 @@ from typing import Dict
 import nbformat
 
 from great_expectations import DataContext
-from great_expectations.render.renderer.suite_edit_notebook_renderer import (
-    SuiteEditNotebookRenderer,
-)
+from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 
 
-class CheckpointNewNotebookRenderer(SuiteEditNotebookRenderer):
+class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
     def __init__(self, context: DataContext, checkpoint_name: str):
         super().__init__(context=context)
         self.context = context
         self.checkpoint_name = checkpoint_name
-        self._notebook = None
 
     def _find_datasource_with_asset(self) -> Dict[str, str]:
         """
