@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from great_expectations import __version__ as ge_version
@@ -147,3 +148,24 @@ def test_valid_expectation_types(dataset, pandas_dataset):
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
     ]
+
+
+def test_custom_expectation_default_arg_values_set(
+    data_context_simple_expectation_suite_with_custom_pandas_dataset,
+):
+    # this test ensures that default arg values in custom expectations are being set properly
+    context = data_context_simple_expectation_suite_with_custom_pandas_dataset
+
+    df = pd.DataFrame({"a": [1, None, 1, 1], "b": [None, 1, 1, 1], "c": [1, 1, 1, 1]})
+
+    batch_kwargs = {
+        "data_asset_name": "multicolumn_ignore_row_if",
+        "datasource": "mycustomdatasource",
+        "dataset": df,
+    }
+    batch = context.get_batch(batch_kwargs, expectation_suite_name="default")
+    # this expectation has a declared default arg value `ignore_row_if="any_value_is_missing"`
+    # which overrides an internal default of "all_values_are_missing"
+    # can only pass if the declared default is set properly
+    result = batch.expect_column_sum_equals_3(column_list=["a", "b", "c"])
+    assert result.success
