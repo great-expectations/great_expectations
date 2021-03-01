@@ -6,7 +6,7 @@ How to populate credentials from a secrets store
 .. role:: python3(code)
    :language: python3
 
-This guide will explain how to configure your ``great_expectations.yml`` project config to substitute variables from a secrets store (AWS Secrets Manager, GCP Secrets Manager or Azure KeyVault).
+This guide will explain how to configure your ``great_expectations.yml`` project config to substitute variables from a secrets store (AWS Secrets Manager, GCP Secrets Manager or Azure Key Vault).
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -151,16 +151,16 @@ Example :
         database: secret|projects/${PROJECT_ID}/secrets/PROD_DB_CREDENTIALS_DATABASE
 
 
-Setup for Azure KeyVault
+Setup for Azure Key Vault
 ------------------------
 
-To use Azure KeyVault, you may need to install the ``great_expectations`` package with its ``azure_secrets`` extra requirement:
+To use Azure Key Vault, you may need to install the ``great_expectations`` package with its ``azure_secrets`` extra requirement:
 
 .. code-block:: bash
 
   pip install great_expectations[azure_secrets]
 
-In order to substitute your value by a secret in Azure KeyVault, you need to provide a name of the secret like this one:
+In order to substitute your value by a secret in Azure Key Vault, you need to provide a name of the secret like this one:
 ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret``
 
 You will get the latest version of the secret by default.
