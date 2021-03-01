@@ -237,6 +237,12 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 @suite.command(name="demo")
 def suite_demo():
     """This command is not supported in the new API."""
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context = toolkit.load_data_context_with_error_handling(directory)
+    usage_event = "cli.suite.delete"
+    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
     cli_message(
         "This command is not supported in the new API. Please use `suite new` instead."
     )

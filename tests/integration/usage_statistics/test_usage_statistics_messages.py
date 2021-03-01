@@ -330,7 +330,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.init.create",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:06:47.697Z",
@@ -341,7 +341,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.init.create",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:06:47.697Z",
@@ -364,7 +364,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.new",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -374,7 +374,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.new",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -396,7 +396,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.script",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -406,7 +406,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.script",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -428,7 +428,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.run",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -438,7 +438,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.run",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -460,7 +460,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.list",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -470,7 +470,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.list",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -492,7 +492,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.delete",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -502,7 +502,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.checkpoint.delete",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
@@ -524,7 +524,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.datasource.list",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T00:01:06.628Z",
@@ -534,7 +534,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.datasource.list",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T00:01:06.628Z",
@@ -556,7 +556,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.datasource.new",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T00:38:32.701Z",
@@ -566,7 +566,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.datasource.new",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T00:38:32.701Z",
@@ -588,7 +588,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.datasource.profile",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": False,
             "version": "1.0.0",
             "event_time": "2020-08-05T01:03:17.567Z",
@@ -598,7 +598,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.datasource.profile",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": False,
             "version": "1.0.0",
             "event_time": "2020-08-05T01:03:17.567Z",
@@ -620,7 +620,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.docs.build",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T00:25:27.088Z",
@@ -630,7 +630,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.docs.build",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T00:25:27.088Z",
@@ -652,7 +652,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.docs.clean",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-05T00:36:50.979Z",
@@ -662,7 +662,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.docs.clean",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-05T00:36:50.979Z",
@@ -684,7 +684,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.docs.list",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T00:20:37.828Z",
@@ -694,7 +694,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.docs.list",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T00:20:37.828Z",
@@ -717,7 +717,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.new_ds_choice",
-            "event_payload": {"type": "pandas", "cli_version": "v012"},
+            "event_payload": {"type": "pandas", "cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:08.963Z",
@@ -728,7 +728,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.new_ds_choice",
-            "event_payload": {"type": "pandas", "cli_version": "v013"},
+            "event_payload": {"type": "pandas", "cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:08.963Z",
@@ -751,7 +751,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.project.check_config",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-03T23:42:34.068Z",
@@ -761,7 +761,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.project.check_config",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-03T23:42:34.068Z",
@@ -783,7 +783,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.store.list",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-03T23:56:53.908Z",
@@ -793,7 +793,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.store.list",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-03T23:56:53.908Z",
@@ -815,7 +815,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.suite.demo",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-05T00:40:41.401Z",
@@ -825,7 +825,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.suite.demo",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-05T00:40:41.401Z",
@@ -851,7 +851,7 @@ valid_usage_statistics_messages = {
             "event": "cli.suite.edit",
             "event_payload": {
                 "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
-                "cli_version": "v012",
+                "cli_version": "v2",
             },
             "success": True,
             "version": "1.0.0",
@@ -864,7 +864,7 @@ valid_usage_statistics_messages = {
             "event": "cli.suite.edit",
             "event_payload": {
                 "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
-                "cli_version": "v013",
+                "cli_version": "v3",
             },
             "success": True,
             "version": "1.0.0",
@@ -888,7 +888,7 @@ valid_usage_statistics_messages = {
         {
             "event": "cli.suite.list",
             "version": "1.0.0",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "event_time": "2020-06-26T19:33:33.123Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
@@ -898,7 +898,7 @@ valid_usage_statistics_messages = {
         {
             "event": "cli.suite.list",
             "version": "1.0.0",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "event_time": "2020-06-26T19:33:33.123Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
@@ -925,7 +925,7 @@ valid_usage_statistics_messages = {
             "ge_version": "0.13.0.manual_testing",
             "event": "cli.suite.new",
             "success": True,
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
         },
         {
             "version": "1.0.0",
@@ -935,7 +935,7 @@ valid_usage_statistics_messages = {
             "ge_version": "0.13.0.manual_testing",
             "event": "cli.suite.new",
             "success": True,
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
         },
     ],
     "cli.suite.scaffold": [
@@ -951,7 +951,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.suite.scaffold",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-05T00:58:51.961Z",
@@ -961,7 +961,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.suite.scaffold",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-05T00:58:51.961Z",
@@ -983,7 +983,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.suite.delete",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-05T00:58:51.961Z",
@@ -993,7 +993,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.suite.delete",
-            "event_payload": {"cli_version": "v013"},
+            "event_payload": {"cli_version": "v3"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-05T00:58:51.961Z",
@@ -1015,7 +1015,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.validation_operator.list",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-03T23:32:33.635Z",
@@ -1037,7 +1037,7 @@ valid_usage_statistics_messages = {
         },
         {
             "event": "cli.validation_operator.run",
-            "event_payload": {"cli_version": "v012"},
+            "event_payload": {"cli_version": "v2"},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-03T23:33:15.664Z",
