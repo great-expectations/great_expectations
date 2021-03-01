@@ -73,7 +73,7 @@ def test_cli_command_invalid_command(caplog):
     assert ("'blarg'" in result.stderr) or ('"blarg"' in result.stderr)
 
 
-def test_cli_version(caplog):
+def test_cli_ge_version_exists(caplog):
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(cli, "--v3-api --version", catch_exceptions=False)
     assert ge_version in str(result.output)

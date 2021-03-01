@@ -235,8 +235,12 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
 @mark.cli_as_deprecation
 @suite.command(name="demo")
-def suite_demo():
+@click.pass_context
+def suite_demo(ctx):
     """This command is not supported in the new API."""
+    context = ctx.obj.data_context
+    usage_event = "cli.suite.delete"
+    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
     cli_message(
         "This command is not supported in the new API. Please use `suite new` instead."
     )
