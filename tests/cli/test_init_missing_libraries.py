@@ -260,6 +260,19 @@ def test_cli_init_db_snowflake_without_library_installed_instructs_user(
     strict=True,
 )
 @pytest.mark.skipif(
+    is_library_loadable(library_name="ibm_db_sa"),
+    reason="requires ibm_db_sa (IBM Db2 plugin) to NOT be installed",
+)
+def test_cli_init_db_ibm_db2_without_library_installed_instructs_user(
+    caplog,
+    tmp_path_factory,
+):
+    _library_not_loaded_test(
+        tmp_path_factory, "\n\n2\n6\nmy_db\nn\n", "ibm_db_sa", "ibm_db_sa", caplog
+    )
+
+
+@pytest.mark.skipif(
     is_library_loadable(library_name="pyspark"),
     reason="requires pyspark to NOT be installed",
 )
