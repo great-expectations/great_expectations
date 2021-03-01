@@ -788,37 +788,37 @@ class ExpectationConfiguration(SerializableDictDot):
         "expect_file_line_regex_match_count_to_be_between": {
             "domain_kwargs": [],
             "success_kwargs": [],
-            "default_kwarg_values": {}
+            "default_kwarg_values": {},
         },
         "expect_file_line_regex_match_count_to_equal": {
             "domain_kwargs": [],
             "success_kwargs": [],
-            "default_kwarg_values": {}
+            "default_kwarg_values": {},
         },
         "expect_file_hash_to_equal": {
             "domain_kwargs": [],
             "success_kwargs": [],
-            "default_kwarg_values": {}
+            "default_kwarg_values": {},
         },
         "expect_file_size_to_be_between": {
             "domain_kwargs": [],
             "success_kwargs": [],
-            "default_kwarg_values": {}
+            "default_kwarg_values": {},
         },
         "expect_file_to_exist": {
             "domain_kwargs": [],
             "success_kwargs": [],
-            "default_kwarg_values": {}
+            "default_kwarg_values": {},
         },
         "expect_file_to_have_valid_table_header": {
             "domain_kwargs": [],
             "success_kwargs": [],
-            "default_kwarg_values": {}
+            "default_kwarg_values": {},
         },
         "expect_file_to_be_valid_json": {
             "domain_kwargs": [],
             "success_kwargs": [],
-            "default_kwarg_values": {}
+            "default_kwarg_values": {},
         },
     }
 

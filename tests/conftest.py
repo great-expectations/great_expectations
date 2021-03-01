@@ -3401,7 +3401,9 @@ def data_context_simple_expectation_suite_with_custom_pandas_dataset(tmp_path_fa
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_basic_with_custom_pandas_dataset.yml"),
+        os.path.join(
+            fixture_dir, "great_expectations_basic_with_custom_pandas_dataset.yml"
+        ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(

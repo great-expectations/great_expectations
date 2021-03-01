@@ -1,4 +1,4 @@
-from great_expectations.dataset import PandasDataset, MetaPandasDataset
+from great_expectations.dataset import MetaPandasDataset, PandasDataset
 
 
 class CustomPandasDataset(PandasDataset):
@@ -116,9 +116,6 @@ class CustomPandasDataset(PandasDataset):
 
     @MetaPandasDataset.multicolumn_map_expectation
     def expect_column_sum_equals_3(
-            self,
-            column_list,
-            ignore_row_if='any_value_is_missing'
+        self, column_list, ignore_row_if="any_value_is_missing"
     ):
         return column_list.sum(axis=1) == 3
-
