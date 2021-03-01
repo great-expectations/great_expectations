@@ -784,6 +784,98 @@ class ExpectationConfiguration(SerializableDictDot):
                 "catch_exceptions": False,
             },
         },
+        "expect_file_line_regex_match_count_to_be_between": {
+            "domain_kwargs": [],
+            "success_kwargs": [
+                "regex",
+                "expected_min_count",
+                "expected_max_count",
+                "skip",
+            ],
+            "default_kwarg_values": {
+                "expected_min_count": 0,
+                "expected_max_count": None,
+                "skip": None,
+                "mostly": 1,
+                "nonnull_lines_regex": r"^\s*$",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "meta": None,
+                "_lines": None,
+            },
+        },
+        "expect_file_line_regex_match_count_to_equal": {
+            "domain_kwargs": [],
+            "success_kwargs": ["regex", "expected_count", "skip"],
+            "default_kwarg_values": {
+                "expected_count": 0,
+                "skip": None,
+                "mostly": 1,
+                "nonnull_lines_regex": r"^\s*$",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "meta": None,
+                "_lines": None,
+            },
+        },
+        "expect_file_hash_to_equal": {
+            "domain_kwargs": [],
+            "success_kwargs": ["value", "hash_alg"],
+            "default_kwarg_values": {
+                "hash_alg": "md5",
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "meta": None,
+            },
+        },
+        "expect_file_size_to_be_between": {
+            "domain_kwargs": [],
+            "success_kwargs": ["minsize", "maxsize"],
+            "default_kwarg_values": {
+                "minsize": 0,
+                "maxsize": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "meta": None,
+            },
+        },
+        "expect_file_to_exist": {
+            "domain_kwargs": [],
+            "success_kwargs": ["filepath"],
+            "default_kwarg_values": {
+                "filepath": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "meta": None,
+            },
+        },
+        "expect_file_to_have_valid_table_header": {
+            "domain_kwargs": [],
+            "success_kwargs": ["regex", "skip"],
+            "default_kwarg_values": {
+                "skip": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "meta": None,
+            },
+        },
+        "expect_file_to_be_valid_json": {
+            "domain_kwargs": [],
+            "success_kwargs": ["schema"],
+            "default_kwarg_values": {
+                "schema": None,
+                "result_format": "BASIC",
+                "include_config": True,
+                "catch_exceptions": False,
+                "meta": None,
+            },
+        },
     }
 
     runtime_kwargs = ["result_format", "include_config", "catch_exceptions"]
