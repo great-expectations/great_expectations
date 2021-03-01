@@ -3,9 +3,6 @@
 How to populate credentials from a secrets store
 ================================================
 
-.. role:: python3(code)
-   :language: python3
-
 This guide will explain how to configure your ``great_expectations.yml`` project config to substitute variables from a secrets store (AWS Secrets Manager, GCP Secrets Manager or Azure Key Vault).
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
