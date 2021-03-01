@@ -10,11 +10,6 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkeypatch):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
@@ -24,11 +19,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkey
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        [
-            "--v3-api",
-            "datasource",
-            "list",
-        ],
+        "--v3-api datasource list",
         catch_exceptions=False,
     )
 
@@ -49,7 +40,8 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkey
         catch_exceptions=False,
     )
     url = str(empty_sqlite_db.engine.url)
-    expected_output = """\
+    expected_output = f"""\
+\x1b[32mUsing v3 (Batch Request) API\x1b[0m\x1b[0m
 1 Datasource found:[0m
 [0m
  - [36mname:[0m wow_a_datasource[0m
@@ -59,13 +51,11 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkey
      [36mdefault:[0m[0m
        [36mclass_name:[0m TableBatchKwargsGenerator[0m
    [36mcredentials:[0m[0m
-     [36murl:[0m {}[0m
+     [36murl:[0m {url}[0m
    [36mdata_asset_type:[0m[0m
      [36mclass_name:[0m SqlAlchemyDataset[0m
      [36mmodule_name:[0m None[0m
-""".format(
-        url
-    ).strip()
+""".strip()
     stdout = result.output.strip()
 
     assert stdout == expected_output

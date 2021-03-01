@@ -124,7 +124,6 @@ def delete_datasource(ctx, datasource):
 @click.pass_context
 def datasource_list(ctx):
     """List known datasources."""
-    display_not_implemented_message_and_exit()
     context = ctx.obj.data_context
     datasources = context.list_datasources()
     datasource_count = len(datasources)

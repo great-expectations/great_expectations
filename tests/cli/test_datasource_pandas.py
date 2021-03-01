@@ -9,13 +9,9 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
-def test_cli_datasource_list(caplog, monkeypatch, empty_data_context, filesystem_csv_2):
-    """Test an empty project and after adding a single datasource."""
+def test_cli_datasource_list_on_project_with_no_datasources(
+    caplog, monkeypatch, empty_data_context, filesystem_csv_2
+):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
 
@@ -23,7 +19,7 @@ def test_cli_datasource_list(caplog, monkeypatch, empty_data_context, filesystem
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "datasource", "list"],
+        "--v3-api datasource list",
         catch_exceptions=False,
     )
 
@@ -31,66 +27,76 @@ def test_cli_datasource_list(caplog, monkeypatch, empty_data_context, filesystem
     assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
-    base_directory = str(filesystem_csv_2)
 
-    context.add_datasource(
-        "wow_a_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": base_directory,
-            }
-        },
-    )
-
-    datasources = context.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "wow_a_datasource",
-            "class_name": "PandasDatasource",
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-            "batch_kwargs_generators": {
-                "subdir_reader": {
-                    "base_directory": base_directory,
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                }
-            },
-            "module_name": "great_expectations.datasource",
-        }
-    ]
+def test_cli_datasource_list_on_project_with_one_datasource(
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    filesystem_csv_2,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    project_root_dir = context.root_directory
+    context = DataContext(project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        [
-            "--v3-api",
-            "datasource",
-            "list",
-        ],
+        "--v3-api datasource list",
         catch_exceptions=False,
     )
-    expected_output = """
+
+    base_directory = context.root_directory
+    # TODO do we want to print out all this information?
+    expected_output = f"""\x1b[32mUsing v3 (Batch Request) API[0m[0m
 1 Datasource found:[0m
 [0m
- - [36mname:[0m wow_a_datasource[0m
+ - [36mname:[0m my_datasource[0m
    [36mmodule_name:[0m great_expectations.datasource[0m
-   [36mclass_name:[0m PandasDatasource[0m
-   [36mbatch_kwargs_generators:[0m[0m
-     [36msubdir_reader:[0m[0m
-       [36mclass_name:[0m SubdirReaderBatchKwargsGenerator[0m
-       [36mbase_directory:[0m {}[0m
-   [36mdata_asset_type:[0m[0m
-     [36mmodule_name:[0m great_expectations.dataset[0m
-     [36mclass_name:[0m PandasDataset[0m""".format(
-        base_directory
-    ).strip()
+   [36mclass_name:[0m Datasource[0m
+   [36mdata_connectors:[0m[0m
+     [36mmy_basic_data_connector:[0m[0m
+       [36mmodule_name:[0m great_expectations.datasource.data_connector[0m
+       [36mclass_name:[0m InferredAssetFilesystemDataConnector[0m
+       [36mbase_directory:[0m {base_directory}/../data/titanic[0m
+       [36mdefault_regex:[0m[0m
+         [36mgroup_names:[0m ['data_asset_name'][0m
+         [36mpattern:[0m (.*)\.csv[0m
+     [36mmy_other_data_connector:[0m[0m
+       [36mmodule_name:[0m great_expectations.datasource.data_connector[0m
+       [36mclass_name:[0m ConfiguredAssetFilesystemDataConnector[0m
+       [36massets:[0m[0m
+         [36musers:[0m[0m
+           [36mmodule_name:[0m great_expectations.datasource.data_connector.asset[0m
+           [36mclass_name:[0m Asset[0m
+       [36mbase_directory:[0m {base_directory}/../data/titanic[0m
+       [36mdefault_regex:[0m[0m
+         [36mgroup_names:[0m ['name'][0m
+         [36mpattern:[0m (.+)\.csv[0m
+       [36mglob_directive:[0m *.csv[0m
+     [36mmy_runtime_data_connector:[0m[0m
+       [36mmodule_name:[0m great_expectations.datasource.data_connector[0m
+       [36mclass_name:[0m RuntimeDataConnector[0m
+       [36mruntime_keys:[0m ['pipeline_stage_name', 'airflow_run_id'][0m
+     [36mmy_special_data_connector:[0m[0m
+       [36mmodule_name:[0m great_expectations.datasource.data_connector[0m
+       [36mclass_name:[0m ConfiguredAssetFilesystemDataConnector[0m
+       [36massets:[0m[0m
+         [36musers:[0m[0m
+           [36mmodule_name:[0m great_expectations.datasource.data_connector.asset[0m
+           [36mclass_name:[0m Asset[0m
+           [36mbase_directory:[0m {base_directory}/../data/titanic[0m
+           [36mgroup_names:[0m ['name', 'timestamp', 'size'][0m
+           [36mpattern:[0m (.+)_(\d+)_(\d+)\.csv[0m
+       [36mbase_directory:[0m {base_directory}/../data/titanic[0m
+       [36mdefault_regex:[0m[0m
+         [36mgroup_names:[0m ['name'][0m
+         [36mpattern:[0m (.+)\.csv[0m
+       [36mglob_directive:[0m *.csv[0m
+   [36mexecution_engine:[0m[0m
+     [36mmodule_name:[0m great_expectations.execution_engine[0m
+     [36mclass_name:[0m PandasExecutionEngine[0m
+""".strip()
     stdout = result.output.strip()
     assert stdout == expected_output
     assert_no_logging_messages_or_tracebacks(caplog, result)
@@ -110,11 +116,7 @@ def test_cli_datasorce_new(caplog, monkeypatch, empty_data_context, filesystem_c
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        [
-            "--v3-api",
-            "datasource",
-            "new",
-        ],
+        "--v3-api datasource new",
         input="1\n1\n%s\nmynewsource\n" % str(filesystem_csv_2),
         catch_exceptions=False,
     )
