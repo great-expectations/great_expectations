@@ -3,9 +3,9 @@ import jsonschema
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_batch_schema,
     anonymized_datasource_schema,
-    cli_basic_payload_schema,
     cli_new_ds_choice_payload_schema,
     cli_suite_edit_expectation_suite_payload_schema,
+    cli_version_payload_schema,
     datasource_sqlalchemy_connect_payload,
     empty_payload_schema,
     init_payload_schema,
@@ -201,5 +201,5 @@ def test_usage_stats_cli_payload_messages():
         )
         jsonschema.validate(
             valid_usage_statistics_messages[message][0]["event_payload"],
-            cli_basic_payload_schema,
+            cli_version_payload_schema,
         )
