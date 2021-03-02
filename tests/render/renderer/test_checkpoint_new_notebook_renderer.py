@@ -192,7 +192,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Test and Store Your Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nNote that if it is valid, it will be automatically saved to your Checkpoint Store.\n\nThis test_yaml_config() function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters.""",
+            "source": """# Test and Store Your Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nNote that if it is valid, it will be automatically saved to your Checkpoint Store.\n\nThis `test_yaml_config()` function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters.""",
         },
         {
             "cell_type": "code",
@@ -222,27 +222,13 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Run Your Checkpoint (Optional)\n\nYou may wish to run the Checkpoint now to see a sample of it's output. If so run the following cell.""",
+            "source": """# Run Your Checkpoint & Open Data Docs(Optional)\n\nYou may wish to run the Checkpoint now and review it's output in Data Docs. If so uncomment and run the following cell.""",
         },
         {
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "context.run_checkpoint(checkpoint_name=my_checkpoint_name)",
-            "outputs": [],
-        },
-    ]
-    optional_open_data_docs = [
-        {
-            "cell_type": "markdown",
-            "metadata": {},
-            "source": """# Open Data Docs (Optional)\nYou may also wish to open up Data Docs to review the results of the Checkpoint run if you ran the above cell.""",
-        },
-        {
-            "cell_type": "code",
-            "metadata": {},
-            "execution_count": None,
-            "source": "# context.open_data_docs()",
+            "source": "# context.run_checkpoint(checkpoint_name=my_checkpoint_name)\n# context.open_data_docs()",
             "outputs": [],
         },
     ]
@@ -257,7 +243,6 @@ validations:
         "test_and_save_your_checkpoint_configuration": test_and_save_your_checkpoint_configuration,
         "review_checkpoint": review_checkpoint,
         "optional_run_checkpoint": optional_run_checkpoint,
-        "optional_open_data_docs": optional_open_data_docs,
     }
 
 
@@ -296,7 +281,6 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
         + checkpoint_new_notebook_assets["test_and_save_your_checkpoint_configuration"]
         + checkpoint_new_notebook_assets["review_checkpoint"]
         + checkpoint_new_notebook_assets["optional_run_checkpoint"]
-        + checkpoint_new_notebook_assets["optional_open_data_docs"]
     )
 
     expected = {
@@ -345,7 +329,6 @@ def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
         + checkpoint_new_notebook_assets["test_and_save_your_checkpoint_configuration"]
         + checkpoint_new_notebook_assets["review_checkpoint"]
         + checkpoint_new_notebook_assets["optional_run_checkpoint"]
-        + checkpoint_new_notebook_assets["optional_open_data_docs"]
     )
 
     expected = {

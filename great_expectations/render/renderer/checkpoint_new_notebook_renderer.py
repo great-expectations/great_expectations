@@ -141,7 +141,7 @@ Here we will test your Checkpoint configuration to make sure it is valid.
 
 Note that if it is valid, it will be automatically saved to your Checkpoint Store.
 
-This test_yaml_config() function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.
+This `test_yaml_config()` function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.
 
 If you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters."""
         )
@@ -165,21 +165,14 @@ You can run the following cell to print out the full yaml configuration. For exa
 
     def _add_optional_run_checkpoint(self):
         self.add_markdown_cell(
-            """# Run Your Checkpoint (Optional)
+            """# Run Your Checkpoint & Open Data Docs(Optional)
 
-You may wish to run the Checkpoint now to see a sample of it's output. If so run the following cell."""
+You may wish to run the Checkpoint now and review it's output in Data Docs. If so uncomment and run the following cell."""
         )
         self.add_code_cell(
-            "context.run_checkpoint(checkpoint_name=my_checkpoint_name)", lint=True
+            "# context.run_checkpoint(checkpoint_name=my_checkpoint_name)\n# context.open_data_docs()",
+            lint=True,
         )
-
-    def _add_optional_open_data_docs(self):
-        self.add_markdown_cell(
-            """# Open Data Docs (Optional)
-You may also wish to open up Data Docs to review the results of the Checkpoint run if you ran the above cell."""
-        )
-        # TODO: <ANTHONY>We should mock the datadocs call or skip running that cell within the notebook (rather than commenting it out in the notebook)</ANTHONY>
-        self.add_code_cell("# context.open_data_docs()", lint=True)
 
     def render(self) -> nbformat.NotebookNode:
         self._notebook: nbformat.NotebookNode = nbformat.v4.new_notebook()
@@ -190,7 +183,6 @@ You may also wish to open up Data Docs to review the results of the Checkpoint r
         self._add_test_and_save_your_checkpoint_configuration()
         self._add_review_checkpoint()
         self._add_optional_run_checkpoint()
-        self._add_optional_open_data_docs()
 
         return self._notebook
 
