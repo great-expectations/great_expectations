@@ -164,7 +164,7 @@ def test_cli_init_on_new_project(
     assert mock_emit.call_count == 9
     assert mock_emit.call_args_list[1] == mock.call(
         {
-            "event_payload": {"cli_version": "v2"},
+            "event_payload": {"api_version": "v2"},
             "event": "cli.init.create",
             "success": True,
         }
