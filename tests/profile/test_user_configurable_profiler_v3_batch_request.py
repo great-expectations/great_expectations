@@ -29,6 +29,7 @@ from tests.profile.conftest import get_set_of_columns_and_expectations_from_suit
 from tests.test_utils import _build_sa_validator_with_data, connection_manager
 
 try:
+    import sqlalchemy as sa
     import sqlalchemy.dialects.postgresql as postgresqltypes
 
     POSTGRESQL_TYPES = {
