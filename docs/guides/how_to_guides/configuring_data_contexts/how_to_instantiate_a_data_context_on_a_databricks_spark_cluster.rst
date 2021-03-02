@@ -272,7 +272,7 @@ Additional notes
                     datasource_name="insert_your_datasource_name_here",
                     data_connector_name="insert_your_runtime_data_connector_name_here",
                     batch_data=df,
-                    data_asset_name="IN_MEMORY_DATA_ASSET",
+                    data_asset_name="optionally_insert_your_data_asset_name_here",
                     partition_request={
                         "partition_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",

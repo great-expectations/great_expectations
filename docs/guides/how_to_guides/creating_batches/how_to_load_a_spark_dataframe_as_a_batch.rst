@@ -149,7 +149,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
             Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``runtime_keys`` to define which keys are allowed.
 
-            NOTE: for now, ``data_asset_name`` can only be set to this predefined string: ``“IN_MEMORY_DATA_ASSET”``. We will fix it very soon and will allow you to specify your own name.
+            NOTE: When passing in Spark dataframe as a batch, ``data_asset_name`` can optionally be passed in as part of ``BatchRequest``.  If you choose to not set your own ``data_asset_name``,  it will be set to  ``“IN_MEMORY_DATA_ASSET”` by default.
 
             .. code-block:: python
 
@@ -159,7 +159,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
                     datasource_name="insert_your_spark_datasource_name_here",
                     data_connector_name="insert_your_runtime_data_connector_name_here",
                     batch_data=insert_your_dataframe_here,
-                    data_asset_name="IN_MEMORY_DATA_ASSET",
+                    data_asset_name="optionally_insert_your_data_asset_name_here",
                     partition_request={
                         "partition_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",

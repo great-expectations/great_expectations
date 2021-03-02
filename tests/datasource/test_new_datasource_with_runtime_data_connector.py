@@ -241,6 +241,53 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
         )
 
 
+def test_set_data_asset_name_for_runtime_data(
+    basic_datasource_with_runtime_data_connector,
+):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    partition_request: dict
+    partition_request = {
+        "partition_identifiers": {
+            "pipeline_stage_name": "core_processing",
+            "airflow_run_id": 1234567890,
+            "custom_key_0": "custom_value_0",
+        }
+    }
+
+    # default : IN_MEMORY_DATA_ASSET
+    batch_request: dict = {
+        "datasource_name": basic_datasource_with_runtime_data_connector.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "batch_data": test_df,
+        "partition_request": partition_request,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert batch_list[0].batch_definition.data_asset_name == "IN_MEMORY_DATA_ASSET"
+
+    # set : my_runtime_data_asset
+    batch_request: dict = {
+        "datasource_name": basic_datasource_with_runtime_data_connector.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_runtime_data_asset",
+        "batch_data": test_df,
+        "partition_request": partition_request,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert batch_list[0].batch_definition.data_asset_name == "my_runtime_data_asset"
+
+
 def test_get_available_data_asset_names(basic_datasource_with_runtime_data_connector):
     expected_available_data_asset_names: dict[List[str]] = {
         "test_runtime_data_connector": ["IN_MEMORY_DATA_ASSET"]
