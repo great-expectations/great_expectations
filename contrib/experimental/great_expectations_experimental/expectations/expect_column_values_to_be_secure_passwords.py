@@ -86,21 +86,20 @@ class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
 
 
 class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
-    """Expect column entries to be strings that match a given regular expression.
-
-    Valid matches can be found \
-    anywhere in the string, for example "[at]+" will identify the following strings as expected: "cat", "hat", \
-    "aa", "a", and "t", and the following strings as unexpected: "fish", "dog".
-
-    expect_column_values_to_match_regex is a \
+    """Expect column entries to be secure passwords, as defined by expectation parameters.
+    
+    expect_column_values_to_be_secure_passwords is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
     .column_map_expectation>`.
 
     Args:
-        column (str): \
-            The column name.
-        regex (str): \
-            The regular expression the column entries should match.
+       min_length (int): minimum length
+       min_uppercase (int): minimum number of uppercase letters
+       min_lowercase (int): minimum number of lowercase letters
+       min_special (int): minimum number of special characters (not letters and not digits)
+       min_digits (int): minimum numbers of digits
+       max_consec_numbers (int): max number of consecutive numbers
+       max_consec_letters (int): max number of consecutive letters
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
@@ -126,16 +125,6 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
 
         Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
-
-    See Also:
-        :func:`expect_column_values_to_not_match_regex \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine
-        .expect_column_values_to_not_match_regex>`
-
-        :func:`expect_column_values_to_match_regex_list \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine
-        .expect_column_values_to_match_regex_list>`
-
     """
 
     library_metadata = {
