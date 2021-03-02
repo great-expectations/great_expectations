@@ -26,7 +26,7 @@ from great_expectations.profile.user_configurable_profiler import (
 )
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-from tests.test_utils import _build_sa_validator_with_data, connection_manager
+from tests.test_utils import SqlAlchemyConnectionManager
 
 try:
     import sqlalchemy as sa
@@ -114,7 +114,7 @@ def get_spark_runtime_validator(context, df):
 def get_sqlalchemy_runtime_validator_postgresql(
     df, schemas=None, caching=True, table_name=None
 ):
-
+    connection_manager = SqlAlchemyConnectionManager()
     sa_engine_name = "postgresql"
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     engine = connection_manager.get_engine(
