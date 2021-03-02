@@ -77,7 +77,12 @@ for datasource_name, datasource in context.datasources.items():
 
 In the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.
 
-To keep it simple, we are just choosing the first Datasource, DataConnector, DataAsset, Partition and Expectation Suite you have configured to create the example yaml config.
+To keep it simple, we are just choosing the first available instance of each of the following items you have configured in your Data Context:
+* Datasource
+* DataConnector
+* DataAsset
+* Partition
+* Expectation Suite
 
 Of course this is purely an example, you may edit this to your heart's content.
 
