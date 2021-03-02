@@ -106,7 +106,7 @@ def checkpoint_new_notebook_assets():
     header = [
         {
             "cell_type": "markdown",
-            "source": "# Create Your Checkpoint\nUse this notebook to create your checkpoint:\n\n**Checkpoint Name**: `my_checkpoint_name`\n\nWe'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!",
+            "source": "# Create Your Checkpoint\nUse this notebook to create your Checkpoint:\n\n**Checkpoint Name**: `my_checkpoint_name`\n\nWe'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!",
             "metadata": {},
         }
     ]
@@ -123,7 +123,7 @@ def checkpoint_new_notebook_assets():
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Example Configuration\n**If you are new to Great Expectations or the Checkpoint feature**, you should probably start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.\n\nThe example in the cell below shows a SimpleCheckpoint for validating a single Batch of data against a single Expectation Suite.\n\n**My configuration is not so simple - are there more advanced options?**\n\nGlad you asked! Checkpoints are very versatile. For example, you can validate many batches in a single checkpoint, validate batches against different suites or against many suites, control the specific post-validation actions based on suite / batch / results of validation among other features. Check out our documentation on Checkpoints for more info:\n\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
+            "source": """# Example Configuration\n**If you are new to Great Expectations or the Checkpoint feature**, you should probably start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.\n\nThe example in the cell below shows a SimpleCheckpoint for validating a single Batch of data against a single Expectation Suite.\n\n**My configuration is not so simple - are there more advanced options?**\n\nGlad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more info:\n\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
         },
         {
             "cell_type": "code",
@@ -154,7 +154,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# List Your Configuration (Optional)\nThe following cells show examples for listing your current configuration.\n\nYou may wish to run these cells to view your currently configured checkpoints and choose a datasource & expectation suite.""",
+            "source": """# List Your Configuration (Optional)\nThe following cells show examples for listing your current configuration.\n\nYou may wish to run these cells to view your currently configured Checkpoints and choose a Datasource & Expectation Suite.""",
         },
         {
             "cell_type": "code",
@@ -183,7 +183,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Sample Checkpoint Config\n\nIn the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single expectation suite against a single batch of data.\n\nTo keep it simple, we are just choosing the first Datasource, DataConnector, DataAsset, Partition and Expectation Suite you have configured to create the example yaml config.\n\nOf course this is purely an example, you may edit this to your heart's content.\n\nPlease also see the docs linked below for instructions on how to implement other more advanced features including using the **Checkpoint** class:\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
+            "source": """# Sample Checkpoint Config\n\nIn the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.\n\nTo keep it simple, we are just choosing the first Datasource, DataConnector, DataAsset, Partition and Expectation Suite you have configured to create the example yaml config.\n\nOf course this is purely an example, you may edit this to your heart's content.\n\nPlease also see the docs linked below for instructions on how to implement other more advanced features including using the **Checkpoint** class:\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
         },
     ]
     sample_checkpoint_config_code_correct = [
@@ -268,7 +268,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Run Checkpoint (Optional)\n\nYou may wish to run the checkpoint now to see a sample of it's output. If so run the following cell.""",
+            "source": """# Run Checkpoint (Optional)\n\nYou may wish to run the Checkpoint now to see a sample of it's output. If so run the following cell.""",
         },
         {
             "cell_type": "code",
