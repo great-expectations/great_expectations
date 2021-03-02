@@ -35,6 +35,33 @@ You will most likely be prompted to install a new template. Rest assured that
 your original yaml file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)
 
+.. _v3_vs_v2_api:
+
+***************************************************
+V3 (Batch Request) API vs The V2 (Batch Kwargs) API
+***************************************************
+
+The 0.13 major release of Great Expectations introduced a group of new features based on “new style” Datasources and Modular Expectations that we call the V3 (Batch Request) API. The V2 (Batch Kwargs) API will be deprecated in the future.
+
+0.13.x releases are compatible with both versions of the API. V3 API is currently marked as experimental.
+
+We are actively working on incorporating user feedback, documenting the new V3 API, and making the CLI work with it.
+
+Here are our current recommendations for choosing between V2 and V3 APIs:
+
+* Always install the latest 0.13.x release in order to keep up to date with various enhancements and bug fixes.
+
+* If you start a new project, use V3 API with the following two exceptions:
+
+    * If you heavily rely on the CLI
+
+    * If you validate in-memory Spark or Pandas DataFrames
+
+* Keep using V2 API for your existing projects.
+
+
+We will announce when V3 API can be used for new projects without any caveats. Also, we will announce when we have documentation/procedure for migrating existing projects from using V2 API to using V3 API.
+
 .. _upgrading_to_0.13:
 
 *************************
