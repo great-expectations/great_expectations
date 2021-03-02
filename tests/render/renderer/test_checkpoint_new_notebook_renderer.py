@@ -129,7 +129,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": """# Running this cell will generate a printout of your Datasources, Data Connectors and Data Assets\n\nfor datasource_name, datasource in context.datasources.items():
+            "source": """# Run this cell to print out the names of your Datasources, Data Connectors and Data Assets\n\nfor datasource_name, datasource in context.datasources.items():
     print(f"datasource_name: {datasource_name}")
     for data_connector_name, data_connector in datasource.data_connectors.items():
         print(f"\tdata_connector_name: {data_connector_name}")
@@ -204,15 +204,8 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "my_checkpoint_config = sample_yaml # Change `sample_yaml` to your custom Checkpoint config if you wish",
-            "outputs": [],
-        },
-        {
-            "cell_type": "code",
-            "metadata": {},
-            "execution_count": None,
             "source": """my_checkpoint = context.test_yaml_config(
-    name=checkpoint_name, yaml_config=my_checkpoint_config
+    name=checkpoint_name, yaml_config=my_checkpoint_name_config
 )""",
             "outputs": [],
         },

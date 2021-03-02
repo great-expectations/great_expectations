@@ -57,7 +57,7 @@ context = ge.get_context()
 The following cells show examples for listing your current configuration. You can replace values in the sample configuration with these values to customize your Checkpoint."""
         )
         self.add_code_cell(
-            """# Running this cell will generate a printout of your Datasources, Data Connectors and Data Assets
+            """# Run this cell to print out the names of your Datasources, Data Connectors and Data Assets
 
 for datasource_name, datasource in context.datasources.items():
     print(f"datasource_name: {datasource_name}")
@@ -143,12 +143,9 @@ If you instead wish to use python instead of yaml to configure your Checkpoint, 
             f'checkpoint_name = "{self.checkpoint_name}" # From your CLI command, feel free to change this.'
         )
         self.add_code_cell(
-            "my_checkpoint_config = sample_yaml # Change `sample_yaml` to your custom Checkpoint config if you wish"
-        )
-        self.add_code_cell(
-            """my_checkpoint = context.test_yaml_config(
+            f"""my_checkpoint = context.test_yaml_config(
     name=checkpoint_name,
-    yaml_config=my_checkpoint_config
+    yaml_config={self.checkpoint_name}_config
 )""",
             lint=True,
         )
