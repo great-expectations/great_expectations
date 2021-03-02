@@ -172,6 +172,8 @@ class SqlAlchemyConnectionManager:
         self._connections = dict()
 
     def get_engine(self, connection_string):
+        if not create_engine:
+            return None
 
         with self.lock:
             if connection_string not in self._connections:
