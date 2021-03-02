@@ -1056,7 +1056,7 @@ def test_suite_delete_with_zero_suites(
         mock.call(
             {
                 "event": "cli.suite.delete",
-                "event_payload": {"cli_version": "v3"},
+                "event_payload": {"api_version": "v3"},
                 "success": False,
             }
         ),
@@ -1097,7 +1097,7 @@ def test_suite_delete_with_non_existent_suite(
         mock.call(
             {
                 "event": "cli.suite.delete",
-                "event_payload": {"cli_version": "v3"},
+                "event_payload": {"api_version": "v3"},
                 "success": False,
             }
         ),
@@ -1144,7 +1144,7 @@ def test_suite_delete_with_one_suite(
         mock.call(
             {
                 "event": "cli.suite.delete",
-                "event_payload": {"cli_version": "v3"},
+                "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
