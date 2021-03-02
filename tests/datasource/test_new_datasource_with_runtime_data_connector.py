@@ -11,10 +11,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     PartitionDefinition,
 )
-from great_expectations.core.batch_spec import RuntimeDataBatchSpec
-from great_expectations.core.id_dict import BatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import RuntimeDataConnector
 from great_expectations.datasource.new_datasource import Datasource
 
 yaml = YAML()
@@ -44,7 +41,6 @@ def basic_datasource_with_runtime_data_connector():
         config_defaults={"module_name": "great_expectations.datasource"},
     )
     return basic_datasource
-
 
 
 def test_basic_datasource_runtime_data_connector_self_check(
@@ -79,7 +75,10 @@ def test_basic_datasource_runtime_data_connector_self_check(
         },
     }
 
-def test_basic_datasource_runtime_data_connector_error_checking(basic_datasource_with_runtime_data_connector):
+
+def test_basic_datasource_runtime_data_connector_error_checking(
+    basic_datasource_with_runtime_data_connector,
+):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # Test for an unknown datasource
@@ -182,7 +181,7 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(
         Batch
     ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
         batch_request=batch_request
-        )
+    )
     assert len(batch_list) == 1
 
 
@@ -243,7 +242,9 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
 
 
 def test_get_available_data_asset_names(basic_datasource_with_runtime_data_connector):
-    expected_available_data_asset_names: dict[List[str]] = {'test_runtime_data_connector': ['IN_MEMORY_DATA_ASSET']}
+    expected_available_data_asset_names: dict[List[str]] = {
+        "test_runtime_data_connector": ["IN_MEMORY_DATA_ASSET"]
+    }
     available_data_asset_names: List[
         dict
     ] = basic_datasource_with_runtime_data_connector.get_available_data_asset_names()
@@ -273,12 +274,11 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     batch_list: List[
         Batch
     ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
-            batch_request=batch_request
+        batch_request=batch_request
     )
     # batches are a little bit more difficult to test because of batch_markers
     # they are ones that uniquely identify the data
     assert len(batch_list) == 1
-
 
 
 def test_get_batch_with_pipeline_style_batch_request_with_and_without_data_asset_name(
@@ -346,6 +346,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
         ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
             batch_request=batch_request
         )
+
 
 def test_get_batch_definitions_and_get_batch_basics(
     basic_datasource_with_runtime_data_connector,
