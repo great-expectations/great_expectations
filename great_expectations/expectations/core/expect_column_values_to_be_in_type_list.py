@@ -228,8 +228,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             comp_types = []
             for type_ in expected_types_list:
                 try:
-                    comp_types.append(np.dtype(type_).type),
-                    comp_types.append(np.dtype(type_)),
+                    comp_types.append(np.dtype(type_).type)
+                    comp_types.append(np.dtype(type_))
                 except TypeError:
                     try:
                         pd_type = getattr(pd, type_)
