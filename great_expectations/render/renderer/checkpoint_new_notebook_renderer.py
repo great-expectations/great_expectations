@@ -51,43 +51,6 @@ context = ge.get_context()
             lint=True,
         )
 
-    def _add_example_configuration(self):
-        self.add_markdown_cell(
-            """# Example Configuration
-**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.
-
-The example in the cell below shows a SimpleCheckpoint for validating a single Batch of data against a single Expectation Suite.
-
-**My configuration is not so simple - are there more advanced options?**
-
-Glad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more info:
-
-- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
-- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
-- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html"""
-        )
-        self.add_code_cell(
-            (
-                'example_config = """'
-                """
-name: my_checkpoint
-config_version: 1
-class_name: SimpleCheckpoint
-run_name_template: "%Y-%M-my-run-name-template"
-validations:
-  - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_data_connector
-      data_asset_name: MyDataAsset
-      partition_request:
-        index: -1
-    expectation_suite_name: my_suite
-"""
-                '"""'
-            ),
-            lint=True,
-        )
-
     def _add_optional_list_your_config(self):
         self.add_markdown_cell(
             """# List Your Configuration (Optional)
@@ -107,13 +70,19 @@ list_of_existing_datasources_by_name""",
         self.add_markdown_cell(
             """# Sample Checkpoint Config
 
+**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.
+
 In the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.
 
 To keep it simple, we are just choosing the first Datasource, DataConnector, DataAsset, Partition and Expectation Suite you have configured to create the example yaml config.
 
 Of course this is purely an example, you may edit this to your heart's content.
 
-Please also see the docs linked below for instructions on how to implement other more advanced features including using the **Checkpoint** class:
+**My configuration is not so simple - are there more advanced options?**
+
+Glad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more info:
+
+Please also see the docs linked below for more details and for instructions on how to implement other more advanced features including using the **Checkpoint** class:
 - https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
 - https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
 - https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html"""
@@ -215,7 +184,6 @@ You may also wish to open up Data Docs to review the results of the Checkpoint r
         self._notebook: nbformat.NotebookNode = nbformat.v4.new_notebook()
         self._add_header()
         self._add_imports()
-        self._add_example_configuration()
         self._add_optional_list_your_config()
         self._add_sample_checkpoint_config()
         self._add_test_and_save_your_checkpoint_configuration()

@@ -119,37 +119,6 @@ def checkpoint_new_notebook_assets():
             "outputs": [],
         },
     ]
-    example_configuration = [
-        {
-            "cell_type": "markdown",
-            "metadata": {},
-            "source": """# Example Configuration\n**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.\n\nThe example in the cell below shows a SimpleCheckpoint for validating a single Batch of data against a single Expectation Suite.\n\n**My configuration is not so simple - are there more advanced options?**\n\nGlad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more info:\n\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
-        },
-        {
-            "cell_type": "code",
-            "metadata": {},
-            "execution_count": None,
-            "source": (
-                'example_config = """'
-                """
-name: my_checkpoint
-config_version: 1
-class_name: SimpleCheckpoint
-run_name_template: "%Y-%M-my-run-name-template"
-validations:
-  - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_data_connector
-      data_asset_name: MyDataAsset
-      partition_request:
-        index: -1
-    expectation_suite_name: my_suite
-"""
-                '"""'
-            ),
-            "outputs": [],
-        },
-    ]
     optional_list_your_config = [
         {
             "cell_type": "markdown",
@@ -183,7 +152,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Sample Checkpoint Config\n\nIn the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.\n\nTo keep it simple, we are just choosing the first Datasource, DataConnector, DataAsset, Partition and Expectation Suite you have configured to create the example yaml config.\n\nOf course this is purely an example, you may edit this to your heart's content.\n\nPlease also see the docs linked below for instructions on how to implement other more advanced features including using the **Checkpoint** class:\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
+            "source": """# Sample Checkpoint Config\n\n**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.\n\nIn the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.\n\nTo keep it simple, we are just choosing the first Datasource, DataConnector, DataAsset, Partition and Expectation Suite you have configured to create the example yaml config.\n\nOf course this is purely an example, you may edit this to your heart's content.\n\n**My configuration is not so simple - are there more advanced options?**\n\nGlad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more info:\n\nPlease also see the docs linked below for more details and for instructions on how to implement other more advanced features including using the **Checkpoint** class:\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
         },
     ]
     sample_checkpoint_config_code_correct = [
@@ -296,7 +265,6 @@ validations:
     return {
         "header": header,
         "imports": imports,
-        "example_configuration": example_configuration,
         "optional_list_your_config": optional_list_your_config,
         "sample_checkpoint_config_markdown_description": sample_checkpoint_config_markdown_description,
         "sample_checkpoint_config_code_correct": sample_checkpoint_config_code_correct,
@@ -334,7 +302,6 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
     expected_cells = (
         checkpoint_new_notebook_assets["header"]
         + checkpoint_new_notebook_assets["imports"]
-        + checkpoint_new_notebook_assets["example_configuration"]
         + checkpoint_new_notebook_assets["optional_list_your_config"]
         + checkpoint_new_notebook_assets[
             "sample_checkpoint_config_markdown_description"
@@ -382,7 +349,6 @@ def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
     expected_cells = (
         checkpoint_new_notebook_assets["header"]
         + checkpoint_new_notebook_assets["imports"]
-        + checkpoint_new_notebook_assets["example_configuration"]
         + checkpoint_new_notebook_assets["optional_list_your_config"]
         + checkpoint_new_notebook_assets[
             "sample_checkpoint_config_markdown_description"
