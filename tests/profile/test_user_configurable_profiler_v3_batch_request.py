@@ -695,6 +695,7 @@ def test_profiler_all_expectation_types_spark(
             "improvement_surcharge",
             "congestion_surcharge",
         ]
+
         semantic_types = {
             "datetime": ["pickup_datetime", "dropoff_datetime"],
             "numeric": ["total_amount", "passenger_count"],
