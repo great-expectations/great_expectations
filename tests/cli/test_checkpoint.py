@@ -5,9 +5,11 @@ import unittest
 from typing import List
 from unittest import mock
 
+import nbformat
 import pandas as pd
 import pytest
 from click.testing import CliRunner, Result
+from nbconvert.preprocessors import ExecutePreprocessor
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -317,79 +319,31 @@ def test_checkpoint_list_with_eight_checkpoints(
     )
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2(
-    mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled_config_version_2
-):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    assert context.list_expectation_suite_names() == []
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"--v3-api checkpoint new foo not_a_suite",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 1
-    assert "Could not find a suite named `not_a_suite`." in stdout
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.new",
-                "event_payload": {"cli_version": "v3"},
-                "success": False,
-            }
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
-    )
-
-
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
+def test_checkpoint_new_raises_error_on_existing_checkpoint(
     mock_emit,
     caplog,
     monkeypatch,
-    titanic_data_context_stats_enabled_config_version_2_with_checkpoint,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    context: DataContext = (
-        titanic_data_context_stats_enabled_config_version_2_with_checkpoint
-    )
+    """
+    What does this test and why?
+    The `checkpoint new` CLI flow should raise an error if the checkpoint name being created already exists in your checkpoint store.
+    """
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    runner = CliRunner(mix_stderr=False)
+    runner: CliRunner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"--v3-api checkpoint new my_checkpoint suite",
+        f"--v3-api checkpoint new my_minimal_simple_checkpoint",
         catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "A checkpoint named `my_checkpoint` already exists. Please choose a new name."
+        "A checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
         in stdout
     )
 
@@ -410,43 +364,50 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
     assert_no_logging_messages_or_tracebacks(
         caplog,
         result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     )
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_ge_config_v2(
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
+    mock_webbroser,
+    mock_subprocess,
     mock_emit,
     caplog,
     monkeypatch,
-    titanic_data_context_stats_enabled_config_version_2,
+    deterministic_asset_dataconnector_context,
     titanic_expectation_suite,
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
+    """
+    What does this test and why?
+    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the checkpoint.
+    This test builds that notebook and runs it to generate a checkpoint and then tests the resulting configuration in the checkpoint file.
+    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the checkpoint configuration.
+    """
+    context: DataContext = deterministic_asset_dataconnector_context
+    root_dir: str = context.root_directory
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
+    # Clear the "data_context.save_expectation_suite" call
+    mock_emit.reset_mock()
+
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        f"--v3-api checkpoint new passengers Titanic.warning",
+        f"--v3-api checkpoint new passengers",
         input="1\n1\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "A checkpoint named `passengers` was added to your project" in stdout
-
     assert mock_emit.call_count == 2
+
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -459,186 +420,63 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
             }
         ),
     ]
-    expected_checkpoint = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "passengers.yml",
+    assert mock_subprocess.call_count == 1
+    assert mock_webbroser.call_count == 0
+    assert "open a notebook for you now" in stdout
+
+    expected_notebook_path = os.path.join(
+        root_dir, "uncommitted", "edit_checkpoint_passengers.ipynb"
     )
-    assert os.path.isfile(expected_checkpoint)
+    assert os.path.isfile(expected_notebook_path)
 
-    # Newup a context for additional assertions
-    del context
-    context: DataContext = DataContext(context.root_directory)
-    assert context.list_checkpoints() == ["passengers"]
+    with open(expected_notebook_path) as f:
+        nb = nbformat.read(f, as_version=4)
 
-    with open(expected_checkpoint) as f:
-        obs_file = f.read()
+    uncommitted_dir = os.path.join(root_dir, "uncommitted")
+    # Run notebook
+    # TODO: <ANTHONY>We should mock the datadocs call or skip running that cell within the notebook (rather than commenting it out in the notebook)</ANTHONY>
+    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
-        # This is snapshot-ish to prove that comments remain in place
-        # TODO: <Alex>ALEX</Alex>
-        #     assert (
-        #         """\
-        # # This checkpoint was created by the command `great_expectations checkpoint new`.
-        # #
-        # # A checkpoint is a list of one or more batches paired with one or more
-        # # Expectation Suites and a configurable Validation Operator.
-        # #
-        # # It can be run with the `great_expectations checkpoint run` command.
-        # # You can edit this file to add batches of data and expectation suites.
-        # #
-        # # For more details please see
-        # # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
-        # validation_operator_name: action_list_operator
-        # # Batches are a list of batch_kwargs paired with a list of one or more suite
-        # # names. A checkpoint can have one or more batches. This makes deploying
-        # # Great Expectations in your pipelines easy!
-        # batches:
-        #   - batch_kwargs:"""
-        #         in obs_file
-        #     )
-        assert (
-            """\
-batches:
-  - batch_kwargs:"""
-            in obs_file
-        )
+    # Ensure the checkpoint file was created
+    expected_checkpoint_path = os.path.join(root_dir, "checkpoints", "passengers.yml")
+    assert os.path.isfile(expected_checkpoint_path)
 
-    assert "/data/Titanic.csv" in obs_file
-
-    assert (
-        """datasource: mydatasource
-      data_asset_name: Titanic
-    expectation_suite_names:
-      - Titanic.warning
+    # Ensure the checkpoint configuration in the file is as expected
+    with open(expected_checkpoint_path) as f:
+        checkpoint_config = f.read()
+    expected_checkpoint_config: str = """name: passengers
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: SimpleCheckpoint
+run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
+expectation_suite_name:
+batch_request:
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names: []
+evaluation_parameters: {}
+runtime_configuration: {}
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_other_data_connector
+      data_asset_name: users
+      partition_request:
+        index: -1
+    expectation_suite_name: Titanic.warning
+profilers: []
 """
-        in obs_file
-    )
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
-    )
-
-
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_new_specify_datasource_with_ge_config_v2(
-    mock_emit,
-    caplog,
-    monkeypatch,
-    titanic_data_context_stats_enabled_config_version_2,
-    titanic_expectation_suite,
-):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    assert context.list_checkpoints() == []
-    context.save_expectation_suite(titanic_expectation_suite)
-    assert context.list_expectation_suite_names() == ["Titanic.warning"]
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"--v3-api checkpoint new passengers Titanic.warning --datasource mydatasource",
-        input="1\n1\n",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 0
-    assert "A checkpoint named `passengers` was added to your project" in stdout
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.new",
-                "event_payload": {"cli_version": "v3"},
-                "success": True,
-            }
-        ),
-    ]
-    expected_checkpoint = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "passengers.yml",
-    )
-    assert os.path.isfile(expected_checkpoint)
-
-    # Newup a context for additional assertions
-    del context
-    context: DataContext = DataContext(context.root_directory)
-    assert context.list_checkpoints() == ["passengers"]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
-    )
-
-
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge_config_v2(
-    mock_emit,
-    caplog,
-    monkeypatch,
-    titanic_data_context_stats_enabled_config_version_2,
-    titanic_expectation_suite,
-):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_2
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    checkpoints_dir = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-    )
-    shutil.rmtree(checkpoints_dir)
-    assert not os.path.isdir(checkpoints_dir)
-
-    context.save_expectation_suite(titanic_expectation_suite)
-    assert context.list_expectation_suite_names() == ["Titanic.warning"]
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"--v3-api checkpoint new passengers Titanic.warning",
-        input="1\n1\n",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 1
-    assert (
-        'Attempted to access the "checkpoint_store_name" field with a legacy config version (2.0) and no `checkpoints` directory.'
-        in stdout
-    )
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.new",
-                "event_payload": {"cli_version": "v3"},
-                "success": False,
-            }
-        ),
-    ]
+    assert checkpoint_config == expected_checkpoint_config
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
