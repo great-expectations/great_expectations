@@ -114,67 +114,73 @@ def get_spark_runtime_validator(context, df):
 def get_sqlalchemy_runtime_validator_postgresql(
     df, schemas=None, caching=True, table_name=None
 ):
-    sa_engine_name = "postgresql"
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-    engine = connection_manager.get_engine(
-        f"postgresql://postgres@{db_hostname}/test_ci"
-    )
-    sql_dtypes = {}
-
-    if (
-        schemas
-        and sa_engine_name in schemas
-        and isinstance(engine.dialect, postgresqltypes.dialect)
-    ):
-        schema = schemas[sa_engine_name]
-        sql_dtypes = {col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
-
-        for col in schema:
-            type_ = schema[col]
-            if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                df[col] = pd.to_numeric(df[col], downcast="signed")
-            elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                df[col] = pd.to_numeric(df[col])
-                min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                    schema=sa_engine_name, negative=True
-                )
-                max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                    schema=sa_engine_name, negative=False
-                )
-                for api_schema_type in ["api_np", "api_cast"]:
-                    min_value_api = get_sql_dialect_floating_point_infinity_value(
-                        schema=api_schema_type, negative=True
-                    )
-                    max_value_api = get_sql_dialect_floating_point_infinity_value(
-                        schema=api_schema_type, negative=False
-                    )
-                    df.replace(
-                        to_replace=[min_value_api, max_value_api],
-                        value=[min_value_dbms, max_value_dbms],
-                        inplace=True,
-                    )
-            elif type_ in ["DATETIME", "TIMESTAMP"]:
-                df[col] = pd.to_datetime(df[col])
-
-    if table_name is None:
-        table_name = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+    try:
+        sa_engine_name = "postgresql"
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        engine = connection_manager.get_engine(
+            f"postgresql://postgres@{db_hostname}/test_ci"
         )
-    df.to_sql(
-        name=table_name,
-        con=engine,
-        index=False,
-        dtype=sql_dtypes,
-        if_exists="replace",
-    )
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data)
-    execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=execution_engine, table_name=table_name
-    )
-    batch = Batch(data=batch_data)
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+        sql_dtypes = {}
+
+        if (
+            schemas
+            and sa_engine_name in schemas
+            and isinstance(engine.dialect, postgresqltypes.dialect)
+        ):
+            schema = schemas[sa_engine_name]
+            sql_dtypes = {
+                col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()
+            }
+
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                    df[col] = pd.to_numeric(df[col], downcast="signed")
+                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                    df[col] = pd.to_numeric(df[col])
+                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=sa_engine_name, negative=True
+                    )
+                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                        schema=sa_engine_name, negative=False
+                    )
+                    for api_schema_type in ["api_np", "api_cast"]:
+                        min_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=True
+                        )
+                        max_value_api = get_sql_dialect_floating_point_infinity_value(
+                            schema=api_schema_type, negative=False
+                        )
+                        df.replace(
+                            to_replace=[min_value_api, max_value_api],
+                            value=[min_value_dbms, max_value_dbms],
+                            inplace=True,
+                        )
+                elif type_ in ["DATETIME", "TIMESTAMP"]:
+                    df[col] = pd.to_datetime(df[col])
+
+        if table_name is None:
+            table_name = "test_data_" + "".join(
+                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+            )
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="replace",
+        )
+        batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
+        batch = Batch(data=batch_data)
+        execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+        batch_data = SqlAlchemyBatchData(
+            execution_engine=execution_engine, table_name=table_name
+        )
+        batch = Batch(data=batch_data)
+        return Validator(execution_engine=execution_engine, batches=(batch,))
+
+    except:
+        return None
 
 
 @pytest.fixture
@@ -851,7 +857,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
     What does this test do and why?
     Ensures that all available expectation types work as expected for spark
     """
-    if postgresqltypes is not None:
+    if postgresqltypes is not None and taxi_validator_sqlalchemy is not None:
         context = titanic_data_context_modular_api
 
         ignored_columns = [
