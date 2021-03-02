@@ -54,7 +54,7 @@ context = ge.get_context()
     def _add_example_configuration(self):
         self.add_markdown_cell(
             """# Example Configuration
-**If you are new to Great Expectations or the Checkpoint feature**, you should probably start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.
+**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.
 
 The example in the cell below shows a SimpleCheckpoint for validating a single Batch of data against a single Expectation Suite.
 
