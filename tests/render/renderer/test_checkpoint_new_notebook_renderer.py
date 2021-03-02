@@ -106,7 +106,7 @@ def checkpoint_new_notebook_assets():
     header = [
         {
             "cell_type": "markdown",
-            "source": "# Create Your Checkpoint\nUse this notebook to create your Checkpoint:\n\n**Checkpoint Name**: `my_checkpoint_name`\n\nWe'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!",
+            "source": "# Create Your Checkpoint\nUse this notebook to create your Checkpoint:\n\n**Checkpoint Name**: `my_checkpoint_name`",
             "metadata": {},
         }
     ]

@@ -40,9 +40,7 @@ class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
             f"""# Create Your Checkpoint
 Use this notebook to create your Checkpoint:
 
-**Checkpoint Name**: `{self.checkpoint_name}`
-
-We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!"""
+**Checkpoint Name**: `{self.checkpoint_name}`"""
         )
 
     def _add_imports(self):
