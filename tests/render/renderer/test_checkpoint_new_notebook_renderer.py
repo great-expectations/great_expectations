@@ -159,8 +159,9 @@ def checkpoint_new_notebook_assets():
             "metadata": {},
             "execution_count": None,
             "source": (
-                'my_checkpoint_name_config = """\n'
-                "name: my_checkpoint_name\n"
+                'my_checkpoint_name = "my_checkpoint_name"  # This was populated from your CLI command.\n\n'
+                'my_checkpoint_name_config = f"""\n'
+                "name: {my_checkpoint_name}\n"
                 """config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
@@ -197,15 +198,8 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": 'checkpoint_name = "my_checkpoint_name" # From your CLI command, feel free to change this.',
-            "outputs": [],
-        },
-        {
-            "cell_type": "code",
-            "metadata": {},
-            "execution_count": None,
             "source": """my_checkpoint = context.test_yaml_config(
-    name=checkpoint_name, yaml_config=my_checkpoint_name_config
+    name=my_checkpoint_name, yaml_config=my_checkpoint_name_config
 )""",
             "outputs": [],
         },
@@ -234,7 +228,7 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "context.run_checkpoint(checkpoint_name=checkpoint_name)",
+            "source": "context.run_checkpoint(checkpoint_name=my_checkpoint_name)",
             "outputs": [],
         },
     ]

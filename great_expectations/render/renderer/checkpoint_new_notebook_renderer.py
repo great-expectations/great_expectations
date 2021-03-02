@@ -100,9 +100,10 @@ Glad you asked! Checkpoints are very versatile. For example, you can validate ma
             first_expectation_suite_name = (
                 first_expectation_suite.expectation_suite_name
             )
-            sample_yaml_str = f'{self.checkpoint_name}_config = """'
+            sample_yaml_str = f'my_checkpoint_name = "{self.checkpoint_name}" # This was populated from your CLI command.\n\n'
+            sample_yaml_str += f'{self.checkpoint_name}_config = f"""'
+            sample_yaml_str += "\nname: {my_checkpoint_name}"
             sample_yaml_str += f"""
-name: {self.checkpoint_name}
 config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
@@ -140,11 +141,8 @@ This test_yaml_config() function is meant to enable fast dev loops. You can cont
 If you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters."""
         )
         self.add_code_cell(
-            f'checkpoint_name = "{self.checkpoint_name}" # From your CLI command, feel free to change this.'
-        )
-        self.add_code_cell(
             f"""my_checkpoint = context.test_yaml_config(
-    name=checkpoint_name,
+    name=my_checkpoint_name,
     yaml_config={self.checkpoint_name}_config
 )""",
             lint=True,
@@ -167,7 +165,7 @@ You can run the following cell to print out the full yaml configuration. For exa
 You may wish to run the Checkpoint now to see a sample of it's output. If so run the following cell."""
         )
         self.add_code_cell(
-            "context.run_checkpoint(checkpoint_name=checkpoint_name)", lint=True
+            "context.run_checkpoint(checkpoint_name=my_checkpoint_name)", lint=True
         )
 
     def _add_optional_open_data_docs(self):
