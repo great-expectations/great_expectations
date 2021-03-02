@@ -71,7 +71,7 @@ for datasource_name, datasource in context.datasources.items():
 
     def _add_sample_checkpoint_config(self):
         self.add_markdown_cell(
-            """# Sample Checkpoint Config
+            """# Create a Checkpoint Configuration
 
 **If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.
 
@@ -131,7 +131,7 @@ validations:
 
     def _add_test_and_save_your_checkpoint_configuration(self):
         self.add_markdown_cell(
-            """# Test the Checkpoint Configuration
+            """# Test and Store Your Checkpoint Configuration
 Here we will test your Checkpoint configuration to make sure it is valid.
 
 Note that if it is valid, it will be automatically saved to your Checkpoint Store.
@@ -150,7 +150,7 @@ If you instead wish to use python instead of yaml to configure your Checkpoint, 
 
     def _add_review_checkpoint(self):
         self.add_markdown_cell(
-            """# Review Checkpoint
+            """# Review Your Checkpoint
 
 You can run the following cell to print out the full yaml configuration. For example, if you used **SimpleCheckpoint**  this will show you the default action list."""
         )
@@ -160,7 +160,7 @@ You can run the following cell to print out the full yaml configuration. For exa
 
     def _add_optional_run_checkpoint(self):
         self.add_markdown_cell(
-            """# Run Checkpoint (Optional)
+            """# Run Your Checkpoint (Optional)
 
 You may wish to run the Checkpoint now to see a sample of it's output. If so run the following cell."""
         )

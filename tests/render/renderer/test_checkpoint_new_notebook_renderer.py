@@ -150,7 +150,7 @@ def checkpoint_new_notebook_assets():
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Sample Checkpoint Config\n\n**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.\n\nIn the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.\n\nTo keep it simple, we are just choosing the first Datasource, DataConnector, DataAsset, Partition and Expectation Suite you have configured to create the example yaml config.\n\nOf course this is purely an example, you may edit this to your heart's content.\n\n**My configuration is not so simple - are there more advanced options?**\n\nGlad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more details and for instructions on how to implement other more advanced features including using the **Checkpoint** class:\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
+            "source": """# Create a Checkpoint Configuration\n\n**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.\n\nIn the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.\n\nTo keep it simple, we are just choosing the first Datasource, DataConnector, DataAsset, Partition and Expectation Suite you have configured to create the example yaml config.\n\nOf course this is purely an example, you may edit this to your heart's content.\n\n**My configuration is not so simple - are there more advanced options?**\n\nGlad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more details and for instructions on how to implement other more advanced features including using the **Checkpoint** class:\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
         },
     ]
     sample_checkpoint_config_code_correct = [
@@ -192,7 +192,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Test the Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nNote that if it is valid, it will be automatically saved to your Checkpoint Store.\n\nThis test_yaml_config() function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters.""",
+            "source": """# Test and Store Your Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nNote that if it is valid, it will be automatically saved to your Checkpoint Store.\n\nThis test_yaml_config() function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters.""",
         },
         {
             "cell_type": "code",
@@ -208,7 +208,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Review Checkpoint\n\nYou can run the following cell to print out the full yaml configuration. For example, if you used **SimpleCheckpoint**  this will show you the default action list.""",
+            "source": """# Review Your Checkpoint\n\nYou can run the following cell to print out the full yaml configuration. For example, if you used **SimpleCheckpoint**  this will show you the default action list.""",
         },
         {
             "cell_type": "code",
@@ -222,7 +222,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Run Checkpoint (Optional)\n\nYou may wish to run the Checkpoint now to see a sample of it's output. If so run the following cell.""",
+            "source": """# Run Your Checkpoint (Optional)\n\nYou may wish to run the Checkpoint now to see a sample of it's output. If so run the following cell.""",
         },
         {
             "cell_type": "code",
