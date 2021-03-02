@@ -3,7 +3,6 @@ import datetime
 import dateutil
 import pandas as pd
 import pytest
-from pyspark import SparkContext, SQLContext
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
@@ -45,31 +44,40 @@ def get_pandas_runtime_validator(context, df):
 
 
 def get_spark_runtime_validator(context, df):
-    sc = SparkContext.getOrCreate()
-    sqlCtx = SQLContext(sc)
-    sdf = sqlCtx.createDataFrame(df)
-    batch_request = BatchRequest(
-        datasource_name="my_spark_datasource",
-        data_connector_name="my_data_connector",
-        batch_data=sdf,
-        data_asset_name="IN_MEMORY_DATA_ASSET",
-        partition_request={
-            "partition_identifiers": {
-                "an_example_key": "a",
-                "another_example_key": "b",
-            }
-        },
-    )
+    try:
+        import pyspark
+        from pyspark import SparkContext, SQLContext
+    except:
+        pyspark = None
 
-    expectation_suite = context.create_expectation_suite(
-        "my_suite", overwrite_existing=True
-    )
+    if pyspark:
+        sc = SparkContext.getOrCreate()
+        sqlCtx = SQLContext(sc)
+        sdf = sqlCtx.createDataFrame(df)
+        batch_request = BatchRequest(
+            datasource_name="my_spark_datasource",
+            data_connector_name="my_data_connector",
+            batch_data=sdf,
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            partition_request={
+                "partition_identifiers": {
+                    "an_example_key": "a",
+                    "another_example_key": "b",
+                }
+            },
+        )
 
-    validator = context.get_validator(
-        batch_request=batch_request, expectation_suite=expectation_suite
-    )
+        expectation_suite = context.create_expectation_suite(
+            "my_suite", overwrite_existing=True
+        )
 
-    return validator
+        validator = context.get_validator(
+            batch_request=batch_request, expectation_suite=expectation_suite
+        )
+
+        return validator
+    else:
+        return None
 
 
 def get_sqlalchemy_runtime_validator(df):
@@ -673,73 +681,74 @@ def test_profiler_all_expectation_types_spark(
     What does this test do and why?
     Ensures that all available expectation types work as expected for spark
     """
-    context = titanic_data_context_modular_api
+    if taxi_validator_spark is not None:
+        context = titanic_data_context_modular_api
 
-    ignored_columns = [
-        "pickup_location_id",
-        "dropoff_location_id",
-        "fare_amount",
-        "extra",
-        "mta_tax",
-        "tip_amount",
-        "tolls_amount",
-        "improvement_surcharge",
-        "congestion_surcharge",
-    ]
-    semantic_types = {
-        "datetime": ["pickup_datetime", "dropoff_datetime"],
-        "numeric": ["total_amount", "passenger_count"],
-        "value_set": [
-            "payment_type",
-            "rate_code_id",
-            "store_and_fwd_flag",
-            "passenger_count",
-        ],
-        "boolean": ["store_and_fwd_flag"],
-    }
+        ignored_columns = [
+            "pickup_location_id",
+            "dropoff_location_id",
+            "fare_amount",
+            "extra",
+            "mta_tax",
+            "tip_amount",
+            "tolls_amount",
+            "improvement_surcharge",
+            "congestion_surcharge",
+        ]
+        semantic_types = {
+            "datetime": ["pickup_datetime", "dropoff_datetime"],
+            "numeric": ["total_amount", "passenger_count"],
+            "value_set": [
+                "payment_type",
+                "rate_code_id",
+                "store_and_fwd_flag",
+                "passenger_count",
+            ],
+            "boolean": ["store_and_fwd_flag"],
+        }
 
-    profiler = UserConfigurableProfiler(
-        taxi_validator_spark,
-        semantic_types_dict=semantic_types,
-        ignored_columns=ignored_columns,
-        # TODO: Add primary_or_compound_key test
-        #  primary_or_compound_key=[
-        #     "vendor_id",
-        #     "pickup_datetime",
-        #     "dropoff_datetime",
-        #     "trip_distance",
-        #     "pickup_location_id",
-        #     "dropoff_location_id",
-        #  ],
-    )
+        profiler = UserConfigurableProfiler(
+            taxi_validator_spark,
+            semantic_types_dict=semantic_types,
+            ignored_columns=ignored_columns,
+            # TODO: Add primary_or_compound_key test
+            #  primary_or_compound_key=[
+            #     "vendor_id",
+            #     "pickup_datetime",
+            #     "dropoff_datetime",
+            #     "trip_distance",
+            #     "pickup_location_id",
+            #     "dropoff_location_id",
+            #  ],
+        )
 
-    assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
-    assert len(suite.expectations) == 45
-    (
-        columns_with_expectations,
-        expectations_from_suite,
-    ) = get_set_of_columns_and_expectations_from_suite(suite)
+        assert profiler.column_info.get("rate_code_id")
+        suite = profiler.build_suite()
+        assert len(suite.expectations) == 45
+        (
+            columns_with_expectations,
+            expectations_from_suite,
+        ) = get_set_of_columns_and_expectations_from_suite(suite)
 
-    unexpected_expectations = {
-        "expect_column_values_to_be_unique",
-        "expect_column_values_to_be_null",
-        "expect_compound_columns_to_be_unique",
-    }
-    assert expectations_from_suite == {
-        i for i in possible_expectations_set if i not in unexpected_expectations
-    }
+        unexpected_expectations = {
+            "expect_column_values_to_be_unique",
+            "expect_column_values_to_be_null",
+            "expect_compound_columns_to_be_unique",
+        }
+        assert expectations_from_suite == {
+            i for i in possible_expectations_set if i not in unexpected_expectations
+        }
 
-    ignored_included_columns_overlap = [
-        i for i in columns_with_expectations if i in ignored_columns
-    ]
-    assert len(ignored_included_columns_overlap) == 0
+        ignored_included_columns_overlap = [
+            i for i in columns_with_expectations if i in ignored_columns
+        ]
+        assert len(ignored_included_columns_overlap) == 0
 
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_spark]
-    )
+        results = context.run_validation_operator(
+            "action_list_operator", assets_to_validate=[taxi_validator_spark]
+        )
 
-    assert results["success"]
+        assert results["success"]
 
 
 def test_profiler_all_expectation_types_sqlalchemy(
