@@ -130,11 +130,11 @@ def checkpoint_new_notebook_assets():
             "metadata": {},
             "execution_count": None,
             "source": """# Running this cell will generate a printout of your Datasources, Data Connectors and Data Assets\n\nfor datasource_name, datasource in context.datasources.items():
-    print(f"Datasource Name: {datasource_name}")
+    print(f"datasource_name: {datasource_name}")
     for data_connector_name, data_connector in datasource.data_connectors.items():
-        print(f"    Data Connector Name: {data_connector_name}")
+        print(f"\tdata_connector_name: {data_connector_name}")
         for data_asset_name in data_connector.get_available_data_asset_names():
-            print(f"        Data Asset Name: {data_asset_name}")""",
+            print(f"\t\tdata_asset_name: {data_asset_name}")""",
             "outputs": [],
         },
         {

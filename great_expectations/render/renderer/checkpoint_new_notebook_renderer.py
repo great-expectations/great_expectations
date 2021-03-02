@@ -60,11 +60,11 @@ The following cells show examples for listing your current configuration. You ca
             """# Running this cell will generate a printout of your Datasources, Data Connectors and Data Assets
 
 for datasource_name, datasource in context.datasources.items():
-    print(f"Datasource Name: {datasource_name}")
+    print(f"datasource_name: {datasource_name}")
     for data_connector_name, data_connector in datasource.data_connectors.items():
-        print(f"    Data Connector Name: {data_connector_name}")
+        print(f"\tdata_connector_name: {data_connector_name}")
         for data_asset_name in data_connector.get_available_data_asset_names():
-            print(f"        Data Asset Name: {data_asset_name}")""",
+            print(f"\t\tdata_asset_name: {data_asset_name}")""",
             lint=True,
         )
         self.add_code_cell("context.list_expectation_suite_names()")
