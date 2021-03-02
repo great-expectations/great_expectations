@@ -47,17 +47,17 @@ The 0.13 major release of Great Expectations introduced a group of new features 
 
 We are actively working on incorporating user feedback, documenting the new V3 API, and making the CLI work with it.
 
-Here are our current recommendations for choosing between the V2 and V3 APIs:
+Here are our current recommendations for choosing between V2 and V3 APIs:
 
-Always install the latest 0.13.x release in order to keep up to date with various enhancements and bug fixes.
+* Always install the latest 0.13.x release in order to keep up to date with various enhancements and bug fixes.
 
-If you start a new project, use V3 API with the following two exceptions:
+* If you start a new project, use V3 API with the following two exceptions:
 
     * If you heavily rely on the CLI
 
     * If you validate in-memory Spark or Pandas DataFrames
 
-    * If you have an existing project on the V2 API, keep using the V2 API for your existing projects.
+* Keep using V2 API for your existing projects.
 
 
 We will announce when V3 API can be used for new projects without any caveats. Also, we will announce when we have documentation/procedure for migrating existing projects from using V2 API to using V3 API.
