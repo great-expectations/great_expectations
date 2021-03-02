@@ -129,13 +129,6 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "context.list_checkpoints()",
-            "outputs": [],
-        },
-        {
-            "cell_type": "code",
-            "metadata": {},
-            "execution_count": None,
             "source": """# Running this cell will generate a printout of your Datasources, Data Connectors and Data Assets\n\nfor datasource_name, datasource in context.datasources.items():
     print(f"Datasource Name: {datasource_name}")
     for data_connector_name, data_connector in datasource.data_connectors.items():

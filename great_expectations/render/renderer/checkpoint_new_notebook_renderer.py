@@ -56,7 +56,6 @@ context = ge.get_context()
             """# Customize Your Configuration
 The following cells show examples for listing your current configuration. You can replace values in the sample configuration with these values to customize your Checkpoint."""
         )
-        self.add_code_cell("context.list_checkpoints()")
         self.add_code_cell(
             """# Running this cell will generate a printout of your Datasources, Data Connectors and Data Assets
 
