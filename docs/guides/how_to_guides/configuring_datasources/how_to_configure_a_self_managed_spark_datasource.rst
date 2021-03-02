@@ -71,7 +71,7 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         #. **Replace lines in great_expectations.yml file**
 
@@ -114,7 +114,7 @@ To enable running Great Expectations against dataframe created by Spark SQL quer
         Now, when creating new expectation suite, query `main` will be available in the list of datasources.
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         #. **Replace lines in great_expectations.yml file**
 
@@ -163,7 +163,7 @@ Additional Notes
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         #. **Configuring Spark options**
 
@@ -205,7 +205,7 @@ Additional Notes
                 spark.hadoop.hive.metastore.uris    thrift://localhost:9083
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         #. **Configuring Spark options**
 
