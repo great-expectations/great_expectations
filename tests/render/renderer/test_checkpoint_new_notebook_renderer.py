@@ -8,64 +8,6 @@ from great_expectations.render.renderer.checkpoint_new_notebook_renderer import 
 )
 
 
-@pytest.fixture
-def assetless_dataconnector_context(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-):
-    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-    root_directory = context.root_directory
-    assert len(context.list_datasources()) == 1
-
-    # mangle the datasource in a specific way
-    config = context.get_config_with_variables_substituted()
-    config.datasources["my_datasource"]["data_connectors"].pop(
-        "my_basic_data_connector"
-    )
-    config.datasources["my_datasource"]["data_connectors"].pop(
-        "my_runtime_data_connector"
-    )
-    config.datasources["my_datasource"]["data_connectors"].pop(
-        "my_special_data_connector"
-    )
-    # Leave the ConfiguredAssetDataConnector "my_other_data_connector"
-    # config.datasources["my_datasource"]["data_connectors"].pop(
-    #     "my_other_data_connector"
-    # )
-
-    # Remove the only asset from the ConfiguredAssetDataConnector "my_other_data_connector"
-    config.datasources["my_datasource"]["data_connectors"]["my_other_data_connector"][
-        "assets"
-    ].pop("users")
-    return BaseDataContext(project_config=config, context_root_dir=root_directory)
-
-
-@pytest.fixture
-def deterministic_asset_dataconnector_context(
-    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-):
-    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
-    root_directory = context.root_directory
-    assert len(context.list_datasources()) == 1
-
-    # mangle the datasource in a specific way
-    config = context.get_config_with_variables_substituted()
-    config.datasources["my_datasource"]["data_connectors"].pop(
-        "my_basic_data_connector"
-    )
-    config.datasources["my_datasource"]["data_connectors"].pop(
-        "my_runtime_data_connector"
-    )
-    config.datasources["my_datasource"]["data_connectors"].pop(
-        "my_special_data_connector"
-    )
-    # Leave the ConfiguredAssetDataConnector "my_other_data_connector"
-    # config.datasources["my_datasource"]["data_connectors"].pop(
-    #     "my_other_data_connector"
-    # )
-
-    return BaseDataContext(project_config=config, context_root_dir=root_directory)
-
-
 def test_find_datasource_with_asset_on_context_with_no_datasources(
     empty_data_context,
 ):
@@ -378,16 +320,7 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
 
     context: DataContext = deterministic_asset_dataconnector_context
 
-    assert context.list_checkpoints() == [
-        "my_simple_checkpoint_with_slack_and_notify_with_all",
-        "my_nested_checkpoint_template_1",
-        "my_nested_checkpoint_template_3",
-        "my_nested_checkpoint_template_2",
-        "my_simple_checkpoint_with_site_names",
-        "my_minimal_simple_checkpoint",
-        "my_simple_checkpoint_with_slack",
-        "my_simple_template_checkpoint",
-    ]
+    assert context.list_checkpoints() == []
     context.save_expectation_suite(titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
@@ -435,16 +368,7 @@ def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
 ):
     context: DataContext = assetless_dataconnector_context
 
-    assert context.list_checkpoints() == [
-        "my_simple_checkpoint_with_slack_and_notify_with_all",
-        "my_nested_checkpoint_template_1",
-        "my_nested_checkpoint_template_3",
-        "my_nested_checkpoint_template_2",
-        "my_simple_checkpoint_with_site_names",
-        "my_minimal_simple_checkpoint",
-        "my_simple_checkpoint_with_slack",
-        "my_simple_template_checkpoint",
-    ]
+    assert context.list_checkpoints() == []
 
     # This config is bad because of a missing expectation suite
 

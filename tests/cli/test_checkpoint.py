@@ -378,7 +378,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     mock_emit,
     caplog,
     monkeypatch,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    deterministic_asset_dataconnector_context,
     titanic_expectation_suite,
 ):
     """
@@ -387,7 +387,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     This test builds that notebook and runs it to generate a checkpoint and then tests the resulting configuration in the checkpoint file.
     The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the checkpoint configuration.
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = deterministic_asset_dataconnector_context
     root_dir: str = context.root_directory
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     assert context.list_checkpoints() == []
@@ -469,7 +469,7 @@ runtime_configuration: {}
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_special_data_connector
+      data_connector_name: my_other_data_connector
       data_asset_name: users
       partition_request:
         index: -1
