@@ -99,11 +99,9 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
 
     df = ge.read_csv(
         file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv"),
-        # parse_dates=['pickup_datetime', 'dropoff_datetime'],
+        parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
 
-    # df = df[["pickup_datetime"]]
-    # df['dropoff_datetime'] = df["dropoff_datetime"].apply(lambda x: dateutil.parser.parse(x))
     return get_pandas_runtime_validator(titanic_data_context_modular_api, df)
 
 
@@ -114,7 +112,8 @@ def taxi_validator_spark(titanic_data_context_modular_api):
     Ensures that all available expectation types work as expected
     """
     df = ge.read_csv(
-        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv")
+        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv"),
+        parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
     return get_spark_runtime_validator(titanic_data_context_modular_api, df)
 
@@ -126,7 +125,8 @@ def taxi_validator_sqlalchemy(titanic_data_context_modular_api):
     Ensures that all available expectation types work as expected
     """
     df = ge.read_csv(
-        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv")
+        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv"),
+        parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
     return get_sqlalchemy_runtime_validator(df)
 
@@ -319,6 +319,50 @@ def test_build_suite_no_config(titanic_validator, possible_expectations_set):
 
     assert expectations_from_suite.issubset(possible_expectations_set)
     assert len(suite.expectations) == 48
+
+
+def test_all_table_columns_populates(taxi_validator_pandas):
+    taxi_profiler = UserConfigurableProfiler(taxi_validator_pandas)
+
+    assert taxi_profiler.all_table_columns == [
+        "vendor_id",
+        "pickup_datetime",
+        "dropoff_datetime",
+        "passenger_count",
+        "trip_distance",
+        "rate_code_id",
+        "store_and_fwd_flag",
+        "pickup_location_id",
+        "dropoff_location_id",
+        "payment_type",
+        "fare_amount",
+        "extra",
+        "mta_tax",
+        "tip_amount",
+        "tolls_amount",
+        "improvement_surcharge",
+        "total_amount",
+        "congestion_surcharge",
+    ]
+
+
+def test_profiler_works_with_batch_object(cardinality_validator):
+    profiler = UserConfigurableProfiler(cardinality_validator.active_batch)
+    assert profiler.primary_or_compound_key == []
+    assert profiler.ignored_columns == []
+    assert profiler.value_set_threshold == "MANY"
+    assert not profiler.table_expectations_only
+    assert profiler.excluded_expectations == []
+
+    assert profiler.all_table_columns == [
+        "col_one",
+        "col_two",
+        "col_very_few",
+        "col_few",
+        "col_many",
+        "col_very_many",
+        "col_unique",
+    ]
 
 
 def test_build_suite_with_config_and_no_semantic_types_dict(
@@ -567,7 +611,6 @@ def test_profiler_all_expectation_types_pandas(
         "congestion_surcharge",
     ]
     semantic_types = {
-        # TODO: Add test for datetime columns
         "datetime": ["pickup_datetime", "dropoff_datetime"],
         "numeric": ["total_amount", "passenger_count"],
         "value_set": [
@@ -623,39 +666,6 @@ def test_profiler_all_expectation_types_pandas(
     assert results["success"]
 
 
-def test_something_new(
-    titanic_data_context_modular_api, taxi_validator_pandas, possible_expectations_set
-):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected for pandas
-    """
-    context = titanic_data_context_modular_api
-
-    semantic_types = {
-        # TODO: Add test for datetime columns
-        "datetime": ["pickup_datetime", "dropoff_datetime"],
-    }
-
-    profiler = UserConfigurableProfiler(
-        taxi_validator_pandas,
-        semantic_types_dict=semantic_types,
-        # TODO: Add primary_or_compound_key test
-        #  primary_or_compound_key=[
-        #     "vendor_id",
-        #     "pickup_datetime",
-        #     "dropoff_datetime",
-        #     "trip_distance",
-        #     "pickup_location_id",
-        #     "dropoff_location_id",
-        #  ],
-    )
-
-    suite = profiler.build_suite()
-
-    print(suite)
-
-
 def test_profiler_all_expectation_types_spark(
     titanic_data_context_modular_api, taxi_validator_spark, possible_expectations_set
 ):
@@ -677,8 +687,7 @@ def test_profiler_all_expectation_types_spark(
         "congestion_surcharge",
     ]
     semantic_types = {
-        # TODO: Add test for datetime columns
-        #  "datetime": ["pickup_datetime", "dropoff_datetime"],
+        "datetime": ["pickup_datetime", "dropoff_datetime"],
         "numeric": ["total_amount", "passenger_count"],
         "value_set": [
             "payment_type",
@@ -706,7 +715,7 @@ def test_profiler_all_expectation_types_spark(
 
     assert profiler.column_info.get("rate_code_id")
     suite = profiler.build_suite()
-    assert len(suite.expectations) == 43
+    assert len(suite.expectations) == 45
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -716,7 +725,6 @@ def test_profiler_all_expectation_types_spark(
         "expect_column_values_to_be_unique",
         "expect_column_values_to_be_null",
         "expect_compound_columns_to_be_unique",
-        "expect_column_values_to_be_between",
     }
     assert expectations_from_suite == {
         i for i in possible_expectations_set if i not in unexpected_expectations
@@ -785,7 +793,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
 
     assert profiler.column_info.get("rate_code_id")
     suite = profiler.build_suite()
-    assert len(suite.expectations) == 43
+    assert len(suite.expectations) == 45
     (
         columns_with_expectations,
         expectations_from_suite,
@@ -795,7 +803,6 @@ def test_profiler_all_expectation_types_sqlalchemy(
         "expect_column_values_to_be_unique",
         "expect_column_values_to_be_null",
         "expect_compound_columns_to_be_unique",
-        "expect_column_values_to_be_between",
     }
     assert expectations_from_suite == {
         i for i in possible_expectations_set if i not in unexpected_expectations

@@ -110,8 +110,11 @@ class UserConfigurableProfiler:
                 execution_engine=self.profile_dataset.data.execution_engine,
                 batches=[self.profile_dataset],
             )
-        if isinstance(self.profile_dataset, Validator):
-            self.all_table_columns = profile_dataset.get_metric(
+            self.all_table_columns = self.profile_dataset.get_metric(
+                MetricConfiguration("table.columns", dict())
+            )
+        elif isinstance(self.profile_dataset, Validator):
+            self.all_table_columns = self.profile_dataset.get_metric(
                 MetricConfiguration("table.columns", dict())
             )
         else:
@@ -162,8 +165,10 @@ class UserConfigurableProfiler:
         ]
 
         for column_name in included_columns:
-            self._add_column_cardinality_to_column_info(profile_dataset, column_name)
-            self._add_column_type_to_column_info(profile_dataset, column_name)
+            self._add_column_cardinality_to_column_info(
+                self.profile_dataset, column_name
+            )
+            self._add_column_type_to_column_info(self.profile_dataset, column_name)
 
         if self.semantic_types_dict is not None:
             self._validate_semantic_types_dict(self.profile_dataset)
