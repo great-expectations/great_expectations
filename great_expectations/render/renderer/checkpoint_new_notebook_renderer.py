@@ -51,17 +51,21 @@ context = ge.get_context()
             lint=True,
         )
 
-    def _add_optional_list_your_config(self):
+    def _add_optional_customize_your_config(self):
         self.add_markdown_cell(
-            """# List Your Configuration (Optional)
-The following cells show examples for listing your current configuration.
-
-You may wish to run these cells to view your currently configured Checkpoints and choose a Datasource & Expectation Suite."""
+            """# Customize Your Configuration
+The following cells show examples for listing your current configuration. You can replace values in the sample configuration with these values to customize your Checkpoint."""
         )
         self.add_code_cell("context.list_checkpoints()")
         self.add_code_cell(
-            """list_of_existing_datasources_by_name = [datasource["name"] for datasource in context.list_datasources()]
-list_of_existing_datasources_by_name""",
+            """# Running this cell will generate a printout of your Datasources, Data Connectors and Data Assets
+
+for datasource_name, datasource in context.datasources.items():
+    print(f"Datasource Name: {datasource_name}")
+    for data_connector_name, data_connector in datasource.data_connectors.items():
+        print(f"    Data Connector Name: {data_connector_name}")
+        for data_asset_name in data_connector.get_available_data_asset_names():
+            print(f"        Data Asset Name: {data_asset_name}")""",
             lint=True,
         )
         self.add_code_cell("context.list_expectation_suite_names()")
@@ -97,7 +101,7 @@ Glad you asked! Checkpoints are very versatile. For example, you can validate ma
             first_expectation_suite_name = (
                 first_expectation_suite.expectation_suite_name
             )
-            sample_yaml_str = 'sample_yaml = """'
+            sample_yaml_str = f'{self.checkpoint_name}_config = """'
             sample_yaml_str += f"""
 name: {self.checkpoint_name}
 config_version: 1.0
@@ -113,7 +117,7 @@ validations:
     expectation_suite_name: {first_expectation_suite_name}
 """
             sample_yaml_str += '"""'
-            sample_yaml_str += "\nprint(sample_yaml)"
+            sample_yaml_str += f"\nprint({self.checkpoint_name}_config)"
 
             self.add_code_cell(
                 sample_yaml_str,
@@ -182,8 +186,8 @@ You may also wish to open up Data Docs to review the results of the Checkpoint r
         self._notebook: nbformat.NotebookNode = nbformat.v4.new_notebook()
         self._add_header()
         self._add_imports()
-        self._add_optional_list_your_config()
         self._add_sample_checkpoint_config()
+        self._add_optional_customize_your_config()
         self._add_test_and_save_your_checkpoint_configuration()
         self._add_review_checkpoint()
         self._add_optional_run_checkpoint()

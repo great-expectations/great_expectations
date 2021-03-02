@@ -119,11 +119,11 @@ def checkpoint_new_notebook_assets():
             "outputs": [],
         },
     ]
-    optional_list_your_config = [
+    optional_customize_your_config = [
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# List Your Configuration (Optional)\nThe following cells show examples for listing your current configuration.\n\nYou may wish to run these cells to view your currently configured Checkpoints and choose a Datasource & Expectation Suite.""",
+            "source": """# Customize Your Configuration\nThe following cells show examples for listing your current configuration. You can replace values in the sample configuration with these values to customize your Checkpoint.""",
         },
         {
             "cell_type": "code",
@@ -136,7 +136,12 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": """list_of_existing_datasources_by_name = [\n    datasource["name"] for datasource in context.list_datasources()\n]\nlist_of_existing_datasources_by_name""",
+            "source": """# Running this cell will generate a printout of your Datasources, Data Connectors and Data Assets\n\nfor datasource_name, datasource in context.datasources.items():
+    print(f"Datasource Name: {datasource_name}")
+    for data_connector_name, data_connector in datasource.data_connectors.items():
+        print(f"    Data Connector Name: {data_connector_name}")
+        for data_asset_name in data_connector.get_available_data_asset_names():
+            print(f"        Data Asset Name: {data_asset_name}")""",
             "outputs": [],
         },
         {
@@ -161,7 +166,7 @@ def checkpoint_new_notebook_assets():
             "metadata": {},
             "execution_count": None,
             "source": (
-                'sample_yaml = """\n'
+                'my_checkpoint_name_config = """\n'
                 "name: my_checkpoint_name\n"
                 """config_version: 1.0
 class_name: SimpleCheckpoint
@@ -176,7 +181,7 @@ validations:
     expectation_suite_name: Titanic.warning
 """
                 '"""'
-                "\nprint(sample_yaml)"
+                "\nprint(my_checkpoint_name_config)"
             ),
             "outputs": [],
         },
@@ -265,7 +270,7 @@ validations:
     return {
         "header": header,
         "imports": imports,
-        "optional_list_your_config": optional_list_your_config,
+        "optional_customize_your_config": optional_customize_your_config,
         "sample_checkpoint_config_markdown_description": sample_checkpoint_config_markdown_description,
         "sample_checkpoint_config_code_correct": sample_checkpoint_config_code_correct,
         "sample_checkpoint_config_markdown_error_message": sample_checkpoint_config_markdown_error_message,
@@ -302,12 +307,12 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
     expected_cells = (
         checkpoint_new_notebook_assets["header"]
         + checkpoint_new_notebook_assets["imports"]
-        + checkpoint_new_notebook_assets["optional_list_your_config"]
         + checkpoint_new_notebook_assets[
             "sample_checkpoint_config_markdown_description"
         ]
         # Testing to make sure everything in the notebook but especially this checkpoint config code is correct.
         + checkpoint_new_notebook_assets["sample_checkpoint_config_code_correct"]
+        + checkpoint_new_notebook_assets["optional_customize_your_config"]
         + checkpoint_new_notebook_assets["test_and_save_your_checkpoint_configuration"]
         + checkpoint_new_notebook_assets["review_checkpoint"]
         + checkpoint_new_notebook_assets["optional_run_checkpoint"]
@@ -349,7 +354,6 @@ def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
     expected_cells = (
         checkpoint_new_notebook_assets["header"]
         + checkpoint_new_notebook_assets["imports"]
-        + checkpoint_new_notebook_assets["optional_list_your_config"]
         + checkpoint_new_notebook_assets[
             "sample_checkpoint_config_markdown_description"
         ]
@@ -357,6 +361,7 @@ def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
         + checkpoint_new_notebook_assets[
             "sample_checkpoint_config_markdown_error_message"
         ]
+        + checkpoint_new_notebook_assets["optional_customize_your_config"]
         + checkpoint_new_notebook_assets["test_and_save_your_checkpoint_configuration"]
         + checkpoint_new_notebook_assets["review_checkpoint"]
         + checkpoint_new_notebook_assets["optional_run_checkpoint"]
