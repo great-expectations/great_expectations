@@ -172,9 +172,6 @@ class SqlAlchemyConnectionManager:
         self._connections = dict()
 
     def get_engine(self, connection_string):
-        if not create_engine:
-            return None
-
         with self.lock:
             if connection_string not in self._connections:
                 try:
@@ -182,9 +179,10 @@ class SqlAlchemyConnectionManager:
                     conn = engine.connect()
                     self._connections[connection_string] = conn
 
-                except:
+                except (ImportError, self.sa.exc.SQLAlchemyError):
                     print(f"Unable to establish connection with {connection_string}")
                     raise
+
             return self._connections[connection_string]
 
 
