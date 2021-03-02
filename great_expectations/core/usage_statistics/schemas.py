@@ -316,17 +316,17 @@ cli_suite_edit_expectation_suite_payload_schema = {
         "anonymized_expectation_suite_name": {
             "$ref": "#/definitions/anonymized_string"
         },
-        "cli_version": {"type": "string", "maxLength": 256},
+        "api_version": {"type": "string", "maxLength": 256},
     },
     "required": ["anonymized_expectation_suite_name"],
     "additionalProperties": False,
 }
 
-cli_version_payload_schema = {
+api_version_payload_schema = {
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
-        "cli_version": {"type": "string", "maxLength": 256},
+        "api_version": {"type": "string", "maxLength": 256},
     },
     "additionalProperties": False,
 }
@@ -338,7 +338,7 @@ cli_new_ds_choice_payload_schema = {
     "properties": {
         "type": {"type": "string", "maxLength": 256},
         "db": {"type": "string", "maxLength": 256},
-        "cli_version": {"type": "string", "maxLength": 256},
+        "api_version": {"type": "string", "maxLength": 256},
     },
     "required": ["type"],
     "additionalProperties": False,
@@ -373,7 +373,7 @@ usage_statistics_record_schema = {
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
         "cli_suite_edit_expectation_suite_payload": cli_suite_edit_expectation_suite_payload_schema,
-        "cli_version_payload": cli_version_payload_schema,
+        "api_version_payload": api_version_payload_schema,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload_schema,
         "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
     },
@@ -492,7 +492,7 @@ usage_statistics_record_schema = {
                         "cli.validation_operator.run",
                     ],
                 },
-                "event_payload": {"$ref": "#/definitions/cli_version_payload"},
+                "event_payload": {"$ref": "#/definitions/api_version_payload"},
             },
         },
     ],
