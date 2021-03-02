@@ -1,6 +1,9 @@
 import pandas as pd
+import pytest
 
-from great_expectations.datasource.util import hash_pandas_dataframe
+from great_expectations.execution_engine.pandas_execution_engine import (
+    hash_pandas_dataframe,
+)
 
 
 def test_hash_pandas_dataframe_hashable_df():

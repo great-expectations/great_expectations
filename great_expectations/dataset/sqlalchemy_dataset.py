@@ -1055,7 +1055,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         [
                             (
                                 sa.and_(
-                                    bins[idx] <= sa.column(column),
+                                    sa.column(column) >= bins[idx],
                                     sa.column(column) < bins[idx + 1],
                                 ),
                                 1,
@@ -1079,7 +1079,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ):
             case_conditions.append(
                 sa.func.sum(
-                    sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
+                    sa.case([(sa.column(column) >= bins[-2], 1)], else_=0)
                 ).label("bin_" + str(len(bins) - 1))
             )
         else:
@@ -1089,7 +1089,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         [
                             (
                                 sa.and_(
-                                    bins[-2] <= sa.column(column),
+                                    sa.column(column) >= bins[-2],
                                     sa.column(column) <= bins[-1],
                                 ),
                                 1,
@@ -1445,9 +1445,15 @@ WHERE
         total_count_query = sa.select([sa.func.count()]).select_from(self._table)
         total_count = self.engine.execute(total_count_query).fetchone()[0]
 
+        if total_count > 0:
+            unexpected_percent = 100.0 * unexpected_count / total_count
+        else:
+            # If no rows, then zero percent are unexpected.
+            unexpected_percent = 0
+
         return {
             "success": unexpected_count == 0,
-            "result": {"unexpected_percent": 100.0 * unexpected_count / total_count},
+            "result": {"unexpected_percent": unexpected_percent},
         }
 
     ###
@@ -1699,26 +1705,26 @@ WHERE
 
         elif max_value is None:
             if strict_min:
-                return min_value < sa.column(column)
+                return sa.column(column) > min_value
             else:
-                return min_value <= sa.column(column)
+                return sa.column(column) >= min_value
 
         else:
             if strict_min and strict_max:
                 return sa.and_(
-                    min_value < sa.column(column), sa.column(column) < max_value
+                    sa.column(column) > min_value, sa.column(column) < max_value
                 )
             elif strict_min:
                 return sa.and_(
-                    min_value < sa.column(column), sa.column(column) <= max_value
+                    sa.column(column) > min_value, sa.column(column) <= max_value
                 )
             elif strict_max:
                 return sa.and_(
-                    min_value <= sa.column(column), sa.column(column) < max_value
+                    sa.column(column) >= min_value, sa.column(column) < max_value
                 )
             else:
                 return sa.and_(
-                    min_value <= sa.column(column), sa.column(column) <= max_value
+                    sa.column(column) >= min_value, sa.column(column) <= max_value
                 )
 
     @DocInherit

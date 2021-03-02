@@ -5,6 +5,7 @@ import sys
 from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Any, Optional, Union
+from urllib.parse import urlparse
 
 import numpy as np
 import pandas as pd
@@ -28,6 +29,9 @@ except ImportError:
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
+
+
+_SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
 
 def nested_update(d, u):
@@ -337,3 +341,65 @@ def parse_string_to_datetime(
 
 def datetime_to_int(dt: datetime.date) -> int:
     return int(dt.strftime("%Y%m%d%H%M%S"))
+
+
+# S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
+class S3Url:
+    """
+    >>> s = S3Url("s3://bucket/hello/world")
+    >>> s.bucket
+    'bucket'
+    >>> s.key
+    'hello/world'
+    >>> s.url
+    's3://bucket/hello/world'
+
+    >>> s = S3Url("s3://bucket/hello/world?qwe1=3#ddd")
+    >>> s.bucket
+    'bucket'
+    >>> s.key
+    'hello/world?qwe1=3#ddd'
+    >>> s.url
+    's3://bucket/hello/world?qwe1=3#ddd'
+
+    >>> s = S3Url("s3://bucket/hello/world#foo?bar=2")
+    >>> s.key
+    'hello/world#foo?bar=2'
+    >>> s.url
+    's3://bucket/hello/world#foo?bar=2'
+    """
+
+    def __init__(self, url):
+        self._parsed = urlparse(url, allow_fragments=False)
+
+    @property
+    def bucket(self):
+        return self._parsed.netloc
+
+    @property
+    def key(self):
+        if self._parsed.query:
+            return self._parsed.path.lstrip("/") + "?" + self._parsed.query
+        else:
+            return self._parsed.path.lstrip("/")
+
+    @property
+    def suffix(self) -> Optional[str]:
+        """
+        Attempts to get a file suffix from the S3 key.
+        If can't find one returns `None`.
+        """
+        splits = self._parsed.path.rsplit(".", 1)
+        _suffix = splits[-1]
+        if len(_suffix) > 0 and len(splits) > 1:
+            return str(_suffix)
+        return None
+
+    @property
+    def url(self):
+        return self._parsed.geturl()
+
+
+def sniff_s3_compression(s3_url: S3Url) -> str:
+    """Attempts to get read_csv compression from s3_url"""
+    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix, "infer")
