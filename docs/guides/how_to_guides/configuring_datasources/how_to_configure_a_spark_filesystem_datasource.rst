@@ -14,7 +14,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -106,7 +106,7 @@ Steps
             Finally, if all goes well and you receive a confirmation on your Terminal screen, you can proceed with exploring the data sets in your new filesystem-backed Spark data source.
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -234,7 +234,7 @@ Additional Notes
     command is executed.
 
 #.
-    For the Experimental API (0.13), relative path locations should be specified from the perspective of the ``great_expectations/`` directory.
+    For the V3 (Batch Request) API, relative path locations should be specified from the perspective of the ``great_expectations/`` directory.
 
 --------
 Comments
