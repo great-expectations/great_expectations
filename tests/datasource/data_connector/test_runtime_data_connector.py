@@ -17,7 +17,6 @@ def test_self_check(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
-
     assert test_runtime_data_connector.self_check() == {
         "class_name": "RuntimeDataConnector",
         "data_asset_count": 1,
@@ -41,7 +40,7 @@ def test_error_checking(basic_datasource):
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    # Test for an unknown execution environment
+    # Test for an unknown datasource
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[

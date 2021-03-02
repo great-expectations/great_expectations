@@ -29,7 +29,6 @@ DEFAULT_DATA_ASSET_NAME: str = "IN_MEMORY_DATA_ASSET"
 DEFAULT_DELIMITER: str = "-"
 
 
-# TODO: <Alex>We need a mechanism for specifying the data_asset_name for RuntimeDataConnector (otherwise, it will always be the default).</Alex>
 class RuntimeDataConnector(DataConnector):
     def __init__(
         self,
@@ -49,7 +48,6 @@ class RuntimeDataConnector(DataConnector):
         self._runtime_keys = runtime_keys
 
     def _refresh_data_references_cache(self):
-        """"""
         # Map data_references to batch_definitions
         data_reference: str = self._get_data_reference_list()[0]
         mapped_batch_definition_list: List[
@@ -151,13 +149,11 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: BatchRequestBase,
     ) -> List[BatchDefinition]:
-        # rename to _validate_batch_request_base?
         if batch_request.data_asset_name:
             data_asset_name = batch_request.data_asset_name
         else:
             data_asset_name = DEFAULT_DATA_ASSET_NAME
 
-        # set the property
         batch_request.data_asset_name = data_asset_name
 
         self._validate_batch_request(batch_request=batch_request)
