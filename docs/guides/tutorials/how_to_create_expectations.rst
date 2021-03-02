@@ -85,7 +85,7 @@ edit this Expectation Suite, use the :ref:`CLI <command_line>` again to generate
 
 If you do not use the :ref:`CLI <command_line>`, create a new notebook in the``great_expectations/notebooks/`` folder in your project.
 
-.. admonition:: If Using Experimental API (0.13)
+.. admonition:: If Using V3 (Batch Request) API
 
     The following steps are only applicable for the stable API (up to 0.12.x). If you are using the experimental API (0.13), follow the steps outlined in the how-to guide on :ref:`how to create a Expectation Suite without the CLI <how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_without_the_cli>`.
 

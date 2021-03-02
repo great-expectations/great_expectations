@@ -19,7 +19,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -189,7 +189,7 @@ Steps
             After this confirmation, you can proceed with exploring the data sets in your new Snowflake Datasource.
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -365,7 +365,7 @@ Additional Notes
 
 
 #.
-    **Single sign-on (SSO) Authentication for Experimental API (0.13)**
+    **Single sign-on (SSO) Authentication for V3 (Batch Request) API**
 
     Add ``connect_args`` and ``authenticator`` to ``credentials`` in the yaml configuration.
     The value for ``authenticator`` can be ``externalbrowser``, or a valid okta URL.
@@ -391,7 +391,7 @@ Additional Notes
     **Note** This feature is still experimental, so please leave us a comment below if you run into any problems.
 
 #.
-    **Key pair Authentication for Experimental API (0.13)**
+    **Key pair Authentication for V3 (Batch Request) API**
 
     Add ``private_key_path`` and optional ``private_key_passphrase`` to ``credentials`` in the yaml configuration.
 
