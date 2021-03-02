@@ -14,7 +14,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -105,7 +105,7 @@ Steps
 
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -234,7 +234,7 @@ Additional Notes
 ----------------
 
 #.
-    For the Stable API (up to 0.12.x), relative path locations (e.g. for the ``base_directory``) should be specified from the perspective of the directory, in which the
+    For the V2 (Batch Kwargs) API, relative path locations (e.g. for the ``base_directory``) should be specified from the perspective of the directory, in which the
 
     .. code-block:: bash
 
@@ -244,7 +244,7 @@ Additional Notes
 
 
 #.
-    For the Experimental API (0.13), relative path locations  (e.g. for the ``base_directory``) should be specified from the perspective of the ``great_expectations/`` directory.
+    For the V3 (Batch Request) API, relative path locations  (e.g. for the ``base_directory``) should be specified from the perspective of the ``great_expectations/`` directory.
 
 
 --------

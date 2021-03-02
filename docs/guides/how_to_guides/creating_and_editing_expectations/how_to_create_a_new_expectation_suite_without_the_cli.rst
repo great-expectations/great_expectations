@@ -8,7 +8,7 @@ In some environments, you might not be able to use the :ref:`CLI <command_line>`
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -57,7 +57,7 @@ In some environments, you might not be able to use the :ref:`CLI <command_line>`
         This will create a JSON file with your Expectation Suite in the Store you have configured, which you can then load and use for :ref:`how_to_guides__validation`.
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 

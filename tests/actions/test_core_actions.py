@@ -5,6 +5,7 @@ import pytest
 from freezegun import freeze_time
 from requests import Session
 
+from great_expectations.checkpoint.util import smtplib
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -15,6 +16,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.validation_operators import (
+    EmailAction,
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
     PagerdutyAlertAction,
@@ -358,6 +360,140 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
         "Request to Microsoft Teams webhook at http://testing returned error 400"
         in caplog.text
     )
+
+
+class MockSMTPServer:
+    def __init__(self, raise_on, exception):
+        self.raise_on = raise_on
+        self.exception = exception
+
+    def __call__(self, *arg, **kwargs):
+        if self.raise_on == "__init__":
+            raise self.exception
+        return self
+
+    def starttls(self, *args, **kwargs):
+        if self.raise_on == "starttls":
+            raise self.exception
+        return None
+
+    def login(self, *args, **kwargs):
+        if self.raise_on == "login":
+            raise self.exception
+        return None
+
+    def sendmail(self, *args, **kwargs):
+        if self.raise_on == "sendmail":
+            raise self.exception
+        return None
+
+    def quit(self, *args, **kwargs):
+        if self.raise_on == "quit":
+            raise self.exception
+        return None
+
+
+@pytest.mark.parametrize(
+    (
+        "class_to_patch,use_tls,use_ssl,raise_on,exception,expected,"
+        "data_context_parameterized_expectation_suite,"
+        "validation_result_suite,validation_result_suite_id"
+    ),
+    [
+        ("SMTP", False, False, None, None, "success", None, None, None),
+        ("SMTP", True, False, None, None, "success", None, None, None),
+        ("SMTP", False, False, None, None, "success", None, None, None),
+        ("SMTP_SSL", False, True, None, None, "success", None, None, None),
+        (
+            "SMTP_SSL",
+            False,
+            True,
+            "__init__",
+            smtplib.SMTPConnectError(421, "Can't connect"),
+            None,
+            None,
+            None,
+            None,
+        ),
+        (
+            "SMTP",
+            True,
+            False,
+            "starttls",
+            smtplib.SMTPConnectError(421, "Can't connect"),
+            None,
+            None,
+            None,
+            None,
+        ),
+        (
+            "SMTP",
+            True,
+            False,
+            "login",
+            smtplib.SMTPAuthenticationError(534, "Can't authenticate"),
+            None,
+            None,
+            None,
+            None,
+        ),
+    ],
+    indirect=[
+        "data_context_parameterized_expectation_suite",
+        "validation_result_suite",
+        "validation_result_suite_id",
+    ],
+    scope="module",
+)
+def test_EmailAction(
+    class_to_patch,
+    use_tls,
+    use_ssl,
+    raise_on,
+    exception,
+    expected,
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
+    with mock.patch.object(
+        smtplib,
+        class_to_patch,
+        new=MockSMTPServer(raise_on=raise_on, exception=exception),
+    ):
+        renderer = {
+            "module_name": "great_expectations.render.renderer.email_renderer",
+            "class_name": "EmailRenderer",
+        }
+        smtp_address = "test"
+        smtp_port = 999
+        sender_login = "test"
+        sender_password = "test"
+        sender_alias = "other"
+        receiver_emails = "test"
+        notify_on = "all"
+        email_action = EmailAction(
+            data_context=data_context_parameterized_expectation_suite,
+            renderer=renderer,
+            smtp_address=smtp_address,
+            smtp_port=smtp_port,
+            sender_login=sender_login,
+            sender_password=sender_password,
+            sender_alias=sender_alias,
+            receiver_emails=receiver_emails,
+            notify_on=notify_on,
+            use_tls=use_tls,
+            use_ssl=use_ssl,
+        )
+        assert email_action.sender_login != email_action.sender_alias
+        assert (
+            email_action.run(
+                validation_result_suite_identifier=validation_result_suite_id,
+                validation_result_suite=validation_result_suite,
+                data_asset=None,
+            )
+            == {"email_result": expected}
+        )
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():
