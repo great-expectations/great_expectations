@@ -591,6 +591,8 @@ class EmailAction(ValidationAction):
         self.sender_password = sender_password
         if not sender_alias:
             self.sender_alias = sender_login
+        else:
+            self.sender_alias = sender_alias
         self.receiver_emails_list = list(
             map(lambda x: x.strip(), receiver_emails.split(","))
         )
