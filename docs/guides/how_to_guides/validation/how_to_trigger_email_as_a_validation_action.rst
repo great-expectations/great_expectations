@@ -20,8 +20,9 @@ Steps
 
     smtp_address: [address of the smtp server]
     smtp_port: [port used by the smtp server]
-    sender_email_address: [address used to send the email]
-    sender_email_password: [password used to send the email]
+    sender_login: [login used to send the email]
+    sender_password: [password used to send the email]
+    sender_alias: [optional alias used to send the email (default = sender_login)]
     receiver_emails: [adresses you want to send the email to]  # each address must be separated by commas
 
 
@@ -53,8 +54,9 @@ Steps
                 # or pass in as environment variable
                 smtp_address: ${smtp_address}
                 smtp_port: ${smtp_port}
-                sender_email_address: ${sender_email_address}
-                sender_email_password: ${sender_email_password}
+                sender_login: ${sender_login}
+                sender_password: ${sender_password}
+                sender_alias: ${sender_alias}
                 receiver_emails: ${receiver_emails}  # string containing email addresses separated by commas
 
 3. Run your ``action_list_operator``, to validate a batch of data and receive an email on the success or failure of validation suite.  
@@ -117,8 +119,9 @@ Additional notes
                 # or pass in as environment variable
                 smtp_address: ${smtp_address}
                 smtp_port: ${smtp_port}
-                sender_email_address: ${email_address}
-                sender_email_password: ${sender_email_password}
+                sender_login: ${sender_login}
+                sender_password: ${sender_password}
+                sender_alias: ${sender_alias}
                 receiver_emails: ${receiver_emails} # string containing email addresses separated by commas
 
 

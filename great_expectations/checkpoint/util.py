@@ -150,14 +150,15 @@ def send_email(
     html,
     smtp_address,
     smtp_port,
-    sender_email_address,
-    sender_email_password,
+    sender_login,
+    sender_password,
+    sender_alias,
     receiver_emails_list,
     use_tls,
     use_ssl,
 ):
     msg = MIMEMultipart()
-    msg["From"] = sender_email_address
+    msg["From"] = sender_alias
     msg["To"] = ", ".join(receiver_emails_list)
     msg["Subject"] = title
     msg.attach(MIMEText(html, "html"))
@@ -175,8 +176,8 @@ def send_email(
         else:
             logger.warning("Not using TLS or SSL to send an email is not secure")
             mailserver = smtplib.SMTP(smtp_address, smtp_port)
-        mailserver.login(sender_email_address, sender_email_password)
-        mailserver.sendmail(sender_email_address, receiver_emails_list, msg.as_string())
+        mailserver.login(sender_login, sender_password)
+        mailserver.sendmail(sender_alias, receiver_emails_list, msg.as_string())
         mailserver.quit()
     except smtplib.SMTPConnectError:
         logger.error(f"Failed to connect to the SMTP server at address: {smtp_address}")

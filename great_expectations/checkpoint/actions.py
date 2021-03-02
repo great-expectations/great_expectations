@@ -530,8 +530,9 @@ class EmailAction(ValidationAction):
           # or pass in as environment variable
           smtp_address: ${smtp_address}
           smtp_port: ${smtp_port}
-          sender_email_address: ${email_address}
-          sender_email_password: ${sender_email_password}
+          sender_login: ${email_address}
+          sender_password: ${sender_password}
+          sender_alias: ${sender_alias} # useful to send an email as an alias (default = sender_login)
           receiver_emails: ${receiver_emails} # string containing email addresses separated by commas
           use_tls: False
           use_ssl: True
@@ -543,9 +544,10 @@ class EmailAction(ValidationAction):
         renderer,
         smtp_address,
         smtp_port,
-        sender_email_address,
-        sender_email_password,
+        sender_login,
+        sender_password,
         receiver_emails,
+        sender_alias=None,
         use_tls=None,
         use_ssl=None,
         notify_on="all",
@@ -561,8 +563,9 @@ class EmailAction(ValidationAction):
                }
             smtp_address: adress of the SMTP server used to send the email
             smtp_address: port of the SMTP server used to send the email
-            sender_email_address: email address used to send the email
-            sender_email_password: email address password used to send the email
+            sender_login: login used send the email
+            sender_password: password used to send the email
+            sender_alias: optional alias used to send the email (default = sender_login)
             receiver_emails: email addresses that will be receive the email (separated by commas)
             use_tls: optional use of TLS to send the email (using either TLS or SSL is highly recommanded)
             use_ssl: optional use of SSL to send the email (using either TLS or SSL is highly recommanded)
@@ -584,8 +587,10 @@ class EmailAction(ValidationAction):
             )
         self.smtp_address = smtp_address
         self.smtp_port = smtp_port
-        self.sender_email_address = sender_email_address
-        self.sender_email_password = sender_email_password
+        self.sender_login = sender_login
+        self.sender_password = sender_password
+        if not sender_alias:
+            self.sender_alias = sender_login
         self.receiver_emails_list = list(
             map(lambda x: x.strip(), receiver_emails.split(","))
         )
@@ -593,12 +598,10 @@ class EmailAction(ValidationAction):
         self.use_ssl = use_ssl
         assert smtp_address, "No SMTP server address found in action config."
         assert smtp_port, "No SMTP server port found in action config."
+        assert sender_login, "No login found for sending the email in action config."
         assert (
-            sender_email_address
-        ), "No email address found for sending the email in action config."
-        assert (
-            sender_email_address
-        ), "No email address password found for sending the email in action config."
+            sender_password
+        ), "No password found for sending the email in action config."
         assert (
             receiver_emails
         ), "No email addresses to send the email to in action config."
@@ -649,8 +652,9 @@ class EmailAction(ValidationAction):
                 html,
                 self.smtp_address,
                 self.smtp_port,
-                self.sender_email_address,
-                self.sender_email_password,
+                self.sender_login,
+                self.sender_password,
+                self.sender_alias,
                 self.receiver_emails_list,
                 self.use_tls,
                 self.use_ssl,

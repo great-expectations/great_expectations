@@ -467,8 +467,9 @@ def test_EmailAction(
         }
         smtp_address = "test"
         smtp_port = 999
-        sender_email_address = "test"
-        sender_email_password = "test"
+        sender_login = "test"
+        sender_password = "test"
+        sender_alias = "other"
         receiver_emails = "test"
         notify_on = "all"
         email_action = EmailAction(
@@ -476,13 +477,15 @@ def test_EmailAction(
             renderer=renderer,
             smtp_address=smtp_address,
             smtp_port=smtp_port,
-            sender_email_address=sender_email_address,
-            sender_email_password=sender_email_password,
+            sender_login=sender_login,
+            sender_password=sender_password,
+            sender_alias=sender_alias,
             receiver_emails=receiver_emails,
             notify_on=notify_on,
             use_tls=use_tls,
             use_ssl=use_ssl,
         )
+        assert email_action.sender_login != email_action.sender_alias
         assert (
             email_action.run(
                 validation_result_suite_identifier=validation_result_suite_id,
