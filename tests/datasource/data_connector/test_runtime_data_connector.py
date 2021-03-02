@@ -280,7 +280,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     assert batch_definition_list == expected_batch_definition_list
 
 
-def test_get_batch_definition_list_from_batch_request_length_zero(
+def test_get_batch_definition_list_from_batch_request_with_and_without_name(
     basic_datasource,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -298,7 +298,7 @@ def test_get_batch_definition_list_from_batch_request_length_zero(
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
         "data_connector_name": test_runtime_data_connector.name,
-        "data_asset_name": "nonexistent_data_asset",
+        # "data_asset_name": NO_NAME,
         "batch_data": test_df,
         "partition_request": partition_request,
         "limit": None,
@@ -310,8 +310,28 @@ def test_get_batch_definition_list_from_batch_request_length_zero(
     ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=batch_request
     )
+    assert len(batch_definition_list) == 1
+    # check that default value has been set
+    assert batch_definition_list[0]["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
 
-    assert len(batch_definition_list) == 0
+    # test that name can be set as "my_data_asset"
+    batch_request: dict = {
+        "datasource_name": basic_datasource.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "my_data_asset",
+        "batch_data": test_df,
+        "partition_request": partition_request,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_definition_list: List[
+        BatchDefinition
+    ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_definition_list) == 1
+    # check that default value has been set
+    assert batch_definition_list[0]["data_asset_name"] == "my_data_asset"
 
 
 def test__get_data_reference_list(basic_datasource):

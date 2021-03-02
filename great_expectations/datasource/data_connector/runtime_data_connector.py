@@ -151,6 +151,15 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: BatchRequestBase,
     ) -> List[BatchDefinition]:
+        # rename to _validate_batch_request_base?
+        if batch_request.data_asset_name:
+            data_asset_name = batch_request.data_asset_name
+        else:
+            data_asset_name = DEFAULT_DATA_ASSET_NAME
+
+        # set the property
+        batch_request.data_asset_name = data_asset_name
+
         self._validate_batch_request(batch_request=batch_request)
 
         partition_identifiers: Optional[dict] = None
@@ -167,21 +176,16 @@ class RuntimeDataConnector(DataConnector):
             partition_identifiers = {}
 
         batch_definition_list: List[BatchDefinition]
-
         batch_definition: BatchDefinition = BatchDefinition(
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
-            data_asset_name=DEFAULT_DATA_ASSET_NAME,
+            data_asset_name=batch_request.data_asset_name,
             partition_definition=PartitionDefinition(partition_identifiers),
         )
 
-        if batch_definition_matches_batch_request(
-            batch_definition=batch_definition, batch_request=batch_request
-        ):
-            batch_definition_list = [batch_definition]
-        else:
-            batch_definition_list = []
-
+        # skipping test for batch_definition_matches_batch_request since data is already passed in at runtime
+        # batch_definition will never be empty
+        batch_definition_list = [batch_definition]
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(

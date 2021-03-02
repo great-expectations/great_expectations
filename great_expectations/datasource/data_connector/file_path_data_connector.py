@@ -124,7 +124,23 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
-        batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
+        # TODO WILL 202103 some methods still call this method with BatchRequestBase instead of
+        #  _get_batch_definition_list_from_batch_request(). refactor so that the current method
+        #  is only called with BatchRequest
+        if isinstance(batch_request, BatchRequest):
+            if not (
+                batch_request.data_asset_name
+                and isinstance(batch_request.data_asset_name, str)
+            ):
+                raise TypeError(
+                    f"""The type of a data_asset name must be a string (Python "str").  The type given is
+            "{str(type(batch_request.data_asset_name))}", which is illegal.
+                            """
+                )
+            batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
+        else:
+            batch_request_base: BatchRequestBase = batch_request
+
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request_base
         )
@@ -148,7 +164,6 @@ class FilePathDataConnector(DataConnector):
 
         """
         self._validate_batch_request(batch_request=batch_request)
-
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
 

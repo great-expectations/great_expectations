@@ -1,8 +1,9 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
+    BatchRequestBase,
     PartitionDefinition,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
@@ -144,7 +145,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = []
-
         try:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
         except KeyError as e:
@@ -204,6 +204,19 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             "partition_definition": batch_definition.partition_definition,
             **self.data_assets[data_asset_name],
         }
+
+    def _validate_batch_request(self, batch_request: BatchRequest):
+        if not (
+            batch_request.data_asset_name
+            and isinstance(batch_request.data_asset_name, str)
+        ):
+            raise TypeError(
+                f"""The type of a data_asset name must be a string (Python "str").  The type given is
+        "{str(type(batch_request.data_asset_name))}", which is illegal.
+                        """
+            )
+        batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
+        super()._validate_batch_request(batch_request=batch_request_base)
 
     # Splitter methods for listing partitions
 
