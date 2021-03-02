@@ -181,7 +181,8 @@ class SqlAlchemyConnectionManager:
                     engine = create_engine(connection_string)
                     conn = engine.connect()
                     self._connections[connection_string] = conn
-                except (ImportError, TypeError):
+
+                except:
                     print(f"Unable to establish connection with {connection_string}")
                     raise
             return self._connections[connection_string]
