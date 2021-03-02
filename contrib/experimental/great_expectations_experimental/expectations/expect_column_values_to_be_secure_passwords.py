@@ -1,13 +1,12 @@
-from typing import Optional
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.expectations.util import render_evaluation_parameter_string
-
 import json
 import re  # regular expressions
+from typing import Optional
 
 # !!! This giant block of imports should be something simpler, such as:
 from great_expectations import *
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.util import render_evaluation_parameter_string
+
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -27,21 +26,39 @@ from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validator import Validator
 
+
 class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.secure_password"
-    condition_value_keys = ("min_length", "min_uppercase", "min_lowercase", "min_special", "min_digits",
-                            "max_consec_numbers", "max_consec_letters")
+    condition_value_keys = (
+        "min_length",
+        "min_uppercase",
+        "min_lowercase",
+        "min_special",
+        "min_digits",
+        "max_consec_numbers",
+        "max_consec_letters",
+    )
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-        def _pandas(cls, column, min_length, min_uppercase, min_lowercase, min_special, min_digits, max_consec_numbers, max_consec_letters, **kwargs):
+    def _pandas(
+        cls,
+        column,
+        min_length,
+        min_uppercase,
+        min_lowercase,
+        min_special,
+        min_digits,
+        max_consec_numbers,
+        max_consec_letters,
+        **kwargs,
+    ):
         def matches_password_requirements(x):
             x = str(x)
             if len(x) < min_length:
@@ -81,13 +98,22 @@ class ColumnValuesContainSecurePasswords(ColumnMapMetricProvider):
                         max_numbers = consec_numbers
                     consec_numbers = 0
                     consec_letters = 0
-            return not (uppercase_letters < min_uppercase or lowercase_letters < min_lowercase or special_characters < min_special or num_digits < min_digits or max_numbers > max_consec_numbers or max_letters > max_consec_letters)
+
+            return not (
+                uppercase_letters < min_uppercase
+                or lowercase_letters < min_lowercase
+                or special_characters < min_special
+                or num_digits < min_digits
+                or max_numbers > max_consec_numbers
+                or max_letters > max_consec_letters
+            )
+
         return column.apply(lambda x: matches_password_requirements(x) if x else False)
 
 
 class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     """Expect column entries to be secure passwords, as defined by expectation parameters.
-    
+
     expect_column_values_to_be_secure_passwords is a \
     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
     .column_map_expectation>`.
@@ -148,7 +174,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         "min_digits",
         "max_consec_numbers",
         "max_consec_letters",
-        "mostly"
+        "mostly",
     )
 
     default_kwarg_values = {
@@ -164,7 +190,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         "min_special": 1,
         "min_digits": 1,
         "max_consec_numbers": 99,
-        "max_consec_letters": 99
+        "max_consec_letters": 99,
     }
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
@@ -179,7 +205,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         cls, configuration, result=None, language=None, runtime_configuration=None
     ):
         column = configuration.kwargs.get("column")
-        #password = configuration.kwargs.get("password")
+        # password = configuration.kwargs.get("password")
         mostly = "{:.2%}".format(float(configuration.kwargs.get("mostly", 1)))
 
         return f'Are at least {mostly} of all values in column "{column}" secure passwords?'
@@ -190,9 +216,9 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         cls, configuration=None, result=None, language=None, runtime_configuration=None
     ):
         column = result.expectation_config.kwargs.get("column")
-        #password = result.expectation_config.kwargs.get("password")
+        # password = result.expectation_config.kwargs.get("password")
         mostly = "{:.2%}".format(float(configuration.kwargs.get("mostly", 1)))
-        
+
         if result.success:
             return f'At least {mostly} of all values in column "{column}" are secure passwords.'
         else:
