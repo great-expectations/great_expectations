@@ -7,8 +7,9 @@ Changelog
 
 Develop
 -----------------
+* [FEATURE] Added EmailAction as a new Validation Action (Thanks @Cedric-Magnan!) #2479
 * [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
-
+* [DOCS] Renamed the "old" and the "new" APIs to "V2 (Batch Kwargs) API" and "V3 (Batch Request) API" and added an article with recommendations for choosing between them
 
 0.13.11
 -----------------
