@@ -1,4 +1,5 @@
 import json
+import numpy as np
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -45,11 +46,12 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
-class TableColumnCount(TableMetricProvider):
+class TableAlphabeticalColumnNameCount(TableMetricProvider):
 
     # This is a built in metric - you do not have to implement it yourself. If you would like to use
     # a metric that does not yet exist, you can use the template below to implement it!
-    metric_name = "table.column_count"
+    metric_name = "table.alphabetical_column_name_count"
+
 
     # Below are metric computations for different dialects (Pandas, SqlAlchemy, Spark)
     # They can be used to compute the table data you will need to validate your Expectation
@@ -63,7 +65,9 @@ class TableColumnCount(TableMetricProvider):
     #     runtime_configuration: Dict,
     # ):
     #     columns = metrics.get("table.columns")
-    #     return len(columns)
+    #
+    #     # For each column, testing if alphabetical and returning number of alphabetical columns
+    #     return len([column for column in columns if np.islpha(column)])
     #
     # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
@@ -75,7 +79,9 @@ class TableColumnCount(TableMetricProvider):
     #     runtime_configuration: Dict,
     # ):
     #     columns = metrics.get("table.columns")
-    #     return len(columns)
+    #
+    #     # For each column, testing if alphabetical and returning number of alphabetical columns
+    #     return len([column for column in columns if np.islpha(column)])
     #
     # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(
@@ -87,7 +93,9 @@ class TableColumnCount(TableMetricProvider):
     #     runtime_configuration: Dict,
     # ):
     #     columns = metrics.get("table.columns")
-    #     return len(columns)
+    #
+    #    # For each column, testing if alphabetical and returning number of alphabetical columns
+    #     return len([column for column in columns if np.islpha(column)])
     #
     # @classmethod
     # def _get_evaluation_dependencies(
@@ -106,7 +114,7 @@ class TableColumnCount(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableColumnCountToEqual4(TableExpectation):
+class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
     """TODO: add a docstring here"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -114,22 +122,23 @@ class ExpectTableColumnCountToEqual4(TableExpectation):
     examples = [
         {
             "data": {
-                "column_1": [3, 5, 7],
-                "column_2": [True, False, True],
-                "column_3": ["a", "b", "c"],
-                "column_4": [None, 2, None],
+                "column_1z": [3, 5, 7],
+                "column_2z": [True, False, True],
+                "column_3z": ["a", "b", "c"],
+                "column_4z": [None, 2, None],
             },
             "data_2": {
-                "column_1": [3, 5, 7],
-                "column_2": [True, False, True],
-                "column_3": ["a", "b", "c"],
+                "column_1a": [3, 5, 7],
+                "column_2b": [True, False, True],
+                "column_3z": ["a", "b", "c"],
+                "column_4z": ["c", "d", "e"],
             },
             "tests": [
                 {
-                    "title": "positive_test_with_4_columns",
+                    "title": "positive_test_with_4_alphabetical_columns",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"df": "data"},
+                    "in": {"user_input": "helloWorld"},
                     "out": {
                         "success": True,
                         "observed_value": 4,
@@ -162,10 +171,11 @@ class ExpectTableColumnCountToEqual4(TableExpectation):
     }
 
     # metric_dependencies = ("table.column_count",)
-    # success_keys = ()
+    # success_keys = ("user_input",)
     #
     #
     # default_kwarg_values = {
+    #     "user_input": None,
     #     "result_format": "BASIC",
     #     "include_config": True,
     #     "catch_exceptions": False,
@@ -184,7 +194,14 @@ class ExpectTableColumnCountToEqual4(TableExpectation):
     #         True if the configuration has been validated successfully. Otherwise, raises an exception
     #     """
     #
-    #     # Setting up a configuration
+    #     #     # Setting up a configuration
+    #     try:
+    #         assert "user_input" in configuration.kwargs, "user_input is required"
+    #         assert (
+    #                 isinstance(configuration.kwargs["user_input"], str)
+    #         ), "user_input must be a string"
+    #     except AssertionError as e:
+    #         raise InvalidExpectationConfigurationError(str(e))
     #     super().validate_configuration(configuration)
     #     return True
 
@@ -228,7 +245,7 @@ class ExpectTableColumnCountToEqual4(TableExpectation):
             runtime_configuration: dict = None,
             execution_engine: ExecutionEngine = None,
     ):
-        actual_column_count = metrics.get("table.column_count")
+        actual_column_count = metrics.get("table.alphabetical_column_name_count")
 
         return {
             "success": actual_column_count == 4,
@@ -237,5 +254,5 @@ class ExpectTableColumnCountToEqual4(TableExpectation):
 
 
 if __name__ == "__main__":
-    diagnostics = ExpectTableColumnCountToEqual4().run_diagnostics()
+    diagnostics = ExpectAlphabeticalColumnNameCountToEqual4().run_diagnostics()
     print(json.dumps(diagnostics, indent=2))
