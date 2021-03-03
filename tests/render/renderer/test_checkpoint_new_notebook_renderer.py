@@ -222,7 +222,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Run Your Checkpoint & Open Data Docs(Optional)\n\nYou may wish to run the Checkpoint now and review it's output in Data Docs. If so uncomment and run the following cell.""",
+            "source": """# Run Your Checkpoint & Open Data Docs(Optional)\n\nYou may wish to run the Checkpoint now and review its output in Data Docs. If so uncomment and run the following cell.""",
         },
         {
             "cell_type": "code",
