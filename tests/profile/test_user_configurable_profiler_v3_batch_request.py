@@ -27,7 +27,6 @@ from great_expectations.profile.user_configurable_profiler import (
 )
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-from tests.test_utils import connection_manager
 
 
 def get_pandas_runtime_validator(context, df):
@@ -755,6 +754,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
     pytest.importorskip("sqlalchemy")
 
     print("importorskip didn't work")
+    from tests.test_utils import connection_manager
 
     df = ge.read_csv(
         file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv"),
