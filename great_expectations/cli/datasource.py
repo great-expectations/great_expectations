@@ -116,32 +116,31 @@ def delete_datasource(ctx, datasource):
 @datasource.command(name="list")
 @click.pass_context
 def datasource_list(ctx):
-    """List known datasources."""
+    """List known Datasources."""
     context = ctx.obj.data_context
     datasources = context.list_datasources()
-    datasource_count = len(datasources)
-
-    if datasource_count == 0:
-        list_intro_string = "No Datasources found"
-    else:
-        list_intro_string = _build_datasource_intro_string(datasource_count)
-
-    cli_message(list_intro_string)
+    cli_message(_build_datasource_intro_string(datasources))
     for datasource in datasources:
         cli_message("")
-        cli_message_dict(datasource)
+        cli_message_dict(
+            {
+                "name": datasource["name"],
+                "class_name": datasource["class_name"],
+            }
+        )
 
     toolkit.send_usage_message(
         data_context=context, event="cli.datasource.list", success=True
     )
 
 
-def _build_datasource_intro_string(datasource_count):
-    if datasource_count == 1:
-        list_intro_string = "1 Datasource found:"
-    if datasource_count > 1:
-        list_intro_string = f"{datasource_count} Datasources found:"
-    return list_intro_string
+def _build_datasource_intro_string(datasources):
+    datasource_count = len(datasources)
+    if datasource_count == 0:
+        return "No Datasources found"
+    elif datasource_count == 1:
+        return "1 Datasource found:"
+    return f"{datasource_count} Datasources found:"
 
 
 def add_datasource(context, choose_one_data_asset=False):

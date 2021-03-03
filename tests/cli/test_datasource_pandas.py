@@ -46,56 +46,11 @@ def test_cli_datasource_list_on_project_with_one_datasource(
         catch_exceptions=False,
     )
 
-    base_directory = context.root_directory
-    # TODO do we want to print out all this information?
     expected_output = f"""\x1b[32mUsing v3 (Batch Request) API[0m[0m
 1 Datasource found:[0m
 [0m
  - [36mname:[0m my_datasource[0m
-   [36mmodule_name:[0m great_expectations.datasource[0m
    [36mclass_name:[0m Datasource[0m
-   [36mdata_connectors:[0m[0m
-     [36mmy_basic_data_connector:[0m[0m
-       [36mmodule_name:[0m great_expectations.datasource.data_connector[0m
-       [36mclass_name:[0m InferredAssetFilesystemDataConnector[0m
-       [36mbase_directory:[0m {base_directory}/../data/titanic[0m
-       [36mdefault_regex:[0m[0m
-         [36mgroup_names:[0m ['data_asset_name'][0m
-         [36mpattern:[0m (.*)\.csv[0m
-     [36mmy_other_data_connector:[0m[0m
-       [36mmodule_name:[0m great_expectations.datasource.data_connector[0m
-       [36mclass_name:[0m ConfiguredAssetFilesystemDataConnector[0m
-       [36massets:[0m[0m
-         [36musers:[0m[0m
-           [36mmodule_name:[0m great_expectations.datasource.data_connector.asset[0m
-           [36mclass_name:[0m Asset[0m
-       [36mbase_directory:[0m {base_directory}/../data/titanic[0m
-       [36mdefault_regex:[0m[0m
-         [36mgroup_names:[0m ['name'][0m
-         [36mpattern:[0m (.+)\.csv[0m
-       [36mglob_directive:[0m *.csv[0m
-     [36mmy_runtime_data_connector:[0m[0m
-       [36mmodule_name:[0m great_expectations.datasource.data_connector[0m
-       [36mclass_name:[0m RuntimeDataConnector[0m
-       [36mruntime_keys:[0m ['pipeline_stage_name', 'airflow_run_id'][0m
-     [36mmy_special_data_connector:[0m[0m
-       [36mmodule_name:[0m great_expectations.datasource.data_connector[0m
-       [36mclass_name:[0m ConfiguredAssetFilesystemDataConnector[0m
-       [36massets:[0m[0m
-         [36musers:[0m[0m
-           [36mmodule_name:[0m great_expectations.datasource.data_connector.asset[0m
-           [36mclass_name:[0m Asset[0m
-           [36mbase_directory:[0m {base_directory}/../data/titanic[0m
-           [36mgroup_names:[0m ['name', 'timestamp', 'size'][0m
-           [36mpattern:[0m (.+)_(\d+)_(\d+)\.csv[0m
-       [36mbase_directory:[0m {base_directory}/../data/titanic[0m
-       [36mdefault_regex:[0m[0m
-         [36mgroup_names:[0m ['name'][0m
-         [36mpattern:[0m (.+)\.csv[0m
-       [36mglob_directive:[0m *.csv[0m
-   [36mexecution_engine:[0m[0m
-     [36mmodule_name:[0m great_expectations.execution_engine[0m
-     [36mclass_name:[0m PandasExecutionEngine[0m
 """.strip()
     stdout = result.output.strip()
     assert stdout == expected_output
