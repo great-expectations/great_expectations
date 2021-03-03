@@ -52,11 +52,6 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
     assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
 
 
-def test_instantiation_with_selectable():
-    # Note Abe 20111119: Fill this in
-    pass
-
-
 # REMOVING PENDING READ OF table.head metric
 # def test_head(sqlite_view_engine):
 #     # Create a larger table so that we can downsample meaningfully
@@ -139,5 +134,5 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
             "schema_name": "main",
         }
     )
-    res = engine.get_batch_data_and_markers(batch_spec=my_batch_spec)
+    res = execution_engine.get_batch_data_and_markers(batch_spec=my_batch_spec)
     assert len(res) == 2
