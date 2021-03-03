@@ -55,62 +55,62 @@ class TableAlphabeticalColumnNameCount(TableMetricProvider):
 
     # Below are metric computations for different dialects (Pandas, SqlAlchemy, Spark)
     # They can be used to compute the table data you will need to validate your Expectation
-    # @metric_value(engine=PandasExecutionEngine)
-    # def _pandas(
-    #     cls,
-    #     execution_engine: "ExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     columns = metrics.get("table.columns")
-    #
-    #     # For each column, testing if alphabetical and returning number of alphabetical columns
-    #     return len([column for column in columns if np.islpha(column)])
-    #
-    # @metric_value(engine=SqlAlchemyExecutionEngine)
-    # def _sqlalchemy(
-    #     cls,
-    #     execution_engine: "ExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     columns = metrics.get("table.columns")
-    #
-    #     # For each column, testing if alphabetical and returning number of alphabetical columns
-    #     return len([column for column in columns if np.islpha(column)])
-    #
-    # @metric_value(engine=SparkDFExecutionEngine)
-    # def _spark(
-    #     cls,
-    #     execution_engine: "ExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     columns = metrics.get("table.columns")
-    #
-    #    # For each column, testing if alphabetical and returning number of alphabetical columns
-    #     return len([column for column in columns if np.islpha(column)])
-    #
-    # @classmethod
-    # def _get_evaluation_dependencies(
-    #     cls,
-    #     metric: MetricConfiguration,
-    #     configuration: Optional[ExpectationConfiguration] = None,
-    #     execution_engine: Optional[ExecutionEngine] = None,
-    #     runtime_configuration: Optional[dict] = None,
-    # ):
-    #     return {
-    #         "table.column_count": MetricConfiguration(
-    #             "table.column_count", metric.metric_domain_kwargs
-    #         ),
-    #     }
-    #
+    @metric_value(engine=PandasExecutionEngine)
+    def _pandas(
+        cls,
+        execution_engine: "ExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        columns = metrics.get("table.columns")
+
+        # For each column, testing if alphabetical and returning number of alphabetical columns
+        return len([column for column in columns if np.islpha(column)])
+
+    @metric_value(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(
+        cls,
+        execution_engine: "ExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        columns = metrics.get("table.columns")
+
+        # For each column, testing if alphabetical and returning number of alphabetical columns
+        return len([column for column in columns if np.islpha(column)])
+
+    @metric_value(engine=SparkDFExecutionEngine)
+    def _spark(
+        cls,
+        execution_engine: "ExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        columns = metrics.get("table.columns")
+
+        # For each column, testing if alphabetical and returning number of alphabetical columns
+        return len([column for column in columns if np.islpha(column)])
+
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        return {
+            "table.alphabetical_column_name_count": MetricConfiguration(
+                "table.alphabetical_column_name_count", metric.metric_domain_kwargs
+            ),
+        }
+
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
@@ -170,72 +170,68 @@ class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
         "package": "experimental_expectations",
     }
 
-    # metric_dependencies = ("table.column_count",)
-    # success_keys = ("user_input",)
-    #
-    #
-    # default_kwarg_values = {
-    #     "user_input": None,
-    #     "result_format": "BASIC",
-    #     "include_config": True,
-    #     "catch_exceptions": False,
-    #     "meta": None,
-    # }
-    #
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
-    #     """
-    #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-    #     necessary configuration arguments have been provided for the validation of the expectation.
-    #
-    #     Args:
-    #         configuration (OPTIONAL[ExpectationConfiguration]): \
-    #             An optional Expectation Configuration entry that will be used to configure the expectation
-    #     Returns:
-    #         True if the configuration has been validated successfully. Otherwise, raises an exception
-    #     """
-    #
-    #     #     # Setting up a configuration
-    #     try:
-    #         assert "user_input" in configuration.kwargs, "user_input is required"
-    #         assert (
-    #                 isinstance(configuration.kwargs["user_input"], str)
-    #         ), "user_input must be a string"
-    #     except AssertionError as e:
-    #         raise InvalidExpectationConfigurationError(str(e))
-    #     super().validate_configuration(configuration)
-    #     return True
+    metric_dependencies = ("table.alphabetical_column_name_count",)
+    success_keys = ("user_input",)
 
-    # @classmethod
-    # @renderer(renderer_type="renderer.prescriptive")
-    # @render_evaluation_parameter_string
-    # def _prescriptive_renderer(
-    #         cls,
-    #         configuration=None,
-    #         result=None,
-    #         language=None,
-    #         runtime_configuration=None,
-    #         **kwargs
-    # ):
-    #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
-    #     styling = runtime_configuration.get("styling")
-    #     params = substitute_none_for_missing(configuration.kwargs, ["value"])
-    #     template_str = "Must have exactly 4 columns."
-    #     return [
-    #         RenderedStringTemplateContent(
-    #             **{
-    #                 "content_block_type": "string_template",
-    #                 "string_template": {
-    #                     "template": template_str,
-    #                     "params": params,
-    #                     "styling": styling,
-    #                 },
-    #             }
-    #         )
-    #     ]
+
+    default_kwarg_values = {
+        "user_input": None,
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": False,
+        "meta": None,
+    }
+
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            True if the configuration has been validated successfully. Otherwise, raises an exception
+        """
+
+        #     # Setting up a configuration
+        try:
+            assert "user_input" in configuration.kwargs, "user_input is required"
+            assert (
+                    isinstance(configuration.kwargs["user_input"], str)
+            ), "user_input must be a string"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+        super().validate_configuration(configuration)
+        return True
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+            cls,
+            configuration=None,
+            result=None,
+            language=None,
+            runtime_configuration=None,
+            **kwargs
+    ):
+        runtime_configuration = runtime_configuration or {}
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(configuration.kwargs, ["value"])
+        template_str = "Must have exactly 4 columns."
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     # This method will utilize the computed metric to validate that your Expectation about the Table is true
     def _validate(
