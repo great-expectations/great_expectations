@@ -370,11 +370,11 @@ def delete_checkpoint(
         checkpoint_name=checkpoint_name,
         usage_event=usage_event,
     )
-    confirm_prompt: str = f"""\nAre you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is
+    confirm_prompt: str = f"""\nAre you sure you want to delete the checkpoint "{checkpoint_name}" (this action is
 irreversible)?"
     """
     continuation_message: str = (
-        f'The Checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
+        f'The checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
     )
     confirm_proceed_or_exit(
         confirm_prompt=confirm_prompt,
