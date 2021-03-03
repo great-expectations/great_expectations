@@ -72,7 +72,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
+        "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
     )
 
@@ -142,7 +142,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "No checkpoints found." in stdout
+    assert "No Checkpoints found." in stdout
 
 
 @mock.patch(
@@ -187,7 +187,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "Found 1 checkpoint." in stdout
+    assert "Found 1 Checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
 
@@ -349,7 +349,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "A checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
+        "A Checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
         in stdout
     )
 
@@ -508,7 +508,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 
     stdout: str = result.stdout
     assert (
-        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
+        "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
@@ -1299,7 +1299,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     )
     stdout = result.stdout
     assert (
-        "Could not find checkpoint `not_a_checkpoint` (or its configuration is invalid)."
+        "Could not find Checkpoint `not_a_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
@@ -1400,7 +1400,7 @@ def test_checkpoint_script_happy_path_generates_script(
 
     stdout: str = result.stdout
     assert (
-        "A python script was created that runs the checkpoint named: `my_v1_checkpoint`"
+        "A python script was created that runs the Checkpoint named: `my_v1_checkpoint`"
         in stdout
     )
     assert (
@@ -1811,7 +1811,7 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3."
+        "The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3."
         in stdout
     )
 

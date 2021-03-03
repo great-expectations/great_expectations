@@ -370,11 +370,11 @@ def delete_checkpoint(
         checkpoint_name=checkpoint_name,
         usage_event=usage_event,
     )
-    confirm_prompt: str = f"""\nAre you sure you want to delete the checkpoint "{checkpoint_name}" (this action is
+    confirm_prompt: str = f"""\nAre you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is
 irreversible)?"
     """
     continuation_message: str = (
-        f'The checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
+        f'The Checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
     )
     confirm_proceed_or_exit(
         confirm_prompt=confirm_prompt,
@@ -442,7 +442,7 @@ def load_checkpoint(
             context,
             usage_event,
             f"""\
-<red>Could not find checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
+<red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )

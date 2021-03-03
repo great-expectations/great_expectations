@@ -14,9 +14,9 @@ class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
 
     def _find_datasource_with_asset(self) -> Dict[str, str]:
         """
-        Find a datasource with a configured asset.
+        Find a Datasource with a configured Asset.
 
-        Useful to pre-populate a working sample checkpoint for notebook users.
+        Useful to pre-populate a working sample Checkpoint for notebook users.
         """
         datasource_candidate = None
         for datasource_name, datasource in self.context.datasources.items():
@@ -38,11 +38,9 @@ class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
     def _add_header(self):
         self.add_markdown_cell(
             f"""# Create Your Checkpoint
-Use this notebook to create your checkpoint:
+Use this notebook to create your Checkpoint:
 
-**Checkpoint Name**: `{self.checkpoint_name}`
-
-We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!"""
+**Checkpoint Name**: `{self.checkpoint_name}`"""
         )
 
     def _add_imports(self):
@@ -53,69 +51,44 @@ context = ge.get_context()
             lint=True,
         )
 
-    def _add_example_configuration(self):
+    def _add_optional_customize_your_config(self):
         self.add_markdown_cell(
-            """# Example Configuration
-**If you are new to Great Expectations or the Checkpoint feature**, you should probably start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.
-
-The example in the cell below shows a SimpleCheckpoint for validating a single Batch of data against a single Expectation Suite.
-
-**My configuration is not so simple - are there more advanced options?**
-
-Glad you asked! Checkpoints are very versatile. For example, you can validate many batches in a single checkpoint, validate batches against different suites or against many suites, control the specific post-validation actions based on suite / batch / results of validation among other features. Check out our documentation on Checkpoints for more info:
-
-- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
-- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
-- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html"""
+            """# Customize Your Configuration
+The following cells show examples for listing your current configuration. You can replace values in the sample configuration with these values to customize your Checkpoint."""
         )
         self.add_code_cell(
-            (
-                'example_config = """'
-                """
-name: my_checkpoint
-config_version: 1
-class_name: SimpleCheckpoint
-run_name_template: "%Y-%M-my-run-name-template"
-validations:
-  - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_data_connector
-      data_asset_name: MyDataAsset
-      partition_request:
-        index: -1
-    expectation_suite_name: my_suite
-"""
-                '"""'
-            ),
-            lint=True,
-        )
+            """# Run this cell to print out the names of your Datasources, Data Connectors and Data Assets
 
-    def _add_optional_list_your_config(self):
-        self.add_markdown_cell(
-            """# List Your Configuration (Optional)
-The following cells show examples for listing your current configuration.
-
-You may wish to run these cells to view your currently configured checkpoints and choose a datasource & expectation suite."""
-        )
-        self.add_code_cell("context.list_checkpoints()")
-        self.add_code_cell(
-            """list_of_existing_datasources_by_name = [datasource["name"] for datasource in context.list_datasources()]
-list_of_existing_datasources_by_name""",
+for datasource_name, datasource in context.datasources.items():
+    print(f"datasource_name: {datasource_name}")
+    for data_connector_name, data_connector in datasource.data_connectors.items():
+        print(f"\tdata_connector_name: {data_connector_name}")
+        for data_asset_name in data_connector.get_available_data_asset_names():
+            print(f"\t\tdata_asset_name: {data_asset_name}")""",
             lint=True,
         )
         self.add_code_cell("context.list_expectation_suite_names()")
 
     def _add_sample_checkpoint_config(self):
         self.add_markdown_cell(
-            """# Sample Checkpoint Config
+            """# Create a Checkpoint Configuration
 
-In the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single expectation suite against a single batch of data.
+**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.
 
-To keep it simple, we are just choosing the first Datasource, DataConnector, DataAsset, Partition and Expectation Suite you have configured to create the example yaml config.
+In the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.
+
+To keep it simple, we are just choosing the first available instance of each of the following items you have configured in your Data Context:
+* Datasource
+* DataConnector
+* DataAsset
+* Partition
+* Expectation Suite
 
 Of course this is purely an example, you may edit this to your heart's content.
 
-Please also see the docs linked below for instructions on how to implement other more advanced features including using the **Checkpoint** class:
+**My configuration is not so simple - are there more advanced options?**
+
+Glad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more details and for instructions on how to implement other more advanced features including using the **Checkpoint** class:
 - https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
 - https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
 - https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html"""
@@ -132,9 +105,10 @@ Please also see the docs linked below for instructions on how to implement other
             first_expectation_suite_name = (
                 first_expectation_suite.expectation_suite_name
             )
-            sample_yaml_str = 'sample_yaml = """'
+            sample_yaml_str = f'my_checkpoint_name = "{self.checkpoint_name}" # This was populated from your CLI command.\n\n'
+            sample_yaml_str += f'{self.checkpoint_name}_config = f"""'
+            sample_yaml_str += "\nname: {my_checkpoint_name}"
             sample_yaml_str += f"""
-name: {self.checkpoint_name}
 config_version: 1.0
 class_name: SimpleCheckpoint
 run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
@@ -148,7 +122,7 @@ validations:
     expectation_suite_name: {first_expectation_suite_name}
 """
             sample_yaml_str += '"""'
-            sample_yaml_str += "\nprint(sample_yaml)"
+            sample_yaml_str += f"\nprint({self.checkpoint_name}_config)"
 
             self.add_code_cell(
                 sample_yaml_str,
@@ -162,32 +136,26 @@ validations:
 
     def _add_test_and_save_your_checkpoint_configuration(self):
         self.add_markdown_cell(
-            """# Test the Checkpoint Configuration
+            """# Test and Store Your Checkpoint Configuration
 Here we will test your Checkpoint configuration to make sure it is valid.
 
 Note that if it is valid, it will be automatically saved to your Checkpoint Store.
 
-This test_yaml_config() function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.
+This `test_yaml_config()` function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.
 
 If you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters."""
         )
         self.add_code_cell(
-            f'checkpoint_name = "{self.checkpoint_name}" # From your CLI command, feel free to change this.'
-        )
-        self.add_code_cell(
-            "my_checkpoint_config = sample_yaml # Change `sample_yaml` to your custom Checkpoint config if you wish"
-        )
-        self.add_code_cell(
-            """my_checkpoint = context.test_yaml_config(
-    name=checkpoint_name,
-    yaml_config=my_checkpoint_config
+            f"""my_checkpoint = context.test_yaml_config(
+    name=my_checkpoint_name,
+    yaml_config={self.checkpoint_name}_config
 )""",
             lint=True,
         )
 
     def _add_review_checkpoint(self):
         self.add_markdown_cell(
-            """# Review Checkpoint
+            """# Review Your Checkpoint
 
 You can run the following cell to print out the full yaml configuration. For example, if you used **SimpleCheckpoint**  this will show you the default action list."""
         )
@@ -197,33 +165,24 @@ You can run the following cell to print out the full yaml configuration. For exa
 
     def _add_optional_run_checkpoint(self):
         self.add_markdown_cell(
-            """# Run Checkpoint (Optional)
+            """# Run Your Checkpoint & Open Data Docs(Optional)
 
-You may wish to run the checkpoint now to see a sample of it's output. If so run the following cell."""
+You may wish to run the Checkpoint now and review its output in Data Docs. If so uncomment and run the following cell."""
         )
         self.add_code_cell(
-            "context.run_checkpoint(checkpoint_name=checkpoint_name)", lint=True
+            "# context.run_checkpoint(checkpoint_name=my_checkpoint_name)\n# context.open_data_docs()",
+            lint=True,
         )
-
-    def _add_optional_open_data_docs(self):
-        self.add_markdown_cell(
-            """# Open Data Docs (Optional)
-You may also wish to open up Data Docs to review the results of the Checkpoint run if you ran the above cell."""
-        )
-        # TODO: <ANTHONY>We should mock the datadocs call or skip running that cell within the notebook (rather than commenting it out in the notebook)</ANTHONY>
-        self.add_code_cell("# context.open_data_docs()", lint=True)
 
     def render(self) -> nbformat.NotebookNode:
         self._notebook: nbformat.NotebookNode = nbformat.v4.new_notebook()
         self._add_header()
         self._add_imports()
-        self._add_example_configuration()
-        self._add_optional_list_your_config()
         self._add_sample_checkpoint_config()
+        self._add_optional_customize_your_config()
         self._add_test_and_save_your_checkpoint_configuration()
         self._add_review_checkpoint()
         self._add_optional_run_checkpoint()
-        self._add_optional_open_data_docs()
 
         return self._notebook
 

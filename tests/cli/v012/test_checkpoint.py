@@ -1116,7 +1116,7 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3."
+        "The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3."
         in stdout
     )
 
@@ -1160,7 +1160,7 @@ def test_checkpoint_run_with_ge_config_3_raises_error(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "The `checkpoint run` CLI command is not yet implemented for GE config versions >= 3."
+        "The `checkpoint run` CLI command is not yet implemented for Great Expectations config versions >= 3."
         in stdout
     )
 
@@ -1204,7 +1204,7 @@ def test_checkpoint_script_with_ge_config_3_raises_error(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "The `checkpoint script` CLI command is not yet implemented for GE config versions >= 3."
+        "The `checkpoint script` CLI command is not yet implemented for Great Expectations config versions >= 3."
         in stdout
     )
 

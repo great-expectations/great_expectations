@@ -141,9 +141,9 @@ def cli(ctx, v2_api, verbose, config_file_location):
     ctx.obj = CLIState(v2_api=v2_api, config_file_location=config_file_location)
 
     if v2_api:
-        cli_message("<yellow>Using v2 (Batch Kwargs) API</yellow>")
+        cli_message("Using v2 (Batch Kwargs) API")
     else:
-        cli_message("<green>Using v3 (Batch Request) API</green>")
+        cli_message("Using v3 (Batch Request) API")
 
 
 def main():

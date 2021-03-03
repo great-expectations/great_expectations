@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Dict, List
+from typing import List
 
 import click
 from ruamel.yaml import YAML
@@ -8,14 +8,7 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
-from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.pretty_printing import (
-    cli_message,
-    cli_message_list,
-    display_not_implemented_message_and_exit,
-)
-from great_expectations.core import ExpectationSuite
-from great_expectations.data_context.types.base import DataContextConfigDefaults
+from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
@@ -66,13 +59,13 @@ def checkpoint(ctx):
     """
     Checkpoint operations
 
-    A checkpoint is a bundle of one or more batches of data with one or more
+    A Checkpoint is a bundle of one or more batches of data with one or more
     Expectation Suites.
 
-    A checkpoint can be as simple as one batch of data paired with one
+    A Checkpoint can be as simple as one batch of data paired with one
     Expectation Suite.
 
-    A checkpoint can be as complex as many batches of data across different
+    A Checkpoint can be as complex as many batches of data across different
     datasources paired with one or more Expectation Suites each.
     """
     directory: str = toolkit.parse_cli_config_file_location(
@@ -94,12 +87,11 @@ def checkpoint(ctx):
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-@mark.cli_as_experimental
 @click.pass_context
 def checkpoint_new(ctx, name, jupyter):
-    """Create a new checkpoint for easy deployments. (Experimental)
+    """Create a new Checkpoint for easy deployments.
 
-    NAME is the name of the checkpoint to create.
+    NAME is the name of the Checkpoint to create.
     """
     _checkpoint_new(ctx=ctx, checkpoint_name=name, jupyter=jupyter)
 
@@ -124,14 +116,14 @@ def _checkpoint_new(ctx, checkpoint_name, jupyter):
 
         if not jupyter:
             cli_message(
-                f"To continue editing this checkpoint, run <green>jupyter notebook {notebook_file_path}</green>"
+                f"To continue editing this Checkpoint, run <green>jupyter notebook {notebook_file_path}</green>"
             )
 
         toolkit.send_usage_message(context, event=usage_event, success=True)
 
         if jupyter:
             cli_message(
-                """<green>Because you requested to create a new checkpoint, we'll open a notebook for you now to edit it!
+                """<green>Because you requested to create a new Checkpoint, we'll open a notebook for you now to edit it!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             )
             toolkit.launch_jupyter_notebook(notebook_file_path)
@@ -153,7 +145,7 @@ def _verify_checkpoint_does_not_exist(
             toolkit.exit_with_failure_message_and_stats(
                 context,
                 usage_event,
-                f"A checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
+                f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
             )
     except InvalidTopLevelConfigKeyError as e:
         toolkit.exit_with_failure_message_and_stats(
@@ -171,15 +163,14 @@ def _get_notebook_path(context, notebook_name):
 
 # TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="list")
-@mark.cli_as_experimental
 @click.pass_context
 def checkpoint_list(ctx):
-    """List configured checkpoints. (Experimental)"""
+    """List configured Checkpoints."""
     context: DataContext = ctx.obj.data_context
     checkpoints: List[str] = context.list_checkpoints()
     if not checkpoints:
         cli_message(
-            "No checkpoints found.\n"
+            "No Checkpoints found.\n"
             "  - Use the command `great_expectations checkpoint new` to create one."
         )
         toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
@@ -187,7 +178,7 @@ def checkpoint_list(ctx):
 
     number_found: int = len(checkpoints)
     plural: str = "s" if number_found > 1 else ""
-    message: str = f"Found {number_found} checkpoint{plural}."
+    message: str = f"Found {number_found} Checkpoint{plural}."
     pretty_list: list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
     toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
@@ -196,10 +187,9 @@ def checkpoint_list(ctx):
 # TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="delete")
 @click.argument("checkpoint")
-@mark.cli_as_experimental
 @click.pass_context
 def checkpoint_delete(ctx, checkpoint):
-    """Delete a checkpoint. (Experimental)"""
+    """Delete a Checkpoint."""
     usage_event: str = "cli.checkpoint.delete"
     context: DataContext = ctx.obj.data_context
 
@@ -225,10 +215,9 @@ def checkpoint_delete(ctx, checkpoint):
 # TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
-@mark.cli_as_experimental
 @click.pass_context
 def checkpoint_run(ctx, checkpoint):
-    """Run a checkpoint. (Experimental)"""
+    """Run a Checkpoint."""
     usage_event: str = "cli.checkpoint.run"
     context: DataContext = ctx.obj.data_context
 
@@ -289,16 +278,15 @@ def print_validation_operator_results_details(
 
 @checkpoint.command(name="script")
 @click.argument("checkpoint")
-@mark.cli_as_experimental
 @click.pass_context
 def checkpoint_script(ctx, checkpoint):
     """
-    Create a python script to run a checkpoint. (Experimental)
+    Create a python script to run a Checkpoint.
 
     Checkpoints can be run directly without this script using the
-    `great_expectations checkpoint run` command.
+    `great_expectations Checkpoint run` command.
 
-    This script is provided for those who wish to run checkpoints via python.
+    This script is provided for those who wish to run Checkpoints via python.
     """
     usage_event: str = "cli.checkpoint.script"
     context: DataContext = ctx.obj.data_context
@@ -326,7 +314,7 @@ def checkpoint_script(ctx, checkpoint):
         script_path=script_path,
     )
     cli_message(
-        f"""<green>A python script was created that runs the checkpoint named: `{checkpoint}`</green>
+        f"""<green>A python script was created that runs the Checkpoint named: `{checkpoint}`</green>
   - The script is located in `great_expectations/uncommitted/run_{checkpoint}.py`
   - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
     )
