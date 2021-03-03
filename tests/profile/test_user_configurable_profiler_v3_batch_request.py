@@ -839,6 +839,10 @@ def test_profiler_all_expectation_types_spark(
 
 
 @pytest.mark.skipif(
+    importlib.util.find_spec("sqlalchemy") is None,
+    reason="requires sqlslchemy",
+)
+@pytest.mark.skipif(
     importlib.util.find_spec("sqlalchemy.dialects.postgresql") is None,
     reason="requires the sqlslchemy postgresql dialects library",
 )
