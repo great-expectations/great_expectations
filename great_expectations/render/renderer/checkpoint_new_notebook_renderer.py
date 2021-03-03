@@ -167,7 +167,7 @@ You can run the following cell to print out the full yaml configuration. For exa
         self.add_markdown_cell(
             """# Run Your Checkpoint & Open Data Docs(Optional)
 
-You may wish to run the Checkpoint now and review it's output in Data Docs. If so uncomment and run the following cell."""
+You may wish to run the Checkpoint now and review its output in Data Docs. If so uncomment and run the following cell."""
         )
         self.add_code_cell(
             "# context.run_checkpoint(checkpoint_name=my_checkpoint_name)\n# context.open_data_docs()",
