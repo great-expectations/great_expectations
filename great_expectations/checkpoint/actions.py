@@ -14,6 +14,7 @@ except ImportError:
 
 
 from great_expectations.checkpoint.util import (
+    send_email,
     send_microsoft_teams_notifications,
     send_opsgenie_alert,
     send_slack_notification,
@@ -507,6 +508,164 @@ class OpsgenieAlertAction(ValidationAction):
             return {"opsgenie_alert_result": alert_result}
         else:
             return {"opsgenie_alert_result": ""}
+
+
+class EmailAction(ValidationAction):
+    """
+    EmailAction sends an email to a given list of email addresses.
+    **Configuration**
+    .. code-block:: yaml
+        - name: send_email_on_validation_result
+        action:
+          class_name: EmailAction
+          notify_on: all # possible values: "all", "failure", "success"
+          notify_with: # optional list of DataDocs site names to display in the email message. Defaults to showing all
+          renderer:
+            # the class that implements the message to be sent
+            # this is the default implementation, but you can
+            # implement a custom one
+            module_name: great_expectations.render.renderer.email_renderer
+            class_name: EmailRenderer
+          # put the actual following informations in the uncommitted/config_variables.yml file
+          # or pass in as environment variable
+          smtp_address: ${smtp_address}
+          smtp_port: ${smtp_port}
+          sender_login: ${email_address}
+          sender_password: ${sender_password}
+          sender_alias: ${sender_alias} # useful to send an email as an alias (default = sender_login)
+          receiver_emails: ${receiver_emails} # string containing email addresses separated by commas
+          use_tls: False
+          use_ssl: True
+    """
+
+    def __init__(
+        self,
+        data_context,
+        renderer,
+        smtp_address,
+        smtp_port,
+        sender_login,
+        sender_password,
+        receiver_emails,
+        sender_alias=None,
+        use_tls=None,
+        use_ssl=None,
+        notify_on="all",
+        notify_with=None,
+    ):
+        """Construct an EmailAction
+        Args:
+            data_context:
+            renderer: dictionary specifying the renderer used to generate an email, for example:
+                {
+                   "module_name": "great_expectations.render.renderer.email_renderer",
+                   "class_name": "EmailRenderer",
+               }
+            smtp_address: adress of the SMTP server used to send the email
+            smtp_address: port of the SMTP server used to send the email
+            sender_login: login used send the email
+            sender_password: password used to send the email
+            sender_alias: optional alias used to send the email (default = sender_login)
+            receiver_emails: email addresses that will be receive the email (separated by commas)
+            use_tls: optional use of TLS to send the email (using either TLS or SSL is highly recommanded)
+            use_ssl: optional use of SSL to send the email (using either TLS or SSL is highly recommanded)
+            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
+            notify_with: optional list of DataDocs site names to display in the email message
+        """
+        super().__init__(data_context)
+        self.renderer = instantiate_class_from_config(
+            config=renderer,
+            runtime_environment={},
+            config_defaults={},
+        )
+        module_name = renderer["module_name"]
+        if not self.renderer:
+            raise ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=renderer["class_name"],
+            )
+        self.smtp_address = smtp_address
+        self.smtp_port = smtp_port
+        self.sender_login = sender_login
+        self.sender_password = sender_password
+        if not sender_alias:
+            self.sender_alias = sender_login
+        else:
+            self.sender_alias = sender_alias
+        self.receiver_emails_list = list(
+            map(lambda x: x.strip(), receiver_emails.split(","))
+        )
+        self.use_tls = use_tls
+        self.use_ssl = use_ssl
+        assert smtp_address, "No SMTP server address found in action config."
+        assert smtp_port, "No SMTP server port found in action config."
+        assert sender_login, "No login found for sending the email in action config."
+        assert (
+            sender_password
+        ), "No password found for sending the email in action config."
+        assert (
+            receiver_emails
+        ), "No email addresses to send the email to in action config."
+        self.notify_on = notify_on
+        self.notify_with = notify_with
+
+    def _run(
+        self,
+        validation_result_suite,
+        validation_result_suite_identifier,
+        data_asset=None,
+        payload=None,
+    ):
+        logger.debug("EmailAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not isinstance(
+            validation_result_suite_identifier, ValidationResultIdentifier
+        ):
+            raise TypeError(
+                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
+
+        validation_success = validation_result_suite.success
+        data_docs_pages = None
+
+        if payload:
+            # process the payload
+            for action_names in payload.keys():
+                if payload[action_names]["class"] == "UpdateDataDocsAction":
+                    data_docs_pages = payload[action_names]
+
+        if (
+            (self.notify_on == "all")
+            or (self.notify_on == "success" and validation_success)
+            or (self.notify_on == "failure" and not validation_success)
+        ):
+            title, html = self.renderer.render(
+                validation_result_suite, data_docs_pages, self.notify_with
+            )
+            # this will actually send the email
+            email_result = send_email(
+                title,
+                html,
+                self.smtp_address,
+                self.smtp_port,
+                self.sender_login,
+                self.sender_password,
+                self.sender_alias,
+                self.receiver_emails_list,
+                self.use_tls,
+                self.use_ssl,
+            )
+
+            # sending payload back as dictionary
+            return {"email_result": email_result}
+        else:
+            return {"email_result": ""}
 
 
 class StoreValidationResultAction(ValidationAction):
