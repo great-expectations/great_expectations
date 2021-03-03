@@ -1,28 +1,33 @@
-import os
 import sys
 
 import click
-import requests
 
+from great_expectations import DataContext
 from great_expectations.cli import toolkit
-from great_expectations.cli.cli_logging import logger
-from great_expectations.cli.util import cli_message, cli_message_list
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.cli.build_docs import build_docs
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_list,
+    display_not_implemented_message_and_exit,
+)
 
 
 @click.group()
-def docs():
+@click.pass_context
+def docs(ctx):
     """Data Docs operations"""
-    pass
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+    # TODO consider moving this all the way up in to the CLIState constructor
+    ctx.obj.data_context = context
 
 
 @docs.command(name="build")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @click.option(
     "--site-name",
     "-s",
@@ -41,23 +46,23 @@ def docs():
     help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
     default=False,
 )
-def docs_build(directory, site_name, view=True, assume_yes=False):
+@click.pass_context
+def docs_build(ctx, site_name, view=True, assume_yes=False):
     """ Build Data Docs for a project."""
-    context = toolkit.load_data_context_with_error_handling(directory)
+    display_not_implemented_message_and_exit()
+    context = ctx.obj.data_context
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
-    send_usage_message(data_context=context, event="cli.docs.build", success=True)
+    toolkit.send_usage_message(
+        data_context=context, event="cli.docs.build", success=True
+    )
 
 
 @docs.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-def docs_list(directory):
+@click.pass_context
+def docs_list(ctx):
     """List known Data Docs Sites."""
-    context = toolkit.load_data_context_with_error_handling(directory)
+    display_not_implemented_message_and_exit()
+    context = ctx.obj.data_context
 
     docs_sites_url_dicts = context.get_docs_sites_urls()
     docs_sites_strings = [
@@ -76,11 +81,12 @@ def docs_list(directory):
         list_intro_string = _build_intro_string(docs_sites_strings)
         cli_message_list(docs_sites_strings, list_intro_string)
 
-    send_usage_message(data_context=context, event="cli.docs.list", success=True)
+    toolkit.send_usage_message(
+        data_context=context, event="cli.docs.list", success=True
+    )
 
 
 @docs.command(name="clean")
-@click.option("--directory", "-d", default=None, help="Clean data docs")
 @click.option(
     "--site-name",
     "-s",
@@ -92,9 +98,11 @@ def docs_list(directory):
     is_flag=True,
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
-def clean_data_docs(directory, site_name=None, all=None):
+@click.pass_context
+def clean_data_docs(ctx, site_name=None, all=None):
     """Delete data docs"""
-    context = toolkit.load_data_context_with_error_handling(directory)
+    display_not_implemented_message_and_exit()
+    context = ctx.obj.data_context
     failed = True
     if site_name is None and all is None:
         cli_message(
@@ -107,11 +115,15 @@ def clean_data_docs(directory, site_name=None, all=None):
     context.clean_data_docs(site_name=site_name)
     failed = False
     if not failed and context is not None:
-        send_usage_message(data_context=context, event="cli.docs.clean", success=True)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.docs.clean", success=True
+        )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
 
     if failed and context is not None:
-        send_usage_message(data_context=context, event="cli.docs.clean", success=False)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.docs.clean", success=False
+        )
 
 
 def _build_intro_string(docs_sites_strings):
@@ -121,33 +133,3 @@ def _build_intro_string(docs_sites_strings):
     elif doc_string_count > 1:
         list_intro_string = f"{doc_string_count} Data Docs sites configured:"
     return list_intro_string
-
-
-def build_docs(context, site_name=None, view=True, assume_yes=False):
-    """Build documentation in a context"""
-    logger.debug("Starting cli.datasource.build_docs")
-
-    if site_name is not None:
-        site_names = [site_name]
-    else:
-        site_names = None
-    index_page_locator_infos = context.build_data_docs(
-        site_names=site_names, dry_run=True
-    )
-
-    msg = "\nThe following Data Docs sites will be built:\n\n"
-    for site_name, index_page_locator_info in index_page_locator_infos.items():
-        msg += " - <cyan>{}:</cyan> ".format(site_name)
-        msg += "{}\n".format(index_page_locator_info)
-
-    cli_message(msg)
-    if not assume_yes:
-        toolkit.confirm_proceed_or_exit()
-
-    cli_message("\nBuilding Data Docs...\n")
-    context.build_data_docs(site_names=site_names)
-
-    cli_message("Done building Data Docs")
-
-    if view:
-        context.open_data_docs(site_name=site_name, only_if_exists=True)

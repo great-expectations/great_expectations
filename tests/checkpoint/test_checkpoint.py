@@ -1,7 +1,6 @@
 import logging
-import os
 import unittest.mock as mock
-from typing import List, Union
+from typing import Union
 
 import pandas as pd
 import pytest
@@ -201,14 +200,22 @@ def test_basic_checkpoint_config_validation(
     empty_data_context.create_expectation_suite(
         expectation_suite_name="my_expectation_suite"
     )
-    result: CheckpointResult = empty_data_context.run_checkpoint(
-        checkpoint_name=checkpoint.config.name,
-    )
-    assert len(result.list_validation_results()) == 0
+    with pytest.raises(
+        ge_exceptions.DataContextError,
+        match=r"Checkpoint 'my_checkpoint' does not contain any validations.",
+    ):
+        # noinspection PyUnusedLocal
+        result: CheckpointResult = empty_data_context.run_checkpoint(
+            checkpoint_name=checkpoint.config.name,
+        )
+
+    empty_data_context.delete_checkpoint(name="my_erroneous_checkpoint")
+    empty_data_context.delete_checkpoint(name="my_checkpoint")
+    assert len(empty_data_context.list_checkpoints()) == 0
 
 
 def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
     monkeypatch.setenv("VAR", "test")
@@ -217,7 +224,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config: str = f"""
     name: my_fancy_checkpoint
@@ -243,11 +250,8 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
               action:
                 class_name: UpdateDataDocsAction
         evaluation_parameters:
-          # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-          # param1: "$MY_PARAM"
-          # param2: 1 + "$OLD_PARAM"
-          param1: 1
-          param2: 2
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
         runtime_configuration:
           result_format:
             result_format: BASIC
@@ -283,7 +287,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
                         "action": {"class_name": "UpdateDataDocsAction"},
                     },
                 ],
-                "evaluation_parameters": {"param1": 1, "param2": 2},
+                "evaluation_parameters": {"param1": "1", "param2": '1 + "2"'},
                 "runtime_configuration": {
                     "result_format": {
                         "result_format": "BASIC",
@@ -323,13 +327,12 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
+    data_context.delete_checkpoint(name="my_fancy_checkpoint")
+    assert len(data_context.list_checkpoints()) == 0
 
 
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
     monkeypatch.setenv("VAR", "test")
@@ -338,7 +341,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
 
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config: str = f"""
     name: my_fancy_checkpoint
@@ -370,11 +373,8 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
           action:
             class_name: UpdateDataDocsAction
     evaluation_parameters:
-      # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-      # param1: "$MY_PARAM"
-      # param2: 1 + "$OLD_PARAM"
-      param1: 1
-      param2: 2
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
     runtime_configuration:
       result_format:
         result_format: BASIC
@@ -422,7 +422,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
                 "action": {"class_name": "UpdateDataDocsAction"},
             },
         ],
-        "evaluation_parameters": {"param1": 1, "param2": 2},
+        "evaluation_parameters": {"param1": "1", "param2": '1 + "2"'},
         "runtime_configuration": {
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
@@ -453,17 +453,16 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
+    data_context.delete_checkpoint(name="my_fancy_checkpoint")
+    assert len(data_context.list_checkpoints()) == 0
 
 
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config: str = f"""
     name: airflow_checkpoint
@@ -554,16 +553,19 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success
 
+    data_context.delete_checkpoint(name="airflow_checkpoint")
+    assert len(data_context.list_checkpoints()) == 0
+
 
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
     monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
 
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config: str = f"""
     name: airflow_users_node_3
@@ -577,7 +579,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
             index: -1
     validations:
       - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
-      - expectation_suite_name: users.error  # runs the locally-specified_action_list (?UNION THE TOP LEVEL?) against the top-level batch_request
+      - expectation_suite_name: users.error  # runs the locally-specified action_list union the top level action-list against the top-level batch_request
         action_list:
         - name: quarantine_failed_data
           action:
@@ -689,11 +691,12 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 2
     assert result.success
 
-    monkeypatch.delenv("GE_ENVIRONMENT")
+    data_context.delete_checkpoint(name="airflow_users_node_3")
+    assert len(data_context.list_checkpoints()) == 0
 
 
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     monkeypatch,
 ):
     monkeypatch.setenv("VAR", "test")
@@ -705,7 +708,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     expected_checkpoint_config: dict
     result: CheckpointResult
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config = f"""
     name: my_base_checkpoint
@@ -723,11 +726,8 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
       action:
         class_name: UpdateDataDocsAction
     evaluation_parameters:
-      # TODO: <Alex>The EvaluationParameters substitution and/or operations capabilities do not work for Checkpoints yet.</Alex>
-      # param1: "$MY_PARAM"
-      # param2: 1 + "$OLD_PARAM"
-      param1: 1
-      param2: 2
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
     runtime_configuration:
         result_format:
           result_format: BASIC
@@ -757,7 +757,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                 "action": {"class_name": "UpdateDataDocsAction"},
             },
         ],
-        "evaluation_parameters": {"param1": 1, "param2": 2},
+        "evaluation_parameters": {"param1": "1", "param2": '1 + "2"'},
         "runtime_configuration": {
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
@@ -776,6 +776,15 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
 
     assert len(data_context.list_checkpoints()) == 1
+
+    with pytest.raises(
+        ge_exceptions.DataContextError,
+        match=r"Checkpoint 'my_base_checkpoint' does not contain any validations.",
+    ):
+        # noinspection PyUnusedLocal
+        result: CheckpointResult = data_context.run_checkpoint(
+            checkpoint_name=checkpoint.config.name,
+        )
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
 
@@ -887,9 +896,9 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     assert len(data_context.validations_store.list_keys()) == 4
     assert result.success
 
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
+    data_context.delete_checkpoint(name="my_base_checkpoint")
+    data_context.delete_checkpoint(name="my_fancy_checkpoint")
+    assert len(data_context.list_checkpoints()) == 0
 
 
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
@@ -951,9 +960,9 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 # TODO: add more test cases
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
@@ -1011,7 +1020,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 def test_newstyle_checkpoint_config_substitution_simple(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
 ):
     monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
@@ -1019,7 +1028,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     simplified_checkpoint_config = CheckpointConfig(
         name="my_simplified_checkpoint",
@@ -1266,14 +1275,9 @@ def test_newstyle_checkpoint_config_substitution_simple(
         == expected_substituted_checkpoint_config_template_and_runtime_kwargs.to_json_dict()
     )
 
-    monkeypatch.delenv("GE_ENVIRONMENT")
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")
-
 
 def test_newstyle_checkpoint_config_substitution_nested(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
 ):
     monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
@@ -1281,7 +1285,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_templates
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
@@ -1554,8 +1558,3 @@ def test_newstyle_checkpoint_config_substitution_nested(
         substituted_config_template_and_runtime_kwargs.to_json_dict()
         == expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict()
     )
-
-    monkeypatch.delenv("GE_ENVIRONMENT")
-    monkeypatch.delenv("VAR")
-    monkeypatch.delenv("MY_PARAM")
-    monkeypatch.delenv("OLD_PARAM")

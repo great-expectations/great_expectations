@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 import jinja2
 import nbformat
@@ -16,11 +16,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.util import lint_code
+from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 
 
-class SuiteEditNotebookRenderer(Renderer):
+class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     """
     Render a notebook that can re-create or edit a suite.
 
@@ -191,23 +190,6 @@ class SuiteEditNotebookRenderer(Renderer):
         )
         self.add_code_cell(code)
 
-    def add_code_cell(self, code: str, lint: bool = False, **template_params) -> None:
-        """
-        Add the given code as a new code cell.
-        """
-        if lint:
-            code = lint_code(code).rstrip("\n")
-
-        cell = nbformat.v4.new_code_cell(code)
-        self._notebook["cells"].append(cell)
-
-    def add_markdown_cell(self, markdown: str) -> None:
-        """
-        Add the given markdown as a new markdown cell.
-        """
-        cell = nbformat.v4.new_markdown_cell(markdown)
-        self._notebook["cells"].append(cell)
-
     def add_expectation_cells_from_suite(self, expectations):
         expectations_by_column = self._get_expectations_by_column(expectations)
         markdown = self.render_with_overwrite(
@@ -285,11 +267,6 @@ class SuiteEditNotebookRenderer(Renderer):
             return ", meta={}".format(meta)
 
         return ""
-
-    @classmethod
-    def write_notebook_to_disk(cls, notebook, notebook_file_path):
-        with open(notebook_file_path, "w") as f:
-            nbformat.write(notebook, f)
 
     def render(
         self, suite: ExpectationSuite, batch_kwargs=None
