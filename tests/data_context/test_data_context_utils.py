@@ -8,10 +8,10 @@ import great_expectations.exceptions as gee
 from great_expectations.data_context.util import (
     PasswordMasker,
     parse_substitution_variable,
-    substitute_template_from_aws_secrets_manager,
-    substitute_template_from_azure_keyvault,
-    substitute_template_from_gcp_secret_manager,
-    substitute_template_from_secret_store,
+    substitute_value_from_aws_secrets_manager,
+    substitute_value_from_azure_keyvault,
+    substitute_value_from_gcp_secret_manager,
+    substitute_value_from_secret_store,
 )
 from great_expectations.util import load_class
 
@@ -298,31 +298,27 @@ def does_not_raise():
         ("secret|any_value", None, "secret|any_value"),
         (
             "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
-            "great_expectations.data_context.util.substitute_template_from_aws_secrets_manager",
+            "great_expectations.data_context.util.substitute_value_from_aws_secrets_manager",
             "success",
         ),
         (
             "secret|projects/project_id/secrets/my_secret",
-            "great_expectations.data_context.util.substitute_template_from_gcp_secret_manager",
+            "great_expectations.data_context.util.substitute_value_from_gcp_secret_manager",
             "success",
         ),
         (
             "secret|https://my-vault-name.vault.azure.net/secrets/my_secret",
-            "great_expectations.data_context.util.substitute_template_from_azure_keyvault",
+            "great_expectations.data_context.util.substitute_value_from_azure_keyvault",
             "success",
         ),
     ],
 )
-def test_substitute_template_from_secret_store(
-    input_value, method_to_patch, return_value
-):
+def test_substitute_value_from_secret_store(input_value, method_to_patch, return_value):
     if method_to_patch:
         with mock.patch(method_to_patch, return_value=return_value):
-            assert (
-                substitute_template_from_secret_store(value=input_value) == return_value
-            )
+            assert substitute_value_from_secret_store(value=input_value) == return_value
     else:
-        assert substitute_template_from_secret_store(value=input_value) == return_value
+        assert substitute_value_from_secret_store(value=input_value) == return_value
 
 
 class MockedBoto3Client:
@@ -385,7 +381,7 @@ class MockedBoto3Session:
         ),
     ],
 )
-def test_substitute_template_from_aws_secrets_manager(
+def test_substitute_value_from_aws_secrets_manager(
     input_value, secret_response, raises, expected
 ):
     with raises:
@@ -393,7 +389,7 @@ def test_substitute_template_from_aws_secrets_manager(
             "great_expectations.data_context.util.boto3.session.Session",
             return_value=MockedBoto3Session(secret_response),
         ):
-            assert substitute_template_from_aws_secrets_manager(input_value) == expected
+            assert substitute_value_from_aws_secrets_manager(input_value) == expected
 
 
 class MockedSecretManagerServiceClient:
@@ -444,7 +440,7 @@ class MockedSecretManagerServiceClient:
         ),
     ],
 )
-def test_substitute_template_from_gcp_secret_manager(
+def test_substitute_value_from_gcp_secret_manager(
     input_value, secret_response, raises, expected
 ):
     with raises:
@@ -452,7 +448,7 @@ def test_substitute_template_from_gcp_secret_manager(
             "great_expectations.data_context.util.secretmanager.SecretManagerServiceClient",
             return_value=MockedSecretManagerServiceClient(secret_response),
         ):
-            assert substitute_template_from_gcp_secret_manager(input_value) == expected
+            assert substitute_value_from_gcp_secret_manager(input_value) == expected
 
 
 class MockedSecretClient:
@@ -501,7 +497,7 @@ class MockedSecretClient:
         ),
     ],
 )
-def test_substitute_template_from_azure_keyvault(
+def test_substitute_value_from_azure_keyvault(
     input_value, secret_response, raises, expected
 ):
     with raises:
@@ -509,4 +505,4 @@ def test_substitute_template_from_azure_keyvault(
             "great_expectations.data_context.util.SecretClient",
             return_value=MockedSecretClient(secret_response),
         ):
-            assert substitute_template_from_azure_keyvault(input_value) == expected
+            assert substitute_value_from_azure_keyvault(input_value) == expected

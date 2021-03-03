@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 
 
 AWS_SECRET_MANAGER_SLOW_REGEX = re.compile(
-    r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]*):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]*)"
+    r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]+):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]+)"
     r"(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
 )
 GCP_SECRET_MANAGER_FAST_REGEX = re.compile(
@@ -206,6 +206,8 @@ def substitute_config_variable(
 
     If the value to substitute begins with dollar_sign_escape_string it is not substituted.
 
+    If the value starts with the keyword `secret|`, it tries to apply secret store substitution.
+
     :param template_str: a string that might or might not be of the form ${SOME_VARIABLE}
             or $SOME_VARIABLE
     :param config_variables_dict: a dictionary of config variables. It is loaded from the
@@ -235,7 +237,7 @@ def substitute_config_variable(
 
         if config_variable_value is not None:
             if not isinstance(config_variable_value, str):
-                config_variable_value = substitute_template_from_secret_store(
+                config_variable_value = substitute_value_from_secret_store(
                     config_variable_value
                 )
                 return config_variable_value
@@ -250,23 +252,69 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
 
     # 2. Replace the "$"'s that had been escaped
     template_str = template_str.replace(dollar_sign_escape_string, "$")
-    template_str = substitute_template_from_secret_store(template_str)
+    template_str = substitute_value_from_secret_store(template_str)
     return template_str
 
 
-def substitute_template_from_secret_store(value):
+def substitute_value_from_secret_store(value):
+    """
+    This method takes a value, tries to parse the value to fetch a secret from a secret manager
+    and returns the secret's value only if the input value is a string and contains one of the following patterns:
+
+    - AWS Secrets Manager: the input value starts with ``secret|arn:aws:secretsmanager``
+
+    - GCP Secret Manager: the input value matches the following regex ``^secret\\|projects\\/[a-z0-9\\_\\-]{6,30}\\/secrets``
+
+    - Azure Key Vault: the input value matches the following regex ``^secret\\|https:\\/\\/[a-zA-Z0-9\\-]{3,24}\\.vault\\.azure\\.net``
+
+    Input value examples:
+
+    - AWS Secrets Manager: ``secret|arn:aws:secretsmanager:eu-west-3:123456789012:secret:my_secret``
+
+    - GCP Secret Manager: ``secret|projects/gcp_project_id/secrets/my_secret``
+
+    - Azure Key Vault: ``secret|https://vault-name.vault.azure.net/secrets/my-secret``
+
+    :param value: a string that might or might not start with `secret|`
+
+    :return: a string with the value substituted by the secret from the secret store,
+            or the same object if value is not a string.
+    """
     if isinstance(value, str) and value.startswith("secret|"):
         if value.startswith("secret|arn:aws:secretsmanager"):
-            return substitute_template_from_aws_secrets_manager(value)
+            return substitute_value_from_aws_secrets_manager(value)
         elif GCP_SECRET_MANAGER_FAST_REGEX.match(value):
-            return substitute_template_from_gcp_secret_manager(value)
+            return substitute_value_from_gcp_secret_manager(value)
         elif AZURE_KEYVAULT_FAST_REGEX.match(value):
-            return substitute_template_from_azure_keyvault(value)
+            return substitute_value_from_azure_keyvault(value)
     return value
 
 
-def substitute_template_from_aws_secrets_manager(value):
+def substitute_value_from_aws_secrets_manager(value):
+    """
+    This methods uses a boto3 client and the secretsmanager service to try to retrieve the secret value
+    from the elements it is able to parse from the input value.
 
+    - value: string with pattern ``secret|arn:aws:secretsmanager:${region_name}:${account_id}:secret:${secret_name}``
+
+        optional : after the value above, a secret version can be added ``:${secret_version}``
+
+        optional : after the value above, a secret key can be added ``|${secret_key}``
+
+    - region_name: `AWS region used by the secrets manager <https://docs.aws.amazon.com/general/latest/gr/rande.html>`_
+    - account_id: `Account ID for the AWS account used by the secrets manager <https://docs.aws.amazon.com/en_us/IAM/latest/UserGuide/console_account-alias.html>`_
+
+            This value is currently not used.
+    - secret_name: Name of the secret
+    - secret_version: UUID of the version of the secret
+    - secret_key: Only if the secret's data is a JSON string, which key of the dict should be retrieve
+
+    :param value: a string that starts with ``secret|arn:aws:secretsmanager``
+
+    :return: a string with the value substituted by the secret from the AWS Secrets Manager store
+
+    :raises: ImportError, ValueError
+    """
     if not boto3:
         logger.error(
             "boto3 is not installed, please install great_expectations with aws_secrets extra > "
@@ -304,7 +352,27 @@ def substitute_template_from_aws_secrets_manager(value):
     return secret
 
 
-def substitute_template_from_gcp_secret_manager(value):
+def substitute_value_from_gcp_secret_manager(value):
+    """
+    This methods uses a google.cloud.secretmanager.SecretManagerServiceClient to try to retrieve the secret value
+    from the elements it is able to parse from the input value.
+
+    value: string with pattern ``secret|projects/${project_id}/secrets/${secret_name}``
+
+        optional : after the value above, a secret version can be added ``/version/${secret_version}``
+
+        optional : after the value above, a secret key can be added ``|${secret_key}``
+
+    - project_id: `Project ID of the GCP project on which the secret manager is implemented <https://cloud.google.com/resource-manager/docs/creating-managing-projects#before_you_begin>`_
+    - secret_name: Name of the secret
+    - secret_version: ID of the version of the secret
+    - secret_key: Only if the secret's data is a JSON string, which key of the dict should be retrieve
+
+    :param value: a string that matches the following regex ``^secret|projects/[a-z0-9_-]{6,30}/secrets``
+
+    :return: a string with the value substituted by the secret from the GCP Secret Manager store
+    :raises: ImportError, ValueError
+    """
     if not secretmanager:
         logger.error(
             "secretmanager is not installed, please install great_expectations with gcp extra > "
@@ -340,7 +408,28 @@ def substitute_template_from_gcp_secret_manager(value):
     return secret
 
 
-def substitute_template_from_azure_keyvault(value):
+def substitute_value_from_azure_keyvault(value):
+    """
+    This methods uses a azure.identity.DefaultAzureCredential to authenticate to the Azure SDK for Python
+    and a azure.keyvault.secrets.SecretClient to try to retrieve the secret value from the elements
+    it is able to parse from the input value.
+
+    - value: string with pattern ``secret|https://${vault_name}.vault.azure.net/secrets/${secret_name}``
+
+        optional : after the value above, a secret version can be added ``/${secret_version}``
+
+        optional : after the value above, a secret key can be added ``|${secret_key}``
+
+    - vault_name: `Vault name of the secret manager <https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#objects-identifiers-and-versioning>`_
+    - secret_name: Name of the secret
+    - secret_version: ID of the version of the secret
+    - secret_key: Only if the secret's data is a JSON string, which key of the dict should be retrieve
+
+    :param value: a string that matches the following regex ``^secret|https://[a-zA-Z0-9-]{3,24}.vault.azure.net``
+
+    :return: a string with the value substituted by the secret from the Azure Key Vault store
+    :raises: ImportError, ValueError
+    """
     if not SecretClient:
         logger.error(
             "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
