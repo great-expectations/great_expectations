@@ -279,7 +279,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     assert batch_definition_list == expected_batch_definition_list
 
 
-def test_get_batch_definition_list_from_batch_request_with_and_without_name(
+def test_get_batch_definition_list_from_batch_request_with_and_without_data_asset_name(
     basic_datasource,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})

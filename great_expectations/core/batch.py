@@ -290,7 +290,7 @@ class BatchRequest(BatchRequestBase):
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
-        self._validate_parameters(
+        self._validate_init_parameters(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -308,7 +308,7 @@ class BatchRequest(BatchRequestBase):
         )
 
     @staticmethod
-    def _validate_parameters(
+    def _validate_init_parameters(
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str = None,

@@ -145,11 +145,9 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
         3. Construct a BatchRequest
 
-            We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument.
+            We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument.  We can also optionally set ``data_asset_name``, or it will be set to  ``IN_MEMORY_DATA_ASSET`` by default.
 
             Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``runtime_keys`` to define which keys are allowed.
-
-            NOTE: When passing in Spark dataframe as a batch, ``data_asset_name`` can optionally be passed in as part of ``BatchRequest``.  If you choose to not set your own ``data_asset_name``,  it will be set to  ``“IN_MEMORY_DATA_ASSET”` by default.
 
             .. code-block:: python
 
