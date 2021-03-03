@@ -5,6 +5,7 @@ variables:
   contrib_major: 0
   contrib_minor: 1
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  python.version: '3.8'
 
 name: $(Date:yyyyMMdd)$(Rev:rrr)
 
@@ -26,12 +27,27 @@ stages:
                 [ExperimentalChanged]
                 contrib/experimental/**
 
-      - job: test
+      - job: lint
         dependsOn: changes
         condition: eq(dependencies.changes.outputs['CheckChanges.ContribChanged'], true)
 
-        variables:
-          python.version: '3.8'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - script: |
+              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==20.8b1 pyupgrade==2.7.2
+              EXIT_STATUS=0
+              isort . --check-only --skip docs/ || EXIT_STATUS=$?
+              black --check --exclude docs/ . || EXIT_STATUS=$?
+              flake8 great_expectations/core || EXIT_STATUS=$?
+              pyupgrade --py3-plus || EXIT_STATUS=$?
+              exit $EXIT_STATUS
+
+      - job: test
+        dependsOn: lint
 
         steps:
           - task: UsePythonVersion@0
@@ -45,9 +61,6 @@ stages:
       - job: deploy_experimental
         dependsOn: [changes, test]
         condition: and(succeeded(), eq(dependencies.changes.outputs['CheckChanges.ExperimentalChanged'], true), eq(variables.isDevelop, true))
-
-        variables:
-          python.version: '3.8'
 
         steps:
           - task: UsePythonVersion@0
