@@ -179,9 +179,13 @@ class RuntimeDataConnector(DataConnector):
             partition_definition=PartitionDefinition(partition_identifiers),
         )
 
-        # skipping test for batch_definition_matches_batch_request since data is already passed in at runtime
-        # batch_definition will never be empty
-        batch_definition_list = [batch_definition]
+        if batch_definition_matches_batch_request(
+            batch_definition=batch_definition, batch_request=batch_request
+        ):
+            batch_definition_list = [batch_definition]
+        else:
+            batch_definition_list = []
+
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
