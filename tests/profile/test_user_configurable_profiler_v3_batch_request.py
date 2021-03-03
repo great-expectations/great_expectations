@@ -25,6 +25,7 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
+from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
@@ -740,7 +741,8 @@ def test_profiler_all_expectation_types_spark(
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("sqlalchemy") is None, reason="requires sqlalchemy"
+    not is_library_loadable(library_name="sqlalchemy"),
+    reason="requires sqlalchemy to NOT be installed",
 )
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
@@ -750,10 +752,8 @@ def test_profiler_all_expectation_types_sqlalchemy(
     What does this test do and why?
     Ensures that all available expectation types work as expected for sqlalchemy
     """
-    print("skipif didn't work")
-    pytest.importorskip("sqlalchemy")
+    print("skip didn't work")
 
-    print("importorskip didn't work")
     from tests.test_utils import connection_manager
 
     df = ge.read_csv(
