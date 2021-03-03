@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 import pytest
 from dateutil.parser import parse
-from sqlalchemy.exc import SQLAlchemyError
 
 from great_expectations.core import (
     ExpectationConfigurationSchema,
@@ -62,6 +61,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from sqlalchemy import create_engine
+
 except ImportError:
     create_engine = None
 
@@ -180,7 +180,7 @@ class SqlAlchemyConnectionManager:
                     conn = engine.connect()
                     self._connections[connection_string] = conn
 
-                except (ImportError, SQLAlchemyError):
+                except ImportError:
                     print(f"Unable to establish connection with {connection_string}")
                     raise
 
