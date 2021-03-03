@@ -58,7 +58,7 @@ class TableAlphabeticalColumnNameCount(TableMetricProvider):
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
-        execution_engine: "ExecutionEngine",
+        execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
@@ -67,12 +67,12 @@ class TableAlphabeticalColumnNameCount(TableMetricProvider):
         columns = metrics.get("table.columns")
 
         # For each column, testing if alphabetical and returning number of alphabetical columns
-        return len([column for column in columns if np.islpha(column)])
+        return len([column for column in columns if column.isalpha()])
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        execution_engine: "ExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
@@ -81,12 +81,12 @@ class TableAlphabeticalColumnNameCount(TableMetricProvider):
         columns = metrics.get("table.columns")
 
         # For each column, testing if alphabetical and returning number of alphabetical columns
-        return len([column for column in columns if np.islpha(column)])
+        return len([column for column in columns if column.isalpha()])
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        execution_engine: "ExecutionEngine",
+        execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
@@ -95,7 +95,7 @@ class TableAlphabeticalColumnNameCount(TableMetricProvider):
         columns = metrics.get("table.columns")
 
         # For each column, testing if alphabetical and returning number of alphabetical columns
-        return len([column for column in columns if np.islpha(column)])
+        return len([column for column in columns if column.isalpha()])
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -106,8 +106,8 @@ class TableAlphabeticalColumnNameCount(TableMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         return {
-            "table.alphabetical_column_name_count": MetricConfiguration(
-                "table.alphabetical_column_name_count", metric.metric_domain_kwargs
+            "table.columns": MetricConfiguration(
+                "table.columns", metric.metric_domain_kwargs
             ),
         }
 
@@ -122,16 +122,16 @@ class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
     examples = [
         {
             "data": {
-                "column_1z": [3, 5, 7],
-                "column_2z": [True, False, True],
-                "column_3z": ["a", "b", "c"],
-                "column_4z": [None, 2, None],
+                "columnone": [3, 5, 7],
+                "columntwo": [True, False, True],
+                "columnthree": ["a", "b", "c"],
+                "columnfour": [None, 2, None],
             },
             "data_2": {
-                "column_1a": [3, 5, 7],
-                "column_2b": [True, False, True],
-                "column_3z": ["a", "b", "c"],
-                "column_4z": ["c", "d", "e"],
+                "columnnumberone": [3, 5, 7],
+                "columnnumbertwo": [True, False, True],
+                "columnnumberthree": ["a", "b", "c"],
+                "!_!!": ["c", "d", "e"],
             },
             "tests": [
                 {
@@ -148,7 +148,7 @@ class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
                     "title": "negative_test_with_3_columns",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"df": "data_2"},
+                    "in": {"user_input": "HelloWorld"},
                     "out": {
                         "success": False,
                         "observed_value": 3,
