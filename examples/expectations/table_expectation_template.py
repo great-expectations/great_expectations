@@ -144,16 +144,6 @@ class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
                         "observed_value": 4,
                     },
                 },
-                {
-                    "title": "negative_test_with_3_columns",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {"user_input": "HelloWorld"},
-                    "out": {
-                        "success": False,
-                        "observed_value": 3,
-                    },
-                }
             ],
         }
     ]
