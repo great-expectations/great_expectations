@@ -442,7 +442,7 @@ def load_checkpoint(
             context,
             usage_event,
             f"""\
-<red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
+<red>Could not find checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
