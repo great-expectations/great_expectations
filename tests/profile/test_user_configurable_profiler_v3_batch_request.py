@@ -30,7 +30,8 @@ from tests.profile.conftest import get_set_of_columns_and_expectations_from_suit
 from tests.test_utils import connection_manager
 
 try:
-    import sqlalchemy.dialects.postgresql as postgresqltypes
+    pytest.importorskip("sqlalchemy")
+    postgresqltypes = pytest.importorskip("sqlalchemy.dialects.postgresql")
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -44,6 +45,7 @@ try:
         "BOOLEAN": postgresqltypes.BOOLEAN,
         "NUMERIC": postgresqltypes.NUMERIC,
     }
+
 except ImportError:
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
