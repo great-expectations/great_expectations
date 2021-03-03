@@ -153,8 +153,7 @@ class RuntimeDataConnector(DataConnector):
             data_asset_name = batch_request.data_asset_name
         else:
             data_asset_name = DEFAULT_DATA_ASSET_NAME
-
-        batch_request.data_asset_name = data_asset_name
+            batch_request.data_asset_name = data_asset_name
 
         self._validate_batch_request(batch_request=batch_request)
 
