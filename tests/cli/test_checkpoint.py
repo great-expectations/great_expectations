@@ -72,7 +72,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
+        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
     )
 
@@ -349,7 +349,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "A Checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
+        "A checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
         in stdout
     )
 
@@ -508,7 +508,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 
     stdout: str = result.stdout
     assert (
-        "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
+        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
@@ -1299,7 +1299,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     )
     stdout = result.stdout
     assert (
-        "Could not find Checkpoint `not_a_checkpoint` (or its configuration is invalid)."
+        "Could not find checkpoint `not_a_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
@@ -1400,7 +1400,7 @@ def test_checkpoint_script_happy_path_generates_script(
 
     stdout: str = result.stdout
     assert (
-        "A python script was created that runs the Checkpoint named: `my_v1_checkpoint`"
+        "A python script was created that runs the checkpoint named: `my_v1_checkpoint`"
         in stdout
     )
     assert (
