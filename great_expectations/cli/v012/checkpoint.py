@@ -94,7 +94,7 @@ def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
         ge_config_version = context.get_config().config_version
         if ge_config_version >= 3:
             cli_message(
-                f"""<red>The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3.</red>"""
+                f"""<red>The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3.</red>"""
             )
             toolkit.send_usage_message(context, usage_event, success=False)
             sys.exit(1)
@@ -221,7 +221,7 @@ def checkpoint_run(checkpoint, directory):
     ge_config_version = context.get_config().config_version
     if ge_config_version >= 3:
         cli_message(
-            f"""<red>The `checkpoint run` CLI command is not yet implemented for GE config versions >= 3.</red>"""
+            f"""<red>The `checkpoint run` CLI command is not yet implemented for Great Expectations config versions >= 3.</red>"""
         )
         toolkit.send_usage_message(context, usage_event, success=False)
         sys.exit(1)
@@ -303,7 +303,7 @@ def checkpoint_script(checkpoint, directory):
     ge_config_version = context.get_config().config_version
     if ge_config_version >= 3:
         cli_message(
-            f"""<red>The `checkpoint script` CLI command is not yet implemented for GE config versions >= 3.</red>"""
+            f"""<red>The `checkpoint script` CLI command is not yet implemented for Great Expectations config versions >= 3.</red>"""
         )
         toolkit.send_usage_message(context, usage_event, success=False)
         sys.exit(1)

@@ -1340,7 +1340,7 @@ You have selected a datasource that is a SQL database. How would you like to spe
     if datasource.engine.dialect.name.lower() == "bigquery":
         # bigquery also requires special handling
         bigquery_temp_table = click.prompt(
-            "GE will create a table to use for "
+            "Great Expectations will create a table to use for "
             "validation." + os.linesep + "Please enter a name for this table: ",
             default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
         )

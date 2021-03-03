@@ -327,7 +327,7 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     # with the datasource's name as the variable name.
     # The value of the datasource's "credentials" key in the config file (great_expectations.yml) will
     # be ${datasource name}.
-    # GE will replace the ${datasource name} with the value from the credentials file in runtime.
+    # Great Expectations will replace the ${datasource name} with the value from the credentials file in runtime.
 
     while True:
         cli_message(msg_db_config.format(datasource_name))

@@ -72,7 +72,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
+        "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
     )
 
@@ -141,7 +141,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "No checkpoints found." in stdout
+    assert "No Checkpoints found." in stdout
 
 
 @mock.patch(
@@ -164,7 +164,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     )
     stdout: str = result.stdout
     assert result.exit_code == 0
-    assert 'The checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
+    assert 'The Checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
 
     assert mock_emit.call_count == 1
     assert mock_emit.call_args_list == [
@@ -185,7 +185,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "Found 1 checkpoint." in stdout
+    assert "Found 1 Checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
 
@@ -205,7 +205,7 @@ def test_checkpoint_list_with_no_checkpoints(
     )
     stdout: str = result.stdout
     assert result.exit_code == 0
-    assert "No checkpoints found." in stdout
+    assert "No Checkpoints found." in stdout
     assert "Use the command `great_expectations checkpoint new` to create one" in stdout
 
     assert mock_emit.call_count == 2
@@ -244,7 +244,7 @@ def test_checkpoint_list_with_single_checkpoint(
     )
     stdout: str = result.stdout
     assert result.exit_code == 0
-    assert "Found 1 checkpoint." in stdout
+    assert "Found 1 Checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
     assert mock_emit.call_count == 2
@@ -286,7 +286,7 @@ def test_checkpoint_list_with_eight_checkpoints(
     )
     stdout: str = result.stdout
     assert result.exit_code == 0
-    assert "Found 8 checkpoints." in stdout
+    assert "Found 8 Checkpoints." in stdout
     checkpoint_names_list: List[str] = [
         "my_simple_checkpoint_with_slack_and_notify_with_all",
         "my_nested_checkpoint_template_1",
@@ -343,7 +343,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "A checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
+        "A Checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
         in stdout
     )
 
@@ -501,7 +501,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     stdout: str = result.stdout
     assert result.exit_code == 1
     assert (
-        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
+        "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
@@ -1289,7 +1289,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     )
     stdout = result.stdout
     assert (
-        "Could not find checkpoint `not_a_checkpoint` (or its configuration is invalid)."
+        "Could not find Checkpoint `not_a_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
@@ -1388,7 +1388,7 @@ def test_checkpoint_script_happy_path_generates_script(
     stdout: str = result.stdout
     assert result.exit_code == 0
     assert (
-        "A python script was created that runs the checkpoint named: `my_v1_checkpoint`"
+        "A python script was created that runs the Checkpoint named: `my_v1_checkpoint`"
         in stdout
     )
     assert (
@@ -1799,7 +1799,7 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        "The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3."
+        "The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3."
         in stdout
     )
 
