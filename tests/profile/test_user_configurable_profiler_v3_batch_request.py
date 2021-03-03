@@ -742,7 +742,11 @@ def test_profiler_all_expectation_types_spark(
 
 @pytest.mark.skipif(
     not is_library_loadable(library_name="sqlalchemy"),
-    reason="requires sqlalchemy to NOT be installed",
+    reason="requires sqlalchemy to be installed",
+)
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="sqlalchemy.dialects.postgresql"),
+    reason="requires sqlalchemy to be installed",
 )
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
@@ -753,6 +757,16 @@ def test_profiler_all_expectation_types_sqlalchemy(
     Ensures that all available expectation types work as expected for sqlalchemy
     """
     print("skip didn't work")
+    try:
+        import sqlalchemy
+        import sqlalchemy.dialects.postgresql as postgres_dialect
+    except:
+        sqlalchemy = None
+        postgres_dialect = None
+
+    print(f"sqlalchemy is {sqlalchemy}")
+
+    print(f"postgres_dialect is {postgres_dialect}")
 
     from tests.test_utils import connection_manager
 
