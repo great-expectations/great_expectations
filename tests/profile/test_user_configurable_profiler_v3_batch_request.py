@@ -29,27 +29,6 @@ from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 from tests.test_utils import connection_manager
 
-try:
-    import sqlalchemy as sa
-    import sqlalchemy.dialects.postgresql as postgresqltypes
-
-    POSTGRESQL_TYPES = {
-        "TEXT": postgresqltypes.TEXT,
-        "CHAR": postgresqltypes.CHAR,
-        "INTEGER": postgresqltypes.INTEGER,
-        "SMALLINT": postgresqltypes.SMALLINT,
-        "BIGINT": postgresqltypes.BIGINT,
-        "TIMESTAMP": postgresqltypes.TIMESTAMP,
-        "DATE": postgresqltypes.DATE,
-        "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
-        "BOOLEAN": postgresqltypes.BOOLEAN,
-        "NUMERIC": postgresqltypes.NUMERIC,
-    }
-except ImportError:
-    sa = None
-    postgresqltypes = None
-    POSTGRESQL_TYPES = {}
-
 
 def get_pandas_runtime_validator(context, df):
     batch_request = BatchRequest(
@@ -106,72 +85,6 @@ def get_spark_runtime_validator(context, df):
     return validator
 
 
-def get_sqlalchemy_runtime_validator_postgresql(
-    df, schemas=None, caching=True, table_name=None
-):
-    sa_engine_name = "postgresql"
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-    engine = connection_manager.get_engine(
-        f"postgresql://postgres@{db_hostname}/test_ci"
-    )
-    sql_dtypes = {}
-
-    if (
-        schemas
-        and sa_engine_name in schemas
-        and isinstance(engine.dialect, postgresqltypes.dialect)
-    ):
-        schema = schemas[sa_engine_name]
-        sql_dtypes = {col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
-
-        for col in schema:
-            type_ = schema[col]
-            if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                df[col] = pd.to_numeric(df[col], downcast="signed")
-            elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                df[col] = pd.to_numeric(df[col])
-                min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                    schema=sa_engine_name, negative=True
-                )
-                max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                    schema=sa_engine_name, negative=False
-                )
-                for api_schema_type in ["api_np", "api_cast"]:
-                    min_value_api = get_sql_dialect_floating_point_infinity_value(
-                        schema=api_schema_type, negative=True
-                    )
-                    max_value_api = get_sql_dialect_floating_point_infinity_value(
-                        schema=api_schema_type, negative=False
-                    )
-                    df.replace(
-                        to_replace=[min_value_api, max_value_api],
-                        value=[min_value_dbms, max_value_dbms],
-                        inplace=True,
-                    )
-            elif type_ in ["DATETIME", "TIMESTAMP"]:
-                df[col] = pd.to_datetime(df[col])
-
-    if table_name is None:
-        table_name = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-        )
-    df.to_sql(
-        name=table_name,
-        con=engine,
-        index=False,
-        dtype=sql_dtypes,
-        if_exists="replace",
-    )
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data)
-    execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=execution_engine, table_name=table_name
-    )
-    batch = Batch(data=batch_data)
-    return Validator(execution_engine=execution_engine, batches=(batch,))
-
-
 @pytest.fixture
 def titanic_validator(titanic_data_context_modular_api):
     """
@@ -209,19 +122,6 @@ def taxi_validator_spark(titanic_data_context_modular_api):
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
     return get_spark_runtime_validator(titanic_data_context_modular_api, df)
-
-
-@pytest.fixture
-def taxi_validator_sqlalchemy(titanic_data_context_modular_api):
-    """
-    What does this test do and why?
-    Ensures that all available expectation types work as expected
-    """
-    df = ge.read_csv(
-        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv"),
-        parse_dates=["pickup_datetime", "dropoff_datetime"],
-    )
-    return get_sqlalchemy_runtime_validator_postgresql(df)
 
 
 @pytest.fixture
@@ -840,23 +740,50 @@ def test_profiler_all_expectation_types_spark(
         assert results["success"]
 
 
-@pytest.mark.skipif(
-    sa is None,
-    reason="requires sqlslchemy",
-)
-@pytest.mark.skipif(
-    postgresqltypes is None,
-    reason="test_profiler_all_expectation_types_sqlalchemy requires sqlalchemy.dialects.postgresql",
-)
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
-    taxi_validator_sqlalchemy,
     possible_expectations_set,
 ):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected for sqlalchemy
     """
+    try:
+        import sqlalchemy
+        import sqlalchemy.dialects.postgresql as postgresqltypes
+
+    except:
+        pytest.skip(
+            "test_profiler_all_expectation_types_sqlalchemy requires sqlalchemy and sqlalchemy.dialects.postgresql"
+        )
+
+    df = ge.read_csv(
+        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv"),
+        parse_dates=["pickup_datetime", "dropoff_datetime"],
+    )
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    engine = connection_manager.get_engine(
+        f"postgresql://postgres@{db_hostname}/test_ci"
+    )
+    sql_dtypes = {}
+
+    table_name = "test_data_" + "".join(
+        [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+    )
+    df.to_sql(
+        name=table_name,
+        con=engine,
+        index=False,
+        dtype=sql_dtypes,
+        if_exists="replace",
+    )
+
+    execution_engine = SqlAlchemyExecutionEngine(caching=True, engine=engine)
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+    batch = Batch(data=batch_data)
+    validator = Validator(execution_engine=execution_engine, batches=(batch,))
 
     context = titanic_data_context_modular_api
 
@@ -884,7 +811,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
     }
 
     profiler = UserConfigurableProfiler(
-        taxi_validator_sqlalchemy,
+        validator,
         semantic_types_dict=semantic_types,
         ignored_columns=ignored_columns,
         # TODO: Add primary_or_compound_key test
@@ -921,7 +848,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
     assert len(ignored_included_columns_overlap) == 0
 
     results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
+        "action_list_operator", assets_to_validate=[validator]
     )
 
     assert results["success"]
