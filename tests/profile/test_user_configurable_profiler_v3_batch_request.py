@@ -1,9 +1,7 @@
-import datetime
 import os
 import random
 import string
 
-import dateutil
 import pandas as pd
 import pytest
 
@@ -24,6 +22,7 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
+from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 from tests.test_utils import connection_manager
@@ -76,111 +75,106 @@ def get_pandas_runtime_validator(context, df):
 
 def get_spark_runtime_validator(context, df):
     try:
-        import pyspark
         from pyspark import SparkContext, SQLContext
     except:
         pyspark = None
 
-    if pyspark:
-        sc = SparkContext.getOrCreate()
-        sqlCtx = SQLContext(sc)
-        sdf = sqlCtx.createDataFrame(df)
-        batch_request = BatchRequest(
-            datasource_name="my_spark_datasource",
-            data_connector_name="my_data_connector",
-            batch_data=sdf,
-            data_asset_name="IN_MEMORY_DATA_ASSET",
-            partition_request={
-                "partition_identifiers": {
-                    "an_example_key": "a",
-                    "another_example_key": "b",
-                }
-            },
-        )
+    sc = SparkContext.getOrCreate()
+    sqlCtx = SQLContext(sc)
+    sdf = sqlCtx.createDataFrame(df)
+    batch_request = BatchRequest(
+        datasource_name="my_spark_datasource",
+        data_connector_name="my_data_connector",
+        batch_data=sdf,
+        data_asset_name="IN_MEMORY_DATA_ASSET",
+        partition_request={
+            "partition_identifiers": {
+                "an_example_key": "a",
+                "another_example_key": "b",
+            }
+        },
+    )
 
-        expectation_suite = context.create_expectation_suite(
-            "my_suite", overwrite_existing=True
-        )
+    expectation_suite = context.create_expectation_suite(
+        "my_suite", overwrite_existing=True
+    )
 
-        validator = context.get_validator(
-            batch_request=batch_request, expectation_suite=expectation_suite
-        )
+    validator = context.get_validator(
+        batch_request=batch_request, expectation_suite=expectation_suite
+    )
 
-        return validator
-    else:
-        return None
+    return validator
 
 
 def get_sqlalchemy_runtime_validator_postgresql(
     df, schemas=None, caching=True, table_name=None
 ):
+    sa_engine_name = "postgresql"
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     try:
-        sa_engine_name = "postgresql"
-        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
         )
-        sql_dtypes = {}
-
-        if (
-            schemas
-            and sa_engine_name in schemas
-            and isinstance(engine.dialect, postgresqltypes.dialect)
-        ):
-            schema = schemas[sa_engine_name]
-            sql_dtypes = {
-                col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()
-            }
-
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=sa_engine_name, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=sa_engine_name, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-
-        if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-        batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-        batch = Batch(data=batch_data)
-        execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-        batch_data = SqlAlchemyBatchData(
-            execution_engine=execution_engine, table_name=table_name
-        )
-        batch = Batch(data=batch_data)
-        return Validator(execution_engine=execution_engine, batches=(batch,))
-
-    except:
+    except sa.exc.OperationalError:
         return None
+
+    sql_dtypes = {}
+
+    if (
+        schemas
+        and sa_engine_name in schemas
+        and isinstance(engine.dialect, postgresqltypes.dialect)
+    ):
+        schema = schemas[sa_engine_name]
+        sql_dtypes = {col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()}
+
+        for col in schema:
+            type_ = schema[col]
+            if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+                df[col] = pd.to_numeric(df[col], downcast="signed")
+            elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
+                df[col] = pd.to_numeric(df[col])
+                min_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                    schema=sa_engine_name, negative=True
+                )
+                max_value_dbms = get_sql_dialect_floating_point_infinity_value(
+                    schema=sa_engine_name, negative=False
+                )
+                for api_schema_type in ["api_np", "api_cast"]:
+                    min_value_api = get_sql_dialect_floating_point_infinity_value(
+                        schema=api_schema_type, negative=True
+                    )
+                    max_value_api = get_sql_dialect_floating_point_infinity_value(
+                        schema=api_schema_type, negative=False
+                    )
+                    df.replace(
+                        to_replace=[min_value_api, max_value_api],
+                        value=[min_value_dbms, max_value_dbms],
+                        inplace=True,
+                    )
+            elif type_ in ["DATETIME", "TIMESTAMP"]:
+                df[col] = pd.to_datetime(df[col])
+
+    if table_name is None:
+        table_name = "test_data_" + "".join(
+            [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+        )
+    df.to_sql(
+        name=table_name,
+        con=engine,
+        index=False,
+        dtype=sql_dtypes,
+        if_exists="replace",
+    )
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
+    batch = Batch(data=batch_data)
+    execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+    batch = Batch(data=batch_data)
+
+    return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
 @pytest.fixture
@@ -770,6 +764,10 @@ def test_profiler_all_expectation_types_pandas(
     assert results["success"]
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyspark"),
+    reason="requires pyspark to be installed",
+)
 def test_profiler_all_expectation_types_spark(
     titanic_data_context_modular_api, taxi_validator_spark, possible_expectations_set
 ):
@@ -848,6 +846,10 @@ def test_profiler_all_expectation_types_spark(
         assert results["success"]
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="sqlalchemy"),
+    reason="requires sqlalchemy to be installed",
+)
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
     taxi_validator_sqlalchemy,
@@ -855,73 +857,75 @@ def test_profiler_all_expectation_types_sqlalchemy(
 ):
     """
     What does this test do and why?
-    Ensures that all available expectation types work as expected for spark
+    Ensures that all available expectation types work as expected for sqlalchemy
     """
-    if postgresqltypes is not None and taxi_validator_sqlalchemy is not None:
-        context = titanic_data_context_modular_api
+    if taxi_validator_sqlalchemy == None:
+        pytest.skip("a message")
 
-        ignored_columns = [
-            "pickup_location_id",
-            "dropoff_location_id",
-            "fare_amount",
-            "extra",
-            "mta_tax",
-            "tip_amount",
-            "tolls_amount",
-            "improvement_surcharge",
-            "congestion_surcharge",
-        ]
-        semantic_types = {
-            "datetime": ["pickup_datetime", "dropoff_datetime"],
-            "numeric": ["total_amount", "passenger_count"],
-            "value_set": [
-                "payment_type",
-                "rate_code_id",
-                "store_and_fwd_flag",
-                "passenger_count",
-            ],
-            "boolean": ["store_and_fwd_flag"],
-        }
+    context = titanic_data_context_modular_api
 
-        profiler = UserConfigurableProfiler(
-            taxi_validator_sqlalchemy,
-            semantic_types_dict=semantic_types,
-            ignored_columns=ignored_columns,
-            # TODO: Add primary_or_compound_key test
-            #  primary_or_compound_key=[
-            #     "vendor_id",
-            #     "pickup_datetime",
-            #     "dropoff_datetime",
-            #     "trip_distance",
-            #     "pickup_location_id",
-            #     "dropoff_location_id",
-            #  ],
-        )
+    ignored_columns = [
+        "pickup_location_id",
+        "dropoff_location_id",
+        "fare_amount",
+        "extra",
+        "mta_tax",
+        "tip_amount",
+        "tolls_amount",
+        "improvement_surcharge",
+        "congestion_surcharge",
+    ]
+    semantic_types = {
+        "datetime": ["pickup_datetime", "dropoff_datetime"],
+        "numeric": ["total_amount", "passenger_count"],
+        "value_set": [
+            "payment_type",
+            "rate_code_id",
+            "store_and_fwd_flag",
+            "passenger_count",
+        ],
+        "boolean": ["store_and_fwd_flag"],
+    }
 
-        assert profiler.column_info.get("rate_code_id")
-        suite = profiler.build_suite()
-        assert len(suite.expectations) == 45
-        (
-            columns_with_expectations,
-            expectations_from_suite,
-        ) = get_set_of_columns_and_expectations_from_suite(suite)
+    profiler = UserConfigurableProfiler(
+        taxi_validator_sqlalchemy,
+        semantic_types_dict=semantic_types,
+        ignored_columns=ignored_columns,
+        # TODO: Add primary_or_compound_key test
+        #  primary_or_compound_key=[
+        #     "vendor_id",
+        #     "pickup_datetime",
+        #     "dropoff_datetime",
+        #     "trip_distance",
+        #     "pickup_location_id",
+        #     "dropoff_location_id",
+        #  ],
+    )
 
-        unexpected_expectations = {
-            "expect_column_values_to_be_unique",
-            "expect_column_values_to_be_null",
-            "expect_compound_columns_to_be_unique",
-        }
-        assert expectations_from_suite == {
-            i for i in possible_expectations_set if i not in unexpected_expectations
-        }
+    assert profiler.column_info.get("rate_code_id")
+    suite = profiler.build_suite()
+    assert len(suite.expectations) == 45
+    (
+        columns_with_expectations,
+        expectations_from_suite,
+    ) = get_set_of_columns_and_expectations_from_suite(suite)
 
-        ignored_included_columns_overlap = [
-            i for i in columns_with_expectations if i in ignored_columns
-        ]
-        assert len(ignored_included_columns_overlap) == 0
+    unexpected_expectations = {
+        "expect_column_values_to_be_unique",
+        "expect_column_values_to_be_null",
+        "expect_compound_columns_to_be_unique",
+    }
+    assert expectations_from_suite == {
+        i for i in possible_expectations_set if i not in unexpected_expectations
+    }
 
-        results = context.run_validation_operator(
-            "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
-        )
+    ignored_included_columns_overlap = [
+        i for i in columns_with_expectations if i in ignored_columns
+    ]
+    assert len(ignored_included_columns_overlap) == 0
 
-        assert results["success"]
+    results = context.run_validation_operator(
+        "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
+    )
+
+    assert results["success"]
