@@ -842,10 +842,6 @@ def test_profiler_all_expectation_types_spark(
     importlib.util.find_spec("sqlalchemy") is None,
     reason="requires sqlslchemy",
 )
-@pytest.mark.skipif(
-    importlib.util.find_spec("sqlalchemy.dialects.postgresql") is None,
-    reason="requires the sqlslchemy postgresql dialects library",
-)
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
     taxi_validator_sqlalchemy,
@@ -855,6 +851,11 @@ def test_profiler_all_expectation_types_sqlalchemy(
     What does this test do and why?
     Ensures that all available expectation types work as expected for spark
     """
+    if postgresqltypes is None:
+        pytest.skip(
+            "test_profiler_all_expectation_types_sqlalchemy requires sqlalchemy.dialects.postgresql"
+        )
+
     context = titanic_data_context_modular_api
 
     ignored_columns = [
