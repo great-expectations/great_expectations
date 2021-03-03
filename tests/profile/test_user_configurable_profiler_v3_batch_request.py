@@ -740,6 +740,9 @@ def test_profiler_all_expectation_types_spark(
         assert results["success"]
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("sqlalchemy") is None, reason="requires sqlalchemy"
+)
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
     possible_expectations_set,
@@ -748,14 +751,10 @@ def test_profiler_all_expectation_types_sqlalchemy(
     What does this test do and why?
     Ensures that all available expectation types work as expected for sqlalchemy
     """
-    try:
-        import sqlalchemy
-        import sqlalchemy.dialects.postgresql as postgresqltypes
+    print("skipif didn't work")
+    pytest.importorskip("sqlalchemy")
 
-    except:
-        pytest.skip(
-            "test_profiler_all_expectation_types_sqlalchemy requires sqlalchemy and sqlalchemy.dialects.postgresql"
-        )
+    print("importorskip didn't work")
 
     df = ge.read_csv(
         file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv"),
