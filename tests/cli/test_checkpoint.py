@@ -142,7 +142,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "No Checkpoints found." in stdout
+    assert "No checkpoints found." in stdout
 
 
 @mock.patch(
@@ -187,7 +187,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "Found 1 Checkpoint." in stdout
+    assert "Found 1 checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
 

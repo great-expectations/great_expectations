@@ -170,7 +170,7 @@ def checkpoint_list(ctx):
     checkpoints: List[str] = context.list_checkpoints()
     if not checkpoints:
         cli_message(
-            "No Checkpoints found.\n"
+            "No checkpoints found.\n"
             "  - Use the command `great_expectations checkpoint new` to create one."
         )
         toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
@@ -178,7 +178,7 @@ def checkpoint_list(ctx):
 
     number_found: int = len(checkpoints)
     plural: str = "s" if number_found > 1 else ""
-    message: str = f"Found {number_found} Checkpoint{plural}."
+    message: str = f"Found {number_found} checkpoint{plural}."
     pretty_list: list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
     toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
