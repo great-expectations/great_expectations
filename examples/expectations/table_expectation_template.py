@@ -7,7 +7,8 @@ from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,
-    ExpectationConfiguration, TableExpectation,
+    ExpectationConfiguration,
+    TableExpectation,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -51,7 +52,6 @@ class TableAlphabeticalColumnNameCount(TableMetricProvider):
     # This is a built in metric - you do not have to implement it yourself. If you would like to use
     # a metric that does not yet exist, you can use the template below to implement it!
     metric_name = "table.alphabetical_column_name_count"
-
 
     # Below are metric computations for different dialects (Pandas, SqlAlchemy, Spark)
     # They can be used to compute the table data you will need to validate your Expectation
@@ -163,7 +163,6 @@ class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
     metric_dependencies = ("table.alphabetical_column_name_count",)
     success_keys = ("user_input",)
 
-
     default_kwarg_values = {
         "user_input": None,
         "result_format": "BASIC",
@@ -187,8 +186,8 @@ class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
         #     # Setting up a configuration
         try:
             assert "user_input" in configuration.kwargs, "user_input is required"
-            assert (
-                    isinstance(configuration.kwargs["user_input"], str)
+            assert isinstance(
+                configuration.kwargs["user_input"], str
             ), "user_input must be a string"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -199,12 +198,12 @@ class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
-            cls,
-            configuration=None,
-            result=None,
-            language=None,
-            runtime_configuration=None,
-            **kwargs
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
     ):
         runtime_configuration = runtime_configuration or {}
         styling = runtime_configuration.get("styling")
@@ -225,11 +224,11 @@ class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
 
     # This method will utilize the computed metric to validate that your Expectation about the Table is true
     def _validate(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
         actual_column_count = metrics.get("table.alphabetical_column_name_count")
 
