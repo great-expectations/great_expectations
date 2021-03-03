@@ -30,8 +30,8 @@ from tests.profile.conftest import get_set_of_columns_and_expectations_from_suit
 from tests.test_utils import connection_manager
 
 try:
-    pytest.importorskip("sqlalchemy")
-    postgresqltypes = pytest.importorskip("sqlalchemy.dialects.postgresql")
+    import sqlalchemy as sa
+    import sqlalchemy.dialects.postgresql as postgresqltypes
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -45,8 +45,8 @@ try:
         "BOOLEAN": postgresqltypes.BOOLEAN,
         "NUMERIC": postgresqltypes.NUMERIC,
     }
-
 except ImportError:
+    sa = None
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
@@ -841,8 +841,12 @@ def test_profiler_all_expectation_types_spark(
 
 
 @pytest.mark.skipif(
-    importlib.util.find_spec("sqlalchemy") is None,
+    sa is None,
     reason="requires sqlslchemy",
+)
+@pytest.mark.skipif(
+    postgresqltypes is None,
+    reason="test_profiler_all_expectation_types_sqlalchemy requires sqlalchemy.dialects.postgresql",
 )
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
@@ -851,12 +855,8 @@ def test_profiler_all_expectation_types_sqlalchemy(
 ):
     """
     What does this test do and why?
-    Ensures that all available expectation types work as expected for spark
+    Ensures that all available expectation types work as expected for sqlalchemy
     """
-    if postgresqltypes is None:
-        pytest.skip(
-            "test_profiler_all_expectation_types_sqlalchemy requires sqlalchemy.dialects.postgresql"
-        )
 
     context = titanic_data_context_modular_api
 
