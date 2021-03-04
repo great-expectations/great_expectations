@@ -122,21 +122,27 @@ class Checkpoint:
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
+        substituted_config: Union[CheckpointConfig, dict]
         if (
             self._substituted_config is not None
             and not runtime_kwargs.get("template_name")
             and not config.template_name
         ):
-            substituted_config = deepcopy(self._substituted_config)
+            substituted_config = deepcopy(self._substituted_config.to_json_dict())
             if any(runtime_kwargs.values()):
-                substituted_config.update(runtime_kwargs=runtime_kwargs)
+                substituted_config.update(runtime_kwargs)
+            substituted_config = CheckpointConfig(**substituted_config)
         else:
             template_name = runtime_kwargs.get("template_name") or config.template_name
 
             if not template_name:
                 substituted_config = copy.deepcopy(config)
                 if any(runtime_kwargs.values()):
-                    substituted_config.update(runtime_kwargs=runtime_kwargs)
+                    if isinstance(config, CheckpointConfig):
+                        substituted_config.update(runtime_kwargs=runtime_kwargs)
+                    else:
+                        substituted_config.update(runtime_kwargs)
+                        substituted_config = CheckpointConfig(**substituted_config)
 
                 self._substituted_config = substituted_config
             else:
@@ -238,7 +244,7 @@ class Checkpoint:
         validations: list = substituted_runtime_config.validations
         if len(validations) == 0:
             raise ge_exceptions.CheckpointError(
-                f"Checkpoint '{self.name}' does not contain any validations."
+                f'Checkpoint "{self.name}" does not contain any validations.'
             )
         run_results = {}
 

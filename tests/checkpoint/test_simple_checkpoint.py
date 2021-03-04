@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.checkpoint import (
@@ -10,6 +11,7 @@ from great_expectations.checkpoint.checkpoint import (
     SimpleCheckpoint,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.util import filter_properties_dict
 
 
 @pytest.fixture
@@ -437,20 +439,13 @@ def test_simple_checkpoint_persisted_to_store(
     assert results.success
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>This behavior has changed; ; exception is raised instead.</Alex>",
-    run=True,
-    strict=True,
-)
 def test_simple_checkpoint_defaults_run_and_no_run_params_returns_empty_checkpoint_result(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults
 ):
-    result = simple_checkpoint_defaults.run()
-    assert isinstance(result, CheckpointResult)
-    assert result.success
-    assert result.run_results == {}
-    assert result.name == "foo"
-    assert result.list_expectation_suite_names() == []
+    with pytest.raises(ge_exceptions.CheckpointError) as cpe:
+        # noinspection PyUnusedLocal
+        result: CheckpointResult = simple_checkpoint_defaults.run()
+    assert 'Checkpoint "foo" does not contain any validations.' in str(cpe.value)
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_checkpoint(
@@ -469,18 +464,17 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
     assert result.success
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>This behavior has changed; ; exception is raised instead.</Alex>",
-    run=True,
-    strict=True,
-)
 def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
     # verify checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
 
-    expected_runtime_kwargs = {
+    expected_runtime_kwargs: dict = {
+        "name": "foo",
+        "config_version": 1.0,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
         "template_name": None,
         "run_name_template": None,
         "expectation_suite_name": None,
@@ -517,37 +511,38 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
         "profilers": None,
     }
 
-    # verify that runtime_kwargs were processed correctly
-    with patch(
-        "great_expectations.checkpoint.checkpoint.Checkpoint.get_substituted_config"
-    ) as get_substituted_config_mock:
-        simple_checkpoint_defaults.run(
-            run_name="bar", validations=[one_validation], site_names=["local_site"]
-        )
-        get_substituted_config_mock.assert_called_with(
+    result: CheckpointResult = simple_checkpoint_defaults.run(
+        run_name="bar",
+        validations=[one_validation],
+        site_names=["local_site"],
+    )
+    assert isinstance(result, CheckpointResult)
+    assert result.run_id.run_name == "bar"
+    assert result.list_expectation_suite_names() == ["one"]
+    assert len(result.list_validation_results()) == 1
+    assert result.success
+
+    substituted_runtime_config: CheckpointConfig = (
+        simple_checkpoint_defaults.get_substituted_config(
             runtime_kwargs=expected_runtime_kwargs
         )
-
-    substituted_runtime_config = simple_checkpoint_defaults.get_substituted_config(
-        runtime_kwargs=expected_runtime_kwargs
     )
-    assert (
-        substituted_runtime_config.action_list == expected_runtime_kwargs["action_list"]
-    )
+    assert filter_properties_dict(
+        properties=substituted_runtime_config.to_json_dict()
+    ) == filter_properties_dict(properties=expected_runtime_kwargs)
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>This behavior has changed; ; exception is raised instead.</Alex>",
-    run=True,
-    strict=True,
-)
 def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
     # verify checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
 
-    expected_runtime_kwargs = {
+    expected_runtime_kwargs: dict = {
+        "name": "foo",
+        "config_version": 1.0,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
         "template_name": None,
         "run_name_template": None,
         "expectation_suite_name": None,
@@ -594,39 +589,38 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
         "profilers": None,
     }
 
-    # verify that runtime_kwargs were processed correctly
-    with patch(
-        "great_expectations.checkpoint.checkpoint.Checkpoint.get_substituted_config"
-    ) as get_substituted_config_mock:
-        simple_checkpoint_defaults.run(
-            run_name="bar",
-            validations=[one_validation],
-            slack_webhook="https://hooks.slack.com/my_slack_webhook.geocities",
-        )
-        get_substituted_config_mock.assert_called_with(
+    result: CheckpointResult = simple_checkpoint_defaults.run(
+        run_name="bar",
+        validations=[one_validation],
+        slack_webhook="https://hooks.slack.com/my_slack_webhook.geocities",
+    )
+    assert isinstance(result, CheckpointResult)
+    assert result.run_id.run_name == "bar"
+    assert result.list_expectation_suite_names() == ["one"]
+    assert len(result.list_validation_results()) == 1
+    assert result.success
+
+    substituted_runtime_config: CheckpointConfig = (
+        simple_checkpoint_defaults.get_substituted_config(
             runtime_kwargs=expected_runtime_kwargs
         )
-
-    substituted_runtime_config = simple_checkpoint_defaults.get_substituted_config(
-        runtime_kwargs=expected_runtime_kwargs
     )
-    assert (
-        substituted_runtime_config.action_list == expected_runtime_kwargs["action_list"]
-    )
+    assert filter_properties_dict(
+        properties=substituted_runtime_config.to_json_dict()
+    ) == filter_properties_dict(properties=expected_runtime_kwargs)
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>This behavior has changed; ; exception is raised instead.</Alex>",
-    run=True,
-    strict=True,
-)
 def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
     # verify checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
 
-    expected_runtime_kwargs = {
+    expected_runtime_kwargs: dict = {
+        "name": "foo",
+        "config_version": 1.0,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
         "template_name": None,
         "run_name_template": None,
         "expectation_suite_name": None,
@@ -676,35 +670,30 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
         "profilers": None,
     }
 
-    # verify that runtime_kwargs were processed correctly
-    with patch(
-        "great_expectations.checkpoint.checkpoint.Checkpoint.get_substituted_config"
-    ) as get_substituted_config_mock:
-        simple_checkpoint_defaults.run(
-            run_name="bar",
-            validations=[one_validation],
-            site_names=["local_site"],
-            notify_with=["local_site"],
-            notify_on="failure",
-            slack_webhook="https://hooks.slack.com/my_slack_webhook.geocities",
-        )
-        get_substituted_config_mock.assert_called_with(
+    result: CheckpointResult = simple_checkpoint_defaults.run(
+        run_name="bar",
+        validations=[one_validation],
+        site_names=["local_site"],
+        notify_with=["local_site"],
+        notify_on="failure",
+        slack_webhook="https://hooks.slack.com/my_slack_webhook.geocities",
+    )
+    assert isinstance(result, CheckpointResult)
+    assert result.run_id.run_name == "bar"
+    assert result.list_expectation_suite_names() == ["one"]
+    assert len(result.list_validation_results()) == 1
+    assert result.success
+
+    substituted_runtime_config: CheckpointConfig = (
+        simple_checkpoint_defaults.get_substituted_config(
             runtime_kwargs=expected_runtime_kwargs
         )
-
-    substituted_runtime_config = simple_checkpoint_defaults.get_substituted_config(
-        runtime_kwargs=expected_runtime_kwargs
     )
-    assert (
-        substituted_runtime_config.action_list == expected_runtime_kwargs["action_list"]
-    )
+    assert filter_properties_dict(
+        properties=substituted_runtime_config.to_json_dict()
+    ) == filter_properties_dict(properties=expected_runtime_kwargs)
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>This behavior has changed; ; exception is raised instead.</Alex>",
-    run=True,
-    strict=True,
-)
 def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     simple_checkpoint_defaults,
@@ -714,11 +703,19 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
     monkeypatch.setenv("MY_PARAM", "1")
 
-    expected_runtime_kwargs = {
+    expected_runtime_kwargs: dict = {
+        "name": "foo",
+        "config_version": 1.0,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
         "template_name": "my_simple_template_checkpoint",
         "run_name_template": "my_runtime_run_name_template",
         "expectation_suite_name": "my_runtime_suite",
-        "batch_request": {"my_special_runtime_key": "my_special_runtime_value"},
+        "batch_request": {
+            "partition_request": {
+                "index": -1,
+            },
+        },
         "action_list": [
             {
                 "name": "store_validation_result",
@@ -749,8 +746,20 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
                 },
             },
         ],
-        "evaluation_parameters": {"my_runtime_key": "my_runtime_value"},
-        "runtime_configuration": {"my_runtime_key": "my_runtime_value"},
+        "evaluation_parameters": {
+            "aux_param_0": "1",
+            "aux_param_1": "1 + 1",
+            "environment": "my_ge_environment",
+            "my_runtime_key": "my_runtime_value",
+            "tolerance": 0.01,
+        },
+        "runtime_configuration": {
+            "my_runtime_key": "my_runtime_value",
+            "result_format": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 20,
+            },
+        },
         "validations": [
             {
                 "batch_request": {
@@ -764,34 +773,39 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
         "profilers": None,
     }
 
-    # verify that runtime_kwargs were processed correctly
-    with patch(
-        "great_expectations.checkpoint.checkpoint.Checkpoint.get_substituted_config"
-    ) as get_substituted_config_mock:
-        simple_checkpoint_defaults.run(
-            run_name="bar",
-            template_name="my_simple_template_checkpoint",
-            run_name_template="my_runtime_run_name_template",
-            expectation_suite_name="my_runtime_suite",
-            batch_request={"my_special_runtime_key": "my_special_runtime_value"},
-            validations=[one_validation],
-            evaluation_parameters={"my_runtime_key": "my_runtime_value"},
-            runtime_configuration={"my_runtime_key": "my_runtime_value"},
-            site_names=["local_site"],
-            notify_with=["local_site"],
-            notify_on="failure",
-            slack_webhook="https://hooks.slack.com/my_slack_webhook.geocities",
-        )
-        get_substituted_config_mock.assert_called_with(
+    result: CheckpointResult = simple_checkpoint_defaults.run(
+        run_name="bar",
+        template_name="my_simple_template_checkpoint",
+        run_name_template="my_runtime_run_name_template",
+        expectation_suite_name="my_runtime_suite",
+        batch_request={
+            "partition_request": {
+                "index": -1,
+            },
+        },
+        validations=[one_validation],
+        evaluation_parameters={"my_runtime_key": "my_runtime_value"},
+        runtime_configuration={"my_runtime_key": "my_runtime_value"},
+        site_names=["local_site"],
+        notify_with=["local_site"],
+        notify_on="failure",
+        slack_webhook="https://hooks.slack.com/my_slack_webhook.geocities",
+    )
+    assert isinstance(result, CheckpointResult)
+    assert result.run_id.run_name == "bar"
+    assert result.list_expectation_suite_names() == ["one"]
+    assert len(result.list_validation_results()) == 1
+    assert result.success
+
+    substituted_runtime_config: CheckpointConfig = (
+        simple_checkpoint_defaults.get_substituted_config(
             runtime_kwargs=expected_runtime_kwargs
         )
-
-    substituted_runtime_config = simple_checkpoint_defaults.get_substituted_config(
-        runtime_kwargs=expected_runtime_kwargs
     )
-    assert (
-        substituted_runtime_config.action_list == expected_runtime_kwargs["action_list"]
-    )
+    expected_runtime_kwargs.pop("template_name")
+    assert filter_properties_dict(
+        properties=substituted_runtime_config.to_json_dict()
+    ) == filter_properties_dict(properties=expected_runtime_kwargs)
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_checkpoint_loaded_from_store(
@@ -829,7 +843,6 @@ def one_validation():
         "batch_request": {
             "datasource_name": "my_datasource",
             "data_connector_name": "my_special_data_connector",
-            # TODO Alex why does a lack of data_asset_name working here?
             "data_asset_name": "users",
         },
         "expectation_suite_name": "one",
