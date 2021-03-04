@@ -352,7 +352,7 @@ class DataConnector:
             "n_rows": n_rows,
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
+    def _validate_batch_request(self, batch_request: BatchRequestBase):
         """
         Validate batch_request by checking:
             1. if configured datasource_name matches batch_request's datasource_name
