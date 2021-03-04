@@ -191,6 +191,8 @@ def send_email(
         return "success"
 
 
+# TODO: <Alex>BatchRequest attribute processing here is not flexible, compared to DataContext.get_batch_list().</Alex>
+# TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
     validation_batch_request: Optional[dict] = None,
