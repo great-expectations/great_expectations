@@ -1707,7 +1707,8 @@ class CheckpointConfig(BaseYamlConfig):
                 other_batch_request = other_config.batch_request
 
                 updated_batch_request = nested_update(
-                    batch_request, other_batch_request
+                    batch_request,
+                    other_batch_request,
                 )
                 self._batch_request = updated_batch_request
             if other_config.action_list is not None:
@@ -1717,14 +1718,20 @@ class CheckpointConfig(BaseYamlConfig):
                 )
             if other_config.evaluation_parameters is not None:
                 nested_update(
-                    self.evaluation_parameters, other_config.evaluation_parameters
+                    self.evaluation_parameters,
+                    other_config.evaluation_parameters,
                 )
             if other_config.runtime_configuration is not None:
                 nested_update(
-                    self.runtime_configuration, other_config.runtime_configuration
+                    self.runtime_configuration,
+                    other_config.runtime_configuration,
                 )
             if other_config.validations is not None:
-                self.validations.extend(other_config.validations)
+                self.validations.extend(
+                    filter(
+                        lambda v: v not in self.validations, other_config.validations
+                    )
+                )
             if other_config.profilers is not None:
                 self.profilers.extend(other_config.profilers)
         if runtime_kwargs is not None and any(runtime_kwargs.values()):
@@ -1740,7 +1747,7 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request = self.batch_request
                 batch_request = batch_request or {}
                 runtime_batch_request = runtime_kwargs.get("batch_request")
-                batch_request.update(runtime_batch_request)
+                batch_request = nested_update(batch_request, runtime_batch_request)
                 self._batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
                 self.action_list = self.get_updated_action_list(
@@ -1758,7 +1765,12 @@ class CheckpointConfig(BaseYamlConfig):
                     runtime_kwargs.get("runtime_configuration"),
                 )
             if runtime_kwargs.get("validations") is not None:
-                self.validations.extend(runtime_kwargs.get("validations"))
+                self.validations.extend(
+                    filter(
+                        lambda v: v not in self.validations,
+                        runtime_kwargs.get("validations"),
+                    )
+                )
             if runtime_kwargs.get("profilers") is not None:
                 self.profilers.extend(runtime_kwargs.get("profilers"))
 
@@ -1873,7 +1885,9 @@ class CheckpointConfig(BaseYamlConfig):
                     base_action_list_dict.pop(other_action_name)
                 else:
                     nested_update(
-                        base_action_list_dict[other_action_name], other_action
+                        base_action_list_dict[other_action_name],
+                        other_action,
+                        dedup=True,
                     )
             else:
                 base_action_list_dict[other_action_name] = other_action
