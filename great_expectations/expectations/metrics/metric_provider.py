@@ -3,7 +3,6 @@ from functools import wraps
 from typing import Callable, Optional, Type, Union
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.util import nested_update
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
@@ -12,7 +11,6 @@ from great_expectations.execution_engine.execution_engine import (
     MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.registry import (
-    get_metric_function_type,
     get_metric_provider,
     register_metric,
     register_renderer,
@@ -24,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 def metric_value(
     engine: Type[ExecutionEngine],
+    dialect: Union[str, None] = None,
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
     **kwargs
 ):
@@ -36,6 +35,7 @@ def metric_value(
 
         inner_func.metric_engine = engine
         inner_func.metric_fn_type = MetricFunctionTypes(metric_fn_type)
+        inner_func.dialect = dialect
         inner_func.metric_definition_kwargs = kwargs
         return inner_func
 
@@ -46,6 +46,7 @@ def metric_partial(
     engine: Type[ExecutionEngine],
     partial_fn_type: Union[str, MetricPartialFunctionTypes],
     domain_type: Union[str, MetricDomainTypes],
+    dialect=None,
     **kwargs
 ):
     """The metric decorator annotates a method """
@@ -60,6 +61,7 @@ def metric_partial(
             partial_fn_type
         )  # raises ValueError if unknown type
         inner_func.domain_type = MetricDomainTypes(domain_type)
+        inner_func.dialect = dialect
         inner_func.metric_definition_kwargs = kwargs
         return inner_func
 
@@ -140,12 +142,14 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 metric_fn_type = getattr(
                     metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE
                 )
+                dialect = getattr(metric_fn, "dialect", None)
                 if metric_fn_type == MetricFunctionTypes.VALUE:
                     register_metric(
                         metric_name=declared_metric_name,
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=metric_fn,
                         metric_fn_type=metric_fn_type,
@@ -158,6 +162,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=metric_fn,
                         metric_fn_type=metric_fn_type,
@@ -167,6 +172,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
+                        dialect=dialect,
                         metric_class=cls,
                         metric_provider=None,
                         metric_fn_type=metric_fn_type,
