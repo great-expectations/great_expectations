@@ -2897,6 +2897,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         return checkpoint
 
+    def delete_checkpoint(self, name: str):
+        key: ConfigurationIdentifier = ConfigurationIdentifier(
+            configuration_key=name,
+        )
+        try:
+            self.checkpoint_store.remove_key(key=key)
+        except ge_exceptions.InvalidKeyError as exc_ik:
+            raise ge_exceptions.CheckpointNotFoundError(
+                message=f'Non-existent checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+            )
+
     def list_checkpoints(self) -> List[str]:
         return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 

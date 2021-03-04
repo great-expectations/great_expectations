@@ -802,8 +802,8 @@ def gen_directory_tree_str(startpath):
     return output_str
 
 
-def lint_code(code):
-    """Lint strings of code passed in. Optional dependency "black" must be installed."""
+def lint_code(code: str) -> str:
+    """Lint strings of code passed in.  Optional dependency "black" must be installed."""
     try:
         import black
 
