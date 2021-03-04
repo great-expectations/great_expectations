@@ -237,9 +237,6 @@ def substitute_config_variable(
 
         if config_variable_value is not None:
             if not isinstance(config_variable_value, str):
-                config_variable_value = substitute_value_from_secret_store(
-                    config_variable_value
-                )
                 return config_variable_value
             template_str = template_str.replace(m.group(), config_variable_value)
         else:
