@@ -439,7 +439,7 @@ def test_simple_checkpoint_persisted_to_store(
     assert results.success
 
 
-def test_simple_checkpoint_defaults_run_and_no_run_params_returns_empty_checkpoint_result(
+def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_error(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults
 ):
     with pytest.raises(ge_exceptions.CheckpointError) as cpe:
