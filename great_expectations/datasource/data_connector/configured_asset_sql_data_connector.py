@@ -1,9 +1,8 @@
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional
 
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
-    BatchRequestBase,
     PartitionDefinition,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector

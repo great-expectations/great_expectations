@@ -294,10 +294,10 @@ def test_get_batch_definition_list_from_batch_request_with_and_without_data_asse
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
+    # data_asset_name is missing
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
         "data_connector_name": test_runtime_data_connector.name,
-        # "data_asset_name": NO_NAME,
         "batch_data": test_df,
         "partition_request": partition_request,
         "limit": None,
