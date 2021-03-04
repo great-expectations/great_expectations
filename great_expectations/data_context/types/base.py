@@ -1707,7 +1707,6 @@ class CheckpointConfig(BaseYamlConfig):
                 other_batch_request = other_config.batch_request
 
                 updated_batch_request = nested_update(
-                    # batch_request, other_batch_request, dedup=True
                     batch_request,
                     other_batch_request,
                 )
@@ -1719,13 +1718,11 @@ class CheckpointConfig(BaseYamlConfig):
                 )
             if other_config.evaluation_parameters is not None:
                 nested_update(
-                    # self.evaluation_parameters, other_config.evaluation_parameters, dedup=True
                     self.evaluation_parameters,
                     other_config.evaluation_parameters,
                 )
             if other_config.runtime_configuration is not None:
                 nested_update(
-                    # self.runtime_configuration, other_config.runtime_configuration, dedup=True
                     self.runtime_configuration,
                     other_config.runtime_configuration,
                 )
@@ -1735,9 +1732,6 @@ class CheckpointConfig(BaseYamlConfig):
                         lambda v: v not in self.validations, other_config.validations
                     )
                 )
-                # for validation in other_config.validations:
-                #     if validation not in self.validations:
-                #         self.validations.append(validation)
             if other_config.profilers is not None:
                 self.profilers.extend(other_config.profilers)
         if runtime_kwargs is not None and any(runtime_kwargs.values()):
