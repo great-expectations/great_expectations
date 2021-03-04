@@ -145,7 +145,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         3. Construct a BatchRequest
 
-            We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument. We can also optionally set ``data_asset_name``, or it will be set to  ``IN_MEMORY_DATA_ASSET`` by default.
+            We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument.
 
             Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``runtime_keys`` to define which keys are allowed.
 
@@ -156,8 +156,8 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                 batch_request = BatchRequest(
                     datasource_name="insert_your_pandas_datasource_name_here",
                     data_connector_name="insert_your_runtime_data_connector_name_here",
+                    data_asset_name="insert_your_data_asset_name_here",
                     batch_data=insert_your_dataframe_here,
-                    data_asset_name="optionally_insert_your_data_asset_name_here",
                     partition_request={
                         "partition_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",

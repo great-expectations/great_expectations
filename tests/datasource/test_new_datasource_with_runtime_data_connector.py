@@ -254,22 +254,6 @@ def test_set_data_asset_name_for_runtime_data(
         }
     }
 
-    # default : IN_MEMORY_DATA_ASSET
-    batch_request: dict = {
-        "datasource_name": basic_datasource_with_runtime_data_connector.name,
-        "data_connector_name": "test_runtime_data_connector",
-        "batch_data": test_df,
-        "partition_request": partition_request,
-        "limit": None,
-    }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
-    batch_list: List[
-        Batch
-    ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
-        batch_request=batch_request
-    )
-    assert batch_list[0].batch_definition.data_asset_name == "IN_MEMORY_DATA_ASSET"
-
     # set : my_runtime_data_asset
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
@@ -328,7 +312,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     assert len(batch_list) == 1
 
 
-def test_get_batch_with_pipeline_style_batch_request_with_and_without_data_asset_name(
+def test_get_batch_with_pipeline_style_batch_request_interrogate_data_connector_more_than_once(
     basic_datasource_with_runtime_data_connector,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -347,6 +331,10 @@ def test_get_batch_with_pipeline_style_batch_request_with_and_without_data_asset
         },
         "limit": None,
     }
+
+    # here something subtle is going on
+    # we are giving it one "partition" and we are attaching some sort of metadata to it
+
     batch_request: BatchRequest = BatchRequest(**batch_request)
     batch_list: List[
         Batch
@@ -355,17 +343,87 @@ def test_get_batch_with_pipeline_style_batch_request_with_and_without_data_asset
     )
 
     assert len(batch_list) == 1
+    my_batch_1: Batch = batch_list[0]
 
-    batch: Batch = batch_list[0]
+    batch_list: List[
+        Batch
+    ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
 
-    assert batch.batch_spec is not None
-    assert batch.batch_definition["data_asset_name"] == data_asset_name
-    assert isinstance(batch.data.dataframe, pd.DataFrame)
-    assert batch.data.dataframe.shape == (2, 2)
-    assert batch.data.dataframe["col2"].values[1] == 4
+    assert len(batch_list) == 1
+    my_batch_2: Batch = batch_list[0]
+
+    # these fields should exist
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == data_asset_name
+    assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
+    assert my_batch_1.data.dataframe.shape == (2, 2)
+    assert my_batch_1.data.dataframe["col2"].values[1] == 4
     assert (
-        batch.batch_markers["pandas_data_fingerprint"]
+        my_batch_1.batch_markers["pandas_data_fingerprint"]
         == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
+    )
+
+    # batch_1 and batch_2 should be equivalent
+    assert my_batch_1.id == my_batch_2.id
+
+    assert my_batch_1.batch_spec == my_batch_2.batch_spec
+    assert (
+        my_batch_1.batch_definition["data_asset_name"]
+        == my_batch_2.batch_definition["data_asset_name"]
+    )
+    assert my_batch_1.data.dataframe.shape == my_batch_2.data.dataframe.shape
+    assert (
+        my_batch_1.data.dataframe["col2"].values[1]
+        == my_batch_2.data.dataframe["col2"].values[1]
+    )
+    assert (
+        my_batch_1.batch_markers["pandas_data_fingerprint"]
+        == my_batch_2.batch_markers["pandas_data_fingerprint"]
+    )
+
+    # we have changed the partition_identifier
+    batch_request: dict = {
+        "datasource_name": basic_datasource_with_runtime_data_connector.name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "batch_data": test_df,
+        "partition_request": {
+            "partition_identifiers": {
+                "airflow_run_id": 465421,
+            }
+        },
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    batch_list: List[
+        Batch
+    ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+
+    assert len(batch_list) == 1
+    my_batch_3: Batch = batch_list[0]
+
+    # The ID is different
+    assert my_batch_3.id is not my_batch_2.id
+
+    # But everything else is the same
+    assert my_batch_3.batch_spec == my_batch_2.batch_spec
+    assert (
+        my_batch_3.batch_definition["data_asset_name"]
+        == my_batch_2.batch_definition["data_asset_name"]
+    )
+    assert my_batch_3.data.dataframe.shape == my_batch_2.data.dataframe.shape
+    assert (
+        my_batch_3.data.dataframe["col2"].values[1]
+        == my_batch_2.data.dataframe["col2"].values[1]
+    )
+    assert (
+        my_batch_3.batch_markers["pandas_data_fingerprint"]
+        == my_batch_2.batch_markers["pandas_data_fingerprint"]
     )
 
 

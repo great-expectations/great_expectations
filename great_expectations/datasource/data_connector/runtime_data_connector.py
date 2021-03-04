@@ -150,8 +150,19 @@ class RuntimeDataConnector(DataConnector):
         batch_request: BatchRequestBase,
     ) -> List[BatchDefinition]:
 
-        if not batch_request.data_asset_name:
+        if (
+            isinstance(batch_request, BatchRequestBase)
+            and not batch_request.data_asset_name
+        ):
             batch_request.data_asset_name = DEFAULT_DATA_ASSET_NAME
+        elif (
+            isinstance(batch_request, BatchRequest)
+            and not batch_request.data_asset_name
+        ):
+            raise TypeError(
+                f"""The type of data_asset name must be a string (Python "str").  The type given is
+                "{str(type(batch_request.data_asset_name))}", which is illegal."""
+            )
 
         self._validate_batch_request(batch_request=batch_request)
 

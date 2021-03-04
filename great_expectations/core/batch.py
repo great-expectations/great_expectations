@@ -311,7 +311,7 @@ class BatchRequest(BatchRequestBase):
     def _validate_init_parameters(
         datasource_name: str,
         data_connector_name: str,
-        data_asset_name: str = None,
+        data_asset_name: str,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
         limit: Optional[int] = None,
     ):
@@ -324,14 +324,20 @@ class BatchRequest(BatchRequestBase):
             )
         if not (data_connector_name and isinstance(data_connector_name, str)):
             raise TypeError(
-                f"""The type of a data_connector name must be a string (Python "str").  The type given is
+                f"""The type of data_connector name must be a string (Python "str").  The type given is
 "{str(type(data_connector_name))}", which is illegal.
                 """
+            )
+        if not (data_asset_name and isinstance(data_asset_name, str)):
+            raise TypeError(
+                f"""The type of data_asset name must be a string (Python "str").  The type given is
+        "{str(type(data_asset_name))}", which is illegal.
+                        """
             )
         # TODO Abe 20201015: Switch this to PartitionRequest.
         if partition_request and not isinstance(partition_request, dict):
             raise TypeError(
-                f"""The type of a partition_request must be a dict object.  The type given is
+                f"""The type of partition_request must be a dict object.  The type given is
 "{str(type(partition_request))}", which is illegal.
                 """
             )

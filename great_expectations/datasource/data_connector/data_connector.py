@@ -352,26 +352,24 @@ class DataConnector:
             "n_rows": n_rows,
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequestBase):
+    def _validate_batch_request(self, batch_request: BatchRequest):
         """
         Validate batch_request by checking:
             1. if configured datasource_name matches batch_request's datasource_name
             2. if current data_connector_name matches batch_request's data_connector_name
-
         Args:
             batch_request (BatchRequest): batch_request to validate
 
         """
         if batch_request.datasource_name != self.datasource_name:
-
             raise ValueError(
                 f"""datasource_name in BatchRequestBase: "{batch_request.datasource_name}" does not
-match DataConnector datasource_name: "{self.datasource_name}".
-                """
+    match DataConnector datasource_name: "{self.datasource_name}".
+                    """
             )
         if batch_request.data_connector_name != self.name:
             raise ValueError(
                 f"""data_connector_name in BatchRequestBase: "{batch_request.data_connector_name}" does not match
-DataConnector name: "{self.name}".
-                """
+    DataConnector name: "{self.name}".
+                    """
             )

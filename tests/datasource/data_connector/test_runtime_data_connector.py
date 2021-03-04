@@ -302,16 +302,8 @@ def test_get_batch_definition_list_from_batch_request_with_and_without_data_asse
         "partition_request": partition_request,
         "limit": None,
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
-
-    batch_definition_list: List[
-        BatchDefinition
-    ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=batch_request
-    )
-    assert len(batch_definition_list) == 1
-    # check that default value has been set
-    assert batch_definition_list[0]["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
+    with pytest.raises(TypeError):
+        batch_request: BatchRequest = BatchRequest(**batch_request)
 
     # test that name can be set as "my_data_asset"
     batch_request: dict = {

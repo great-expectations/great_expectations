@@ -205,19 +205,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             **self.data_assets[data_asset_name],
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
-        if not (
-            batch_request.data_asset_name
-            and isinstance(batch_request.data_asset_name, str)
-        ):
-            raise TypeError(
-                f"""The type of a data_asset name must be a string (Python "str").  The type given is
-        "{str(type(batch_request.data_asset_name))}", which is illegal.
-                        """
-            )
-        batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
-        super()._validate_batch_request(batch_request=batch_request_base)
-
     # Splitter methods for listing partitions
 
     def _split_on_whole_table(
