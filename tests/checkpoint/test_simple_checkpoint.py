@@ -328,7 +328,7 @@ def test_simple_checkpoint_raises_errors_on_site_name_that_does_not_exist_on_dat
 ):
     # assert the fixture is adequate
     assert "prod" not in empty_data_context.get_site_names()
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         SimpleCheckpointConfigurator(
             "foo", empty_data_context, site_names=["prod"]
         ).build()
@@ -506,7 +506,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
                     "data_asset_name": "users",
                 },
                 "expectation_suite_name": "one",
-            }
+            },
         ],
         "profilers": None,
     }

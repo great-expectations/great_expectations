@@ -11,7 +11,7 @@ from great_expectations.checkpoint.configurator import SimpleCheckpointConfigura
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -128,21 +128,16 @@ class Checkpoint:
             and not runtime_kwargs.get("template_name")
             and not config.template_name
         ):
-            substituted_config = deepcopy(self._substituted_config.to_json_dict())
+            substituted_config = deepcopy(self._substituted_config)
             if any(runtime_kwargs.values()):
-                substituted_config.update(runtime_kwargs)
-            substituted_config = CheckpointConfig(**substituted_config)
+                substituted_config.update(runtime_kwargs=runtime_kwargs)
         else:
             template_name = runtime_kwargs.get("template_name") or config.template_name
 
             if not template_name:
                 substituted_config = copy.deepcopy(config)
                 if any(runtime_kwargs.values()):
-                    if isinstance(config, CheckpointConfig):
-                        substituted_config.update(runtime_kwargs=runtime_kwargs)
-                    else:
-                        substituted_config.update(runtime_kwargs)
-                        substituted_config = CheckpointConfig(**substituted_config)
+                    substituted_config.update(runtime_kwargs=runtime_kwargs)
 
                 self._substituted_config = substituted_config
             else:

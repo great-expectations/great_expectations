@@ -4,7 +4,7 @@ import logging
 import sys
 from collections import OrderedDict
 from collections.abc import Mapping
-from typing import Any, Optional, Union
+from typing import Any, Iterable, Optional, Union
 from urllib.parse import urlparse
 
 import numpy as np
@@ -34,11 +34,13 @@ except ImportError:
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
 
-def nested_update(d, u):
+def nested_update(
+    d: Union[Iterable, dict], u: Union[Iterable, dict], dedup: bool = False
+):
     """update d with items from u, recursively and joining elements"""
     for k, v in u.items():
         if isinstance(v, Mapping):
-            d[k] = nested_update(d.get(k, {}), v)
+            d[k] = nested_update(d.get(k, {}), v, dedup=dedup)
         elif isinstance(v, set) or (k in d and isinstance(d[k], set)):
             s1 = d.get(k, set())
             s2 = v or set()
@@ -46,7 +48,10 @@ def nested_update(d, u):
         elif isinstance(v, list) or (k in d and isinstance(d[k], list)):
             l1 = d.get(k, [])
             l2 = v or []
-            d[k] = l1 + l2
+            if dedup:
+                d[k] = list(set(l1 + l2))
+            else:
+                d[k] = l1 + l2
         else:
             d[k] = v
     return d
