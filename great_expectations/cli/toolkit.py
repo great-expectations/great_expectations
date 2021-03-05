@@ -4,7 +4,7 @@ import platform
 import subprocess
 import sys
 import warnings
-from pathlib import Path, PosixPath, PurePosixPath, PureWindowsPath, WindowsPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Optional, Union
 
 import click
@@ -698,62 +698,35 @@ def confirm_proceed_or_exit(
     return True
 
 
-def parse_cli_config_file_location(
-    config_file_location: str, windows: bool = None
-) -> dict:
+def parse_cli_config_file_location(config_file_location: str) -> dict:
     """
     Parse CLI yaml config file or directory location into directory and filename.
-    Automatically detects whether running on windows.
+    Uses pathlib to handle windows paths.
     Args:
         config_file_location: string of config_file_location
-        windows: set True to force handling of paths for windows, mainly for testing.
 
     Returns:
         {
             "directory": "directory/where/config/file/is/located",
-            "filename": "great_expectations.yml" # or filename passed to CLI
+            "filename": "great_expectations.yml"
         }
     """
 
     if config_file_location is not None and config_file_location != "":
 
-        # Check if running on Windows
-        if windows is not True:
-            windows: bool = "windows" in platform.platform().lower()
-
         config_file_location_path = Path(config_file_location)
-
-        # If running on windows, use WindowsPath else PosixPath
-        if windows:
-            pure_path: Union[PurePosixPath, PureWindowsPath] = PureWindowsPath(
-                config_file_location
-            )
-        else:
-            pure_path: Union[PurePosixPath, PureWindowsPath] = PurePosixPath(
-                config_file_location
-            )
 
         # If the file or directory exists, treat it appropriately
         # This handles files without extensions
         if config_file_location_path.is_file():
-            filename: Optional[str] = fr"{str(pure_path.name)}"
-            directory: Optional[str] = fr"{str(pure_path.parent)}"
+            filename: Optional[str] = fr"{str(config_file_location_path.name)}"
+            directory: Optional[str] = fr"{str(config_file_location_path.parent)}"
         elif config_file_location_path.is_dir():
             filename: Optional[str] = None
             directory: Optional[str] = config_file_location
 
-        # If the file or directory does not exist, treat it as a directory unless
-        #  there is a trailing extension
         else:
-            file_extension: str = pure_path.suffix
-            if file_extension == "":
-                # treat as directory
-                filename: Optional[str] = None
-                directory: Optional[str] = config_file_location
-            else:
-                # treat as file
-                filename: Optional[str] = fr"{str(pure_path.name)}"
-                directory: Optional[str] = fr"{str(pure_path.parent)}"
+            raise ge_exceptions.ConfigNotFoundError()
 
     else:
         # Return None if config_file_location is empty rather than default output of ""
