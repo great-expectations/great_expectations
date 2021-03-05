@@ -900,6 +900,7 @@ class UserConfigurableProfiler:
             if isinstance(profile_dataset, Validator) and not hasattr(
                 profile_dataset, "expect_compound_columns_to_be_unique"
             ):
+                # TODO: Remove this upon implementation of this expectation for V3
                 logger.warning(
                     "expect_compound_columns_to_be_unique is not currently available in the V3 (Batch Request) API. Specifying a compound key will not add any expectations. This will be updated when that expectation becomes available."
                 )
