@@ -170,7 +170,7 @@ def checkpoint_list(ctx):
     if not checkpoints:
         cli_message(
             "No Checkpoints found.\n"
-            "  - Use the command `great_expectations Checkpoint new` to create one."
+            "  - Use the command `great_expectations checkpoint new` to create one."
         )
         toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
         sys.exit(0)
