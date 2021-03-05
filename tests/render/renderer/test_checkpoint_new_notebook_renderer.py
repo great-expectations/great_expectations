@@ -106,7 +106,7 @@ def checkpoint_new_notebook_assets():
     header = [
         {
             "cell_type": "markdown",
-            "source": "# Create Your Checkpoint\n Use this notebook to configure a new Checkpoint and add it to your project:\n\n**Checkpoint Name**: `my_checkpoint_name`",
+            "source": "# Create Your Checkpoint\nUse this notebook to configure a new Checkpoint and add it to your project:\n\n**Checkpoint Name**: `my_checkpoint_name`",
             "metadata": {},
         }
     ]
