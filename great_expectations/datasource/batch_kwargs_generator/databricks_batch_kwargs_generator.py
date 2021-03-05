@@ -4,7 +4,7 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
     BatchKwargsGenerator,
 )
 from great_expectations.datasource.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v012,
+    get_or_create_spark_session as get_or_create_spark_session_v2,
 )
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
         super().__init__(name, datasource=datasource)
         self.database = database
         try:
-            self.spark = get_or_create_spark_session_v012()
+            self.spark = get_or_create_spark_session_v2()
         except Exception:
             logger.error(
                 "Unable to load spark context; install optional spark dependency for support."

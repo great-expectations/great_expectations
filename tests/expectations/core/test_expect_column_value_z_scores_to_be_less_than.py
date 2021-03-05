@@ -13,7 +13,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v013,
+    get_or_create_spark_session as get_or_create_spark_session_v3,
 )
 from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
@@ -66,7 +66,7 @@ def test_sa_expect_column_value_z_scores_to_be_less_than_impl(postgresql_engine)
 
 def test_spark_expect_column_value_z_scores_to_be_less_than_impl(spark_session):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
-    spark = get_or_create_spark_session_v013()
+    spark = get_or_create_spark_session_v3()
     df = spark.createDataFrame(df)
 
     expectationConfiguration = ExpectationConfiguration(

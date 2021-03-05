@@ -39,7 +39,7 @@ from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.datasource.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v012,
+    get_or_create_spark_session as get_or_create_spark_session_v2,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
@@ -50,7 +50,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v013,
+    get_or_create_spark_session as get_or_create_spark_session_v3,
 )
 from great_expectations.expectations.self_check_util import (
     build_spark_validator_with_data,
@@ -565,7 +565,7 @@ def get_dataset(
             "DataType": sparktypes.DataType,
             "NullType": sparktypes.NullType,
         }
-        spark = get_or_create_spark_session_v012()
+        spark = get_or_create_spark_session_v2()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -726,7 +726,7 @@ def get_test_validator_with_data(
             "NullType": sparktypes.NullType,
         }
 
-        spark = get_or_create_spark_session_v013()
+        spark = get_or_create_spark_session_v3()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(

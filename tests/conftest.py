@@ -35,11 +35,11 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.datasource.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v012,
+    get_or_create_spark_session as get_or_create_spark_session_v2,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v013,
+    get_or_create_spark_session as get_or_create_spark_session_v3,
 )
 from great_expectations.util import import_library_module
 from tests.test_utils import (
@@ -321,7 +321,7 @@ def spark_session(test_backends):
         import pyspark
         from pyspark.sql import SparkSession
 
-        return get_or_create_spark_session_v013()
+        return get_or_create_spark_session_v3()
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
@@ -335,7 +335,7 @@ def spark_session_v012(test_backends):
         import pyspark
         from pyspark.sql import SparkSession
 
-        return get_or_create_spark_session_v012()
+        return get_or_create_spark_session_v2()
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
