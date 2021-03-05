@@ -158,7 +158,11 @@ def test_max_metric_sa_column_does_not_exist(sa):
 
 
 def test_max_metric_spark_column_exists(spark_session):
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
+    engine = _build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame({"a": [1, 2, 1]}),
+        batch_id="my_id",
+    )
     partial_metric = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
@@ -180,7 +184,11 @@ def test_max_metric_spark_column_exists(spark_session):
 
 
 def test_max_metric_spark_column_does_not_exist(spark_session):
-    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
+    engine = _build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame({"a": [1, 2, 1]}),
+        batch_id="my_id",
+    )
 
     partial_metric = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
@@ -492,13 +500,14 @@ def test_map_unique_sa_column_does_not_exist(sa):
 
 def test_map_unique_spark_column_exists(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame(
+        spark=spark_session,
+        df=pd.DataFrame(
             {
                 "a": [1, 2, 3, 3, 4, None],
                 "b": [None, "foo", "bar", "baz", "qux", "fish"],
             }
         ),
-        spark_session,
+        batch_id="my_id",
     )
 
     condition_metric = MetricConfiguration(
@@ -562,13 +571,14 @@ def test_map_unique_spark_column_exists(spark_session):
 
 def test_map_unique_spark_column_does_not_exist(spark_session):
     engine = _build_spark_engine(
-        pd.DataFrame(
+        spark=spark_session,
+        df=pd.DataFrame(
             {
                 "a": [1, 2, 3, 3, 4, None],
                 "b": [None, "foo", "bar", "baz", "qux", "fish"],
             }
         ),
-        spark_session,
+        batch_id="my_id",
     )
 
     condition_metric = MetricConfiguration(
