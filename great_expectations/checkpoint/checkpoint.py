@@ -11,7 +11,7 @@ from great_expectations.checkpoint.configurator import SimpleCheckpointConfigura
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -122,6 +122,7 @@ class Checkpoint:
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
+        substituted_config: Union[CheckpointConfig, dict]
         if (
             self._substituted_config is not None
             and not runtime_kwargs.get("template_name")
@@ -238,7 +239,7 @@ class Checkpoint:
         validations: list = substituted_runtime_config.validations
         if len(validations) == 0:
             raise ge_exceptions.CheckpointError(
-                f"Checkpoint '{self.name}' does not contain any validations."
+                f'Checkpoint "{self.name}" does not contain any validations.'
             )
         run_results = {}
 
