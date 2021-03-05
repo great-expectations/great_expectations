@@ -37,8 +37,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
     id: checkpoint_command_line
     title: LegacyCheckpoint - Command Line
     icon:
-    short_description: Run a configured checkpoint from a command line.
-    description: Run a configured checkpoint from a command line in a Terminal shell.
+    short_description: Run a configured Checkpoint from a command line.
+    description: Run a configured Checkpoint from a command line in a Terminal shell.
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
     maturity_details:
@@ -161,11 +161,10 @@ def _get_notebook_path(context, notebook_name):
     )
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="list")
 @click.pass_context
 def checkpoint_list(ctx):
-    """List configured Checkpoints."""
+    """List configured checkpoints."""
     context: DataContext = ctx.obj.data_context
     checkpoints: List[str] = context.list_checkpoints()
     if not checkpoints:
@@ -184,7 +183,6 @@ def checkpoint_list(ctx):
     toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="delete")
 @click.argument("checkpoint")
 @click.pass_context
@@ -212,7 +210,6 @@ def checkpoint_delete(ctx, checkpoint):
     sys.exit(0)
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
 @click.pass_context

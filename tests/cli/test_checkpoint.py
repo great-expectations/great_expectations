@@ -1,5 +1,4 @@
 import os
-import shutil
 import subprocess
 import unittest
 from typing import List
@@ -7,7 +6,6 @@ from unittest import mock
 
 import nbformat
 import pandas as pd
-import pytest
 from click.testing import CliRunner, Result
 from nbconvert.preprocessors import ExecutePreprocessor
 from ruamel.yaml import YAML
@@ -17,7 +15,6 @@ from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from tests.cli.utils import (
-    LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
@@ -25,34 +22,6 @@ from tests.cli.utils import (
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
-
-
-# TODO: <Alex>ALEX Delete?</Alex>
-@pytest.fixture
-def titanic_checkpoint(
-    titanic_data_context_stats_enabled_config_version_2, titanic_expectation_suite
-):
-    csv_path = os.path.join(
-        titanic_data_context_stats_enabled_config_version_2.root_directory,
-        "..",
-        "data",
-        "Titanic.csv",
-    )
-    return {
-        "validation_operator_name": "action_list_operator",
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "path": csv_path,
-                    "datasource": "mydatasource",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": [
-                    titanic_expectation_suite.expectation_suite_name
-                ],
-            },
-        ],
-    }
 
 
 @mock.patch(
@@ -69,8 +38,9 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
         f"--v3-api checkpoint delete my_checkpoint",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
@@ -111,8 +81,9 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
 
     assert mock_emit.call_count == 2
@@ -139,8 +110,9 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
+
+    stdout = result.stdout
     assert "No Checkpoints found." in stdout
 
 
@@ -162,8 +134,9 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
         input="n\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert 'The Checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
 
     assert mock_emit.call_count == 1
@@ -183,8 +156,9 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
+
+    stdout = result.stdout
     assert "Found 1 Checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
@@ -203,8 +177,9 @@ def test_checkpoint_list_with_no_checkpoints(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "No Checkpoints found." in stdout
     assert "Use the command `great_expectations checkpoint new` to create one" in stdout
 
@@ -242,8 +217,9 @@ def test_checkpoint_list_with_single_checkpoint(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "Found 1 Checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
@@ -284,9 +260,11 @@ def test_checkpoint_list_with_eight_checkpoints(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "Found 8 Checkpoints." in stdout
+
     checkpoint_names_list: List[str] = [
         "my_simple_checkpoint_with_slack_and_notify_with_all",
         "my_nested_checkpoint_template_1",
@@ -330,7 +308,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 ):
     """
     What does this test and why?
-    The `checkpoint new` CLI flow should raise an error if the checkpoint name being created already exists in your checkpoint store.
+    The `checkpoint new` CLI flow should raise an error if the Checkpoint name being created already exists in your checkpoint store.
     """
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -340,8 +318,9 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
         f"--v3-api checkpoint new my_minimal_simple_checkpoint",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 1
+    stdout = result.stdout
+
     assert (
         "A Checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
         in stdout
@@ -383,9 +362,9 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
 ):
     """
     What does this test and why?
-    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the checkpoint.
-    This test builds that notebook and runs it to generate a checkpoint and then tests the resulting configuration in the checkpoint file.
-    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the checkpoint configuration.
+    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the Checkpoint.
+    This test builds that notebook and runs it to generate a Checkpoint and then tests the resulting configuration in the Checkpoint file.
+    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the Checkpoint configuration.
     """
     context: DataContext = deterministic_asset_dataconnector_context
     root_dir: str = context.root_directory
@@ -397,15 +376,18 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     # Clear the "data_context.save_expectation_suite" call
     mock_emit.reset_mock()
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"--v3-api checkpoint new passengers",
         input="1\n1\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "open a notebook for you now" in stdout
+
     assert mock_emit.call_count == 2
 
     assert mock_emit.call_args_list == [
@@ -422,7 +404,6 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     ]
     assert mock_subprocess.call_count == 1
     assert mock_webbroser.call_count == 0
-    assert "open a notebook for you now" in stdout
 
     expected_notebook_path = os.path.join(
         root_dir, "uncommitted", "edit_checkpoint_passengers.ipynb"
@@ -438,11 +419,11 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
-    # Ensure the checkpoint file was created
+    # Ensure the Checkpoint file was created
     expected_checkpoint_path = os.path.join(root_dir, "checkpoints", "passengers.yml")
     assert os.path.isfile(expected_checkpoint_path)
 
-    # Ensure the checkpoint configuration in the file is as expected
+    # Ensure the Checkpoint configuration in the file is as expected
     with open(expected_checkpoint_path) as f:
         checkpoint_config = f.read()
     expected_checkpoint_config: str = """name: passengers
@@ -498,8 +479,9 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
         f"--v3-api checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
@@ -547,9 +529,9 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
         f"--v3-api checkpoint run my_nested_checkpoint_template_1",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    stdout: str = result.stdout
     assert "expectation_suite suite_from_template_1 not found" in stdout
 
     assert mock_emit.call_count == 2
@@ -645,8 +627,9 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         f"--v3-api checkpoint run bad_batch",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
 
     # TODO: <Alex>ALEX -- Investigate how to make Abe's suggestion a reality.</Alex>
     # Note: Abe : 2020/09: This was a better error message, but it should live in DataContext.get_batch, not a random CLI method.
@@ -656,7 +639,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     #     in stdout
     # )
     # assert (
-    #     "Please verify these batch kwargs in checkpoint bad_batch`"
+    #     "Please verify these batch kwargs in Checkpoint bad_batch`"
     #     in stdout
     # )
     # assert "No such file or directory" in stdout
@@ -758,12 +741,12 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         f"--v3-api checkpoint run no_suite",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
 
-    assert "Exception occurred while running checkpoint" in stdout
+    stdout: str = result.stdout
+    assert "Exception occurred while running Checkpoint" in stdout
     assert (
-        "of checkpoint 'no_suite': validation expectation_suite_name must be specified"
+        "of Checkpoint 'no_suite': validation expectation_suite_name must be specified"
         in stdout
     )
 
@@ -844,9 +827,9 @@ def test_checkpoint_run_on_non_existent_validations(
         f"--v3-api checkpoint run no_validations",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    stdout: str = result.stdout
     assert 'Checkpoint "no_validations" does not contain any validations.' in stdout
 
     assert mock_emit.call_count == 2
@@ -938,9 +921,9 @@ def test_checkpoint_run_happy_path_with_successful_validation(
         f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
 
+    stdout: str = result.stdout
     assert all(
         [
             msg in stdout
@@ -1085,8 +1068,9 @@ def test_checkpoint_run_happy_path_with_failed_validation(
         f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
     assert mock_emit.call_count == 5
@@ -1220,9 +1204,10 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
         f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
-    assert "Exception occurred while running checkpoint." in stdout
+
+    stdout: str = result.stdout
+    assert "Exception occurred while running Checkpoint." in stdout
 
     assert mock_emit.call_count == 4
 
@@ -1287,13 +1272,14 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
         f"--v3-api checkpoint script not_a_checkpoint",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "Could not find Checkpoint `not_a_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
-    assert result.exit_code == 1
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1339,12 +1325,13 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
         f"--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
+    assert result.exit_code == 1
+
     stdout: str = result.stdout
     assert (
         "Warning! A script named run_my_v1_checkpoint.py already exists and this command will not overwrite it."
         in stdout
     )
-    assert result.exit_code == 1
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1385,8 +1372,9 @@ def test_checkpoint_script_happy_path_generates_script(
         f"--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert (
         "A python script was created that runs the Checkpoint named: `my_v1_checkpoint`"
         in stdout
@@ -1430,7 +1418,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -1500,8 +1488,8 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
         f"--v3-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
@@ -1543,7 +1531,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     titanic_expectation_suite,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -1662,7 +1650,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     titanic_expectation_suite,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -1773,54 +1761,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     assert (
         'ExecutionEngineError: Error: The column "Name" in BatchData does not exist.'
         in output
-    )
-
-
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_new_with_ge_config_3_raises_error(
-    mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled
-):
-    context: DataContext = titanic_data_context_stats_enabled
-
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        f"--v3-api checkpoint new foo not_a_suite",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 1
-    assert (
-        "The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3."
-        in stdout
-    )
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.new",
-                "event_payload": {"api_version": "v3"},
-                "success": False,
-            }
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 

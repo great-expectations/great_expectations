@@ -955,11 +955,11 @@ class DataContextConfigSchema(Schema):
             )
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
-                "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
+                "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
                     data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
                 ),
                 validation_error=ValidationError(
-                    message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
+                    message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
                         data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
                     )
                 ),
@@ -1597,7 +1597,7 @@ class CheckpointConfigSchema(Schema):
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current Checkpoint configuration is incomplete.  Please update your checkpoint configuration to
+                f"""Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
                 continue.
                 """
             )
@@ -1605,7 +1605,7 @@ class CheckpointConfigSchema(Schema):
         if data.get("config_version"):
             if "name" not in data:
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current checkpoint
+                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
                     configuration to continue.
                     """
                 )

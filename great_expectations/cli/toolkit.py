@@ -364,7 +364,7 @@ def delete_checkpoint(
     checkpoint_name: str,
     usage_event: str,
 ):
-    """Delete a checkpoint or raise helpful errors."""
+    """Delete a Checkpoint or raise helpful errors."""
     validate_checkpoint(
         context=context,
         checkpoint_name=checkpoint_name,
@@ -388,8 +388,8 @@ def run_checkpoint(
     checkpoint_name: str,
     usage_event: str,
 ) -> CheckpointResult:
-    """Run a checkpoint or raise helpful errors."""
-    failure_message: str = "Exception occurred while running checkpoint."
+    """Run a Checkpoint or raise helpful errors."""
+    failure_message: str = "Exception occurred while running Checkpoint."
     validate_checkpoint(
         context=context,
         checkpoint_name=checkpoint_name,
@@ -428,7 +428,7 @@ def load_checkpoint(
     checkpoint_name: str,
     usage_event: str,
 ) -> Union[Checkpoint, LegacyCheckpoint]:
-    """Load a checkpoint or raise helpful errors."""
+    """Load a Checkpoint or raise helpful errors."""
     try:
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
             name=checkpoint_name
@@ -443,8 +443,8 @@ def load_checkpoint(
             usage_event,
             f"""\
 <red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
-  - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
-  - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
+  - `<green>great_expectations checkpoint list</green>` to verify your Checkpoint exists
+  - `<green>great_expectations checkpoint new</green>` to configure a new Checkpoint""",
         )
 
 

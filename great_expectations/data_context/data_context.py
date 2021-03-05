@@ -772,7 +772,7 @@ class BaseDataContext:
                 directory_path=self.root_directory
             ):
                 logger.warning(
-                    f'Detected legacy config version ({config_version}) so will try to use default checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
+                    f'Detected legacy config version ({config_version}) so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
                 )
                 return self._build_store_from_config(
                     checkpoint_store_name,
@@ -781,7 +781,7 @@ class BaseDataContext:
                     ],
                 )
             raise ge_exceptions.StoreConfigurationError(
-                f'Attempted to access the checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
+                f'Attempted to access the Checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
             )
 
     @property
@@ -2850,11 +2850,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
             raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
             )
         except ValidationError as exc_ve:
             raise ge_exceptions.InvalidCheckpointConfigError(
-                message="Invalid checkpoint configuration", validation_error=exc_ve
+                message="Invalid Checkpoint configuration", validation_error=exc_ve
             )
 
         if checkpoint_config.config_version is None:
@@ -2905,7 +2905,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             self.checkpoint_store.remove_key(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
             raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
             )
 
     def list_checkpoints(self) -> List[str]:
@@ -2930,9 +2930,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         **kwargs,
     ) -> CheckpointResult:
         """
-        Validate against a pre-defined checkpoint. (Experimental)
+        Validate against a pre-defined Checkpoint. (Experimental)
         Args:
-            checkpoint_name: The name of a checkpoint defined via the CLI or by manually creating a yml file
+            checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
             run_name: The run_name for the validation; if None, a default value will be used
             **kwargs: Additional kwargs to pass to the validation operator
 
