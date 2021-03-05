@@ -289,7 +289,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
         "data_connector_name": "test_runtime_data_connector",
-        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "data_asset_name": "my_data_asset",
         "batch_data": test_df,
         "partition_request": partition_request,
         "limit": None,
@@ -303,25 +303,33 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     # batches are a little bit more difficult to test because of batch_markers
     # they are ones that uniquely identify the data
     assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
+    assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
+    assert my_batch_1.data.dataframe.shape == (2, 2)
+    assert my_batch_1.data.dataframe["col2"].values[1] == 4
+    assert (
+        my_batch_1.batch_markers["pandas_data_fingerprint"]
+        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
+    )
 
 
 def test_get_batch_with_pipeline_style_batch_request_interrogate_data_connector_more_than_once(
     basic_datasource_with_runtime_data_connector,
 ):
-
-    print(" HI ALEX AND WILL ")
-    print(basic_datasource_with_runtime_data_connector.get_available_data_asset_names())
-    print(" BYE ALEX AND WILL ")
-    # {'test_runtime_data_connector': []}
+    assert (
+        basic_datasource_with_runtime_data_connector.get_available_data_asset_names()
+        == {"test_runtime_data_connector": []}
+    )
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    data_connector_name: str = "test_runtime_data_connector"
-    data_asset_name: str = "test_data_asset"
 
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "test_data_asset",
         "batch_data": test_df,
         "partition_request": {
             "partition_identifiers": {
@@ -331,68 +339,23 @@ def test_get_batch_with_pipeline_style_batch_request_interrogate_data_connector_
         "limit": None,
     }
 
-    # here something subtle is going on
-    # we are giving it one "partition" and we are attaching some sort of metadata to it
-
     batch_request: BatchRequest = BatchRequest(**batch_request)
     batch_list: List[
         Batch
     ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
-
     assert len(batch_list) == 1
-    my_batch_1: Batch = batch_list[0]
-
-    batch_list: List[
-        Batch
-    ] = basic_datasource_with_runtime_data_connector.get_batch_list_from_batch_request(
-        batch_request=batch_request
-    )
-
-    print(" HI ALEX AND WILL ")
-    print(basic_datasource_with_runtime_data_connector.get_available_data_asset_names())
-    # {'test_runtime_data_connector': ["test_data_asset"]}
-
-    assert len(batch_list) == 1
-    my_batch_2: Batch = batch_list[0]
-
-    # these fields should exist
-    assert my_batch_1.batch_spec is not None
-    assert my_batch_1.batch_definition["data_asset_name"] == data_asset_name
-    assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
-    assert my_batch_1.data.dataframe.shape == (2, 2)
-    assert my_batch_1.data.dataframe["col2"].values[1] == 4
     assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == "1e461a0df5fe0a6db2c3bc4ef88ef1f0"
+        basic_datasource_with_runtime_data_connector.get_available_data_asset_names()
+        == {"test_runtime_data_connector": ["test_data_asset"]}
     )
 
-    # batch_1 and batch_2 should be equivalent
-    assert my_batch_1.id == my_batch_2.id
-
-    assert my_batch_1.batch_spec == my_batch_2.batch_spec
-    assert (
-        my_batch_1.batch_definition["data_asset_name"]
-        == my_batch_2.batch_definition["data_asset_name"]
-    )
-    assert my_batch_1.data.dataframe.shape == my_batch_2.data.dataframe.shape
-    assert (
-        my_batch_1.data.dataframe["col2"].values[1]
-        == my_batch_2.data.dataframe["col2"].values[1]
-    )
-    assert (
-        my_batch_1.batch_markers["pandas_data_fingerprint"]
-        == my_batch_2.batch_markers["pandas_data_fingerprint"]
-    )
-
-    # we have changed the partition_identifier
-    data_asset_name: str = "test_data_asset_updated"
-
+    # updating data asset_name test_data_asset_updated
     batch_request: dict = {
         "datasource_name": basic_datasource_with_runtime_data_connector.name,
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "test_data_asset_updated",
         "batch_data": test_df,
         "partition_request": {
             "partition_identifiers": {
@@ -410,36 +373,11 @@ def test_get_batch_with_pipeline_style_batch_request_interrogate_data_connector_
     )
 
     assert len(batch_list) == 1
-    my_batch_3: Batch = batch_list[0]
-
-    # The ID is different
-    # assert my_batch_3.id is not my_batch_2.id
-    #
-    # # But everything else is the same
-    # assert my_batch_3.batch_spec == my_batch_2.batch_spec
-    # assert (
-    #     my_batch_3.batch_definition["data_asset_name"]
-    #     == my_batch_2.batch_definition["data_asset_name"]
-    # )
-    # assert my_batch_3.data.dataframe.shape == my_batch_2.data.dataframe.shape
-    # assert (
-    #     my_batch_3.data.dataframe["col2"].values[1]
-    #     == my_batch_2.data.dataframe["col2"].values[1]
-    # )
-    # assert (
-    #     my_batch_3.batch_markers["pandas_data_fingerprint"]
-    #     == my_batch_2.batch_markers["pandas_data_fingerprint"]
-    # )
-
-    print(" HI ALEX AND WILL ")
-    print(basic_datasource_with_runtime_data_connector.get_available_data_asset_names())
-    # {'test_runtime_data_connector': ["test_data_asset_updated"]}
-
-    print(" BYE ALEX AND WILL ")
-    ######## what are all ##### IN MEMORY DATA_ASSET NAME or nothing
-    # TEST TO ADD
-    # FROM DATA SOURCE (NEW STYLE)
-    # GET AVIALABL
+    my_batch: Batch = batch_list[0]
+    assert (
+        basic_datasource_with_runtime_data_connector.get_available_data_asset_names()
+        == {"test_runtime_data_connector": ["test_data_asset_updated"]}
+    )
 
 
 def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_error(

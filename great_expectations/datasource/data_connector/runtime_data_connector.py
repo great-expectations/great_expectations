@@ -46,22 +46,17 @@ class RuntimeDataConnector(DataConnector):
         self._refresh_data_references_cache()
 
     def _refresh_data_references_cache(self):
-        # Map data_references to batch_definitions
         self._data_references_cache = {}
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
         """List objects in the underlying data store to create a list of data_references.
-
-        This method is used to refresh the cache.
         """
         return self._get_data_reference_list_from_cache_by_data_asset_name(
             data_asset_name
         )
 
-    # why split? self check may do this? but we might be able to simplify
-    # <WILL>
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
     ) -> List[str]:
@@ -69,17 +64,16 @@ class RuntimeDataConnector(DataConnector):
         return self._data_references_cache.get(data_asset_name, [""])
 
     def get_data_reference_list_count(self) -> int:
-        # TEST THIS METHOD
-        return sum(
-            [len(v) for k, v in self._data_references_cache.items() if v is not None]
-        )
+        """returns length of cache which can be 0 or 1"""
+        return len(self._data_references_cache)
 
     def get_unmatched_data_references(self) -> List[str]:
+        """returns empty list for runtime_data_connector"""
         if self._data_references_cache is None:
             raise ValueError(
                 '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
             )
-        return [k for k, v in self._data_references_cache.items() if v is None]
+        return []
 
     def get_available_data_asset_names(self) -> List[str]:
         return list(self._data_references_cache.keys())
@@ -107,7 +101,6 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        # is this necessary to split this up?
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
@@ -116,9 +109,7 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        # DO WE NEED TO DO THIS EVERY TIME?
         self._refresh_data_references_cache()
-
         self._validate_batch_request(batch_request=batch_request)
 
         partition_identifiers: Optional[dict] = None
@@ -146,32 +137,25 @@ class RuntimeDataConnector(DataConnector):
             batch_definition=batch_definition, batch_request=batch_request
         ):
             batch_definition_list = [batch_definition]
-            self._data_references_cache[
-                batch_request.data_asset_name
-            ] = batch_definition_list
+            self._data_references_cache[batch_request.data_asset_name] = [""]
         else:
             batch_definition_list = []
-
         return batch_definition_list
-        # ACTUALLY A MAP DATA ASSET NAME FROM CACHE?
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: str, data_asset_name: str
     ) -> Optional[List[BatchDefinition]]:
-        # <WILLWILL>
         if data_asset_name is None:
             return []
-        elif data_asset_name not in self._data_references_cache:
-            # add to cache
-            self._data_references_cache[data_asset_name] = [
-                BatchDefinition(
-                    datasource_name=self.datasource_name,
-                    data_connector_name=self.name,
-                    data_asset_name=data_asset_name,
-                    partition_definition=PartitionDefinition(),
-                )
-            ]
-        return self._data_references_cache[data_asset_name]
+        batch_definition_list = [
+            BatchDefinition(
+                datasource_name=self.datasource_name,
+                data_connector_name=self.name,
+                data_asset_name=data_asset_name,
+                partition_definition=PartitionDefinition(),
+            )
+        ]
+        return batch_definition_list
 
     def _map_batch_definition_to_data_reference(
         self,
