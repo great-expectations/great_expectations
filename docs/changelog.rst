@@ -4,11 +4,17 @@
 Changelog
 #########
 
-
 Develop
 -----------------
 * [ENHANCEMENT] Add support for spark 3 based spark_config
 
+
+0.13.12
+-----------------
+
+* [FEATURE] Added EmailAction as a new Validation Action (Thanks @Cedric-Magnan!) #2479
+* [ENHANCEMENT] CLI global options and checkpoint functionality for v3 api #2497
+* [DOCS] Renamed the "old" and the "new" APIs to "V2 (Batch Kwargs) API" and "V3 (Batch Request) API" and added an article with recommendations for choosing between them
 
 0.13.11
 -----------------

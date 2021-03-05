@@ -8,6 +8,7 @@ import sys
 import threading
 from functools import wraps
 from queue import Queue
+from typing import Optional
 
 import jsonschema
 import requests
@@ -402,13 +403,20 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
     return payload
 
 
-def send_usage_message(data_context, event, event_payload=None, success=None):
+def send_usage_message(
+    data_context,
+    event: str,
+    event_payload: Optional[dict] = None,
+    success: Optional[bool] = None,
+):
     """send a usage statistics message."""
     try:
-        handler = getattr(data_context, "_usage_statistics_handler", None)
-        message = {
+        handler: UsageStatisticsHandler = getattr(
+            data_context, "_usage_statistics_handler", None
+        )
+        message: dict = {
             "event": event,
-            "event_payload": event_payload or {},
+            "event_payload": event_payload,
             "success": success,
         }
         if handler is not None:

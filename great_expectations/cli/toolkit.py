@@ -1,27 +1,32 @@
 import datetime
 import os
+import platform
 import subprocess
 import sys
 import warnings
+from pathlib import Path, PosixPath, PurePosixPath, PureWindowsPath, WindowsPath
 from typing import Optional, Union
 
 import click
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
 
-from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.cli.batch_kwargs import get_batch_kwargs
+from great_expectations.cli.build_docs import build_docs
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
-from great_expectations.cli.datasource import get_batch_kwargs
-from great_expectations.cli.docs import build_docs
+from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
-from great_expectations.cli.util import cli_colorize_string, cli_message
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message as send_usage_stats_message,
+)
 from great_expectations.data_asset import DataAsset
+from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -29,6 +34,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.datasource import Datasource
 from great_expectations.profile import BasicSuiteBuilderProfiler
+
+try:
+    from termcolor import colored
+except ImportError:
+    pass
+
 
 EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "
@@ -348,6 +359,70 @@ def exit_with_failure_message_and_stats(
     sys.exit(1)
 
 
+def delete_checkpoint(
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+):
+    """Delete a checkpoint or raise helpful errors."""
+    validate_checkpoint(
+        context=context,
+        checkpoint_name=checkpoint_name,
+        usage_event=usage_event,
+    )
+    confirm_prompt: str = f"""\nAre you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is
+irreversible)?"
+    """
+    continuation_message: str = (
+        f'The Checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
+    )
+    confirm_proceed_or_exit(
+        confirm_prompt=confirm_prompt,
+        continuation_message=continuation_message,
+    )
+    context.delete_checkpoint(name=checkpoint_name)
+
+
+def run_checkpoint(
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+) -> CheckpointResult:
+    """Run a checkpoint or raise helpful errors."""
+    failure_message: str = "Exception occurred while running checkpoint."
+    validate_checkpoint(
+        context=context,
+        checkpoint_name=checkpoint_name,
+        usage_event=usage_event,
+        failure_message=failure_message,
+    )
+    try:
+        result: CheckpointResult = context.run_checkpoint(
+            checkpoint_name=checkpoint_name
+        )
+        return result
+    except ge_exceptions.CheckpointError as e:
+        cli_message(string=failure_message)
+        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}.</red>")
+
+
+def validate_checkpoint(
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+    failure_message: Optional[str] = None,
+):
+    try:
+        # noinspection PyUnusedLocal
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = load_checkpoint(
+            context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
+        )
+    except ge_exceptions.CheckpointError as e:
+        if failure_message:
+            cli_message(string=failure_message)
+        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
+
+
 def load_checkpoint(
     context: DataContext,
     checkpoint_name: str,
@@ -367,12 +442,10 @@ def load_checkpoint(
             context,
             usage_event,
             f"""\
-<red>Could not find checkpoint `{checkpoint_name}`.</red> Try running:
+<red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
-    except ge_exceptions.CheckpointError as e:
-        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
 def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
@@ -623,3 +696,85 @@ def confirm_proceed_or_exit(
         else:
             return False
     return True
+
+
+def parse_cli_config_file_location(
+    config_file_location: str, windows: bool = None
+) -> dict:
+    """
+    Parse CLI yaml config file or directory location into directory and filename.
+    Automatically detects whether running on windows.
+    Args:
+        config_file_location: string of config_file_location
+        windows: set True to force handling of paths for windows, mainly for testing.
+
+    Returns:
+        {
+            "directory": "directory/where/config/file/is/located",
+            "filename": "great_expectations.yml" # or filename passed to CLI
+        }
+    """
+
+    if config_file_location is not None and config_file_location != "":
+
+        # Check if running on Windows
+        if windows is not True:
+            windows: bool = "windows" in platform.platform().lower()
+
+        config_file_location_path = Path(config_file_location)
+
+        # If running on windows, use WindowsPath else PosixPath
+        if windows:
+            pure_path: Union[PurePosixPath, PureWindowsPath] = PureWindowsPath(
+                config_file_location
+            )
+        else:
+            pure_path: Union[PurePosixPath, PureWindowsPath] = PurePosixPath(
+                config_file_location
+            )
+
+        # If the file or directory exists, treat it appropriately
+        # This handles files without extensions
+        if config_file_location_path.is_file():
+            filename: Optional[str] = fr"{str(pure_path.name)}"
+            directory: Optional[str] = fr"{str(pure_path.parent)}"
+        elif config_file_location_path.is_dir():
+            filename: Optional[str] = None
+            directory: Optional[str] = config_file_location
+
+        # If the file or directory does not exist, treat it as a directory unless
+        #  there is a trailing extension
+        else:
+            file_extension: str = pure_path.suffix
+            if file_extension == "":
+                # treat as directory
+                filename: Optional[str] = None
+                directory: Optional[str] = config_file_location
+            else:
+                # treat as file
+                filename: Optional[str] = fr"{str(pure_path.name)}"
+                directory: Optional[str] = fr"{str(pure_path.parent)}"
+
+    else:
+        # Return None if config_file_location is empty rather than default output of ""
+        directory = None
+        filename = None
+
+    return {"directory": directory, "filename": filename}
+
+
+def send_usage_message(
+    data_context: DataContext,
+    event: str,
+    event_payload: Optional[dict] = None,
+    success: bool = False,
+):
+    if event_payload is None:
+        event_payload = {}
+    event_payload.update({"api_version": "v3"})
+    send_usage_stats_message(
+        data_context=data_context,
+        event=event,
+        event_payload=event_payload,
+        success=success,
+    )

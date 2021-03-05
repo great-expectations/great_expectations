@@ -5,9 +5,9 @@ from unittest import mock
 from click.testing import CliRunner
 
 from great_expectations import DataContext
-from great_expectations.cli import cli
+from great_expectations.cli.v012 import cli
 from great_expectations.core.expectation_suite import ExpectationSuite
-from tests.cli.utils import (
+from tests.cli.v012.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
@@ -464,7 +464,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     We call the "suite demo" command without the suite name argument
@@ -477,14 +477,16 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     - open Data Docs
     - NOT open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     os.chdir(root_dir)
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir],
-        input="\n1\n1\n1\nmy_new_suite\n\n",
+        input="1\n1\n1\nmy_new_suite\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -539,6 +541,7 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -548,7 +551,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     We call the "suite demo" command with the suite name argument
@@ -559,14 +562,16 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     - open Data Docs
     - NOT open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     os.chdir(root_dir)
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
-        input="\n2\n1\n1\n\n",
+        input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -608,6 +613,7 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -770,7 +776,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify the batch
@@ -789,13 +795,15 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
-        input="\n2\n1\n1\n\n",
+        input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -822,7 +830,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
             "-d",
             root_dir,
         ],
-        input="\n2\n1\n1\n\n",
+        input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
 
@@ -846,6 +854,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -855,7 +864,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     Here we verify that the "suite edit" command uses the batch kwargs found in
@@ -871,13 +880,15 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - NOT open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
-        input="\n2\n1\n1\n\n",
+        input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert mock_webbrowser.call_count == 2
@@ -893,7 +904,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     result = runner.invoke(
         cli,
         ["suite", "edit", "foo_suite", "-d", root_dir],
-        input="\n2\n1\n1\n\n",
+        input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
 
@@ -916,6 +927,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -925,7 +937,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     mock_webbrowser,
     mock_subprocess,
     caplog,
-    site_builder_data_context_with_html_store_titanic_random,
+    site_builder_data_context_v013_with_html_store_titanic_random,
 ):
     """
     Here we verify that when the "suite edit" command is called with batch_kwargs arg
@@ -946,12 +958,14 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = site_builder_data_context_with_html_store_titanic_random.root_directory
+    root_dir = (
+        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
+    )
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         ["suite", "demo", "-d", root_dir, "--suite", "foo_suite", "--no-view"],
-        input="\n2\n1\n1\n\n",
+        input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -1012,6 +1026,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
@@ -1301,7 +1316,13 @@ def test_suite_delete_with_zero_suites(
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"api_version": "v2"},
+                "success": False,
+            }
+        ),
     ]
 
     assert_no_logging_messages_or_tracebacks(
@@ -1336,7 +1357,13 @@ def test_suite_delete_with_non_existent_suite(
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": False}),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"api_version": "v2"},
+                "success": False,
+            }
+        ),
     ]
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1377,7 +1404,13 @@ def test_suite_delete_with_one_suite(
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
-        mock.call({"event": "cli.suite.delete", "event_payload": {}, "success": True}),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"api_version": "v2"},
+                "success": True,
+            }
+        ),
     ]
 
     assert_no_logging_messages_or_tracebacks(
@@ -1424,7 +1457,11 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": False}
+            {
+                "event": "cli.suite.scaffold",
+                "event_payload": {"api_version": "v2"},
+                "success": False,
+            }
         ),
     ]
 
@@ -1475,7 +1512,11 @@ def test_suite_scaffold_on_existing_suite_raises_error(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": False}
+            {
+                "event": "cli.suite.scaffold",
+                "event_payload": {"api_version": "v2"},
+                "success": False,
+            }
         ),
     ]
 
@@ -1530,7 +1571,11 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": True}
+            {
+                "event": "cli.suite.scaffold",
+                "event_payload": {"api_version": "v2"},
+                "success": True,
+            }
         ),
     ]
     assert_no_logging_messages_or_tracebacks(
@@ -1587,7 +1632,11 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": True}
+            {
+                "event": "cli.suite.scaffold",
+                "event_payload": {"api_version": "v2"},
+                "success": True,
+            }
         ),
     ]
 

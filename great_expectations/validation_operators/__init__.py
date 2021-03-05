@@ -1,4 +1,5 @@
 from great_expectations.checkpoint.actions import (
+    EmailAction,
     MicrosoftTeamsNotificationAction,
     NoOpAction,
     OpsgenieAlertAction,

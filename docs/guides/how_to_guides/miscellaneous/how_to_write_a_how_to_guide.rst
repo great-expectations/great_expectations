@@ -123,12 +123,12 @@ The following code snippet shows how two tabs (``tab0`` and ``tab1``) can be cre
         .. content-tabs::
 
             .. tab-container:: tab0
-                :title: Show Docs for Stable API (up to 0.12.x)
+                :title: Show Docs for V2 (Batch Kwargs) API
 
                 # Content for Stable API #
 
             .. tab-container:: tab1
-                :title: Show Docs for Experimental API (0.13)
+                :title: Show Docs for V3 (Batch Request) API
 
                 # Content for Experimental API #
 
