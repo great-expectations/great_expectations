@@ -462,7 +462,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v
     )
     stdout = result.stdout
 
-    assert "Could not find Checkpoint `fake_checkpoint`." in stdout
+    assert "Could not find checkpoint `fake_checkpoint`." in stdout
     assert "Try running" in stdout
     assert result.exit_code == 1
 
@@ -852,7 +852,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
         catch_exceptions=False,
     )
     stdout = result.stdout
-    assert "Could not find Checkpoint `not_a_checkpoint`." in stdout
+    assert "Could not find checkpoint `not_a_checkpoint`." in stdout
     assert "Try running" in stdout
     assert result.exit_code == 1
 
