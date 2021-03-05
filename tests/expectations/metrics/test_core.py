@@ -2,7 +2,9 @@ import logging
 
 import numpy as np
 import pandas as pd
+import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -66,19 +68,6 @@ def test_basic_metric():
     assert results == {desired_metric.id: 3}
 
 
-def test_column_max():
-    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
-    desired_metric = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-    )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
-    assert results == {desired_metric.id: 3}
-
-
 def test_mean_metric_pd():
     engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     desired_metric = MetricConfiguration(
@@ -101,7 +90,41 @@ def test_stdev_metric_pd():
     assert results == {desired_metric.id: 1}
 
 
-def test_max_metric_sa(sa):
+def test_max_metric_pd_column_exists():
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert results == {desired_metric.id: 3}
+
+
+def test_max_metric_pd_column_does_not_exist():
+    df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+    batch = Batch(data=df)
+    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "non_existent_column"},
+        metric_value_kwargs=dict(),
+    )
+
+    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+        # noinspection PyUnusedLocal
+        results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert (
+        str(eee.value)
+        == 'Error: The column "non_existent_column" in BatchData does not exist.'
+    )
+
+
+def test_max_metric_sa_column_exists(sa):
     engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
 
     partial_metric = MetricConfiguration(
@@ -124,7 +147,32 @@ def test_max_metric_sa(sa):
     assert results == {desired_metric.id: 2}
 
 
-def test_max_metric_spark(spark_session):
+def test_max_metric_sa_column_does_not_exist(sa):
+    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
+
+    partial_metric = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "non_existent_column"},
+        metric_value_kwargs=dict(),
+    )
+
+    metrics = engine.resolve_metrics(metrics_to_resolve=(partial_metric,))
+    desired_metric = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "non_existent_column"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"metric_partial_fn": partial_metric},
+    )
+
+    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+        # noinspection PyUnusedLocal
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(desired_metric,), metrics=metrics
+        )
+    assert "An SQL execution Exception occurred.  OperationalError" in str(eee.value)
+
+
+def test_max_metric_spark_column_exists(spark_session):
     engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
     partial_metric = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
@@ -144,6 +192,24 @@ def test_max_metric_spark(spark_session):
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     assert results == {desired_metric.id: 2}
+
+
+def test_max_metric_spark_column_does_not_exist(spark_session):
+    engine = _build_spark_engine(pd.DataFrame({"a": [1, 2, 1]}), spark_session)
+
+    partial_metric = MetricConfiguration(
+        metric_name="column.max.aggregate_fn",
+        metric_domain_kwargs={"column": "non_existent_column"},
+        metric_value_kwargs=dict(),
+    )
+
+    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+        # noinspection PyUnusedLocal
+        metrics = engine.resolve_metrics(metrics_to_resolve=(partial_metric,))
+    assert (
+        str(eee.value)
+        == 'Error: The column "non_existent_column" in BatchData does not exist.'
+    )
 
 
 def test_map_value_set_sa(sa):
@@ -282,7 +348,7 @@ def test_map_column_value_lengths_between_pd():
     assert ser_expected_lengths.equals(result_series)
 
 
-def test_map_unique_pd():
+def test_map_unique_pd_column_exists():
     engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.condition",
@@ -294,77 +360,25 @@ def test_map_unique_pd():
     assert list(results[desired_metric.id][0]) == [False, False, True, True]
 
 
-def test_map_unique_spark(spark_session):
-    engine = _build_spark_engine(
-        pd.DataFrame(
-            {
-                "a": [1, 2, 3, 3, 4, None],
-                "b": [None, "foo", "bar", "baz", "qux", "fish"],
-            }
-        ),
-        spark_session,
-    )
+def test_map_unique_pd_column_does_not_exist():
+    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
 
-    condition_metric = MetricConfiguration(
+    desired_metric = MetricConfiguration(
         metric_name="column_values.unique.condition",
-        metric_domain_kwargs={"column": "a"},
+        metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=dict(),
     )
-    metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
 
-    # unique is a *window* function so does not use the aggregate_fn version of unexpected count
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"unexpected_condition": condition_metric},
+    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+        # noinspection PyUnusedLocal
+        results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    assert (
+        str(eee.value)
+        == 'Error: The column "non_existent_column" in BatchData does not exist.'
     )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
-    assert results[desired_metric.id] == 2
-
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_values",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
-        },
-        metric_dependencies={"unexpected_condition": condition_metric},
-    )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
-    assert results[desired_metric.id] == [3, 3]
-
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_value_counts",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
-        },
-        metric_dependencies={"unexpected_condition": condition_metric},
-    )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
-    assert results[desired_metric.id] == [(3, 2)]
-
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_rows",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={
-            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
-        },
-        metric_dependencies={"unexpected_condition": condition_metric},
-    )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
-    assert results[desired_metric.id] == [(3, "bar"), (3, "baz")]
 
 
-def test_map_unique_sa(sa):
+def test_map_unique_sa_column_exists(sa):
     engine = _build_sa_engine(
         pd.DataFrame(
             {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
@@ -441,6 +455,144 @@ def test_map_unique_sa(sa):
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     assert results[desired_metric.id] == [(3, "baz"), (3, "qux")]
+
+
+def test_map_unique_sa_column_does_not_exist(sa):
+    engine = _build_sa_engine(
+        pd.DataFrame(
+            {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
+        ),
+        sa,
+    )
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.unique.condition",
+        metric_domain_kwargs={"column": "non_existent_column"},
+        metric_value_kwargs=dict(),
+    )
+    metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
+
+    # This is no longer a MAP_CONDITION because mssql does not support it. Instead, it is a WINDOW_CONDITION
+    #
+    # aggregate_fn = MetricConfiguration(
+    #     metric_name="column_values.unique.unexpected_count.aggregate_fn",
+    #     metric_domain_kwargs={"column": "a"},
+    #     metric_value_kwargs=dict(),
+    #     metric_dependencies={"unexpected_condition": condition_metric},
+    # )
+    # aggregate_fn_metrics = engine.resolve_metrics(
+    #     metrics_to_resolve=(aggregate_fn,), metrics=metrics
+    # )
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "non_existent_column"},
+        metric_value_kwargs=dict(),
+        # metric_dependencies={"metric_partial_fn": aggregate_fn},
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+        # noinspection PyUnusedLocal
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(desired_metric,),
+            metrics=metrics,  # metrics=aggregate_fn_metrics
+        )
+    assert "An SQL execution Exception occurred.  OperationalError" in str(eee.value)
+
+
+def test_map_unique_spark_column_exists(spark_session):
+    engine = _build_spark_engine(
+        pd.DataFrame(
+            {
+                "a": [1, 2, 3, 3, 4, None],
+                "b": [None, "foo", "bar", "baz", "qux", "fish"],
+            }
+        ),
+        spark_session,
+    )
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.unique.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+    )
+    metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
+
+    # unique is a *window* function so does not use the aggregate_fn version of unexpected count
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == 2
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [3, 3]
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_value_counts",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [(3, 2)]
+
+    desired_metric = MetricConfiguration(
+        metric_name="column_values.unique.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
+        },
+        metric_dependencies={"unexpected_condition": condition_metric},
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    assert results[desired_metric.id] == [(3, "bar"), (3, "baz")]
+
+
+def test_map_unique_spark_column_does_not_exist(spark_session):
+    engine = _build_spark_engine(
+        pd.DataFrame(
+            {
+                "a": [1, 2, 3, 3, 4, None],
+                "b": [None, "foo", "bar", "baz", "qux", "fish"],
+            }
+        ),
+        spark_session,
+    )
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.unique.condition",
+        metric_domain_kwargs={"column": "non_existent_column"},
+        metric_value_kwargs=dict(),
+    )
+
+    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+        # noinspection PyUnusedLocal
+        metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
+    assert (
+        str(eee.value)
+        == 'Error: The column "non_existent_column" in BatchData does not exist.'
+    )
 
 
 def test_z_score_under_threshold_pd():
