@@ -84,7 +84,7 @@ def checkpoint():
     help="The project's great_expectations directory.",
 )
 @mark.cli_as_experimental
-def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
+def checkpoint_new(checkpoint, suite, directory, datasource):
     """Create a new checkpoint for easy deployments. (Experimental)"""
     suite_name = suite
     usage_event = "cli.checkpoint.new"
