@@ -37,8 +37,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
     id: checkpoint_command_line
     title: LegacyCheckpoint - Command Line
     icon:
-    short_description: Run a configured checkpoint from a command line.
-    description: Run a configured checkpoint from a command line in a Terminal shell.
+    short_description: Run a configured Checkpoint from a command line.
+    description: Run a configured Checkpoint from a command line in a Terminal shell.
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
     maturity_details:
@@ -59,13 +59,13 @@ def checkpoint(ctx):
     """
     Checkpoint operations
 
-    A checkpoint is a bundle of one or more batches of data with one or more
+    A Checkpoint is a bundle of one or more batches of data with one or more
     Expectation Suites.
 
-    A checkpoint can be as simple as one batch of data paired with one
+    A Checkpoint can be as simple as one batch of data paired with one
     Expectation Suite.
 
-    A checkpoint can be as complex as many batches of data across different
+    A Checkpoint can be as complex as many batches of data across different
     datasources paired with one or more Expectation Suites each.
     """
     directory: str = toolkit.parse_cli_config_file_location(
@@ -89,9 +89,9 @@ def checkpoint(ctx):
 )
 @click.pass_context
 def checkpoint_new(ctx, name, jupyter):
-    """Create a new checkpoint for easy deployments.
+    """Create a new Checkpoint for easy deployments.
 
-    NAME is the name of the checkpoint to create.
+    NAME is the name of the Checkpoint to create.
     """
     _checkpoint_new(ctx=ctx, checkpoint_name=name, jupyter=jupyter)
 
@@ -116,14 +116,14 @@ def _checkpoint_new(ctx, checkpoint_name, jupyter):
 
         if not jupyter:
             cli_message(
-                f"To continue editing this checkpoint, run <green>jupyter notebook {notebook_file_path}</green>"
+                f"To continue editing this Checkpoint, run <green>jupyter notebook {notebook_file_path}</green>"
             )
 
         toolkit.send_usage_message(context, event=usage_event, success=True)
 
         if jupyter:
             cli_message(
-                """<green>Because you requested to create a new checkpoint, we'll open a notebook for you now to edit it!
+                """<green>Because you requested to create a new Checkpoint, we'll open a notebook for you now to edit it!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             )
             toolkit.launch_jupyter_notebook(notebook_file_path)
@@ -145,7 +145,7 @@ def _verify_checkpoint_does_not_exist(
             toolkit.exit_with_failure_message_and_stats(
                 context,
                 usage_event,
-                f"A checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
+                f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
             )
     except InvalidTopLevelConfigKeyError as e:
         toolkit.exit_with_failure_message_and_stats(
@@ -161,7 +161,6 @@ def _get_notebook_path(context, notebook_name):
     )
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="list")
 @click.pass_context
 def checkpoint_list(ctx):
@@ -170,26 +169,25 @@ def checkpoint_list(ctx):
     checkpoints: List[str] = context.list_checkpoints()
     if not checkpoints:
         cli_message(
-            "No checkpoints found.\n"
-            "  - Use the command `great_expectations checkpoint new` to create one."
+            "No Checkpoints found.\n"
+            "  - Use the command `great_expectations Checkpoint new` to create one."
         )
         toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
         sys.exit(0)
 
     number_found: int = len(checkpoints)
     plural: str = "s" if number_found > 1 else ""
-    message: str = f"Found {number_found} checkpoint{plural}."
+    message: str = f"Found {number_found} Checkpoint{plural}."
     pretty_list: list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
     toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="delete")
 @click.argument("checkpoint")
 @click.pass_context
 def checkpoint_delete(ctx, checkpoint):
-    """Delete a checkpoint."""
+    """Delete a Checkpoint."""
     usage_event: str = "cli.checkpoint.delete"
     context: DataContext = ctx.obj.data_context
 
@@ -212,12 +210,11 @@ def checkpoint_delete(ctx, checkpoint):
     sys.exit(0)
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
 @click.pass_context
 def checkpoint_run(ctx, checkpoint):
-    """Run a checkpoint."""
+    """Run a Checkpoint."""
     usage_event: str = "cli.checkpoint.run"
     context: DataContext = ctx.obj.data_context
 
@@ -281,12 +278,12 @@ def print_validation_operator_results_details(
 @click.pass_context
 def checkpoint_script(ctx, checkpoint):
     """
-    Create a python script to run a checkpoint.
+    Create a python script to run a Checkpoint.
 
     Checkpoints can be run directly without this script using the
-    `great_expectations checkpoint run` command.
+    `great_expectations Checkpoint run` command.
 
-    This script is provided for those who wish to run checkpoints via python.
+    This script is provided for those who wish to run Checkpoints via python.
     """
     usage_event: str = "cli.checkpoint.script"
     context: DataContext = ctx.obj.data_context
@@ -314,7 +311,7 @@ def checkpoint_script(ctx, checkpoint):
         script_path=script_path,
     )
     cli_message(
-        f"""<green>A python script was created that runs the checkpoint named: `{checkpoint}`</green>
+        f"""<green>A python script was created that runs the Checkpoint named: `{checkpoint}`</green>
   - The script is located in `great_expectations/uncommitted/run_{checkpoint}.py`
   - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
     )

@@ -42,7 +42,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
 
     stdout: str = result.stdout
     assert (
-        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
+        "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
     )
 
@@ -113,7 +113,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     assert result.exit_code == 0
 
     stdout = result.stdout
-    assert "No checkpoints found." in stdout
+    assert "No Checkpoints found." in stdout
 
 
 @mock.patch(
@@ -137,7 +137,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     assert result.exit_code == 0
 
     stdout: str = result.stdout
-    assert 'The checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
+    assert 'The Checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
 
     assert mock_emit.call_count == 1
     assert mock_emit.call_args_list == [
@@ -159,7 +159,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     assert result.exit_code == 0
 
     stdout = result.stdout
-    assert "Found 1 checkpoint." in stdout
+    assert "Found 1 Checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
 
@@ -180,7 +180,7 @@ def test_checkpoint_list_with_no_checkpoints(
     assert result.exit_code == 0
 
     stdout: str = result.stdout
-    assert "No checkpoints found." in stdout
+    assert "No Checkpoints found." in stdout
     assert "Use the command `great_expectations checkpoint new` to create one" in stdout
 
     assert mock_emit.call_count == 2
@@ -220,7 +220,7 @@ def test_checkpoint_list_with_single_checkpoint(
     assert result.exit_code == 0
 
     stdout: str = result.stdout
-    assert "Found 1 checkpoint." in stdout
+    assert "Found 1 Checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
     assert mock_emit.call_count == 2
@@ -263,7 +263,7 @@ def test_checkpoint_list_with_eight_checkpoints(
     assert result.exit_code == 0
 
     stdout: str = result.stdout
-    assert "Found 8 checkpoints." in stdout
+    assert "Found 8 Checkpoints." in stdout
 
     checkpoint_names_list: List[str] = [
         "my_simple_checkpoint_with_slack_and_notify_with_all",
@@ -308,7 +308,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 ):
     """
     What does this test and why?
-    The `checkpoint new` CLI flow should raise an error if the checkpoint name being created already exists in your checkpoint store.
+    The `checkpoint new` CLI flow should raise an error if the Checkpoint name being created already exists in your checkpoint store.
     """
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -322,7 +322,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     stdout = result.stdout
 
     assert (
-        "A checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
+        "A Checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
         in stdout
     )
 
@@ -362,9 +362,9 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
 ):
     """
     What does this test and why?
-    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the checkpoint.
-    This test builds that notebook and runs it to generate a checkpoint and then tests the resulting configuration in the checkpoint file.
-    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the checkpoint configuration.
+    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the Checkpoint.
+    This test builds that notebook and runs it to generate a Checkpoint and then tests the resulting configuration in the Checkpoint file.
+    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the Checkpoint configuration.
     """
     context: DataContext = deterministic_asset_dataconnector_context
     root_dir: str = context.root_directory
@@ -419,11 +419,11 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
-    # Ensure the checkpoint file was created
+    # Ensure the Checkpoint file was created
     expected_checkpoint_path = os.path.join(root_dir, "checkpoints", "passengers.yml")
     assert os.path.isfile(expected_checkpoint_path)
 
-    # Ensure the checkpoint configuration in the file is as expected
+    # Ensure the Checkpoint configuration in the file is as expected
     with open(expected_checkpoint_path) as f:
         checkpoint_config = f.read()
     expected_checkpoint_config: str = """name: passengers
@@ -483,7 +483,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
 
     stdout: str = result.stdout
     assert (
-        "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
+        "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
@@ -639,7 +639,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     #     in stdout
     # )
     # assert (
-    #     "Please verify these batch kwargs in checkpoint bad_batch`"
+    #     "Please verify these batch kwargs in Checkpoint bad_batch`"
     #     in stdout
     # )
     # assert "No such file or directory" in stdout
@@ -744,9 +744,9 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     assert result.exit_code == 1
 
     stdout: str = result.stdout
-    assert "Exception occurred while running checkpoint" in stdout
+    assert "Exception occurred while running Checkpoint" in stdout
     assert (
-        "of checkpoint 'no_suite': validation expectation_suite_name must be specified"
+        "of Checkpoint 'no_suite': validation expectation_suite_name must be specified"
         in stdout
     )
 
@@ -1207,7 +1207,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
     assert result.exit_code == 1
 
     stdout: str = result.stdout
-    assert "Exception occurred while running checkpoint." in stdout
+    assert "Exception occurred while running Checkpoint." in stdout
 
     assert mock_emit.call_count == 4
 
@@ -1276,7 +1276,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
 
     stdout: str = result.stdout
     assert (
-        "Could not find checkpoint `not_a_checkpoint` (or its configuration is invalid)."
+        "Could not find Checkpoint `not_a_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
@@ -1376,7 +1376,7 @@ def test_checkpoint_script_happy_path_generates_script(
 
     stdout: str = result.stdout
     assert (
-        "A python script was created that runs the checkpoint named: `my_v1_checkpoint`"
+        "A python script was created that runs the Checkpoint named: `my_v1_checkpoint`"
         in stdout
     )
     assert (
@@ -1418,7 +1418,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -1531,7 +1531,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     titanic_expectation_suite,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -1650,7 +1650,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     titanic_expectation_suite,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)

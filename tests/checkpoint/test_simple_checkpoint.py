@@ -451,7 +451,7 @@ def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_erro
 def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
-    # verify checkpoint is not persisted in the data context
+    # verify Checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
     result = simple_checkpoint_defaults.run(
         run_name="bar",
@@ -467,7 +467,7 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
 def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
-    # verify checkpoint is not persisted in the data context
+    # verify Checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
 
     expected_runtime_kwargs: dict = {
@@ -535,7 +535,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
 def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
-    # verify checkpoint is not persisted in the data context
+    # verify Checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
 
     expected_runtime_kwargs: dict = {
@@ -613,7 +613,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
 def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
-    # verify checkpoint is not persisted in the data context
+    # verify Checkpoint is not persisted in the data context
     assert context_with_data_source_and_empty_suite.list_checkpoints() == []
 
     expected_runtime_kwargs: dict = {

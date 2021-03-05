@@ -88,7 +88,7 @@ def test_cli_works_from_adjacent_directory_without_config_flag(
     monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
     result = runner.invoke(cli, "--v3-api checkpoint list", catch_exceptions=False)
     assert result.exit_code == 0
-    assert "No checkpoints found" in result.output
+    assert "No Checkpoints found" in result.output
 
 
 def test_cli_works_from_great_expectations_directory_without_config_flag(
@@ -99,7 +99,7 @@ def test_cli_works_from_great_expectations_directory_without_config_flag(
     monkeypatch.chdir(empty_data_context.root_directory)
     result = runner.invoke(cli, "--v3-api checkpoint list", catch_exceptions=False)
     assert result.exit_code == 0
-    assert "No checkpoints found" in result.output
+    assert "No Checkpoints found" in result.output
 
 
 def test_cli_works_from_random_directory_with_config_flag_fully_specified_yml(
@@ -116,7 +116,7 @@ def test_cli_works_from_random_directory_with_config_flag_fully_specified_yml(
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "No checkpoints found" in result.output
+    assert "No Checkpoints found" in result.output
 
 
 def test_cli_works_from_random_directory_with_config_flag_great_expectations_directory(
@@ -133,7 +133,7 @@ def test_cli_works_from_random_directory_with_config_flag_great_expectations_dir
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "No checkpoints found" in result.output
+    assert "No Checkpoints found" in result.output
 
 
 def test_cli_works_from_random_directory_with_c_flag_fully_specified_yml(
@@ -150,7 +150,7 @@ def test_cli_works_from_random_directory_with_c_flag_fully_specified_yml(
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "No checkpoints found" in result.output
+    assert "No Checkpoints found" in result.output
 
 
 def test_cli_works_from_random_directory_with_c_flag_great_expectations_directory(
@@ -167,7 +167,7 @@ def test_cli_works_from_random_directory_with_c_flag_great_expectations_director
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "No checkpoints found" in result.output
+    assert "No Checkpoints found" in result.output
 
 
 CONFIG_NOT_FOUND_ERROR_MESSAGE = "No great_expectations directory was found here!"
