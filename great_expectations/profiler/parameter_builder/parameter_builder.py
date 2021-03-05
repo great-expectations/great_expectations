@@ -3,7 +3,8 @@ from abc import ABC, abstractmethod
 
 class ParameterBuilder(ABC):
     """
-    A ParameterBuilder implementation provides support for building parameters suitable for use in
+    A ParameterBuilder implementation provides support for building Expectation
+    Configuration Parameters suitable for use in
     other ParameterBuilders or in ConfigurationBuilders as part of profiling.
 
     A ParameterBuilder is configured as part of a ProfilerRule. Its primary interface is the
