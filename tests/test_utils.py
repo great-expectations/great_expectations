@@ -172,15 +172,19 @@ class SqlAlchemyConnectionManager:
         self._connections = dict()
 
     def get_engine(self, connection_string):
+        import sqlalchemy as sa
+
         with self.lock:
             if connection_string not in self._connections:
                 try:
                     engine = create_engine(connection_string)
                     conn = engine.connect()
                     self._connections[connection_string] = conn
-                except (ImportError, self.sa.exc.SQLAlchemyError):
+
+                except (ImportError, sa.exc.SQLAlchemyError):
                     print(f"Unable to establish connection with {connection_string}")
                     raise
+
             return self._connections[connection_string]
 
 

@@ -854,8 +854,7 @@ def test_checkpoint_run_on_non_existent_validations(
     )
     assert result.exit_code == 1
 
-    stdout: str = result.stdout
-    assert "Checkpoint 'no_validations' does not contain any validations." in stdout
+    assert 'Checkpoint "no_validations" does not contain any validations.' in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [

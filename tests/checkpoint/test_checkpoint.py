@@ -202,7 +202,7 @@ def test_basic_checkpoint_config_validation(
     )
     with pytest.raises(
         ge_exceptions.DataContextError,
-        match=r"Checkpoint 'my_checkpoint' does not contain any validations.",
+        match=r'Checkpoint "my_checkpoint" does not contain any validations.',
     ):
         # noinspection PyUnusedLocal
         result: CheckpointResult = empty_data_context.run_checkpoint(
@@ -779,7 +779,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
     with pytest.raises(
         ge_exceptions.DataContextError,
-        match=r"Checkpoint 'my_base_checkpoint' does not contain any validations.",
+        match=r'Checkpoint "my_base_checkpoint" does not contain any validations.',
     ):
         # noinspection PyUnusedLocal
         result: CheckpointResult = data_context.run_checkpoint(
