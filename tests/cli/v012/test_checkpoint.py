@@ -951,7 +951,7 @@ def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
     stdout = result.stdout
     assert result.exit_code == 0
     assert (
-        "A python script was created that runs the Checkpoint named: `my_checkpoint`"
+        "A python script was created that runs the checkpoint named: `my_checkpoint`"
         in stdout
     )
     assert (
