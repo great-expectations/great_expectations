@@ -10,7 +10,8 @@ from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     BatchSpec,
     PathBatchSpec,
@@ -20,15 +21,13 @@ from great_expectations.core.batch_spec import (
 from great_expectations.core.util import S3Url, sniff_s3_compression
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 
+from .execution_engine import ExecutionEngine, MetricDomainTypes
+
 try:
     import boto3
 except ImportError:
     boto3 = None
 
-from great_expectations.core.batch import BatchMarkers
-
-from ..exceptions import BatchSpecError, GreatExpectationsError, ValidationError
-from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +104,7 @@ Notes:
         elif isinstance(batch_data, PandasBatchData):
             pass
         else:
-            raise GreatExpectationsError(
+            raise ge_exceptions.GreatExpectationsError(
                 "PandasExecutionEngine requires batch data that is either a DataFrame or a PandasBatchData object"
             )
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
@@ -163,7 +162,7 @@ Notes:
             reader_fn: Callable = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
         else:
-            raise BatchSpecError(
+            raise ge_exceptions.BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
 
@@ -213,7 +212,7 @@ Notes:
 
         """
         if reader_method is None and path is None:
-            raise BatchSpecError(
+            raise ge_exceptions.BatchSpecError(
                 "Unable to determine pandas reader function without reader_method or path."
             )
 
@@ -231,7 +230,7 @@ Notes:
                 reader_fn = partial(reader_fn, **reader_options)
             return reader_fn
         except AttributeError:
-            raise BatchSpecError(
+            raise ge_exceptions.BatchSpecError(
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
@@ -265,7 +264,9 @@ Notes:
                 "reader_options": {"compression": "gzip"},
             }
 
-        raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
+        raise ge_exceptions.BatchSpecError(
+            f'Unable to determine reader method from path: "{path}".'
+        )
 
     def get_compute_domain(
         self,
@@ -302,14 +303,16 @@ Notes:
             if self.active_batch_data_id is not None:
                 data = self.active_batch_data.dataframe
             else:
-                raise ValidationError(
+                raise ge_exceptions.ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.loaded_batch_data_dict:
                 data = self.loaded_batch_data_dict[batch_id].dataframe
             else:
-                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
+                raise ge_exceptions.ValidationError(
+                    f"Unable to find batch with batch_id {batch_id}"
+                )
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
@@ -372,7 +375,7 @@ Notes:
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
             else:
                 # If column not given
-                raise GreatExpectationsError(
+                raise ge_exceptions.GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
 
@@ -390,7 +393,7 @@ Notes:
                     "column_B"
                 )
             else:
-                raise GreatExpectationsError(
+                raise ge_exceptions.GreatExpectationsError(
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
 

@@ -1,24 +1,20 @@
 import os
 import sys
-from typing import Dict
+from typing import List
 
 import click
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
-from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
-from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.util import cli_message, cli_message_list
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
-from great_expectations.data_context.types.base import DataContextConfigDefaults
+from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
-from great_expectations.util import lint_code
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
+from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
+    CheckpointNewNotebookRenderer,
 )
+from great_expectations.util import lint_code
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -41,12 +37,12 @@ yaml.indent(mapping=2, sequence=4, offset=2)
     id: checkpoint_command_line
     title: LegacyCheckpoint - Command Line
     icon:
-    short_description: Run a configured legacy checkpoint from a command line.
-    description: Run a configured legacy checkpoint from a command line in a Terminal shell.
+    short_description: Run a configured checkpoint from a command line.
+    description: Run a configured checkpoint from a command line in a Terminal shell.
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
     maturity_details:
-        api_stability: Unstable (expect changes to batch request; no checkpoint store)
+        api_stability: Unstable (expect changes to batch request)
         implementation_completeness: Complete
         unit_test_coverage: Complete
         integration_infrastructure_test_coverage: N/A
@@ -58,91 +54,98 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 
 
 @click.group(short_help="Checkpoint operations")
-def checkpoint():
+@click.pass_context
+def checkpoint(ctx):
     """
     Checkpoint operations
 
-    A checkpoint is a bundle of one or more batches of data with one or more
+    A Checkpoint is a bundle of one or more batches of data with one or more
     Expectation Suites.
 
-    A checkpoint can be as simple as one batch of data paired with one
+    A Checkpoint can be as simple as one batch of data paired with one
     Expectation Suite.
 
-    A checkpoint can be as complex as many batches of data across different
+    A Checkpoint can be as complex as many batches of data across different
     datasources paired with one or more Expectation Suites each.
     """
-    pass
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+    # TODO consider moving this all the way up in to the CLIState constructor
+    ctx.obj.data_context = context
 
 
 @checkpoint.command(name="new")
-@click.argument("checkpoint")
-@click.argument("suite")
-@click.option("--datasource", default=None)
+@click.argument("name")
 @click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
+    "--jupyter/--no-jupyter",
+    is_flag=True,
+    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
+    default=True,
 )
-@click.option("--legacy/--non-legacy", default=True)
-@mark.cli_as_experimental
-def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
-    """Create a new checkpoint for easy deployments. (Experimental)"""
-    if legacy:
-        suite_name = suite
-        usage_event = "cli.checkpoint.new"
-        context = toolkit.load_data_context_with_error_handling(directory)
-        ge_config_version = context.get_config().config_version
-        if ge_config_version >= 3:
+@click.pass_context
+def checkpoint_new(ctx, name, jupyter):
+    """Create a new Checkpoint for easy deployments.
+
+    NAME is the name of the Checkpoint to create.
+    """
+    _checkpoint_new(ctx=ctx, checkpoint_name=name, jupyter=jupyter)
+
+
+def _checkpoint_new(ctx, checkpoint_name, jupyter):
+
+    usage_event: str = "cli.checkpoint.new"
+    context = ctx.obj.data_context
+
+    try:
+        _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event)
+
+        # Create notebook on disk
+        notebook_name = f"edit_checkpoint_{checkpoint_name}.ipynb"
+        notebook_file_path = _get_notebook_path(context, notebook_name)
+        checkpoint_new_notebook_renderer = CheckpointNewNotebookRenderer(
+            context=context, checkpoint_name=checkpoint_name
+        )
+        checkpoint_new_notebook_renderer.render_to_disk(
+            notebook_file_path=notebook_file_path
+        )
+
+        if not jupyter:
             cli_message(
-                f"""<red>The `checkpoint new` CLI command is not yet implemented for GE config versions >= 3.</red>"""
+                f"To continue editing this Checkpoint, run <green>jupyter notebook {notebook_file_path}</green>"
             )
-            send_usage_message(context, usage_event, success=False)
-            sys.exit(1)
 
-        _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
-        suite: ExpectationSuite = toolkit.load_expectation_suite(
-            context, suite_name, usage_event
-        )
-        datasource = toolkit.select_datasource(context, datasource_name=datasource)
-        if datasource is None:
-            send_usage_message(context, usage_event, success=False)
-            sys.exit(1)
-        _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
+        toolkit.send_usage_message(context, event=usage_event, success=True)
 
-        _ = context.add_checkpoint(
-            name=checkpoint,
-            **{
-                "class_name": "LegacyCheckpoint",
-                "validation_operator_name": "action_list_operator",
-                "batches": [
-                    {
-                        "batch_kwargs": dict(batch_kwargs),
-                        "expectation_suite_names": [suite.expectation_suite_name],
-                    }
-                ],
-            },
-        )
+        if jupyter:
+            cli_message(
+                """<green>Because you requested to create a new Checkpoint, we'll open a notebook for you now to edit it!
+If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
+            )
+            toolkit.launch_jupyter_notebook(notebook_file_path)
 
-        cli_message(
-            f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
-      - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
+    except Exception as e:
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event,
+            message=f"<red>{e}</red>",
         )
-        send_usage_message(context, usage_event, success=True)
-    # TODO: <Rob>Rob</Rob> Add flow for new style checkpoints
-    else:
-        pass
+        return
 
 
 def _verify_checkpoint_does_not_exist(
-    context: DataContext, checkpoint: str, usage_event: str
+    context: DataContext, checkpoint_name: str, usage_event: str
 ) -> None:
     try:
-        if checkpoint in context.list_checkpoints():
+        if checkpoint_name in context.list_checkpoints():
             toolkit.exit_with_failure_message_and_stats(
                 context,
                 usage_event,
-                f"A checkpoint named `{checkpoint}` already exists. Please choose a new name.",
+                f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
             )
     except InvalidTopLevelConfigKeyError as e:
         toolkit.exit_with_failure_message_and_stats(
@@ -150,118 +153,110 @@ def _verify_checkpoint_does_not_exist(
         )
 
 
-def _write_checkpoint_to_disk(
-    context: DataContext, checkpoint: Dict, checkpoint_name: str
-) -> str:
-    # TODO this should be the responsibility of the DataContext
-    checkpoint_dir = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+def _get_notebook_path(context, notebook_name):
+    return os.path.abspath(
+        os.path.join(
+            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+        )
     )
-    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
-    os.makedirs(checkpoint_dir, exist_ok=True)
-    with open(checkpoint_file, "w") as f:
-        yaml.dump(checkpoint, f)
-    return checkpoint_file
 
 
-def _load_checkpoint_yml_template() -> dict:
-    # TODO this should be the responsibility of the DataContext
-    template_file = file_relative_path(
-        __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
-    )
-    with open(template_file) as f:
-        template = yaml.load(f)
-    return template
-
-
+# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@mark.cli_as_experimental
-def checkpoint_list(directory):
-    """List configured checkpoints. (Experimental)"""
-    context = toolkit.load_data_context_with_error_handling(directory)
-    checkpoints = context.list_checkpoints()
+@click.pass_context
+def checkpoint_list(ctx):
+    """List configured Checkpoints."""
+    context: DataContext = ctx.obj.data_context
+    checkpoints: List[str] = context.list_checkpoints()
     if not checkpoints:
         cli_message(
-            "No checkpoints found.\n"
+            "No Checkpoints found.\n"
             "  - Use the command `great_expectations checkpoint new` to create one."
         )
-        send_usage_message(context, event="cli.checkpoint.list", success=True)
+        toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
         sys.exit(0)
 
-    number_found = len(checkpoints)
-    plural = "s" if number_found > 1 else ""
-    message = f"Found {number_found} checkpoint{plural}."
-    pretty_list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
+    number_found: int = len(checkpoints)
+    plural: str = "s" if number_found > 1 else ""
+    message: str = f"Found {number_found} Checkpoint{plural}."
+    pretty_list: list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
-    send_usage_message(context, event="cli.checkpoint.list", success=True)
+    toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
 
 
-@checkpoint.command(name="run")
+# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
+@checkpoint.command(name="delete")
 @click.argument("checkpoint")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@mark.cli_as_experimental
-def checkpoint_run(checkpoint, directory):
-    """Run a checkpoint. (Experimental)"""
-    usage_event = "cli.checkpoint.run"
-    context = toolkit.load_data_context_with_error_handling(
-        directory=directory, from_cli_upgrade_command=False
-    )
-
-    ge_config_version = context.get_config().config_version
-    if ge_config_version >= 3:
-        cli_message(
-            f"""<red>The `checkpoint run` CLI command is not yet implemented for GE config versions >= 3.</red>"""
-        )
-        send_usage_message(context, usage_event, success=False)
-        sys.exit(1)
-
-    checkpoint: Checkpoint = toolkit.load_checkpoint(
-        context,
-        checkpoint,
-        usage_event,
-    )
+@click.pass_context
+def checkpoint_delete(ctx, checkpoint):
+    """Delete a Checkpoint."""
+    usage_event: str = "cli.checkpoint.delete"
+    context: DataContext = ctx.obj.data_context
 
     try:
-        results = checkpoint.run()
+        toolkit.delete_checkpoint(
+            context=context,
+            checkpoint_name=checkpoint,
+            usage_event=usage_event,
+        )
+        toolkit.send_usage_message(context, event="cli.checkpoint.delete", success=True)
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context, usage_event, f"<red>{e}</red>"
+            context=context,
+            usage_event=usage_event,
+            message=f"<red>{e}</red>",
         )
+        return
 
-    if not results["success"]:
-        cli_message("Validation failed!")
-        send_usage_message(context, event=usage_event, success=True)
-        print_validation_operator_results_details(results)
+    cli_message(f'Checkpoint "{checkpoint}" deleted.')
+    sys.exit(0)
+
+
+# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
+@checkpoint.command(name="run")
+@click.argument("checkpoint")
+@click.pass_context
+def checkpoint_run(ctx, checkpoint):
+    """Run a Checkpoint."""
+    usage_event: str = "cli.checkpoint.run"
+    context: DataContext = ctx.obj.data_context
+
+    try:
+        result: CheckpointResult = toolkit.run_checkpoint(
+            context=context,
+            checkpoint_name=checkpoint,
+            usage_event=usage_event,
+        )
+    except Exception as e:
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event,
+            message=f"<red>{e}</red>",
+        )
+        return
+
+    if not result["success"]:
+        cli_message(string="Validation failed!")
+        toolkit.send_usage_message(context, event=usage_event, success=True)
+        print_validation_operator_results_details(result=result)
         sys.exit(1)
 
     cli_message("Validation succeeded!")
-    send_usage_message(context, event=usage_event, success=True)
-    print_validation_operator_results_details(results)
+    toolkit.send_usage_message(context, event=usage_event, success=True)
+    print_validation_operator_results_details(result=result)
     sys.exit(0)
 
 
 def print_validation_operator_results_details(
-    results: ValidationOperatorResult,
+    result: CheckpointResult,
 ) -> None:
     max_suite_display_width = 40
-    toolkit.cli_message(
+    cli_message(
         f"""
 {'Suite Name'.ljust(max_suite_display_width)}     Status     Expectations met"""
     )
-    for id, result in results.run_results.items():
-        vr = result["validation_result"]
+    for result_id, result_item in result.run_results.items():
+        vr = result_item["validation_result"]
         stats = vr.statistics
         passed = stats["successful_expectations"]
         evaluated = stats["evaluated_expectations"]
@@ -273,47 +268,35 @@ def print_validation_operator_results_details(
             status_slug = "<green>✔ Passed</green>"
         else:
             status_slug = "<red>✖ Failed</red>"
-        suite_name = str(vr.meta["expectation_suite_name"])
+        suite_name: str = str(vr.meta["expectation_suite_name"])
         if len(suite_name) > max_suite_display_width:
             suite_name = suite_name[0:max_suite_display_width]
             suite_name = suite_name[:-1] + "…"
-        status_line = f"- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}"
-        toolkit.cli_message(status_line)
+        status_line: str = f"- {suite_name.ljust(max_suite_display_width)}   {status_slug}   {stats_slug}"
+        cli_message(status_line)
 
 
 @checkpoint.command(name="script")
 @click.argument("checkpoint")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@mark.cli_as_experimental
-def checkpoint_script(checkpoint, directory):
+@click.pass_context
+def checkpoint_script(ctx, checkpoint):
     """
-    Create a python script to run a checkpoint. (Experimental)
+    Create a python script to run a Checkpoint.
 
     Checkpoints can be run directly without this script using the
-    `great_expectations checkpoint run` command.
+    `great_expectations Checkpoint run` command.
 
-    This script is provided for those who wish to run checkpoints via python.
+    This script is provided for those who wish to run Checkpoints via python.
     """
-    context = toolkit.load_data_context_with_error_handling(directory)
-    usage_event = "cli.checkpoint.script"
-    ge_config_version = context.get_config().config_version
-    if ge_config_version >= 3:
-        cli_message(
-            f"""<red>The `checkpoint script` CLI command is not yet implemented for GE config versions >= 3.</red>"""
-        )
-        send_usage_message(context, usage_event, success=False)
-        sys.exit(1)
+    usage_event: str = "cli.checkpoint.script"
+    context: DataContext = ctx.obj.data_context
 
-    # Attempt to load the checkpoint and deal with errors
-    _ = toolkit.load_checkpoint(context, checkpoint, usage_event)
+    toolkit.validate_checkpoint(
+        context=context, checkpoint_name=checkpoint, usage_event=usage_event
+    )
 
-    script_name = f"run_{checkpoint}.py"
-    script_path = os.path.join(
+    script_name: str = f"run_{checkpoint}.py"
+    script_path: str = os.path.join(
         context.root_directory, context.GE_UNCOMMITTED_DIR, script_name
     )
 
@@ -325,26 +308,30 @@ def checkpoint_script(checkpoint, directory):
   - Existing file path: {script_path}""",
         )
 
-    _write_checkpoint_script_to_disk(context.root_directory, checkpoint, script_path)
+    _write_checkpoint_script_to_disk(
+        context_directory=context.root_directory,
+        checkpoint_name=checkpoint,
+        script_path=script_path,
+    )
     cli_message(
-        f"""<green>A python script was created that runs the checkpoint named: `{checkpoint}`</green>
+        f"""<green>A python script was created that runs the Checkpoint named: `{checkpoint}`</green>
   - The script is located in `great_expectations/uncommitted/run_{checkpoint}.py`
   - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
     )
-    send_usage_message(context, event=usage_event, success=True)
+    toolkit.send_usage_message(context, event=usage_event, success=True)
+
+
+def _write_checkpoint_script_to_disk(
+    context_directory: str, checkpoint_name: str, script_path: str
+) -> None:
+    script_full_path: str = os.path.abspath(os.path.join(script_path))
+    template: str = _load_script_template().format(checkpoint_name, context_directory)
+    linted_code: str = lint_code(code=template)
+    with open(script_full_path, "w") as f:
+        f.write(linted_code)
 
 
 def _load_script_template() -> str:
     with open(file_relative_path(__file__, "checkpoint_script_template.py")) as f:
         template = f.read()
     return template
-
-
-def _write_checkpoint_script_to_disk(
-    context_directory: str, checkpoint_name: str, script_path: str
-) -> None:
-    script_full_path = os.path.abspath(os.path.join(script_path))
-    template = _load_script_template().format(checkpoint_name, context_directory)
-    linted_code = lint_code(template)
-    with open(script_full_path, "w") as f:
-        f.write(linted_code)

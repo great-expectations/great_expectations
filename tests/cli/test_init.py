@@ -3,7 +3,7 @@ import shutil
 from unittest import mock
 
 import pytest
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -14,10 +14,16 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     tmp_path_factory,
 ):
     """
@@ -39,10 +45,11 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     # Create a new project from scratch that we will use for the test in the next step
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(root_dir)
     result = runner.invoke(
         cli,
-        ["init", "-d", root_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
+        ["--v3-api", "init"],
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -64,11 +71,15 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
 
     # Test the second invocation of init
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", root_dir], input="Y\nn\n", catch_exceptions=False
+            cli,
+            ["--v3-api", "init"],
+            input="Y\nn\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -90,10 +101,16 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     tmp_path_factory,
 ):
     """
@@ -102,25 +119,24 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     The user just checked an existing project out of source control and does
     not yet have an uncommitted directory.
     """
-    root_dir = tmp_path_factory.mktemp("hiya")
-    root_dir = str(root_dir)
+    root_dir: str = str(tmp_path_factory.mktemp("hiya"))
     os.makedirs(os.path.join(root_dir, "data"))
-    data_folder_path = os.path.join(root_dir, "data")
-    data_path = os.path.join(root_dir, "data", "Titanic.csv")
-    fixture_path = file_relative_path(
+    data_folder_path: str = os.path.join(root_dir, "data")
+    data_path: str = os.path.join(root_dir, "data", "Titanic.csv")
+    fixture_path: str = file_relative_path(
         __file__, os.path.join("..", "test_sets", "Titanic.csv")
     )
     shutil.copy(fixture_path, data_path)
 
     # Create a new project from scratch that we will use for the test in the next step
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(root_dir)
+    result: Result = runner.invoke(
         cli,
-        ["init", "-d", root_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(
-            data_folder_path, data_path, catch_exceptions=False
-        ),
+        ["--v3-api", "init"],
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
@@ -134,11 +150,15 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     # Now the test begins - rerun the init on an existing project
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(root_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", root_dir], input="n\n", catch_exceptions=False
+            cli,
+            ["--v3-api", "init"],
+            input="n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
     assert mock_webbrowser.call_count == 1
@@ -151,18 +171,24 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_connection_string_non_working_db_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging(
-    mock_webbrowser, caplog, tmp_path_factory, sa
+    mock_webbrowser, caplog, monkeypatch, tmp_path_factory, sa
 ):
     root_dir = tmp_path_factory.mktemp("bad_con_string_test")
     root_dir = str(root_dir)
     os.chdir(root_dir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(root_dir)
     result = runner.invoke(
         cli,
-        ["init"],
+        ["--v3-api", "init"],
         input="\n\n2\n6\nmy_db\nsqlite:////not_a_real.db\n\nn\n",
         catch_exceptions=False,
     )
@@ -216,7 +242,6 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
     notebooks/

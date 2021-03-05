@@ -164,11 +164,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         else:
             allow_relative_error = False
 
-        if allow_relative_error is not False:
-            raise ValueError(
-                "PandasExecutionEngine does not support relative error in column quantiles."
-            )
-
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
                 "quntile_values and quantiles must have the same number of elements"
