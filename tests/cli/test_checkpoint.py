@@ -1,5 +1,4 @@
 import os
-import shutil
 import subprocess
 import unittest
 from typing import List
@@ -7,7 +6,6 @@ from unittest import mock
 
 import nbformat
 import pandas as pd
-import pytest
 from click.testing import CliRunner, Result
 from nbconvert.preprocessors import ExecutePreprocessor
 from ruamel.yaml import YAML
@@ -17,7 +15,6 @@ from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from tests.cli.utils import (
-    LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
@@ -25,34 +22,6 @@ from tests.cli.utils import (
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
-
-
-# TODO: <Alex>ALEX Delete?</Alex>
-@pytest.fixture
-def titanic_checkpoint(
-    titanic_data_context_stats_enabled_config_version_2, titanic_expectation_suite
-):
-    csv_path = os.path.join(
-        titanic_data_context_stats_enabled_config_version_2.root_directory,
-        "..",
-        "data",
-        "Titanic.csv",
-    )
-    return {
-        "validation_operator_name": "action_list_operator",
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "path": csv_path,
-                    "datasource": "mydatasource",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": [
-                    titanic_expectation_suite.expectation_suite_name
-                ],
-            },
-        ],
-    }
 
 
 @mock.patch(
@@ -143,6 +112,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     )
     assert result.exit_code == 0
 
+    stdout = result.stdout
     assert "No checkpoints found." in stdout
 
 
@@ -861,7 +831,6 @@ def test_checkpoint_run_on_non_existent_validations(
 
     stdout: str = result.stdout
     assert 'Checkpoint "no_validations" does not contain any validations.' in stdout
-    assert "open a notebook for you now" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1792,55 +1761,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     assert (
         'ExecutionEngineError: Error: The column "Name" in BatchData does not exist.'
         in output
-    )
-
-
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_new_with_ge_config_3_raises_error(
-    mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled
-):
-    context: DataContext = titanic_data_context_stats_enabled
-
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        f"--v3-api checkpoint new foo not_a_suite",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 1
-
-    stdout: str = result.stdout
-    assert (
-        "The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3."
-        in stdout
-    )
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.new",
-                "event_payload": {"api_version": "v3"},
-                "success": False,
-            }
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
