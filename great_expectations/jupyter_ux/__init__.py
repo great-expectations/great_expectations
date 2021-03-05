@@ -377,12 +377,14 @@ def display_profiled_column_evrs_as_section(
     """
 
     # TODO: replace this with a generic utility function, preferably a method on an ExpectationSuite class
-    column_evr_list = [
-        e
-        for e in evrs.results
-        if "column" in e.expectation_config.kwargs
-        and e.expectation_config.kwargs["column"] == column
-    ]
+    column_evr_list = []
+    for e in evrs.results:
+        if e.expectation_config is not None:
+            if (
+                "column" in e.expectation_config.kwargs
+                and e.expectation_config.kwargs["column"] == column
+            ):
+                column_evr_list.append(e)
 
     # TODO: Handle the case where zero evrs match the column name
 
@@ -444,4 +446,4 @@ def display_column_evrs_as_section(
 
 # When importing the jupyter_ux module, we set up a preferred logging configuration
 logger = logging.getLogger("great_expectations")
-setup_notebook_logging(logger)
+setup_notebook_logging(logger, log_level=logging.CRITICAL)

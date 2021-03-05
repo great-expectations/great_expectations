@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
+from dateutil.parser import ParserError, parse
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -74,14 +75,26 @@ class ColumnMedian(ColumnMetricProvider):
         if len(column_values) == 0:
             column_median = None
         elif nonnull_count % 2 == 0:
-            # An even number of column values: take the average of the two center values
-            column_median = (
-                float(
-                    column_values[0][0]
-                    + column_values[1][0]  # left center value  # right center value
-                )
-                / 2.0
-            )  # Average center values
+            # An even number of column values: take the average of the two center values,
+            # unless the values are datetime types
+            if isinstance(column_values[0][0], str) and isinstance(
+                column_values[1][0], str
+            ):
+                # This could indicate datetimes, which we allow. Otherwise, raise an error.
+                try:
+                    d1 = parse(column_values[0][0])
+                    d2 = parse(column_values[1][0])
+                    column_median = d1 + ((d2 - d1) / 2)
+                except (ParserError, ValueError):
+                    raise
+            else:
+                column_median = (
+                    float(
+                        column_values[0][0]
+                        + column_values[1][0]  # left center value  # right center value
+                    )
+                    / 2.0
+                )  # Average center values
         else:
             # An odd number of column values, we can just take the center value
             column_median = column_values[1][0]  # True center value

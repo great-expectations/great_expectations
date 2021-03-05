@@ -47,6 +47,8 @@ class ColumnSectionRenderer(Renderer):
     def _get_column_name(cls, ge_object):
         # This is broken out for ease of locating future validation here
         if isinstance(ge_object, list):
+            if len(ge_object) == 0:
+                return
             candidate_object = ge_object[0]
         else:
             candidate_object = ge_object

@@ -24,10 +24,10 @@ def unique_proportion(_metrics):
     unique_values = _metrics.get("column.distinct_values.count")
     null_count = _metrics.get("column_values.nonnull.unexpected_count")
 
-    if total_values > 0:
+    if (total_values - null_count) > 0:
         return unique_values / (total_values - null_count)
     else:
-        return 0
+        return None
 
 
 class ColumnUniqueProportion(ColumnMetricProvider):
