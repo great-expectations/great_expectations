@@ -8,7 +8,7 @@ notification to team members about validation results, or storing a result in a 
 
 See also <cyan>https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html</cyan> for more information about the Checkpoints and how to configure them in your Great Expectations environment.
 
-Checkpoints can be run directly without this script using the `great_expectations Checkpoint run` command.  This script
+Checkpoints can be run directly without this script using the `great_expectations checkpoint run` command.  This script
 is provided for those who wish to run Checkpoints in python.
 
 Usage:
