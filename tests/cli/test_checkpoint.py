@@ -69,8 +69,9 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
         f"--v3-api checkpoint delete my_checkpoint",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "Could not find checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
@@ -140,8 +141,8 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
+
     assert "No checkpoints found." in stdout
 
 
@@ -185,8 +186,9 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
+
+    stdout = result.stdout
     assert "Found 1 checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
@@ -346,8 +348,9 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
         f"--v3-api checkpoint new my_minimal_simple_checkpoint",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 1
+    stdout = result.stdout
+
     assert (
         "A checkpoint named `my_minimal_simple_checkpoint` already exists. Please choose a new name."
         in stdout
@@ -403,15 +406,18 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     # Clear the "data_context.save_expectation_suite" call
     mock_emit.reset_mock()
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"--v3-api checkpoint new passengers",
         input="1\n1\n",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "open a notebook for you now" in stdout
+
     assert mock_emit.call_count == 2
 
     assert mock_emit.call_args_list == [
@@ -428,7 +434,6 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     ]
     assert mock_subprocess.call_count == 1
     assert mock_webbroser.call_count == 0
-    assert "open a notebook for you now" in stdout
 
     expected_notebook_path = os.path.join(
         root_dir, "uncommitted", "edit_checkpoint_passengers.ipynb"
@@ -854,7 +859,9 @@ def test_checkpoint_run_on_non_existent_validations(
     )
     assert result.exit_code == 1
 
+    stdout: str = result.stdout
     assert 'Checkpoint "no_validations" does not contain any validations.' in stdout
+    assert "open a notebook for you now" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1296,13 +1303,14 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
         f"--v3-api checkpoint script not_a_checkpoint",
         catch_exceptions=False,
     )
-    stdout = result.stdout
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "Could not find checkpoint `not_a_checkpoint` (or its configuration is invalid)."
         in stdout
     )
     assert "Try running" in stdout
-    assert result.exit_code == 1
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1807,8 +1815,9 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
         f"--v3-api checkpoint new foo not_a_suite",
         catch_exceptions=False,
     )
-    stdout = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3."
         in stdout
