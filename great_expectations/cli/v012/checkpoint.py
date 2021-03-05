@@ -83,54 +83,42 @@ def checkpoint():
     default=None,
     help="The project's great_expectations directory.",
 )
-@click.option("--legacy/--non-legacy", default=True)
 @mark.cli_as_experimental
 def checkpoint_new(checkpoint, suite, directory, datasource, legacy):
     """Create a new checkpoint for easy deployments. (Experimental)"""
-    if legacy:
-        suite_name = suite
-        usage_event = "cli.checkpoint.new"
-        context = toolkit.load_data_context_with_error_handling(directory)
-        ge_config_version = context.get_config().config_version
-        if ge_config_version >= 3:
-            cli_message(
-                f"""<red>The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3.</red>"""
-            )
-            toolkit.send_usage_message(context, usage_event, success=False)
-            sys.exit(1)
+    suite_name = suite
+    usage_event = "cli.checkpoint.new"
+    context = toolkit.load_data_context_with_error_handling(directory)
 
-        _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
-        suite: ExpectationSuite = toolkit.load_expectation_suite(
-            context, suite_name, usage_event
-        )
-        datasource = toolkit.select_datasource(context, datasource_name=datasource)
-        if datasource is None:
-            toolkit.send_usage_message(context, usage_event, success=False)
-            sys.exit(1)
-        _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
+    _verify_checkpoint_does_not_exist(context, checkpoint, usage_event)
+    suite: ExpectationSuite = toolkit.load_expectation_suite(
+        context, suite_name, usage_event
+    )
+    datasource = toolkit.select_datasource(context, datasource_name=datasource)
+    if datasource is None:
+        toolkit.send_usage_message(context, usage_event, success=False)
+        sys.exit(1)
+    _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
 
-        _ = context.add_checkpoint(
-            name=checkpoint,
-            **{
-                "class_name": "LegacyCheckpoint",
-                "validation_operator_name": "action_list_operator",
-                "batches": [
-                    {
-                        "batch_kwargs": dict(batch_kwargs),
-                        "expectation_suite_names": [suite.expectation_suite_name],
-                    }
-                ],
-            },
-        )
+    _ = context.add_checkpoint(
+        name=checkpoint,
+        **{
+            "class_name": "LegacyCheckpoint",
+            "validation_operator_name": "action_list_operator",
+            "batches": [
+                {
+                    "batch_kwargs": dict(batch_kwargs),
+                    "expectation_suite_names": [suite.expectation_suite_name],
+                }
+            ],
+        },
+    )
 
-        cli_message(
-            f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
-      - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
-        )
-        toolkit.send_usage_message(context, usage_event, success=True)
-    # TODO: <Rob>Rob</Rob> Add flow for new style checkpoints
-    else:
-        pass
+    cli_message(
+        f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
+  - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
+    )
+    toolkit.send_usage_message(context, usage_event, success=True)
 
 
 def _verify_checkpoint_does_not_exist(
@@ -218,14 +206,6 @@ def checkpoint_run(checkpoint, directory):
         directory=directory, from_cli_upgrade_command=False
     )
 
-    ge_config_version = context.get_config().config_version
-    if ge_config_version >= 3:
-        cli_message(
-            f"""<red>The `checkpoint run` CLI command is not yet implemented for Great Expectations config versions >= 3.</red>"""
-        )
-        toolkit.send_usage_message(context, usage_event, success=False)
-        sys.exit(1)
-
     checkpoint: Checkpoint = toolkit.load_checkpoint(
         context,
         checkpoint,
@@ -300,13 +280,6 @@ def checkpoint_script(checkpoint, directory):
     """
     context = toolkit.load_data_context_with_error_handling(directory)
     usage_event = "cli.checkpoint.script"
-    ge_config_version = context.get_config().config_version
-    if ge_config_version >= 3:
-        cli_message(
-            f"""<red>The `checkpoint script` CLI command is not yet implemented for Great Expectations config versions >= 3.</red>"""
-        )
-        toolkit.send_usage_message(context, usage_event, success=False)
-        sys.exit(1)
 
     # Attempt to load the checkpoint and deal with errors
     _ = toolkit.load_checkpoint(context, checkpoint, usage_event)
