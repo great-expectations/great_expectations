@@ -17,19 +17,14 @@ def test_self_check(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
+
     assert test_runtime_data_connector.self_check() == {
         "class_name": "RuntimeDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": ["IN_MEMORY_DATA_ASSET"],
-        "data_assets": {
-            "IN_MEMORY_DATA_ASSET": {
-                "batch_definition_count": 1,
-                "example_data_references": [""],
-            }
-        },
+        "data_asset_count": 0,
+        "example_data_asset_names": [],
+        "data_assets": {},
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
     }
 
 
@@ -225,7 +220,7 @@ def test_get_available_data_asset_names(basic_datasource):
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    expected_available_data_asset_names: List[str] = ["IN_MEMORY_DATA_ASSET"]
+    expected_available_data_asset_names: List[str] = []
 
     available_data_asset_names: List[
         str

@@ -125,11 +125,13 @@ class FilePathDataConnector(DataConnector):
 
         """
         # <WILL> TODO 202103 some methods still call this method with BatchRequestBase. Refactor to only allow BatchRequest
+        # in this case we can guarantee that batch_request_base will contain a data_asset_name because it is being converted here
+        batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
+
         if isinstance(batch_request, BatchRequest):
             batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         else:
             batch_request_base: BatchRequestBase = batch_request
-
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request_base
         )
@@ -263,6 +265,10 @@ partition definition {batch_definition.partition_definition} from batch definiti
 
     def _validate_batch_request(self, batch_request: BatchRequestBase):
         super()._validate_batch_request(batch_request=batch_request)
+
+        # <WILL> how do we check that : has batch_request_base.data_asset_name????
+        # this is
+
         self._validate_sorters_configuration(
             data_asset_name=batch_request.data_asset_name
         )
