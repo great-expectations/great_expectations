@@ -464,11 +464,6 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_without_persisting_
     assert result.success
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>This behavior has changed; ; exception is raised instead.</Alex>",
-    run=True,
-    strict=True,
-)
 def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
@@ -537,11 +532,6 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
     ) == filter_properties_dict(properties=expected_runtime_kwargs)
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>This behavior has changed; ; exception is raised instead.</Alex>",
-    run=True,
-    strict=True,
-)
 def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
@@ -620,11 +610,6 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
     ) == filter_properties_dict(properties=expected_runtime_kwargs)
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>This behavior has changed; ; exception is raised instead.</Alex>",
-    run=True,
-    strict=True,
-)
 def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_persisting_checkpoint(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults, one_validation
 ):
@@ -709,11 +694,6 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
     ) == filter_properties_dict(properties=expected_runtime_kwargs)
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>This behavior has changed; ; exception is raised instead.</Alex>",
-    run=True,
-    strict=True,
-)
 def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     simple_checkpoint_defaults,
