@@ -1,6 +1,5 @@
 import logging
 
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -10,13 +9,14 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import get_metric_provider
-from great_expectations.expectations.self_check_util import build_spark_engine
+
+# noinspection PyProtectedMember
+from great_expectations.expectations.self_check_util import _build_spark_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -251,7 +251,7 @@ def test_map_of_type_sa(sa):
 
 
 def test_map_value_set_spark(spark_session):
-    engine = build_spark_engine(
+    engine = _build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 3, None]},
@@ -639,7 +639,7 @@ def test_z_score_under_threshold_pd():
 
 
 def test_z_score_under_threshold_spark(spark_session):
-    engine = build_spark_engine(
+    engine = _build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 3, None]},
@@ -784,7 +784,7 @@ def test_column_pairs_in_set_metric_pd():
 
 
 def test_table_metric_spark(spark_session):
-    engine = build_spark_engine(
+    engine = _build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1]},
@@ -813,7 +813,7 @@ def test_table_metric_spark(spark_session):
 
 
 def test_median_metric_spark(spark_session):
-    engine = build_spark_engine(
+    engine = _build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3]},
@@ -849,7 +849,7 @@ def test_median_metric_spark(spark_session):
 
 
 def test_distinct_metric_spark(spark_session):
-    engine = build_spark_engine(
+    engine = _build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1, 2, 3, 3, None]},
@@ -1038,7 +1038,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
 def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     import datetime
 
-    engine = build_spark_engine(
+    engine = _build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]},

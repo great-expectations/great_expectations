@@ -790,7 +790,7 @@ def get_test_validator_with_data(
 
 
 # Builds a Spark Execution Engine
-def build_spark_engine(spark, df, batch_id):
+def _build_spark_engine(spark, df, batch_id):
     df = spark.createDataFrame(
         [
             tuple(
