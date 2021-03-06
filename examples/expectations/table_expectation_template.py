@@ -1,9 +1,26 @@
 import json
+
+# This class defines a Metric to support your Expectation
+# For most Expectations, the main business logic for calculation will live here.
+# To learn about the relationship between Metrics and Expectations, please visit
+# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
+from typing import Any, Dict, Optional, Tuple
+
 import numpy as np
+
+from great_expectations.core import ExpectationConfiguration
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,
@@ -14,6 +31,8 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 from great_expectations.expectations.registry import (
     _registered_expectations,
     _registered_metrics,
@@ -23,27 +42,8 @@ from great_expectations.expectations.util import render_evaluation_parameter_str
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
-
-
-# This class defines a Metric to support your Expectation
-# For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit
-# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
-from typing import Any, Dict, Optional, Tuple
-
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
