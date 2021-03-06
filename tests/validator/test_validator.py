@@ -1,17 +1,15 @@
 import pandas as pd
 import pytest
 
-import great_expectations.expectations.metrics
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.exceptions import InvalidDataContextKeyError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.core import ExpectColumnMaxToBeBetween
 from great_expectations.expectations.core.expect_column_value_z_scores_to_be_less_than import (
     ExpectColumnValueZScoresToBeLessThan,
 )
@@ -247,13 +245,15 @@ def test_graph_validate_with_bad_config(basic_datasource):
         expectation_type="expect_column_max_to_be_between",
         kwargs={"column": "not_in_table", "min_value": 1, "max_value": 29},
     )
-    try:
+    with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
+        # noinspection PyUnusedLocal
         result = Validator(
             execution_engine=PandasExecutionEngine(), batches=[batch]
         ).graph_validate(configurations=[expectation_configuration])
-    except KeyError as e:
-        result = e
-    assert isinstance(result, KeyError)
+    assert (
+        str(eee.value)
+        == 'Error: The column "not_in_table" in BatchData does not exist.'
+    )
 
 
 # Tests that runtime configuration actually works during graph validation
@@ -361,7 +361,7 @@ def test_validator_default_expectation_args__sql(
 
     print(my_validator.get_default_expectation_arguments())
 
-    with pytest.raises(InvalidDataContextKeyError):
+    with pytest.raises(ge_exceptions.InvalidDataContextKeyError):
         # expectation_suite_name is a number not str
         my_validator = context.get_validator(
             datasource_name="my_sqlite_db",
