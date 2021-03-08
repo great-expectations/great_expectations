@@ -223,30 +223,6 @@ def test_cli_config_not_found_raises_error_for_datasource_delete(
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
-def test_cli_config_not_found_raises_error_for_docs_build(
-    tmp_path_factory, monkeypatch
-):
-    tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
-    monkeypatch.chdir(tmp_dir)
-    runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(
-        cli,
-        ["-c", "./", "--v3-api", "docs", "build", "--no-view"],
-        catch_exceptions=False,
-    )
-    assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "docs", "build", "--no-view"], catch_exceptions=False
-    )
-    assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli,
-        ["--v3-api", "docs", "build", "--no-view", "--assume-yes"],
-        catch_exceptions=False,
-    )
-    assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-
-
 def test_cli_config_not_found_raises_error_for_project_check_config(
     tmp_path_factory, monkeypatch
 ):
