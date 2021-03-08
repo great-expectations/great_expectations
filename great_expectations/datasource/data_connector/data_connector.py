@@ -385,13 +385,9 @@ class DataConnector:
         """
         if batch_request.datasource_name != self.datasource_name:
             raise ValueError(
-                f"""datasource_name in BatchRequestBase: "{batch_request.datasource_name}" does not
-    match DataConnector datasource_name: "{self.datasource_name}".
-                    """
+                f"""datasource_name in BatchRequestBase: "{batch_request.datasource_name}" does not match DataConnector datasource_name: "{self.datasource_name}"."""
             )
         if batch_request.data_connector_name != self.name:
             raise ValueError(
-                f"""data_connector_name in BatchRequestBase: "{batch_request.data_connector_name}" does not match
-    DataConnector name: "{self.name}".
-                    """
+                f"""data_connector_name in BatchRequestBase: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}"."""
             )

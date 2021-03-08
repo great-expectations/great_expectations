@@ -233,10 +233,6 @@ def test_get_available_data_asset_names_updating_after_batch_request(basic_datas
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    test_runtime_data_connector: RuntimeDataConnector = (
-        basic_datasource.data_connectors["test_runtime_data_connector"]
-    )
-
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # empty if data_connector has not been used
@@ -287,9 +283,9 @@ def test_get_available_data_asset_names_updating_after_batch_request(basic_datas
         batch_request=batch_request
     )
 
-    # updated to my_data_asset_2
+    # updated to my_data_asset_1 and my_data_asset_2
     assert test_runtime_data_connector.get_available_data_asset_names() == [
-        "my_data_asset_2"
+        "my_data_asset_1", "my_data_asset_2"
     ]
 
 

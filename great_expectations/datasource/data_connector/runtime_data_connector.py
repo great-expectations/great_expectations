@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, Optional, Tuple, cast
+from typing import Any, List, Optional, Tuple
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -25,7 +25,6 @@ from great_expectations.execution_engine import ExecutionEngine
 logger = logging.getLogger(__name__)
 
 DEFAULT_DELIMITER: str = "-"
-
 
 class RuntimeDataConnector(DataConnector):
     def __init__(
@@ -108,7 +107,6 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-        self._refresh_data_references_cache()
         self._validate_batch_request(batch_request=batch_request)
 
         partition_identifiers: Optional[dict] = None
@@ -136,6 +134,8 @@ class RuntimeDataConnector(DataConnector):
             batch_definition=batch_definition, batch_request=batch_request
         ):
             batch_definition_list = [batch_definition]
+            # <WILL> this currently stores the data_assets that have been seen.
+            # TODO: would be to store the BatchDefinitions that have been seen
             self._data_references_cache[batch_request.data_asset_name] = [""]
         else:
             batch_definition_list = []
