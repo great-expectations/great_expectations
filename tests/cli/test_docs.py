@@ -1,5 +1,6 @@
 import os
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -17,28 +18,41 @@ except ImportError:
 
 def test_docs_help_output(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["docs"], catch_exceptions=False)
+    result = runner.invoke(cli, ["--v3-api", "docs"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "build  Build Data Docs for a project." in result.stdout
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_view(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    context = site_builder_data_context_v013_with_html_store_titanic_random
+    root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
-        cli, ["docs", "build", "-d", root_dir], input="\n", catch_exceptions=False
+        cli,
+        [
+            "--v3-api",
+            "docs",
+            "build",
+        ],
+        input="\n",
+        catch_exceptions=False,
     )
     stdout = result.stdout
-
+    print(result.output)
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert "Building" in stdout
@@ -66,25 +80,35 @@ def test_docs_build_view(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_docs_build_no_view(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    context = site_builder_data_context_v013_with_html_store_titanic_random
+    root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["docs", "build", "--no-view", "-d", root_dir],
+        [
+            "--v3-api",
+            "docs",
+            "build",
+            "--no-view",
+        ],
         input="\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
-
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 0
     assert "Building" in stdout
@@ -112,17 +136,27 @@ def test_docs_build_no_view(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_docs_build_assume_yes(
-    caplog, site_builder_data_context_v013_with_html_store_titanic_random
+    caplog, monkeypatch, site_builder_data_context_v013_with_html_store_titanic_random
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    context = site_builder_data_context_v013_with_html_store_titanic_random
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["docs", "build", "--no-view", "--assume-yes", "-d", root_dir],
+        [
+            "--v3-api",
+            "docs",
+            "build",
+            "--no-view",
+            "--assume-yes",
+        ],
         catch_exceptions=False,
     )
     stdout = result.stdout

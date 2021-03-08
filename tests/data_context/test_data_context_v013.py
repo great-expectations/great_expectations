@@ -451,9 +451,9 @@ data_connectors:
 
 
 def test_in_memory_data_context_configuration(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.get_config(
+    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.get_config(
         mode="dict"
     )
     project_config_dict["plugins_directory"] = None
@@ -479,7 +479,7 @@ def test_in_memory_data_context_configuration(
     project_config: DataContextConfig = DataContextConfig(**project_config_dict)
     data_context = BaseDataContext(
         project_config=project_config,
-        context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.root_directory,
+        context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.root_directory,
     )
 
     my_validator: Validator = data_context.get_validator(

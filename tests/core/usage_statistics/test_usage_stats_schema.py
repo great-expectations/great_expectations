@@ -1,12 +1,11 @@
-from unittest import mock
-
 import jsonschema
-import pytest
 
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_batch_schema,
     anonymized_datasource_schema,
-    cli_new_ds_choice_payload,
+    api_version_payload_schema,
+    cli_new_ds_choice_payload_schema,
+    cli_suite_edit_expectation_suite_payload_schema,
     datasource_sqlalchemy_connect_payload,
     empty_payload_schema,
     init_payload_schema,
@@ -26,7 +25,7 @@ def test_comprehensive_list_of_messages():
     # NOTE: If you are changing the expected valid message list below, you need
     # to also update one or more tests below!
 
-    assert valid_message_list == [
+    assert set(valid_message_list) == {
         "data_context.__init__",
         "data_asset.validate",
         "data_context.add_datasource",
@@ -34,25 +33,30 @@ def test_comprehensive_list_of_messages():
         "data_context.open_data_docs",
         "data_context.save_expectation_suite",
         "datasource.sqlalchemy.connect",
-        "cli.init.create",
+        "cli.new_ds_choice",
+        "cli.checkpoint.delete",
         "cli.checkpoint.list",
+        "cli.checkpoint.new",
+        "cli.checkpoint.run",
+        "cli.checkpoint.script",
         "cli.datasource.list",
         "cli.datasource.new",
         "cli.datasource.profile",
         "cli.docs.build",
         "cli.docs.clean",
         "cli.docs.list",
-        "cli.new_ds_choice",
+        "cli.init.create",
         "cli.project.check_config",
         "cli.store.list",
+        "cli.suite.delete",
         "cli.suite.demo",
-        "cli.suite.edit",
         "cli.suite.list",
         "cli.suite.new",
         "cli.suite.scaffold",
+        "cli.suite.edit",
         "cli.validation_operator.list",
         "cli.validation_operator.run",
-    ]
+    }
 
 
 def test_init_message():
@@ -134,7 +138,7 @@ def test_cli_new_ds_choice_message():
     # non-empty payload
     jsonschema.validate(
         valid_usage_statistics_messages["cli.new_ds_choice"][0]["event_payload"],
-        cli_new_ds_choice_payload,
+        cli_new_ds_choice_payload_schema,
     )
 
 
@@ -146,7 +150,7 @@ def test_cli_suite_edit_message():
     )
     jsonschema.validate(
         valid_usage_statistics_messages["cli.suite.edit"][0]["event_payload"],
-        save_or_edit_expectation_suite_payload_schema,
+        cli_suite_edit_expectation_suite_payload_schema,
     )
 
 
@@ -154,19 +158,6 @@ def test_usage_stats_empty_payload_messages():
     usage_stats_records_messages = [
         "data_context.build_data_docs",
         "data_context.open_data_docs",
-        "cli.suite.demo",
-        "cli.suite.list",
-        "cli.suite.new",
-        "cli.suite.scaffold",
-        "cli.store.list",
-        "cli.project.check_config",
-        "cli.validation_operator.list",
-        "cli.validation_operator.run",
-        "cli.docs.list",
-        "cli.docs.build",
-        "cli.datasource.list",
-        "cli.datasource.new",
-        "cli.init.create",
     ]
     for message in usage_stats_records_messages:
         jsonschema.validate(
@@ -176,4 +167,39 @@ def test_usage_stats_empty_payload_messages():
         jsonschema.validate(
             valid_usage_statistics_messages[message][0]["event_payload"],
             empty_payload_schema,
+        )
+
+
+def test_usage_stats_cli_payload_messages():
+    usage_stats_records_messages = [
+        "cli.checkpoint.delete",
+        "cli.checkpoint.list",
+        "cli.checkpoint.new",
+        "cli.checkpoint.run",
+        "cli.checkpoint.script",
+        "cli.datasource.list",
+        "cli.datasource.new",
+        "cli.datasource.profile",
+        "cli.docs.build",
+        "cli.docs.clean",
+        "cli.docs.list",
+        "cli.init.create",
+        "cli.project.check_config",
+        "cli.store.list",
+        "cli.suite.delete",
+        "cli.suite.demo",
+        "cli.suite.list",
+        "cli.suite.new",
+        "cli.suite.scaffold",
+        "cli.validation_operator.list",
+        "cli.validation_operator.run",
+    ]
+    for message in usage_stats_records_messages:
+        jsonschema.validate(
+            valid_usage_statistics_messages[message][0],
+            usage_statistics_record_schema,
+        )
+        jsonschema.validate(
+            valid_usage_statistics_messages[message][0]["event_payload"],
+            api_version_payload_schema,
         )
