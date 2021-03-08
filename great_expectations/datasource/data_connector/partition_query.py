@@ -30,7 +30,7 @@ def build_partition_query(
     if not partition_request_dict:
         return PartitionQuery(
             custom_filter_function=None,
-            partition_identifiers=None,
+            batch_identifiers=None,
             index=None,
             limit=None,
         )
@@ -50,23 +50,23 @@ def build_partition_query(
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
-    partition_identifiers: Optional[dict] = partition_request_dict.get(
-        "partition_identifiers"
+    batch_identifiers: Optional[dict] = partition_request_dict.get(
+        "batch_identifiers"
     )
-    if partition_identifiers:
-        if not isinstance(partition_identifiers, dict):
+    if batch_identifiers:
+        if not isinstance(batch_identifiers, dict):
             raise ge_exceptions.PartitionQueryError(
-                f"""The type of a partition_identifiers must be a dictionary (Python "dict").  The type given is
-"{str(type(partition_identifiers))}", which is illegal.
+                f"""The type of a batch_identifiers must be a dictionary (Python "dict").  The type given is
+"{str(type(batch_identifiers))}", which is illegal.
                 """
             )
-        if not all([isinstance(key, str) for key in partition_identifiers.keys()]):
+        if not all([isinstance(key, str) for key in batch_identifiers.keys()]):
             raise ge_exceptions.PartitionQueryError(
                 'All partition_definition keys must strings (Python "str").'
             )
-    if partition_identifiers is not None:
-        partition_identifiers: PartitionDefinitionSubset = PartitionDefinitionSubset(
-            partition_identifiers
+    if batch_identifiers is not None:
+        batch_identifiers: PartitionDefinitionSubset = PartitionDefinitionSubset(
+            batch_identifiers
         )
     index: Optional[Union[int, list, tuple, slice, str]] = partition_request_dict.get(
         "index"
@@ -85,7 +85,7 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
     index = _parse_index(index=index)
     return PartitionQuery(
         custom_filter_function=custom_filter_function,
-        partition_identifiers=partition_identifiers,
+        batch_identifiers=batch_identifiers,
         limit=limit,
         index=index,
     )
@@ -127,7 +127,7 @@ The type given is "{str(type(index))}", which is illegal.
 class PartitionQuery:
     RECOGNIZED_KEYS: set = {
         "custom_filter_function",
-        "partition_identifiers",
+        "batch_identifiers",
         "index",
         "limit",
     }
@@ -135,12 +135,12 @@ class PartitionQuery:
     def __init__(
         self,
         custom_filter_function: Callable = None,
-        partition_identifiers: Optional[PartitionDefinitionSubset] = None,
+        batch_identifiers: Optional[PartitionDefinitionSubset] = None,
         index: Optional[Union[int, slice]] = None,
         limit: int = None,
     ):
         self._custom_filter_function = custom_filter_function
-        self._partition_identifiers = partition_identifiers
+        self._batch_identifiers = batch_identifiers
         self._index = index
         self._limit = limit
 
@@ -149,8 +149,8 @@ class PartitionQuery:
         return self._custom_filter_function
 
     @property
-    def partition_identifiers(self) -> Optional[PartitionDefinitionSubset]:
-        return self._partition_identifiers
+    def batch_identifiers(self) -> Optional[PartitionDefinitionSubset]:
+        return self._batch_identifiers
 
     @property
     def index(self) -> Optional[Union[int, slice]]:
@@ -163,7 +163,7 @@ class PartitionQuery:
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "custom_filter_function": self._custom_filter_function,
-            "partition_identifiers": self.partition_identifiers,
+            "batch_identifiers": self.batch_identifiers,
             "index": self.index,
             "limit": self.limit,
         }
@@ -200,17 +200,17 @@ class PartitionQuery:
 
     def best_effort_partition_matcher(self) -> Callable:
         def match_partition_to_query_params(partition_definition: dict) -> bool:
-            if self.partition_identifiers:
+            if self.batch_identifiers:
                 if not partition_definition:
                     return False
-                partition_definition_keys: set = set(self.partition_identifiers.keys())
+                partition_definition_keys: set = set(self.batch_identifiers.keys())
 
                 if not partition_definition_keys:
                     return False
                 for key in partition_definition_keys:
                     if not (
                         key in partition_definition
-                        and partition_definition[key] == self.partition_identifiers[key]
+                        and partition_definition[key] == self.batch_identifiers[key]
                     ):
                         return False
             return True

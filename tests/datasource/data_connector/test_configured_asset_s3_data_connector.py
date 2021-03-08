@@ -567,7 +567,7 @@ def test_return_all_batch_definitions_sorted():
         data_asset_name="TestFiles",
         partition_request=PartitionRequest(
             **{
-                "partition_identifiers": {
+                "batch_identifiers": {
                     "name": "james",
                     "timestamp": "20200713",
                     "price": "1567",
@@ -693,7 +693,7 @@ def test_alpha():
         data_connector_name="general_s3_data_connector",
         data_asset_name="A",
         partition_request=PartitionRequest(
-            **{"partition_identifiers": {"part_1": "B"}}
+            **{"batch_identifiers": {"part_1": "B"}}
         ),
     )
     my_batch_definition_list = (
