@@ -3,6 +3,7 @@ from typing import Iterable
 
 import numpy as np
 from dateutil.parser import parse
+from tqdm.auto import tqdm
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.dataset.util import build_categorical_partition_object
@@ -609,53 +610,61 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
         column_cache = {}
         if selected_columns:
-            for column in selected_columns:
-                cardinality = cls._get_column_cardinality_with_caching(
-                    dataset, column, column_cache
-                )
-                column_type = cls._get_column_type_with_caching(
-                    dataset, column, column_cache
-                )
-
-                if cardinality in [
-                    ProfilerCardinality.TWO,
-                    ProfilerCardinality.VERY_FEW,
-                    ProfilerCardinality.FEW,
-                ]:
-                    cls._create_expectations_for_low_card_column(
+            with tqdm(
+                total=len(selected_columns), desc="Profiling Columns", delay=5
+            ) as pbar:
+                for column in selected_columns:
+                    pbar.set_postfix_str(column)
+                    cardinality = cls._get_column_cardinality_with_caching(
                         dataset, column, column_cache
                     )
-                elif cardinality in [
-                    ProfilerCardinality.MANY,
-                    ProfilerCardinality.VERY_MANY,
-                    ProfilerCardinality.UNIQUE,
-                ]:
-                    # TODO we will want to finesse the number and types of
-                    #  expectations created here. The simple version is deny/allow list
-                    #  and the more complex version is desired per column type and
-                    #  cardinality. This deserves more thought on configuration.
-                    dataset.expect_column_values_to_be_unique(column)
+                    column_type = cls._get_column_type_with_caching(
+                        dataset, column, column_cache
+                    )
 
-                    if column_type in [ProfilerDataType.INT, ProfilerDataType.FLOAT]:
-                        cls._create_expectations_for_numeric_column(dataset, column)
-                    elif column_type in [ProfilerDataType.DATETIME]:
-                        cls._create_expectations_for_datetime_column(
-                            dataset,
-                            column,
-                            excluded_expectations=excluded_expectations,
-                            included_expectations=included_expectations,
+                    if cardinality in [
+                        ProfilerCardinality.TWO,
+                        ProfilerCardinality.VERY_FEW,
+                        ProfilerCardinality.FEW,
+                    ]:
+                        cls._create_expectations_for_low_card_column(
+                            dataset, column, column_cache
                         )
-                    elif column_type in [ProfilerDataType.STRING]:
-                        cls._create_expectations_for_string_column(
-                            dataset,
-                            column,
-                            excluded_expectations=excluded_expectations,
-                            included_expectations=included_expectations,
-                        )
-                    elif column_type in [ProfilerDataType.UNKNOWN]:
-                        logger.debug(
-                            f"Skipping expectation creation for column {column} of unknown type: {column_type}"
-                        )
+                    elif cardinality in [
+                        ProfilerCardinality.MANY,
+                        ProfilerCardinality.VERY_MANY,
+                        ProfilerCardinality.UNIQUE,
+                    ]:
+                        # TODO we will want to finesse the number and types of
+                        #  expectations created here. The simple version is deny/allow list
+                        #  and the more complex version is desired per column type and
+                        #  cardinality. This deserves more thought on configuration.
+                        dataset.expect_column_values_to_be_unique(column)
+
+                        if column_type in [
+                            ProfilerDataType.INT,
+                            ProfilerDataType.FLOAT,
+                        ]:
+                            cls._create_expectations_for_numeric_column(dataset, column)
+                        elif column_type in [ProfilerDataType.DATETIME]:
+                            cls._create_expectations_for_datetime_column(
+                                dataset,
+                                column,
+                                excluded_expectations=excluded_expectations,
+                                included_expectations=included_expectations,
+                            )
+                        elif column_type in [ProfilerDataType.STRING]:
+                            cls._create_expectations_for_string_column(
+                                dataset,
+                                column,
+                                excluded_expectations=excluded_expectations,
+                                included_expectations=included_expectations,
+                            )
+                        elif column_type in [ProfilerDataType.UNKNOWN]:
+                            logger.debug(
+                                f"Skipping expectation creation for column {column} of unknown type: {column_type}"
+                            )
+                    pbar.update()
 
         if excluded_expectations:
             # NOTE: we reach into a private member here because of an expected future
