@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -11,15 +12,25 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DatasourceKeyPairAuthBadPassphraseError
 
 
-def test_snowflake_user_password_credentials_exit(empty_data_context):
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
+def test_snowflake_user_password_credentials_exit(empty_data_context, monkeypatch):
     """Test an empty project and after adding a single datasource."""
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["datasource", "new", "-d", project_root_dir],
+        [
+            "--v3-api",
+            "datasource",
+            "new",
+        ],
         catch_exceptions=False,
         input="2\n4\nmy_snowflake_db\n1\nuser\nABCD.us-east-1\ndefault_db\ndefault_schema\nxsmall\npublic\npassword\nn\n",
     )

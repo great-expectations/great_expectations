@@ -46,6 +46,7 @@ stores:
     class_name: CheckpointStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
+      suppress_store_backend_id: true
       base_directory: checkpoints/
 
 expectations_store_name: expectations_store

@@ -1,7 +1,7 @@
 from functools import wraps
 from typing import Callable
 
-from great_expectations.cli.util import cli_message
+from great_expectations.cli.pretty_printing import cli_message
 
 
 class Mark:

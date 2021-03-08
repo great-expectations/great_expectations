@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from dateutil.parser import parse
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
@@ -12,7 +13,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
@@ -224,7 +224,7 @@ class ActionListValidationOperator(ValidationOperator):
                 config_defaults={"module_name": module_name},
             )
             if not new_action:
-                raise ClassInstantiationError(
+                raise ge_exceptions.ClassInstantiationError(
                     module_name=module_name,
                     package_name=None,
                     class_name=config["class_name"],

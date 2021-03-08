@@ -1,53 +1,35 @@
 """
 This is a basic generated Great Expectations script that runs a checkpoint.
 
-A checkpoint is a list of one or more batches paired with one or more
-Expectation Suites and a configurable Validation Operator.
+Checkpoints are the primary method for validating batches of data in production and triggering any followup actions.
 
-Checkpoints can be run directly without this script using the
-`great_expectations checkpoint run` command. This script is provided for those
-who wish to run checkpoints via python.
+A Checkpoint facilitates running a validation as well as configurable Actions such as updating Data Docs, sending a
+notification to team members about validation results, or storing a result in a shared cloud storage.
 
-Data that is validated is controlled by BatchKwargs, which can be adjusted in
-the checkpoint file: great_expectations/checkpoints/{0}.yml.
+See also <cyan>https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html</cyan> for more information about the Checkpoints and how to configure them in your Great Expectations environment.
 
-Data are validated by use of the `ActionListValidationOperator` which is
-configured by default. The default configuration of this Validation Operator
-saves validation results to your results store and then updates Data Docs.
-
-This makes viewing validation results easy for you and your team.
+Checkpoints can be run directly without this script using the `great_expectations checkpoint run` command.  This script
+is provided for those who wish to run checkpoints in python.
 
 Usage:
-- Run this file: `python great_expectations/uncommitted/run_{0}.py`.
-- This can be run manually or via a scheduler such as cron.
-- If your pipeline runner supports python snippets you can paste this into your
-pipeline.
+- Run this file: `python great_expectations/uncommitted/run_{0:s}.py`.
+- This can be run manually or via a scheduler such, as cron.
+- If your pipeline runner supports python snippets, then you can paste this into your pipeline.
 """
 import sys
 
-from great_expectations import DataContext
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.data_context import DataContext
 
-# checkpoint configuration
-context = DataContext("{1}")
-checkpoint = context.get_checkpoint("{0}")
+data_context: DataContext = DataContext(context_root_dir="{1:s}")
 
-# load batches of data
-batches_to_validate = []
-for batch in checkpoint.batches:
-    batch_kwargs = batch["batch_kwargs"]
-    for suite_name in batch["expectation_suite_names"]:
-        suite = context.get_expectation_suite(suite_name)
-        batch = context.get_batch(batch_kwargs, suite)
-        batches_to_validate.append(batch)
-
-# run the validation operator
-results = context.run_validation_operator(
-    checkpoint.validation_operator_name,
-    assets_to_validate=batches_to_validate,
+result: CheckpointResult = data_context.run_checkpoint(
+    checkpoint_name="{0:s}",
+    batch_request=None,
+    run_name=None,
 )
 
-# take action based on results
-if not results["success"]:
+if not result["success"]:
     print("Validation failed!")
     sys.exit(1)
 
