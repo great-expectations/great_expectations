@@ -692,9 +692,7 @@ def test_alpha():
         datasource_name="BASE",
         data_connector_name="general_s3_data_connector",
         data_asset_name="A",
-        partition_request=PartitionRequest(
-            **{"batch_identifiers": {"part_1": "B"}}
-        ),
+        partition_request=PartitionRequest(**{"batch_identifiers": {"part_1": "B"}}),
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(

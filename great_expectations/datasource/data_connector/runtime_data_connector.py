@@ -160,9 +160,7 @@ class RuntimeDataConnector(DataConnector):
                     "batch_identifiers"
                 )
             )
-            batch_identifiers = batch_request.partition_request.get(
-                "batch_identifiers"
-            )
+            batch_identifiers = batch_request.partition_request.get("batch_identifiers")
         if not batch_identifiers:
             batch_identifiers = {}
 

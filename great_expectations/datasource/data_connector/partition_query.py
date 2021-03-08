@@ -50,9 +50,7 @@ def build_partition_query(
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
-    batch_identifiers: Optional[dict] = partition_request_dict.get(
-        "batch_identifiers"
-    )
+    batch_identifiers: Optional[dict] = partition_request_dict.get("batch_identifiers")
     if batch_identifiers:
         if not isinstance(batch_identifiers, dict):
             raise ge_exceptions.PartitionQueryError(
