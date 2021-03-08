@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_DELIMITER: str = "-"
 
+
 class RuntimeDataConnector(DataConnector):
     def __init__(
         self,
@@ -42,10 +43,10 @@ class RuntimeDataConnector(DataConnector):
             execution_engine=execution_engine,
         )
         self._runtime_keys = runtime_keys
-        self._refresh_data_references_cache()
+        self._refresh_batch_definitions_cache()
 
-    def _refresh_data_references_cache(self):
-        self._data_references_cache = {}
+    def _refresh_batch_definitions_cache(self):
+        self._batch_definitions_cache = {}
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None

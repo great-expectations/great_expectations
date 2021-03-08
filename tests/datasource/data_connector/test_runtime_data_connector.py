@@ -285,7 +285,8 @@ def test_get_available_data_asset_names_updating_after_batch_request(basic_datas
 
     # updated to my_data_asset_1 and my_data_asset_2
     assert test_runtime_data_connector.get_available_data_asset_names() == [
-        "my_data_asset_1", "my_data_asset_2"
+        "my_data_asset_1",
+        "my_data_asset_2",
     ]
 
 

@@ -376,7 +376,12 @@ def test_get_batch_with_pipeline_style_batch_request_interrogate_data_connector_
     my_batch: Batch = batch_list[0]
     assert (
         basic_datasource_with_runtime_data_connector.get_available_data_asset_names()
-        == {"test_runtime_data_connector": ["test_data_asset", "test_data_asset_updated"]}
+        == {
+            "test_runtime_data_connector": [
+                "test_data_asset",
+                "test_data_asset_updated",
+            ]
+        }
     )
 
 
