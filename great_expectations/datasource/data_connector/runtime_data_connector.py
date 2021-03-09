@@ -31,13 +31,8 @@ DEFAULT_DELIMITER: str = "-"
 
 # TODO: <Alex>We need a mechanism for specifying the data_asset_name for RuntimeDataConnector (otherwise, it will always be the default).</Alex>
 class RuntimeDataConnector(DataConnector):
-    def __init__(
-        self,
-        name: str,
-        datasource_name: str,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_keys: Optional[list] = None,
-    ):
+    def __init__(self, name: str, datasource_name: str, execution_engine: Optional[ExecutionEngine] = None,
+                 batch_identifiers: Optional[list] = None):
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
         super().__init__(
@@ -46,7 +41,7 @@ class RuntimeDataConnector(DataConnector):
             execution_engine=execution_engine,
         )
 
-        self._runtime_keys = runtime_keys
+        self._batch_identifiers = batch_identifiers
 
     def _refresh_data_references_cache(self):
         """"""
@@ -277,17 +272,15 @@ class RuntimeDataConnector(DataConnector):
     def _validate_batch_identifiers(self, batch_identifiers: dict):
         if batch_identifiers is None:
             batch_identifiers = {}
-        self._validate_runtime_keys_configuration(
-            runtime_keys=list(batch_identifiers.keys())
-        )
+        self._validate_batch_identifiers_configuration(batch_identifiers=list(batch_identifiers.keys()))
 
-    def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
-        if runtime_keys and len(runtime_keys) > 0:
+    def _validate_batch_identifiers_configuration(self, batch_identifiers: List[str]):
+        if batch_identifiers and len(batch_identifiers) > 0:
             if not (
-                self._runtime_keys and set(runtime_keys) <= set(self._runtime_keys)
+                    self._batch_identifiers and set(batch_identifiers) <= set(self._batch_identifiers)
             ):
                 raise ge_exceptions.DataConnectorError(
-                    f"""RuntimeDataConnector "{self.name}" was invoked with one or more runtime keys that do not
-appear among the configured runtime keys.
+                    f"""RuntimeDataConnector "{self.name}" was invoked with one or more batch identifiers that do not
+appear among the configured batch identifiers.
                     """
                 )

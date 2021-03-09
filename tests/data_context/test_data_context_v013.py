@@ -206,7 +206,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
           my_runtime_data_connector:
             module_name: great_expectations.datasource.data_connector
             class_name: RuntimeDataConnector
-            runtime_keys:
+            batch_identifiers:
             - airflow_run_id
     """
     # noinspection PyUnusedLocal
@@ -422,7 +422,7 @@ data_connectors:
     general_runtime_data_connector:
       module_name: great_expectations.datasource.data_connector
       class_name: RuntimeDataConnector
-      runtime_keys:
+      batch_identifiers:
       - airflow_run_id
 """
     # noinspection PyUnusedLocal

@@ -77,7 +77,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
                         "insert_your_runtime_data_connector_name_here": {
                             "module_name": "great_expectations.datasource.data_connector",
                             "class_name": "RuntimeDataConnector",
-                            "runtime_keys": [
+                            "batch_identifiers": [
                                 "some_key_maybe_pipeline_stage",
                                 "some_other_key_maybe_run_id"
                             ]
@@ -251,7 +251,7 @@ Additional notes
                       "insert_your_runtime_data_connector_name_here": {
                         "module_name": "great_expectations.datasource.data_connector",
                         "class_name": "RuntimeDataConnector",
-                        "runtime_keys": [
+                        "batch_identifiers": [
                           "some_key_maybe_pipeline_stage",
                           "some_other_key_maybe_run_id"
                         ]

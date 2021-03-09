@@ -2350,7 +2350,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
             my_runtime_data_connector:
                 module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
-                runtime_keys:
+                batch_identifiers:
                     - pipeline_stage_name
                     - airflow_run_id
         """
@@ -2384,7 +2384,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                 my_runtime_data_connector:
                     module_name: great_expectations.datasource.data_connector
                     class_name: RuntimeDataConnector
-                    runtime_keys:
+                    batch_identifiers:
                         - pipeline_stage_name
                         - airflow_run_id
             """
@@ -4198,7 +4198,7 @@ data_connectors:
     test_runtime_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
+        batch_identifiers:
         - pipeline_stage_name
         - airflow_run_id
         - custom_key_0

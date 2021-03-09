@@ -134,7 +134,7 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    # Verify that all keys in partition_request are acceptable as runtime_keys (using batch count).
+    # Verify that all keys in partition_request are acceptable as batch_identifiers (using batch count).
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
         "data_connector_name": test_runtime_data_connector.name,
@@ -174,7 +174,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    # Insure that keys in partition_request["batch_identifiers"] that are not among runtime_keys declared in configuration
+    # Insure that keys in partition_request["batch_identifiers"] that are not among batch_identifiers declared in configuration
     # are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
@@ -200,7 +200,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    # Insure that keys in partition_request["batch_identifiers"] that are not among runtime_keys declared in configuration
+    # Insure that keys in partition_request["batch_identifiers"] that are not among batch_identifiers declared in configuration
     # are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
         "datasource_name": basic_datasource.name,

@@ -114,7 +114,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         1. Configure a Datasource
 
-            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Pandas DataFrame, we use the ``PandasExecutionEngine``. You can use ``runtime_keys`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
+            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Pandas DataFrame, we use the ``PandasExecutionEngine``. You can use ``batch_identifiers`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
 
             .. code-block:: yaml
 
@@ -126,7 +126,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                     insert_your_runtime_data_connector_name_here:
                       module_name: great_expectations.datasource.data_connector
                       class_name: RuntimeDataConnector
-                      runtime_keys:
+                      batch_identifiers:
                         - some_key_maybe_pipeline_stage
                         - some_other_key_maybe_run_id
 
@@ -147,7 +147,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument.
 
-            Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``runtime_keys`` to define which keys are allowed.
+            Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``batch_identifiers`` to define which keys are allowed.
 
             NOTE: for now, ``data_asset_name`` can only be set to this predefined string: ``“IN_MEMORY_DATA_ASSET”``. We will fix it very soon and will allow you to specify your own name.
 

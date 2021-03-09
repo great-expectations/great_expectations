@@ -251,22 +251,9 @@ class SorterConfigSchema(Schema):
 
 
 class DataConnectorConfig(DictDot):
-    def __init__(
-        self,
-        class_name,
-        module_name=None,
-        assets=None,
-        base_directory=None,
-        glob_directive=None,
-        default_regex=None,
-        runtime_keys=None,
-        bucket=None,
-        prefix=None,
-        delimiter=None,
-        max_keys=None,
-        boto3_options=None,
-        **kwargs,
-    ):
+    def __init__(self, class_name, module_name=None, assets=None, base_directory=None, glob_directive=None,
+                 default_regex=None, batch_identifiers=None, bucket=None, prefix=None, delimiter=None, max_keys=None,
+                 boto3_options=None, **kwargs):
         self._class_name = class_name
         self._module_name = module_name
         if assets is not None:
@@ -277,8 +264,8 @@ class DataConnectorConfig(DictDot):
             self.glob_directive = glob_directive
         if default_regex is not None:
             self.default_regex = default_regex
-        if runtime_keys is not None:
-            self.runtime_keys = runtime_keys
+        if batch_identifiers is not None:
+            self.batch_identifiers = batch_identifiers
         if bucket is not None:
             self.bucket = bucket
         if prefix is not None:
@@ -318,7 +305,7 @@ class DataConnectorConfigSchema(Schema):
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
     default_regex = fields.Dict(required=False, allow_none=True)
-    runtime_keys = fields.List(
+    batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     bucket = fields.String(required=False, allow_none=True)
