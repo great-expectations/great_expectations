@@ -2,6 +2,7 @@ import logging
 from functools import wraps
 from typing import Any, Callable, Dict, Tuple, Type
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
@@ -27,7 +28,7 @@ def column_aggregate_value(
     engine: Type[ExecutionEngine],
     metric_fn_type="value",
     domain_type="column",
-    **kwargs
+    **kwargs,
 ):
     """Return the column aggregate metric decorator for the specified engine.
 
@@ -62,14 +63,22 @@ def column_aggregate_value(
                 df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
-                if filter_column_isnull:
-                    df = df[df[accessor_domain_kwargs["column"]].notnull()]
-                return metric_fn(
-                    cls,
-                    column=df[accessor_domain_kwargs["column"]],
-                    **metric_value_kwargs,
-                    _metrics=metrics,
-                )
+
+                column_name = accessor_domain_kwargs["column"]
+                try:
+                    if filter_column_isnull:
+                        df = df[df[column_name].notnull()]
+
+                    return metric_fn(
+                        cls,
+                        column=df[column_name],
+                        **metric_value_kwargs,
+                        _metrics=metrics,
+                    )
+                except KeyError:
+                    raise ge_exceptions.ExecutionEngineError(
+                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                    )
 
             return inner_func
 
@@ -126,9 +135,11 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 ) = execution_engine.get_compute_domain(
                     compute_domain_kwargs, domain_type=domain_type
                 )
+
                 column_name = accessor_domain_kwargs["column"]
                 sqlalchemy_engine = execution_engine.engine
                 dialect = sqlalchemy_engine.dialect
+
                 metric_aggregate = metric_fn(
                     cls,
                     column=sa.column(column_name),
@@ -181,10 +192,17 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 ) = execution_engine.get_compute_domain(
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
+
                 column_name = accessor_domain_kwargs["column"]
+                if column_name not in data.columns:
+                    raise ge_exceptions.ExecutionEngineError(
+                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                    )
+
+                column = data[column_name]
                 metric_aggregate = metric_fn(
                     cls,
-                    column=data[column_name],
+                    column=column,
                     **metric_value_kwargs,
                     _table=data,
                     _column_name=column_name,

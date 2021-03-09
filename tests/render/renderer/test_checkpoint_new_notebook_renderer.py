@@ -106,7 +106,7 @@ def checkpoint_new_notebook_assets():
     header = [
         {
             "cell_type": "markdown",
-            "source": "# Create Your Checkpoint\nUse this notebook to create your Checkpoint:\n\n**Checkpoint Name**: `my_checkpoint_name`",
+            "source": "# Create Your Checkpoint\nUse this notebook to configure a new Checkpoint and add it to your project:\n\n**Checkpoint Name**: `my_checkpoint_name`",
             "metadata": {},
         }
     ]
@@ -192,7 +192,7 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Test and Store Your Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nNote that if it is valid, it will be automatically saved to your Checkpoint Store.\n\nThis `test_yaml_config()` function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters.""",
+            "source": """# Test and Store Your Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nNote that if it is valid, it will be automatically saved to your Checkpoint Store.\n\nThis `test_yaml_config()` function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters.""",
         },
         {
             "cell_type": "code",
