@@ -124,12 +124,12 @@ class RuntimeDataConnector(DataConnector):
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
-        self._validate_partition_identifiers(
-            partition_identifiers=batch_request.partition_request.get(
+        self._validate_batch_identifiers(
+            batch_identifiers=batch_request.partition_request.get(
                 "batch_identifiers"
             )
         )
-        partition_identifiers = batch_request.partition_request.get(
+        batch_identifiers = batch_request.partition_request.get(
             "batch_identifiers"
         )
 
@@ -143,7 +143,7 @@ class RuntimeDataConnector(DataConnector):
         )
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(
-            batch_request.data_asset_name, batch_definition_list, partition_identifiers
+            batch_request.data_asset_name, batch_definition_list, batch_identifiers
         )
         return batch_definition_list
 
@@ -151,9 +151,9 @@ class RuntimeDataConnector(DataConnector):
         self,
         data_asset_name: str,
         batch_definition_list: List,
-        partition_identifiers: PartitionDefinitionSubset,
+        batch_identifiers: PartitionDefinitionSubset,
     ):
-        data_reference = self._get_data_reference_name(partition_identifiers)
+        data_reference = self._get_data_reference_name(batch_identifiers)
 
         if data_asset_name not in self._data_references_cache:
             # add

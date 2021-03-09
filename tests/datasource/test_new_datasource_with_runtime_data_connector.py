@@ -154,7 +154,7 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     partition_request: dict
     partition_request = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "pipeline_stage_name": "core_processing",
             "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
@@ -184,7 +184,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     partition_request: dict
     partition_request = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "pipeline_stage_name": "core_processing",
             "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
@@ -240,7 +240,7 @@ def test_set_data_asset_name_for_runtime_data(
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     partition_request: dict
     partition_request = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "pipeline_stage_name": "core_processing",
             "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
@@ -281,7 +281,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "airflow_run_id": 1234567890,
         }
     }
@@ -356,7 +356,7 @@ def test_get_batch_definitions_and_get_batch_basics(
         "data_asset_name": data_asset_name,
         "batch_data": test_df,
         "partition_request": {
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "airflow_run_id": 1234567890,
             }
         },

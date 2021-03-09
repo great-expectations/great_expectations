@@ -235,7 +235,7 @@ def test_get_available_data_asset_names_updating_after_batch_request(basic_datas
     assert test_runtime_data_connector.get_available_data_asset_names() == []
 
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "airflow_run_id": 1234567890,
         }
     }
@@ -260,7 +260,7 @@ def test_get_available_data_asset_names_updating_after_batch_request(basic_datas
     ]
 
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "airflow_run_id": 1234567890,
         }
     }
@@ -298,7 +298,7 @@ def test_get_available_data_references_cache_updating_after_batch_request(
     assert test_runtime_data_connector.get_available_data_asset_names() == []
 
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "airflow_run_id": 1234567890,
         }
     }
@@ -335,7 +335,7 @@ def test_get_available_data_references_cache_updating_after_batch_request(
     # update with
     test_df_new: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "airflow_run_id": 987654321,
         }
     }
@@ -385,7 +385,7 @@ def test_get_available_data_references_cache_updating_after_batch_request(
         data={"col1": [9, 10], "col2": [11, 12]}
     )
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "airflow_run_id": 5555555,
         }
     }
@@ -526,7 +526,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
             data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
             partition_definition=PartitionDefinition(
-                partition_request["partition_identifiers"]
+                partition_request["batch_identifiers"]
             ),
         )
     ]
@@ -546,7 +546,7 @@ def test_get_batch_definition_list_from_batch_request_with_and_without_data_asse
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "airflow_run_id": 1234567890,
         }
     }
