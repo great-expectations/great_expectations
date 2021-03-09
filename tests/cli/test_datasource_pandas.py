@@ -1,6 +1,6 @@
 import os
+from unittest import mock
 
-import mock
 import nbformat
 from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
@@ -142,6 +142,41 @@ def test_cli_datasource_delete_on_project_with_one_datasource(
 
     stdout = result.output
     assert result.exit_code == 0
+    assert "Using v3 (Batch Request) API" in stdout
+    assert "Datasource deleted successfully." in stdout
+
+    # reload context from disk to see if the datasource was in fact deleted
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+    assert len(context.list_datasources()) == 0
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert "my_datasource" in [ds["name"] for ds in context.list_datasources()]
+    assert len(context.list_datasources()) == 1
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        "--v3-api --assume-yes datasource delete my_datasource",
+        catch_exceptions=False,
+    )
+
+    stdout = result.output
+    assert result.exit_code == 0
+
+    assert "Would you like to proceed? [Y/n]:" not in stdout
+    # This assertion is extra assurance since this test is too permissive if we change the confirmation message
+    assert "[Y/n]" not in stdout
+
     assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource deleted successfully." in stdout
 

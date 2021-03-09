@@ -169,6 +169,7 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
         f'Are you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is irreversible)?'
         not in stdout
     )
+    # This assertion is extra assurance since this test is too permissive if we change the confirmation message
     assert "[Y/n]" not in stdout
 
     assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
