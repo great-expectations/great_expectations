@@ -73,7 +73,7 @@ def datasource_new(ctx):
 @click.pass_context
 def delete_datasource(ctx, datasource):
     """Delete the datasource specified as an argument"""
-    context = ctx.obj.data_context
+    context: DataContext = ctx.obj.data_context
     if not ctx.obj.assume_yes:
         if not toolkit.confirm_proceed_or_exit(exit_on_no=False):
             cli_message(f"Datasource `{datasource}` was not deleted.")
