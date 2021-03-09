@@ -286,7 +286,7 @@ def test_get_available_data_asset_names_updating_after_batch_request(basic_datas
     ]
 
 
-def test_get_available_data_references_cache_updating_after_batch_request(
+def test_data_references_cache_updating_after_batch_request(
     basic_datasource,
 ):
     test_runtime_data_connector: RuntimeDataConnector = (
