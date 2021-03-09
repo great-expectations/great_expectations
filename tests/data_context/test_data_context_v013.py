@@ -224,7 +224,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
         data_asset_name="IN_MEMORY_DATA_ASSET",
         batch_data=test_df,
         partition_request={
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "airflow_run_id": 1234567890,
             }
         },

@@ -274,7 +274,7 @@ Additional notes
                     batch_data=df,
                     data_asset_name="IN_MEMORY_DATA_ASSET",
                     partition_request={
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
                             "some_other_key_maybe_run_id": "run 18"
                         }
