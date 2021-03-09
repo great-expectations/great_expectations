@@ -478,6 +478,10 @@ def test_assume_yes_using_full_flag_using_checkpoint_delete(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
+    """
+    What does this test and why?
+    All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
+    """
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -537,6 +541,10 @@ def test_assume_yes_using_yes_flag_using_checkpoint_delete(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
+    """
+    What does this test and why?
+    All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
+    """
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -596,6 +604,10 @@ def test_assume_yes_using_y_flag_using_checkpoint_delete(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
+    """
+    What does this test and why?
+    All versions of the --assume-yes flag (--assume-yes/--yes/-y) should behave the same.
+    """
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
