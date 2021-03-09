@@ -12,10 +12,7 @@ from great_expectations.core.batch_spec import (
     BatchSpec,
     RuntimeDataBatchSpec,
 )
-from great_expectations.core.id_dict import (
-    PartitionDefinition,
-    PartitionDefinitionSubset,
-)
+from great_expectations.core.id_dict import PartitionDefinition
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
@@ -43,10 +40,10 @@ class RuntimeDataConnector(DataConnector):
             execution_engine=execution_engine,
         )
         self._runtime_keys = runtime_keys
-        self._refresh_batch_definitions_cache()
+        self._refresh_data_references_cache()
 
-    def _refresh_batch_definitions_cache(self):
-        self._batch_definitions_cache = {}
+    def _refresh_data_references_cache(self):
+        self._data_references_cache = {}
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
@@ -135,12 +132,24 @@ class RuntimeDataConnector(DataConnector):
             batch_definition=batch_definition, batch_request=batch_request
         ):
             batch_definition_list = [batch_definition]
-            # <WILL> this currently stores the data_assets that have been seen.
-            # TODO: would be to store the BatchDefinitions that have been seen
-            self._data_references_cache[batch_request.data_asset_name] = [""]
+            self._update_data_references_cache(
+                batch_request.data_asset_name, batch_definition_list
+            )
         else:
             batch_definition_list = []
         return batch_definition_list
+
+    def _update_data_references_cache(
+        self, data_asset_name: str, batch_definition_list: List
+    ):
+        if data_asset_name not in self._data_references_cache:
+            # add
+            self._data_references_cache[data_asset_name] = batch_definition_list
+        else:
+            # or append
+            self._data_references_cache[data_asset_name].append(
+                batch_definition_list[0]
+            )
 
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: str, data_asset_name: str
@@ -156,22 +165,6 @@ class RuntimeDataConnector(DataConnector):
             )
         ]
         return batch_definition_list
-
-    def _map_batch_definition_to_data_reference(
-        self,
-        batch_definition: BatchDefinition,
-    ) -> str:
-        if not isinstance(batch_definition, BatchDefinition):
-            raise TypeError(
-                "batch_definition is not of an instance of type BatchDefinition"
-            )
-        partition_definition: PartitionDefinition = (
-            batch_definition.partition_definition
-        )
-        data_reference: str = self._get_data_reference_name(
-            partition_identifiers=partition_definition
-        )
-        return data_reference
 
     def _self_check_fetch_batch(
         self,
@@ -197,17 +190,6 @@ class RuntimeDataConnector(DataConnector):
         batch_spec = super().build_batch_spec(batch_definition=batch_definition)
         batch_spec["batch_data"] = batch_data
         return RuntimeDataBatchSpec(batch_spec)
-
-    @staticmethod
-    def _get_data_reference_name(
-        partition_identifiers: PartitionDefinitionSubset,
-    ) -> str:
-        if partition_identifiers is None:
-            partition_identifiers = PartitionDefinitionSubset({})
-        data_reference_name = DEFAULT_DELIMITER.join(
-            [str(value) for value in partition_identifiers.values()]
-        )
-        return data_reference_name
 
     def _validate_batch_request(self, batch_request: BatchRequestBase):
         super()._validate_batch_request(batch_request=batch_request)
