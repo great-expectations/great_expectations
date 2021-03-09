@@ -2,12 +2,12 @@ import datetime
 import logging
 import uuid
 import warnings
-from typing import Optional, Union
+from typing import Optional
 
-from great_expectations.datasource.util import get_or_create_spark_session
 from great_expectations.types import ClassConfig
 
 from ..core.batch import Batch, BatchMarkers
+from ..core.util import get_or_create_spark_application
 from ..dataset import SparkDFDataset
 from ..exceptions import BatchKwargsError
 from ..types.configurations import classConfigSchema
@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 try:
     from pyspark.sql import DataFrame, SparkSession
 except ImportError:
+    DataFrame = None
     SparkSession = None
     # TODO: review logging more detail here
     logger.debug(
@@ -137,23 +138,11 @@ class SparkDFDatasource(LegacyDatasource):
             **configuration_with_defaults
         )
 
-        spark_config: dict = configuration_with_defaults["spark_config"]
-        if len(spark_config) > 0:
-            try:
-                builder = SparkSession.builder
-                app_name: Optional[str] = spark_config.pop("spark.app.name", None)
-                if app_name:
-                    builder.appName(app_name)
-                for k, v in spark_config.items():
-                    builder.config(k, v)
-                self.spark = builder.getOrCreate()
-            except AttributeError:
-                logger.error(
-                    "Unable to load spark context; install optional spark dependency for support."
-                )
-                self.spark = None
-        else:
-            self.spark = get_or_create_spark_session()
+        if spark_config is None:
+            spark_config = {}
+        name: Optional[str] = spark_config.get("spark.app.name")
+        spark = get_or_create_spark_application(name=name, spark_config=spark_config)
+        self.spark = spark
 
         self._build_generators()
 

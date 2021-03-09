@@ -12,8 +12,8 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.exceptions import exceptions as ge_exceptions
-from great_expectations.execution_engine.util import get_or_create_spark_session
 
 from ..exceptions import (
     BatchKwargsError,
@@ -142,41 +142,25 @@ class SparkDFExecutionEngine(ExecutionEngine):
         "reader_options",
     }
 
-    def __init__(self, *args, persist=True, spark_config=None, spark=None, **kwargs):
+    def __init__(self, *args, persist=True, spark_config=None, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
         self._persist = persist
+
         if spark_config is None:
-            spark_config = dict()
+            spark_config = {}
+        name: Optional[str] = spark_config.get("spark.app.name")
+        spark: SparkSession = get_or_create_spark_application(
+            name=name, spark_config=spark_config
+        )
+        self.spark = spark
         self._spark_config = spark_config
-        if len(spark_config) > 0 and spark is not None:
-            raise ValueError(
-                "Please provide either spark_config or spark, but not both."
-            )
-        elif len(spark_config) > 0:
-            try:
-                builder = SparkSession.builder
-                app_name: Optional[str] = spark_config.pop("spark.app.name", None)
-                if app_name:
-                    builder.appName(app_name)
-                for k, v in spark_config.items():
-                    builder.config(k, v)
-                self.spark = builder.getOrCreate()
-            except AttributeError:
-                logger.error(
-                    "Unable to load spark context; install optional spark dependency for support."
-                )
-                self.spark = None
-        elif spark is not None:
-            self.spark = spark
-        else:
-            self.spark = get_or_create_spark_session()
 
         super().__init__(*args, **kwargs)
 
         self._config.update(
             {
                 "persist": self._persist,
-                "spark_config": self._spark_config,
+                "spark_config": spark_config,
             }
         )
 
@@ -516,7 +500,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 Returns:
                     A dictionary of the collected metrics over their respective domains
         """
-
         resolved_metrics = dict()
         aggregates: Dict[Tuple, dict] = dict()
         for (

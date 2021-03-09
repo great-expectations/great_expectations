@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import string
@@ -7,6 +8,7 @@ import pytest
 
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -26,6 +28,8 @@ from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 from tests.test_utils import connection_manager
+
+logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
@@ -74,15 +78,12 @@ def get_pandas_runtime_validator(context, df):
 
 
 def get_spark_runtime_validator(context, df):
-    from pyspark import SparkContext, SQLContext
-
-    sc = SparkContext.getOrCreate()
-    sqlCtx = SQLContext(sc)
-    sdf = sqlCtx.createDataFrame(df)
+    spark = get_or_create_spark_application()
+    df = spark.createDataFrame(df)
     batch_request = BatchRequest(
         datasource_name="my_spark_datasource",
         data_connector_name="my_data_connector",
-        batch_data=sdf,
+        batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
         partition_request={
             "partition_identifiers": {

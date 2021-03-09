@@ -7,7 +7,7 @@ import string
 import threading
 import uuid
 from functools import wraps
-from typing import List
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -22,6 +22,7 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.core.batch import Batch
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.store import CheckpointStore, StoreBackend
 from great_expectations.data_context.store.util import (
     build_checkpoint_store_using_store_backend,
@@ -38,22 +39,16 @@ from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemy
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.datasource.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v2,
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.util import (
-    get_or_create_spark_session as get_or_create_spark_session_v3,
-)
-from great_expectations.expectations.self_check_util import (
-    build_spark_validator_with_data,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.validator.validator import Validator
@@ -551,7 +546,6 @@ def get_dataset(
 
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
-        from pyspark.sql import SparkSession
 
         SPARK_TYPES = {
             "StringType": sparktypes.StringType,
@@ -565,7 +559,7 @@ def get_dataset(
             "DataType": sparktypes.DataType,
             "NullType": sparktypes.NullType,
         }
-        spark = get_or_create_spark_session_v2()
+        spark = get_or_create_spark_application()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -726,7 +720,7 @@ def get_test_validator_with_data(
             "NullType": sparktypes.NullType,
         }
 
-        spark = get_or_create_spark_session_v3()
+        spark = get_or_create_spark_application()
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -816,10 +810,54 @@ def get_test_validator_with_data(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return build_spark_validator_with_data(df=spark_df)
+        return build_spark_validator_with_data(df=spark_df, spark=spark)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
+
+
+def build_spark_validator_with_data(df, spark):
+    if isinstance(df, pd.DataFrame):
+        df = spark.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in df.to_records(index=False)
+            ],
+            df.columns.tolist(),
+        )
+    batch = Batch(data=df)
+    conf: List[tuple] = spark.sparkContext.getConf().getAll()
+    spark_config: Dict[str, str] = dict(conf)
+    batch_data_dict: dict = {batch.id: df}
+    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+        spark_config=spark_config, batch_data_dict=batch_data_dict
+    )
+    # return Validator(execution_engine=SparkDFExecutionEngine(spark_config=spark.sparkContext.getConf().getAll()), batches=(batch,))
+    return Validator(execution_engine=execution_engine, batches=(batch,))
+
+
+# Builds a Spark Execution Engine
+def build_spark_engine(spark, df, batch_id):
+    df = spark.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in df.to_records(index=False)
+        ],
+        df.columns.tolist(),
+    )
+    conf: List[tuple] = spark.sparkContext.getConf().getAll()
+    spark_config: Dict[str, str] = dict(conf)
+    batch_data_dict: dict = {batch_id: df}
+    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+        spark_config=spark_config, batch_data_dict=batch_data_dict
+    )
+    return execution_engine
 
 
 def _build_sa_engine(df, sa):
