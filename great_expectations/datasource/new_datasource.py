@@ -294,6 +294,12 @@ class BaseDatasource:
                 """
             )
 
+        if not (batch_request.data_connector_name in self.data_connectors.keys()):
+            raise ValueError(
+                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" is not configured for DataSource: "{self.name}".
+                    """
+            )
+
     @property
     def name(self) -> str:
         """
