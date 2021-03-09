@@ -1,10 +1,25 @@
+import logging
 from typing import Dict, List
 
-from pyspark import SparkContext
-from pyspark.sql import SparkSession
+logger = logging.getLogger(__name__)
 
-from great_expectations.datasource import SparkDFDatasource
-from great_expectations.execution_engine import SparkDFExecutionEngine
+try:
+    import pyspark
+    from pyspark import SparkContext
+    from pyspark.sql import SparkSession
+
+    from great_expectations.datasource import SparkDFDatasource
+    from great_expectations.execution_engine import SparkDFExecutionEngine
+except ImportError:
+    pyspark = None
+    SparkContext = None
+    SparkSession = None
+    SparkDFDatasource = None
+    SparkDFExecutionEngine = None
+    # TODO: review logging more detail here
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes."
+    )
 
 
 def test_spark_config_datasource(spark_session_v012):

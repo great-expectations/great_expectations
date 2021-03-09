@@ -2,7 +2,6 @@
 # The methods were pretty hastily copied from test_utils and conftest. It is very possible
 # that some are not even needed. A cleanup pass is required.
 
-
 import copy
 import locale
 import os
