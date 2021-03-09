@@ -153,18 +153,16 @@ class RuntimeDataConnector(DataConnector):
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
-        partition_identifiers: Optional[dict] = None
+        batch_identifiers: Optional[dict] = None
         if batch_request.partition_request:
-            self._validate_partition_identifiers(
-                partition_identifiers=batch_request.partition_request.get(
-                    "partition_identifiers"
+            self._validate_batch_identifiers(
+                batch_identifiers=batch_request.partition_request.get(
+                    "batch_identifiers"
                 )
             )
-            partition_identifiers = batch_request.partition_request.get(
-                "partition_identifiers"
-            )
-        if not partition_identifiers:
-            partition_identifiers = {}
+            batch_identifiers = batch_request.partition_request.get("batch_identifiers")
+        if not batch_identifiers:
+            batch_identifiers = {}
 
         batch_definition_list: List[BatchDefinition]
 
@@ -172,7 +170,7 @@ class RuntimeDataConnector(DataConnector):
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
             data_asset_name=DEFAULT_DATA_ASSET_NAME,
-            partition_definition=PartitionDefinition(partition_identifiers),
+            partition_definition=PartitionDefinition(batch_identifiers),
         )
 
         if batch_definition_matches_batch_request(
@@ -210,7 +208,7 @@ class RuntimeDataConnector(DataConnector):
             batch_definition.partition_definition
         )
         data_reference: str = self._get_data_reference_name(
-            partition_identifiers=partition_definition
+            batch_identifiers=partition_definition
         )
         return data_reference
 
@@ -243,12 +241,12 @@ class RuntimeDataConnector(DataConnector):
 
     @staticmethod
     def _get_data_reference_name(
-        partition_identifiers: PartitionDefinitionSubset,
+        batch_identifiers: PartitionDefinitionSubset,
     ) -> str:
-        if partition_identifiers is None:
-            partition_identifiers = PartitionDefinitionSubset({})
+        if batch_identifiers is None:
+            batch_identifiers = PartitionDefinitionSubset({})
         data_reference_name = DEFAULT_DELIMITER.join(
-            [str(value) for value in partition_identifiers.values()]
+            [str(value) for value in batch_identifiers.values()]
         )
         return data_reference_name
 
@@ -261,13 +259,13 @@ class RuntimeDataConnector(DataConnector):
                 batch_request.batch_data is None
                 and (
                     batch_request.partition_request is None
-                    or not batch_request.partition_request.get("partition_identifiers")
+                    or not batch_request.partition_request.get("batch_identifiers")
                 )
             )
             or (
                 batch_request.batch_data is not None
                 and batch_request.partition_request
-                and batch_request.partition_request.get("partition_identifiers")
+                and batch_request.partition_request.get("batch_identifiers")
             )
         ):
             raise ge_exceptions.DataConnectorError(
@@ -276,11 +274,11 @@ class RuntimeDataConnector(DataConnector):
                 """
             )
 
-    def _validate_partition_identifiers(self, partition_identifiers: dict):
-        if partition_identifiers is None:
-            partition_identifiers = {}
+    def _validate_batch_identifiers(self, batch_identifiers: dict):
+        if batch_identifiers is None:
+            batch_identifiers = {}
         self._validate_runtime_keys_configuration(
-            runtime_keys=list(partition_identifiers.keys())
+            runtime_keys=list(batch_identifiers.keys())
         )
 
     def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):

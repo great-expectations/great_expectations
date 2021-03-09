@@ -1155,7 +1155,7 @@ class BaseDataContext:
         batch_request: Optional[BatchRequest] = None,
         batch_data: Optional[Any] = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        partition_identifiers: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
@@ -1176,7 +1176,7 @@ class BaseDataContext:
             batch_request
             batch_data
             partition_request
-            partition_identifiers
+            batch_identifiers
 
             limit
             index
@@ -1208,7 +1208,7 @@ class BaseDataContext:
             batch_request=batch_request,
             batch_data=batch_data,
             partition_request=partition_request,
-            partition_identifiers=partition_identifiers,
+            batch_identifiers=batch_identifiers,
             limit=limit,
             index=index,
             custom_filter_function=custom_filter_function,
@@ -1434,7 +1434,7 @@ class BaseDataContext:
         batch_request: Optional[BatchRequest] = None,
         batch_data: Optional[Any] = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        partition_identifiers: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
@@ -1458,7 +1458,7 @@ class BaseDataContext:
             batch_request
             batch_data
             partition_request
-            partition_identifiers
+            batch_identifiers
 
             limit
             index
@@ -1501,21 +1501,21 @@ class BaseDataContext:
             )
         else:
             if partition_request is None:
-                if partition_identifiers is None:
-                    partition_identifiers = kwargs
+                if batch_identifiers is None:
+                    batch_identifiers = kwargs
                 else:
                     # Raise a warning if kwargs exist
                     pass
 
                 partition_request_params: dict = {
-                    "partition_identifiers": partition_identifiers,
+                    "batch_identifiers": batch_identifiers,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
                 partition_request = PartitionRequest(partition_request_params)
             else:
-                # Raise a warning if partition_identifiers or kwargs exist
+                # Raise a warning if batch_identifiers or kwargs exist
                 partition_request = PartitionRequest(partition_request)
 
             if batch_spec_passthrough is None:
@@ -1556,7 +1556,7 @@ class BaseDataContext:
         batch_request: Optional[BatchRequest] = None,
         batch_data: Optional[Any] = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        partition_identifiers: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
@@ -1606,7 +1606,7 @@ class BaseDataContext:
                 batch_request=batch_request,
                 batch_data=batch_data,
                 partition_request=partition_request,
-                partition_identifiers=partition_identifiers,
+                batch_identifiers=batch_identifiers,
                 limit=limit,
                 index=index,
                 custom_filter_function=custom_filter_function,

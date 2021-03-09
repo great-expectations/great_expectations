@@ -212,7 +212,7 @@ def test__batch_definition_matches_batch_request():
             data_connector_name="a",
             data_asset_name="aaa",
             partition_request={
-                "partition_identifiers": {"id": "B"},
+                "batch_identifiers": {"id": "B"},
             },
         ),
     )
@@ -221,7 +221,7 @@ def test__batch_definition_matches_batch_request():
         batch_definition=A,
         batch_request=BatchRequestBase(
             partition_request={
-                "partition_identifiers": {"id": "A"},
+                "batch_identifiers": {"id": "A"},
             }
         ),
     )
