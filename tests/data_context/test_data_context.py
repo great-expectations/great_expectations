@@ -1958,7 +1958,7 @@ def test_get_batch_with_query_as_batch_data_using_runtime_data_connector(
             batch_data="SELECT * FROM table_partitioned_by_date_column__A",
             partition_request=PartitionRequest(
                 **{
-                    "partition_identifiers": {
+                    "batch_identifiers": {
                         "pipeline_stage_name": "core_processing",
                         "airflow_run_id": 1234567890,
                     },
@@ -1980,7 +1980,7 @@ def test_get_batch_with_query_as_batch_data_using_runtime_data_connector(
         data_asset_name="IN_MEMORY_DATA_ASSET",
         batch_data="SELECT * FROM table_partitioned_by_date_column__A",
         partition_request={
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
             },
@@ -2014,7 +2014,7 @@ def test_get_validator_with_query_as_batch_data_using_runtime_data_connector(
             batch_data="SELECT * FROM table_partitioned_by_date_column__A",
             partition_request=PartitionRequest(
                 **{
-                    "partition_identifiers": {
+                    "batch_identifiers": {
                         "pipeline_stage_name": "core_processing",
                         "airflow_run_id": 1234567890,
                     },
@@ -2033,7 +2033,7 @@ def test_get_validator_with_query_as_batch_data_using_runtime_data_connector(
         batch_data="SELECT * FROM table_partitioned_by_date_column__A",
         expectation_suite=my_expectation_suite,
         partition_request={
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
             },

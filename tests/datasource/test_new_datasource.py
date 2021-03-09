@@ -504,7 +504,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
         "data_asset_name": data_asset_name,
         "batch_data": "SELECT * FROM my_table",
         "partition_request": {
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
             },
@@ -535,7 +535,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
         "data_asset_name": data_asset_name,
         "batch_data": "SELECT * FROM my_table",
         "partition_request": {
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
             },
