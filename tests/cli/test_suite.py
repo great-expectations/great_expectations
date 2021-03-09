@@ -1213,11 +1213,6 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     )
 
 
-# @pytest.mark.xfail(
-#     reason="This command is not yet implemented for the modern API",
-#     run=True,
-#     strict=True,
-# )
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
