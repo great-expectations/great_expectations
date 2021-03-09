@@ -175,7 +175,7 @@ def test_graph_validate(basic_datasource):
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "pipeline_stage_name": 0,
                             "airflow_run_id": 0,
                             "custom_key_0": 0,
@@ -230,7 +230,7 @@ def test_graph_validate_with_bad_config(basic_datasource):
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "pipeline_stage_name": 0,
                             "airflow_run_id": 0,
                             "custom_key_0": 0,
@@ -271,7 +271,7 @@ def test_graph_validate_with_runtime_config(basic_datasource):
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "pipeline_stage_name": 0,
                             "airflow_run_id": 0,
                             "custom_key_0": 0,
@@ -330,7 +330,7 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "pipeline_stage_name": 0,
                             "airflow_run_id": 0,
                             "custom_key_0": 0,
@@ -355,7 +355,7 @@ def test_validator_default_expectation_args__sql(
         datasource_name="my_sqlite_db",
         data_connector_name="daily",
         data_asset_name="table_partitioned_by_date_column__A",
-        partition_identifiers={"date": "2020-01-15"},
+        batch_identifiers={"date": "2020-01-15"},
         create_expectation_suite_with_name="test_suite",
     )
 
@@ -367,7 +367,7 @@ def test_validator_default_expectation_args__sql(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            partition_identifiers={"date": "2020-01-15"},
+            batch_identifiers={"date": "2020-01-15"},
             expectation_suite_name=1,
         )
 
@@ -377,6 +377,6 @@ def test_validator_default_expectation_args__sql(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            partition_identifiers={"date": "2020-01-15"},
+            batch_identifiers={"date": "2020-01-15"},
             expectation_suite="I_am_not_an_expectation_suite",
         )

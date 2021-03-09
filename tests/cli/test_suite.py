@@ -21,7 +21,7 @@ def test_suite_help_output(caplog):
     assert (
         """Commands:
   delete    Delete an expectation suite from the expectation store.
-  demo      This command is not supported in the new API.
+  demo      This command is not supported in the v3 (Batch Request) API.
   edit      Generate a Jupyter notebook for editing an existing Expectation...
   list      Lists available Expectation Suites.
   new       Create a new empty Expectation Suite.
@@ -39,7 +39,9 @@ def test_suite_demo_deprecation_message(caplog, monkeypatch, empty_data_context)
     monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
     result = runner.invoke(cli, ["--v3-api", "suite", "demo"], catch_exceptions=False)
     assert result.exit_code == 0
-    assert "This command is not supported in the new API." in result.stdout
+    assert (
+        "This command is not supported in the v3 (Batch Request) API." in result.stdout
+    )
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,

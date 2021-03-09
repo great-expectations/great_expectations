@@ -159,7 +159,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                     data_asset_name="insert_your_data_asset_name_here",
                     batch_data=insert_your_dataframe_here,
                     partition_request={
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
                             "some_other_key_maybe_run_id": "run 18"
                         }
