@@ -147,6 +147,64 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    empty_context_with_checkpoint_v1_stats_enabled,
+):
+    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    checkpoint_name: str = "my_v1_checkpoint"
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api --assume-yes checkpoint delete {checkpoint_name}",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 0
+
+    assert (
+        f'Are you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is irreversible)?'
+        not in stdout
+    )
+    assert "[Y/n]" not in stdout
+
+    assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        caplog,
+        result,
+    )
+
+    result = runner.invoke(
+        cli,
+        f"--v3-api checkpoint list",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "No Checkpoints found." in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     mock_emit,
     caplog,
