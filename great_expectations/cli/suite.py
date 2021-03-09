@@ -237,12 +237,12 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 @suite.command(name="demo")
 @click.pass_context
 def suite_demo(ctx):
-    """This command is not supported in the new API."""
+    """This command is not supported in the v3 (Batch Request) API."""
     context = ctx.obj.data_context
     usage_event = "cli.suite.demo"
     toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
     cli_message(
-        "This command is not supported in the new API. Please use `suite new` instead."
+        "This command is not supported in the v3 (Batch Request) API. Please use `suite new` instead."
     )
 
 
