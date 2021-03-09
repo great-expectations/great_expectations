@@ -22,7 +22,6 @@ from great_expectations.cli.cli_messages import (
     SLACK_SETUP_PROMPT,
     SLACK_WEBHOOK_PROMPT,
 )
-from great_expectations.cli.datasource import add_datasource as add_datasource_impl
 from great_expectations.cli.pretty_printing import (
     cli_message,
     display_not_implemented_message_and_exit,

@@ -1,11 +1,12 @@
 import os
 
-import pytest
+import mock
+import nbformat
 from click.testing import CliRunner
+from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -46,7 +47,7 @@ def test_cli_datasource_list_on_project_with_one_datasource(
         catch_exceptions=False,
     )
 
-    expected_output = f"""\x1b[32mUsing v3 (Batch Request) API[0m[0m
+    expected_output = f"""Using v3 (Batch Request) API\x1b[0m
 1 Datasource found:[0m
 [0m
  - [36mname:[0m my_datasource[0m
@@ -57,22 +58,20 @@ def test_cli_datasource_list_on_project_with_one_datasource(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
-def test_cli_datasorce_new(caplog, monkeypatch, empty_data_context, filesystem_csv_2):
-    project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_cli_datasource_new(
+    mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
+):
+    context = empty_data_context
+    root_dir = context.root_directory
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    monkeypatch.chdir(os.path.dirname(root_dir))
     result = runner.invoke(
         cli,
         "--v3-api datasource new",
-        input="1\n1\n%s\nmynewsource\n" % str(filesystem_csv_2),
+        input=f"1\n1\n{filesystem_csv_2}\nmynewsource\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -80,16 +79,46 @@ def test_cli_datasorce_new(caplog, monkeypatch, empty_data_context, filesystem_c
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "What are you processing your files with?" in stdout
     assert "Give your new Datasource a short name." in stdout
-    assert "A new datasource 'mynewsource' was added to your project." in stdout
 
     assert result.exit_code == 0
 
-    config_path = os.path.join(project_root_dir, DataContext.GE_YML)
-    config = yaml.load(open(config_path))
-    datasources = config["datasources"]
-    assert "mynewsource" in datasources.keys()
-    data_source_class = datasources["mynewsource"]["data_asset_type"]["class_name"]
-    assert data_source_class == "PandasDataset"
+    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    expected_notebook = os.path.join(
+        uncommitted_dir, "datasource_new_mynewsource.ipynb"
+    )
+    assert os.path.isfile(expected_notebook)
+    mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
+
+    # Run notebook
+    with open(expected_notebook) as f:
+        nb = nbformat.read(f, as_version=4)
+    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
+
+    del context
+    context = DataContext(root_dir)
+    assert context.list_datasources() == [
+        {
+            "name": "mynewsource",
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+            },
+            "data_connectors": {
+                "mynewsource_example_data_connector": {
+                    "default_regex": {
+                        "group_names": "data_asset_name",
+                        "pattern": "(.*)",
+                    },
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "base_directory": os.path.join(root_dir, filesystem_csv_2),
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                }
+            },
+        }
+    ]
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 

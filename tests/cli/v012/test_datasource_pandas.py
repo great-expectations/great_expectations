@@ -84,7 +84,7 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
+def test_cli_datasource_new(caplog, empty_data_context, filesystem_csv_2):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     assert context.list_datasources() == []

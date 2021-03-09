@@ -1,12 +1,13 @@
 import os
 from collections import OrderedDict
 
-import pytest
+import mock
+import nbformat
 from click.testing import CliRunner
+from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -40,7 +41,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkey
         catch_exceptions=False,
     )
     expected_output = """\
-\x1b[32mUsing v3 (Batch Request) API\x1b[0m\x1b[0m
+Using v3 (Batch Request) API\x1b[0m
 1 Datasource found:[0m
 [0m
  - [36mname:[0m wow_a_datasource[0m
@@ -146,50 +147,53 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     return context
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
-def test_cli_datasorce_new_connection_string(
-    empty_data_context, empty_sqlite_db, caplog, monkeypatch
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_cli_datasource_new_connection_string(
+    mock_subprocess, empty_data_context, empty_sqlite_db, caplog, monkeypatch
 ):
-    project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    root_dir = empty_data_context.root_directory
+    context = DataContext(root_dir)
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        [
-            "--v3-api",
-            "datasource",
-            "new",
-        ],
-        input=f"2\n6\nmynewsource\n{empty_sqlite_db.url}\n\n",
+        "--v3-api datasource new",
+        input=f"2\n6\nwarehouse\n{empty_sqlite_db.url}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "Give your new Datasource a short name." in stdout
-    assert (
-        "Next, we will configure database credentials and store them in the `mynewsource` section"
-        in stdout
-    )
     assert "What is the url/connection string for the sqlalchemy connection?" in stdout
-    assert "Attempting to connect to your database. This may take a moment" in stdout
-    assert "Great Expectations connected to your database" in stdout
-    assert "A new datasource 'mynewsource' was added to your project." in stdout
 
     assert result.exit_code == 0
 
-    config_path = os.path.join(project_root_dir, DataContext.GE_YML)
-    config = yaml.load(open(config_path))
-    datasources = config["datasources"]
-    assert "mynewsource" in datasources.keys()
-    data_source_class = datasources["mynewsource"]["data_asset_type"]["class_name"]
-    assert data_source_class == "SqlAlchemyDataset"
+    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new_warehouse.ipynb")
+    assert os.path.isfile(expected_notebook)
+    mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
+
+    # Run notebook
+    with open(expected_notebook) as f:
+        nb = nbformat.read(f, as_version=4)
+    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
+
+    del context
+    context = DataContext(root_dir)
+    assert context.list_datasources() == [
+        {
+            "class_name": "SimpleSqlalchemyDatasource",
+            "connection_string": "sqlite://",
+            "introspection": {
+                "whole_table": {"data_asset_name_suffix": "__whole_table"}
+            },
+            "module_name": "great_expectations.datasource",
+            "name": "warehouse",
+        }
+    ]
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
