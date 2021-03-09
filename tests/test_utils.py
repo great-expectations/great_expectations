@@ -831,11 +831,10 @@ def build_spark_validator_with_data(df, spark):
     batch = Batch(data=df)
     conf: List[tuple] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
-    batch_data_dict: dict = {batch.id: df}
     execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
-        spark_config=spark_config, batch_data_dict=batch_data_dict
+        spark_config=spark_config
     )
-    # return Validator(execution_engine=SparkDFExecutionEngine(spark_config=spark.sparkContext.getConf().getAll()), batches=(batch,))
+    execution_engine.load_batch_data(batch_id=batch.id, batch_data=df)
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
@@ -853,10 +852,10 @@ def build_spark_engine(spark, df, batch_id):
     )
     conf: List[tuple] = spark.sparkContext.getConf().getAll()
     spark_config: Dict[str, str] = dict(conf)
-    batch_data_dict: dict = {batch_id: df}
     execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
-        spark_config=spark_config, batch_data_dict=batch_data_dict
+        spark_config=spark_config
     )
+    execution_engine.load_batch_data(batch_id=batch_id, batch_data=df)
     return execution_engine
 
 
