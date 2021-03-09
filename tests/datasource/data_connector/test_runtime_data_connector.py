@@ -429,6 +429,8 @@ def test_get_available_data_references_cache_updating_after_batch_request(
         "my_data_asset_2",
     ]
 
+    assert test_runtime_data_connector.get_data_reference_list_count() == 3
+
 
 def test_get_batch_definition_list_from_batch_request_length_one(
     basic_datasource,

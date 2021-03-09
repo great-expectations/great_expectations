@@ -60,8 +60,10 @@ class RuntimeDataConnector(DataConnector):
         return self._data_references_cache.get(data_asset_name, [""])
 
     def get_data_reference_list_count(self) -> int:
-        """returns length of cache which can be 0 or 1"""
-        return len(self._data_references_cache)
+        sums = 0
+        for key in self._data_references_cache.keys():
+            sums += len(self._data_references_cache[key])
+        return sums
 
     def get_unmatched_data_references(self) -> List[str]:
         """returns empty list for runtime_data_connector"""
@@ -154,6 +156,7 @@ class RuntimeDataConnector(DataConnector):
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: str, data_asset_name: str
     ) -> Optional[List[BatchDefinition]]:
+        """Instantiate BatchDefinition directly. No need to map data_reference"""
         if data_asset_name is None:
             return []
         batch_definition_list = [
