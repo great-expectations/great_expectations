@@ -318,16 +318,18 @@ def test_get_available_data_references_cache_updating_after_batch_request(
     )
 
     assert test_runtime_data_connector._data_references_cache == {
-        "my_data_asset_1": [
-            BatchDefinition(
-                datasource_name="my_datasource",
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition(
-                    {"airflow_run_id": 1234567890}
-                ),
-            )
-        ]
+        "my_data_asset_1": {
+            "1234567890": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 1234567890}
+                    ),
+                )
+            ],
+        }
     }
 
     # update with
@@ -354,22 +356,28 @@ def test_get_available_data_references_cache_updating_after_batch_request(
     )
 
     assert test_runtime_data_connector._data_references_cache == {
-        "my_data_asset_1": [
-            BatchDefinition(
-                datasource_name="my_datasource",
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition(
-                    {"airflow_run_id": 1234567890}
-                ),
-            ),
-            BatchDefinition(
-                datasource_name="my_datasource",
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition({"airflow_run_id": 987654321}),
-            ),
-        ]
+        "my_data_asset_1": {
+            "1234567890": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 1234567890}
+                    ),
+                )
+            ],
+            "987654321": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 987654321}
+                    ),
+                )
+            ],
+        },
     }
 
     # new data_asset_name
@@ -398,30 +406,40 @@ def test_get_available_data_references_cache_updating_after_batch_request(
     )
 
     assert test_runtime_data_connector._data_references_cache == {
-        "my_data_asset_1": [
-            BatchDefinition(
-                datasource_name="my_datasource",
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition(
-                    {"airflow_run_id": 1234567890}
-                ),
-            ),
-            BatchDefinition(
-                datasource_name="my_datasource",
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition({"airflow_run_id": 987654321}),
-            ),
-        ],
-        "my_data_asset_2": [
-            BatchDefinition(
-                datasource_name="my_datasource",
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset_2",
-                partition_definition=PartitionDefinition({"airflow_run_id": 5555555}),
-            ),
-        ],
+        "my_data_asset_1": {
+            "1234567890": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 1234567890}
+                    ),
+                )
+            ],
+            "987654321": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 987654321}
+                    ),
+                )
+            ],
+        },
+        "my_data_asset_2": {
+            "5555555": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_2",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 5555555}
+                    ),
+                )
+            ]
+        },
     }
 
     assert test_runtime_data_connector.get_available_data_asset_names() == [
@@ -573,7 +591,7 @@ def test__get_data_reference_list(basic_datasource):
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    expected_data_reference_list: List[str] = [""]
+    expected_data_reference_list: List[str] = []
 
     # noinspection PyProtectedMember
     data_reference_list: List[
