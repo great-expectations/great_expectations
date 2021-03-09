@@ -77,7 +77,7 @@ data_connectors:
 
 
 @pytest.fixture
-def basic_spark_datasource(tmp_path_factory):
+def basic_spark_datasource(tmp_path_factory, spark_session):
     base_directory: str = str(
         tmp_path_factory.mktemp("basic_spark_datasource_v013_filesystem_data_connector")
     )
