@@ -20,15 +20,17 @@ TOP_LEVEL_HELP = """Usage: great_expectations [OPTIONS] COMMAND [ARGS]...
   validation-operator. Most nouns accept the following verbs: new, list, edit
 
 Options:
-  --version            Show the version and exit.
-  --v2-api / --v3-api  Default to v2 (Batch Kwargs) API. Use --v3-api for v3
-                       (Batch Request) API
+  --version                Show the version and exit.
+  --v2-api / --v3-api      Default to v2 (Batch Kwargs) API. Use --v3-api for v3
+                           (Batch Request) API
 
-  -v, --verbose        Set great_expectations to use verbose output.
-  -c, --config TEXT    Path to great_expectations configuration file location
-                       (great_expectations.yml). Inferred if not provided.
+  -v, --verbose            Set great_expectations to use verbose output.
+  -c, --config TEXT        Path to great_expectations configuration file
+                           location (great_expectations.yml). Inferred if not
+                           provided.
 
-  --help               Show this message and exit.
+  -y, --assume-yes, --yes  Assume "yes" for all prompts.
+  --help                   Show this message and exit.
 
 Commands:
   checkpoint  Checkpoint operations

@@ -1213,6 +1213,69 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_delete_with_one_suite_assume_yes_flag(
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
+):
+    project_dir = empty_data_context_stats_enabled.root_directory
+    context = DataContext(project_dir)
+    suite = context.create_expectation_suite("a.warning")
+    context.save_expectation_suite(suite)
+    mock_emit.reset_mock()
+
+    suite_dir = os.path.join(project_dir, "expectations", "a")
+    suite_path = os.path.join(suite_dir, "warning.json")
+    assert os.path.isfile(suite_path)
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    mock_emit.reset_mock()
+    result = runner.invoke(
+        cli,
+        f"--v3-api --assume-yes suite delete a.warning",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert "Deleted the expectation suite named: a.warning" in result.output
+
+    assert "Would you like to proceed? [Y/n]:" not in result.output
+    # This assertion is extra assurance since this test is too permissive if we change the confirmation message
+    assert "[Y/n]" not in result.output
+
+    # assert not os.path.isdir(suite_dir)
+    assert not os.path.isfile(suite_path)
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.delete",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+    result = runner.invoke(
+        cli,
+        f"--v3-api suite list",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "No Expectation Suites found" in stdout
+
+
 @pytest.mark.xfail(
     reason="This command is not yet implemented for the modern API",
     run=True,
