@@ -363,7 +363,6 @@ def delete_checkpoint(
     context: DataContext,
     checkpoint_name: str,
     usage_event: str,
-    assume_yes: bool,
 ):
     """Delete a Checkpoint or raise helpful errors."""
     validate_checkpoint(
@@ -377,11 +376,10 @@ irreversible)?"
     continuation_message: str = (
         f'The Checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
     )
-    if not assume_yes:
-        confirm_proceed_or_exit(
-            confirm_prompt=confirm_prompt,
-            continuation_message=continuation_message,
-        )
+    confirm_proceed_or_exit(
+        confirm_prompt=confirm_prompt,
+        continuation_message=continuation_message,
+    )
     context.delete_checkpoint(name=checkpoint_name)
 
 
