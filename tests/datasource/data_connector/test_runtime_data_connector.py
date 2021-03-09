@@ -82,8 +82,8 @@ def test_error_checking(basic_datasource):
             )
         )
 
-    # Test for illegal nullity of partition_request["partition_identifiers"] when batch_data is specified
-    partition_request: dict = {"partition_identifiers": None}
+    # Test for illegal nullity of partition_request["batch_identifiers"] when batch_data is specified
+    partition_request: dict = {"batch_identifiers": None}
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[
@@ -98,8 +98,8 @@ def test_error_checking(basic_datasource):
             )
         )
 
-    # Test for illegal falsiness of partition_request["partition_identifiers"] when batch_data is specified
-    partition_request: dict = {"partition_identifiers": {}}
+    # Test for illegal falsiness of partition_request["batch_identifiers"] when batch_data is specified
+    partition_request: dict = {"batch_identifiers": {}}
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[
@@ -123,7 +123,7 @@ def test_partition_request_and_runtime_keys_success_all_keys_present(
     partition_request: dict
 
     partition_request = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "pipeline_stage_name": "core_processing",
             "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
@@ -162,7 +162,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
     partition_request: dict
 
     partition_request = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "pipeline_stage_name": "core_processing",
             "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
@@ -174,7 +174,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
+    # Insure that keys in partition_request["batch_identifiers"] that are not among runtime_keys declared in configuration
     # are not accepted.  In this test, all legal keys plus a single illegal key are present.
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
@@ -194,13 +194,13 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
             batch_request=batch_request
         )
 
-    partition_request = {"partition_identifiers": {"unknown_key": "some_value"}}
+    partition_request = {"batch_identifiers": {"unknown_key": "some_value"}}
 
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    # Insure that keys in partition_request["partition_identifiers"] that are not among runtime_keys declared in configuration
+    # Insure that keys in partition_request["batch_identifiers"] that are not among runtime_keys declared in configuration
     # are not accepted.  In this test, a single illegal key is present.
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
@@ -241,7 +241,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "airflow_run_id": 1234567890,
         }
     }
@@ -266,7 +266,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
             data_connector_name="test_runtime_data_connector",
             data_asset_name="IN_MEMORY_DATA_ASSET",
             partition_definition=PartitionDefinition(
-                partition_request["partition_identifiers"]
+                partition_request["batch_identifiers"]
             ),
         )
     ]
@@ -286,7 +286,7 @@ def test_get_batch_definition_list_from_batch_request_length_zero(
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "airflow_run_id": 1234567890,
         }
     }
@@ -333,7 +333,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
     basic_datasource,
 ):
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "custom_key_0": "staging",
             "airflow_run_id": 1234567890,
         }
@@ -352,7 +352,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
             data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
             partition_definition=PartitionDefinition(
-                partition_request["partition_identifiers"]
+                partition_request["batch_identifiers"]
             ),
         )
     )
@@ -362,7 +362,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
 
 def test__build_batch_spec(basic_datasource):
     partition_request: dict = {
-        "partition_identifiers": {
+        "batch_identifiers": {
             "custom_key_0": "staging",
             "airflow_run_id": 1234567890,
         }
@@ -379,7 +379,7 @@ def test__build_batch_spec(basic_datasource):
             data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
             partition_definition=PartitionDefinition(
-                partition_request["partition_identifiers"]
+                partition_request["batch_identifiers"]
             ),
         ),
         batch_data=pd.DataFrame({"x": range(10)}),
