@@ -1,4 +1,5 @@
 import os
+from typing import List
 from unittest import mock
 
 from click.testing import CliRunner, Result
@@ -641,3 +642,59 @@ def test_assume_yes_using_y_flag_using_checkpoint_delete(
     stdout = result.stdout
     assert result.exit_code == 0
     assert "No Checkpoints found." in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+):
+    """
+    What does this test and why?
+    The --assume-yes flag should not cause issues when run with commands that do not implement any logic based on it.
+    """
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api --assume-yes checkpoint list",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+    assert result.exit_code == 0
+    assert "Found 8 Checkpoints." in stdout
+    checkpoint_names_list: List[str] = [
+        "my_simple_checkpoint_with_slack_and_notify_with_all",
+        "my_nested_checkpoint_template_1",
+        "my_nested_checkpoint_template_3",
+        "my_nested_checkpoint_template_2",
+        "my_simple_checkpoint_with_site_names",
+        "my_minimal_simple_checkpoint",
+        "my_simple_checkpoint_with_slack",
+        "my_simple_template_checkpoint",
+    ]
+    assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        caplog,
+        result,
+    )
