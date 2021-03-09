@@ -784,36 +784,42 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         )
 
     def get_column_median(self, column):
-        # AWS Athena does not support offset
+        # AWS Athena and presto have an special function that can be used to retrieve the median
         if self.sql_engine_dialect.name.lower() == "awsathena":
-            raise NotImplementedError("AWS Athena does not support OFFSET.")
-        nonnull_count = self.get_column_nonnull_count(column)
-        element_values = self.engine.execute(
-            sa.select([sa.column(column)])
-            .order_by(sa.column(column))
-            .where(sa.column(column) != None)
-            .offset(max(nonnull_count // 2 - 1, 0))
-            .limit(2)
-            .select_from(self._table)
-        )
-
-        column_values = list(element_values.fetchall())
-
-        if len(column_values) == 0:
-            column_median = None
-        elif nonnull_count % 2 == 0:
-            # An even number of column values: take the average of the two center values
-            column_median = (
-                float(
-                    column_values[0][0]
-                    + column_values[1][0]  # left center value  # right center value
-                )
-                / 2.0
-            )  # Average center values
+            element_values = self.engine.execute(
+                f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
+            )
+            return convert_to_json_serializable(element_values.fetchone()[0])
         else:
-            # An odd number of column values, we can just take the center value
-            column_median = column_values[1][0]  # True center value
-        return convert_to_json_serializable(column_median)
+
+            nonnull_count = self.get_column_nonnull_count(column)
+            element_values = self.engine.execute(
+                sa.select([sa.column(column)])
+                .order_by(sa.column(column))
+                .where(sa.column(column) != None)
+                .offset(max(nonnull_count // 2 - 1, 0))
+                .limit(2)
+                .select_from(self._table)
+            )
+
+            column_values = list(element_values.fetchall())
+
+            if len(column_values) == 0:
+                column_median = None
+            elif nonnull_count % 2 == 0:
+                # An even number of column values: take the average of the two center values
+                column_median = (
+                    float(
+                        column_values[0][0]
+                        + column_values[1][0]  # left center value  # right center value
+                    )
+                    / 2.0
+                )  # Average center values
+            else:
+                # An odd number of column values, we can just take the center value
+                column_median = column_values[1][0]  # True center value
+
+            return convert_to_json_serializable(column_median)
 
     def get_column_quantiles(
         self, column: str, quantiles: Iterable, allow_relative_error: bool = False
