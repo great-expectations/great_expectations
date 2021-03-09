@@ -38,7 +38,7 @@ class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
     def _add_header(self):
         self.add_markdown_cell(
             f"""# Create Your Checkpoint
-Use this notebook to create your Checkpoint:
+Use this notebook to configure a new Checkpoint and add it to your project:
 
 **Checkpoint Name**: `{self.checkpoint_name}`"""
         )
@@ -143,7 +143,7 @@ Note that if it is valid, it will be automatically saved to your Checkpoint Stor
 
 This `test_yaml_config()` function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.
 
-If you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters."""
+If you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters."""
         )
         self.add_code_cell(
             f"""my_checkpoint = context.test_yaml_config(
