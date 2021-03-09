@@ -99,7 +99,8 @@ If you instead wish to use python instead of yaml to configure your Datasource, 
 Here we will save your Datasource in your Data Context once you are satisfied with the configuration."""
         )
         self.add_code_cell(
-            f"context._save_project_config()",
+            """context._save_project_config()
+context.list_datasources()""",
             lint=True,
         )
         self.add_markdown_cell("""Now you can close this notebook and delete it!""")

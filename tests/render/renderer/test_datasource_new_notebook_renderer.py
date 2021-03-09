@@ -96,7 +96,8 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "context._save_project_config()",
+                "source": """context._save_project_config()
+context.list_datasources()""",
                 "outputs": [],
             },
             {
