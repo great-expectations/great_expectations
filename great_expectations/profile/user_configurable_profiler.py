@@ -129,8 +129,13 @@ class UserConfigurableProfiler:
         self.excluded_expectations = excluded_expectations or []
         assert isinstance(self.excluded_expectations, list)
 
+        assert isinstance(
+            value_set_threshold, str
+        ), "value_set_threshold must be a string"
         self.value_set_threshold = value_set_threshold.upper()
-        assert isinstance(self.value_set_threshold, str)
+        assert (
+            self.value_set_threshold in OrderedProfilerCardinality.__members__
+        ), f"value_set_threshold must be one of {[i for i in OrderedProfilerCardinality.__members__]}"
 
         self.not_null_only = not_null_only
         assert isinstance(self.not_null_only, bool)

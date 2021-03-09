@@ -58,7 +58,7 @@ def get_pandas_runtime_validator(context, df):
         batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
         partition_request={
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "an_example_key": "a",
                 "another_example_key": "b",
             }
@@ -88,7 +88,7 @@ def get_spark_runtime_validator(context, df):
         batch_data=sdf,
         data_asset_name="IN_MEMORY_DATA_ASSET",
         partition_request={
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "an_example_key": "a",
                 "another_example_key": "b",
             }

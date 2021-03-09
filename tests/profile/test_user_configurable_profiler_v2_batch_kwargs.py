@@ -191,6 +191,34 @@ def test__validate_config(cardinality_dataset):
     assert e.typename == "AssertionError"
 
 
+def test_value_set_threshold(cardinality_dataset):
+    """
+    What does this test do and why?
+    Tests the value_set_threshold logic on the profiler works as expected.
+    """
+    # Test that when value_set_threshold is unset, it will default to "MANY"
+    profiler = UserConfigurableProfiler(cardinality_dataset)
+    assert profiler.value_set_threshold == "MANY"
+
+    # Test that when value_set_threshold is set to an appropriate enum value, the value_set_threshold will be correct
+    profiler = UserConfigurableProfiler(cardinality_dataset, value_set_threshold="FEW")
+    assert profiler.value_set_threshold == "FEW"
+
+    # Test that when value_set_threshold is set to a non-string, it will error
+    with pytest.raises(AssertionError) as e:
+        UserConfigurableProfiler(cardinality_dataset, value_set_threshold=None)
+    assert e.typename == "AssertionError"
+
+    # Test that when value_set_threshold is set to a string that is not in the cardinality enum, it will error
+    with pytest.raises(AssertionError) as e:
+        UserConfigurableProfiler(cardinality_dataset, value_set_threshold="wrong_value")
+    assert e.typename == "AssertionError"
+    assert (
+        e.value.args[0]
+        == "value_set_threshold must be one of ['NONE', 'ONE', 'TWO', 'VERY_FEW', 'FEW', 'MANY', 'VERY_MANY', 'UNIQUE']"
+    )
+
+
 def test__validate_semantic_types_dict(cardinality_dataset):
     """
     What does this test do and why?
