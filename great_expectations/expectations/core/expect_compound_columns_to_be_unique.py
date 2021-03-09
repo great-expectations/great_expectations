@@ -10,13 +10,24 @@ from great_expectations.render.util import (
 
 
 class ExpectCompoundColumnsToBeUnique(TableExpectation):
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": [
+            "core expectation",
+            "multi-column expectation",
+            "needs migration to modular expectations api",
+        ],
+        "contributors": [
+            "@great_expectations",
+        ],
+        "requirements": [],
+    }
+
     metric_dependencies = tuple()
-    success_keys = (
-        "column_list",
-        "ignore_row_if",
-    )
+    domain_keys = ("column_list",)
+    success_keys = ("ignore_row_if",)
     default_kwarg_values = {
-        "column_list": None,
         "ignore_row_if": "all_values_are_missing",
         "result_format": "BASIC",
         "include_config": True,

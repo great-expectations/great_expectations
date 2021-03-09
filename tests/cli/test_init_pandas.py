@@ -19,6 +19,11 @@ except ImportError:
     from unittest import mock
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @freeze_time("09/26/2019 13:42:41")
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @mock.patch(
@@ -38,18 +43,17 @@ def test_cli_init_on_new_project(
     shutil.copy(fixture_path, data_path)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
+        ["--v3-api", "init"],
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
         catch_exceptions=False,
     )
     stdout = result.output
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/"
         in mock_webbrowser.call_args[0][0]
     )
 
@@ -95,7 +99,6 @@ def test_cli_init_on_new_project(
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
         Titanic/
@@ -170,11 +173,17 @@ def test_cli_init_on_new_project(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
     mock_webbrowser,
     capsys,
     caplog,
+    monkeypatch,
     initialized_project,
 ):
     project_dir = initialized_project
@@ -194,12 +203,13 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     data_folder_path = os.path.join(project_dir, "data")
     csv_path = os.path.join(project_dir, "data", "Titanic.csv")
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["--v3-api", "init"],
             input="\n1\n1\n{}\n\n\n\n2\n{}\nmy_suite\n\n\n\n\n".format(
                 data_folder_path, csv_path
             ),
@@ -269,7 +279,7 @@ def _load_config_file(config_path):
 
 @pytest.fixture
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def initialized_project(mock_webbrowser, tmp_path_factory):
+def initialized_project(mock_webbrowser, monkeypatch, tmp_path_factory):
     """This is an initialized project through the CLI."""
     project_dir = str(tmp_path_factory.mktemp("my_rad_project"))
     os.makedirs(os.path.join(project_dir, "data"))
@@ -278,10 +288,11 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
     shutil.copy(fixture_path, data_path)
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     _ = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n\n\n".format(data_folder_path, data_path),
+        ["--v3-api", "init"],
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
         catch_exceptions=False,
     )
     assert mock_webbrowser.call_count == 1
@@ -298,9 +309,14 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
     return project_dir
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
-    mock_webbrowser, caplog, initialized_project, filesystem_csv_2
+    mock_webbrowser, caplog, monkeypatch, initialized_project, filesystem_csv_2
 ):
     project_dir = initialized_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -315,12 +331,13 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["--v3-api", "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -338,21 +355,28 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     initialized_project,
 ):
     project_dir = initialized_project
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["--v3-api", "init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -371,21 +395,28 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     initialized_project,
 ):
     project_dir = initialized_project
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
+            ["--v3-api", "init"],
             input="Y\n\n",
             catch_exceptions=False,
         )
@@ -394,9 +425,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/index.html".format(
-            project_dir
-        )
+        "{project_dir}/great_expectations/uncommitted/data_docs/local_site/index.html"
         in mock_webbrowser.call_args[0][0]
     )
 
@@ -410,10 +439,16 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_browser,
     caplog,
+    monkeypatch,
     initialized_project,
 ):
     project_dir = initialized_project
@@ -436,13 +471,14 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
-            input="\n2\n{}\nsink_me\n\n\n".format(data_path),
+            ["--v3-api", "init"],
+            input=f"\n2\n{data_path}\nsink_me\n\n\n",
             catch_exceptions=False,
         )
     stdout = result.stdout
@@ -462,8 +498,13 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
-    caplog, tmp_path_factory
+    caplog, monkeypatch, tmp_path_factory
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(project_dir, "data"))
@@ -473,10 +514,11 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     shutil.copy(fixture_path, data_path)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\nn\n".format(data_folder_path, data_path),
+        ["--v3-api", "init"],
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\nn\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -517,10 +559,15 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file(
-    mock_webbrowser, caplog, tmp_path_factory
+    mock_webbrowser, caplog, monkeypatch, tmp_path_factory
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     os.makedirs(os.path.join(project_dir, "data"))
@@ -533,20 +580,17 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     shutil.copy(fixture_path_2, data_path_2)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
-        input="\n\n1\n1\n{}\n\n\n\n2\n{}\n\n{}\n\n\n\n".format(
-            data_folder_path, data_path, data_path_2
-        ),
+        ["--v3-api", "init"],
+        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n{data_path_2}\n\n\n\n",
         catch_exceptions=False,
     )
     stdout = result.output
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/"
         in mock_webbrowser.call_args[0][0]
     )
 
@@ -603,7 +647,6 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
         Titanic/

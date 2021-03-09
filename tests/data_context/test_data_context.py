@@ -33,10 +33,6 @@ from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
-)
-from tests.datasource.conftest import postgresql_sqlalchemy_datasource
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -294,7 +290,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
         class_name="SqlAlchemyDatasource",
         credentials={
             "drivername": "postgresql",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "65432",
             "username": "username_str",
             "password": "password_str",
@@ -347,7 +343,7 @@ def test_list_datasources(data_context_parameterized_expectation_suite):
             },
             "credentials": {
                 "drivername": "postgresql",
-                "host": "localhost",
+                "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                 "port": "65432",
                 "username": "username_str",
                 "password": "***",
@@ -534,7 +530,6 @@ project_path/
         .gitignore
         great_expectations.yml
         checkpoints/
-            .ge_store_backend_id
         expectations/
             .ge_store_backend_id
             titanic/
@@ -1094,7 +1089,6 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
     notebooks/
@@ -1127,7 +1121,6 @@ great_expectations/
     .gitignore
     great_expectations.yml
     checkpoints/
-        .ge_store_backend_id
     expectations/
         .ge_store_backend_id
     notebooks/
@@ -1647,33 +1640,6 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     }
 
 
-def test_get_checkpoint_default_validation_operator(empty_data_context):
-    yaml = YAML(typ="safe")
-    context = empty_data_context
-
-    checkpoint = {"batches": []}
-    checkpoint_file_path = os.path.join(
-        context.root_directory,
-        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
-        "foo.yml",
-    )
-    with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
-    assert os.path.isfile(checkpoint_file_path)
-
-    obs = context.get_checkpoint("foo")
-    assert isinstance(obs, Checkpoint)
-    assert isinstance(obs.config.to_json_dict(), dict)
-    expected = {
-        "module_name": "great_expectations.checkpoint",
-        "class_name": "LegacyCheckpoint",
-        "config_version": None,
-        "name": "foo",
-        "validation_operator_name": "action_list_operator",
-    }
-    assert obs.config.to_json_dict() == expected
-
-
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
     yaml = YAML(typ="safe")
     context = empty_data_context
@@ -1764,10 +1730,10 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
 
 
 # TODO: add more test cases
-def test_run_checkpoint_newstyle(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+def test_run_checkpoint_new_style(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
@@ -1880,7 +1846,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
+        batch_identifiers={
             "alphanumeric": "some_file",
         },
         expectation_suite=ExpectationSuite("my_expectation_suite"),
@@ -1932,7 +1898,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
+        batch_identifiers={
             "alphanumeric": "some_file",
         },
         create_expectation_suite_with_name="A_expectation_suite",

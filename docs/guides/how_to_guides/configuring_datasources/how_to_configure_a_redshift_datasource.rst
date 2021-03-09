@@ -13,7 +13,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -144,7 +144,7 @@ Steps
 
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -185,16 +185,15 @@ Steps
             .. code-block:: python
 
                 config = f"""
-                my_datasource_name:
-                  class_name: SimpleSqlalchemyDatasource
-                  credentials:
-                    drivername: postgresql+psycopg2
-                    username: YOUR_REDSHIFT_USERNAME
-                    password: YOUR_REDSHIFT_PASSWORD
-                    host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
-                    port: 5439
-                    database: dev
-                    query:
+                class_name: SimpleSqlalchemyDatasource
+                credentials:
+                  drivername: postgresql+psycopg2
+                  username: YOUR_REDSHIFT_USERNAME
+                  password: YOUR_REDSHIFT_PASSWORD
+                  host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
+                  port: 5439
+                  database: dev
+                  query:
                       sslmode: prefer
                 introspection:
                   whole_table:

@@ -11,12 +11,12 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
+    BatchRequestBase,
     PartitionDefinition,
     PartitionRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
 
@@ -275,9 +275,19 @@ def test_return_all_batch_definitions_unsorted():
         my_data_connector.get_batch_definition_list_from_batch_request()
 
     # with unnamed data_asset_name
-    unsorted_batch_definition_list = (
+    with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_s3_data_connector",
+                data_asset_name=None,
+            )
+        )
+
+    # with unnamed data_asset_name
+    unsorted_batch_definition_list = (
+        my_data_connector._get_batch_definition_list_from_batch_request(
+            BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_s3_data_connector",
                 data_asset_name=None,
@@ -557,7 +567,7 @@ def test_return_all_batch_definitions_sorted():
         data_asset_name="TestFiles",
         partition_request=PartitionRequest(
             **{
-                "partition_identifiers": {
+                "batch_identifiers": {
                     "name": "james",
                     "timestamp": "20200713",
                     "price": "1567",
@@ -682,9 +692,7 @@ def test_alpha():
         datasource_name="BASE",
         data_connector_name="general_s3_data_connector",
         data_asset_name="A",
-        partition_request=PartitionRequest(
-            **{"partition_identifiers": {"part_1": "B"}}
-        ),
+        partition_request=PartitionRequest(**{"batch_identifiers": {"part_1": "B"}}),
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -1022,6 +1030,7 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="alpha",
                 )
@@ -1034,6 +1043,7 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="beta",
                 )
@@ -1046,6 +1056,7 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="gamma",
                 )

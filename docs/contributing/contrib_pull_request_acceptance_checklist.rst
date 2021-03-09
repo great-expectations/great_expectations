@@ -15,7 +15,7 @@ Both contributors and reviewers should follow this checklist:
 
 * Basic class/module structure and naming of new Expectation and Metric classes
     * One new Expectation class per module (file).
-    * The modules are placed in a subdirectory of `/contrib/experimental/expectations` that makes sense for the new Expectation
+    * The modules are placed in a subdirectory of `/contrib/experimental/great_expectations_experimental/expectations` that makes sense for the new Expectation
     * The new Expectation classes follow CamelCase convention. Module names are snake_case versions of the Expectation class names.
     * Metric classes that implement the new Metrics the Expectation depends on are implemented in the same module.
     * Expectation class names summarize the nature of the expectation.
@@ -85,6 +85,9 @@ Both contributors and reviewers should follow this checklist:
     * The tests included in the module must pass for the PR to be approved.
 
  * Verify that changes to existing renderers (or new renderers) make sense--the language needs to accurately describe the semantics and behavior of the Expectation. 
+
+* Clarification about imports, renderers
+    * At this time, unused module imports and commented out renderer code from the template should not be removed if left in by the contributor. However if the contributor has already removed it, please do not put it back in.
 
 * And finally, "Does it run?"
     * Check out the PR branch and run the ``run_diagnostics`` method of the Expectation. This :ref:`how-to guide <how_to_guides__creating_and_editing_expectations__how_to_template>` shows how to do it. Check the output and make sure everything ran without errors.

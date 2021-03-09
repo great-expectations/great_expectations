@@ -6,6 +6,7 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
+from great_expectations.cli.build_docs import build_docs
 from great_expectations.cli.cli_messages import (
     BUILD_DOCS_PROMPT,
     GREETING,
@@ -22,9 +23,10 @@ from great_expectations.cli.cli_messages import (
     SLACK_WEBHOOK_PROMPT,
 )
 from great_expectations.cli.datasource import add_datasource as add_datasource_impl
-from great_expectations.cli.docs import build_docs
-from great_expectations.cli.util import cli_message
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    display_not_implemented_message_and_exit,
+)
 from great_expectations.exceptions import (
     DataContextError,
     DatasourceInitializationError,
@@ -41,12 +43,6 @@ except ImportError:
 
 @click.command()
 @click.option(
-    "--target-directory",
-    "-d",
-    default="./",
-    help="The root of the project directory where you want to initialize Great Expectations.",
-)
-@click.option(
     # Note this --no-view option is mostly here for tests
     "--view/--no-view",
     help="By default open in browser unless you specify the --no-view flag.",
@@ -57,7 +53,8 @@ except ImportError:
     help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
     default=True,
 )
-def init(target_directory, view, usage_stats):
+@click.pass_context
+def init(ctx, view, usage_stats):
     """
     Initialize a new Great Expectations project.
 
@@ -67,7 +64,11 @@ def init(target_directory, view, usage_stats):
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
-    target_directory = os.path.abspath(target_directory)
+    display_not_implemented_message_and_exit()
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    target_directory = os.path.abspath(directory)
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
 
@@ -102,7 +103,7 @@ def init(target_directory, view, usage_stats):
             context = DataContext.create(
                 target_directory, usage_statistics_enabled=usage_stats
             )
-            send_usage_message(
+            toolkit.send_usage_message(
                 data_context=context, event="cli.init.create", success=True
             )
         except DataContextError as e:

@@ -169,7 +169,9 @@ Steps
                       partial_unexpected_count: 20
                 """
 
-           .. code-block:: python
+            The above Checkpoint can be run using the code below, providing missing parameters from the configured Checkpoint at runtime.
+
+            .. code-block:: python
 
                 checkpoint_run_result: CheckpointResult
 
@@ -273,7 +275,7 @@ Steps
                     batch_request={
                         "batch_data": my_data_frame,
                         "partition_request": {
-                            "partition_identifiers": {
+                            "batch_identifiers": {
                                 "airflow_run_id": airflow_run_id,
                             }
                         },
@@ -288,4 +290,4 @@ Additional Resources
 
 
 .. discourse::
-   :topic_identifier: <TBD>
+   :topic_identifier: 220

@@ -200,18 +200,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
-                    data_connector_name="my_data_connector",
-                    data_asset_name="alpha",
-                )
-            )
-        )
-        == 3
-    )
-
-    assert (
-        len(
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="beta",
                 )
@@ -226,7 +215,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
             partition_request={
-                "partition_identifiers": {
+                "batch_identifiers": {
                     "year_dir": "2020",
                     "month_dir": "03",
                 }

@@ -4,6 +4,7 @@ from .column_section_renderer import (
     ProfilingResultsColumnSectionRenderer,
     ValidationResultsColumnSectionRenderer,
 )
+from .email_renderer import EmailRenderer
 from .microsoft_teams_renderer import MicrosoftTeamsRenderer
 from .opsgenie_renderer import OpsgenieRenderer
 from .page_renderer import (

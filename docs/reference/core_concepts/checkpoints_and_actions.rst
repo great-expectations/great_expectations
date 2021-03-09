@@ -122,7 +122,7 @@ Example CheckpointResult:
     }
 
 **************************************
-Configuration Configuration Examples
+Checkpoint Configuration Examples
 **************************************
 
 .. content-tabs::
@@ -289,7 +289,7 @@ Configuration Configuration Examples
   .. tab-container:: tab3
     :title: Using template
 
-    This configuration references the Checkpoint detailed in the previous example ("Keys provided at runtime"), allowing the runtime call to ``run_checkpoint`` to be much slimmer.
+    This configuration references the Checkpoint detailed in the previous example ("Keys passed at runtime"), allowing the runtime call to ``run_checkpoint`` to be much slimmer.
 
     **yaml**:
 

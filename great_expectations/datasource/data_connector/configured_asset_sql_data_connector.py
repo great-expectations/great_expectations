@@ -2,10 +2,9 @@ from typing import Dict, List, Optional
 
 from great_expectations.core.batch import (
     BatchDefinition,
-    BatchSpec,
+    BatchRequest,
     PartitionDefinition,
 )
-from great_expectations.datasource.data_connector.asset.asset import Asset
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
@@ -34,8 +33,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        data_assets: Optional[Dict[str, Asset]] = None,
+        data_assets: Optional[Dict[str, dict]] = None,
     ):
+        if data_assets is None:
+            data_assets = {}
         self._data_assets = data_assets
 
         super().__init__(
@@ -45,13 +46,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         )
 
     @property
-    def data_assets(self) -> Dict[str, Asset]:
+    def data_assets(self) -> Dict[str, dict]:
         return self._data_assets
 
     def add_data_asset(
         self,
-        name,
-        config,
+        name: str,
+        config: dict,
     ):
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
@@ -136,13 +137,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
         return []
 
-    def get_batch_definition_list_from_batch_request(self, batch_request):
+    def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
         self._validate_batch_request(batch_request=batch_request)
 
         if self._data_references_cache is None:
             self._refresh_data_references_cache()
 
-        batch_definition_list = []
+        batch_definition_list: List[BatchDefinition] = []
 
         try:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
@@ -152,7 +153,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         for partition_definition in sub_cache:
-            batch_definition = BatchDefinition(
+            batch_definition: BatchDefinition = BatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
@@ -182,9 +183,11 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
         ]
 
-    def build_batch_spec(self, batch_definition: BatchDefinition):
+    def _generate_batch_spec_parameters_from_batch_definition(
+        self, batch_definition: BatchDefinition
+    ) -> Dict:
         """
-        Build BatchSpec from batch_definition with the following components:
+        Build BatchSpec parameters from batch_definition with the following components:
             1. data_asset_name from batch_definition
             2. partition_definition from batch_definition
             3. data_asset from data_connector
@@ -193,26 +196,22 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             batch_definition (BatchDefinition): to be used to build batch_spec
 
         Returns:
-            BatchSpec built from batch_definition
+            dict built from batch_definition
         """
-        data_asset_name = batch_definition.data_asset_name
-        batch_spec = BatchSpec(
-            {
-                "table_name": data_asset_name,
-                "partition_definition": batch_definition.partition_definition,
-                **self.data_assets[data_asset_name],
-            }
-        )
-        return batch_spec
+        data_asset_name: str = batch_definition.data_asset_name
+        return {
+            "table_name": data_asset_name,
+            "partition_definition": batch_definition.partition_definition,
+            **self.data_assets[data_asset_name],
+        }
 
-    ### Splitter methods for listing partitions ###
+    # Splitter methods for listing partitions
 
     def _split_on_whole_table(
         self,
         table_name: str,
     ):
-        """
-        'Split' by returning the whole table
+        """'Split' by returning the whole table
 
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """

@@ -97,7 +97,7 @@ def test_checkpoint_store_with_filesystem_store_backend(
     expected_checkpoint_store_config = {
         "store_name": "my_checkpoint_store",
         "class_name": "CheckpointStore",
-        "module_name": "great_expectations.data_context.store.configuration_store",
+        "module_name": "great_expectations.data_context.store.checkpoint_store",
         "store_backend": {
             "module_name": "great_expectations.data_context.store",
             "class_name": "TupleFilesystemStoreBackend",
@@ -327,13 +327,14 @@ def test_golden_path_sql_datasource_configuration(
 
     context = ge.get_context()
 
-    yaml_config = """
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    yaml_config = f"""
 class_name: SimpleSqlalchemyDatasource
 credentials:
     drivername: postgresql
     username: postgres
     password: ""
-    host: localhost
+    host: {db_hostname}
     port: 5432
     database: test_ci
 
@@ -456,7 +457,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
+        batch_identifiers={
             "number": "2",
         },
         batch_spec_passthrough={
@@ -470,7 +471,7 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
@@ -496,7 +497,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
-        partition_request={"partition_identifiers": {"number": "3"}},
+        partition_request={"batch_identifiers": {"number": "3"}},
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -612,7 +613,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
+        batch_identifiers={
             "number": "2",
         },
         batch_spec_passthrough={
@@ -628,7 +629,7 @@ data_connectors:
 
     my_batch.head()
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
@@ -654,7 +655,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
-        partition_request={"partition_identifiers": {"year": "2019"}},
+        partition_request={"batch_identifiers": {"year": "2019"}},
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {

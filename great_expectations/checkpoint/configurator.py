@@ -20,7 +20,7 @@ class ActionDicts:
     }
     UPDATE_DATA_DOCS = {
         "name": "update_data_docs",
-        "action": {"class_name": "UpdateDataDocsAction", "site_names": None},
+        "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
     }
 
     @staticmethod
@@ -179,21 +179,13 @@ class SimpleCheckpointConfigurator:
             self.site_names is None
             or self.site_names == "all"
             or is_list_of_strings(self.site_names)
+            and set(self.site_names).issubset(set(data_context.get_site_names()))
         ):
             raise TypeError(
                 "site_names must be one of: None, 'all', or a list of site names to update"
             )
         if self.site_names in ["all", None]:
             return
-
-        configured_sites = data_context.get_site_names()
-        for site_name in self.site_names:
-            if site_name not in configured_sites:
-                raise ValueError(
-                    f"""Sites listed in site_names must exist on the data context.
-    Please either configure the selected sites ({self.site_names}) or choose from the currently configured sites:
-    {configured_sites}"""
-                )
 
     def _validate_notify_on(self):
         if self.notify_on not in ["all", "success", "failure"]:

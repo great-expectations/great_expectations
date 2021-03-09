@@ -327,8 +327,9 @@ def get_dataset(
             return None
 
         # Create a new database
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         engine = connection_manager.get_engine(
-            "postgresql://postgres@localhost/test_ci"
+            f"postgresql://postgres@{db_hostname}/test_ci"
         )
         sql_dtypes = {}
         if (
@@ -388,7 +389,8 @@ def get_dataset(
         if not create_engine:
             return None
 
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
 
         sql_dtypes = {}
         if (
@@ -446,8 +448,10 @@ def get_dataset(
         if not create_engine:
             return None
 
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         engine = create_engine(
-            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+            "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
 
@@ -860,6 +864,7 @@ def _build_sa_validator_with_data(
         "mysql": MYSQL_TYPES,
         "mssql": MSSQL_TYPES,
     }
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         if sqlite_db_path is not None:
             engine = create_engine(f"sqlite:////{sqlite_db_path}")
@@ -867,13 +872,14 @@ def _build_sa_validator_with_data(
             engine = create_engine("sqlite://")
     elif sa_engine_name == "postgresql":
         engine = connection_manager.get_engine(
-            "postgresql://postgres@localhost/test_ci"
+            f"postgresql://postgres@{db_hostname}/test_ci"
         )
     elif sa_engine_name == "mysql":
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
     elif sa_engine_name == "mssql":
         engine = create_engine(
-            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 "
+            "for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
     else:
@@ -935,7 +941,7 @@ def _build_sa_validator_with_data(
         if_exists="replace",
     )
 
-    batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
@@ -1671,6 +1677,7 @@ def build_test_backends_list(
             raise ValueError("spark tests are requested, but pyspark is not installed")
         test_backends += ["spark"]
 
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if include_sqlalchemy:
 
         sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
@@ -1690,7 +1697,7 @@ def build_test_backends_list(
             # Be sure to ensure that tests (and users!) understand that subtlety,
             # which can be important for distributional expectations, for example.
             ###
-            connection_string = "postgresql://postgres@localhost/test_ci"
+            connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
             checker = LockingConnectionCheck(sa, connection_string)
             if checker.is_valid() is True:
                 test_backends += ["postgresql"]
@@ -1702,20 +1709,21 @@ def build_test_backends_list(
 
         if include_mysql:
             try:
-                engine = sa.create_engine("mysql+pymysql://root@localhost/test_ci")
+                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "mysql tests are requested, but unable to connect to the mysql database at "
-                    "'mysql+pymysql://root@localhost/test_ci'"
+                    f"'mysql+pymysql://root@{db_hostname}/test_ci'"
                 )
             test_backends += ["mysql"]
 
         if include_mssql:
             try:
                 engine = sa.create_engine(
-                    "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+                    f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
                     # echo=True,
                 )
                 conn = engine.connect()
@@ -1723,7 +1731,8 @@ def build_test_backends_list(
             except (ImportError, sa.exc.SQLAlchemyError):
                 raise ImportError(
                     "mssql tests are requested, but unable to connect to the mssql database at "
-                    "'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                    f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                 )
             test_backends += ["mssql"]
 

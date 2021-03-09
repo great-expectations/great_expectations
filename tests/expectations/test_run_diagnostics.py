@@ -1,7 +1,10 @@
 import json
 
+import pandas as pd
+
 from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,
@@ -310,22 +313,11 @@ def test_self_check_on_an_existing_expectation():
             }
         ],
         "library_metadata": {
+            "contributors": ["@great_expectations"],
             "maturity": "production",
             "package": "great_expectations",
-            "tags": [
-                "arrows",
-                "design",
-                "flows",
-                "prototypes",
-                "svg",
-                "whiteboarding",
-                "wireframe",
-                "wirefames",
-            ],
-            "contributors": [
-                "@shinnyshinshin",
-                "@abegong",
-            ],
+            "requirements": [],
+            "tags": ["core expectation", "column map expectation"],
         },
         # "test_report": [
         #     {
@@ -351,7 +343,7 @@ def test_expectation__get_renderers():
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
-    my_batch = Batch(data=example_data)
+    my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
         **{"expectation_type": expectation_name, "kwargs": example_test}
@@ -393,7 +385,7 @@ def test_expectation__get_renderers():
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
-    my_batch = Batch(data=example_data)
+    my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
         **{"expectation_type": expectation_name, "kwargs": example_test}
@@ -416,7 +408,7 @@ def test_expectation__get_renderers():
     assert renderer_dict == {
         "standard": {
             "renderer.answer": None,
-            "renderer.diagnostic.observed_value": "20% unexpected",
+            "renderer.diagnostic.observed_value": "25% unexpected",
             "renderer.diagnostic.status_icon": "",
             "renderer.diagnostic.unexpected_statement": "",
             "renderer.diagnostic.unexpected_table": None,
@@ -434,7 +426,7 @@ def test_expectation__get_renderers():
     supported_renderers = my_expectation._get_supported_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
-    my_batch = Batch(data=example_data)
+    my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
         **{"expectation_type": expectation_name, "kwargs": example_test}
@@ -457,7 +449,7 @@ def test_expectation__get_renderers():
     assert renderer_dict == {
         "standard": {
             "renderer.answer": 'At least 60.0% of values in column "mostly_threes" equal 3.',
-            "renderer.diagnostic.observed_value": "20% unexpected",
+            "renderer.diagnostic.observed_value": "25% unexpected",
             "renderer.diagnostic.status_icon": "",
             "renderer.diagnostic.unexpected_statement": "",
             "renderer.diagnostic.unexpected_table": None,
@@ -477,7 +469,7 @@ def test_expectation__get_execution_engine_dict(
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
-    my_batch = Batch(data=example_data)
+    my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
         **{"expectation_type": expectation_name, "kwargs": example_test}

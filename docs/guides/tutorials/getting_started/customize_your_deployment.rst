@@ -86,8 +86,8 @@ Great Expectations generates and provides notebooks as interactive development e
 
 .. _tutorials__getting_started__customize_your_deployment__additional_datasources_and_generators:
 
-Additional Datasources and Generators
------------------------------------------
+Additional Datasources
+-----------------------
 
 Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up in `the public discussion forum <https://discuss.greatexpectations.io/>`_.
 
@@ -125,6 +125,7 @@ Most teams will want to configure various :ref:`Validation Actions <validation_a
 * :ref:`how_to_guides__validation__how_to_update_data_docs_as_a_validation_action`
 * :ref:`how_to_guides__validation__how_to_store_validation_results_as_a_validation_action`
 * :ref:`how_to_guides__validation__how_to_trigger_slack_notifications_as_a_validation_action`
+* :ref:`how_to_guides__validation__how_to_trigger_email_as_a_validation_action`
 
 If you also want to modify your :ref:reference__core_concepts__validation__validation_operator, you can learn how here:
 

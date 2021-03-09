@@ -2,7 +2,8 @@ import copy
 import logging
 from typing import List, Optional
 
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector import FilePathDataConnector
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -30,6 +31,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
@@ -51,6 +53,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             default_regex=default_regex,
             sorters=sorters,
         )
+
+        self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     def _refresh_data_references_cache(self):
         """ refreshes data_reference cache """
@@ -108,8 +112,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         # This will fetch ALL batch_definitions in the cache
         batch_definition_list: List[
             BatchDefinition
-        ] = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
+        ] = self._get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequestBase(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
             )
@@ -121,6 +125,24 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         ]
 
         return list(set(data_asset_names))
+
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+
+        batch_spec.update(self._batch_spec_passthrough)
+
+        return PathBatchSpec(batch_spec)
 
     def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
         batch_definition_list: List[BatchDefinition] = [

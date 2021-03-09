@@ -42,8 +42,11 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.profile import ColumnsExistProfiler
@@ -169,15 +172,19 @@ class SqlAlchemyConnectionManager:
         self._connections = dict()
 
     def get_engine(self, connection_string):
+        import sqlalchemy as sa
+
         with self.lock:
             if connection_string not in self._connections:
                 try:
                     engine = create_engine(connection_string)
                     conn = engine.connect()
                     self._connections[connection_string] = conn
-                except (ImportError, self.sa.exc.SQLAlchemyError):
+
+                except (ImportError, sa.exc.SQLAlchemyError):
                     print(f"Unable to establish connection with {connection_string}")
                     raise
+
             return self._connections[connection_string]
 
 
@@ -346,8 +353,9 @@ def get_dataset(
             return None
 
         # Create a new database
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         engine = connection_manager.get_engine(
-            "postgresql://postgres@localhost/test_ci"
+            f"postgresql://postgres@{db_hostname}/test_ci"
         )
         sql_dtypes = {}
         if (
@@ -407,7 +415,8 @@ def get_dataset(
         if not create_engine:
             return None
 
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
 
         sql_dtypes = {}
         if (
@@ -456,17 +465,24 @@ def get_dataset(
             if_exists="replace",
         )
 
-        # Build a SqlAlchemyDataset using that database
+        # Will - 20210126
+        # For mysql we want our tests to know when a temp_table is referred to more than once in the
+        # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
+        # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
+        # rather than referring the table by name.
+        custom_sql = "SELECT * FROM " + table_name
         return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
+            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mssql":
         if not create_engine:
             return None
 
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         engine = create_engine(
-            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+            "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
 
@@ -844,10 +860,11 @@ def _build_sa_engine(df):
 
     eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
+    engine = SqlAlchemyExecutionEngine(engine=eng)
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name="test")
     batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
+    engine.load_batch_data(
+        batch_id=batch.batch_definition.to_id(), batch_data=batch_data
     )
     return engine
 
@@ -879,6 +896,7 @@ def _build_sa_validator_with_data(
         "mysql": MYSQL_TYPES,
         "mssql": MSSQL_TYPES,
     }
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         if sqlite_db_path is not None:
             engine = create_engine(f"sqlite:////{sqlite_db_path}")
@@ -886,13 +904,14 @@ def _build_sa_validator_with_data(
             engine = create_engine("sqlite://")
     elif sa_engine_name == "postgresql":
         engine = connection_manager.get_engine(
-            "postgresql://postgres@localhost/test_ci"
+            f"postgresql://postgres@{db_hostname}/test_ci"
         )
     elif sa_engine_name == "mysql":
-        engine = create_engine("mysql+pymysql://root@localhost/test_ci")
+        engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
     elif sa_engine_name == "mssql":
         engine = create_engine(
-            "mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@localhost:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
+            f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+            "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
     else:
@@ -954,10 +973,22 @@ def _build_sa_validator_with_data(
         if_exists="replace",
     )
 
-    batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+    # Will - 20210126
+    # For mysql we want our tests to know when a temp_table is referred to more than once in the
+    # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
+    # Here we instantiate a SqlAlchemyBatchData with a query, which causes a temp_table to be created.
+    if sa_engine_name == "mysql":
+        query = "SELECT * FROM " + table_name
+        batch_data = SqlAlchemyBatchData(execution_engine=engine, query=query)
+    else:
+        batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
+
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
-
+    batch_data = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+    batch = Batch(data=batch_data)
     return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
@@ -1244,7 +1275,7 @@ def check_json_test_result(test, result, data_asset=None):
             elif key == "unexpected_index_list":
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
                     pass
-                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDataFrame)):
+                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
                     pass
                 else:
                     assert result["result"]["unexpected_index_list"] == value
@@ -1446,6 +1477,19 @@ def validate_uuid4(uuid_string: str) -> bool:
     # valid uuid4. This is bad for validation purposes.
 
     return val.hex == uuid_string.replace("-", "")
+
+
+def get_sqlite_temp_table_names(engine):
+    result = engine.execute(
+        """
+SELECT
+    name
+FROM
+    sqlite_temp_master
+"""
+    )
+    rows = result.fetchall()
+    return {row[0] for row in rows}
 
 
 def build_in_memory_store_backend(

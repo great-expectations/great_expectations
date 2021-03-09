@@ -224,7 +224,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
         data_asset_name="IN_MEMORY_DATA_ASSET",
         batch_data=test_df,
         partition_request={
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "airflow_run_id": 1234567890,
             }
         },
@@ -232,7 +232,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
     )
     assert my_batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
 
-    assert my_batch.data.equals(test_df)
+    assert my_batch.data.dataframe.equals(test_df)
 
 
 def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas_execution_engine(
@@ -297,7 +297,7 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
@@ -323,7 +323,7 @@ data_connectors:
             },
         },
     )
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (4, 10)
     df_data["date"] = df_data.apply(
         lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
@@ -402,7 +402,7 @@ data_connectors:
         data_asset_name="A",
     )
 
-    df_data = my_batch.data
+    df_data = my_batch.data.dataframe
     assert df_data.shape == (120, 10)
 
 
@@ -451,9 +451,9 @@ data_connectors:
 
 
 def test_in_memory_data_context_configuration(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.get_config(
+    project_config_dict: dict = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.get_config(
         mode="dict"
     )
     project_config_dict["plugins_directory"] = None
@@ -479,7 +479,7 @@ def test_in_memory_data_context_configuration(
     project_config: DataContextConfig = DataContextConfig(**project_config_dict)
     data_context = BaseDataContext(
         project_config=project_config,
-        context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store.root_directory,
+        context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.root_directory,
     )
 
     my_validator: Validator = data_context.get_validator(

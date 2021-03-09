@@ -1,4 +1,5 @@
 import copy
+import os
 from typing import Dict, Optional
 
 import pytest
@@ -175,7 +176,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -195,6 +195,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",
                 "prefix": "validations",
+            },
+        },
+        "checkpoint_S3_store": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "checkpoints",
             },
         },
     }
@@ -219,6 +227,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         expectations_store_name="expectations_S3_store",
         validations_store_name="validations_S3_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
+        checkpoint_store_name="checkpoint_S3_store",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -244,12 +253,15 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         expectations_store_bucket_name="custom_expectations_store_bucket_name",
         validations_store_bucket_name="custom_validations_store_bucket_name",
         data_docs_bucket_name="custom_data_docs_store_bucket_name",
+        checkpoint_store_bucket_name="custom_checkpoint_store_bucket_name",
         expectations_store_prefix="custom_expectations_store_prefix",
         validations_store_prefix="custom_validations_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
+        checkpoint_store_prefix="custom_checkpoint_store_prefix",
         expectations_store_name="custom_expectations_S3_store_name",
         validations_store_name="custom_validations_S3_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_S3_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -269,7 +281,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -291,6 +302,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
                 "bucket": "custom_validations_store_bucket_name",
                 "class_name": "TupleS3StoreBackend",
                 "prefix": "custom_validations_store_prefix",
+            },
+        },
+        "custom_checkpoint_S3_store_name": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "custom_checkpoint_store_bucket_name",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "custom_checkpoint_store_prefix",
             },
         },
     }
@@ -315,6 +334,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         expectations_store_name="custom_expectations_S3_store_name",
         validations_store_name="custom_validations_S3_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_S3_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -353,7 +373,6 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -366,6 +385,9 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         "store_backend"
     ]["root_directory"] = test_root_directory
     desired_config["stores"][desired_config["validations_store_name"]]["store_backend"][
+        "root_directory"
+    ] = test_root_directory
+    desired_config["stores"][desired_config["checkpoint_store_name"]]["store_backend"][
         "root_directory"
     ] = test_root_directory
     desired_config["data_docs_sites"]["local_site"]["store_backend"][
@@ -450,7 +472,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -475,6 +496,15 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
                 "prefix": "validations",
             },
         },
+        "checkpoint_GCS_store": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "project": "my_default_project",
+                "class_name": "TupleGCSStoreBackend",
+                "prefix": "checkpoints",
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "gcs_site": {
@@ -497,6 +527,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_GCS_store",
         validations_store_name="validations_GCS_store",
+        checkpoint_store_name="checkpoint_GCS_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
@@ -524,15 +555,19 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         expectations_store_bucket_name="custom_expectations_store_bucket_name",
         validations_store_bucket_name="custom_validations_store_bucket_name",
         data_docs_bucket_name="custom_data_docs_store_bucket_name",
+        checkpoint_store_bucket_name="custom_checkpoint_store_bucket_name",
         expectations_store_project_name="custom_expectations_store_project_name",
         validations_store_project_name="custom_validations_store_project_name",
         data_docs_project_name="custom_data_docs_store_project_name",
+        checkpoint_store_project_name="custom_checkpoint_store_project_name",
         expectations_store_prefix="custom_expectations_store_prefix",
         validations_store_prefix="custom_validations_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
+        checkpoint_store_prefix="custom_checkpoint_store_prefix",
         expectations_store_name="custom_expectations_GCS_store_name",
         validations_store_name="custom_validations_GCS_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_GCS_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -552,7 +587,6 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -578,6 +612,15 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_validations_store_prefix",
             },
         },
+        "custom_checkpoint_GCS_store_name": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "custom_checkpoint_store_bucket_name",
+                "project": "custom_checkpoint_store_project_name",
+                "class_name": "TupleGCSStoreBackend",
+                "prefix": "custom_checkpoint_store_prefix",
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "gcs_site": {
@@ -600,6 +643,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         expectations_store_name="custom_expectations_GCS_store_name",
         validations_store_name="custom_validations_GCS_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_GCS_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -623,7 +667,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
     store_backend_defaults = DatabaseStoreBackendDefaults(
         default_credentials={
             "drivername": "postgresql",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "65432",
             "username": "ge_tutorials",
             "password": "ge_tutorials",
@@ -648,7 +692,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -660,7 +703,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
                     "drivername": "postgresql",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "65432",
                     "username": "ge_tutorials",
                     "password": "ge_tutorials",
@@ -674,7 +717,21 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                 "class_name": "DatabaseStoreBackend",
                 "credentials": {
                     "drivername": "postgresql",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+                    "port": "65432",
+                    "username": "ge_tutorials",
+                    "password": "ge_tutorials",
+                    "database": "ge_tutorials",
+                },
+            },
+        },
+        "checkpoint_database_store": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "class_name": "DatabaseStoreBackend",
+                "credentials": {
+                    "drivername": "postgresql",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "65432",
                     "username": "ge_tutorials",
                     "password": "ge_tutorials",
@@ -702,6 +759,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_database_store",
         validations_store_name="validations_database_store",
+        checkpoint_store_name="checkpoint_database_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
@@ -726,7 +784,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
     store_backend_defaults = DatabaseStoreBackendDefaults(
         default_credentials={
             "drivername": "postgresql",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "65432",
             "username": "ge_tutorials",
             "password": "ge_tutorials",
@@ -748,9 +806,18 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             "password": "custom_validations_store_password",
             "database": "custom_validations_store_database",
         },
+        checkpoint_store_credentials={
+            "drivername": "custom_checkpoint_store_drivername",
+            "host": "custom_checkpoint_store_host",
+            "port": "custom_checkpoint_store_port",
+            "username": "custom_checkpoint_store_username",
+            "password": "custom_checkpoint_store_password",
+            "database": "custom_checkpoint_store_database",
+        },
         expectations_store_name="custom_expectations_database_store_name",
         validations_store_name="custom_validations_database_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_database_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -770,7 +837,6 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -806,6 +872,20 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
                 },
             },
         },
+        "custom_checkpoint_database_store_name": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "class_name": "DatabaseStoreBackend",
+                "credentials": {
+                    "database": "custom_checkpoint_store_database",
+                    "drivername": "custom_checkpoint_store_drivername",
+                    "host": "custom_checkpoint_store_host",
+                    "password": "custom_checkpoint_store_password",
+                    "port": "custom_checkpoint_store_port",
+                    "username": "custom_checkpoint_store_username",
+                },
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "local_site": {
@@ -827,6 +907,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         expectations_store_name="custom_expectations_database_store_name",
         validations_store_name="custom_validations_database_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
+        checkpoint_store_name="custom_checkpoint_database_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -1106,7 +1187,6 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
             )
         },
         store_backend_defaults=store_backend_defaults,
-        checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
     )
 
     # Create desired config
@@ -1126,6 +1206,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
                 "bucket": "my_default_bucket",
                 "class_name": "TupleS3StoreBackend",
                 "prefix": "validations",
+            },
+        },
+        "checkpoint_S3_store": {
+            "class_name": "CheckpointStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "checkpoints",
             },
         },
     }
@@ -1149,6 +1237,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         datasources=default_pandas_datasource_config,
         expectations_store_name="expectations_S3_store",
         validations_store_name="validations_S3_store",
+        checkpoint_store_name="checkpoint_S3_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,

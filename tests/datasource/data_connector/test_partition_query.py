@@ -87,11 +87,13 @@ def test_partition_request_non_recognized_param(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
-    # Test 1: non valid_partition_identifiers_limit
+
+    # Test 1: non valid_batch_identifiers_limit
     with pytest.raises(ge_exceptions.PartitionQueryError):
+        # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
-                BatchRequest(
+                batch_request=BatchRequest(
                     datasource_name="test_environment",
                     data_connector_name="general_filesystem_data_connector",
                     data_asset_name="TestFiles",
@@ -102,36 +104,35 @@ def test_partition_request_non_recognized_param(
 
     # Test 2: Unrecognized custom_filter is not a function
     with pytest.raises(ge_exceptions.PartitionQueryError):
-        sorted_batch_definition_list = (
-            my_data_connector.get_batch_definition_list_from_batch_request(
-                BatchRequest(
-                    datasource_name="test_environment",
-                    data_connector_name="general_filesystem_data_connector",
-                    data_asset_name="TestFiles",
-                    partition_request={"custom_filter_function": "I_wont_work_either"},
-                )
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                partition_request={"custom_filter_function": "I_wont_work_either"},
             )
         )
 
     # Test 3: partition_definitions is not dict
     with pytest.raises(ge_exceptions.PartitionQueryError):
+        # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
-                BatchRequest(
+                batch_request=BatchRequest(
                     datasource_name="test_environment",
                     data_connector_name="general_filesystem_data_connector",
                     data_asset_name="TestFiles",
-                    partition_request={"partition_identifiers": 1},
+                    partition_request={"batch_identifiers": 1},
                 )
             )
         )
 
     returned = my_data_connector.get_batch_definition_list_from_batch_request(
-        BatchRequest(
+        batch_request=BatchRequest(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_request={"partition_identifiers": {"name": "alex"}},
+            partition_request={"batch_identifiers": {"name": "alex"}},
         )
     )
     assert len(returned) == 2
@@ -142,7 +143,7 @@ def test_partition_request_limit(create_files_and_instantiate_data_connector):
     # no limit
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -155,7 +156,7 @@ def test_partition_request_limit(create_files_and_instantiate_data_connector):
     # proper limit
     sorted_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -169,7 +170,7 @@ def test_partition_request_limit(create_files_and_instantiate_data_connector):
     with pytest.raises(ge_exceptions.PartitionQueryError):
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
-                BatchRequest(
+                batch_request=BatchRequest(
                     datasource_name="test_environment",
                     data_connector_name="general_filesystem_data_connector",
                     data_asset_name="TestFiles",
@@ -184,9 +185,10 @@ def test_partition_request_illegal_index_and_limit_combination(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     with pytest.raises(ge_exceptions.PartitionQueryError):
+        # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
-                BatchRequest(
+                batch_request=BatchRequest(
                     datasource_name="test_environment",
                     data_connector_name="general_filesystem_data_connector",
                     data_asset_name="TestFiles",
@@ -200,8 +202,8 @@ def test_partition_request_sorted_filtered_by_custom_filter(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return (
             partition_definition["name"] in ["abe", "james", "eugene"]
@@ -213,7 +215,7 @@ def test_partition_request_sorted_filtered_by_custom_filter(
 
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -274,8 +276,8 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_limit(
 ):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return (
             partition_definition["name"] in ["abe", "james", "eugene"]
@@ -287,7 +289,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_limit(
 
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -341,8 +343,8 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(
 ):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return (
             partition_definition["name"] in ["abe", "james", "eugene"]
@@ -354,7 +356,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_int(
 
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -385,8 +387,8 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_string
 ):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return (
             partition_definition["name"] in ["abe", "james", "eugene"]
@@ -398,7 +400,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_index_as_string
 
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -428,8 +430,8 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(
 ):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return (
             partition_definition["name"] in ["abe", "james", "eugene"]
@@ -441,7 +443,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_list(
 
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -481,8 +483,8 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(
 ):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return (
             partition_definition["name"] in ["abe", "james", "eugene"]
@@ -494,7 +496,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_tuple(
 
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -533,8 +535,8 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(
 ):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return (
             partition_definition["name"] in ["abe", "james", "eugene"]
@@ -546,7 +548,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_as_str(
 
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -585,8 +587,8 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(
 ):
     # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
 
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return (
             partition_definition["name"] in ["abe", "james", "eugene"]
@@ -598,7 +600,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(
 
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
@@ -632,19 +634,19 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_identifiers_1_key(
+def test_partition_request_partition_request_batch_identifiers_1_key(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 partition_request={
-                    "partition_identifiers": {"timestamp": "20200809"},
+                    "batch_identifiers": {"timestamp": "20200809"},
                 },
             )
         )
@@ -688,19 +690,19 @@ def test_partition_request_partition_request_partition_identifiers_1_key(
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_identifiers_1_key_and_index(
+def test_partition_request_partition_request_batch_identifiers_1_key_and_index(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 partition_request={
-                    "partition_identifiers": {"name": "james"},
+                    "batch_identifiers": {"name": "james"},
                     "index": 0,
                 },
             )
@@ -721,19 +723,19 @@ def test_partition_request_partition_request_partition_identifiers_1_key_and_ind
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_identifiers_2_key_name_timestamp(
+def test_partition_request_partition_request_batch_identifiers_2_key_name_timestamp(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
     # no limit
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 partition_request={
-                    "partition_identifiers": {"timestamp": "20200809", "name": "will"},
+                    "batch_identifiers": {"timestamp": "20200809", "name": "will"},
                 },
             )
         )
@@ -760,7 +762,7 @@ def test_partition_request_for_data_asset_name(
     # no limit
     returned_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
+            batch_request=BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",

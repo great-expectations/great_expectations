@@ -13,6 +13,7 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class BatchDefinition(SerializableDictDot):
@@ -159,15 +160,30 @@ class BatchDefinition(SerializableDictDot):
             ^ hash(self.data_connector_name)
             ^ hash(self.data_asset_name)
         )
-        if self.definition is not None:
+        if self.partition_definition is not None:
             for key, value in self.partition_definition.items():
                 _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
         return _result_hash
 
 
-class BatchRequest(DictDot):
+class BatchRequestBase(DictDot):
     """
-    This class contains all attributes of a batch_request.
+    This class is for internal inter-object protocol purposes only.
+    As such, it contains all attributes of a batch_request, but does not validate them.
+    See the BatchRequest class, which extends BatchRequestBase and validates the attributes.
+
+    BatchRequestBase is used for the internal protocol purposes exclusively, not part of API for the developer users.
+
+    Previously, the very same BatchRequest was used for both the internal protocol purposes and as part of the API
+    exposed to developers.  However, while convenient for internal data interchange, using the same BatchRequest class
+    as arguments to the externally-exported DataContext.get_batch(), DataContext.get_batch_list(), and
+    DataContext.get_validator() API calls for obtaining batches and/or validators was insufficiently expressive to
+    fulfill the needs of both. In the user-accessible API, BatchRequest, must enforce that all members of the triple,
+    consisting of data_source_name, data_connector_name, and data_asset_name, are not NULL.  Whereas for the internal
+    protocol, BatchRequest is used as a flexible bag of attributes, in which any fields are allowed to be NULL.  Hence,
+    now, BatchRequestBase is dedicated for the use as the bag oof attributes for the internal protocol use, whereby NULL
+    values are allowed as per the internal needs.  The BatchRequest class extends BatchRequestBase and adds to it strong
+    validation (described above plus additional attribute validation) so as to formally validate user specified fields.
     """
 
     def __init__(
@@ -180,14 +196,6 @@ class BatchRequest(DictDot):
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
-        self._validate_batch_request(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            limit=limit,
-        )
-
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
@@ -224,47 +232,6 @@ class BatchRequest(DictDot):
     def batch_spec_passthrough(self) -> dict:
         return self._batch_spec_passthrough
 
-    @staticmethod
-    def _validate_batch_request(
-        datasource_name: str,
-        data_connector_name: str,
-        data_asset_name: str,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        limit: Optional[int] = None,
-    ):
-        # TODO test and check all logic in this validator!
-        if datasource_name and not isinstance(datasource_name, str):
-            raise TypeError(
-                f"""The type of an datasource name must be a string (Python "str").  The type given is
-"{str(type(datasource_name))}", which is illegal.
-            """
-            )
-        if data_connector_name and not isinstance(data_connector_name, str):
-            raise TypeError(
-                f"""The type of a data_connector name must be a string (Python "str").  The type given is
-"{str(type(data_connector_name))}", which is illegal.
-                """
-            )
-        if data_asset_name and not isinstance(data_asset_name, str):
-            raise TypeError(
-                f"""The type of a data_asset name must be a string (Python "str").  The type given is
-"{str(type(data_asset_name))}", which is illegal.
-                """
-            )
-        # TODO Abe 20201015: Switch this to PartitionRequest.
-        if partition_request and not isinstance(partition_request, dict):
-            raise TypeError(
-                f"""The type of a partition_request must be a dict object.  The type given is
-"{str(type(partition_request))}", which is illegal.
-                """
-            )
-        if limit and not isinstance(limit, int):
-            raise TypeError(
-                f"""The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
-is illegal.
-                """
-            )
-
     def get_json_dict(self) -> dict:
         partition_request: Optional[dict] = None
         if self.partition_request is not None:
@@ -279,6 +246,8 @@ is illegal.
             "data_asset_name": self.data_asset_name,
             "partition_request": partition_request,
         }
+        if self.batch_data:
+            json_dict["batch_data"] = str(type(self.batch_data))
         if self.batch_spec_passthrough is not None:
             json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
         if self.limit is not None:
@@ -300,6 +269,80 @@ is illegal.
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         return self.id == other.id
+
+
+class BatchRequest(BatchRequestBase):
+    """
+    This class contains all attributes of a batch_request.  See the comments in BatchRequestBase for design specifics.
+    """
+
+    def __init__(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        batch_data: Any = None,
+        limit: Optional[int] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+    ):
+        self._validate_batch_request(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            partition_request=partition_request,
+            limit=limit,
+        )
+        super().__init__(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            partition_request=partition_request,
+            batch_data=batch_data,
+            limit=limit,
+            batch_spec_passthrough=batch_spec_passthrough,
+        )
+
+    @staticmethod
+    def _validate_batch_request(
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        limit: Optional[int] = None,
+    ):
+        # TODO test and check all logic in this validator!
+        if not (datasource_name and isinstance(datasource_name, str)):
+            raise TypeError(
+                f"""The type of an datasource name must be a string (Python "str").  The type given is
+"{str(type(datasource_name))}", which is illegal.
+            """
+            )
+        if not (data_connector_name and isinstance(data_connector_name, str)):
+            raise TypeError(
+                f"""The type of a data_connector name must be a string (Python "str").  The type given is
+"{str(type(data_connector_name))}", which is illegal.
+                """
+            )
+        if not (data_asset_name and isinstance(data_asset_name, str)):
+            raise TypeError(
+                f"""The type of a data_asset name must be a string (Python "str").  The type given is
+"{str(type(data_asset_name))}", which is illegal.
+                """
+            )
+        # TODO Abe 20201015: Switch this to PartitionRequest.
+        if partition_request and not isinstance(partition_request, dict):
+            raise TypeError(
+                f"""The type of a partition_request must be a dict object.  The type given is
+"{str(type(partition_request))}", which is illegal.
+                """
+            )
+        if limit and not isinstance(limit, int):
+            raise TypeError(
+                f"""The type of limit must be an integer (Python "int").  The type given is "{str(type(limit))}", which
+is illegal.
+                """
+            )
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
@@ -430,5 +473,12 @@ class Batch(DictDot):
         }
         return json.dumps(json_dict, indent=2)
 
-    def head(self):
-        return self._data.head()
+    def head(self, n_rows=5, fetch_all=False):
+        # FIXME - we should use a Validator after resolving circularity
+        # Validator(self._data.execution_engine, batches=(self,)).get_metric(MetricConfiguration("table.head", {"batch_id": self.id}, {"n_rows": n_rows, "fetch_all": fetch_all}))
+        metric = MetricConfiguration(
+            "table.head",
+            {"batch_id": self.id},
+            {"n_rows": n_rows, "fetch_all": fetch_all},
+        )
+        return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
