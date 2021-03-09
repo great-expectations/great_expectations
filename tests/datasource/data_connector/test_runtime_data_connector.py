@@ -323,7 +323,12 @@ def test_get_available_data_references_cache_updating_after_batch_request(
                 datasource_name="my_datasource",
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition({"airflow_run_id": 1234567890}))]}
+                partition_definition=PartitionDefinition(
+                    {"airflow_run_id": 1234567890}
+                ),
+            )
+        ]
+    }
 
     # update with
     test_df_new: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
@@ -354,15 +359,18 @@ def test_get_available_data_references_cache_updating_after_batch_request(
                 datasource_name="my_datasource",
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition({"airflow_run_id": 1234567890})),
+                partition_definition=PartitionDefinition(
+                    {"airflow_run_id": 1234567890}
+                ),
+            ),
             BatchDefinition(
                 datasource_name="my_datasource",
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition({"airflow_run_id": 987654321})),
-
-        ]}
-
+                partition_definition=PartitionDefinition({"airflow_run_id": 987654321}),
+            ),
+        ]
+    }
 
     # new data_asset_name
     test_df_new_asset: pd.DataFrame = pd.DataFrame(
@@ -395,28 +403,31 @@ def test_get_available_data_references_cache_updating_after_batch_request(
                 datasource_name="my_datasource",
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition({"airflow_run_id": 1234567890})),
+                partition_definition=PartitionDefinition(
+                    {"airflow_run_id": 1234567890}
+                ),
+            ),
             BatchDefinition(
                 datasource_name="my_datasource",
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset_1",
-                partition_definition=PartitionDefinition({"airflow_run_id": 987654321})),
-
+                partition_definition=PartitionDefinition({"airflow_run_id": 987654321}),
+            ),
         ],
         "my_data_asset_2": [
             BatchDefinition(
                 datasource_name="my_datasource",
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset_2",
-                partition_definition=PartitionDefinition({"airflow_run_id": 5555555})),
-        ]
+                partition_definition=PartitionDefinition({"airflow_run_id": 5555555}),
+            ),
+        ],
     }
 
     assert test_runtime_data_connector.get_available_data_asset_names() == [
         "my_data_asset_1",
         "my_data_asset_2",
     ]
-
 
 
 def test_get_batch_definition_list_from_batch_request_length_one(
