@@ -524,7 +524,13 @@ def get_dataset(
             "NullType": sparktypes.NullType,
         }
 
-        spark = get_or_create_spark_application()
+        spark = get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+            }
+        )
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(

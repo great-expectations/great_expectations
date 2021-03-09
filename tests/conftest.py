@@ -316,7 +316,13 @@ def spark_session(test_backends):
         import pyspark
         from pyspark.sql import SparkSession
 
-        return get_or_create_spark_application()
+        return get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+            }
+        )
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
@@ -343,7 +349,13 @@ def spark_session_v012(test_backends):
         import pyspark
         from pyspark.sql import SparkSession
 
-        return get_or_create_spark_application()
+        return get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+            }
+        )
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 

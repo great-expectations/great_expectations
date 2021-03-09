@@ -80,7 +80,13 @@ def get_pandas_runtime_validator(context, df):
 
 
 def get_spark_runtime_validator(context, df):
-    spark = get_or_create_spark_application()
+    spark = get_or_create_spark_application(
+        spark_config={
+            "spark.sql.catalogImplementation": "hive",
+            "spark.executor.memory": "450m",
+            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+        }
+    )
     df = spark.createDataFrame(df)
     batch_request = BatchRequest(
         datasource_name="my_spark_datasource",

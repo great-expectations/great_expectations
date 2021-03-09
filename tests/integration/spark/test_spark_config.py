@@ -28,6 +28,7 @@ def test_spark_config_datasource(spark_session_v012):
         "spark.app.name": name,
         "spark.sql.catalogImplementation": "hive",
         "spark.executor.memory": "768m",
+        # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
     }
     source: SparkDFDatasource = SparkDFDatasource(spark_config=spark_config)
     sess: SparkSession = source.spark
@@ -49,6 +50,7 @@ def test_spark_config_execution_engine(spark_session):
         "spark.app.name": name,
         "spark.sql.catalogImplementation": "hive",
         "spark.executor.memory": "512m",
+        # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
     }
     execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
         spark_config=spark_config

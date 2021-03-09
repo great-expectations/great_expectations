@@ -412,7 +412,6 @@ def sniff_s3_compression(s3_url: S3Url) -> str:
 
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
-    name: Optional[str] = None,
     spark_config: Optional[Dict[str, str]] = None,
 ):
     # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
@@ -431,14 +430,15 @@ def get_or_create_spark_application(
             "Unable to load pyspark; install optional spark dependency for support."
         )
 
-    if not name:
-        name = "default_great_expectations_spark_application"
     if spark_config is None:
         spark_config = {
-            "spark.app.name": name,
             "spark.sql.catalogImplementation": "hive",
             "spark.executor.memory": "450m",
         }
+    name: Optional[str] = spark_config.get("spark.app.name")
+    if not name:
+        name = "default_great_expectations_spark_application"
+    spark_config.update({"spark.app.name": name})
 
     spark_session: Optional[SparkSession] = get_or_create_spark_session(
         spark_config=spark_config

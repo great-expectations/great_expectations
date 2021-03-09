@@ -140,8 +140,7 @@ class SparkDFDatasource(LegacyDatasource):
 
         if spark_config is None:
             spark_config = {}
-        name: Optional[str] = spark_config.get("spark.app.name")
-        spark = get_or_create_spark_application(name=name, spark_config=spark_config)
+        spark = get_or_create_spark_application(spark_config=spark_config)
         self.spark = spark
 
         self._build_generators()

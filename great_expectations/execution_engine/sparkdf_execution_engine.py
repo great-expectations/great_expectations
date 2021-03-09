@@ -148,10 +148,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         if spark_config is None:
             spark_config = {}
-        name: Optional[str] = spark_config.get("spark.app.name")
-        spark: SparkSession = get_or_create_spark_application(
-            name=name, spark_config=spark_config
-        )
+
+        spark: SparkSession = get_or_create_spark_application(spark_config=spark_config)
         self.spark = spark
         self._spark_config = spark_config
 

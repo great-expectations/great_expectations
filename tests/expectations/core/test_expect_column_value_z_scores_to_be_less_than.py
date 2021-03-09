@@ -63,7 +63,13 @@ def test_spark_expect_column_value_z_scores_to_be_less_than_impl(
     spark_session, basic_spark_df_execution_engine
 ):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
-    spark = get_or_create_spark_application()
+    spark = get_or_create_spark_application(
+        spark_config={
+            "spark.sql.catalogImplementation": "hive",
+            "spark.executor.memory": "450m",
+            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+        }
+    )
     df = spark.createDataFrame(df)
 
     expectationConfiguration = ExpectationConfiguration(
