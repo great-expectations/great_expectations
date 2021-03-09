@@ -144,7 +144,9 @@ Notes:
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
             if "compression" not in reader_options.keys():
-                reader_options["compression"] = sniff_s3_compression(s3_url)
+                inferred_compression_param = sniff_s3_compression(s3_url)
+                if inferred_compression_param is not None:
+                    reader_options["compression"] = inferred_compression_param
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(

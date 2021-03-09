@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [BUGFIX] Fix an issue where "compression" was added to reader_options for all files loaded from S3 by PandasExecutionEngine
 
 0.13.12
 -----------------
