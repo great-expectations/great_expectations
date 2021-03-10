@@ -82,10 +82,6 @@ class RuntimeDataConnector(DataConnector):
         return sums
 
     def get_unmatched_data_references(self) -> List[str]:
-        if self._data_references_cache is None:
-            raise ValueError(
-                '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
-            )
         return []
 
     def get_available_data_asset_names(self) -> List[str]:
@@ -155,14 +151,11 @@ class RuntimeDataConnector(DataConnector):
             self._data_references_cache[data_asset_name] = {
                 data_reference: batch_definition_list
             }
-        elif data_reference not in self._data_references_cache[data_asset_name]:
+            # or replace
+        else:
             self._data_references_cache[data_asset_name][
                 data_reference
             ] = batch_definition_list
-        else:
-            self._data_references_cache[data_asset_name][data_reference].append(
-                batch_definition_list[0]
-            )
 
     def _map_batch_definition_to_data_reference(
         self,

@@ -666,3 +666,38 @@ def test__build_batch_spec(basic_datasource):
     assert type(batch_spec) == RuntimeDataBatchSpec
     assert set(batch_spec.keys()) == {"batch_data"}
     assert batch_spec["batch_data"].shape == (10, 1)
+
+
+def test__get_data_reference_name(basic_datasource):
+    partition_request: dict = {
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        }
+    }
+    partition_definition = PartitionDefinition(partition_request["batch_identifiers"])
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+
+    assert (
+        test_runtime_data_connector._get_data_reference_name(partition_definition)
+        == "1234567890"
+    )
+
+    partition_request: dict = {
+        "batch_identifiers": {
+            "run_id_1": 1234567890,
+            "run_id_2": 1111111111,
+        }
+    }
+    partition_definition = PartitionDefinition(partition_request["batch_identifiers"])
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+
+    assert (
+        test_runtime_data_connector._get_data_reference_name(partition_definition)
+        == "1234567890-1111111111"
+    )

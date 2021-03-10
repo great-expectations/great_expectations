@@ -58,7 +58,7 @@ class DataConnector:
         self._execution_engine = execution_engine
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache = None
+        self._data_references_cache = {}
 
         self._data_context_root_directory = None
 
@@ -200,7 +200,7 @@ class DataConnector:
             max_examples (int): how many data_references should be printed?
 
         """
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         if pretty_print:
