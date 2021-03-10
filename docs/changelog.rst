@@ -15,7 +15,6 @@ Changelog
 * [DOCS] rst bold formatting fix #2525
 * [DOCS] Made the V2vsV3 note in the tutorial bold, since several users missed it #2522
 * [DOCS] expectation and validation store in Azure Blob Storage #2514 Thanks @benoitLebreton-perso !
-* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfilerß
 * [MAINTENANCE] Remove extraneous linebreak #2512
 * [MAINTENANCE] Wording tweaks to `checkpoint new` notebook renderer. #2510
 * [MAINTENANCE] Reference "v3 (Batch Request) API" instead of "new API" #2509
