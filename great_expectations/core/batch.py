@@ -335,6 +335,65 @@ is illegal.
             )
 
 
+class RuntimeBatchRequest(BatchRequest):
+    def __init__(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        limit: Optional[int] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
+    ):
+        super().__init__(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            limit=limit,
+            batch_spec_passthrough=batch_spec_passthrough,
+        )
+        self._runtime_parameters = runtime_parameters
+        self._batch_identifiers = batch_identifiers
+
+    @property
+    def runtime_parameters(self) -> dict:
+        return self._runtime_parameters
+
+    @property
+    def batch_identifiers(self) -> dict:
+        return self._batch_identifiers
+
+    @staticmethod
+    def _validate_batch_request(
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        limit: Optional[int] = None,
+    ):
+        super()._validate_batch_request(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            partition_request=partition_request,
+            limit=limit,
+        )
+
+    def get_json_dict(self):
+        json_dict = super().get_json_dict()
+        json_dict["batch_identifiers"] = self.batch_identifiers
+        json_dict["runtime_parameters"] = self.runtime_parameters
+
+        if json_dict["runtime_parameters"] is not None and json_dict[
+            "runtime_parameters"
+        ].get("batch_data"):
+            json_dict["runtime_parameters"]["batch_data"] = str(
+                type(json_dict["runtime_parameters"]["batch_data"])
+            )
+        return json_dict
+
+
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
 class BatchMarkers(BatchKwargs):
     """A BatchMarkers is a special type of BatchKwargs (so that it has a batch_fingerprint) but it generally does
