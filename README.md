@@ -138,7 +138,7 @@ To see Great Expectations in action on your own data:
 
 For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
 
-If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
+If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there!
 
 <!--
 -------------------------------------------------------------
