@@ -192,7 +192,6 @@ class BatchRequestBase(DictDot):
         data_connector_name: str = None,
         data_asset_name: str = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        batch_data: Any = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -200,7 +199,6 @@ class BatchRequestBase(DictDot):
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
         self._partition_request = partition_request
-        self._batch_data = batch_data
         self._limit = limit
         self._batch_spec_passthrough = batch_spec_passthrough
 
@@ -219,10 +217,6 @@ class BatchRequestBase(DictDot):
     @property
     def partition_request(self) -> Union[PartitionRequest, dict]:  # PartitionRequest:
         return self._partition_request
-
-    @property
-    def batch_data(self) -> Any:
-        return self._batch_data
 
     @property
     def limit(self) -> int:
@@ -246,8 +240,6 @@ class BatchRequestBase(DictDot):
             "data_asset_name": self.data_asset_name,
             "partition_request": partition_request,
         }
-        if self.batch_data:
-            json_dict["batch_data"] = str(type(self.batch_data))
         if self.batch_spec_passthrough is not None:
             json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
         if self.limit is not None:
@@ -282,7 +274,6 @@ class BatchRequest(BatchRequestBase):
         data_connector_name: str = None,
         data_asset_name: str = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        batch_data: Any = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -298,7 +289,6 @@ class BatchRequest(BatchRequestBase):
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
             partition_request=partition_request,
-            batch_data=batch_data,
             limit=limit,
             batch_spec_passthrough=batch_spec_passthrough,
         )
