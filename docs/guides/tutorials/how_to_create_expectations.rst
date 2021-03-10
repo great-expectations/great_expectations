@@ -87,7 +87,7 @@ If you do not use the :ref:`CLI <command_line>`, create a new notebook in the``g
 
 .. admonition:: If Using V3 (Batch Request) API
 
-    **The following steps are only applicable for V2 (Batch Kwargs) API. If you are using V3 (Batch Request) API, follow the steps outlined in the how-to guide on :ref:`how to create a Expectation Suite without the CLI <how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_without_the_cli>`.**
+    **The following steps are only applicable for V2 (Batch Kwargs) API. If you are using V3 (Batch Request) API, follow the steps outlined in the how-to guide on** :ref:`how to create a Expectation Suite without the CLI <how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_without_the_cli>`.
 
 1. Setup
 ********************************************
