@@ -126,8 +126,6 @@ class FilePathDataConnector(DataConnector):
         """
         # <WILL> TODO 202103 some methods still call this method with BatchRequestBase. Refactor to only allow BatchRequest
         # in this case we can guarantee that batch_request_base will contain a data_asset_name because it is being converted here
-        batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
-
         if isinstance(batch_request, BatchRequest):
             batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         else:

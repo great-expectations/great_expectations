@@ -85,6 +85,7 @@ class RuntimeDataConnector(DataConnector):
         return []
 
     def get_available_data_asset_names(self) -> List[str]:
+        """Please see note in : _get_batch_definition_list_from_batch_request()"""
         return list(self._data_references_cache.keys())
 
     # noinspection PyMethodOverriding
@@ -118,6 +119,17 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
+
+        """
+        <Will> 202103. The following behavior of the _data_references_cache follows a pattern that we are using for
+        other data_connectors, including variations of FilePathDataConnector. When BatchRequest contains batch_data
+        that is passed in as a in-memory dataframe, the cache will contain the names of all data_assets
+        (and data_references) that have been passed into the RuntimeDataConnector in this session, even though technically
+        only the most recent batch_data is available. This can be misleading. However, allowing the RuntimeDataConnector
+        to keep a record of all data_assets (and data_references) that have been passed in will allow for the proposed
+        behavior of RuntimeBatchRequest which will allow for paths and queries to be passed in as part of the BatchRequest.
+        Therefore this behavior will be revisited when the design of RuntimeBatchRequest and related classes are complete.
+        """
         self._validate_batch_request(batch_request=batch_request)
 
         self._validate_batch_identifiers(
@@ -156,22 +168,6 @@ class RuntimeDataConnector(DataConnector):
             self._data_references_cache[data_asset_name][
                 data_reference
             ] = batch_definition_list
-
-    def _map_batch_definition_to_data_reference(
-        self,
-        batch_definition: BatchDefinition,
-    ) -> str:
-        if not isinstance(batch_definition, BatchDefinition):
-            raise TypeError(
-                "batch_definition is not of an instance of type BatchDefinition"
-            )
-        partition_definition: PartitionDefinition = (
-            batch_definition.partition_definition
-        )
-        data_reference: str = self._get_data_reference_name(
-            batch_identifiers=partition_definition
-        )
-        return data_reference
 
     def _self_check_fetch_batch(
         self,
