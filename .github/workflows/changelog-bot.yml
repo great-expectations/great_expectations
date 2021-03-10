@@ -3,8 +3,6 @@ on:
   pull_request:
     types:
       - opened
-    branches:
-      - develop
 jobs:
   create-comment:
     runs-on: ubuntu-latest
