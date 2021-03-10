@@ -4,9 +4,22 @@
 Changelog
 #########
 
-Develop
+0.13.13
 -----------------
+
+* [ENHANCEMENT] Update suite scaffold to work with the UserConfigurableProfiler #2519
+* [ENHANCEMENT] rename `partition_identifiers` to `batch_identifiers` #2517
+* [BUGFIX] Updates handling of value_set_threshold with the UserConfigurableProfiler #2518
+* [BUGFIX] Handle expect_compound_columns_to_be_unique in UserConfigurableProfiler for V3 #2507
+* [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend #2501 
+* [DOCS] rst bold formatting fix #2525
+* [DOCS] Made the V2vsV3 note in the tutorial bold, since several users missed it #2522
+* [DOCS] expectation and validation store in Azure Blob Storage #2514 Thanks @benoitLebreton-perso !
 * [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfilerß
+* [MAINTENANCE] Remove extraneous linebreak #2512
+* [MAINTENANCE] Wording tweaks to `checkpoint new` notebook renderer. #2510
+* [MAINTENANCE] Reference "v3 (Batch Request) API" instead of "new API" #2509
+* [MAINTENANCE] Raise an error instead of trying to parse paths that don't exist #2508
 
 0.13.12
 -----------------
