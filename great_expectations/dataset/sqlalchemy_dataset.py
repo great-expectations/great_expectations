@@ -548,11 +548,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "sqlite",
             "oracle",
             "mssql",
+            "hive",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
+        elif self.engine.dialect.name.lower() == b"hive":
+            self.dialect = import_library_module(module_name="sqlalchemy.dialects.hive")
 
         elif self.engine.dialect.name.lower() == "snowflake":
             self.dialect = import_library_module(
@@ -1339,6 +1342,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif engine_dialect == "oracle":
             stmt = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
+            )
+        elif self.sql_engine_dialect.name.lower() in ("hive", b"hive"):
+            stmt = "CREATE TEMPORARY TABLE {schema_name}.{table_name} AS {custom_sql}".format(
+                schema_name=schema_name if schema_name is not None else "default",
+                table_name=table_name,
+                custom_sql=custom_sql,
             )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
