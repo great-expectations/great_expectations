@@ -88,7 +88,7 @@ def test_partition_request_non_recognized_param(
 ):
     my_data_connector = create_files_and_instantiate_data_connector
 
-    # Test 1: non valid_partition_identifiers_limit
+    # Test 1: non valid_batch_identifiers_limit
     with pytest.raises(ge_exceptions.PartitionQueryError):
         # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
@@ -122,7 +122,7 @@ def test_partition_request_non_recognized_param(
                     datasource_name="test_environment",
                     data_connector_name="general_filesystem_data_connector",
                     data_asset_name="TestFiles",
-                    partition_request={"partition_identifiers": 1},
+                    partition_request={"batch_identifiers": 1},
                 )
             )
         )
@@ -132,7 +132,7 @@ def test_partition_request_non_recognized_param(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            partition_request={"partition_identifiers": {"name": "alex"}},
+            partition_request={"batch_identifiers": {"name": "alex"}},
         )
     )
     assert len(returned) == 2
@@ -634,7 +634,7 @@ def test_partition_request_sorted_filtered_by_custom_filter_with_slice_obj(
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_identifiers_1_key(
+def test_partition_request_partition_request_batch_identifiers_1_key(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
@@ -646,7 +646,7 @@ def test_partition_request_partition_request_partition_identifiers_1_key(
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 partition_request={
-                    "partition_identifiers": {"timestamp": "20200809"},
+                    "batch_identifiers": {"timestamp": "20200809"},
                 },
             )
         )
@@ -690,7 +690,7 @@ def test_partition_request_partition_request_partition_identifiers_1_key(
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_identifiers_1_key_and_index(
+def test_partition_request_partition_request_batch_identifiers_1_key_and_index(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
@@ -702,7 +702,7 @@ def test_partition_request_partition_request_partition_identifiers_1_key_and_ind
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 partition_request={
-                    "partition_identifiers": {"name": "james"},
+                    "batch_identifiers": {"name": "james"},
                     "index": 0,
                 },
             )
@@ -723,7 +723,7 @@ def test_partition_request_partition_request_partition_identifiers_1_key_and_ind
     assert returned_batch_definition_list == expected
 
 
-def test_partition_request_partition_request_partition_identifiers_2_key_name_timestamp(
+def test_partition_request_partition_request_batch_identifiers_2_key_name_timestamp(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
@@ -735,7 +735,7 @@ def test_partition_request_partition_request_partition_identifiers_2_key_name_ti
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 partition_request={
-                    "partition_identifiers": {"timestamp": "20200809", "name": "will"},
+                    "batch_identifiers": {"timestamp": "20200809", "name": "will"},
                 },
             )
         )

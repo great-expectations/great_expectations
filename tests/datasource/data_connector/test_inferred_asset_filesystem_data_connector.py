@@ -215,7 +215,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
             partition_request={
-                "partition_identifiers": {
+                "batch_identifiers": {
                     "year_dir": "2020",
                     "month_dir": "03",
                 }
