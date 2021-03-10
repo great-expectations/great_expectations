@@ -251,9 +251,22 @@ class SorterConfigSchema(Schema):
 
 
 class DataConnectorConfig(DictDot):
-    def __init__(self, class_name, module_name=None, assets=None, base_directory=None, glob_directive=None,
-                 default_regex=None, batch_identifiers=None, bucket=None, prefix=None, delimiter=None, max_keys=None,
-                 boto3_options=None, **kwargs):
+    def __init__(
+        self,
+        class_name,
+        module_name=None,
+        assets=None,
+        base_directory=None,
+        glob_directive=None,
+        default_regex=None,
+        batch_identifiers=None,
+        bucket=None,
+        prefix=None,
+        delimiter=None,
+        max_keys=None,
+        boto3_options=None,
+        **kwargs,
+    ):
         self._class_name = class_name
         self._module_name = module_name
         if assets is not None:

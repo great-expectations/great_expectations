@@ -31,8 +31,13 @@ DEFAULT_DELIMITER: str = "-"
 
 # TODO: <Alex>We need a mechanism for specifying the data_asset_name for RuntimeDataConnector (otherwise, it will always be the default).</Alex>
 class RuntimeDataConnector(DataConnector):
-    def __init__(self, name: str, datasource_name: str, execution_engine: Optional[ExecutionEngine] = None,
-                 batch_identifiers: Optional[list] = None):
+    def __init__(
+        self,
+        name: str,
+        datasource_name: str,
+        execution_engine: Optional[ExecutionEngine] = None,
+        batch_identifiers: Optional[list] = None,
+    ):
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
         super().__init__(
@@ -103,8 +108,7 @@ class RuntimeDataConnector(DataConnector):
             BatchDefinition
         ] = self._get_batch_definition_list_from_batch_request(
             batch_request=BatchRequestBase(
-                datasource_name=self.datasource_name,
-                data_connector_name=self.name,
+                datasource_name=self.datasource_name, data_connector_name=self.name
             )
         )
 
@@ -272,12 +276,15 @@ class RuntimeDataConnector(DataConnector):
     def _validate_batch_identifiers(self, batch_identifiers: dict):
         if batch_identifiers is None:
             batch_identifiers = {}
-        self._validate_batch_identifiers_configuration(batch_identifiers=list(batch_identifiers.keys()))
+        self._validate_batch_identifiers_configuration(
+            batch_identifiers=list(batch_identifiers.keys())
+        )
 
     def _validate_batch_identifiers_configuration(self, batch_identifiers: List[str]):
         if batch_identifiers and len(batch_identifiers) > 0:
             if not (
-                    self._batch_identifiers and set(batch_identifiers) <= set(self._batch_identifiers)
+                self._batch_identifiers
+                and set(batch_identifiers) <= set(self._batch_identifiers)
             ):
                 raise ge_exceptions.DataConnectorError(
                     f"""RuntimeDataConnector "{self.name}" was invoked with one or more batch identifiers that do not
