@@ -11,6 +11,7 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
+from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 
 @pytest.fixture()
@@ -59,22 +60,6 @@ def possible_expectations_set():
         "expect_column_values_to_be_unique",
         "expect_compound_columns_to_be_unique",
     }
-
-
-def get_set_of_columns_and_expectations_from_suite(suite):
-    """
-    Args:
-        suite: An expectation suite
-
-    Returns:
-        A tuple containing a set of columns and a set of expectations found in a suite
-    """
-    columns = {
-        i.kwargs.get("column") for i in suite.expectations if i.kwargs.get("column")
-    }
-    expectations = {i.expectation_type for i in suite.expectations}
-
-    return columns, expectations
 
 
 def test_profiler_init_no_config(
