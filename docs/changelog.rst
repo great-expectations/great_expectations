@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfilerß
 
 0.13.12
 -----------------
