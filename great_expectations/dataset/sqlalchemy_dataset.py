@@ -1243,7 +1243,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ###
 
         engine_dialect = self.sql_engine_dialect.name.lower()
-        if type(engine_dialect) != str:
+        # handle cases where dialect.name.lower() returns a byte string (e.g. databricks)
+        if isinstance(engine_dialect, bytes):
             engine_dialect = str(engine_dialect, "utf-8")
 
         if engine_dialect == "bigquery":
