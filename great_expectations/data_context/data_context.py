@@ -24,7 +24,12 @@ from ruamel.yaml.constructor import DuplicateKeyError
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    PartitionRequest,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -1164,6 +1169,8 @@ class BaseDataContext:
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
+        query: Optional[str] = None,
+        runtime_parameters: Optional[dict] = None,
         **kwargs,
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -1217,6 +1224,8 @@ class BaseDataContext:
             sampling_kwargs=sampling_kwargs,
             splitter_method=splitter_method,
             splitter_kwargs=splitter_kwargs,
+            query=query,
+            runtime_parameters=runtime_parameters,
             **kwargs,
         )
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
@@ -1431,7 +1440,7 @@ class BaseDataContext:
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[BatchRequest] = None,
+        batch_request: Optional[BatchRequest, RuntimeBatchRequest] = None,
         batch_data: Optional[Any] = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
         batch_identifiers: Optional[dict] = None,
@@ -1443,6 +1452,8 @@ class BaseDataContext:
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
+        query: Optional[str] = None,
+        runtime_parameters: Optional[dict] = None,
         **kwargs,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -1457,6 +1468,8 @@ class BaseDataContext:
 
             batch_request
             batch_data
+            query
+            runtime_parameters
             partition_request
             batch_identifiers
 
@@ -1494,11 +1507,48 @@ class BaseDataContext:
 
         datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
+        if batch_data and query:
+            raise ValueError("Must provide only one of batch_data or query.")
+        if any(
+            [
+                batch_data
+                and runtime_parameters
+                and "batch_data" in runtime_parameters,
+                query and runtime_parameters and "query" in runtime_parameters,
+            ]
+        ):
+            raise ValueError(
+                "If batch_data or query arguments are provided, the same keys cannot appear in the runtime_parameters argument."
+            )
+
         if batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
             return datasource.get_batch_list_from_batch_request(
                 batch_request=batch_request
             )
+        elif any([batch_data, query, runtime_parameters]):
+            runtime_parameters = runtime_parameters or {}
+            if batch_data is not None:
+                runtime_parameters["batch_data"] = batch_data
+            elif query is not None:
+                runtime_parameters["query"] = query
+
+            if batch_identifiers is None:
+                batch_identifiers = kwargs
+            else:
+                # Raise a warning if kwargs exist
+                pass
+
+            batch_request = RuntimeBatchRequest(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                limit=limit,
+                batch_spec_passthrough=batch_spec_passthrough,
+                runtime_parameters=runtime_parameters,
+                batch_identifiers=batch_identifiers,
+            )
+
         else:
             if partition_request is None:
                 if batch_identifiers is None:
@@ -1539,13 +1589,10 @@ class BaseDataContext:
                 datasource_name=datasource_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
-                batch_data=batch_data,
                 partition_request=partition_request,
                 batch_spec_passthrough=batch_spec_passthrough,
             )
-            return datasource.get_batch_list_from_batch_request(
-                batch_request=batch_request
-            )
+        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_validator(
         self,
