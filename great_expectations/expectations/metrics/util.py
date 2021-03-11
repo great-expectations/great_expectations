@@ -220,14 +220,14 @@ def attempt_allowing_relative_error(dialect):
 
 def is_column_present_in_table(
     engine: Engine,
-    table_name: str,
+    table_selectable: Select,
     column_name: str,
     schema_name: Optional[str] = None,
 ) -> bool:
     all_columns_metadata: Optional[
         List[Dict[str, Any]]
     ] = get_sqlalchemy_column_metadata(
-        engine=engine, table_name=table_name, schema_name=schema_name
+        engine=engine, table_selectable=table_selectable, schema_name=schema_name
     )
     # Purposefully do not check for a NULL "all_columns_metadata" to insure that it must never happen.
     column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
@@ -235,7 +235,7 @@ def is_column_present_in_table(
 
 
 def get_sqlalchemy_column_metadata(
-    engine: Engine, table_name: str, schema_name: Optional[str] = None
+    engine: Engine, table_selectable: Select, schema_name: Optional[str] = None
 ) -> Optional[List[Dict[str, Any]]]:
     try:
         columns: List[Dict[str, Any]]
@@ -243,14 +243,14 @@ def get_sqlalchemy_column_metadata(
         inspector: reflection.Inspector = reflection.Inspector.from_engine(engine)
         try:
             columns = inspector.get_columns(
-                table_name,
+                table_selectable,
                 schema=schema_name,
             )
         except (KeyError, AttributeError, sa.exc.NoSuchTableError):
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
             columns = column_reflection_fallback(
-                selectable=table_name,
+                selectable=table_selectable,
                 dialect=engine.dialect,
                 sqlalchemy_engine=engine,
             )
@@ -258,7 +258,7 @@ def get_sqlalchemy_column_metadata(
         # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
         if len(columns) == 0:
             columns = column_reflection_fallback(
-                selectable=table_name,
+                selectable=table_selectable,
                 dialect=engine.dialect,
                 sqlalchemy_engine=engine,
             )

@@ -144,7 +144,7 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 if isinstance(selectable, sa.Table):
                     if not is_column_present_in_table(
                         engine=sqlalchemy_engine,
-                        table_name=selectable,
+                        table_selectable=selectable,
                         column_name=column_name,
                     ):
                         raise ge_exceptions.ExecutionEngineError(

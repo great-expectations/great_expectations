@@ -163,7 +163,7 @@ def column_function_partial(
                 if isinstance(selectable, sa.Table):
                     if not is_column_present_in_table(
                         engine=sqlalchemy_engine,
-                        table_name=selectable,
+                        table_selectable=selectable,
                         column_name=column_name,
                     ):
                         raise ge_exceptions.ExecutionEngineError(
@@ -389,7 +389,7 @@ def column_condition_partial(
                 if isinstance(selectable, sa.Table):
                     if not is_column_present_in_table(
                         engine=sqlalchemy_engine,
-                        table_name=selectable,
+                        table_selectable=selectable,
                         column_name=column_name,
                     ):
                         raise ge_exceptions.ExecutionEngineError(
@@ -941,7 +941,7 @@ def _sqlalchemy_column_map_condition_values(
         # The "selectable" reference is guaranteed to be of the "sa.Table" type here.
         if not is_column_present_in_table(
             engine=execution_engine.engine,
-            table_name=selectable,
+            table_selectable=selectable,
             column_name=accessor_domain_kwargs.get("column"),
         ):
             error: sa.exc.SQLAlchemyError = sa.exc.SQLAlchemyError(
@@ -989,7 +989,7 @@ def _sqlalchemy_column_map_condition_value_counts(
         # The "selectable" reference is guaranteed to be of the "sa.Table" type here.
         if not is_column_present_in_table(
             engine=execution_engine.engine,
-            table_name=selectable,
+            table_selectable=selectable,
             column_name=accessor_domain_kwargs.get("column"),
         ):
             error: sa.exc.SQLAlchemyError = sa.exc.SQLAlchemyError(
