@@ -363,6 +363,7 @@ def test_validator_default_expectation_args__sql(
 
     with pytest.raises(ge_exceptions.InvalidDataContextKeyError):
         # expectation_suite_name is a number not str
+        # noinspection PyUnusedLocal
         my_validator = context.get_validator(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
@@ -373,6 +374,7 @@ def test_validator_default_expectation_args__sql(
 
     with pytest.raises(TypeError):
         # expectation_suite is a string not an ExpectationSuite
+        # noinspection PyUnusedLocal
         my_validator = context.get_validator(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",

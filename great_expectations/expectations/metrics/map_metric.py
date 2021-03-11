@@ -1,5 +1,4 @@
 import logging
-import traceback
 import uuid
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Type, Union
@@ -29,6 +28,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
 )
+from great_expectations.expectations.metrics.util import is_column_present_in_table
 from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
@@ -872,12 +872,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             )
         ).scalar()
     except OperationalError as oe:
-        exception_message: str = "An SQL execution Exception occurred.  "
-        exception_traceback: str = traceback.format_exc()
-        exception_message += (
-            f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
-        )
-        logger.error(exception_message)
+        exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise ge_exceptions.ExecutionEngineError(message=exception_message)
 
     return convert_to_json_serializable(unexpected_count)
@@ -885,7 +880,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
 def _sqlalchemy_column_map_condition_values(
     cls,
-    execution_engine: "SqlAlchemyExecutionEngine",
+    execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: Dict,
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
@@ -918,17 +913,26 @@ def _sqlalchemy_column_map_condition_values(
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
     try:
+        if not is_column_present_in_table(
+            engine=execution_engine.engine,
+            table_name=selectable.description,
+            column_name=accessor_domain_kwargs.get("column"),
+        ):
+            error_message: str = f'The column "{accessor_domain_kwargs.get("column")}" in table "{selectable.description}" does not exist.'
+            error: sa.exc.SQLAlchemyError = sa.exc.SQLAlchemyError(error_message)
+            raise OperationalError(
+                orig=error,
+                params={
+                    "column_name": accessor_domain_kwargs.get("column"),
+                },
+                statement=None,
+            )
         return [
             val.unexpected_values
             for val in execution_engine.engine.execute(query).fetchall()
         ]
     except OperationalError as oe:
-        exception_message: str = "An SQL execution Exception occurred.  "
-        exception_traceback: str = traceback.format_exc()
-        exception_message += (
-            f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
-        )
-        logger.error(exception_message)
+        exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise ge_exceptions.ExecutionEngineError(message=exception_message)
 
 
@@ -954,8 +958,22 @@ def _sqlalchemy_column_map_condition_value_counts(
         raise ValueError(
             "_sqlalchemy_column_map_condition_value_counts requires a column in accessor_domain_kwargs"
         )
-    column = sa.column(accessor_domain_kwargs["column"])
     try:
+        if not is_column_present_in_table(
+            engine=execution_engine.engine,
+            table_name=selectable.description,
+            column_name=accessor_domain_kwargs.get("column"),
+        ):
+            error_message: str = f'The column "{accessor_domain_kwargs.get("column")}" in table "{selectable.description}" does not exist.'
+            error: sa.exc.SQLAlchemyError = sa.exc.SQLAlchemyError(error_message)
+            raise OperationalError(
+                orig=error,
+                params={
+                    "column_name": accessor_domain_kwargs.get("column"),
+                },
+                statement=None,
+            )
+        column = sa.column(accessor_domain_kwargs["column"])
         return execution_engine.engine.execute(
             sa.select([column, sa.func.count(column)])
             .select_from(selectable)
@@ -963,12 +981,7 @@ def _sqlalchemy_column_map_condition_value_counts(
             .group_by(column)
         ).fetchall()
     except OperationalError as oe:
-        exception_message: str = "An SQL execution Exception occurred.  "
-        exception_traceback: str = traceback.format_exc()
-        exception_message += (
-            f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
-        )
-        logger.error(exception_message)
+        exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise ge_exceptions.ExecutionEngineError(message=exception_message)
 
 
@@ -1000,12 +1013,7 @@ def _sqlalchemy_map_condition_rows(
     try:
         return execution_engine.engine.execute(query).fetchall()
     except OperationalError as oe:
-        exception_message: str = "An SQL execution Exception occurred.  "
-        exception_traceback: str = traceback.format_exc()
-        exception_message += (
-            f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
-        )
-        logger.error(exception_message)
+        exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise ge_exceptions.ExecutionEngineError(message=exception_message)
 
 

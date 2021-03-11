@@ -1,5 +1,5 @@
+import logging
 import os
-import shutil
 import subprocess
 import unittest
 from typing import List
@@ -16,50 +16,70 @@ from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfigDefaults
-from tests.cli.utils import (
-    LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
-    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    assert_no_logging_messages_or_tracebacks,
-)
+from great_expectations.data_context.util import file_relative_path
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
+logger = logging.getLogger(__name__)
 
-# TODO: <Alex>ALEX Delete?</Alex>
+
 @pytest.fixture
-def titanic_checkpoint(
-    titanic_data_context_stats_enabled_config_version_2, titanic_expectation_suite
+def titanic_data_context_with_sql_datasource(
+    sa,
+    titanic_data_context_stats_enabled_config_version_3,
+    test_df,
 ):
-    csv_path = os.path.join(
-        titanic_data_context_stats_enabled_config_version_2.root_directory,
-        "..",
-        "data",
-        "Titanic.csv",
+    context: DataContext = titanic_data_context_stats_enabled_config_version_3
+
+    db_file_path: str = file_relative_path(
+        __file__,
+        os.path.join("..", "test_sets", "titanic_sql_test_cases.db"),
     )
-    return {
-        "validation_operator_name": "action_list_operator",
-        "batches": [
-            {
-                "batch_kwargs": {
-                    "path": csv_path,
-                    "datasource": "mydatasource",
-                    "reader_method": "read_csv",
-                },
-                "expectation_suite_names": [
-                    titanic_expectation_suite.expectation_suite_name
-                ],
-            },
-        ],
-    }
+    sqlite_engine: sa.engine.base.Engine = sa.create_engine(f"sqlite:///{db_file_path}")
+    # noinspection PyUnusedLocal
+    conn: sa.engine.base.Connection = sqlite_engine.connect()
+    try:
+        csv_path: str = file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")
+        )
+        df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
+        df.to_sql("titanic", con=sqlite_engine)
+        test_df.to_sql("wrong", con=sqlite_engine)
+    except ValueError as ve:
+        logger.warning(f"Unable to store information into database: {str(ve)}")
+
+    config = yaml.load(
+        f"""
+class_name: SimpleSqlalchemyDatasource
+connection_string: sqlite:///{db_file_path}
+"""
+        + """
+introspection:
+    whole_table: {}
+""",
+    )
+
+    try:
+        my_sql_datasource = context.add_datasource(
+            "test_sqlite_db_datasource", **config
+        )
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
+    return context
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_delete_with_non_existent_checkpoint(
-    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
+    mock_emit,
+    caplog,
+    monkeypatch,
+    empty_data_context_stats_enabled,
 ):
     context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -111,8 +131,9 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
         input="\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
 
     assert mock_emit.call_count == 2
@@ -162,8 +183,9 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
         input="n\n",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert 'The Checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
 
     assert mock_emit.call_count == 1
@@ -203,8 +225,9 @@ def test_checkpoint_list_with_no_checkpoints(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "No Checkpoints found." in stdout
     assert "Use the command `great_expectations checkpoint new` to create one" in stdout
 
@@ -242,8 +265,9 @@ def test_checkpoint_list_with_single_checkpoint(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "Found 1 Checkpoint." in stdout
     assert "my_v1_checkpoint" in stdout
 
@@ -284,8 +308,9 @@ def test_checkpoint_list_with_eight_checkpoints(
         f"--v3-api checkpoint list",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "Found 8 Checkpoints." in stdout
     checkpoint_names_list: List[str] = [
         "my_simple_checkpoint_with_slack_and_notify_with_all",
@@ -498,8 +523,9 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
         f"--v3-api checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "Could not find Checkpoint `my_checkpoint` (or its configuration is invalid)."
         in stdout
@@ -547,9 +573,9 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
         f"--v3-api checkpoint run my_nested_checkpoint_template_1",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    stdout: str = result.stdout
     assert "expectation_suite suite_from_template_1 not found" in stdout
 
     assert mock_emit.call_count == 2
@@ -645,8 +671,9 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         f"--v3-api checkpoint run bad_batch",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
 
     # TODO: <Alex>ALEX -- Investigate how to make Abe's suggestion a reality.</Alex>
     # Note: Abe : 2020/09: This was a better error message, but it should live in DataContext.get_batch, not a random CLI method.
@@ -758,9 +785,9 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         f"--v3-api checkpoint run no_suite",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    stdout: str = result.stdout
     assert "Exception occurred while running checkpoint" in stdout
     assert (
         "of checkpoint 'no_suite': validation expectation_suite_name must be specified"
@@ -844,9 +871,9 @@ def test_checkpoint_run_on_non_existent_validations(
         f"--v3-api checkpoint run no_validations",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
 
+    stdout: str = result.stdout
     assert 'Checkpoint "no_validations" does not contain any validations.' in stdout
 
     assert mock_emit.call_count == 2
@@ -872,7 +899,7 @@ def test_checkpoint_run_on_non_existent_validations(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_happy_path_with_successful_validation(
+def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     mock_emit,
     caplog,
     monkeypatch,
@@ -938,9 +965,9 @@ def test_checkpoint_run_happy_path_with_successful_validation(
         f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
 
+    stdout: str = result.stdout
     assert all(
         [
             msg in stdout
@@ -1010,7 +1037,145 @@ def test_checkpoint_run_happy_path_with_successful_validation(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_happy_path_with_failed_validation(
+def test_checkpoint_run_happy_path_with_successful_validation_sql(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_data_context_with_sql_datasource,
+    titanic_expectation_suite,
+):
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_data_context_with_sql_datasource
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: test_sqlite_db_datasource
+          data_connector_name: whole_table
+          data_asset_name: titanic
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api checkpoint run my_fancy_checkpoint",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert all(
+        [
+            msg in stdout
+            for msg in [
+                "Validation succeeded!",
+                "Titanic.warning",
+                "Passed",
+                "100.0 %",
+            ]
+        ]
+    )
+
+    assert mock_emit.call_count == 5
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     mock_emit,
     caplog,
     monkeypatch,
@@ -1085,8 +1250,9 @@ def test_checkpoint_run_happy_path_with_failed_validation(
         f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
     assert mock_emit.call_count == 5
@@ -1146,7 +1312,7 @@ def test_checkpoint_run_happy_path_with_failed_validation(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
+def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas(
     mock_emit,
     caplog,
     monkeypatch,
@@ -1220,9 +1386,133 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data(
         f"--v3-api checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert "Exception occurred while running checkpoint." in stdout
+    assert 'Error: The column "Name" in BatchData does not exist...' in stdout
+
+    assert mock_emit.call_count == 4
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_data_context_with_sql_datasource,
+    titanic_expectation_suite,
+):
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_data_context_with_sql_datasource
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: test_sqlite_db_datasource
+          data_connector_name: whole_table
+          data_asset_name: wrong
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api checkpoint run my_fancy_checkpoint",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
+    assert "Exception occurred while running checkpoint." in stdout
+    assert 'The column "Name" in table ' in stdout
+    assert "does not exist." in stdout
 
     assert mock_emit.call_count == 4
 
@@ -1339,12 +1629,13 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
         f"--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
+    assert result.exit_code == 1
+
     stdout: str = result.stdout
     assert (
         "Warning! A script named run_my_v1_checkpoint.py already exists and this command will not overwrite it."
         in stdout
     )
-    assert result.exit_code == 1
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1373,7 +1664,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_checkpoint_script_happy_path_generates_script(
+def test_checkpoint_script_happy_path_generates_script_pandas(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
     context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
@@ -1385,8 +1676,9 @@ def test_checkpoint_script_happy_path_generates_script(
         f"--v3-api checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert (
         "A python script was created that runs the Checkpoint named: `my_v1_checkpoint`"
         in stdout
@@ -1424,7 +1716,7 @@ def test_checkpoint_script_happy_path_generates_script(
     )
 
 
-def test_checkpoint_script_happy_path_executable_successful_validation(
+def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -1500,8 +1792,8 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
         f"--v3-api checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
-    stdout: str = result.stdout
     assert result.exit_code == 0
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
@@ -1536,7 +1828,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation(
     assert "Validation succeeded!" in output
 
 
-def test_checkpoint_script_happy_path_executable_failed_validation(
+def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -1655,7 +1947,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation(
     assert "Validation failed!" in output
 
 
-def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data(
+def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data_pandas(
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -1785,9 +2077,9 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_new_with_ge_config_3_raises_error(
-    mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled
+    mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled_config_version_3
 ):
-    context: DataContext = titanic_data_context_stats_enabled
+    context: DataContext = titanic_data_context_stats_enabled_config_version_3
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -1820,7 +2112,6 @@ def test_checkpoint_new_with_ge_config_3_raises_error(
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
