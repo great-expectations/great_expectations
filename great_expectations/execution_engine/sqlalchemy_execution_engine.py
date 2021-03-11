@@ -1,6 +1,7 @@
 import copy
 import datetime
 import logging
+import traceback
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
@@ -10,6 +11,7 @@ from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
+    ExecutionEngineError,
     GreatExpectationsError,
     InvalidConfigError,
 )
@@ -33,6 +35,7 @@ try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.engine.url import URL
+    from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
@@ -41,6 +44,7 @@ except ImportError:
     Select = None
     TextClause = None
     quoted_name = None
+    OperationalError = None
 
 
 try:
@@ -558,9 +562,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self,
         metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
     ) -> dict:
-        """For every metrics in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds a
-        bundles the metrics into one large query dictionary so that they are all executed simultaneously. Will fail if
-        bundling the metrics together is not possible.
+        """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
+        bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
+        if bundling the metrics together is not possible.
 
             Args:
                 metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
@@ -601,12 +605,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 query["domain_kwargs"], domain_type="identity"
             )
             assert len(query["select"]) == len(query["ids"])
-            res = self.engine.execute(
-                sa.select(query["select"]).select_from(selectable)
-            ).fetchall()
-            logger.debug(
-                f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
-            )
+            try:
+                res = self.engine.execute(
+                    sa.select(query["select"]).select_from(selectable)
+                ).fetchall()
+                logger.debug(
+                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
+                )
+            except OperationalError as oe:
+                exception_message: str = "An SQL execution Exception occurred.  "
+                exception_traceback: str = traceback.format_exc()
+                exception_message += f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
+                logger.error(exception_message)
+                raise ExecutionEngineError(message=exception_message)
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
