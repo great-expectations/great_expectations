@@ -156,19 +156,9 @@ def test_max_metric_sa_column_does_not_exist(sa):
         metric_value_kwargs=dict(),
     )
 
-    metrics = engine.resolve_metrics(metrics_to_resolve=(partial_metric,))
-    desired_metric = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={"column": "non_existent_column"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": partial_metric},
-    )
-
     with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
         # noinspection PyUnusedLocal
-        results = engine.resolve_metrics(
-            metrics_to_resolve=(desired_metric,), metrics=metrics
-        )
+        metrics = engine.resolve_metrics(metrics_to_resolve=(partial_metric,))
     assert (
         'Error: The column "non_existent_column" in BatchData does not exist.'
         in str(eee.value)
@@ -472,33 +462,9 @@ def test_map_unique_sa_column_does_not_exist(sa):
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=dict(),
     )
-    metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
-
-    # This is no longer a MAP_CONDITION because mssql does not support it. Instead, it is a WINDOW_CONDITION
-    #
-    # aggregate_fn = MetricConfiguration(
-    #     metric_name="column_values.unique.unexpected_count.aggregate_fn",
-    #     metric_domain_kwargs={"column": "a"},
-    #     metric_value_kwargs=dict(),
-    #     metric_dependencies={"unexpected_condition": condition_metric},
-    # )
-    # aggregate_fn_metrics = engine.resolve_metrics(
-    #     metrics_to_resolve=(aggregate_fn,), metrics=metrics
-    # )
-
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
-        metric_domain_kwargs={"column": "non_existent_column"},
-        metric_value_kwargs=dict(),
-        # metric_dependencies={"metric_partial_fn": aggregate_fn},
-        metric_dependencies={"unexpected_condition": condition_metric},
-    )
     with pytest.raises(ge_exceptions.ExecutionEngineError) as eee:
         # noinspection PyUnusedLocal
-        results = engine.resolve_metrics(
-            metrics_to_resolve=(desired_metric,),
-            metrics=metrics,  # metrics=aggregate_fn_metrics
-        )
+        metrics = engine.resolve_metrics(metrics_to_resolve=(condition_metric,))
     assert (
         'Error: The column "non_existent_column" in BatchData does not exist.'
         in str(eee.value)
