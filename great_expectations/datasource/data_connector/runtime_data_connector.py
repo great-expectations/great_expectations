@@ -132,10 +132,11 @@ class RuntimeDataConnector(DataConnector):
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        self._validate_batch_identifiers(
-            batch_identifiers=batch_request.partition_request.get("batch_identifiers")
-        )
         batch_identifiers = batch_request.partition_request.get("batch_identifiers")
+        
+        self._validate_batch_identifiers(
+            batch_identifiers=batch_identifiers
+        )
 
         batch_definition_list: List[BatchDefinition]
         batch_definition: BatchDefinition = BatchDefinition(
