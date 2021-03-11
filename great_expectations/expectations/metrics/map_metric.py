@@ -389,7 +389,7 @@ def column_condition_partial(
                     column_name=column_name,
                 ):
                     raise ge_exceptions.ExecutionEngineError(
-                        f'Error: The column "{accessor_domain_kwargs.get("column")}" in BatchData does not exist.'
+                        f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
                 dialect = execution_engine.dialect_module
