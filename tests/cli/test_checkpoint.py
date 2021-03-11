@@ -175,6 +175,16 @@ def titanic_data_context_with_spark_datasource(
     # noinspection PyProtectedMember
     context._save_project_config()
 
+    csv_path: str
+
+    # To fail an expectation, make number of rows less than 1313 (the original number of rows in the "Titanic" dataset).
+    csv_path = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_1911.csv"
+    )
+    df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
+    df = df.sample(frac=0.5, replace=True, random_state=1)
+    df.to_csv(path_or_buf=csv_path)
+
     csv_path: str = os.path.join(
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
@@ -1599,6 +1609,138 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
           datasource_name: test_sqlite_db_datasource
           data_connector_name: whole_table
           data_asset_name: incomplete
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api checkpoint run my_fancy_checkpoint",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
+    assert "Validation failed!" in stdout
+
+    assert mock_emit.call_count == 5
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_happy_path_with_failed_validation_spark(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_data_context_with_spark_datasource,
+    titanic_expectation_suite,
+):
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_data_context_with_spark_datasource
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_basic_data_connector
+          data_asset_name: Titanic_1911
+          partition_request:
+            index: -1
+          batch_spec_passthrough:
+            reader_options:
+              header: true
         expectation_suite_name: Titanic.warning
         action_list:
             - name: store_validation_result
