@@ -41,7 +41,7 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "import great_expectations as ge\ncontext = ge.get_context()",
+                "source": "import yaml\nimport great_expectations as ge\ncontext = ge.get_context()",
                 "outputs": [],
             },
         ]
@@ -81,7 +81,7 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": f"""datasource = context.test_yaml_config(example_yaml, name="{datasource_name}")""",
+                "source": f"""context.test_yaml_config(example_yaml, name="{datasource_name}")""",
                 "outputs": [],
             },
         ]
@@ -96,7 +96,7 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """context._save_project_config()
+                "source": f"""context.add_datasource(name="{datasource_name}", **yaml.load(example_yaml))
 context.list_datasources()""",
                 "outputs": [],
             },

@@ -57,7 +57,8 @@ Use this notebook to configure a new {self.datasource_type.value} Datasource and
 **Datasource Name**: `{self.datasource_name}`"""
         )
         self.add_code_cell(
-            """import great_expectations as ge
+            """import yaml
+import great_expectations as ge
 context = ge.get_context()""",
         )
 
@@ -89,7 +90,7 @@ This `test_yaml_config()` function is meant to enable fast dev loops. You can co
 If you instead wish to use python instead of yaml to configure your Datasource, you can use `context.add_datasource()` and specify all the required parameters."""
         )
         self.add_code_cell(
-            f"""datasource = context.test_yaml_config(example_yaml, name="{self.datasource_name}")""",
+            f"""context.test_yaml_config(example_yaml, name="{self.datasource_name}")""",
             lint=True,
         )
 
@@ -99,7 +100,7 @@ If you instead wish to use python instead of yaml to configure your Datasource, 
 Here we will save your Datasource in your Data Context once you are satisfied with the configuration."""
         )
         self.add_code_cell(
-            """context._save_project_config()
+            f"""context.add_datasource(name="{self.datasource_name}", **yaml.load(example_yaml))
 context.list_datasources()""",
             lint=True,
         )
