@@ -20,6 +20,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     metric_value,
 )
 from great_expectations.expectations.metrics.table_metric import TableMetricProvider
+from great_expectations.expectations.metrics.util import is_column_present_in_table
 
 logger = logging.getLogger(__name__)
 
@@ -136,10 +137,19 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
-                sqlalchemy_engine = execution_engine.engine
-                dialect = sqlalchemy_engine.dialect
+                column_name: str = accessor_domain_kwargs["column"]
 
+                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                if not is_column_present_in_table(
+                    engine=sqlalchemy_engine,
+                    table_name=selectable.description,
+                    column_name=column_name,
+                ):
+                    raise ge_exceptions.ExecutionEngineError(
+                        f'Error: The column "{accessor_domain_kwargs.get("column")}" in BatchData does not exist.'
+                    )
+
+                dialect = sqlalchemy_engine.dialect
                 metric_aggregate = metric_fn(
                     cls,
                     column=sa.column(column_name),

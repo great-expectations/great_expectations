@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import subprocess
 import unittest
 from typing import List
@@ -17,6 +18,7 @@ from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource import Datasource
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 yaml = YAML()
@@ -63,12 +65,120 @@ introspection:
     )
 
     try:
+        # noinspection PyUnusedLocal
         my_sql_datasource = context.add_datasource(
             "test_sqlite_db_datasource", **config
         )
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_spark_datasource(
+    tmp_path_factory,
+    test_df,
+    monkeypatch,
+):
+    # Reenable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "..",
+                "test_fixtures",
+                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
+        str(
+            os.path.join(
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+    )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    datasource_config: str = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SparkDFExecutionEngine
+
+        data_connectors:
+            my_basic_data_connector:
+                class_name: InferredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                default_regex:
+                    pattern: (.*)\\.csv
+                    group_names:
+                        - data_asset_name
+
+            my_special_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users:
+                        base_directory: {data_path}
+                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
+                        group_names:
+                            - name
+                            - timestamp
+                            - size
+
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users: {{}}
+        """
+
+    # noinspection PyUnusedLocal
+    datasource: Datasource = context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    csv_path: str = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
+    # mangle the csv
+    with open(csv_path, "w") as f:
+        f.write("foo,bar\n1,2\n")
     return context
 
 
@@ -1175,6 +1285,146 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+def test_checkpoint_run_happy_path_with_successful_validation_spark(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_data_context_with_spark_datasource,
+    titanic_expectation_suite,
+):
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_data_context_with_spark_datasource
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_basic_data_connector
+          batch_spec_passthrough:
+            reader_options:
+              header: true
+          data_asset_name: Titanic_1912
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api checkpoint run my_fancy_checkpoint",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert all(
+        [
+            msg in stdout
+            for msg in [
+                "Validation succeeded!",
+                "Titanic.warning",
+                "Passed",
+                "100.0 %",
+            ]
+        ]
+    )
+
+    assert mock_emit.call_count == 5
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.build_data_docs",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     mock_emit,
     caplog,
@@ -1511,8 +1761,140 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
 
     stdout: str = result.stdout
     assert "Exception occurred while running checkpoint." in stdout
-    assert 'The column "Name" in table ' in stdout
-    assert "does not exist." in stdout
+    assert 'Error: The column "Name" in BatchData does not exist...' in stdout
+
+    assert mock_emit.call_count == 4
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_data_context_with_spark_datasource,
+    titanic_expectation_suite,
+):
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_data_context_with_spark_datasource
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    csv_path: str = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
+    # mangle the csv
+    with open(csv_path, "w") as f:
+        f.write("foo,bar\n1,2\n")
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: my_datasource
+          data_connector_name: my_special_data_connector
+          data_asset_name: users
+          partition_request:
+            index: -1
+          batch_spec_passthrough:
+            reader_options:
+              header: true
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api checkpoint run my_fancy_checkpoint",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
+    assert "Exception occurred while running checkpoint." in stdout
+    assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
     assert mock_emit.call_count == 4
 

@@ -155,7 +155,19 @@ def column_function_partial(
                 ) = execution_engine.get_compute_domain(
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
-                column_name = accessor_domain_kwargs["column"]
+
+                column_name: str = accessor_domain_kwargs["column"]
+
+                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                if not is_column_present_in_table(
+                    engine=sqlalchemy_engine,
+                    table_name=selectable.description,
+                    column_name=column_name,
+                ):
+                    raise ge_exceptions.ExecutionEngineError(
+                        f'Error: The column "{accessor_domain_kwargs.get("column")}" in BatchData does not exist.'
+                    )
+
                 dialect = execution_engine.dialect_module
                 column_function = metric_fn(
                     cls,
@@ -368,10 +380,19 @@ def column_condition_partial(
                     metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
-                dialect = execution_engine.dialect_module
-                sqlalchemy_engine = execution_engine.engine
+                column_name: str = accessor_domain_kwargs["column"]
 
+                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+                if not is_column_present_in_table(
+                    engine=sqlalchemy_engine,
+                    table_name=selectable.description,
+                    column_name=column_name,
+                ):
+                    raise ge_exceptions.ExecutionEngineError(
+                        f'Error: The column "{accessor_domain_kwargs.get("column")}" in BatchData does not exist.'
+                    )
+
+                dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
                     cls,
                     sa.column(column_name),
@@ -918,8 +939,9 @@ def _sqlalchemy_column_map_condition_values(
             table_name=selectable.description,
             column_name=accessor_domain_kwargs.get("column"),
         ):
-            error_message: str = f'The column "{accessor_domain_kwargs.get("column")}" in table "{selectable.description}" does not exist.'
-            error: sa.exc.SQLAlchemyError = sa.exc.SQLAlchemyError(error_message)
+            error: sa.exc.SQLAlchemyError = sa.exc.SQLAlchemyError(
+                f'Error: The column "{accessor_domain_kwargs.get("column")}" in BatchData does not exist.'
+            )
             raise OperationalError(
                 orig=error,
                 params={
