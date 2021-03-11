@@ -80,6 +80,7 @@ introspection:
 @pytest.fixture
 def titanic_data_context_with_spark_datasource(
     tmp_path_factory,
+    spark_session,
     test_df,
     monkeypatch,
 ):
