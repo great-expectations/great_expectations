@@ -49,6 +49,8 @@ def titanic_data_context_with_sql_datasource(
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
         df.to_sql("titanic", con=sqlite_engine)
+        df = df.sample(frac=0.5, replace=True, random_state=1)
+        df.to_sql("incomplete", con=sqlite_engine)
         test_df.to_sql("wrong", con=sqlite_engine)
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
@@ -1014,17 +1016,18 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_expectation_suite,
 ):
     monkeypatch.setenv("VAR", "test")
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    suite: ExpectationSuite = context.create_expectation_suite(
-        expectation_suite_name="users.delivery"
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
     )
-    context.save_expectation_suite(expectation_suite=suite)
-    assert context.list_expectation_suite_names() == ["users.delivery"]
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
     checkpoint_file_path: str = os.path.join(
         context.root_directory,
@@ -1044,7 +1047,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
           data_asset_name: users
           partition_request:
             index: -1
-        expectation_suite_name: users.delivery
+        expectation_suite_name: Titanic.warning
         action_list:
             - name: store_validation_result
               action:
@@ -1083,9 +1086,9 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
             msg in stdout
             for msg in [
                 "Validation succeeded!",
-                "users.delivery",
+                "Titanic.warning",
                 "Passed",
-                "100 %",
+                "100.0 %",
             ]
         ]
     )
@@ -1096,7 +1099,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
         mock.call(
             {
                 "event_payload": {
-                    "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
                 },
                 "event": "data_context.save_expectation_suite",
                 "success": True,
@@ -1539,6 +1542,133 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
             {
                 "event": "data_context.build_data_docs",
                 "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert expected_events == actual_events
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_checkpoint_run_happy_path_with_failed_validation_sql(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_data_context_with_sql_datasource,
+    titanic_expectation_suite,
+):
+    monkeypatch.setenv("VAR", "test")
+    monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("OLD_PARAM", "2")
+
+    context: DataContext = titanic_data_context_with_sql_datasource
+    context.save_expectation_suite(
+        expectation_suite=titanic_expectation_suite,
+        expectation_suite_name="Titanic.warning",
+    )
+    assert context.list_expectation_suite_names() == ["Titanic.warning"]
+
+    checkpoint_file_path: str = os.path.join(
+        context.root_directory,
+        DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
+        "my_fancy_checkpoint.yml",
+    )
+
+    checkpoint_yaml_config: str = f"""
+    name: my_fancy_checkpoint
+    config_version: 1
+    class_name: Checkpoint
+    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    validations:
+      - batch_request:
+          datasource_name: test_sqlite_db_datasource
+          data_connector_name: whole_table
+          data_asset_name: incomplete
+        expectation_suite_name: Titanic.warning
+        action_list:
+            - name: store_validation_result
+              action:
+                class_name: StoreValidationResultAction
+            - name: store_evaluation_params
+              action:
+                class_name: StoreEvaluationParametersAction
+            - name: update_data_docs
+              action:
+                class_name: UpdateDataDocsAction
+        evaluation_parameters:
+          param1: "$MY_PARAM"
+          param2: 1 + "$OLD_PARAM"
+        runtime_configuration:
+          result_format:
+            result_format: BASIC
+            partial_unexpected_count: 20
+    """
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
+    _write_checkpoint_dict_to_file(
+        config=config, checkpoint_file_path=checkpoint_file_path
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api checkpoint run my_fancy_checkpoint",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
+    assert "Validation failed!" in stdout
+
+    assert mock_emit.call_count == 5
+
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.__init__",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
                 "success": True,
             }
         ),
