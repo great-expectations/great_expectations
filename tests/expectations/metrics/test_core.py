@@ -169,7 +169,10 @@ def test_max_metric_sa_column_does_not_exist(sa):
         results = engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=metrics
         )
-    assert "An SQL execution Exception occurred.  OperationalError" in str(eee.value)
+    assert (
+        'Error: The column "non_existent_column" in BatchData does not exist.'
+        in str(eee.value)
+    )
 
 
 def test_max_metric_spark_column_exists(spark_session):
@@ -496,7 +499,10 @@ def test_map_unique_sa_column_does_not_exist(sa):
             metrics_to_resolve=(desired_metric,),
             metrics=metrics,  # metrics=aggregate_fn_metrics
         )
-    assert "An SQL execution Exception occurred.  OperationalError" in str(eee.value)
+    assert (
+        'Error: The column "non_existent_column" in BatchData does not exist.'
+        in str(eee.value)
+    )
 
 
 def test_map_unique_spark_column_exists(spark_session):

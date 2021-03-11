@@ -20,7 +20,7 @@ except ImportError:
 try:
     import sqlalchemy as sa
     from sqlalchemy.dialects import registry
-    from sqlalchemy.engine import reflection
+    from sqlalchemy.engine import Engine, reflection
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import BinaryExpression, TextClause, literal
@@ -33,6 +33,7 @@ except ImportError:
     TextClause = None
     literal = None
     custom_op = None
+    Engine = None
     reflection = None
     OperationalError = None
 
@@ -218,47 +219,53 @@ def attempt_allowing_relative_error(dialect):
 
 
 def is_column_present_in_table(
-    engine: sa.engine.Engine,
+    engine: Engine,
     table_name: str,
     column_name: str,
     schema_name: Optional[str] = None,
 ) -> bool:
-    all_columns_metadata: List[Dict[str, Any]] = get_sqlalchemy_column_metadata(
+    all_columns_metadata: Optional[
+        List[Dict[str, Any]]
+    ] = get_sqlalchemy_column_metadata(
         engine=engine, table_name=table_name, schema_name=schema_name
     )
+    # Purposefully do not check for a NULL "all_columns_metadata" to insure that it must never happen.
     column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
     return column_name in column_names
 
 
 def get_sqlalchemy_column_metadata(
-    engine: sa.engine.Engine, table_name: str, schema_name: Optional[str] = None
-) -> List[Dict[str, Any]]:
-    columns: List[Dict[str, Any]]
-
-    inspector: reflection.Inspector = reflection.Inspector.from_engine(engine)
+    engine: Engine, table_name: str, schema_name: Optional[str] = None
+) -> Optional[List[Dict[str, Any]]]:
     try:
-        columns = inspector.get_columns(
-            table_name,
-            schema=schema_name,
-        )
-    except (KeyError, AttributeError, sa.exc.NoSuchTableError):
-        # we will get a KeyError for temporary tables, since
-        # reflection will not find the temporary schema
-        columns = column_reflection_fallback(
-            selectable=table_name,
-            dialect=engine.dialect,
-            sqlalchemy_engine=engine,
-        )
+        columns: List[Dict[str, Any]]
 
-    # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
-    if len(columns) == 0:
-        columns = column_reflection_fallback(
-            selectable=table_name,
-            dialect=engine.dialect,
-            sqlalchemy_engine=engine,
-        )
+        inspector: reflection.Inspector = reflection.Inspector.from_engine(engine)
+        try:
+            columns = inspector.get_columns(
+                table_name,
+                schema=schema_name,
+            )
+        except (KeyError, AttributeError, sa.exc.NoSuchTableError):
+            # we will get a KeyError for temporary tables, since
+            # reflection will not find the temporary schema
+            columns = column_reflection_fallback(
+                selectable=table_name,
+                dialect=engine.dialect,
+                sqlalchemy_engine=engine,
+            )
 
-    return columns
+        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
+        if len(columns) == 0:
+            columns = column_reflection_fallback(
+                selectable=table_name,
+                dialect=engine.dialect,
+                sqlalchemy_engine=engine,
+            )
+
+        return columns
+    except AttributeError:
+        return None
 
 
 def column_reflection_fallback(selectable, dialect, sqlalchemy_engine):
