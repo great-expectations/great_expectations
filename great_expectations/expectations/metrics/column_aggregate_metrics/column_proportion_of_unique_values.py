@@ -25,7 +25,7 @@ def unique_proportion(_metrics):
     unique_values = _metrics.get("column.distinct_values.count")
     null_count = _metrics.get("column_values.nonnull.unexpected_count")
 
-    # Ensuring that we do not divide by 0, returning 0 if al values are nulls (we only consider non-nulls unique values)
+    # Ensuring that we do not divide by 0, returning 0 if all values are nulls (we only consider non-nulls unique values)
     if total_values > 0 and total_values != null_count:
         return unique_values / (total_values - null_count)
     else:
