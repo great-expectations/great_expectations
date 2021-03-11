@@ -159,14 +159,16 @@ def column_function_partial(
                 column_name: str = accessor_domain_kwargs["column"]
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
-                if not is_column_present_in_table(
-                    engine=sqlalchemy_engine,
-                    table_name=selectable.description,
-                    column_name=column_name,
-                ):
-                    raise ge_exceptions.ExecutionEngineError(
-                        f'Error: The column "{accessor_domain_kwargs.get("column")}" in BatchData does not exist.'
-                    )
+
+                if isinstance(selectable, sa.Table):
+                    if not is_column_present_in_table(
+                        engine=sqlalchemy_engine,
+                        table_name=selectable,
+                        column_name=column_name,
+                    ):
+                        raise ge_exceptions.ExecutionEngineError(
+                            f'Error: The column "{accessor_domain_kwargs.get("column")}" in BatchData does not exist.'
+                        )
 
                 dialect = execution_engine.dialect_module
                 column_function = metric_fn(
@@ -383,14 +385,16 @@ def column_condition_partial(
                 column_name: str = accessor_domain_kwargs["column"]
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
-                if not is_column_present_in_table(
-                    engine=sqlalchemy_engine,
-                    table_name=selectable.description,
-                    column_name=column_name,
-                ):
-                    raise ge_exceptions.ExecutionEngineError(
-                        f'Error: The column "{column_name}" in BatchData does not exist.'
-                    )
+
+                if isinstance(selectable, sa.Table):
+                    if not is_column_present_in_table(
+                        engine=sqlalchemy_engine,
+                        table_name=selectable,
+                        column_name=column_name,
+                    ):
+                        raise ge_exceptions.ExecutionEngineError(
+                            f'Error: The column "{column_name}" in BatchData does not exist.'
+                        )
 
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
@@ -934,9 +938,10 @@ def _sqlalchemy_column_map_condition_values(
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
     try:
+        # The "selectable" reference is guaranteed to be of the "sa.Table" type here.
         if not is_column_present_in_table(
             engine=execution_engine.engine,
-            table_name=selectable.description,
+            table_name=selectable,
             column_name=accessor_domain_kwargs.get("column"),
         ):
             error: sa.exc.SQLAlchemyError = sa.exc.SQLAlchemyError(
@@ -981,13 +986,15 @@ def _sqlalchemy_column_map_condition_value_counts(
             "_sqlalchemy_column_map_condition_value_counts requires a column in accessor_domain_kwargs"
         )
     try:
+        # The "selectable" reference is guaranteed to be of the "sa.Table" type here.
         if not is_column_present_in_table(
             engine=execution_engine.engine,
-            table_name=selectable.description,
+            table_name=selectable,
             column_name=accessor_domain_kwargs.get("column"),
         ):
-            error_message: str = f'The column "{accessor_domain_kwargs.get("column")}" in table "{selectable.description}" does not exist.'
-            error: sa.exc.SQLAlchemyError = sa.exc.SQLAlchemyError(error_message)
+            error: sa.exc.SQLAlchemyError = sa.exc.SQLAlchemyError(
+                f'Error: The column "{column_name}" in BatchData does not exist.'
+            )
             raise OperationalError(
                 orig=error,
                 params={

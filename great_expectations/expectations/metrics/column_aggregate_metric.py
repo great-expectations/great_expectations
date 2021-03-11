@@ -140,14 +140,16 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 column_name: str = accessor_domain_kwargs["column"]
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
-                if not is_column_present_in_table(
-                    engine=sqlalchemy_engine,
-                    table_name=selectable.description,
-                    column_name=column_name,
-                ):
-                    raise ge_exceptions.ExecutionEngineError(
-                        f'Error: The column "{accessor_domain_kwargs.get("column")}" in BatchData does not exist.'
-                    )
+
+                if isinstance(selectable, sa.Table):
+                    if not is_column_present_in_table(
+                        engine=sqlalchemy_engine,
+                        table_name=selectable,
+                        column_name=column_name,
+                    ):
+                        raise ge_exceptions.ExecutionEngineError(
+                            f'Error: The column "{accessor_domain_kwargs.get("column")}" in BatchData does not exist.'
+                        )
 
                 dialect = sqlalchemy_engine.dialect
                 metric_aggregate = metric_fn(
