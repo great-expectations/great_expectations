@@ -387,6 +387,11 @@ def suite_delete(ctx, suite):
             message=f"No expectation suite named {suite} found.",
         )
 
+    if not ctx.obj.assume_yes:
+        if not toolkit.confirm_proceed_or_exit(exit_on_no=False):
+            cli_message(f"Suite `{suite}` was not deleted.")
+            sys.exit(0)
+
     context.delete_expectation_suite(suite)
     cli_message(f"Deleted the expectation suite named: {suite}")
     toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
