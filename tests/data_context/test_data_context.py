@@ -30,7 +30,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import LegacyDatasource
+from great_expectations.datasource import Datasource, LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -1935,3 +1935,127 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
         expectation_suite_name=expectation_suite,
     )
     assert len(batch) == 3
+
+
+def test_add_datasource_from_yaml(empty_data_context):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
+    """
+
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = f"""
+    class_name: Datasource
+    execution_engine:
+      class_name: PandasExecutionEngine
+    data_connectors:
+      data_dir_example_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        datasource_name: {datasource_name}
+        base_directory: ../data
+        default_regex:
+          group_names: data_asset_name
+          pattern: (.*)
+    """
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
+
+    assert datasource_from_yaml.name == datasource_name
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "data_dir_example_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
+                "base_directory": "../data",
+            }
+        },
+    }
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+
+def test_add_datasource_from_yaml_with_substitution_variables(
+    empty_data_context, monkeypatch
+):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string containing substitution variables should work as expected.
+    """
+
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    monkeypatch.setenv("SUBSTITUTED_BASE_DIRECTORY", "../data")
+
+    example_yaml = f"""
+        class_name: Datasource
+        execution_engine:
+          class_name: PandasExecutionEngine
+        data_connectors:
+          data_dir_example_data_connector:
+            class_name: InferredAssetFilesystemDataConnector
+            datasource_name: {datasource_name}
+            base_directory: ${{SUBSTITUTED_BASE_DIRECTORY}}
+            default_regex:
+              group_names: data_asset_name
+              pattern: (.*)
+        """
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
+
+    assert datasource_from_yaml.name == datasource_name
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "data_dir_example_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
+                "base_directory": "../data",
+            }
+        },
+    }
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
