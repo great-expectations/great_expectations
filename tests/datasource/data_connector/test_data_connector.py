@@ -181,27 +181,20 @@ def test__batch_definition_matches_batch_request():
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequestBase(
-            datasource_name="A",
-            data_connector_name="a",
-        ),
+        batch_request=BatchRequestBase(datasource_name="A", data_connector_name="a"),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequestBase(
-            datasource_name="A",
-            data_connector_name="a",
-            data_asset_name="aaa",
+            datasource_name="A", data_connector_name="a", data_asset_name="aaa"
         ),
     )
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequestBase(
-            datasource_name="A",
-            data_connector_name="a",
-            data_asset_name="bbb",
+            datasource_name="A", data_connector_name="a", data_asset_name="bbb"
         ),
     )
 

@@ -127,11 +127,7 @@ def test_batch_request_instantiation():
     with pytest.raises(TypeError):
         BatchRequest(partition_request={"id": "A"})
 
-    BatchRequest(
-        datasource_name="A",
-        data_connector_name="a",
-        data_asset_name="aaa",
-    )
+    BatchRequest(datasource_name="A", data_connector_name="a", data_asset_name="aaa")
 
 
 def test_RuntimeDataBatchSpec():

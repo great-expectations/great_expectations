@@ -77,8 +77,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
     with pytest.raises(TypeError):
         context.get_batch(
             batch_request=BatchRequest(
-                datasource_name="my_sqlite_db",
-                data_connector_name="daily",
+                datasource_name="my_sqlite_db", data_connector_name="daily"
             )
         )
 
@@ -201,8 +200,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
     with pytest.raises(TypeError):
         context.get_validator(
             batch_request=BatchRequest(
-                datasource_name="my_sqlite_db",
-                data_connector_name="daily",
+                datasource_name="my_sqlite_db", data_connector_name="daily"
             ),
             expectation_suite_name="my_expectations",
         )

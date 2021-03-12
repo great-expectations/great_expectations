@@ -156,9 +156,7 @@ def test_get_batch_definition_list_from_batch_request(
 
     with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="FAKE_Datasource_NAME",
-            )
+            batch_request=BatchRequest(datasource_name="FAKE_Datasource_NAME")
         )
 
     with pytest.raises(TypeError):
