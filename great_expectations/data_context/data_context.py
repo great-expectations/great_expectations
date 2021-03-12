@@ -1169,8 +1169,9 @@ class BaseDataContext:
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
-        query: Optional[str] = None,
         runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
         **kwargs,
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -1224,8 +1225,9 @@ class BaseDataContext:
             sampling_kwargs=sampling_kwargs,
             splitter_method=splitter_method,
             splitter_kwargs=splitter_kwargs,
-            query=query,
             runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
             **kwargs,
         )
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
@@ -1452,8 +1454,9 @@ class BaseDataContext:
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
-        query: Optional[str] = None,
         runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
         **kwargs,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -1507,18 +1510,20 @@ class BaseDataContext:
 
         datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
-        if batch_data and query:
-            raise ValueError("Must provide only one of batch_data or query.")
+        if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
+            raise ValueError("Must provide only one of batch_data, query, or path.")
         if any(
             [
                 batch_data
                 and runtime_parameters
                 and "batch_data" in runtime_parameters,
                 query and runtime_parameters and "query" in runtime_parameters,
+                path and runtime_parameters and "path" in runtime_parameters,
             ]
         ):
             raise ValueError(
-                "If batch_data or query arguments are provided, the same keys cannot appear in the runtime_parameters argument."
+                "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "
+                "runtime_parameters argument."
             )
 
         if batch_request:
@@ -1526,12 +1531,14 @@ class BaseDataContext:
             return datasource.get_batch_list_from_batch_request(
                 batch_request=batch_request
             )
-        elif any([batch_data, query, runtime_parameters]):
+        elif any([batch_data, query, path, runtime_parameters]):
             runtime_parameters = runtime_parameters or {}
             if batch_data is not None:
                 runtime_parameters["batch_data"] = batch_data
             elif query is not None:
                 runtime_parameters["query"] = query
+            elif path is not None:
+                runtime_parameters["path"] = path
 
             if batch_identifiers is None:
                 batch_identifiers = kwargs
@@ -1615,6 +1622,9 @@ class BaseDataContext:
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -1662,6 +1672,9 @@ class BaseDataContext:
                 sampling_kwargs=sampling_kwargs,
                 splitter_method=splitter_method,
                 splitter_kwargs=splitter_kwargs,
+                runtime_parameters=runtime_parameters,
+                query=query,
+                path=path,
                 **kwargs,
             ),
         )
