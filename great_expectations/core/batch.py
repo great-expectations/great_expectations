@@ -366,6 +366,7 @@ class RuntimeBatchRequest(BatchRequest):
         runtime_parameters: Optional[dict] = None,
         batch_identifiers: Optional[dict] = None,
     ):
+        self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
         super().__init__(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -385,20 +386,22 @@ class RuntimeBatchRequest(BatchRequest):
         return self._batch_identifiers
 
     @staticmethod
-    def _validate_batch_request(
-        datasource_name: str,
-        data_connector_name: str,
-        data_asset_name: str,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        limit: Optional[int] = None,
-    ):
-        super()._validate_batch_request(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            limit=limit,
-        )
+    def _validate_runtime_parameters(runtime_parameters: Union[dict, type(None)]):
+        if not isinstance(runtime_parameters, dict):
+            raise TypeError(
+                f"""The type of runtime_parameters must be a dict object. The type given is
+        "{str(type(runtime_parameters))}", which is illegal.
+                        """
+            )
+        keys_present = [
+            key
+            for key, val in runtime_parameters.items()
+            if val is not None and key in ["batch_data", "query", "path"]
+        ]
+        if len(keys_present) != 1:
+            raise InvalidBatchRequestError(
+                "The runtime_parameters dict must have one (and only one) of the following keys: 'batch_data', "
+                "'query', 'path'."
             )
 
 
