@@ -1997,9 +1997,9 @@ def test_get_batch_with_query_as_batch_data_using_runtime_data_connector(
 
 def test_get_validator_with_query_as_batch_data_using_runtime_data_connector(
     sa,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
         "my_expectations"
     )
