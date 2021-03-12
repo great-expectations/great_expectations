@@ -113,7 +113,7 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
     )
 
     assert my_data_connector.get_data_reference_list_count() == 0
-    assert my_data_connector.get_unmatched_data_references() == []
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
