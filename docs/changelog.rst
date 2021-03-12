@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+
 * [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfilerß
 * [ENHANCEMENT] Improve support for median calculation in Athena (Thanks @kuhnen!) #2521
 
