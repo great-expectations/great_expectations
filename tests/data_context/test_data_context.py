@@ -1972,28 +1972,8 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     assert batch.data.row_count() == 120
     assert batch.batch_markers.get("ge_load_time") is not None
 
-    batch = context.get_batch(
-        datasource_name="my_runtime_sql_datasource",
-        data_connector_name="my_runtime_data_connector",
-        data_asset_name="my_data_asset_name",
-        batch_data="SELECT * FROM table_partitioned_by_date_column__A",
-        partition_request={
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-        },
-    )
 
-    assert batch.batch_spec is not None
-    assert batch.batch_definition["data_asset_name"] == "my_data_asset_name"
-    assert isinstance(batch.data, SqlAlchemyBatchData)
-    assert len(batch.data.head(fetch_all=True)) == 120
-    assert batch.data.row_count() == 120
-    assert batch.batch_markers.get("ge_load_time") is not None
-
-
-def test_get_validator_with_query_as_batch_data_using_runtime_data_connector(
+def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -2005,37 +1985,19 @@ def test_get_validator_with_query_as_batch_data_using_runtime_data_connector(
     validator: Validator
 
     validator = context.get_validator(
-        batch_request=BatchRequest(
+        batch_request=RuntimeBatchRequest(
             datasource_name="my_runtime_sql_datasource",
             data_connector_name="my_runtime_data_connector",
-            data_asset_name="IN_MEMORY_DATA_ASSET",
-            batch_data="SELECT * FROM table_partitioned_by_date_column__A",
-            partition_request=PartitionRequest(
-                **{
-                    "batch_identifiers": {
-                        "pipeline_stage_name": "core_processing",
-                        "airflow_run_id": 1234567890,
-                    },
-                },
-            ),
-        ),
-        expectation_suite=my_expectation_suite,
-    )
-
-    assert len(validator.batches) == 1
-
-    validator = context.get_validator(
-        datasource_name="my_runtime_sql_datasource",
-        data_connector_name="my_runtime_data_connector",
-        data_asset_name="IN_MEMORY_DATA_ASSET",
-        batch_data="SELECT * FROM table_partitioned_by_date_column__A",
-        expectation_suite=my_expectation_suite,
-        partition_request={
-            "batch_identifiers": {
+            data_asset_name="my_data_asset_name",
+            runtime_parameters={
+                "query": "SELECT * FROM table_partitioned_by_date_column__A"
+            },
+            batch_identifiers={
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
-            },
-        },
+            }
+        ),
+        expectation_suite=my_expectation_suite,
     )
 
     assert len(validator.batches) == 1
