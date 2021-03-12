@@ -1550,7 +1550,6 @@ class BaseDataContext:
                 datasource_name=datasource_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
-                limit=limit,
                 batch_spec_passthrough=batch_spec_passthrough,
                 runtime_parameters=runtime_parameters,
                 batch_identifiers=batch_identifiers,
