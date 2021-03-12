@@ -1968,7 +1968,7 @@ def test_get_batch_with_query_as_batch_data_using_runtime_data_connector(
     )
 
     assert batch.batch_spec is not None
-    assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
+    assert batch.batch_definition["data_asset_name"] == "my_data_asset_name"
     assert isinstance(batch.data, SqlAlchemyBatchData)
     assert len(batch.data.head(fetch_all=True)) == 120
     assert batch.data.row_count() == 120
@@ -1977,7 +1977,7 @@ def test_get_batch_with_query_as_batch_data_using_runtime_data_connector(
     batch = context.get_batch(
         datasource_name="my_runtime_sql_datasource",
         data_connector_name="my_runtime_data_connector",
-        data_asset_name="IN_MEMORY_DATA_ASSET",
+        data_asset_name="my_data_asset_name",
         batch_data="SELECT * FROM table_partitioned_by_date_column__A",
         partition_request={
             "batch_identifiers": {
@@ -1988,7 +1988,7 @@ def test_get_batch_with_query_as_batch_data_using_runtime_data_connector(
     )
 
     assert batch.batch_spec is not None
-    assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
+    assert batch.batch_definition["data_asset_name"] == "my_data_asset_name"
     assert isinstance(batch.data, SqlAlchemyBatchData)
     assert len(batch.data.head(fetch_all=True)) == 120
     assert batch.data.row_count() == 120
