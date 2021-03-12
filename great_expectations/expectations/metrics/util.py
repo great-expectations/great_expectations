@@ -246,7 +246,12 @@ def get_sqlalchemy_column_metadata(
                 table_selectable,
                 schema=schema_name,
             )
-        except (KeyError, AttributeError, sa.exc.NoSuchTableError):
+        except (
+            KeyError,
+            AttributeError,
+            sa.exc.NoSuchTableError,
+            sa.exc.ProgrammingError,
+        ):
             # we will get a KeyError for temporary tables, since
             # reflection will not find the temporary schema
             columns = column_reflection_fallback(
@@ -274,29 +279,37 @@ def column_reflection_fallback(selectable, dialect, sqlalchemy_engine):
     if dialect.name.lower() == "mssql":
         type_module = _get_dialect_type_module(dialect)
         # Get column names and types from the database
-        # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
-        col_info_query: TextClause = sa.text(
-            f"""
+        # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
+        columns_query: str = f"""
 SELECT
-cols.NAME, ty.NAME
-FROM
-tempdb.sys.columns AS cols
-JOIN
-sys.types AS ty
-ON
-cols.user_type_id = ty.user_type_id
-WHERE
-object_id = OBJECT_ID('tempdb..{selectable}')
+    SCHEMA_NAME(tab.schema_id) AS schema_name,
+    tab.name AS table_name, 
+    col.column_id AS column_id,
+    col.name AS column_name, 
+    t.name AS column_data_type,    
+    col.max_length AS column_max_length,
+    col.precision AS column_precision
+FROM sys.tables AS tab
+    INNER JOIN sys.columns AS col
+    ON tab.object_id = col.object_id
+    LEFT JOIN sys.types AS t
+    ON col.user_type_id = t.user_type_id
+ORDER BY schema_name,
+    table_name, 
+    column_id
             """
-        )
-        col_info_tuples_list = sqlalchemy_engine.execute(col_info_query).fetchall()
-        col_info_dict_list = [
-            {"name": col_name, "type": getattr(type_module, col_type.upper())()}
-            for col_name, col_type in col_info_tuples_list
+        col_info_query: TextClause = sa.text(columns_query)
+        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
+            col_info_query
+        ).fetchall()
+        col_info_dict_list: List[Dict[str, str]] = [
+            {"name": column_name, "type": column_data_type}
+            for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
         ]
     else:
         query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
         result_object = sqlalchemy_engine.execute(query)
+        # noinspection PyProtectedMember
         col_names = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list

@@ -45,7 +45,15 @@ def pytest_generate_tests(metafunc):
             dir_path + "/" + expectation_category + "/*.json"
         )
         for c in backends:
+            # TODO: <Alex>ALEX</Alex>
+            # if c != "mssql":
+            #     continue
+            # TODO: <Alex>ALEX</Alex>
             for filename in test_configuration_files:
+                # TODO: <Alex>ALEX</Alex>
+                # if filename.find("expect_column_values_to_be_null") == -1:
+                #     continue
+                # TODO: <Alex>ALEX</Alex>
                 file = open(filename)
                 test_configuration = json.load(file)
 
@@ -92,6 +100,10 @@ def pytest_generate_tests(metafunc):
                             )
 
                     for test in d["tests"]:
+                        # TODO: <Alex>ALEX</Alex>
+                        # if test["title"] != "basic_positive_case_basic_result_format":
+                        #     continue
+                        # TODO: <Alex>ALEX</Alex>
                         generate_test = True
                         skip_test = False
                         if "only_for" in test:
