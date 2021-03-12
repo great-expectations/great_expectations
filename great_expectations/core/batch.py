@@ -256,6 +256,14 @@ class BatchRequestBase(DictDot):
             json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
         if self.limit is not None:
             json_dict["limit"] = self.limit
+        if self.batch_identifiers is not None:
+            json_dict["batch_identifiers"] = self.batch_identifiers
+        if self.runtime_parameters is not None:
+            json_dict["runtime_parameters"] = self.runtime_parameters
+            if json_dict["runtime_parameters"].get("batch_data"):
+                json_dict["runtime_parameters"]["batch_data"] = str(
+                    type(json_dict["runtime_parameters"]["batch_data"])
+                )
 
         return json_dict
 
