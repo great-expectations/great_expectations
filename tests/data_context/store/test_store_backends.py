@@ -405,7 +405,7 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
         f.write("")
     assert os.path.isfile(nb_file)
     my_store = TupleFilesystemStoreBackend(
-        root_directory=os.path.abspath("dummy_str"),
+        root_directory=os.path.join(project_path, "dummy_str"),
         base_directory=project_path,
     )
 
