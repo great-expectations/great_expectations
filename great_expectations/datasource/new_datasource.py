@@ -8,6 +8,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -98,7 +99,7 @@ class BaseDatasource:
         return batch_list[0]
 
     def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
+        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> List[Batch]:
         """
         Processes batch_request and returns the (possibly empty) list of batch objects.
