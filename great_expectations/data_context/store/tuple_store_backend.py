@@ -1012,8 +1012,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         )
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
+
         from azure.storage.blob import ContentSettings
-        
+
         az_blob_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
 
         if isinstance(value, str):
