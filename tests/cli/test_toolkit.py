@@ -1,9 +1,14 @@
 import os
+import shutil
 from unittest import mock
 
 import pytest
 
 from great_expectations.cli import toolkit
+from great_expectations.cli.toolkit import (
+    get_path_to_data_relative_to_context_root,
+    is_cloud_file_url,
+)
 from great_expectations.data_context import DataContext
 from great_expectations.exceptions import UnsupportedConfigVersionError
 
@@ -300,3 +305,136 @@ def test_parse_cli_config_file_location_windows_paths():
             )
             == fixture["expected"]
         )
+
+
+def test_is_cloud_file_path_local_posix():
+    assert not is_cloud_file_url("bucket/files/ ")
+    assert not is_cloud_file_url("./bucket/files/ ")
+    assert not is_cloud_file_url("/full/path/files/ ")
+
+
+def test_is_cloud_file_path_file_url():
+    assert not is_cloud_file_url("file://bucket/files/ ")
+    assert not is_cloud_file_url("file://./bucket/files/ ")
+    assert not is_cloud_file_url("file:///full/path/files/ ")
+
+
+def test_is_cloud_file_path_ftp_url():
+    assert is_cloud_file_url("ftp://bucket/files/ ")
+    assert is_cloud_file_url("ftp://./bucket/files/ ")
+    assert is_cloud_file_url("ftp:///full/path/files/ ")
+
+
+def test_is_cloud_file_path_s3():
+    assert is_cloud_file_url("s3://bucket/files/")
+    assert is_cloud_file_url(" s3://bucket/files/ ")
+
+
+def test_is_cloud_file_path_google_storage():
+    assert is_cloud_file_url("gs://bucket/files/")
+    assert is_cloud_file_url(" gs://bucket/files/ ")
+
+
+def test_is_cloud_file_path_azure_storage():
+    assert is_cloud_file_url("wasb://bucket/files/")
+    assert is_cloud_file_url(" wasb://bucket/files/ ")
+
+
+def test_is_cloud_file_path_http_url():
+    assert is_cloud_file_url("http://bucket/files/")
+    assert is_cloud_file_url(" http://bucket/files/ ")
+    assert is_cloud_file_url("https://bucket/files/")
+    assert is_cloud_file_url(" https://bucket/files/ ")
+
+
+@pytest.fixture
+def simulated_project_directories(tmp_path_factory):
+    """
+    Using a wacky simulated directory structure allows testing of permutations
+    of relative, absolute, and current working directories.
+
+    /random/pytest/dir/projects/pipeline1/great_expectations
+    /random/pytest/dir/projects/data/pipeline1
+    """
+    test_dir = tmp_path_factory.mktemp("relative", numbered=False)
+    assert os.path.isabs(test_dir)
+
+    ge_dir = os.path.join(test_dir, "projects", "pipeline1", "great_expectations")
+    os.makedirs(ge_dir)
+    assert os.path.isdir(ge_dir)
+
+    data_dir = os.path.join(test_dir, "projects", "data", "pipeline1")
+    os.makedirs(data_dir)
+    assert os.path.isdir(data_dir)
+
+    yield ge_dir, data_dir
+    shutil.rmtree(test_dir)
+
+
+def test_get_relative_path_to_data_from_ge_dir_and_absolute_data_path(
+    monkeypatch, simulated_project_directories
+):
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(ge_dir)
+
+    obs = get_path_to_data_relative_to_context_root(ge_dir, data_dir)
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_to_data_from_ge_dir_and_relative_data_path(
+    monkeypatch, simulated_project_directories
+):
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(ge_dir)
+
+    obs = get_path_to_data_relative_to_context_root(
+        ge_dir,
+        os.path.join("..", "..", "data", "pipeline1"),
+    )
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_to_data_from_adjacent_dir_and_absolute_data_path(
+    monkeypatch, simulated_project_directories
+):
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(os.path.dirname(ge_dir))
+
+    obs = get_path_to_data_relative_to_context_root(ge_dir, data_dir)
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_to_data_from_adjacent_dir_and_relative_data_path(
+    monkeypatch, simulated_project_directories
+):
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(os.path.dirname(ge_dir))
+
+    obs = get_path_to_data_relative_to_context_root(
+        ge_dir,
+        os.path.join("..", "..", "data", "pipeline1"),
+    )
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_to_data_from_misc_dir_and_absolute_data_path(
+    monkeypatch, simulated_project_directories
+):
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(os.path.join(data_dir, "../../"))
+
+    obs = get_path_to_data_relative_to_context_root(ge_dir, data_dir)
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_relative_path_to_data_from_misc_dir_and_relative_data_path(
+    monkeypatch, simulated_project_directories
+):
+    ge_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(os.path.join(data_dir, "../../"))
+
+    obs = get_path_to_data_relative_to_context_root(
+        ge_dir,
+        os.path.join("..", "..", "data", "pipeline1"),
+    )
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
