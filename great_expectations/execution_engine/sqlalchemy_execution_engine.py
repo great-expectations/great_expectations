@@ -10,7 +10,7 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
-    SqlAlchemyDatasourceBatchSpec,
+    SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec,
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
@@ -837,11 +837,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
-        if isinstance(batch_spec, RuntimeDataBatchSpec):
-            # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
-            query: str = batch_spec.batch_data
+        if isinstance(batch_spec, RuntimeQueryBatchSpec):
+            # query != None is already checked when RuntimeQueryBatchSpec is instantiated
+            query: str = batch_spec.query
             if query:
-                batch_spec.batch_data = "SQLQuery"
+                batch_spec.query = "SQLQuery"
                 batch_data = SqlAlchemyBatchData(
                     execution_engine=self.engine, query=query
                 )
@@ -850,7 +850,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if not isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
             raise InvalidBatchSpecError(
                 f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
-RuntimeDataBatchSpec (illegal type "{str(type(batch_spec))}" was received).
+RuntimeQueryBatchSpec (illegal type "{str(type(batch_spec))}" was received).
                 """
             )
         selectable: Select = self._build_selectable_from_batch_spec(
