@@ -57,8 +57,9 @@ Use this notebook to configure a new {self.datasource_type.value} Datasource and
 **Datasource Name**: `{self.datasource_name}`"""
         )
         self.add_code_cell(
-            """import yaml
+            """from ruamel.yaml import YAML
 import great_expectations as ge
+yaml = YAML()
 context = ge.get_context()""",
         )
 

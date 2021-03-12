@@ -41,7 +41,7 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "import yaml\nimport great_expectations as ge\ncontext = ge.get_context()",
+                "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\nyaml = YAML()\ncontext = ge.get_context()",
                 "outputs": [],
             },
         ]
