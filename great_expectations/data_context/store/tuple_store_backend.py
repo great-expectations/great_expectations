@@ -1008,15 +1008,26 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         )
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
+        from azure.storage.blob import ContentSettings
         az_blob_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
 
         if isinstance(value, str):
-            self._get_container_client().upload_blob(
-                name=az_blob_key,
-                data=value,
-                encoding=content_encoding,
-                overwrite=True,
-            )
+            if az_blob_key.endswith(".html"):
+                my_content_settings = ContentSettings(content_type='text/html')
+                self._get_container_client().upload_blob(
+                    name=az_blob_key,
+                    data=value,
+                    encoding=content_encoding,
+                    overwrite=True,
+                    content_settings=my_content_settings,
+                )
+            else:
+                self._get_container_client().upload_blob(
+                    name=az_blob_key,
+                    data=value,
+                    encoding=content_encoding,
+                    overwrite=True,
+                )
         else:
             self._get_container_client().upload_blob(
                 name=az_blob_key, data=value, overwrite=True
