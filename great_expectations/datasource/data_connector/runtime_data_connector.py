@@ -1,5 +1,6 @@
 import logging
 from typing import Any, List, Optional, Tuple, Union, cast
+from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -13,7 +14,7 @@ from great_expectations.core.batch_spec import (
     BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
-    RuntimeQueryBatchSpec,
+    RuntimeQueryBatchSpec, S3BatchSpec,
 )
 from great_expectations.core.id_dict import (
     PartitionDefinition,
@@ -237,15 +238,20 @@ class RuntimeDataConnector(DataConnector):
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-        if runtime_parameters.get("batch_data"):
+        if runtime_parameters.get("batch_data") is not None:
             batch_spec["batch_data"] = runtime_parameters.get("batch_data")
             return RuntimeDataBatchSpec(batch_spec)
         elif runtime_parameters.get("query"):
             batch_spec["query"] = runtime_parameters.get("query")
             return RuntimeQueryBatchSpec(batch_spec)
         elif runtime_parameters.get("path"):
-            batch_spec["path"] = runtime_parameters.get("path")
-            return PathBatchSpec(batch_spec)
+            path = runtime_parameters.get("path")
+            batch_spec["path"] = path
+            parsed_url = urlparse(path)
+            if "s3" in parsed_url.scheme:
+                return S3BatchSpec(batch_spec)
+            else:
+                return PathBatchSpec(batch_spec)
 
     @staticmethod
     def _get_data_reference_name(
