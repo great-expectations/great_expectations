@@ -65,7 +65,7 @@ stages:
       - job: compatibility_matrix
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
-          GE_pytest_opts: '--no-sqlalchemy --no-spark --ignore-glob="*v012" --svv'
+          GE_pytest_opts: '--no-sqlalchemy --no-spark --ignore-glob="*v012" -svv'
         strategy:
           matrix:
             Python36-Pandas023:
@@ -126,7 +126,7 @@ stages:
 
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
-          GE_pytest_opts: '--ignore-glob="*v012" --svv'
+          GE_pytest_opts: '--ignore-glob="*v012" -svv'
 
         strategy:
           matrix:
@@ -257,7 +257,7 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore-glob="*v012" --svv
+              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore-glob="*v012" -svv
             displayName: 'pytest'
 
       - job: mssql
@@ -287,7 +287,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore-glob="*v012" --svv
+              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore-glob="*v012" -svv
             displayName: 'pytest'
 
   - stage: deploy

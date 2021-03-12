@@ -23,7 +23,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
         cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
     )
 
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
@@ -54,7 +54,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
 """.format(
         url
     ).strip()
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
 
     assert stdout == expected_output
 

@@ -42,7 +42,7 @@ def test_snowflake_user_password_credentials_generates_notebook(
         f"\n[ALEX_TEST] SELF_CHECK_REPORT: {self_check_report} ; TYPE: {str(type(self_check_report))}"
     )
 
-    stdout = result.output.strip()
+    stdout = result.stdout
 
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "Which database backend are you using?" in stdout
