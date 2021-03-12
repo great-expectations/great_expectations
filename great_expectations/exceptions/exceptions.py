@@ -98,6 +98,10 @@ class InvalidBatchSpecError(GreatExpectationsError):
     pass
 
 
+class InvalidBatchRequestError(GreatExpectationsError):
+    pass
+
+
 class InvalidBatchIdError(GreatExpectationsError):
     pass
 
