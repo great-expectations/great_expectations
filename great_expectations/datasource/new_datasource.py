@@ -119,38 +119,12 @@ class BaseDatasource:
             batch_request=batch_request
         )
 
-        if batch_request["batch_data"] is None:
-            batches: List[Batch] = []
-            for batch_definition in batch_definition_list:
-                batch_definition.batch_spec_passthrough = (
-                    batch_request.batch_spec_passthrough
-                )
-                batch_data: Any
-                batch_spec: PathBatchSpec
-                batch_markers: BatchMarkers
-                (
-                    batch_data,
-                    batch_spec,
-                    batch_markers,
-                ) = data_connector.get_batch_data_and_metadata(
-                    batch_definition=batch_definition
-                )
-                new_batch: Batch = Batch(
-                    data=batch_data,
-                    batch_request=batch_request,
-                    batch_definition=batch_definition,
-                    batch_spec=batch_spec,
-                    batch_markers=batch_markers,
-                )
-                batches.append(new_batch)
-            return batches
-
-        else:
+        if isinstance(batch_request, RuntimeBatchRequest):
             # This is a runtime batch_request
 
             if len(batch_definition_list) != 1:
                 raise ValueError(
-                    "When batch_request includes batch_data, it must specify exactly one corresponding BatchDefinition"
+                    "RuntimeBatchRequests must specify exactly one corresponding BatchDefinition"
                 )
 
             batch_definition = batch_definition_list[0]
@@ -175,6 +149,31 @@ class BaseDatasource:
             )
 
             return [new_batch]
+        else:
+            batches: List[Batch] = []
+            for batch_definition in batch_definition_list:
+                batch_definition.batch_spec_passthrough = (
+                    batch_request.batch_spec_passthrough
+                )
+                batch_data: Any
+                batch_spec: PathBatchSpec
+                batch_markers: BatchMarkers
+                (
+                    batch_data,
+                    batch_spec,
+                    batch_markers,
+                ) = data_connector.get_batch_data_and_metadata(
+                    batch_definition=batch_definition
+                )
+                new_batch: Batch = Batch(
+                    data=batch_data,
+                    batch_request=batch_request,
+                    batch_definition=batch_definition,
+                    batch_spec=batch_spec,
+                    batch_markers=batch_markers,
+                )
+                batches.append(new_batch)
+            return batches
 
     def _build_data_connector_from_config(
         self,
