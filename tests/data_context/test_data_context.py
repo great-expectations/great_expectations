@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from collections import OrderedDict
 
 import pandas as pd
 import pytest
@@ -23,6 +24,7 @@ from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
     DataContextConfigDefaults,
+    DatasourceConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -30,7 +32,11 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import Datasource, LegacyDatasource
+from great_expectations.datasource import (
+    Datasource,
+    LegacyDatasource,
+    SimpleSqlalchemyDatasource,
+)
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -1937,12 +1943,12 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
     assert len(batch) == 3
 
 
-def test_add_datasource_from_yaml(empty_data_context):
+def test_add_datasource_from_yaml_with_comments(empty_data_context):
     """
     What does this test and why?
-    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected. Comments should be persisted.
     """
-
+    yaml = YAML(typ="safe")
     context: DataContext = empty_data_context
 
     assert "my_new_datasource" not in context.datasources.keys()
@@ -1960,6 +1966,7 @@ def test_add_datasource_from_yaml(empty_data_context):
         class_name: InferredAssetFilesystemDataConnector
         datasource_name: {datasource_name}
         base_directory: ../data
+          # THIS IS A COMMENT AFTER base_directory
         default_regex:
           group_names: data_asset_name
           pattern: (.*)
@@ -1995,6 +2002,147 @@ def test_add_datasource_from_yaml(empty_data_context):
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
     assert datasource_name in context.get_config()["datasources"]
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    # Check that comments are persisted
+    with open(os.path.join(root_directory, "great_expectations.yml")) as ge_config:
+        ge_config_str = ge_config.readlines()
+    assert "# THIS IS A COMMENT AFTER base_directory" in ge_config_str
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+
+def test_add_datasource_from_yaml_sql_datasource(empty_data_context):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
+    """
+
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = f"""
+    class_name: SimpleSqlalchemyDatasource
+    introspection:
+      whole_table:
+        data_asset_name_suffix: __whole_table
+    credentials:
+      drivername: postgresql
+      host: localhost
+      port: '5432'
+      username: postgres
+      password: ''
+      database: postgres
+    """
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    # .config not implemented for SimpleSqlalchemyDatasource
+    assert datasource_from_test_yaml_config.config == {}
+    assert datasource_from_yaml.config == {}
+
+    assert datasource_from_yaml.name == datasource_name
+    assert isinstance(datasource_from_yaml, SimpleSqlalchemyDatasource)
+    assert datasource_from_yaml.__class__.__name__ == "SimpleSqlalchemyDatasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        SimpleSqlalchemyDatasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        SimpleSqlalchemyDatasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
 
 
 def test_add_datasource_from_yaml_with_substitution_variables(
@@ -2055,6 +2203,15 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     }
     assert isinstance(datasource_from_yaml, Datasource)
     assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
 
     assert datasource_name in [d["name"] for d in context.list_datasources()]
     assert datasource_name in context.datasources
