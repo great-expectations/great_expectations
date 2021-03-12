@@ -141,7 +141,7 @@ class RuntimeDataConnector(DataConnector):
 
     def get_batch_definition_list_from_batch_request(
         self,
-        batch_request: BatchRequest,
+        batch_request: RuntimeBatchRequest,
     ) -> List[BatchDefinition]:
         batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         return self._get_batch_definition_list_from_batch_request(
