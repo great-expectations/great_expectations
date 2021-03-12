@@ -77,7 +77,7 @@ class RuntimeDataConnector(DataConnector):
         if data_references_for_data_asset_name is not None:
             return list(data_references_for_data_asset_name.keys())
         else:
-            return [""]
+            return []
 
     def get_data_reference_list_count(self) -> int:
         """
@@ -85,10 +85,7 @@ class RuntimeDataConnector(DataConnector):
         RuntimeDataConnector has been passed a BatchRequest with the same data_asset_name but different
         batch_identifiers, it is possible to have more than one data_reference for a data_asset.
         """
-        sums = 0
-        for key, data_reference_dict in self._data_references_cache.items():
-            sums += len(data_reference_dict)
-        return sums
+        return sum(len(data_reference_dict) for key, data_reference_dict in self._data_references_cache.items())
 
     def get_unmatched_data_references(self) -> List[str]:
         return []
