@@ -377,14 +377,6 @@ class RuntimeBatchRequest(BatchRequest):
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
 
-    @property
-    def runtime_parameters(self) -> dict:
-        return self._runtime_parameters
-
-    @property
-    def batch_identifiers(self) -> dict:
-        return self._batch_identifiers
-
     @staticmethod
     def _validate_runtime_parameters(runtime_parameters: Union[dict, type(None)]):
         if not isinstance(runtime_parameters, dict):
