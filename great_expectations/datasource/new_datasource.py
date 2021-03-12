@@ -154,20 +154,20 @@ class BaseDatasource:
                 )
 
             batch_definition = batch_definition_list[0]
-            batch_data = batch_request["batch_data"]
+            runtime_parameters = batch_request.runtime_parameters
 
             # noinspection PyArgumentList
             (
-                typed_batch_data,
+                batch_data,
                 batch_spec,
                 batch_markers,
             ) = data_connector.get_batch_data_and_metadata(
                 batch_definition=batch_definition,
-                batch_data=batch_data,
+                runtime_parameters=runtime_parameters,
             )
 
             new_batch: Batch = Batch(
-                data=typed_batch_data,
+                data=batch_data,
                 batch_request=batch_request,
                 batch_definition=batch_definition,
                 batch_spec=batch_spec,
