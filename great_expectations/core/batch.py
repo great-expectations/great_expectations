@@ -11,7 +11,7 @@ from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionRequest,
 )
-from great_expectations.exceptions import InvalidBatchIdError
+from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchRequestError
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.validator.validation_graph import MetricConfiguration
 
@@ -194,6 +194,8 @@ class BatchRequestBase(DictDot):
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
     ):
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
@@ -201,6 +203,16 @@ class BatchRequestBase(DictDot):
         self._partition_request = partition_request
         self._limit = limit
         self._batch_spec_passthrough = batch_spec_passthrough
+        self._runtime_parameters = runtime_parameters
+        self._batch_identifiers = batch_identifiers
+
+    @property
+    def runtime_parameters(self) -> dict:
+        return self._runtime_parameters
+
+    @property
+    def batch_identifiers(self) -> dict:
+        return self._batch_identifiers
 
     @property
     def datasource_name(self) -> str:
