@@ -361,7 +361,6 @@ class RuntimeBatchRequest(BatchRequest):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
         batch_identifiers: Optional[dict] = None,
@@ -371,7 +370,6 @@ class RuntimeBatchRequest(BatchRequest):
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            limit=limit,
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._runtime_parameters = runtime_parameters
