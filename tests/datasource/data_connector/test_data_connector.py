@@ -271,7 +271,7 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_PandasExecuti
 
 
 def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecutionEngine(
-    spark_session, tmp_path_factory
+    spark_session, basic_spark_df_execution_engine, tmp_path_factory
 ):
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -291,7 +291,7 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
         base_directory=base_directory,
         glob_directive="*.csv",
         datasource_name="FAKE_DATASOURCE",
-        execution_engine=SparkDFExecutionEngine(),
+        execution_engine=basic_spark_df_execution_engine,
         default_regex={
             "pattern": "(.+)_(\\d+)_(\\d+)\\.csv",
             "group_names": ["data_asset_name", "timestamp", "size"],
