@@ -1242,11 +1242,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # similar, for example.
         ###
 
-        if self.sql_engine_dialect.name.lower() == "bigquery":
+        engine_dialect = self.sql_engine_dialect.name.lower()
+        # handle cases where dialect.name.lower() returns a byte string (e.g. databricks)
+        if isinstance(engine_dialect, bytes):
+            engine_dialect = str(engine_dialect, "utf-8")
+
+        if engine_dialect == "bigquery":
             stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name.lower() == "snowflake":
+        elif engine_dialect == "databricks":
+            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif engine_dialect == "snowflake":
             table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
 
             logger.info("Creating temporary table %s" % table_name)
@@ -1272,7 +1281,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = (
                 custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
             ).format(table_name=table_name)
-        elif self.sql_engine_dialect.name.lower() == "awsathena":
+        elif engine_dialect == "awsathena":
             stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )

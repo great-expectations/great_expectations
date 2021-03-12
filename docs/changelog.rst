@@ -7,7 +7,7 @@ Changelog
 Develop
 -----------------
 * [ENHANCEMENT] Add support for spark 3 based spark_config
-
+* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfilerß
 
 0.13.12
 -----------------
