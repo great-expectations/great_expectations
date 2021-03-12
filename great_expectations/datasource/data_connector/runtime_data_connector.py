@@ -237,6 +237,15 @@ class RuntimeDataConnector(DataConnector):
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
+        if runtime_parameters.get("batch_data"):
+            batch_spec["batch_data"] = runtime_parameters.get("batch_data")
+            return RuntimeDataBatchSpec(batch_spec)
+        elif runtime_parameters.get("query"):
+            batch_spec["query"] = runtime_parameters.get("query")
+            return RuntimeQueryBatchSpec(batch_spec)
+        elif runtime_parameters.get("path"):
+            batch_spec["path"] = runtime_parameters.get("path")
+            return PathBatchSpec(batch_spec)
 
     @staticmethod
     def _get_data_reference_name(
