@@ -7,12 +7,16 @@ import re
 import sre_constants
 import sre_parse
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchRequestBase,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionDefinitionSubset,
@@ -76,6 +80,18 @@ def batch_definition_matches_batch_request(
                     == batch_identifiers[key]
                 ):
                     return False
+
+    if batch_request.batch_identifiers:
+        if not isinstance(batch_request.batch_identifiers, dict):
+            return False
+        for key in batch_request.batch_identifiers.keys():
+            if not (
+                key in batch_definition.partition_definition
+                and batch_definition.partition_definition[key]
+                == batch_request.batch_identifiers[key]
+            ):
+                return False
+
     return True
 
 
