@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 import pandas as pd
 import pytest
@@ -188,7 +188,7 @@ def test_partition_request_and_runtime_keys_error_illegal_keys(
             "pipeline_stage_name": "core_processing",
             "airflow_run_id": 1234567890,
             "custom_key_0": "custom_value_0",
-            "custom_key_1": "custom_value_1",
+            "i_am_illegal_key": "i_am_illegal_value",
         }
     }
 
@@ -266,11 +266,11 @@ def test_set_data_asset_name_for_runtime_data(
 
 
 def test_get_available_data_asset_names(basic_datasource_with_runtime_data_connector):
-    expected_available_data_asset_names: dict[List[str]] = {
+    expected_available_data_asset_names: Dict[List[str]] = {
         "test_runtime_data_connector": []
     }
-    available_data_asset_names: List[
-        dict
+    available_data_asset_names: Dict[
+        List[str]
     ] = basic_datasource_with_runtime_data_connector.get_available_data_asset_names()
     assert available_data_asset_names == expected_available_data_asset_names
 

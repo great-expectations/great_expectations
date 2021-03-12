@@ -49,18 +49,22 @@ class RuntimeDataConnector(DataConnector):
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
     ) -> List[str]:
+        """
+        List objects in the cache to create a list of data_references. If data_asset_name is passed in, method will
+        return all data_references for the named data_asset. If no data_asset_name is passed in, will return a list of
+        all data_references for all data_assets in the cache.
+        """
         if data_asset_name:
             return self._get_data_reference_list_from_cache_by_data_asset_name(
                 data_asset_name
             )
         else:
-            data_reference_list = []
-            for data_asset_name in self.get_available_data_asset_names():
-                data_reference_list += (
-                    self._get_data_reference_list_from_cache_by_data_asset_name(
-                        data_asset_name
-                    )
+            data_reference_list = [
+                self._get_data_reference_list_from_cache_by_data_asset_name(
+                    data_asset_name
                 )
+                for data_asset_name in self.get_available_data_asset_names()
+            ]
             return data_reference_list
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
@@ -68,17 +72,22 @@ class RuntimeDataConnector(DataConnector):
     ) -> List[str]:
         """Fetch data_references corresponding to data_asset_name from the cache."""
         data_references_for_data_asset_name = self._data_references_cache.get(
-            data_asset_name, None
+            data_asset_name
         )
-        if isinstance(data_references_for_data_asset_name, dict):
+        if data_references_for_data_asset_name is not None:
             return list(data_references_for_data_asset_name.keys())
         else:
             return [""]
 
     def get_data_reference_list_count(self) -> int:
+        """
+        Get number of data_references corresponding to all data_asset_names in cache. In cases where the
+        RuntimeDataConnector has been passed a BatchRequest with the same data_asset_name but different
+        batch_identifiers, it is possible to have more than one data_reference for a data_asset.
+        """
         sums = 0
-        for key in self._data_references_cache.keys():
-            sums += len(self._data_references_cache[key])
+        for key, data_reference_dict in self._data_references_cache.items():
+            sums += len(data_reference_dict)
         return sums
 
     def get_unmatched_data_references(self) -> List[str]:
@@ -119,7 +128,6 @@ class RuntimeDataConnector(DataConnector):
         self,
         batch_request: BatchRequest,
     ) -> List[BatchDefinition]:
-
         """
         <Will> 202103. The following behavior of the _data_references_cache follows a pattern that we are using for
         other data_connectors, including variations of FilePathDataConnector. When BatchRequest contains batch_data
@@ -133,10 +141,8 @@ class RuntimeDataConnector(DataConnector):
         self._validate_batch_request(batch_request=batch_request)
 
         batch_identifiers = batch_request.partition_request.get("batch_identifiers")
-        
-        self._validate_batch_identifiers(
-            batch_identifiers=batch_identifiers
-        )
+
+        self._validate_batch_identifiers(batch_identifiers=batch_identifiers)
 
         batch_definition_list: List[BatchDefinition]
         batch_definition: BatchDefinition = BatchDefinition(
