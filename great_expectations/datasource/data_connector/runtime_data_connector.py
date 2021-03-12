@@ -14,7 +14,8 @@ from great_expectations.core.batch_spec import (
     BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
-    RuntimeQueryBatchSpec, S3BatchSpec,
+    RuntimeQueryBatchSpec,
+    S3BatchSpec,
 )
 from great_expectations.core.id_dict import (
     PartitionDefinition,

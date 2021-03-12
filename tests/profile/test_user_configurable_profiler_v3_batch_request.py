@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -49,16 +49,14 @@ except ImportError:
 
 
 def get_pandas_runtime_validator(context, df):
-    batch_request = BatchRequest(
+    batch_request = RuntimeBatchRequest(
         datasource_name="my_pandas_runtime_datasource",
         data_connector_name="my_data_connector",
-        batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
-        partition_request={
-            "batch_identifiers": {
-                "an_example_key": "a",
-                "another_example_key": "b",
-            }
+        runtime_parameters={"batch_data": df},
+        batch_identifiers={
+            "an_example_key": "a",
+            "another_example_key": "b",
         },
     )
 
@@ -79,16 +77,14 @@ def get_spark_runtime_validator(context, df):
     sc = SparkContext.getOrCreate()
     sqlCtx = SQLContext(sc)
     sdf = sqlCtx.createDataFrame(df)
-    batch_request = BatchRequest(
+    batch_request = RuntimeBatchRequest(
         datasource_name="my_spark_datasource",
         data_connector_name="my_data_connector",
-        batch_data=sdf,
         data_asset_name="IN_MEMORY_DATA_ASSET",
-        partition_request={
-            "batch_identifiers": {
-                "an_example_key": "a",
-                "another_example_key": "b",
-            }
+        runtime_parameters={"batch_data": sdf},
+        batch_identifiers={
+            "an_example_key": "a",
+            "another_example_key": "b",
         },
     )
 
