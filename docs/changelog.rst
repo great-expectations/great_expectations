@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-* [ENHANCEMENT] Improve support for median calculation in Athena
+* [ENHANCEMENT] Improve support for median calculation in Athena (Thanks @kuhnen!) #2521
 
 0.13.12
 -----------------
