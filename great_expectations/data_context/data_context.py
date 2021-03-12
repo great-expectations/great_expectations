@@ -1440,7 +1440,7 @@ class BaseDataContext:
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[BatchRequest, RuntimeBatchRequest] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
         batch_identifiers: Optional[dict] = None,
