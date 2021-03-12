@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List, Optional, Tuple, cast, Union
+from typing import Any, List, Optional, Tuple, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -11,7 +11,9 @@ from great_expectations.core.batch import (
 from great_expectations.core.batch_spec import (
     BatchMarkers,
     BatchSpec,
-    RuntimeDataBatchSpec, RuntimeQueryBatchSpec, PathBatchSpec,
+    PathBatchSpec,
+    RuntimeDataBatchSpec,
+    RuntimeQueryBatchSpec,
 )
 from great_expectations.core.id_dict import (
     PartitionDefinition,

@@ -10,7 +10,8 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
-    SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec,
+    RuntimeQueryBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
