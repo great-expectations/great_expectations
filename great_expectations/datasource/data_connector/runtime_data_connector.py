@@ -256,30 +256,6 @@ class RuntimeDataConnector(DataConnector):
         )
         return data_reference_name
 
-    def _validate_batch_request(self, batch_request: BatchRequestBase):
-        super()._validate_batch_request(batch_request=batch_request)
-
-        # Insure that batch_data and batch_request satisfy the "if and only if" condition.
-        if not (
-            (
-                batch_request.batch_data is None
-                and (
-                    batch_request.partition_request is None
-                    or not batch_request.partition_request.get("batch_identifiers")
-                )
-            )
-            or (
-                batch_request.batch_data is not None
-                and batch_request.partition_request
-                and batch_request.partition_request.get("batch_identifiers")
-            )
-        ):
-            raise ge_exceptions.DataConnectorError(
-                f"""RuntimeDataConnector "{self.name}" requires batch_data and partition_request to be both present or
-                both absent in the batch_request parameter.
-                """
-            )
-
     def _validate_batch_identifiers(self, batch_identifiers: dict):
         if batch_identifiers is None:
             batch_identifiers = {}
