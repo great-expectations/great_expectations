@@ -4,7 +4,7 @@ import logging
 import sys
 from collections import OrderedDict
 from collections.abc import Mapping
-from typing import Any, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, Optional, Union
 from urllib.parse import urlparse
 
 import numpy as np
@@ -408,3 +408,109 @@ class S3Url:
 def sniff_s3_compression(s3_url: S3Url) -> str:
     """Attempts to get read_csv compression from s3_url"""
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix, "infer")
+
+
+# noinspection PyPep8Naming
+def get_or_create_spark_application(
+    spark_config: Optional[Dict[str, str]] = None,
+):
+    # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
+    # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
+    # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
+    # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+    try:
+        from pyspark import SparkContext
+        from pyspark.sql import SparkSession
+    except ImportError:
+        SparkContext = None
+        SparkSession = None
+        # TODO: review logging more detail here
+        logger.debug(
+            "Unable to load pyspark; install optional spark dependency for support."
+        )
+
+    if spark_config is None:
+        spark_config = {}
+    name: Optional[str] = spark_config.get("spark.app.name")
+    if not name:
+        name = "default_great_expectations_spark_application"
+    spark_config.update({"spark.app.name": name})
+
+    spark_session: Optional[SparkSession] = get_or_create_spark_session(
+        spark_config=spark_config
+    )
+    if spark_session is None:
+        raise ValueError("SparkContext could not be started.")
+
+    sc: SparkContext = spark_session.sparkContext
+    # noinspection PyProtectedMember
+    sc_stopped: bool = sc._jsc.sc().isStopped()
+    if ("spark.app.name", name) not in sc.getConf().getAll():
+        if not sc_stopped:
+            try:
+                # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
+                logger.info("Stopping existing spark context to reconfigure.")
+                sc.stop()
+            except AttributeError:
+                logger.error(
+                    "Unable to load spark context; install optional spark dependency for support."
+                )
+        spark_session = get_or_create_spark_session(spark_config=spark_config)
+        if spark_session is None:
+            raise ValueError("SparkContext could not be started.")
+        sc = spark_session.sparkContext
+        # noinspection PyProtectedMember
+        sc_stopped = sc._jsc.sc().isStopped()
+
+    if sc_stopped:
+        raise ValueError("SparkContext stopped unexpectedly.")
+
+    return spark_session
+
+
+# noinspection PyPep8Naming
+def get_or_create_spark_session(
+    spark_config: Optional[Dict[str, str]] = None,
+):
+    # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
+    # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
+    # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
+    # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+    try:
+        from pyspark import SparkContext
+        from pyspark.sql import SparkSession
+    except ImportError:
+        SparkContext = None
+        SparkSession = None
+        # TODO: review logging more detail here
+        logger.debug(
+            "Unable to load pyspark; install optional spark dependency for support."
+        )
+
+    spark_session: Optional[SparkSession]
+    try:
+        if spark_config is None:
+            spark_config = {}
+
+        builder = SparkSession.builder
+
+        app_name: Optional[str] = spark_config.get("spark.app.name")
+        if app_name:
+            builder.appName(app_name)
+        for k, v in spark_config.items():
+            if k != "spark.app.name":
+                builder.config(k, v)
+        spark_session = builder.getOrCreate()
+        sc: SparkContext = spark_session.sparkContext
+        # noinspection PyProtectedMember
+        if sc._jsc.sc().isStopped():
+            raise ValueError("SparkContext stopped unexpectedly.")
+    except AttributeError:
+        logger.error(
+            "Unable to load spark context; install optional spark dependency for support."
+        )
+        spark_session = None
+
+    return spark_session
