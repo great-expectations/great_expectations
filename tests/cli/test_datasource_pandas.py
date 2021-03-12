@@ -71,21 +71,18 @@ def test_cli_datasource_new(
     result = runner.invoke(
         cli,
         "--v3-api datasource new",
-        input=f"1\n1\n{filesystem_csv_2}\nmynewsource\n",
+        input=f"1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "What are you processing your files with?" in stdout
-    assert "Give your new Datasource a short name." in stdout
 
     assert result.exit_code == 0
 
     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(
-        uncommitted_dir, "datasource_new_mynewsource.ipynb"
-    )
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
@@ -99,7 +96,7 @@ def test_cli_datasource_new(
     context = DataContext(root_dir)
     assert context.list_datasources() == [
         {
-            "name": "mynewsource",
+            "name": "my_datasource",
             "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
             "execution_engine": {
@@ -107,7 +104,7 @@ def test_cli_datasource_new(
                 "class_name": "PandasExecutionEngine",
             },
             "data_connectors": {
-                "mynewsource_example_data_connector": {
+                "my_datasource_example_data_connector": {
                     "default_regex": {
                         "group_names": "data_asset_name",
                         "pattern": "(.*)",
@@ -141,21 +138,18 @@ def test_cli_datasource_new_from_misc_directory(
     result = runner.invoke(
         cli,
         f"--config {root_dir} --v3-api datasource new",
-        input=f"1\n1\n{filesystem_csv_2}\nmynewsource\n",
+        input=f"1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "What are you processing your files with?" in stdout
-    assert "Give your new Datasource a short name." in stdout
 
     assert result.exit_code == 0
 
     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(
-        uncommitted_dir, "datasource_new_mynewsource.ipynb"
-    )
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
@@ -169,7 +163,7 @@ def test_cli_datasource_new_from_misc_directory(
     context = DataContext(root_dir)
     assert context.list_datasources() == [
         {
-            "name": "mynewsource",
+            "name": "my_datasource",
             "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
             "execution_engine": {
@@ -177,7 +171,7 @@ def test_cli_datasource_new_from_misc_directory(
                 "class_name": "PandasExecutionEngine",
             },
             "data_connectors": {
-                "mynewsource_example_data_connector": {
+                "my_datasource_example_data_connector": {
                     "default_regex": {
                         "group_names": "data_asset_name",
                         "pattern": "(.*)",

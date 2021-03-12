@@ -166,7 +166,6 @@ def test_cli_datasource_new_connection_string(
     stdout = result.stdout
 
     assert "What data would you like Great Expectations to connect to?" in stdout
-    assert "Give your new Datasource a short name." in stdout
     assert "What is the url/connection string for the sqlalchemy connection?" in stdout
 
     assert result.exit_code == 0

@@ -138,9 +138,9 @@ def test_render_datasource_new_notebook_with_pandas_Datasource(
 
     datasource_new_notebook_renderer = DatasourceNewNotebookRenderer(
         context=context,
-        datasource_name=datasource_name,
         datasource_type=DatasourceTypes.PANDAS,
         datasource_yaml=datasource_yaml,
+        datasource_name=datasource_name,
     )
     obs: nbformat.NotebookNode = datasource_new_notebook_renderer.render()
 
@@ -190,9 +190,9 @@ def test_render_datasource_new_notebook_with_spark_Datasource(
 
     datasource_new_notebook_renderer = DatasourceNewNotebookRenderer(
         context=context,
-        datasource_name=datasource_name,
         datasource_type=DatasourceTypes.SPARK,
         datasource_yaml=datasource_yaml,
+        datasource_name=datasource_name,
     )
     obs: nbformat.NotebookNode = datasource_new_notebook_renderer.render()
 
@@ -242,9 +242,9 @@ def test_render_datasource_new_notebook_with_sql_Datasource(
 
     datasource_new_notebook_renderer = DatasourceNewNotebookRenderer(
         context=context,
-        datasource_name=datasource_name,
         datasource_type=DatasourceTypes.SQL,
         datasource_yaml=datasource_yaml,
+        datasource_name=datasource_name,
     )
     obs: nbformat.NotebookNode = datasource_new_notebook_renderer.render()
 
