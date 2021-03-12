@@ -1,8 +1,8 @@
 import os
 from copy import deepcopy
+from unittest import mock
 from unittest.mock import patch
 
-import mock
 import pytest
 from click.testing import CliRunner
 
@@ -21,6 +21,12 @@ def test_snowflake_user_password_credentials_generates_notebook(
     root_dir = empty_data_context.root_directory
     context = DataContext(root_dir)
 
+    # TODO: ANTHONY: Remove this
+    self_check_report = "********** Before CliRunner.invoke() **********"
+    print(
+        f"\n[ALEX_TEST] SELF_CHECK_REPORT: {self_check_report} ; TYPE: {str(type(self_check_report))}"
+    )
+
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
@@ -30,20 +36,44 @@ def test_snowflake_user_password_credentials_generates_notebook(
         input="2\n4\nsnowflake\n1\nuser\nABCD.us-east-1\ndefault_db\ndefault_schema\nxsmall\npublic\npassword\n",
     )
 
+    # TODO: ANTHONY: Remove this
+    self_check_report = "********** After CliRunner.invoke() **********"
+    print(
+        f"\n[ALEX_TEST] SELF_CHECK_REPORT: {self_check_report} ; TYPE: {str(type(self_check_report))}"
+    )
+
     stdout = result.output.strip()
 
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "Which database backend are you using?" in stdout
     assert "Give your new Datasource a short name." in stdout
 
+    # TODO: ANTHONY: Remove this
+    self_check_report = "********** After assertions **********"
+    print(
+        f"\n[ALEX_TEST] SELF_CHECK_REPORT: {self_check_report} ; TYPE: {str(type(self_check_report))}"
+    )
+
     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new_snowflake.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
+    # TODO: ANTHONY: Remove this
+    self_check_report = "********** After checking for notebook exists **********"
+    print(
+        f"\n[ALEX_TEST] SELF_CHECK_REPORT: {self_check_report} ; TYPE: {str(type(self_check_report))}"
+    )
+
     # We don't have a snowflake account to use for testing, therefore we do not
     # want to run the notebook, as it will hang as it tries to connect.
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+    # TODO: ANTHONY: Remove this
+    self_check_report = "********** At the end of the test **********"
+    print(
+        f"\n[ALEX_TEST] SELF_CHECK_REPORT: {self_check_report} ; TYPE: {str(type(self_check_report))}"
+    )
 
 
 @patch("click.prompt")
