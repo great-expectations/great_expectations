@@ -155,13 +155,11 @@ class RuntimeDataConnector(DataConnector):
         self._validate_batch_request(batch_request=batch_request)
 
         batch_identifiers: Optional[dict] = None
-        if batch_request.partition_request:
+        if batch_request.batch_identifiers:
             self._validate_batch_identifiers(
-                batch_identifiers=batch_request.partition_request.get(
-                    "batch_identifiers"
-                )
+                batch_identifiers=batch_request.batch_identifiers
             )
-            batch_identifiers = batch_request.partition_request.get("batch_identifiers")
+            batch_identifiers = batch_request.batch_identifiers
         if not batch_identifiers:
             batch_identifiers = {}
 
