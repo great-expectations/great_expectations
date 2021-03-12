@@ -6,9 +6,12 @@ Changelog
 
 Develop
 -----------------
-* [ENHANCEMENT] Add support for spark 3 based spark_config
-* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfilerß
+
+0.13.13
+-----------------
 * [ENHANCEMENT] Improve support for median calculation in Athena (Thanks @kuhnen!) #2521
+* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfiler #2519
+* [MAINTENANCE] Add support for spark 3 based spark_config #2481
 
 0.13.12
 -----------------
