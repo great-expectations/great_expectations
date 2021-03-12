@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 
@@ -218,13 +219,16 @@ def test_password_masker_mask_db_url(tmp_path_factory):
     # SQLite
     # relative path
     path_to_sqlite_db = str(tmp_path_factory.mktemp("path_to_sqlite_db"))
+    Path(os.path.join(path_to_sqlite_db, "foo.db")).touch()
     assert (
         PasswordMasker.mask_db_url(f"sqlite://{path_to_sqlite_db}/foo.db")
         == f"sqlite://{path_to_sqlite_db}/foo.db"
     )
     assert (
-        PasswordMasker.mask_db_url("sqlite:///foo.db", use_urlparse=True)
-        == "sqlite:///foo.db"
+        PasswordMasker.mask_db_url(
+            f"sqlite://{path_to_sqlite_db}/foo.db", use_urlparse=True
+        )
+        == f"sqlite://{path_to_sqlite_db}/foo.db"
     )
 
     # absolute path
