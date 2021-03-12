@@ -56,7 +56,7 @@ Steps
 
     .. code-block:: python
 
-        included_columns = [
+        ignored_columns = [
             'crim',
             'zn',
             'indus',
@@ -73,18 +73,25 @@ Steps
             # 'medv'
         ]
 
-    To select which columns you want to scaffold Expectations on, simply uncomment them to include them.
-    
-    The next code cell shows the scaffold config, which contains the list of columns you included in the previous step, and the list of Expectations you want to generate (or not generate) for these columns. The list of included or excluded Expectations is a list of *strings* of the Expectation names, for example:
+    By default, all columns are ignored. To select which columns you want to scaffold Expectations on, simply comment them out to include them.
+
+    The next code cell is where you will configure and instantiate your profiler, and build your suite. You can leave these defaults as-is for now - :ref:`learn more about the available parameters here. <how_to_guides__creating_and_editing_expectations__how_to_create_an_expectation_suite_with_the_user_configurable_profiler>`
+
+    When you run this cell and build your suite, you will see a list of the expectations included by column. At this point, you may also make modifications to the ignored_columns or the profiler, and re-run the cell.
 
     .. code-block:: python
 
-        scaffold_config = {
-            "included_columns": included_columns,
-            # "excluded_columns": [],
-            # "included_expectations": [],
-            # "excluded_expectations": [],
-        }
+        profiler = UserConfigurableProfiler(profile_dataset=batch,
+            ignored_columns=ignored_columns,
+            excluded_expectations=None,
+            not_null_only=False,
+            primary_or_compound_key=False,
+            semantic_types_dict=None,
+            table_expectations_only=False,
+            value_set_threshold="MANY",
+            )
+
+        suite = profiler.build_suite()
 
 3. **Generate Data Docs and review the results there**
 

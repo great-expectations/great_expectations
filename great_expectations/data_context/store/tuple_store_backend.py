@@ -972,6 +972,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
+        suppress_store_backend_id=False,
+        store_name=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -980,6 +982,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            store_name=store_name,
         )
         self.connection_string = connection_string
         self.prefix = prefix

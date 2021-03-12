@@ -6,7 +6,7 @@ import random
 import shutil
 import threading
 from types import ModuleType
-from typing import Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -21,7 +21,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.data_context import BaseDataContext
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -306,15 +306,56 @@ def sa(test_backends):
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
 
+@pytest.mark.order(index=2)
 @pytest.fixture
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
+
     try:
         import pyspark
         from pyspark.sql import SparkSession
 
-        return SparkSession.builder.getOrCreate()
+        return get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+            }
+        )
+    except ImportError:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
+
+
+@pytest.fixture
+def basic_spark_df_execution_engine(spark_session):
+    from great_expectations.execution_engine import SparkDFExecutionEngine
+
+    conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
+    spark_config: Dict[str, str] = dict(conf)
+    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+        spark_config=spark_config,
+    )
+    return execution_engine
+
+
+@pytest.mark.order(index=3)
+@pytest.fixture
+def spark_session_v012(test_backends):
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
+    try:
+        import pyspark
+        from pyspark.sql import SparkSession
+
+        return get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+            }
+        )
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
@@ -2225,8 +2266,6 @@ def sqlalchemy_dataset(test_backends):
 @pytest.fixture
 def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
-        import sqlalchemy as sa
-
         try:
             import sqlalchemy as sa
 
