@@ -124,11 +124,11 @@ class RuntimeDataConnector(DataConnector):
     def get_batch_data_and_metadata(
         self,
         batch_definition: BatchDefinition,
-        batch_data: Any,
+        runtime_parameters: dict,
     ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
             batch_definition=batch_definition,
-            batch_data=batch_data,
+            runtime_parameters=runtime_parameters,
         )
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
@@ -232,13 +232,11 @@ class RuntimeDataConnector(DataConnector):
     def build_batch_spec(
         self,
         batch_definition: BatchDefinition,
-        batch_data: Any,
-    ) -> RuntimeDataBatchSpec:
+        runtime_parameters: dict,
+    ) -> Union[RuntimeDataBatchSpec, RuntimeQueryBatchSpec, PathBatchSpec]:
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-        batch_spec["batch_data"] = batch_data
-        return RuntimeDataBatchSpec(batch_spec)
 
     @staticmethod
     def _get_data_reference_name(
