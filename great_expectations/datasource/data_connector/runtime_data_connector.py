@@ -168,7 +168,7 @@ class RuntimeDataConnector(DataConnector):
         batch_definition: BatchDefinition = BatchDefinition(
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
-            data_asset_name=DEFAULT_DATA_ASSET_NAME,
+            data_asset_name=batch_request.data_asset_name or DEFAULT_DATA_ASSET_NAME,
             partition_definition=PartitionDefinition(batch_identifiers),
         )
 
