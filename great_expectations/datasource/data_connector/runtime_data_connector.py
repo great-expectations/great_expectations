@@ -85,7 +85,10 @@ class RuntimeDataConnector(DataConnector):
         RuntimeDataConnector has been passed a BatchRequest with the same data_asset_name but different
         batch_identifiers, it is possible to have more than one data_reference for a data_asset.
         """
-        return sum(len(data_reference_dict) for key, data_reference_dict in self._data_references_cache.items())
+        return sum(
+            len(data_reference_dict)
+            for key, data_reference_dict in self._data_references_cache.items()
+        )
 
     def get_unmatched_data_references(self) -> List[str]:
         return []
