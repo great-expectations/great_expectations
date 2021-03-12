@@ -7,7 +7,7 @@ import string
 import threading
 import uuid
 from functools import wraps
-from typing import Any, List
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -22,6 +22,7 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.core.batch import Batch
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.store import CheckpointStore, StoreBackend
 from great_expectations.data_context.store.util import (
     build_checkpoint_store_using_store_backend,
@@ -291,6 +292,7 @@ def get_dataset(
             return None
 
         if sqlite_db_path is not None:
+            # Create a new database
             engine = create_engine(f"sqlite:////{sqlite_db_path}")
         else:
             engine = create_engine("sqlite://")
@@ -544,7 +546,6 @@ def get_dataset(
 
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
-        from pyspark.sql import SparkSession
 
         SPARK_TYPES = {
             "StringType": sparktypes.StringType,
@@ -558,8 +559,13 @@ def get_dataset(
             "DataType": sparktypes.DataType,
             "NullType": sparktypes.NullType,
         }
-
-        spark = SparkSession.builder.getOrCreate()
+        spark = get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+            }
+        )
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -720,7 +726,13 @@ def get_test_validator_with_data(
             "NullType": sparktypes.NullType,
         }
 
-        spark = SparkSession.builder.getOrCreate()
+        spark = get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+            }
+        )
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -805,20 +817,18 @@ def get_test_validator_with_data(
             spark_df = spark.createDataFrame(data_reshaped, columns)
 
         if table_name is None:
+            # noinspection PyUnusedLocal
             table_name = "test_data_" + "".join(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return _build_spark_validator_with_data(df=spark_df)
+        return build_spark_validator_with_data(df=spark_df, spark=spark)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
 
 
-def _build_spark_engine(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
+def build_spark_validator_with_data(df, spark):
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
             [
@@ -831,33 +841,37 @@ def _build_spark_engine(df):
             df.columns.tolist(),
         )
     batch = Batch(data=df)
-    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
-    return engine
+    conf: List[tuple] = spark.sparkContext.getConf().getAll()
+    spark_config: Dict[str, str] = dict(conf)
+    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+        spark_config=spark_config
+    )
+    execution_engine.load_batch_data(batch_id=batch.id, batch_data=df)
+    return Validator(execution_engine=execution_engine, batches=(batch,))
 
 
-def _build_spark_validator_with_data(df):
-    from pyspark.sql import SparkSession
+# Builds a Spark Execution Engine
+def build_spark_engine(spark, df, batch_id):
+    df = spark.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in df.to_records(index=False)
+        ],
+        df.columns.tolist(),
+    )
+    conf: List[tuple] = spark.sparkContext.getConf().getAll()
+    spark_config: Dict[str, str] = dict(conf)
+    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+        spark_config=spark_config
+    )
+    execution_engine.load_batch_data(batch_id=batch_id, batch_data=df)
+    return execution_engine
 
-    spark = SparkSession.builder.getOrCreate()
-    if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
-    batch = Batch(data=df)
 
-    return Validator(execution_engine=SparkDFExecutionEngine(), batches=(batch,))
-
-
-def _build_sa_engine(df):
-    import sqlalchemy as sa
-
+def _build_sa_engine(df, sa):
     eng = sa.create_engine("sqlite://", echo=False)
     df.to_sql("test", eng)
     engine = SqlAlchemyExecutionEngine(engine=eng)
