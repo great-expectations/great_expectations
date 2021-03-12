@@ -11,7 +11,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
-from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
+from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -1942,7 +1942,7 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
     assert len(batch) == 3
 
 
-def test_get_batch_with_query_as_batch_data_using_runtime_data_connector(
+def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1951,19 +1951,17 @@ def test_get_batch_with_query_as_batch_data_using_runtime_data_connector(
     batch: Batch
 
     batch = context.get_batch(
-        batch_request=BatchRequest(
+        batch_request=RuntimeBatchRequest(
             datasource_name="my_runtime_sql_datasource",
             data_connector_name="my_runtime_data_connector",
-            data_asset_name="IN_MEMORY_DATA_ASSET",
-            batch_data="SELECT * FROM table_partitioned_by_date_column__A",
-            partition_request=PartitionRequest(
-                **{
-                    "batch_identifiers": {
-                        "pipeline_stage_name": "core_processing",
-                        "airflow_run_id": 1234567890,
-                    },
-                },
-            ),
+            data_asset_name="my_data_asset_name",
+            runtime_parameters={
+                "query": "SELECT * FROM table_partitioned_by_date_column__A"
+            },
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            }
         ),
     )
 
