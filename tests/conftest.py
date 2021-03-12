@@ -320,7 +320,7 @@ def spark_session(test_backends):
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
     except ImportError:
@@ -353,7 +353,7 @@ def spark_session_v012(test_backends):
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
     except ImportError:

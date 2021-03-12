@@ -431,10 +431,7 @@ def get_or_create_spark_application(
         )
 
     if spark_config is None:
-        spark_config = {
-            "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "450m",
-        }
+        spark_config = {}
     name: Optional[str] = spark_config.get("spark.app.name")
     if not name:
         name = "default_great_expectations_spark_application"

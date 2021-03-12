@@ -563,7 +563,7 @@ def get_dataset(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
         # We need to allow null values in some column types that do not support them natively, so we skip
@@ -730,7 +730,7 @@ def get_test_validator_with_data(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
         # We need to allow null values in some column types that do not support them natively, so we skip

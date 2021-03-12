@@ -31,10 +31,13 @@ from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemy
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import import_library_module
@@ -528,7 +531,7 @@ def get_dataset(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
                 "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
         # We need to allow null values in some column types that do not support them natively, so we skip
@@ -622,16 +625,24 @@ def get_dataset(
 def _build_sa_engine(df):
     import sqlalchemy as sa
 
-    execution_engine = sa.create_engine("sqlite://", echo=False)
-    df.to_sql("test", execution_engine)
-    batch_data = SqlAlchemyBatchData(
-        execution_engine=execution_engine, table_name="test"
+    table_name: str = "test"
+
+    sqlalchemy_engine: sa.engine.Engine = sa.create_engine("sqlite://", echo=False)
+    df.to_sql(table_name, sqlalchemy_engine)
+
+    execution_engine: SqlAlchemyExecutionEngine
+
+    execution_engine = SqlAlchemyExecutionEngine(engine=sqlalchemy_engine)
+    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
     )
-    batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=execution_engine, batch_data_dict={batch.id: batch_data}
+    batch: Batch = Batch(data=batch_data)
+
+    execution_engine = SqlAlchemyExecutionEngine(
+        engine=sqlalchemy_engine, batch_data_dict={batch.id: batch_data}
     )
-    return engine
+
+    return execution_engine
 
 
 def _build_pandas_engine(df):

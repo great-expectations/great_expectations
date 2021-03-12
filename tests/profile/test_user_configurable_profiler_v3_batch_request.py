@@ -84,7 +84,7 @@ def get_spark_runtime_validator(context, df):
         spark_config={
             "spark.sql.catalogImplementation": "hive",
             "spark.executor.memory": "450m",
-            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
         }
     )
     df = spark.createDataFrame(df)

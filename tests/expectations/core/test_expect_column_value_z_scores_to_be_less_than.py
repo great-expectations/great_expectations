@@ -67,7 +67,7 @@ def test_spark_expect_column_value_z_scores_to_be_less_than_impl(
         spark_config={
             "spark.sql.catalogImplementation": "hive",
             "spark.executor.memory": "450m",
-            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have affect.
+            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
         }
     )
     df = spark.createDataFrame(df)
