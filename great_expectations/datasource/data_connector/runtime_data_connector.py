@@ -1,16 +1,17 @@
 import logging
-from typing import Any, List, Optional, Tuple, cast
+from typing import Any, List, Optional, Tuple, cast, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     BatchRequestBase,
+    RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import (
     BatchMarkers,
     BatchSpec,
-    RuntimeDataBatchSpec,
+    RuntimeDataBatchSpec, RuntimeQueryBatchSpec, PathBatchSpec,
 )
 from great_expectations.core.id_dict import (
     PartitionDefinition,
@@ -55,7 +56,8 @@ class RuntimeDataConnector(DataConnector):
         mapped_batch_definition_list: List[
             BatchDefinition
         ] = self._map_data_reference_to_batch_definition_list(
-            data_reference=data_reference, data_asset_name=None
+            data_reference=data_reference,
+            data_asset_name=None,  # FIXME: data_asset_name is no longer optional
         )
         self._data_references_cache = {data_reference: mapped_batch_definition_list}
 
