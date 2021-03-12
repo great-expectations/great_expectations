@@ -399,19 +399,7 @@ class RuntimeBatchRequest(BatchRequest):
             partition_request=partition_request,
             limit=limit,
         )
-
-    def get_json_dict(self):
-        json_dict = super().get_json_dict()
-        json_dict["batch_identifiers"] = self.batch_identifiers
-        json_dict["runtime_parameters"] = self.runtime_parameters
-
-        if json_dict["runtime_parameters"] is not None and json_dict[
-            "runtime_parameters"
-        ].get("batch_data"):
-            json_dict["runtime_parameters"]["batch_data"] = str(
-                type(json_dict["runtime_parameters"]["batch_data"])
             )
-        return json_dict
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
