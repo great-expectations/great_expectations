@@ -973,6 +973,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         platform_specific_separator=False,
         fixed_length_key=False,
         suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
         store_name=None,
     ):
         super().__init__(
@@ -983,6 +984,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
             suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
             store_name=store_name,
         )
         self.connection_string = connection_string
