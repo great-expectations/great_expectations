@@ -1,6 +1,7 @@
 import pytest
 
 from great_expectations.core.batch import BatchSpec
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 try:
@@ -127,7 +128,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
 
     # test schema with execution engine
     # TODO : Will20210222 Add tests for specifying schema with non-sqlite backend that actually supports new schema creation
-    my_batch_spec = BatchSpec(
+    my_batch_spec = SqlAlchemyDatasourceBatchSpec(
         **{
             "table_name": "test_table",
             "partition_definition": {},
