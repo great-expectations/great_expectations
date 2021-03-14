@@ -1514,7 +1514,7 @@ class BaseDataContext:
             raise ValueError("Must provide only one of batch_data, query, or path.")
         if any(
             [
-                batch_data
+                batch_data is not None
                 and runtime_parameters
                 and "batch_data" in runtime_parameters,
                 query and runtime_parameters and "query" in runtime_parameters,
@@ -1531,7 +1531,7 @@ class BaseDataContext:
             return datasource.get_batch_list_from_batch_request(
                 batch_request=batch_request
             )
-        elif any([batch_data, query, path, runtime_parameters]):
+        elif any([batch_data is not None, query, path, runtime_parameters]):
             runtime_parameters = runtime_parameters or {}
             if batch_data is not None:
                 runtime_parameters["batch_data"] = batch_data
