@@ -830,6 +830,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:
+        if not isinstance(batch_spec, (SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec)):
+            raise InvalidBatchSpecError(
+                f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
+        RuntimeQueryBatchSpec (illegal type "{str(type(batch_spec))}" was received).
+                        """
+            )
+
         batch_data: SqlAlchemyBatchData
         batch_markers: BatchMarkers = BatchMarkers(
             {
@@ -848,12 +855,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
                 return batch_data, batch_markers
 
-        if not isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            raise InvalidBatchSpecError(
-                f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
-RuntimeQueryBatchSpec (illegal type "{str(type(batch_spec))}" was received).
-                """
-            )
         selectable: Select = self._build_selectable_from_batch_spec(
             batch_spec=batch_spec
         )
