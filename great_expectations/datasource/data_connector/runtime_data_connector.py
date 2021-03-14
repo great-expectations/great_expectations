@@ -290,15 +290,15 @@ class RuntimeDataConnector(DataConnector):
         runtime_parameters = batch_request.runtime_parameters
         batch_identifiers = batch_request.batch_identifiers
         if not (
-            (runtime_parameters is None and batch_identifiers is None)
+            (not runtime_parameters and not batch_identifiers)
             or (
-                runtime_parameters is not None
-                and batch_identifiers is not None
+                runtime_parameters
+                and batch_identifiers
             )
         ):
             raise ge_exceptions.DataConnectorError(
                 f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both 
-                present or
+                present and non-empty or
                 both absent in the batch_request parameter.
                 """
             )
