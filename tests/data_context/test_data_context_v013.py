@@ -223,10 +223,8 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
         data_connector_name="my_runtime_data_connector",
         data_asset_name="IN_MEMORY_DATA_ASSET",
         batch_data=test_df,
-        partition_request={
-            "batch_identifiers": {
-                "airflow_run_id": 1234567890,
-            }
+        batch_identifiers={
+            "airflow_run_id": 1234567890,
         },
         limit=None,
     )
