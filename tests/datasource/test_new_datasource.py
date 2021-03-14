@@ -12,7 +12,7 @@ from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
     BatchRequest,
-    PartitionDefinition,
+    PartitionDefinition, RuntimeBatchRequest,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -435,15 +435,14 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
         "datasource_name": basic_pandas_datasource_v013.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": test_df,
-        "partition_request": {
-            "batch_identifiers": {
-                "airflow_run_id": 1234567890,
-            }
+        "runtime_parameters": {
+            "batch_data": test_df,
         },
-        "limit": None,
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        },
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
     batch_list: List[
         Batch
     ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
@@ -477,11 +476,12 @@ def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_e
         "datasource_name": basic_pandas_datasource_v013.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": test_df,
-        "partition_request": None,
-        "limit": None,
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": None,
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         batch_list: List[
@@ -503,16 +503,15 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
         "datasource_name": basic_pandas_datasource_v013.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": "SELECT * FROM my_table",
-        "partition_request": {
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
+        "runtime_parameters": {
+            "batch_data": "SELECT * FROM my_table",
         },
-        "limit": None,
+        "batch_identifiers": {
+            "pipeline_stage_name": "core_processing",
+            "airflow_run_id": 1234567890,
+        },
     }
-    batch_request = BatchRequest(**batch_request)
+    batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
         batch_list: List[
@@ -534,16 +533,15 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
         "datasource_name": basic_spark_datasource.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": "SELECT * FROM my_table",
-        "partition_request": {
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
+        "runtime_parameters": {
+            "batch_data": "SELECT * FROM my_table",
         },
-        "limit": None,
+        "batch_identifiers": {
+            "pipeline_stage_name": "core_processing",
+            "airflow_run_id": 1234567890,
+        },
     }
-    batch_request = BatchRequest(**batch_request)
+    batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
         batch_list: List[
@@ -566,15 +564,14 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
         "datasource_name": basic_pandas_datasource_v013.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": test_df,
-        "partition_request": {
-            "batch_identifiers": {
-                "airflow_run_id": 1234567890,
-            }
+        "runtime_parameters": {
+            "batch_data": test_df,
         },
-        "limit": None,
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        },
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
     batch_list: List[
         Batch
@@ -686,15 +683,14 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
         "datasource_name": datasource.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": test_df,
-        "partition_request": {
-            "batch_identifiers": {
-                "airflow_run_id": 1234567890,
-            },
-            "limit": None,
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
         },
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
     batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(
         batch_request=batch_request

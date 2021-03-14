@@ -540,11 +540,11 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.config.name,
         batch_request={
-            "batch_data": test_df,
-            "partition_request": {
-                "batch_identifiers": {
-                    "airflow_run_id": 1234567890,
-                }
+            "runtime_parameters": {
+                "batch_data": test_df,
+            },
+            "batch_identifiers": {
+                "airflow_run_id": 1234567890,
             },
         },
         run_name="airflow_run_1234567890",
