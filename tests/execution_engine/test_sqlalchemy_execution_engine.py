@@ -6,7 +6,7 @@ import pytest
 
 from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
-    SqlAlchemyDatasourceBatchSpec,
+    SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import GreatExpectationsError
@@ -521,8 +521,8 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
 
     query: str = "SELECT * FROM test_table_0"
     batch_data, batch_markers = my_execution_engine.get_batch_data_and_markers(
-        batch_spec=RuntimeDataBatchSpec(
-            batch_data=query,
+        batch_spec=RuntimeQueryBatchSpec(
+            query=query,
         )
     )
 
