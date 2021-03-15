@@ -828,6 +828,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ) -> list:
         if self.sql_engine_dialect.name.lower() == "mssql":
             return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
+        elif self.sql_engine_dialect.name.lower() == "awsathena":
+            return self._get_column_quantiles_awsathena(
+                column=column, quantiles=quantiles
+            )
         elif self.sql_engine_dialect.name.lower() == "bigquery":
             return self._get_column_quantiles_bigquery(
                 column=column, quantiles=quantiles
