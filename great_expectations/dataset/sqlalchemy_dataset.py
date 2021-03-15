@@ -79,7 +79,9 @@ try:
 
     # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sa.dialects.registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect")
+    sa.dialects.registry.register(
+        "bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect"
+    )
     try:
         getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
         bigquery_types_tuple = None
