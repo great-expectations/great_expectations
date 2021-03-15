@@ -2,7 +2,7 @@ import copy
 import datetime
 import hashlib
 import json
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 from great_expectations.core.id_dict import (
     BatchKwargs,
@@ -11,7 +11,7 @@ from great_expectations.core.id_dict import (
     PartitionDefinition,
     PartitionRequest,
 )
-from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchRequestError
+from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.validator.validation_graph import MetricConfiguration
 
