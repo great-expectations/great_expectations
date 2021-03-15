@@ -41,7 +41,7 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "import great_expectations as ge\ncontext = ge.get_context()",
+                "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\nyaml = YAML()\ncontext = ge.get_context()",
                 "outputs": [],
             },
         ]
@@ -81,7 +81,7 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": f"""datasource = context.test_yaml_config(example_yaml, name="{datasource_name}")""",
+                "source": f"""context.test_yaml_config(example_yaml, name="{datasource_name}")""",
                 "outputs": [],
             },
         ]
@@ -89,14 +89,14 @@ def construct_datasource_new_notebook_assets():
         save_datasource_cells = [
             {
                 "cell_type": "markdown",
-                "source": """## Save Your Datasource Configuration\nHere we will save your Datasource in your Data Context once you are satisfied with the configuration.""",
+                "source": """## Save Your Datasource Configuration\nHere we will save your Datasource in your Data Context once you are satisfied with the configuration. Note that saving comments via `context.add_datasource()` is not yet fully supported, please modify your `great_expectations.yml` config if you wish to add comments.""",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": """context._save_project_config()
+                "source": f"""context.add_datasource(name="{datasource_name}", **yaml.load(example_yaml))
 context.list_datasources()""",
                 "outputs": [],
             },
