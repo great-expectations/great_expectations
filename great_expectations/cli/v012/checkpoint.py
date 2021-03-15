@@ -104,7 +104,6 @@ def checkpoint_new(checkpoint, suite, directory, datasource):
         name=checkpoint,
         **{
             "class_name": "LegacyCheckpoint",
-            "validation_operator_name": "action_list_operator",
             "batches": [
                 {
                     "batch_kwargs": dict(batch_kwargs),
