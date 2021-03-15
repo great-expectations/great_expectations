@@ -198,6 +198,7 @@ def checkpoint_delete(ctx, checkpoint):
             context=context,
             checkpoint_name=checkpoint,
             usage_event=usage_event,
+            assume_yes=ctx.obj.assume_yes,
         )
         toolkit.send_usage_message(context, event="cli.checkpoint.delete", success=True)
     except Exception as e:

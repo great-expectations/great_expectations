@@ -67,6 +67,8 @@ def init(ctx, view, usage_stats):
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
+    if directory is None:
+        directory = os.getcwd()
     target_directory = os.path.abspath(directory)
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
@@ -93,10 +95,11 @@ def init(ctx, view, usage_stats):
             # TODO ensure this is covered by a test
             exit(5)
     else:
-        if not click.confirm(LETS_BEGIN_PROMPT, default=True):
-            cli_message(RUN_INIT_AGAIN)
-            # TODO ensure this is covered by a test
-            exit(0)
+        if not ctx.obj.assume_yes:
+            if not click.confirm(LETS_BEGIN_PROMPT, default=True):
+                cli_message(RUN_INIT_AGAIN)
+                # TODO ensure this is covered by a test
+                exit(0)
 
         try:
             context = DataContext.create(
@@ -108,6 +111,12 @@ def init(ctx, view, usage_stats):
         except DataContextError as e:
             # TODO ensure this is covered by a test
             cli_message("<red>{}</red>".format(e))
+
+    # Skip the rest of setup if --assume-yes flag is passed
+    if ctx.obj.assume_yes:
+        cli_message(SECTION_SEPARATOR)
+        cli_message(SETUP_SUCCESS)
+        sys.exit(0)
 
     try:
         # if expectations exist, offer to build docs

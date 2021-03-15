@@ -73,13 +73,13 @@ def datasource_new(ctx):
 @click.pass_context
 def delete_datasource(ctx, datasource):
     """Delete the datasource specified as an argument"""
-    context = ctx.obj.data_context
-    if not toolkit.confirm_proceed_or_exit(exit_on_no=False):
-        cli_message(f"Datasource `{datasource}` was not deleted.")
-        sys.exit(0)
+    context: DataContext = ctx.obj.data_context
+    if not ctx.obj.assume_yes:
+        if not toolkit.confirm_proceed_or_exit(exit_on_no=False):
+            cli_message(f"Datasource `{datasource}` was not deleted.")
+            sys.exit(0)
 
     try:
-        # TODO taylor add confirmation prompt and associated tests
         context.delete_datasource(datasource)
     except ValueError:
         cli_message(f"<red>Datasource {datasource} could not be found.</red>")
