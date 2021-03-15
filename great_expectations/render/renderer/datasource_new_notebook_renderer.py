@@ -98,7 +98,7 @@ If you instead wish to use python instead of yaml to configure your Datasource, 
     def _add_save_datasource_cell(self):
         self.add_markdown_cell(
             """## Save Your Datasource Configuration
-Here we will save your Datasource in your Data Context once you are satisfied with the configuration."""
+Here we will save your Datasource in your Data Context once you are satisfied with the configuration. Note that saving comments via `context.add_datasource()` is not yet fully supported, please modify your `great_expectations.yml` config if you wish to add comments."""
         )
         self.add_code_cell(
             f"""context.add_datasource(name="{self.datasource_name}", **yaml.load(example_yaml))

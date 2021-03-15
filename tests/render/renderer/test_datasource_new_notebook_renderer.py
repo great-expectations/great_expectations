@@ -89,7 +89,7 @@ def construct_datasource_new_notebook_assets():
         save_datasource_cells = [
             {
                 "cell_type": "markdown",
-                "source": """## Save Your Datasource Configuration\nHere we will save your Datasource in your Data Context once you are satisfied with the configuration.""",
+                "source": """## Save Your Datasource Configuration\nHere we will save your Datasource in your Data Context once you are satisfied with the configuration. Note that saving comments via `context.add_datasource()` is not yet fully supported, please modify your `great_expectations.yml` config if you wish to add comments.""",
                 "metadata": {},
             },
             {
