@@ -89,9 +89,7 @@ def test_error_checking(basic_datasource):
                 datasource_name=basic_datasource.name,
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
-                batch_identifiers={
-                    "pipeline_stage_name": "munge"
-                }
+                batch_identifiers={"pipeline_stage_name": "munge"},
             )
         )
 
@@ -106,9 +104,7 @@ def test_error_checking(basic_datasource):
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
                 runtime_parameters={"batch_data": test_df, "path": "my_path"},
-                batch_identifiers={
-                    "pipeline_stage_name": "munge"
-                }
+                batch_identifiers={"pipeline_stage_name": "munge"},
             )
         )
 

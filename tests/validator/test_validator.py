@@ -3,7 +3,12 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
-from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    PartitionRequest,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,

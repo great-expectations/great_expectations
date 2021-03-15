@@ -6,7 +6,8 @@ import pytest
 
 from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
-    SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec,
+    RuntimeQueryBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import GreatExpectationsError

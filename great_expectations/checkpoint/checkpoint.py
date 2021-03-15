@@ -256,9 +256,9 @@ class Checkpoint:
                     substituted_runtime_config=substituted_runtime_config,
                     validation_dict=validation_dict,
                 )
-                batch_request: Union[BatchRequest, RuntimeBatchRequest] = substituted_validation_dict.get(
-                    "batch_request"
-                )
+                batch_request: Union[
+                    BatchRequest, RuntimeBatchRequest
+                ] = substituted_validation_dict.get("batch_request")
                 expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )

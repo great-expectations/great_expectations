@@ -12,7 +12,9 @@ from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
-from great_expectations.execution_engine.sqlalchemy_batch_data import SqlAlchemyBatchData
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
 from great_expectations.validator.validator import Validator
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -567,7 +569,9 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_asset_path = os.path.join(context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv")
+    data_asset_path = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
 
     batch: Batch
 
@@ -576,9 +580,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
             datasource_name="my_datasource",
             data_connector_name="my_runtime_data_connector",
             data_asset_name="IN_MEMORY_DATA_ASSET",
-            runtime_parameters={
-                "path": data_asset_path
-            },
+            runtime_parameters={"path": data_asset_path},
             batch_identifiers={
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
@@ -598,7 +600,9 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_asset_path = os.path.join(context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv")
+    data_asset_path = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
     my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
         "my_expectations"
     )
@@ -610,9 +614,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
             datasource_name="my_datasource",
             data_connector_name="my_runtime_data_connector",
             data_asset_name="IN_MEMORY_DATA_ASSET",
-            runtime_parameters={
-                "path": data_asset_path
-            },
+            runtime_parameters={"path": data_asset_path},
             batch_identifiers={
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,

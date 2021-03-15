@@ -12,7 +12,8 @@ from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
     BatchRequest,
-    PartitionDefinition, RuntimeBatchRequest,
+    PartitionDefinition,
+    RuntimeBatchRequest,
 )
 from great_expectations.data_context.util import (
     file_relative_path,

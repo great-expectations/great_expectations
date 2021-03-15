@@ -199,11 +199,16 @@ def get_runtime_batch_request(
 ) -> Union[BatchRequest, RuntimeBatchRequest]:
     runtime_config_batch_request = substituted_runtime_config.batch_request
 
-    if (runtime_config_batch_request is not None and "runtime_parameters" in runtime_config_batch_request) or (validation_batch_request is not None and "runtime_parameters" in validation_batch_request):
+    if (
+        runtime_config_batch_request is not None
+        and "runtime_parameters" in runtime_config_batch_request
+    ) or (
+        validation_batch_request is not None
+        and "runtime_parameters" in validation_batch_request
+    ):
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest
-
 
     if runtime_config_batch_request is None:
         return (
@@ -217,10 +222,7 @@ def get_runtime_batch_request(
 
     runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
     for key, val in runtime_batch_request_dict.items():
-        if (
-            val is not None
-            and runtime_config_batch_request.get(key) is not None
-        ):
+        if val is not None and runtime_config_batch_request.get(key) is not None:
             raise ge_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
