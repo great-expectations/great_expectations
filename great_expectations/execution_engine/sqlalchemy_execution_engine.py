@@ -851,7 +851,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if query:
                 batch_spec.query = "SQLQuery"
                 batch_data = SqlAlchemyBatchData(
-                    execution_engine=self.engine, query=query
+                    execution_engine=self, query=query
                 )
                 return batch_data, batch_markers
 
