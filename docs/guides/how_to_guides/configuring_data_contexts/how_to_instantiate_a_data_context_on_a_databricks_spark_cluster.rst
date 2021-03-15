@@ -35,7 +35,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
     .. content-tabs::
 
         .. tab-container:: tab0
-            :title: Show Docs for Stable API (up to 0.12.x)
+            :title: Show Docs for V2 (Batch Kwargs) API
 
             .. code-block:: python
                 :linenos:
@@ -61,7 +61,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
                 context = BaseDataContext(project_config=data_context_config)
 
         .. tab-container:: tab1
-            :title: Show Docs for Experimental API (0.13)
+            :title: Show Docs for V3 (Batch Request) API
 
             .. code-block:: python
                 :linenos:
@@ -179,7 +179,7 @@ Additional notes
     .. content-tabs::
 
         .. tab-container:: tab0
-            :title: Show Docs for Stable API (up to 0.12.x)
+            :title: Show Docs for V2 (Batch Kwargs) API
 
             Please note that this code-snippet assumes that you have already installed Great Expectations and configured a :ref:`Datasource <reference__core_concepts__datasources>`.
 
@@ -216,7 +216,7 @@ Additional notes
 
 
         .. tab-container:: tab1
-            :title: Show Docs for Experimental API (0.13)
+            :title: Show Docs for V3 (Batch Request) API
 
             .. code-block:: python
                 :linenos:
@@ -274,7 +274,7 @@ Additional notes
                     batch_data=df,
                     data_asset_name="IN_MEMORY_DATA_ASSET",
                     partition_request={
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
                             "some_other_key_maybe_run_id": "run 18"
                         }

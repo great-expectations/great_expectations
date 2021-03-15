@@ -8,7 +8,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -240,7 +240,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
             - ``expect_compound_columns_to_be_unique`` (if a compound key is specified for ``primary_or_compound_key``)
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         .. admonition:: The UserConfigurableProfiler is not currently configured to work with the 0.13 Experimental API.
 

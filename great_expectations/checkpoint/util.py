@@ -1,5 +1,9 @@
 import copy
 import logging
+import smtplib
+import ssl
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from typing import Optional
 
 import requests
@@ -141,6 +145,54 @@ def send_webhook_notifications(query, webhook, target_platform):
             )
 
 
+def send_email(
+    title,
+    html,
+    smtp_address,
+    smtp_port,
+    sender_login,
+    sender_password,
+    sender_alias,
+    receiver_emails_list,
+    use_tls,
+    use_ssl,
+):
+    msg = MIMEMultipart()
+    msg["From"] = sender_alias
+    msg["To"] = ", ".join(receiver_emails_list)
+    msg["Subject"] = title
+    msg.attach(MIMEText(html, "html"))
+    try:
+        mailserver = None
+        if use_ssl:
+            if use_tls:
+                logger.warning("Please choose between SSL or TLS, will default to SSL")
+            context = ssl.create_default_context()
+            mailserver = smtplib.SMTP_SSL(smtp_address, smtp_port, context=context)
+        elif use_tls:
+            mailserver = smtplib.SMTP(smtp_address, smtp_port)
+            context = ssl.create_default_context()
+            mailserver.starttls(context=context)
+        else:
+            logger.warning("Not using TLS or SSL to send an email is not secure")
+            mailserver = smtplib.SMTP(smtp_address, smtp_port)
+        mailserver.login(sender_login, sender_password)
+        mailserver.sendmail(sender_alias, receiver_emails_list, msg.as_string())
+        mailserver.quit()
+    except smtplib.SMTPConnectError:
+        logger.error(f"Failed to connect to the SMTP server at address: {smtp_address}")
+    except smtplib.SMTPAuthenticationError:
+        logger.error(
+            f"Failed to authenticate to the SMTP server at address: {smtp_address}"
+        )
+    except Exception as e:
+        logger.error(str(e))
+    else:
+        return "success"
+
+
+# TODO: <Alex>BatchRequest attribute processing here is not flexible, compared to DataContext.get_batch_list().</Alex>
+# TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
     validation_batch_request: Optional[dict] = None,

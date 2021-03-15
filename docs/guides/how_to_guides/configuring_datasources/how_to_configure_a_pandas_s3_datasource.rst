@@ -13,7 +13,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -123,7 +123,7 @@ Steps
 
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 

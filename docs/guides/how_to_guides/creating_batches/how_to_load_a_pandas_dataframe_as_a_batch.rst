@@ -8,7 +8,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -82,7 +82,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
 
         What used to be called a “batch” in the old API was replaced with :ref:`Validator <reference__core_concepts__validation>`. A Validator knows how to validate a particular batch of data on a particular :ref:`Execution Engine <reference__core_concepts>` against a particular :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
@@ -161,7 +161,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                     batch_data=insert_your_dataframe_here,
                     data_asset_name="IN_MEMORY_DATA_ASSET",
                     partition_request={
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
                             "some_other_key_maybe_run_id": "run 18"
                         }

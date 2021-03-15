@@ -66,7 +66,7 @@ data_connectors:
         "data_connector_name": "my_data_connector",
         "data_asset_name": "path",
         "partition_request": {
-            "partition_identifiers": {
+            "batch_identifiers": {
                 # "data_asset_name": "path",
                 "letter": "A",
                 "number": "101",
@@ -148,7 +148,7 @@ data_connectors:
         "data_connector_name": "my_data_connector",
         "data_asset_name": "Titanic",
         "partition_request": {
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "name": "Titanic",
                 "timestamp": "19120414",
                 "size": "1313",

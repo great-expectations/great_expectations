@@ -45,6 +45,8 @@ def pytest_generate_tests(metafunc):
             dir_path + "/" + expectation_category + "/*.json"
         )
         for c in backends:
+            if c != "spark":
+                continue
             for filename in test_configuration_files:
                 file = open(filename)
                 test_configuration = json.load(file)
@@ -278,10 +280,10 @@ def pytest_generate_tests(metafunc):
                             + ":"
                             + test["title"]
                         )
-
     metafunc.parametrize("test_case", parametrized_tests, ids=ids)
 
 
+@pytest.mark.order(index=0)
 def test_case_runner_cfe(test_case):
     if test_case["skip"]:
         pytest.skip()
