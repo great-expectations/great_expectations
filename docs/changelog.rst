@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Improve support for quantiles calculation in Athena
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [ENHANCEMENT] V3 API CLI docs commands have better error messages and more consistent short flags
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
