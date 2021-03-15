@@ -70,7 +70,7 @@ data_connectors:
 
 
 @pytest.fixture
-def basic_spark_datasource(tmp_path_factory):
+def basic_spark_datasource(tmp_path_factory, spark_session):
     base_directory: str = str(
         tmp_path_factory.mktemp("basic_spark_datasource_v013_filesystem_data_connector")
     )
@@ -204,6 +204,7 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
             "class_name": "SparkDFExecutionEngine",
             "persist": True,
             "spark_config": {
+                "spark.app.name": "default_great_expectations_spark_application",
                 "spark.master": "local[*]",
                 "spark.executor.memory": "6g",
                 "spark.driver.memory": "6g",

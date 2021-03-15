@@ -59,6 +59,8 @@ def pytest_generate_tests(metafunc):
             dir_path + "/" + expectation_category + "/*.json"
         )
         for c in build_test_backends_list(metafunc):
+            if c != "SparkDFDataset":
+                continue
             for filename in test_configuration_files:
                 file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases
@@ -239,6 +241,7 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize("test_case", parametrized_tests, ids=ids)
 
 
+@pytest.mark.order(index=1)
 def test_case_runner(test_case):
     if test_case["skip"]:
         pytest.skip()
