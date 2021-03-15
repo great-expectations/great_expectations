@@ -290,7 +290,7 @@ def no_usage_stats(monkeypatch):
 
 @pytest.fixture
 def sa(test_backends):
-    if not all(
+    if not any(
         [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
