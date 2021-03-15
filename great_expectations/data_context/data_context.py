@@ -3102,15 +3102,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
                 instantiated_class = Checkpoint(data_context=self, **checkpoint_config)
 
-                checkpoint_config = CheckpointConfig.from_commented_map(
-                    commented_map=instantiated_class.config.commented_map
-                )
-                checkpoint_config = checkpoint_config.to_json_dict()
-
-                # noinspection PyUnusedLocal
-                checkpoint: Checkpoint = self.add_checkpoint(
-                    **checkpoint_config,
-                )
             elif class_name == "SimpleCheckpoint":
                 print(
                     f"\tInstantiating as a SimpleCheckpoint, since class_name is {class_name}"
@@ -3130,15 +3121,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     data_context=self, **checkpoint_config
                 )
 
-                checkpoint_config = CheckpointConfig.from_commented_map(
-                    commented_map=instantiated_class.config.commented_map
-                )
-                checkpoint_config = checkpoint_config.to_json_dict()
-
-                # noinspection PyUnusedLocal
-                checkpoint: Checkpoint = self.add_checkpoint(
-                    **checkpoint_config,
-                )
             else:
                 print(
                     "\tNo matching class found. Attempting to instantiate class from the raw config..."
