@@ -1852,7 +1852,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
+        batch_identifiers={
             "alphanumeric": "some_file",
         },
         expectation_suite=ExpectationSuite("my_expectation_suite"),
@@ -1904,7 +1904,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
+        batch_identifiers={
             "alphanumeric": "some_file",
         },
         create_expectation_suite_with_name="A_expectation_suite",

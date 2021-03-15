@@ -2,7 +2,6 @@
 # The methods were pretty hastily copied from test_utils and conftest. It is very possible
 # that some are not even needed. A cleanup pass is required.
 
-
 import copy
 import locale
 import os
@@ -27,17 +26,18 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.core.batch import Batch
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.util import (
     get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.execution_engine import (
+    ExecutionEngine,
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import import_library_module
@@ -513,7 +513,6 @@ def get_dataset(
 
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
-        from pyspark.sql import SparkSession
 
         SPARK_TYPES = {
             "StringType": sparktypes.StringType,
@@ -528,7 +527,13 @@ def get_dataset(
             "NullType": sparktypes.NullType,
         }
 
-        spark = SparkSession.builder.getOrCreate()
+        spark = get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+            }
+        )
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -617,224 +622,27 @@ def get_dataset(
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
 
-def get_test_validator_with_data(
-    execution_engine,
-    data,
-    schemas=None,
-    profiler=ColumnsExistProfiler,
-    caching=True,
-    table_name=None,
-    sqlite_db_path=None,
-):
-    """Utility to create datasets for json-formatted tests."""
-    df = pd.DataFrame(data)
-    if execution_engine == "pandas":
-        if schemas and "pandas" in schemas:
-            schema = schemas["pandas"]
-            pandas_schema = {}
-            for (key, value) in schema.items():
-                # Note, these are just names used in our internal schemas to build datasets *for internal tests*
-                # Further, some changes in pandas internal about how datetimes are created means to support pandas
-                # pre- 0.25, we need to explicitly specify when we want timezone.
-
-                # We will use timestamp for timezone-aware (UTC only) dates in our tests
-                if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
-                    df[key] = pd.to_datetime(df[key], utc=True)
-                    continue
-                elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
-                    df[key] = pd.to_datetime(df[key])
-                    continue
-                try:
-                    type_ = np.dtype(value)
-                except TypeError:
-                    type_ = getattr(pd.core.dtypes.dtypes, value)
-                    # If this raises AttributeError it's okay: it means someone built a bad test
-                pandas_schema[key] = type_
-            # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
-            df = df.astype(pandas_schema)
-
-        if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
-
-        return _build_pandas_validator_with_data(df=df)
-
-    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql"]:
-        if not create_engine:
-            return None
-        return _build_sa_validator_with_data(
-            df=df,
-            sa_engine_name=execution_engine,
-            schemas=schemas,
-            caching=caching,
-            table_name=table_name,
-            sqlite_db_path=sqlite_db_path,
-        )
-
-    elif execution_engine == "spark":
-        import pyspark.sql.types as sparktypes
-        from pyspark.sql import SparkSession
-
-        SPARK_TYPES = {
-            "StringType": sparktypes.StringType,
-            "IntegerType": sparktypes.IntegerType,
-            "LongType": sparktypes.LongType,
-            "DateType": sparktypes.DateType,
-            "TimestampType": sparktypes.TimestampType,
-            "FloatType": sparktypes.FloatType,
-            "DoubleType": sparktypes.DoubleType,
-            "BooleanType": sparktypes.BooleanType,
-            "DataType": sparktypes.DataType,
-            "NullType": sparktypes.NullType,
-        }
-
-        spark = SparkSession.builder.getOrCreate()
-        # We need to allow null values in some column types that do not support them natively, so we skip
-        # use of df in this case.
-        data_reshaped = list(
-            zip(*[v for _, v in data.items()])
-        )  # create a list of rows
-        if schemas and "spark" in schemas:
-            schema = schemas["spark"]
-            # sometimes first method causes Spark to throw a TypeError
-            try:
-                spark_schema = sparktypes.StructType(
-                    [
-                        sparktypes.StructField(
-                            column, SPARK_TYPES[schema[column]](), True
-                        )
-                        for column in schema
-                    ]
-                )
-                # We create these every time, which is painful for testing
-                # However nuance around null treatment as well as the desire
-                # for real datetime support in tests makes this necessary
-                data = copy.deepcopy(data)
-                if "ts" in data:
-                    print(data)
-                    print(schema)
-                for col in schema:
-                    type_ = schema[col]
-                    if type_ in ["IntegerType", "LongType"]:
-                        # Ints cannot be None...but None can be valid in Spark (as Null)
-                        vals = []
-                        for val in data[col]:
-                            if val is None:
-                                vals.append(val)
-                            else:
-                                vals.append(int(val))
-                        data[col] = vals
-                    elif type_ in ["FloatType", "DoubleType"]:
-                        vals = []
-                        for val in data[col]:
-                            if val is None:
-                                vals.append(val)
-                            else:
-                                vals.append(float(val))
-                        data[col] = vals
-                    elif type_ in ["DateType", "TimestampType"]:
-                        vals = []
-                        for val in data[col]:
-                            if val is None:
-                                vals.append(val)
-                            else:
-                                vals.append(parse(val))
-                        data[col] = vals
-                # Do this again, now that we have done type conversion using the provided schema
-                data_reshaped = list(
-                    zip(*[v for _, v in data.items()])
-                )  # create a list of rows
-                spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
-            except TypeError:
-                string_schema = sparktypes.StructType(
-                    [
-                        sparktypes.StructField(column, sparktypes.StringType())
-                        for column in schema
-                    ]
-                )
-                spark_df = spark.createDataFrame(data_reshaped, string_schema)
-                for c in spark_df.columns:
-                    spark_df = spark_df.withColumn(
-                        c, spark_df[c].cast(SPARK_TYPES[schema[c]]())
-                    )
-        elif len(data_reshaped) == 0:
-            # if we have an empty dataset and no schema, need to assign an arbitrary type
-            columns = list(data.keys())
-            spark_schema = sparktypes.StructType(
-                [
-                    sparktypes.StructField(column, sparktypes.StringType())
-                    for column in columns
-                ]
-            )
-            spark_df = spark.createDataFrame(data_reshaped, spark_schema)
-        else:
-            # if no schema provided, uses Spark's schema inference
-            columns = list(data.keys())
-            spark_df = spark.createDataFrame(data_reshaped, columns)
-
-        if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
-
-        return _build_spark_validator_with_data(df=spark_df)
-
-    else:
-        raise ValueError("Unknown dataset_type " + str(execution_engine))
-
-
-def _build_spark_engine(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
-    if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
-    batch = Batch(data=df)
-    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
-    return engine
-
-
-def _build_spark_validator_with_data(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
-    if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
-    batch = Batch(data=df)
-
-    return Validator(execution_engine=SparkDFExecutionEngine(), batches=(batch,))
-
-
 def _build_sa_engine(df):
     import sqlalchemy as sa
 
-    eng = sa.create_engine("sqlite://", echo=False)
-    df.to_sql("test", eng)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
+    table_name: str = "test"
+
+    sqlalchemy_engine: sa.engine.Engine = sa.create_engine("sqlite://", echo=False)
+    df.to_sql(table_name, sqlalchemy_engine)
+
+    execution_engine: SqlAlchemyExecutionEngine
+
+    execution_engine = SqlAlchemyExecutionEngine(engine=sqlalchemy_engine)
+    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
     )
-    return engine
+    batch: Batch = Batch(data=batch_data)
+
+    execution_engine = SqlAlchemyExecutionEngine(
+        engine=sqlalchemy_engine, batch_data_dict={batch.id: batch_data}
+    )
+
+    return execution_engine
 
 
 def _build_pandas_engine(df):
@@ -941,7 +749,7 @@ def _build_sa_validator_with_data(
         if_exists="replace",
     )
 
-    batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
@@ -1765,12 +1573,12 @@ def generate_expectation_tests(
                 "PandasExecutionEngine"
             )
             == True,
-            include_sqlalchemy=expectation_execution_engines_dict.get(
-                "SqlAlchemyExecutionEngine"
-            )
-            == True,
             include_spark=expectation_execution_engines_dict.get(
                 "SparkDFExecutionEngine"
+            )
+            == True,
+            include_sqlalchemy=expectation_execution_engines_dict.get(
+                "SqlAlchemyExecutionEngine"
             )
             == True,
         )
