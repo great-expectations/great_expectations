@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [ENHANCEMENT] Improve support for quantiles calculation in Athena
 
 0.13.13
 -----------------
