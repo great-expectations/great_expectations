@@ -28,7 +28,6 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
-    from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.engine.result import RowProxy
@@ -42,7 +41,6 @@ except ImportError:
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sa = None
-    registry = None
     reflection = None
     BinaryExpression = None
     literal = None
@@ -72,7 +70,7 @@ try:
 
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
+    sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
 except (ImportError, KeyError):
     snowflake = None
 
@@ -81,7 +79,7 @@ try:
 
     # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect")
+    sa.dialects.registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect")
     try:
         getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
         bigquery_types_tuple = None
