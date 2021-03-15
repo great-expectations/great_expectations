@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 
@@ -42,7 +43,7 @@ def test_load_class_raises_error_when_module_name_is_not_string():
             load_class(bad_input, "great_expectations.datasource")
 
 
-def test_password_masker_mask_db_url():
+def test_password_masker_mask_db_url(tmp_path_factory):
     """
     What does this test and why?
     The PasswordMasker.mask_db_url() should mask passwords consistently in database urls. The output of mask_db_url should be the same whether user_urlparse is set to True or False.
@@ -217,10 +218,17 @@ def test_password_masker_mask_db_url():
 
     # SQLite
     # relative path
-    assert PasswordMasker.mask_db_url("sqlite:///foo.db") == "sqlite:///foo.db"
+    path_to_sqlite_db = str(tmp_path_factory.mktemp("path_to_sqlite_db"))
+    Path(os.path.join(path_to_sqlite_db, "foo.db")).touch()
     assert (
-        PasswordMasker.mask_db_url("sqlite:///foo.db", use_urlparse=True)
-        == "sqlite:///foo.db"
+        PasswordMasker.mask_db_url(f"sqlite://{path_to_sqlite_db}/foo.db")
+        == f"sqlite://{path_to_sqlite_db}/foo.db"
+    )
+    assert (
+        PasswordMasker.mask_db_url(
+            f"sqlite://{path_to_sqlite_db}/foo.db", use_urlparse=True
+        )
+        == f"sqlite://{path_to_sqlite_db}/foo.db"
     )
 
     # absolute path
