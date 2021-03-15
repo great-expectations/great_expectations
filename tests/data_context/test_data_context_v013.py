@@ -2,11 +2,16 @@ import datetime
 import os
 import re
 
+import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
+from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.execution_engine.sqlalchemy_batch_data import SqlAlchemyBatchData
 from great_expectations.validator.validator import Validator
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -489,3 +494,68 @@ def test_in_memory_data_context_configuration(
 
     assert my_validator.expect_table_row_count_to_equal(1313)["success"]
     assert my_validator.expect_table_column_count_to_equal(7)["success"]
+
+
+def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector(
+    sa,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    batch: Batch
+
+    batch = context.get_batch(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_runtime_sql_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={
+                "query": "SELECT * FROM table_partitioned_by_date_column__A"
+            },
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+        ),
+    )
+
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
+    assert isinstance(batch.data, SqlAlchemyBatchData)
+
+    selectable_table_name = batch.data.selectable.name
+    selectable_count_sql_str = f"select count(*) from {selectable_table_name}"
+    sa_engine = batch.data.execution_engine.engine
+
+    assert sa_engine.execute(selectable_count_sql_str).scalar() == 120
+    assert batch.batch_markers.get("ge_load_time") is not None
+
+
+def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_connector(
+    sa,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        "my_expectations"
+    )
+
+    validator: Validator
+
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_runtime_sql_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={
+                "query": "SELECT * FROM table_partitioned_by_date_column__A"
+            },
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+        ),
+        expectation_suite=my_expectation_suite,
+    )
+
+    assert len(validator.batches) == 1
