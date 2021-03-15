@@ -782,3 +782,32 @@ def send_usage_message(
         event_payload=event_payload,
         success=success,
     )
+
+
+def is_cloud_file_url(file_path: str) -> bool:
+    """Check for commonly used cloud urls."""
+    sanitized = file_path.strip()
+    if sanitized[0:7] == "file://":
+        return False
+    if (
+        sanitized[0:5] in ["s3://", "gs://"]
+        or sanitized[0:6] == "ftp://"
+        or sanitized[0:7] in ["http://", "wasb://"]
+        or sanitized[0:8] == "https://"
+    ):
+        return True
+    return False
+
+
+def get_path_to_data_relative_to_context_root(context_root_directory, data_path):
+    """Base directory paths in v3 API are relative to the great_expectations.yml file."""
+    if os.path.isabs(data_path):
+        absolute_data_path = data_path
+    else:
+        # Note a simple os.path.abs() can't be used due to the user having an unusual cwd
+        absolute_data_path = os.path.normpath(
+            os.path.join(context_root_directory, data_path)
+        )
+
+    relpath = os.path.relpath(absolute_data_path, start=context_root_directory)
+    return relpath

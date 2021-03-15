@@ -2257,12 +2257,14 @@ def postgresql_engine(test_backend):
 
 @pytest.fixture
 def empty_data_context(tmp_path_factory) -> DataContext:
-    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
+    project_path = str(tmp_path_factory.mktemp("empty_data_context", numbered=False))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
-    return context
+    assert context.list_datasources() == []
+    yield context
+    shutil.rmtree(project_path)
 
 
 @pytest.fixture
@@ -3663,14 +3665,17 @@ def filesystem_csv(tmp_path_factory):
 
 @pytest.fixture
 def filesystem_csv_2(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files")
+    base_dir = tmp_path_factory.mktemp("test_files", numbered=False)
     base_dir = str(base_dir)
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    assert os.path.isabs(base_dir)
+    assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
 
-    return base_dir
+    yield base_dir
+    shutil.rmtree(base_dir)
 
 
 @pytest.fixture

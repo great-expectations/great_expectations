@@ -122,9 +122,6 @@ def _build_datasource_intro_string(datasources):
 
 
 def _interactive_datasource_new_flow(context: DataContext) -> None:
-    """
-    Interactive flow for adding a Datasource to an existing context.
-    """
     files_or_sql_selection = click.prompt(
         """
 What data would you like Great Expectations to connect to?
@@ -145,15 +142,21 @@ What are you processing your files with?
             type=click.Choice(["1", "2"]),
             show_choices=False,
         )
-        base_path = click.prompt(PROMPT_FILES_BASE_PATH)
+
+        # TODO taylor consider forking here to select remote (s3, etc) or local to allow Click to verify existence
+        file_url_or_path: str = click.prompt(PROMPT_FILES_BASE_PATH, type=click.Path())
+        if not toolkit.is_cloud_file_url(file_url_or_path):
+            file_url_or_path = toolkit.get_path_to_data_relative_to_context_root(
+                context.root_directory, file_url_or_path
+            )
         datasource_name = click.prompt(PROMPT_DATASOURCE_NAME)
         if execution_engine_selection == "1":  # pandas
             notebook_path = _create_pandas_datasource_notebook(
-                context, datasource_name, base_path
+                context, datasource_name, file_url_or_path
             )
         elif execution_engine_selection == "2":  # Spark
             notebook_path = _create_spark_datasource_notebook(
-                context, datasource_name, base_path
+                context, datasource_name, file_url_or_path
             )
     elif files_or_sql_selection == "2":
         notebook_path = _create_sqlalchemy_datasource_notebook(context)
@@ -632,8 +635,9 @@ def _verify_pyspark_dependent_modules() -> bool:
     )
 
 
+# TODO taylor it might be nice to hint that remote urls can be entered here!
 PROMPT_FILES_BASE_PATH = """
-Enter the path (relative or absolute) of the root directory where the data files are stored.
+Enter the path of the root directory where the data files are stored. If files are on a local disk then enter either a path relative to great_expectations.yml or an absolute path.
 """
 
 PROMPT_DATASOURCE_NAME = "Give your new Datasource a short name."
