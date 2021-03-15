@@ -859,6 +859,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
             )
 
+    @classmethod
+    def _treat_quantiles_exception(cls, pe):
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
+
     def _get_column_quantiles_mssql(self, column: str, quantiles: Iterable) -> list:
         # mssql requires over(), so we add an empty over() clause
         selects: List[WithinGroup] = [
@@ -875,11 +885,23 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
-            exception_message: str = "An SQL syntax Exception occurred."
-            exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-            logger.error(exception_message)
-            raise pe
+            self._treat_quantiles_exception(pe)
+
+    def _get_column_quantiles_awsathena(self, column: str, quantiles: Iterable) -> list:
+        import ast
+
+        quantiles_list = list(quantiles)
+        quantiles_query = (
+            f"SELECT approx_percentile({column}, ARRAY{str(quantiles_list)}) as quantiles "
+            f"from (SELECT {column} from {self._table})"
+        )
+        try:
+            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            quantiles_results_list = ast.literal_eval(quantiles_results)
+            return quantiles_results_list
+
+        except ProgrammingError as pe:
+            self._treat_quantiles_exception(pe)
 
     def _get_column_quantiles_bigquery(self, column: str, quantiles: Iterable) -> list:
         # BigQuery does not support "WITHIN", so we need a special case for it
@@ -895,11 +917,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
-            exception_message: str = "An SQL syntax Exception occurred."
-            exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-            logger.error(exception_message)
-            raise pe
+            self._treat_quantiles_exception(pe)
 
     def _get_column_quantiles_mysql(self, column: str, quantiles: Iterable) -> list:
         # MySQL does not support "percentile_disc", so we implement it as a compound query.
@@ -951,11 +969,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
-            exception_message: str = "An SQL syntax Exception occurred."
-            exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-            logger.error(exception_message)
-            raise pe
+            self._treat_quantiles_exception(pe)
 
     # Support for computing the quantiles column for PostGreSQL and Redshift is included in the same method as that for
     # the generic sqlalchemy compatible DBMS engine, because users often use the postgresql driver to connect to Redshift
@@ -994,11 +1008,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         ).fetchone()
                         return list(quantiles_results)
                     except ProgrammingError as pe:
-                        exception_message: str = "An SQL syntax Exception occurred."
-                        exception_traceback: str = traceback.format_exc()
-                        exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-                        logger.error(exception_message)
-                        raise pe
+                        self._treat_quantiles_exception(pe)
                 else:
                     raise ValueError(
                         f'The SQL engine dialect "{str(self.sql_engine_dialect)}" does not support computing quantiles '
