@@ -1665,7 +1665,7 @@ class BaseDataContext:
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
-        config: dict
+        config: Union[CommentedMap, dict]
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
         else:
@@ -1678,7 +1678,7 @@ class BaseDataContext:
         )
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: dict, initialize: bool = True
+        self, name: str, config: Union[CommentedMap, dict], initialize: bool = True
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
