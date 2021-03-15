@@ -680,6 +680,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
 def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
+    # checkpoint should still run using fallback action_list_operator
     context = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
@@ -716,18 +717,16 @@ def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
         catch_exceptions=False,
     )
     stdout = result.stdout
-    assert result.exit_code == 1
+    assert result.exit_code == 0
 
-    assert (
-        f"No validation operator `foo` was found in your project. Please verify this in your great_expectations.yml"
-        in stdout
-    )
+    assert "Validation succeeded!" in stdout
     usage_emits = mock_emit.call_args_list
 
-    assert mock_emit.call_count == 3
+    assert mock_emit.call_count == 4
     assert usage_emits[0][0][0]["success"] is True
-    assert usage_emits[1][0][0]["success"] is False
-    assert usage_emits[2][0][0]["success"] is False
+    assert usage_emits[1][0][0]["success"] is True
+    assert usage_emits[2][0][0]["success"] is True
+    assert usage_emits[3][0][0]["success"] is True
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
