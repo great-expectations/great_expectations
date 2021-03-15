@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [BUGFIX] Use temporary paths in tests and execute_shell_command instead of subprocess
 
 0.13.13
 -----------------
