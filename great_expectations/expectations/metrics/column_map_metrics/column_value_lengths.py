@@ -49,7 +49,13 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
             return {
                 "column_values.value_length.map": MetricConfiguration(
                     "column_values.value_length.map", metric.metric_domain_kwargs
-                )
+                ),
+                "table.columns": MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                    metric_dependencies=None,
+                ),
             }
         return super()._get_evaluation_dependencies(
             metric=metric,
@@ -216,7 +222,13 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
             return {
                 "column_values.value_length.map": MetricConfiguration(
                     "column_values.value_length.map", metric.metric_domain_kwargs
-                )
+                ),
+                "table.columns": MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                    metric_dependencies=None,
+                ),
             }
         return super()._get_evaluation_dependencies(
             metric=metric,
