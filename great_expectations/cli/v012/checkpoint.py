@@ -114,7 +114,7 @@ def checkpoint_new(checkpoint, suite, directory, datasource):
     )
 
     cli_message(
-        f"""<green>A checkpoint named `{checkpoint}` was added to your project!</green>
+        f"""<green>A Checkpoint named `{checkpoint}` was added to your project!</green>
   - To run this checkpoint run `great_expectations checkpoint run {checkpoint}`"""
     )
     toolkit.send_usage_message(context, usage_event, success=True)
