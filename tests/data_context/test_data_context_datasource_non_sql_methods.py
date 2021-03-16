@@ -204,13 +204,12 @@ data_connectors:
         "datasource_name": "my_datasource",
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": test_df,
-        "partition_request": {
-            "batch_identifiers": {
-                "airflow_run_id": 1234567890,
-            }
+        "runtime_parameters": {
+            "batch_data": test_df,
         },
-        "limit": None,
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        },
     }
 
     batch_list = context.get_batch_list(**batch_request)
