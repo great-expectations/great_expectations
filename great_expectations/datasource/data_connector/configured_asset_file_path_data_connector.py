@@ -148,11 +148,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             number of data_references known by this DataConnector.
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated."
-            )
-
         total_references: int = sum(
             [
                 len(self._data_references_cache[data_asset_name])
@@ -170,11 +165,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
-            )
-
         unmatched_data_references: List[str] = []
         for (
             data_asset_name,
