@@ -1,7 +1,7 @@
 """
 This is a basic generated Great Expectations script that runs a checkpoint.
 
-Internally, a checkpoint is a list of one or more batches paired with one or more
+Internally, a Checkpoint is a list of one or more batches paired with one or more
 Expectation Suites and a configurable Validation Operator.
 
 Checkpoints can be run directly without this script using the
