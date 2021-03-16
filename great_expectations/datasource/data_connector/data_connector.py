@@ -60,7 +60,7 @@ class DataConnector:
         self._execution_engine = execution_engine
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache = None
+        self._data_references_cache = {}
 
         self._data_context_root_directory = None
 
@@ -202,7 +202,7 @@ class DataConnector:
             max_examples (int): how many data_references should be printed?
 
         """
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         if pretty_print:
@@ -361,26 +361,20 @@ class DataConnector:
             "n_rows": n_rows,
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequestBase):
+    def _validate_batch_request(self, batch_request: BatchRequest):
         """
         Validate batch_request by checking:
             1. if configured datasource_name matches batch_request's datasource_name
             2. if current data_connector_name matches batch_request's data_connector_name
-
         Args:
             batch_request (BatchRequest): batch_request to validate
 
         """
         if batch_request.datasource_name != self.datasource_name:
-
             raise ValueError(
-                f"""datasource_name in BatchRequestBase: "{batch_request.datasource_name}" does not
-match DataConnector datasource_name: "{self.datasource_name}".
-                """
+                f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not match DataConnector datasource_name: "{self.datasource_name}"."""
             )
         if batch_request.data_connector_name != self.name:
             raise ValueError(
-                f"""data_connector_name in BatchRequestBase: "{batch_request.data_connector_name}" does not match
-DataConnector name: "{self.name}".
-                """
+                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" does not match DataConnector name: "{self.name}"."""
             )

@@ -133,20 +133,15 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                "_data_references_cache is None. Have you called _refresh_data_references_cache yet?"
-            )
         return []
 
     def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
         self._validate_batch_request(batch_request=batch_request)
 
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = []
-
         try:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
         except KeyError as e:

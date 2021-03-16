@@ -113,6 +113,7 @@ class BaseDatasource:
         data_connector: DataConnector = self.data_connectors[
             batch_request.data_connector_name
         ]
+
         batch_definition_list: List[
             BatchDefinition
         ] = data_connector.get_batch_definition_list_from_batch_request(
@@ -291,6 +292,12 @@ class BaseDatasource:
                 f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not
                 match Datasource name: "{self.name}".
                 """
+            )
+
+        if batch_request.data_connector_name not in self.data_connectors.keys():
+            raise ValueError(
+                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" is not configured for DataSource: "{self.name}".
+                    """
             )
 
     @property

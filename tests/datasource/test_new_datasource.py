@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from typing import List, Optional, Union
+from typing import List
 
 import pandas as pd
 import pytest
@@ -197,7 +197,7 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
             "boto3_options": {},
         },
         "data_connectors": {
-            "count": 2,
+            "count": 1,
             "my_filesystem_data_connector": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
                 "data_asset_count": 1,
@@ -206,20 +206,6 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
                     "Titanic": {
                         "batch_definition_count": 0,
                         "example_data_references": [],
-                    }
-                },
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-                "example_data_reference": {},
-            },
-            "test_runtime_data_connector": {
-                "class_name": "RuntimeDataConnector",
-                "data_asset_count": 1,
-                "example_data_asset_names": ["IN_MEMORY_DATA_ASSET"],
-                "data_assets": {
-                    "IN_MEMORY_DATA_ASSET": {
-                        "batch_definition_count": 1,
-                        "example_data_references": [""],
                     }
                 },
                 "unmatched_data_reference_count": 0,
@@ -249,7 +235,7 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
             },
         },
         "data_connectors": {
-            "count": 2,
+            "count": 1,
             "simple_filesystem_data_connector": {
                 "class_name": "InferredAssetFilesystemDataConnector",
                 "data_asset_count": 0,
@@ -257,20 +243,6 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
                 "data_assets": {},
                 "unmatched_data_reference_count": 0,
                 "example_unmatched_data_references": [],
-            },
-            "test_runtime_data_connector": {
-                "class_name": "RuntimeDataConnector",
-                "data_asset_count": 1,
-                "example_data_asset_names": ["IN_MEMORY_DATA_ASSET"],
-                "data_assets": {
-                    "IN_MEMORY_DATA_ASSET": {
-                        "batch_definition_count": 1,
-                        "example_data_references": [""],
-                    }
-                },
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-                "example_data_reference": {},
             },
         },
     }
@@ -781,6 +753,7 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
         assert set(asset_list) == set(expected_data_asset_names[connector_name])
 
 
+# TODO
 def test_get_available_data_asset_names_with_caching():
     pass
 

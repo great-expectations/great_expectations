@@ -27,20 +27,13 @@ def test_self_check(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
-
     assert test_runtime_data_connector.self_check() == {
         "class_name": "RuntimeDataConnector",
-        "data_asset_count": 1,
-        "example_data_asset_names": ["IN_MEMORY_DATA_ASSET"],
-        "data_assets": {
-            "IN_MEMORY_DATA_ASSET": {
-                "batch_definition_count": 1,
-                "example_data_references": [""],
-            }
-        },
+        "data_asset_count": 0,
+        "example_data_asset_names": [],
+        "data_assets": {},
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
     }
 
 
@@ -51,7 +44,7 @@ def test_error_checking(basic_datasource):
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    # Test for an unknown execution environment
+    # Test for an unknown datasource
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[
@@ -214,14 +207,236 @@ def test_get_available_data_asset_names(basic_datasource):
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
-
-    expected_available_data_asset_names: List[str] = ["IN_MEMORY_DATA_ASSET"]
-
+    expected_available_data_asset_names: List[str] = []
     available_data_asset_names: List[
         str
     ] = test_runtime_data_connector.get_available_data_asset_names()
-
     assert available_data_asset_names == expected_available_data_asset_names
+
+
+def test_get_available_data_asset_names_updating_after_batch_request(basic_datasource):
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    # empty if data_connector has not been used
+    assert test_runtime_data_connector.get_available_data_asset_names() == []
+
+    partition_request: dict = {
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        }
+    }
+    batch_request: dict = {
+        "datasource_name": basic_datasource.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "my_data_asset_1",
+        "batch_data": test_df,
+        "partition_request": partition_request,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    # run with my_data_asset_1
+    test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=batch_request
+    )
+
+    # updated to my_data_asset_1
+    assert test_runtime_data_connector.get_available_data_asset_names() == [
+        "my_data_asset_1"
+    ]
+
+    partition_request: dict = {
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        }
+    }
+    batch_request: dict = {
+        "datasource_name": basic_datasource.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "my_data_asset_2",
+        "batch_data": test_df,
+        "partition_request": partition_request,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    # run with my_data_asset_2
+    test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=batch_request
+    )
+
+    # updated to my_data_asset_1 and my_data_asset_2
+    assert test_runtime_data_connector.get_available_data_asset_names() == [
+        "my_data_asset_1",
+        "my_data_asset_2",
+    ]
+
+
+def test_data_references_cache_updating_after_batch_request(
+    basic_datasource,
+):
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    # empty if data_connector has not been used
+    assert test_runtime_data_connector.get_available_data_asset_names() == []
+
+    partition_request: dict = {
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        }
+    }
+    batch_request: dict = {
+        "datasource_name": basic_datasource.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "my_data_asset_1",
+        "batch_data": test_df,
+        "partition_request": partition_request,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    # run with my_data_asset_1
+    test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=batch_request
+    )
+
+    assert test_runtime_data_connector._data_references_cache == {
+        "my_data_asset_1": {
+            "1234567890": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 1234567890}
+                    ),
+                )
+            ],
+        }
+    }
+
+    # update with
+    test_df_new: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
+    partition_request: dict = {
+        "batch_identifiers": {
+            "airflow_run_id": 987654321,
+        }
+    }
+
+    batch_request: dict = {
+        "datasource_name": basic_datasource.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "my_data_asset_1",
+        "batch_data": test_df_new,
+        "partition_request": partition_request,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    # run with with new_data_asset but a new batch
+    test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=batch_request
+    )
+
+    assert test_runtime_data_connector._data_references_cache == {
+        "my_data_asset_1": {
+            "1234567890": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 1234567890}
+                    ),
+                )
+            ],
+            "987654321": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 987654321}
+                    ),
+                )
+            ],
+        },
+    }
+
+    # new data_asset_name
+    test_df_new_asset: pd.DataFrame = pd.DataFrame(
+        data={"col1": [9, 10], "col2": [11, 12]}
+    )
+    partition_request: dict = {
+        "batch_identifiers": {
+            "airflow_run_id": 5555555,
+        }
+    }
+
+    batch_request: dict = {
+        "datasource_name": basic_datasource.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "my_data_asset_2",
+        "batch_data": test_df_new_asset,
+        "partition_request": partition_request,
+        "limit": None,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
+
+    # run with with new_data_asset but a new batch
+    test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=batch_request
+    )
+
+    assert test_runtime_data_connector._data_references_cache == {
+        "my_data_asset_1": {
+            "1234567890": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 1234567890}
+                    ),
+                )
+            ],
+            "987654321": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_1",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 987654321}
+                    ),
+                )
+            ],
+        },
+        "my_data_asset_2": {
+            "5555555": [
+                BatchDefinition(
+                    datasource_name="my_datasource",
+                    data_connector_name="test_runtime_data_connector",
+                    data_asset_name="my_data_asset_2",
+                    partition_definition=PartitionDefinition(
+                        {"airflow_run_id": 5555555}
+                    ),
+                )
+            ]
+        },
+    }
+
+    assert test_runtime_data_connector.get_available_data_asset_names() == [
+        "my_data_asset_1",
+        "my_data_asset_2",
+    ]
+
+    assert test_runtime_data_connector.get_data_reference_list_count() == 3
 
 
 def test_get_batch_definition_list_from_batch_request_length_one(
@@ -240,7 +455,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
         "data_connector_name": test_runtime_data_connector.name,
-        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "data_asset_name": "my_data_asset",
         "runtime_parameters": {"batch_data": test_df},
         "batch_identifiers": batch_identifiers,
     }
@@ -250,7 +465,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
         BatchDefinition(
             datasource_name="my_datasource",
             data_connector_name="test_runtime_data_connector",
-            data_asset_name="IN_MEMORY_DATA_ASSET",
+            data_asset_name="my_data_asset",
             partition_definition=PartitionDefinition(batch_identifiers),
         )
     ]
@@ -264,7 +479,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
     assert batch_definition_list == expected_batch_definition_list
 
 
-def test_get_batch_definition_list_from_batch_request_length_zero(
+def test_get_batch_definition_list_from_batch_request_with_and_without_data_asset_name(
     basic_datasource,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -277,24 +492,37 @@ def test_get_batch_definition_list_from_batch_request_length_zero(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
+    # data_asset_name is missing
     batch_request: dict = {
         "datasource_name": basic_datasource.name,
         "data_connector_name": test_runtime_data_connector.name,
-        "data_asset_name": "nonexistent_data_asset",
         "runtime_parameters": {
             "batch_data": test_df,
         },
         "batch_identifiers": batch_identifiers,
     }
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    with pytest.raises(TypeError):
+        batch_request: BatchRequest = BatchRequest(**batch_request)
 
+    # test that name can be set as "my_data_asset"
+    batch_request: dict = {
+        "datasource_name": basic_datasource.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "batch_data": test_df,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request)
     batch_definition_list: List[
         BatchDefinition
     ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
         batch_request=batch_request
     )
-
-    assert len(batch_definition_list) == 0
+    assert len(batch_definition_list) == 1
+    # check that default value has been set
+    assert batch_definition_list[0]["data_asset_name"] == "my_data_asset"
 
 
 def test__get_data_reference_list(basic_datasource):
@@ -302,7 +530,7 @@ def test__get_data_reference_list(basic_datasource):
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    expected_data_reference_list: List[str] = [""]
+    expected_data_reference_list: List[str] = []
 
     # noinspection PyProtectedMember
     data_reference_list: List[
@@ -310,6 +538,13 @@ def test__get_data_reference_list(basic_datasource):
     ] = test_runtime_data_connector._get_data_reference_list()
 
     assert data_reference_list == expected_data_reference_list
+
+
+def test_refresh_data_references_cache(basic_datasource):
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+    assert len(test_runtime_data_connector._data_references_cache) == 0
 
 
 def test__generate_batch_spec_parameters_from_batch_definition(
@@ -390,3 +625,38 @@ def test__build_batch_spec(basic_datasource):
         runtime_parameters={"path": "s3a://my.s3.path"},
     )
     assert type(batch_spec) == S3BatchSpec
+
+
+def test__get_data_reference_name(basic_datasource):
+    partition_request: dict = {
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        }
+    }
+    partition_definition = PartitionDefinition(partition_request["batch_identifiers"])
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+
+    assert (
+        test_runtime_data_connector._get_data_reference_name(partition_definition)
+        == "1234567890"
+    )
+
+    partition_request: dict = {
+        "batch_identifiers": {
+            "run_id_1": 1234567890,
+            "run_id_2": 1111111111,
+        }
+    }
+    partition_definition = PartitionDefinition(partition_request["batch_identifiers"])
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+
+    assert (
+        test_runtime_data_connector._get_data_reference_name(partition_definition)
+        == "1234567890-1111111111"
+    )

@@ -149,8 +149,6 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``batch_identifiers`` to define which keys are allowed.
 
-            NOTE: for now, ``data_asset_name`` can only be set to this predefined string: ``“IN_MEMORY_DATA_ASSET”``. We will fix it very soon and will allow you to specify your own name.
-
             .. code-block:: python
 
                 from great_expectations.core.batch import BatchRequest
@@ -158,8 +156,8 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                 batch_request = BatchRequest(
                     datasource_name="insert_your_pandas_datasource_name_here",
                     data_connector_name="insert_your_runtime_data_connector_name_here",
+                    data_asset_name="insert_your_data_asset_name_here",
                     batch_data=insert_your_dataframe_here,
-                    data_asset_name="IN_MEMORY_DATA_ASSET",
                     partition_request={
                         "batch_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
