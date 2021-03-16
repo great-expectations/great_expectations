@@ -482,9 +482,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         """
         if isinstance(document, list):
             return [
-                super(DefaultMarkdownPageView, self).render(
-                    document=d, template=template, **kwargs
-                )
+                super().render(document=d, template=template, **kwargs)
                 for d in document
             ]
 

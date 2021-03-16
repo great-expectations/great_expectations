@@ -322,7 +322,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     ):
         # this calls TableExpectation.get_validation_dependencies to set baseline dependencies
         # for the aggregate version of the expectation
-        dependencies = super(ColumnMapExpectation, self).get_validation_dependencies(
+        dependencies = super().get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
 
