@@ -10,7 +10,7 @@ import click
 from great_expectations.core import logger
 
 
-def execute_shell_command(command: str, shell: bool = False) -> int:
+def execute_shell_command(command: str) -> int:
     """
     Execute a shell (bash in the present case) command from inside Python program.
 
@@ -18,7 +18,6 @@ def execute_shell_command(command: str, shell: bool = False) -> int:
     https://stackoverflow.com/questions/30993411/environment-variables-using-subprocess-check-output-python
 
     :param command: bash command -- as if typed in a shell/Terminal window
-    :param shell: run using your shell including environment variables etc.
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
     cwd: str = os.getcwd()
@@ -35,7 +34,7 @@ def execute_shell_command(command: str, shell: bool = False) -> int:
             stdout=None,
             stderr=None,
             capture_output=True,
-            shell=shell,
+            shell=False,
             cwd=cwd,
             timeout=None,
             check=True,
@@ -61,14 +60,11 @@ def execute_shell_command(command: str, shell: bool = False) -> int:
     return status_code
 
 
-def execute_shell_command_with_progress_polling(
-    command: str, shell: bool = False
-) -> int:
+def execute_shell_command_with_progress_polling(command: str) -> int:
     """
     Execute a shell (bash in the present case) command from inside Python program with polling (to enable progress bar).
 
     :param command: bash command -- as if typed in a shell/Terminal window
-    :param shell: run using your shell including environment variables etc.
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
     cwd: str = os.getcwd()
@@ -97,7 +93,7 @@ def execute_shell_command_with_progress_polling(
                 stderr=PIPE,
                 preexec_fn=None,
                 close_fds=True,
-                shell=shell,
+                shell=False,
                 cwd=cwd,
                 env=env,
                 universal_newlines=True,
