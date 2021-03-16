@@ -32,7 +32,7 @@ from tests.test_utils import connection_manager
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sqlalchemy
     import sqlalchemy.dialects.postgresql as postgresqltypes
 
     POSTGRESQL_TYPES = {
@@ -48,6 +48,7 @@ try:
         "NUMERIC": postgresqltypes.NUMERIC,
     }
 except ImportError:
+    sqlalchemy = None
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
@@ -121,7 +122,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
         )
-    except sa.exc.OperationalError:
+    except sqlalchemy.exc.OperationalError:
         return None
 
     sql_dtypes = {}
@@ -210,7 +211,7 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
 
 
 @pytest.fixture
-def taxi_validator_spark(titanic_data_context_modular_api):
+def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
@@ -223,7 +224,7 @@ def taxi_validator_spark(titanic_data_context_modular_api):
 
 
 @pytest.fixture
-def taxi_validator_sqlalchemy(titanic_data_context_modular_api):
+def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
