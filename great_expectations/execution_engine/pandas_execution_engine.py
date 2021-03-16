@@ -143,6 +143,7 @@ Notes:
             s3_url = S3Url(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+
             if "compression" not in reader_options.keys():
                 reader_options["compression"] = sniff_s3_compression(s3_url)
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
@@ -154,6 +155,13 @@ Notes:
             reader_fn = self._get_reader_fn(reader_method, s3_url.key)
             buf = BytesIO(s3_object["Body"].read())
             buf.seek(0)
+
+            available_params = reader_fn.__code__.co_varnames
+            reader_options = {
+                param: reader_options[param]
+                for param in available_params
+                if param in reader_options
+            }
             df = reader_fn(buf, **reader_options)
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
