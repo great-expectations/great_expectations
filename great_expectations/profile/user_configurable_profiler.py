@@ -26,6 +26,8 @@ from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
+from tqdm.auto import tqdm
+
 
 class UserConfigurableProfiler:
 
@@ -242,10 +244,15 @@ class UserConfigurableProfiler:
                     profile_dataset=self.profile_dataset, column=column_name
                 )
 
-        for column_name in self.column_info.keys():
-            self._build_expectations_for_all_column_types(
-                self.profile_dataset, column_name
-            )
+        with tqdm(
+            desc="Profiling Columns", total=len(self.column_info), delay=5
+        ) as pbar:
+            for column_name in self.column_info.keys():
+                pbar.set_postfix_str(f"Column={column_name}")
+                self._build_expectations_for_all_column_types(
+                    self.profile_dataset, column_name
+                )
+                pbar.update()
 
         expectation_suite = self._build_column_description_metadata(
             self.profile_dataset
@@ -267,33 +274,36 @@ class UserConfigurableProfiler:
                 column_list=self.primary_or_compound_key,
             )
         self._build_expectations_table(profile_dataset=self.profile_dataset)
-        for column_name, column_info in self.column_info.items():
-            data_type = column_info.get("type")
-            cardinality = column_info.get("cardinality")
+        with tqdm(desc="Profiling", total=len(self.column_info), delay=5) as pbar:
+            for column_name, column_info in self.column_info.items():
+                pbar.set_postfix_str(f"Column={column_name}")
+                data_type = column_info.get("type")
+                cardinality = column_info.get("cardinality")
 
-            if data_type in ("FLOAT", "INT", "NUMERIC"):
-                self._build_expectations_numeric(
-                    profile_dataset=self.profile_dataset,
-                    column=column_name,
-                )
+                if data_type in ("FLOAT", "INT", "NUMERIC"):
+                    self._build_expectations_numeric(
+                        profile_dataset=self.profile_dataset,
+                        column=column_name,
+                    )
 
-            if data_type == "DATETIME":
-                self._build_expectations_datetime(
-                    profile_dataset=self.profile_dataset,
-                    column=column_name,
-                )
+                if data_type == "DATETIME":
+                    self._build_expectations_datetime(
+                        profile_dataset=self.profile_dataset,
+                        column=column_name,
+                    )
 
-            if (
-                OrderedProfilerCardinality[self.value_set_threshold]
-                >= OrderedProfilerCardinality[cardinality]
-            ):
-                self._build_expectations_value_set(
+                if (
+                    OrderedProfilerCardinality[self.value_set_threshold]
+                    >= OrderedProfilerCardinality[cardinality]
+                ):
+                    self._build_expectations_value_set(
+                        profile_dataset=self.profile_dataset, column=column_name
+                    )
+
+                self._build_expectations_for_all_column_types(
                     profile_dataset=self.profile_dataset, column=column_name
                 )
-
-            self._build_expectations_for_all_column_types(
-                profile_dataset=self.profile_dataset, column=column_name
-            )
+                pbar.update()
 
         expectation_suite = self._build_column_description_metadata(
             self.profile_dataset
