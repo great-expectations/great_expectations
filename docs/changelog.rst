@@ -6,7 +6,8 @@ Changelog
 
 Develop
 -----------------
-* [BUGFIX] Use temporary paths in tests and execute_shell_command instead of subprocess
+* [BUGFIX] Use temporary paths in tests and execute_shell_command instead of subprocess #2545
+* [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
 
 0.13.13
 -----------------
