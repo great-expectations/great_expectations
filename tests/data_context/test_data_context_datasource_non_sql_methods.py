@@ -186,7 +186,7 @@ data_connectors:
     test_runtime_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
+        batch_identifiers:
             - airflow_run_id
     """,
     )

@@ -102,7 +102,7 @@ def test_error_checking(basic_datasource):
         )
 
 
-def test_batch_identifiers_and_runtime_keys_success_all_keys_present(
+def test_batch_identifiers_and_batch_identifiers_success_all_keys_present(
     basic_datasource,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -138,7 +138,7 @@ def test_batch_identifiers_and_runtime_keys_success_all_keys_present(
     assert len(batch_definition_list) == 1
 
 
-def test_batch_identifiers_and_runtime_keys_error_illegal_keys(
+def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
     basic_datasource,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})

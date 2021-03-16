@@ -188,64 +188,54 @@ data_connectors:
 
 def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
     report = basic_pandas_datasource_v013.self_check()
-    assert report == {
-        "execution_engine": {
-            "caching": True,
-            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
-            "class_name": "PandasExecutionEngine",
-            "discard_subset_failing_expectations": False,
-            "boto3_options": {},
-        },
-        "data_connectors": {
-            "count": 1,
-            "my_filesystem_data_connector": {
-                "class_name": "ConfiguredAssetFilesystemDataConnector",
-                "data_asset_count": 1,
-                "example_data_asset_names": ["Titanic"],
-                "data_assets": {
-                    "Titanic": {
-                        "batch_definition_count": 0,
-                        "example_data_references": [],
-                    }
-                },
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-                "example_data_reference": {},
-            },
-        },
-    }
+    assert report == {'data_connectors': {'count': 2,
+                     'my_filesystem_data_connector': {'class_name': 'ConfiguredAssetFilesystemDataConnector',
+                                                      'data_asset_count': 1,
+                                                      'data_assets': {'Titanic': {'batch_definition_count': 0,
+                                                                                  'example_data_references': []}},
+                                                      'example_data_asset_names': ['Titanic'],
+                                                      'example_data_reference': {},
+                                                      'example_unmatched_data_references': [],
+                                                      'unmatched_data_reference_count': 0},
+                     'test_runtime_data_connector': {'class_name': 'RuntimeDataConnector',
+                                                     'data_asset_count': 0,
+                                                     'data_assets': {},
+                                                     'example_data_asset_names': [],
+                                                     'example_unmatched_data_references': [],
+                                                     'unmatched_data_reference_count': 0}},
+ 'execution_engine': {'boto3_options': {},
+                      'caching': True,
+                      'class_name': 'PandasExecutionEngine',
+                      'discard_subset_failing_expectations': False,
+                      'module_name': 'great_expectations.execution_engine.pandas_execution_engine'}}
 
 
 def test_basic_spark_datasource_self_check(basic_spark_datasource):
     report = basic_spark_datasource.self_check()
-    assert report == {
-        "execution_engine": {
-            "caching": True,
-            "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
-            "class_name": "SparkDFExecutionEngine",
-            "persist": True,
-            "spark_config": {
-                "spark.app.name": "default_great_expectations_spark_application",
-                "spark.master": "local[*]",
-                "spark.executor.memory": "6g",
-                "spark.driver.memory": "6g",
-                "spark.ui.showConsoleProgress": False,
-                "spark.sql.shuffle.partitions": 2,
-                "spark.default.parallelism": 4,
-            },
-        },
-        "data_connectors": {
-            "count": 1,
-            "simple_filesystem_data_connector": {
-                "class_name": "InferredAssetFilesystemDataConnector",
-                "data_asset_count": 0,
-                "example_data_asset_names": [],
-                "data_assets": {},
-                "unmatched_data_reference_count": 0,
-                "example_unmatched_data_references": [],
-            },
-        },
-    }
+    assert report == {'data_connectors': {'count': 2,
+                     'simple_filesystem_data_connector': {'class_name': 'InferredAssetFilesystemDataConnector',
+                                                          'data_asset_count': 0,
+                                                          'data_assets': {},
+                                                          'example_data_asset_names': [],
+                                                          'example_unmatched_data_references': [],
+                                                          'unmatched_data_reference_count': 0},
+                     'test_runtime_data_connector': {'class_name': 'RuntimeDataConnector',
+                                                     'data_asset_count': 0,
+                                                     'data_assets': {},
+                                                     'example_data_asset_names': [],
+                                                     'example_unmatched_data_references': [],
+                                                     'unmatched_data_reference_count': 0}},
+ 'execution_engine': {'caching': True,
+                      'class_name': 'SparkDFExecutionEngine',
+                      'module_name': 'great_expectations.execution_engine.sparkdf_execution_engine',
+                      'persist': True,
+                      'spark_config': {'spark.app.name': 'default_great_expectations_spark_application',
+                                       'spark.default.parallelism': 4,
+                                       'spark.driver.memory': '6g',
+                                       'spark.executor.memory': '6g',
+                                       'spark.master': 'local[*]',
+                                       'spark.sql.shuffle.partitions': 2,
+                                       'spark.ui.showConsoleProgress': False}}}
 
 
 def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013):
