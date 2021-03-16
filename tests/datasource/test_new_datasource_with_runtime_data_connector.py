@@ -8,8 +8,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
-    RuntimeBatchRequest,
     PartitionDefinition,
+    RuntimeBatchRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.new_datasource import Datasource
@@ -110,9 +110,7 @@ def test_basic_datasource_runtime_data_connector_error_checking(
                 datasource_name=basic_datasource_with_runtime_data_connector.name,
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
-                runtime_parameters={
-                    "batch_data": test_df
-                },
+                runtime_parameters={"batch_data": test_df},
                 batch_identifiers=None,
             )
         )
@@ -127,9 +125,7 @@ def test_basic_datasource_runtime_data_connector_error_checking(
                 datasource_name=basic_datasource_with_runtime_data_connector.name,
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
-                runtime_parameters={
-                    "batch_data": test_df
-                },
+                runtime_parameters={"batch_data": test_df},
                 batch_identifiers=dict(),
             )
         )
@@ -153,7 +149,7 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present(
         "runtime_parameters": {
             "batch_data": test_df,
         },
-        "batch_identifiers": batch_identifiers
+        "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
     batch_list: List[
@@ -239,7 +235,7 @@ def test_set_data_asset_name_for_runtime_data(
         "runtime_parameters": {
             "batch_data": test_df,
         },
-        "batch_identifiers": batch_identifiers
+        "batch_identifiers": batch_identifiers,
     }
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
     batch_list: List[
