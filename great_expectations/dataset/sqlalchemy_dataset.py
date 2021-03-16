@@ -784,36 +784,42 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         )
 
     def get_column_median(self, column):
-        # AWS Athena does not support offset
+        # AWS Athena and presto have an special function that can be used to retrieve the median
         if self.sql_engine_dialect.name.lower() == "awsathena":
-            raise NotImplementedError("AWS Athena does not support OFFSET.")
-        nonnull_count = self.get_column_nonnull_count(column)
-        element_values = self.engine.execute(
-            sa.select([sa.column(column)])
-            .order_by(sa.column(column))
-            .where(sa.column(column) != None)
-            .offset(max(nonnull_count // 2 - 1, 0))
-            .limit(2)
-            .select_from(self._table)
-        )
-
-        column_values = list(element_values.fetchall())
-
-        if len(column_values) == 0:
-            column_median = None
-        elif nonnull_count % 2 == 0:
-            # An even number of column values: take the average of the two center values
-            column_median = (
-                float(
-                    column_values[0][0]
-                    + column_values[1][0]  # left center value  # right center value
-                )
-                / 2.0
-            )  # Average center values
+            element_values = self.engine.execute(
+                f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
+            )
+            return convert_to_json_serializable(element_values.fetchone()[0])
         else:
-            # An odd number of column values, we can just take the center value
-            column_median = column_values[1][0]  # True center value
-        return convert_to_json_serializable(column_median)
+
+            nonnull_count = self.get_column_nonnull_count(column)
+            element_values = self.engine.execute(
+                sa.select([sa.column(column)])
+                .order_by(sa.column(column))
+                .where(sa.column(column) != None)
+                .offset(max(nonnull_count // 2 - 1, 0))
+                .limit(2)
+                .select_from(self._table)
+            )
+
+            column_values = list(element_values.fetchall())
+
+            if len(column_values) == 0:
+                column_median = None
+            elif nonnull_count % 2 == 0:
+                # An even number of column values: take the average of the two center values
+                column_median = (
+                    float(
+                        column_values[0][0]
+                        + column_values[1][0]  # left center value  # right center value
+                    )
+                    / 2.0
+                )  # Average center values
+            else:
+                # An odd number of column values, we can just take the center value
+                column_median = column_values[1][0]  # True center value
+
+            return convert_to_json_serializable(column_median)
 
     def get_column_quantiles(
         self, column: str, quantiles: Iterable, allow_relative_error: bool = False
@@ -1055,7 +1061,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         [
                             (
                                 sa.and_(
-                                    bins[idx] <= sa.column(column),
+                                    sa.column(column) >= bins[idx],
                                     sa.column(column) < bins[idx + 1],
                                 ),
                                 1,
@@ -1079,7 +1085,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ):
             case_conditions.append(
                 sa.func.sum(
-                    sa.case([(bins[-2] <= sa.column(column), 1)], else_=0)
+                    sa.case([(sa.column(column) >= bins[-2], 1)], else_=0)
                 ).label("bin_" + str(len(bins) - 1))
             )
         else:
@@ -1089,7 +1095,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                         [
                             (
                                 sa.and_(
-                                    bins[-2] <= sa.column(column),
+                                    sa.column(column) >= bins[-2],
                                     sa.column(column) <= bins[-1],
                                 ),
                                 1,
@@ -1242,11 +1248,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # similar, for example.
         ###
 
-        if self.sql_engine_dialect.name.lower() == "bigquery":
+        engine_dialect = self.sql_engine_dialect.name.lower()
+        # handle cases where dialect.name.lower() returns a byte string (e.g. databricks)
+        if isinstance(engine_dialect, bytes):
+            engine_dialect = str(engine_dialect, "utf-8")
+
+        if engine_dialect == "bigquery":
             stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name.lower() == "snowflake":
+        elif engine_dialect == "databricks":
+            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif engine_dialect == "snowflake":
             table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
 
             logger.info("Creating temporary table %s" % table_name)
@@ -1272,7 +1287,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = (
                 custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
             ).format(table_name=table_name)
-        elif self.sql_engine_dialect.name.lower() == "awsathena":
+        elif engine_dialect == "awsathena":
             stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
@@ -1437,9 +1452,15 @@ WHERE
         total_count_query = sa.select([sa.func.count()]).select_from(self._table)
         total_count = self.engine.execute(total_count_query).fetchone()[0]
 
+        if total_count > 0:
+            unexpected_percent = 100.0 * unexpected_count / total_count
+        else:
+            # If no rows, then zero percent are unexpected.
+            unexpected_percent = 0
+
         return {
             "success": unexpected_count == 0,
-            "result": {"unexpected_percent": 100.0 * unexpected_count / total_count},
+            "result": {"unexpected_percent": unexpected_percent},
         }
 
     ###
@@ -1691,26 +1712,26 @@ WHERE
 
         elif max_value is None:
             if strict_min:
-                return min_value < sa.column(column)
+                return sa.column(column) > min_value
             else:
-                return min_value <= sa.column(column)
+                return sa.column(column) >= min_value
 
         else:
             if strict_min and strict_max:
                 return sa.and_(
-                    min_value < sa.column(column), sa.column(column) < max_value
+                    sa.column(column) > min_value, sa.column(column) < max_value
                 )
             elif strict_min:
                 return sa.and_(
-                    min_value < sa.column(column), sa.column(column) <= max_value
+                    sa.column(column) > min_value, sa.column(column) <= max_value
                 )
             elif strict_max:
                 return sa.and_(
-                    min_value <= sa.column(column), sa.column(column) < max_value
+                    sa.column(column) >= min_value, sa.column(column) < max_value
                 )
             else:
                 return sa.and_(
-                    min_value <= sa.column(column), sa.column(column) <= max_value
+                    sa.column(column) >= min_value, sa.column(column) <= max_value
                 )
 
     @DocInherit

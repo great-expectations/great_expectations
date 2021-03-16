@@ -8,6 +8,7 @@ import os
 import pstats
 import time
 from collections import OrderedDict
+from datetime import datetime
 from functools import wraps
 from gc import get_referrers
 from inspect import (
@@ -25,6 +26,7 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Optional
 
+from dateutil.parser import parse
 from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
@@ -800,8 +802,8 @@ def gen_directory_tree_str(startpath):
     return output_str
 
 
-def lint_code(code):
-    """Lint strings of code passed in. Optional dependency "black" must be installed."""
+def lint_code(code: str) -> str:
+    """Lint strings of code passed in.  Optional dependency "black" must be installed."""
     try:
         import black
 
@@ -901,6 +903,14 @@ def is_int(value: Any) -> bool:
 def is_float(value: Any) -> bool:
     try:
         num: float = float(value)
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
+def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
+    try:
+        parsed_date: datetime = parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
         return False
     return True

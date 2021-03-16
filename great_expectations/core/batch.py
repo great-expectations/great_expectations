@@ -13,6 +13,7 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class BatchDefinition(SerializableDictDot):
@@ -215,6 +216,10 @@ class BatchRequestBase(DictDot):
     def data_asset_name(self) -> str:
         return self._data_asset_name
 
+    @data_asset_name.setter
+    def data_asset_name(self, data_asset_name):
+        self._data_asset_name = data_asset_name
+
     @property
     def partition_request(self) -> Union[PartitionRequest, dict]:  # PartitionRequest:
         return self._partition_request
@@ -285,7 +290,7 @@ class BatchRequest(BatchRequestBase):
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
-        self._validate_batch_request(
+        self._validate_init_parameters(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -303,7 +308,7 @@ class BatchRequest(BatchRequestBase):
         )
 
     @staticmethod
-    def _validate_batch_request(
+    def _validate_init_parameters(
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
@@ -319,20 +324,20 @@ class BatchRequest(BatchRequestBase):
             )
         if not (data_connector_name and isinstance(data_connector_name, str)):
             raise TypeError(
-                f"""The type of a data_connector name must be a string (Python "str").  The type given is
+                f"""The type of data_connector name must be a string (Python "str").  The type given is
 "{str(type(data_connector_name))}", which is illegal.
                 """
             )
         if not (data_asset_name and isinstance(data_asset_name, str)):
             raise TypeError(
-                f"""The type of a data_asset name must be a string (Python "str").  The type given is
-"{str(type(data_asset_name))}", which is illegal.
-                """
+                f"""The type of data_asset name must be a string (Python "str").  The type given is
+        "{str(type(data_asset_name))}", which is illegal.
+                        """
             )
         # TODO Abe 20201015: Switch this to PartitionRequest.
         if partition_request and not isinstance(partition_request, dict):
             raise TypeError(
-                f"""The type of a partition_request must be a dict object.  The type given is
+                f"""The type of partition_request must be a dict object.  The type given is
 "{str(type(partition_request))}", which is illegal.
                 """
             )
@@ -472,5 +477,12 @@ class Batch(DictDot):
         }
         return json.dumps(json_dict, indent=2)
 
-    def head(self):
-        return self._data.head()
+    def head(self, n_rows=5, fetch_all=False):
+        # FIXME - we should use a Validator after resolving circularity
+        # Validator(self._data.execution_engine, batches=(self,)).get_metric(MetricConfiguration("table.head", {"batch_id": self.id}, {"n_rows": n_rows, "fetch_all": fetch_all}))
+        metric = MetricConfiguration(
+            "table.head",
+            {"batch_id": self.id},
+            {"n_rows": n_rows, "fetch_all": fetch_all},
+        )
+        return self._data.execution_engine.resolve_metrics((metric,))[metric.id]

@@ -8,6 +8,7 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     BatchSpec,
 )
+from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.partition_query import (
     PartitionQuery,
@@ -20,7 +21,6 @@ from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
-from great_expectations.datasource.types import PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -148,8 +148,7 @@ class FilePathDataConnector(DataConnector):
 
         """
         self._validate_batch_request(batch_request=batch_request)
-
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = list(

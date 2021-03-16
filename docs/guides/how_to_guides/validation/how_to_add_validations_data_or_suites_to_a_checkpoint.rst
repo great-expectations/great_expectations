@@ -202,7 +202,7 @@ Steps
                   data_connector_name: my_other_data_connector
                   data_asset_name: users
                   partition_request:
-                    partition_identifiers:
+                    batch_identifiers:
                       name: Titanic
                 action_list:
                   - name: quarantine_failed_data

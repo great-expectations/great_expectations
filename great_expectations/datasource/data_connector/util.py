@@ -19,7 +19,7 @@ from great_expectations.core.id_dict import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.sorter import Sorter
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 
@@ -63,17 +63,17 @@ def batch_definition_matches_batch_request(
         return False
 
     if batch_request.partition_request:
-        partition_identifiers: Any = batch_request.partition_request.get(
-            "partition_identifiers"
+        batch_identifiers: Any = batch_request.partition_request.get(
+            "batch_identifiers"
         )
-        if partition_identifiers:
-            if not isinstance(partition_identifiers, dict):
+        if batch_identifiers:
+            if not isinstance(batch_identifiers, dict):
                 return False
-            for key in partition_identifiers.keys():
+            for key in batch_identifiers.keys():
                 if not (
                     key in batch_definition.partition_definition
                     and batch_definition.partition_definition[key]
-                    == partition_identifiers[key]
+                    == batch_identifiers[key]
                 ):
                     return False
     return True
@@ -375,13 +375,3 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
         },
     )
     return sorter
-
-
-def fetch_batch_data_as_pandas_df(batch_data):
-    if isinstance(batch_data, pd.DataFrame):
-        return batch_data
-    if pyspark_sql and isinstance(batch_data, pyspark_sql.DataFrame):
-        return batch_data.toPandas()
-    if isinstance(batch_data, SqlAlchemyBatchData):
-        return batch_data.head(fetch_all=True)
-    raise ge_exceptions.DataConnectorError("Unknown batch_data type encountered.")

@@ -6,12 +6,13 @@ import uuid
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 from great_expectations.core.batch import BatchMarkers
-from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.types.batch_spec import (
+from great_expectations.core.batch_spec import (
     BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
+from great_expectations.core.id_dict import IDDict
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.exceptions import exceptions as ge_exceptions
 
 from ..exceptions import (
@@ -24,6 +25,7 @@ from ..exceptions import (
 from ..expectations.row_conditions import parse_condition_to_spark
 from ..validator.validation_graph import MetricConfiguration
 from .execution_engine import ExecutionEngine, MetricDomainTypes
+from .sparkdf_batch_data import SparkDFBatchData
 
 logger = logging.getLogger(__name__)
 
@@ -41,13 +43,6 @@ try:
         StructType,
     )
 
-    class SparkDFBatchData(DataFrame):
-        def __init__(self, df):
-            super(self.__class__, self).__init__(df._jdf, df.sql_ctx)
-
-        def row_count(self):
-            return self.count()
-
 
 except ImportError:
     pyspark = None
@@ -61,8 +56,6 @@ except ImportError:
     StringType = (None,)
     DateType = (None,)
     BooleanType = (None,)
-
-    SparkDFBatchData = None
 
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
@@ -149,30 +142,23 @@ class SparkDFExecutionEngine(ExecutionEngine):
         "reader_options",
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, persist=True, spark_config=None, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
-        self._persist = kwargs.pop("persist", True)
-        self._spark_config = kwargs.pop("spark_config", {})
-        try:
-            builder = SparkSession.builder
-            app_name: Optional[str] = self._spark_config.pop("spark.app.name", None)
-            if app_name:
-                builder.appName(app_name)
-            for k, v in self._spark_config.items():
-                builder.config(k, v)
-            self.spark = builder.getOrCreate()
-        except AttributeError:
-            logger.error(
-                "Unable to load spark context; install optional spark dependency for support."
-            )
-            self.spark = None
+        self._persist = persist
+
+        if spark_config is None:
+            spark_config = {}
+
+        spark: SparkSession = get_or_create_spark_application(spark_config=spark_config)
+        self.spark = spark
+        self._spark_config = spark_config
 
         super().__init__(*args, **kwargs)
 
         self._config.update(
             {
                 "persist": self._persist,
-                "spark_config": self._spark_config,
+                "spark_config": spark_config,
             }
         )
 
@@ -184,7 +170,18 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 "Batch has not been loaded - please run load_batch() to load a batch."
             )
 
-        return self.active_batch_data
+        return self.active_batch_data.dataframe
+
+    def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
+        if isinstance(batch_data, DataFrame):
+            batch_data = SparkDFBatchData(self, batch_data)
+        elif isinstance(batch_data, SparkDFBatchData):
+            pass
+        else:
+            raise GreatExpectationsError(
+                "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"
+            )
+        super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
@@ -230,7 +227,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
             )
 
         batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
-        typed_batch_data = SparkDFBatchData(batch_data)
+        typed_batch_data = SparkDFBatchData(execution_engine=self, dataframe=batch_data)
 
         return typed_batch_data, batch_markers
 
@@ -332,14 +329,14 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.active_batch_data:
-                data = self.active_batch_data
+                data = self.active_batch_data.dataframe
             else:
                 raise ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.loaded_batch_data_dict:
-                data = self.loaded_batch_data_dict[batch_id]
+                data = self.loaded_batch_data_dict[batch_id].dataframe
             else:
                 raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
 
@@ -501,7 +498,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 Returns:
                     A dictionary of the collected metrics over their respective domains
         """
-
         resolved_metrics = dict()
         aggregates: Dict[Tuple, dict] = dict()
         for (

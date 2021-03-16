@@ -3,14 +3,12 @@ from typing import Dict, List, Optional
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
-    BatchSpec,
     PartitionDefinition,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
-from great_expectations.datasource.types import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 try:
@@ -133,20 +131,15 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                "_data_references_cache is None. Have you called _refresh_data_references_cache yet?"
-            )
         return []
 
     def get_batch_definition_list_from_batch_request(self, batch_request: BatchRequest):
         self._validate_batch_request(batch_request=batch_request)
 
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = []
-
         try:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
         except KeyError as e:
@@ -185,39 +178,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
         ]
 
-    def build_batch_spec(
-        self, batch_definition: BatchDefinition
-    ) -> SqlAlchemyDatasourceBatchSpec:
-        """
-        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
-
-        Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
-
-        Returns:
-            BatchSpec built from batch_definition
-        """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
-
-        data_asset_name: str = batch_definition.data_asset_name
-        if (
-            data_asset_name in self.data_assets
-            and self.data_assets[data_asset_name].get("batch_spec_passthrough")
-            and isinstance(
-                self.data_assets[data_asset_name].get("batch_spec_passthrough"), dict
-            )
-        ):
-            batch_spec.update(
-                self.data_assets[data_asset_name]["batch_spec_passthrough"]
-            )
-
-        return SqlAlchemyDatasourceBatchSpec(batch_spec)
-
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
-    ) -> dict:
+    ) -> Dict:
         """
         Build BatchSpec parameters from batch_definition with the following components:
             1. data_asset_name from batch_definition
@@ -243,8 +206,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self,
         table_name: str,
     ):
-        """
-        'Split' by returning the whole table
+        """'Split' by returning the whole table
 
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """

@@ -9,7 +9,7 @@ from great_expectations.core.batch import (
     BatchSpec,
     PartitionDefinition,
 )
-from great_expectations.datasource.types import RuntimeDataBatchSpec
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError
 
 

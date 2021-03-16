@@ -6,7 +6,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
 from great_expectations.exceptions.exceptions import DataContextError
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.marshmallow__shade.exceptions import ValidationError
@@ -31,7 +31,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request=PartitionRequest(
-                partition_identifiers={"date": "2020-01-15"}
+                batch_identifiers={"date": "2020-01-15"}
             ),
         )
     )
@@ -43,7 +43,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
                 "datasource_name": "my_sqlite_db",
                 "data_connector_name": "daily",
                 "data_asset_name": "table_partitioned_by_date_column__A",
-                "partition_request": {"partition_identifiers": {"date": "2020-01-15"}},
+                "partition_request": {"batch_identifiers": {"date": "2020-01-15"}},
             }
         )
 
@@ -54,7 +54,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
                 datasource_name="my_sqlite_db",
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request=PartitionRequest(partition_identifiers={}),
+                partition_request=PartitionRequest(batch_identifiers={}),
             )
         )
 
@@ -85,7 +85,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
                 # datasource_name=MISSING
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request=PartitionRequest(partition_identifiers={}),
+                partition_request=PartitionRequest(batch_identifiers={}),
             )
         )
 
@@ -120,16 +120,16 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
         "daily",
         "table_partitioned_by_date_column__A",
         partition_request=PartitionRequest(
-            {"partition_identifiers": {"date": "2020-01-15"}}
+            {"batch_identifiers": {"date": "2020-01-15"}}
         ),
     )
 
-    # Successful specification using parameters and partition_identifiers
+    # Successful specification using parameters and batch_identifiers
     context.get_batch(
         "my_sqlite_db",
         "daily",
         "table_partitioned_by_date_column__A",
-        partition_identifiers={"date": "2020-01-15"},
+        batch_identifiers={"date": "2020-01-15"},
     )
 
 
@@ -151,7 +151,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request=PartitionRequest(
-                partition_identifiers={"date": "2020-01-15"}
+                batch_identifiers={"date": "2020-01-15"}
             ),
         ),
         expectation_suite_name="my_expectations",
@@ -164,7 +164,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
                 "datasource_name": "my_sqlite_db",
                 "data_connector_name": "daily",
                 "data_asset_name": "table_partitioned_by_date_column__A",
-                "partition_request": {"partition_identifiers": {"date": "2020-01-15"}},
+                "partition_request": {"batch_identifiers": {"date": "2020-01-15"}},
             },
             expectation_suite_name="my_expectations",
         )
@@ -176,7 +176,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
                 datasource_name="my_sqlite_db",
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request=PartitionRequest(partition_identifiers={}),
+                partition_request=PartitionRequest(batch_identifiers={}),
             ),
             expectation_suite_name="my_expectations",
         )
@@ -210,7 +210,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
                 # datasource_name=MISSING
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request=PartitionRequest(partition_identifiers={}),
+                partition_request=PartitionRequest(batch_identifiers={}),
             ),
             expectation_suite_name="my_expectations",
         )
@@ -249,17 +249,17 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
         "daily",
         "table_partitioned_by_date_column__A",
         partition_request=PartitionRequest(
-            {"partition_identifiers": {"date": "2020-01-15"}}
+            {"batch_identifiers": {"date": "2020-01-15"}}
         ),
         expectation_suite_name="my_expectations",
     )
 
-    # Successful specification using parameters and partition_identifiers
+    # Successful specification using parameters and batch_identifiers
     context.get_validator(
         "my_sqlite_db",
         "daily",
         "table_partitioned_by_date_column__A",
-        partition_identifiers={"date": "2020-01-15"},
+        batch_identifiers={"date": "2020-01-15"},
         expectation_suite_name="my_expectations",
     )
 
@@ -301,28 +301,20 @@ def test_get_validator_expectation_suite_options(
         expectation_suite=some_more_expectations,
     )
 
-    # Successful specification using create_expectation_suite_with_name
+    # Successful specification using overwrite_existing_expectation_suite
     context.get_validator(
         batch_request=BatchRequest(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             partition_request=PartitionRequest(
-                partition_identifiers={"date": "2020-01-15"}
+                batch_identifiers={"date": "2020-01-15"}
             ),
         ),
         create_expectation_suite_with_name="yet_more_expectations",
+        # TODO: readd
+        # overwrite_existing_expectation_suite=True,
     )
-
-    # Failed specification, because the named expectation suite already exists
-    with pytest.raises(DataContextError):
-        context.get_validator(
-            datasource_name="my_sqlite_db",
-            data_connector_name="daily",
-            data_asset_name="table_partitioned_by_date_column__A",
-            date="2020-01-15",
-            create_expectation_suite_with_name="some_expectations",
-        )
 
     # Failed specification: incorrectly typed expectation suite
     with pytest.raises(TypeError):
@@ -348,7 +340,7 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
         "datasource_name": "my_sqlite_db",
         "data_connector_name": "daily",
         "data_asset_name": "table_partitioned_by_date_column__A",
-        "partition_request": {"partition_identifiers": {"date": "2020-01-15"}},
+        "partition_request": {"batch_identifiers": {"date": "2020-01-15"}},
     }
     batch_list: List[Batch] = context.get_batch_list(**batch_request)
 
@@ -362,4 +354,3 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
     )
     assert batch.batch_definition["partition_definition"] == {"date": "2020-01-15"}
     assert isinstance(batch.data, SqlAlchemyBatchData)
-    assert len(batch.data.head(fetch_all=True)) == 4

@@ -66,7 +66,7 @@ data_connectors:
         "data_connector_name": "my_data_connector",
         "data_asset_name": "path",
         "partition_request": {
-            "partition_identifiers": {
+            "batch_identifiers": {
                 # "data_asset_name": "path",
                 "letter": "A",
                 "number": "101",
@@ -84,8 +84,8 @@ data_connectors:
         "letter": "A",
         "number": "101",
     }
-    assert isinstance(batch.data, pd.DataFrame)
-    assert batch.data.shape == (2, 3)
+    assert isinstance(batch.data.dataframe, pd.DataFrame)
+    assert batch.data.dataframe.shape == (2, 3)
 
 
 def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets(
@@ -148,7 +148,7 @@ data_connectors:
         "data_connector_name": "my_data_connector",
         "data_asset_name": "Titanic",
         "partition_request": {
-            "partition_identifiers": {
+            "batch_identifiers": {
                 "name": "Titanic",
                 "timestamp": "19120414",
                 "size": "1313",
@@ -167,5 +167,60 @@ data_connectors:
         "timestamp": "19120414",
         "size": "1313",
     }
-    assert isinstance(batch.data, pd.DataFrame)
-    assert batch.data.shape == (1313, 7)
+    assert isinstance(batch.data.dataframe, pd.DataFrame)
+    assert batch.data.dataframe.shape == (1313, 7)
+
+
+def test_get_batch_list_from_new_style_datasource_with_runtime_data_connector(
+    empty_data_context, tmp_path_factory
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+class_name: Datasource
+
+execution_engine:
+    class_name: PandasExecutionEngine
+
+data_connectors:
+    test_runtime_data_connector:
+        module_name: great_expectations.datasource.data_connector
+        class_name: RuntimeDataConnector
+        runtime_keys:
+            - airflow_run_id
+    """,
+    )
+
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    data_connector_name: str = "test_runtime_data_connector"
+    data_asset_name: str = "test_asset_1"
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        "batch_data": test_df,
+        "partition_request": {
+            "batch_identifiers": {
+                "airflow_run_id": 1234567890,
+            }
+        },
+        "limit": None,
+    }
+
+    batch_list = context.get_batch_list(**batch_request)
+    assert len(batch_list) == 1
+
+    batch: Batch = batch_list[0]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "test_asset_1"
+    assert batch.batch_definition["partition_definition"] == {
+        "airflow_run_id": 1234567890,
+    }
+    assert isinstance(batch.data.dataframe, pd.DataFrame)
+    assert batch.data.dataframe.shape == (2, 2)

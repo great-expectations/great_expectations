@@ -109,7 +109,7 @@ def test_setting_config_variables_is_visible_immediately(
     )
     dict_to_escape = {
         "drivername": "po$tgresql",
-        "host": "localhost",
+        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "port": "5432",
         "username": "postgres",
         "password": "pas$wor$d1$",
@@ -148,7 +148,7 @@ def test_setting_config_variables_is_visible_immediately(
     )
     assert config_variables_with_escaped_vars["escaped_password_dict"] == {
         "drivername": r"po\$tgresql",
-        "host": "localhost",
+        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "port": "5432",
         "username": "postgres",
         "password": r"pas\$wor\$d1\$",
@@ -399,7 +399,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     # dict
     value_dict = {
         "drivername": "postgresql",
-        "host": "localhost",
+        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "port": "5432",
         "username": "postgres",
         "password": "pass$word1",
@@ -407,7 +407,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     }
     escaped_value_dict = {
         "drivername": "postgresql",
-        "host": "localhost",
+        "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "port": "5432",
         "username": "postgres",
         "password": r"pass\$word1",
@@ -458,7 +458,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     # list
     value_list = [
         "postgresql",
-        "localhost",
+        os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "5432",
         "postgres",
         "pass$word1",
@@ -466,7 +466,7 @@ def test_escape_all_config_variables(empty_data_context_with_config_variables):
     ]
     escaped_value_list = [
         "postgresql",
-        "localhost",
+        os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "5432",
         "postgres",
         r"pass\$word1",
@@ -703,7 +703,7 @@ def test_escape_all_config_variables_skip_substitution_vars(
     # list
     value_list = [
         "postgresql",
-        "localhost",
+        os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "5432",
         "$postgres",
         "pass$word1",
@@ -711,7 +711,7 @@ def test_escape_all_config_variables_skip_substitution_vars(
     ]
     escaped_value_list = [
         "postgresql",
-        "localhost",
+        os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "5432",
         r"\$postgres",
         r"pass\$word1",
@@ -719,7 +719,7 @@ def test_escape_all_config_variables_skip_substitution_vars(
     ]
     escaped_value_list_skip_substitution_variables = [
         "postgresql",
-        "localhost",
+        os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
         "5432",
         "$postgres",
         r"pass\$word1",

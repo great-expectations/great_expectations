@@ -7,6 +7,7 @@ from ruamel.yaml import YAML
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, BatchSpec
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.validator.validator import Validator
 
 yaml = YAML()
 
@@ -93,7 +94,7 @@ def test_get_batch_definition_list_from_batch_request(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request={"partition_identifiers": {"date": "2020-01-01"}},
+                partition_request={"batch_identifiers": {"date": "2020-01-01"}},
             )
         )
     )
@@ -105,14 +106,14 @@ def test_get_batch_definition_list_from_batch_request(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request={"partition_identifiers": {}},
+                partition_request={"batch_identifiers": {}},
             )
         )
     )
     assert len(batch_definition_list) == 30
 
     # Note: Abe 20201109: It would be nice to put in safeguards for mistakes like this.
-    # In this case, "date" should go inside "partition_identifiers".
+    # In this case, "date" should go inside "batch_identifiers".
     # Currently, the method ignores "date" entirely, and matches on too many partitions.
     # I don't think this is unique to ConfiguredAssetSqlDataConnector.
     # with pytest.raises(ge_exceptions.DataConnectorError) as e:
@@ -122,7 +123,7 @@ def test_get_batch_definition_list_from_batch_request(
     #             data_connector_name="my_sql_data_connector",
     #             data_asset_name="table_partitioned_by_date_column__A",
     #             partition_request={
-    #                 "partition_identifiers": {},
+    #                 "batch_identifiers": {},
     #                 "date" : "2020-01-01",
     #             }
     #         )
@@ -550,10 +551,16 @@ def test_sampling_method__limit(
             }
         )
     )
-    assert len(batch_data.head(fetch_all=True)) == 20
+    execution_engine.load_batch_data("__", batch_data)
+    validator = Validator(execution_engine)
+    assert len(validator.head(fetch_all=True)) == 20
 
-    # TODO: Implement this test once get_batch_data_and_markers is returning a proper SqlAlchemyBatchData
-    # batch_data.expect_column_values_to_be_in_set("date", values=["2020-01-02"])
+    assert (
+        validator.expect_column_values_to_be_in_set(
+            "date", value_set=["2020-01-02"]
+        ).success
+        == False
+    )
 
 
 def test_sampling_method__random(
@@ -600,8 +607,9 @@ def test_sampling_method__mod(
             }
         )
     )
-
-    assert len(batch_data.head(fetch_all=True)) == 12
+    execution_engine.load_batch_data("__", batch_data)
+    validator = Validator(execution_engine)
+    assert len(validator.head(fetch_all=True)) == 12
 
 
 def test_sampling_method__a_list(
@@ -624,8 +632,9 @@ def test_sampling_method__a_list(
             }
         )
     )
-
-    assert len(batch_data.head(fetch_all=True)) == 4
+    execution_engine.load_batch_data("__", batch_data)
+    validator = Validator(execution_engine)
+    assert len(validator.head(fetch_all=True)) == 4
 
 
 def test_sampling_method__md5(
@@ -667,8 +676,9 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
             }
         )
     )
-
-    assert len(batch_data.head(fetch_all=True)) == 12
+    execution_engine.load_batch_data("__", batch_data)
+    validator = Validator(execution_engine)
+    assert len(validator.head(fetch_all=True)) == 12
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=BatchSpec(
@@ -678,8 +688,9 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
             }
         )
     )
-
-    assert len(batch_data.head(fetch_all=True)) == 120
+    execution_engine.load_batch_data("__", batch_data)
+    validator = Validator(execution_engine)
+    assert len(validator.head(fetch_all=True)) == 120
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=BatchSpec(
@@ -692,7 +703,9 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
         )
     )
 
-    assert len(batch_data.head(fetch_all=True)) == 120
+    execution_engine.load_batch_data("__", batch_data)
+    validator = Validator(execution_engine)
+    assert len(validator.head(fetch_all=True)) == 120
 
 
 def test_default_behavior_with_no_splitter(
@@ -746,7 +759,7 @@ def test_default_behavior_with_no_splitter(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request={"partition_identifiers": {}},
+                partition_request={"batch_identifiers": {}},
             )
         )
     )
@@ -807,7 +820,7 @@ def test_behavior_with_whole_table_splitter(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request={"partition_identifiers": {}},
+                partition_request={"batch_identifiers": {}},
             )
         )
     )
