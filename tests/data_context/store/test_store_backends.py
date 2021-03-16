@@ -112,14 +112,14 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     )
 
     tuple_filesystem_store_backend = TupleFilesystemStoreBackend(
-        root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        root_directory=os.path.abspath(path),
+        base_directory=project_path,
+        # filepath_template="my_file_{0}",
     )
     # Check that store_backend_id is created on instantiation, before being accessed
     desired_directory_tree_str = """\
 test_StoreBackend_id_initialization__dir0/
-    dummy_str/
-        .ge_store_backend_id
+    .ge_store_backend_id
 """
     assert gen_directory_tree_str(project_path) == desired_directory_tree_str
     check_store_backend_store_backend_id_functionality(
@@ -132,7 +132,7 @@ test_StoreBackend_id_initialization__dir0/
         tmp_path_factory.mktemp("test_StoreBackend_id_initialization__dir")
     )
     tuple_filesystem_store_backend_with_filepath_template = TupleFilesystemStoreBackend(
-        root_directory=os.path.join(project_path, path),
+        root_directory=os.path.abspath(path),
         base_directory=project_path_with_filepath_template,
         filepath_template="my_file_{0}",
     )
@@ -149,8 +149,8 @@ test_StoreBackend_id_initialization__dir1/
 
     # Create a new store with the same config and make sure it reports the same store_backend_id
     tuple_filesystem_store_backend_duplicate = TupleFilesystemStoreBackend(
-        root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        root_directory=os.path.abspath(path),
+        base_directory=project_path,
         # filepath_template="my_file_{0}",
     )
     check_store_backend_store_backend_id_functionality(
@@ -309,8 +309,8 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
 
     with pytest.raises(StoreBackendError) as e:
         TupleFilesystemStoreBackend(
-            root_directory=project_path,
-            base_directory=os.path.join(project_path, path),
+            root_directory=os.path.abspath(path),
+            base_directory=project_path,
             filepath_prefix="invalid_prefix_ends_with\\",
         )
     assert "filepath_prefix may not end with" in e.value.message
@@ -325,8 +325,8 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("my_dir"))
 
     my_store = TupleFilesystemStoreBackend(
-        root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        root_directory=os.path.abspath(path),
+        base_directory=project_path,
         filepath_template="{0}/{1}/{2}/foo-{2}-expectations.txt",
     )
 
@@ -350,8 +350,8 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
     base_public_path = "http://www.test.com/"
 
     my_store = TupleFilesystemStoreBackend(
-        root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        root_directory=os.path.abspath(path),
+        base_directory=project_path,
         filepath_template="my_file_{0}",
     )
 
@@ -369,10 +369,9 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
         gen_directory_tree_str(project_path)
         == """\
 test_TupleFilesystemStoreBackend__dir0/
-    dummy_str/
-        .ge_store_backend_id
-        my_file_AAA
-        my_file_BBB
+    .ge_store_backend_id
+    my_file_AAA
+    my_file_BBB
 """
     )
     my_store.remove_key(("BBB",))
@@ -380,8 +379,8 @@ test_TupleFilesystemStoreBackend__dir0/
         assert my_store.get(("BBB",)) == ""
 
     my_store_with_base_public_path = TupleFilesystemStoreBackend(
-        root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        root_directory=os.path.abspath(path),
+        base_directory=project_path,
         filepath_template="my_file_{0}",
         base_public_path=base_public_path,
     )
@@ -404,7 +403,7 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
         f.write("")
     assert os.path.isfile(nb_file)
     my_store = TupleFilesystemStoreBackend(
-        root_directory=os.path.join(project_path, "dummy_str"),
+        root_directory=os.path.abspath("dummy_str"),
         base_directory=project_path,
     )
 
