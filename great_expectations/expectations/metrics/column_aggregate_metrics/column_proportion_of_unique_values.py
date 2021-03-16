@@ -68,4 +68,10 @@ class ColumnUniqueProportion(ColumnMetricProvider):
             "column_values.nonnull.unexpected_count": MetricConfiguration(
                 "column_values.nonnull.unexpected_count", metric.metric_domain_kwargs
             ),
+            "table.columns": MetricConfiguration(
+                metric_name="table.columns",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+                metric_value_kwargs=None,
+                metric_dependencies=None,
+            ),
         }

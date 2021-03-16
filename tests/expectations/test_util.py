@@ -2,8 +2,10 @@ import pytest
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 @pytest.fixture(scope="module")
@@ -247,3 +249,35 @@ def test_prescriptive_renderer_with_decorator(
         runtime_configuration=runtime_configuration_with_missing,
     )
     assert len(res) == 2
+
+
+def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, dict]:
+    resolved_metrics: dict = {}
+
+    results: dict
+
+    table_column_types_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="table.column_types",
+        metric_domain_kwargs=dict(),
+        metric_value_kwargs={
+            "include_nested": True,
+        },
+        metric_dependencies=None,
+    )
+    results = engine.resolve_metrics(metrics_to_resolve=(table_column_types_metric,))
+    resolved_metrics.update(results)
+
+    table_columns_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="table.columns",
+        metric_domain_kwargs=dict(),
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "table.column_types": table_column_types_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
+    )
+    resolved_metrics.update(results)
+
+    return table_columns_metric, resolved_metrics

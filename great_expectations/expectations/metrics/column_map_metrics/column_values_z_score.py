@@ -105,26 +105,43 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
     ):
         """Returns a dictionary of given metric names and their corresponding configuration, specifying the metric
         types and their respective domains"""
-        if metric.metric_name == "column_values.z_score.under_threshold.condition":
-            return {
-                "column_values.z_score.map": MetricConfiguration(
-                    "column_values.z_score.map", metric.metric_domain_kwargs
-                )
-            }
-
-        if metric.metric_name == "column_values.z_score.map":
-            return {
-                "column.mean": MetricConfiguration(
-                    "column.mean", metric.metric_domain_kwargs
-                ),
-                "column.standard_deviation": MetricConfiguration(
-                    "column.standard_deviation", metric.metric_domain_kwargs
-                ),
-            }
-
-        return super()._get_evaluation_dependencies(
+        dependencies = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
+
+        if metric.metric_name == "column_values.z_score.under_threshold.condition":
+            dependencies.update(
+                {
+                    "column_values.z_score.map": MetricConfiguration(
+                        "column_values.z_score.map", metric.metric_domain_kwargs
+                    ),
+                }
+            )
+
+        if metric.metric_name == "column_values.z_score.map":
+            dependencies.update(
+                {
+                    "column.mean": MetricConfiguration(
+                        "column.mean", metric.metric_domain_kwargs
+                    ),
+                    "column.standard_deviation": MetricConfiguration(
+                        "column.standard_deviation", metric.metric_domain_kwargs
+                    ),
+                }
+            )
+
+        dependencies.update(
+            {
+                "table.columns": MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                    metric_dependencies=None,
+                ),
+            }
+        )
+
+        return dependencies

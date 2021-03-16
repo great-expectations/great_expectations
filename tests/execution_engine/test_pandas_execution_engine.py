@@ -25,6 +25,7 @@ from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
+from tests.expectations.test_util import get_table_columns_metric
 
 
 def test_reader_fn():
@@ -208,18 +209,36 @@ def test_resolve_metric_bundle():
 
     # Building engine and configurations in attempt to resolve metrics
     engine = PandasExecutionEngine(batch_data_dict={"made-up-id": df})
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
     mean = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     desired_metrics = (mean, stdev)
-    metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+    results = engine.resolve_metrics(
+        metrics_to_resolve=desired_metrics, metrics=metrics
+    )
+    metrics.update(results)
 
     # Ensuring metrics have been properly resolved
     assert (

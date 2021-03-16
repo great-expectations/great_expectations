@@ -115,7 +115,6 @@ class CLI(click.MultiCommand):
     default=False,
     help="Set great_expectations to use verbose output.",
 )
-# TODO: <Alex>ALEX -- Update this --help page to fit with the new design.</Alex>
 @click.option(
     "--config",
     "-c",

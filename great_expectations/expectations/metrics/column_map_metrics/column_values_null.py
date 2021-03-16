@@ -62,8 +62,31 @@ class ColumnValuesNullCount(MetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        return {
-            "column_values.nonnull.unexpected_count": MetricConfiguration(
-                "column_values.nonnull.unexpected_count", metric.metric_domain_kwargs
-            ),
-        }
+        dependencies = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
+        dependencies.update(
+            {
+                "column_values.nonnull.unexpected_count": MetricConfiguration(
+                    "column_values.nonnull.unexpected_count",
+                    metric.metric_domain_kwargs,
+                ),
+            }
+        )
+
+        dependencies.update(
+            {
+                "table.columns": MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                    metric_dependencies=None,
+                ),
+            }
+        )
+
+        return dependencies

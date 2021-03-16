@@ -90,6 +90,12 @@ class ColumnPartition(ColumnMetricProvider):
                 "column.max": MetricConfiguration(
                     "column.max", metric.metric_domain_kwargs
                 ),
+                "table.columns": MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                    metric_dependencies=None,
+                ),
             }
         elif bins in ["ntile", "quantile", "percentile"]:
             return {
@@ -102,7 +108,13 @@ class ColumnPartition(ColumnMetricProvider):
                         ).tolist(),
                         "allow_relative_error": allow_relative_error,
                     },
-                )
+                ),
+                "table.columns": MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                    metric_dependencies=None,
+                ),
             }
         elif bins == "auto":
             return {
@@ -117,6 +129,12 @@ class ColumnPartition(ColumnMetricProvider):
                         "quantiles": (0.0, 0.25, 0.75, 1.0),
                         "allow_relative_error": allow_relative_error,
                     },
+                ),
+                "table.columns": MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs=metric.metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                    metric_dependencies=None,
                 ),
             }
         else:

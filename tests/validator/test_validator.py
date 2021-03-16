@@ -23,7 +23,7 @@ from great_expectations.validator.validator import Validator
 
 def test_parse_validation_graph():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
@@ -32,11 +32,13 @@ def test_parse_validation_graph():
             "double_sided": True,
         },
     )
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
+    # noinspection PyUnusedLocal
+    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
+    # noinspection PyUnusedLocal
     batch = Batch(data=df)
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
-    for configuration in [expectationConfiguration]:
+    for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
         )
@@ -51,14 +53,13 @@ def test_parse_validation_graph():
     ready_metrics, needed_metrics = Validator(engine)._parse_validation_graph(
         validation_graph=graph, metrics=dict()
     )
-
-    assert len(ready_metrics) == 4 and len(needed_metrics) == 5
+    assert len(ready_metrics) == 3 and len(needed_metrics) == 10
 
 
 # Should be passing tests even if given incorrect MetricProvider data
 def test_parse_validation_graph_with_bad_metrics_args():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
@@ -70,7 +71,7 @@ def test_parse_validation_graph_with_bad_metrics_args():
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
     validator = Validator(execution_engine=engine)
-    for configuration in [expectationConfiguration]:
+    for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
         )
@@ -88,12 +89,12 @@ def test_parse_validation_graph_with_bad_metrics_args():
     ready_metrics, needed_metrics = validator._parse_validation_graph(
         validation_graph=graph, metrics=("nonexistent", "NONE")
     )
-    assert len(ready_metrics) == 4 and len(needed_metrics) == 5
+    assert len(ready_metrics) == 3 and len(needed_metrics) == 10
 
 
 def test_populate_dependencies():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
@@ -102,11 +103,13 @@ def test_populate_dependencies():
             "double_sided": True,
         },
     )
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
+    # noinspection PyUnusedLocal
+    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
+    # noinspection PyUnusedLocal
     batch = Batch(data=df)
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
-    for configuration in [expectationConfiguration]:
+    for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
         )
@@ -121,12 +124,12 @@ def test_populate_dependencies():
             Validator(execution_engine=engine).build_metric_dependency_graph(
                 graph, metric_configuration, configuration, execution_engine=engine
             )
-    assert len(graph.edges) == 10
+    assert len(graph.edges) == 19
 
 
 def test_populate_dependencies_with_incorrect_metric_name():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
@@ -135,11 +138,13 @@ def test_populate_dependencies_with_incorrect_metric_name():
             "double_sided": True,
         },
     )
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
+    # noinspection PyUnusedLocal
+    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
+    # noinspection PyUnusedLocal
     batch = Batch(data=df)
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
-    for configuration in [expectationConfiguration]:
+    for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
         )
