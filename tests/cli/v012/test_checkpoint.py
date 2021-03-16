@@ -256,7 +256,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "A checkpoint named `passengers` was added to your project" in stdout
+    assert "A Checkpoint named `passengers` was added to your project" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -357,7 +357,7 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "A checkpoint named `passengers` was added to your project" in stdout
+    assert "A Checkpoint named `passengers` was added to your project" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
