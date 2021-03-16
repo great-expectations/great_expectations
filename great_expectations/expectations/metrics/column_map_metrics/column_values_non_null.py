@@ -77,15 +77,16 @@ class ColumnValuesNonNullCount(MetricProvider):
             }
         )
 
-        dependencies.update(
-            {
-                "table.columns": MetricConfiguration(
-                    metric_name="table.columns",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                    metric_dependencies=None,
-                ),
-            }
-        )
+        metric_domain_kwargs: dict = metric.metric_domain_kwargs
+        if "table.columns" not in dependencies:
+            if "column" in metric.metric_domain_kwargs:
+                metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
+                metric_domain_kwargs.pop("column")
+            dependencies["table.columns"] = MetricConfiguration(
+                metric_name="table.columns",
+                metric_domain_kwargs=metric_domain_kwargs,
+                metric_value_kwargs=None,
+                metric_dependencies=None,
+            )
 
         return dependencies
