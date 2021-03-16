@@ -177,6 +177,7 @@ class ProfilerTypeMapping:
         "TimestampType",
         "datetime64",
         "Timestamp",
+        "datetime64[ns]",
     ]
 
 

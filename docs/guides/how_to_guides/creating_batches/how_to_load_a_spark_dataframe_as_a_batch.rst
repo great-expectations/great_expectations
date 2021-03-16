@@ -8,7 +8,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -82,7 +82,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
 
         What used to be called a “batch” in the old API was replaced with a :ref:`Validator <reference__core_concepts__validation>`. A Validator knows how to validate a particular batch of data on a particular :ref:`Execution Engine <reference__core_concepts>` against a particular :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
@@ -149,8 +149,6 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
             Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``runtime_keys`` to define which keys are allowed.
 
-            NOTE: for now, ``data_asset_name`` can only be set to this predefined string: ``“IN_MEMORY_DATA_ASSET”``. We will fix it very soon and will allow you to specify your own name.
-
             .. code-block:: python
 
                 from great_expectations.core.batch import BatchRequest
@@ -158,10 +156,10 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
                 batch_request = BatchRequest(
                     datasource_name="insert_your_spark_datasource_name_here",
                     data_connector_name="insert_your_runtime_data_connector_name_here",
+                    data_asset_name="insert_your_data_asset_name_here",
                     batch_data=insert_your_dataframe_here,
-                    data_asset_name="IN_MEMORY_DATA_ASSET",
                     partition_request={
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
                             "some_other_key_maybe_run_id": "run 18"
                         }

@@ -4,10 +4,22 @@
 Changelog
 #########
 
-
 Develop
 -----------------
+* [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
 
+0.13.13
+-----------------
+* [ENHANCEMENT] Improve support for median calculation in Athena (Thanks @kuhnen!) #2521
+* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfiler #2519
+* [MAINTENANCE] Add support for spark 3 based spark_config #2481
+
+0.13.12
+-----------------
+
+* [FEATURE] Added EmailAction as a new Validation Action (Thanks @Cedric-Magnan!) #2479
+* [ENHANCEMENT] CLI global options and checkpoint functionality for v3 api #2497
+* [DOCS] Renamed the "old" and the "new" APIs to "V2 (Batch Kwargs) API" and "V3 (Batch Request) API" and added an article with recommendations for choosing between them
 
 0.13.11
 -----------------
