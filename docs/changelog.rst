@@ -7,6 +7,7 @@ Changelog
 Develop
 -----------------
 * [BREAKING] Remove autosave of Checkpoints in test_yaml_config
+* [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
 
 0.13.13
 -----------------
