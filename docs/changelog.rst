@@ -4,10 +4,19 @@
 Changelog
 #########
 
-Develop
+develop
+-----------------
+
+0.13.14
 -----------------
 * [BREAKING] Remove autosave of Checkpoints in test_yaml_config
 * [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
+* [ENHANCEMENT] Restore cli functionality for legacy checkpoints #2511
+* [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend #2513 (thanks @benoitLebreton-perso)
+* [BUGFIX] force azure to set content_type='text/html' if the file is HTML #2539 (thanks @benoitLebreton-perso)
+* [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 in requirements-dev-sqlalchemy.txt #2547
+* [DOCS] Fix documentation links generated within template #2542 (thanks @thejasraju)
+* [MAINTENANCE] Remove deprecated automerge config #2492
 
 0.13.13
 -----------------

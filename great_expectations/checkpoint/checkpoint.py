@@ -558,7 +558,12 @@ class LegacyCheckpoint(Checkpoint):
     ):
         batches_to_validate = self._get_batches_to_validate(self.batches)
 
-        if self.validation_operator_name:
+        if (
+            self.validation_operator_name
+            and self.data_context.validation_operators.get(
+                self.validation_operator_name
+            )
+        ):
             results = self.data_context.run_validation_operator(
                 self.validation_operator_name,
                 assets_to_validate=batches_to_validate,
@@ -570,6 +575,11 @@ class LegacyCheckpoint(Checkpoint):
                 **kwargs,
             )
         else:
+            if self.validation_operator_name:
+                logger.warning(
+                    f'Could not find Validation Operator "{self.validation_operator_name}" when '
+                    f'running Checkpoint "{self.name}". Using default action_list_operator.'
+                )
             results = self._run_default_validation_operator(
                 assets_to_validate=batches_to_validate,
                 run_id=run_id,
