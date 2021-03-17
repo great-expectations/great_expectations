@@ -1,6 +1,5 @@
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics import ColumnMax, ColumnValuesNonNull
@@ -24,7 +23,9 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     assert dependencies == dict()
 
 
-def test_get_aggregate_count_aware_metric_dependencies(spark_session):
+def test_get_aggregate_count_aware_metric_dependencies(
+    spark_session, basic_spark_df_execution_engine
+):
     mp = ColumnValuesNonNull()
     metric = MetricConfiguration(
         "column_values.nonnull.unexpected_count", dict(), dict()
@@ -40,7 +41,7 @@ def test_get_aggregate_count_aware_metric_dependencies(spark_session):
         "column_values.nonnull.unexpected_count", dict(), dict()
     )
     dependencies = mp.get_evaluation_dependencies(
-        metric, execution_engine=SparkDFExecutionEngine()
+        metric, execution_engine=basic_spark_df_execution_engine
     )
     assert (
         dependencies["metric_partial_fn"].id[0]

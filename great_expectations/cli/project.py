@@ -4,10 +4,10 @@ import click
 
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
+from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.cli.toolkit import load_data_context_with_error_handling
-from great_expectations.cli.util import cli_message
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
 
@@ -18,18 +18,16 @@ def project():
 
 
 @project.command(name="check-config")
-@click.option(
-    "--directory",
-    "-d",
-    default="./great_expectations",
-    help="The project's great_expectations directory.",
-)
-def project_check_config(directory):
+@click.pass_context
+def project_check_config(ctx):
     """Check a config for validity and help with migrations."""
     cli_message("Checking your config files for validity...\n")
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
     is_config_ok, error_message, context = do_config_check(directory)
     if context:
-        send_usage_message(
+        toolkit.send_usage_message(
             data_context=context, event="cli.project.check_config", success=True
         )
     if not is_config_ok:
@@ -41,16 +39,14 @@ def project_check_config(directory):
 
 
 @project.command(name="upgrade")
-@click.option(
-    "--directory",
-    "-d",
-    default="./great_expectations",
-    help="The project's great_expectations directory.",
-)
-def project_upgrade(directory):
+@click.pass_context
+def project_upgrade(ctx):
     """Upgrade a project after installing the next Great Expectations major version."""
     cli_message("\nChecking project...")
     cli_message(SECTION_SEPARATOR)
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
     if load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=True
     ):

@@ -12,6 +12,7 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.exceptions import exceptions as ge_exceptions
 
 from ..exceptions import (
@@ -141,30 +142,23 @@ class SparkDFExecutionEngine(ExecutionEngine):
         "reader_options",
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, persist=True, spark_config=None, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
-        self._persist = kwargs.pop("persist", True)
-        self._spark_config = kwargs.pop("spark_config", {})
-        try:
-            builder = SparkSession.builder
-            app_name: Optional[str] = self._spark_config.pop("spark.app.name", None)
-            if app_name:
-                builder.appName(app_name)
-            for k, v in self._spark_config.items():
-                builder.config(k, v)
-            self.spark = builder.getOrCreate()
-        except AttributeError:
-            logger.error(
-                "Unable to load spark context; install optional spark dependency for support."
-            )
-            self.spark = None
+        self._persist = persist
+
+        if spark_config is None:
+            spark_config = {}
+
+        spark: SparkSession = get_or_create_spark_application(spark_config=spark_config)
+        self.spark = spark
+        self._spark_config = spark_config
 
         super().__init__(*args, **kwargs)
 
         self._config.update(
             {
                 "persist": self._persist,
-                "spark_config": self._spark_config,
+                "spark_config": spark_config,
             }
         )
 
@@ -504,7 +498,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 Returns:
                     A dictionary of the collected metrics over their respective domains
         """
-
         resolved_metrics = dict()
         aggregates: Dict[Tuple, dict] = dict()
         for (
