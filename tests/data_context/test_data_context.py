@@ -2055,3 +2055,40 @@ profilers: []
 
     assert checkpoint_name in context.list_checkpoints()
     assert len(context.list_checkpoints()) == 1
+
+
+def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(empty_data_context):
+    """
+    What does this test and why?
+    Checkpoint yaml should have a valid class_name
+    """
+
+    context: DataContext = empty_data_context
+    checkpoint_name: str = "my_new_checkpoint"
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_yaml_config = f"""
+name: {checkpoint_name}
+config_version: 1.0
+class_name: NotAValidCheckpointClassName
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+    """
+
+    with pytest.raises(KeyError):
+        context.test_yaml_config(checkpoint_yaml_config, name=checkpoint_name)
+
+    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError):
+        context.add_checkpoint(name=checkpoint_name, yaml_config=checkpoint_yaml_config)
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
