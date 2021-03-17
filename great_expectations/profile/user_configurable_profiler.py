@@ -236,22 +236,20 @@ class UserConfigurableProfiler:
                 self.profile_dataset, self.primary_or_compound_key
             )
 
-        for column_name, column_info in self.column_info.items():
-            semantic_types = column_info.get("semantic_types")
-            for semantic_type in semantic_types:
-                semantic_type_fn = self.semantic_type_functions.get(semantic_type)
-                semantic_type_fn(
-                    profile_dataset=self.profile_dataset, column=column_name
-                )
-
         with tqdm(
             desc="Profiling Columns", total=len(self.column_info), delay=5
         ) as pbar:
-            for column_name in self.column_info.keys():
+            for column_name, column_info in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
-                self._build_expectations_for_all_column_types(
-                    self.profile_dataset, column_name
-                )
+                semantic_types = column_info.get("semantic_types")
+                for semantic_type in semantic_types:
+                    semantic_type_fn = self.semantic_type_functions.get(semantic_type)
+                    semantic_type_fn(
+                        profile_dataset=self.profile_dataset, column=column_name
+                    )
+                    self._build_expectations_for_all_column_types(
+                        self.profile_dataset, column_name
+                    )
                 pbar.update()
 
         expectation_suite = self._build_column_description_metadata(
