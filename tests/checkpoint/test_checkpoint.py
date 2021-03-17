@@ -122,7 +122,9 @@ def test_basic_checkpoint_config_validation(
     )
 
     assert len(empty_data_context.list_checkpoints()) == 0
-    empty_data_context.add_checkpoint(**yaml.load(yaml_config_erroneous))
+    empty_data_context.add_checkpoint(
+        name="my_erroneous_checkpoint", yaml_config=yaml_config_erroneous
+    )
     assert len(empty_data_context.list_checkpoints()) == 1
 
     yaml_config: str = f"""
@@ -198,7 +200,7 @@ def test_basic_checkpoint_config_validation(
     )
 
     assert len(empty_data_context.list_checkpoints()) == 1
-    empty_data_context.add_checkpoint(**yaml.load(yaml_config))
+    empty_data_context.add_checkpoint(name="my_checkpoint", yaml_config=yaml_config)
     assert len(empty_data_context.list_checkpoints()) == 2
 
     empty_data_context.create_expectation_suite(
@@ -322,7 +324,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     )
 
     assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
+    data_context.add_checkpoint(name="my_fancy_checkpoint", yaml_config=yaml_config)
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
@@ -450,7 +452,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     )
 
     assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
+    data_context.add_checkpoint(name="my_fancy_checkpoint", yaml_config=yaml_config)
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
@@ -542,7 +544,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     )
 
     assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
+    data_context.add_checkpoint(name="airflow_checkpoint", yaml_config=yaml_config)
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
@@ -691,7 +693,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     )
 
     assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
+    data_context.add_checkpoint(name="airflow_users_node_3", yaml_config=yaml_config)
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.warning")
@@ -788,7 +790,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
 
     assert len(data_context.list_checkpoints()) == 0
-    data_context.add_checkpoint(**yaml.load(yaml_config))
+    data_context.add_checkpoint(name="my_base_checkpoint", yaml_config=yaml_config)
     assert len(data_context.list_checkpoints()) == 1
 
     with pytest.raises(
@@ -902,7 +904,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     )
 
     assert len(data_context.list_checkpoints()) == 1
-    data_context.add_checkpoint(**yaml.load(yaml_config))
+    data_context.add_checkpoint(name="my_fancy_checkpoint", yaml_config=yaml_config)
     assert len(data_context.list_checkpoints()) == 2
 
     result: CheckpointResult = data_context.run_checkpoint(

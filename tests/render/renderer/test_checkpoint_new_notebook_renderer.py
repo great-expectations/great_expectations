@@ -115,7 +115,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\n\nyaml = YAML()\ncontext = ge.get_context()",
+            "source": "import great_expectations as ge\n\ncontext = ge.get_context()",
             "outputs": [],
         },
     ]
@@ -228,7 +228,7 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": f"context.add_checkpoint(**yaml.load(my_checkpoint_name_config))",
+            "source": f"context.add_checkpoint(name=my_checkpoint_name, yaml_config=my_checkpoint_name_config)",
             "outputs": [],
         },
     ]

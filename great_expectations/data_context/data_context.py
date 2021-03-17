@@ -845,6 +845,40 @@ class BaseDataContext:
         else:
             return {}
 
+    def get_config_with_variables_substituted_from_yaml_str(self, yaml_config: str):
+        """
+        Substitute config variables into an arbitrary yaml config
+        Args:
+            yaml_config: yaml config as a string
+
+        Returns:
+            CommentedMap containing config with variables substituted
+        """
+
+        substituted_config_variables: Union[
+            DataContextConfig, dict
+        ] = substitute_all_config_variables(
+            self.config_variables,
+            dict(os.environ),
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        substitutions: dict = {
+            **substituted_config_variables,
+            **dict(os.environ),
+            **self.runtime_environment,
+        }
+
+        config_dict_with_substituted_variables: dict = substitute_all_config_variables(
+            yaml_config,
+            substitutions,
+            self.DOLLAR_SIGN_ESCAPE_STRING,
+        )
+
+        config: CommentedMap = yaml.load(config_dict_with_substituted_variables)
+
+        return config
+
     def get_config_with_variables_substituted(self, config=None) -> DataContextConfig:
 
         if not config:
@@ -2778,6 +2812,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def add_checkpoint(
         self,
         name: str,
+        yaml_config: Optional[str] = None,
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
@@ -2799,30 +2834,69 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
+
         checkpoint_config: Union[CheckpointConfig, dict]
-        checkpoint_config = {
-            "name": name,
-            "config_version": config_version,
-            "template_name": template_name,
-            "module_name": module_name,
-            "class_name": class_name,
-            "run_name_template": run_name_template,
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "profilers": profilers,
-            # Next two fields are for LegacyCheckpoint configuration
-            "validation_operator_name": validation_operator_name,
-            "batches": batches,
-            # the following four keys are used by SimpleCheckpoint
-            "site_names": site_names,
-            "slack_webhook": slack_webhook,
-            "notify_on": notify_on,
-            "notify_with": notify_with,
-        }
+
+        if yaml_config is not None:
+
+            config = self.get_config_with_variables_substituted_from_yaml_str(
+                yaml_config=yaml_config
+            )
+
+            if "class_name" in config:
+                class_name = config["class_name"]
+                if class_name == "Checkpoint":
+                    checkpoint_class = Checkpoint
+                elif class_name == "SimpleCheckpoint":
+                    checkpoint_class = SimpleCheckpoint
+                else:
+                    raise ge_exceptions.InvalidCheckpointConfigError(
+                        message="Please make sure your configuration contains a supported class_name (Checkpoint or SimpleCheckpoint)."
+                    )
+
+            checkpoint_name: str = name
+            checkpoint_config = CheckpointConfig.from_commented_map(
+                commented_map=config
+            )
+            checkpoint_config = checkpoint_config.to_json_dict()
+            # Insert user supplied checkpoint_name in add_checkpoint, overwrites name from yaml
+            checkpoint_config.update({"name": checkpoint_name})
+
+            instantiated_class = checkpoint_class(
+                data_context=self, **checkpoint_config
+            )
+
+            checkpoint_config = CheckpointConfig.from_commented_map(
+                commented_map=instantiated_class.config.commented_map
+            )
+            checkpoint_config = checkpoint_config.to_json_dict()
+
+        else:
+
+            checkpoint_config = {
+                "name": name,
+                "config_version": config_version,
+                "template_name": template_name,
+                "module_name": module_name,
+                "class_name": class_name,
+                "run_name_template": run_name_template,
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request,
+                "action_list": action_list,
+                "evaluation_parameters": evaluation_parameters,
+                "runtime_configuration": runtime_configuration,
+                "validations": validations,
+                "profilers": profilers,
+                # Next two fields are for LegacyCheckpoint configuration
+                "validation_operator_name": validation_operator_name,
+                "batches": batches,
+                # the following four keys are used by SimpleCheckpoint
+                "site_names": site_names,
+                "slack_webhook": slack_webhook,
+                "notify_on": notify_on,
+                "notify_with": notify_with,
+            }
+
         checkpoint_config = filter_properties_dict(properties=checkpoint_config)
         new_checkpoint: Union[
             Checkpoint, LegacyCheckpoint

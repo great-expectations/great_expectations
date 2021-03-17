@@ -45,9 +45,8 @@ Use this notebook to configure a new Checkpoint and add it to your project:
 
     def _add_imports(self):
         self.add_code_cell(
-            """from ruamel.yaml import YAML
-import great_expectations as ge
-yaml = YAML()
+            """import great_expectations as ge
+
 context = ge.get_context()
 """,
             lint=True,
@@ -170,7 +169,7 @@ You can run the following cell to print out the full yaml configuration. For exa
 Run the following cell to save this Checkpoint to your Checkpoint Store."""
         )
         self.add_code_cell(
-            f"context.add_checkpoint(**yaml.load({self.checkpoint_name}_config))",
+            f"context.add_checkpoint(name=my_checkpoint_name, yaml_config={self.checkpoint_name}_config)",
             lint=True,
         )
 
