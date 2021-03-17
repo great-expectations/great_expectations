@@ -481,8 +481,11 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         Handle list as well as single document
         """
         if isinstance(document, list):
+            # We need to keep this as super(DefaultMarkdownPageView, self); otherwise a wrong render will be called.
             return [
-                super().render(document=d, template=template, **kwargs)
+                super(DefaultMarkdownPageView, self).render(
+                    document=d, template=template, **kwargs
+                )
                 for d in document
             ]
 

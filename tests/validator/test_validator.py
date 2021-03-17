@@ -53,7 +53,7 @@ def test_parse_validation_graph():
     ready_metrics, needed_metrics = Validator(engine)._parse_validation_graph(
         validation_graph=graph, metrics=dict()
     )
-    assert len(ready_metrics) == 3 and len(needed_metrics) == 10
+    assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
 # Should be passing tests even if given incorrect MetricProvider data
@@ -89,7 +89,7 @@ def test_parse_validation_graph_with_bad_metrics_args():
     ready_metrics, needed_metrics = validator._parse_validation_graph(
         validation_graph=graph, metrics=("nonexistent", "NONE")
     )
-    assert len(ready_metrics) == 3 and len(needed_metrics) == 10
+    assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
 def test_populate_dependencies():
@@ -124,7 +124,7 @@ def test_populate_dependencies():
             Validator(execution_engine=engine).build_metric_dependency_graph(
                 graph, metric_configuration, configuration, execution_engine=engine
             )
-    assert len(graph.edges) == 19
+    assert len(graph.edges) == 17
 
 
 def test_populate_dependencies_with_incorrect_metric_name():
