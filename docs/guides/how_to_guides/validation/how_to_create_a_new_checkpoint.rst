@@ -116,10 +116,10 @@ Steps
 
         .. code-block:: python
 
-            from ruamel.yaml import YAML
-            yaml = YAML()
-
-            context.add_checkpoint(**yaml.load(config))
+            context.add_checkpoint(
+                name="my_checkpoint",
+                yaml_config=config,
+            )
 
         5. **Check your stored Checkpoint config.**
 
