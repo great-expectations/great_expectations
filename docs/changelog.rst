@@ -10,7 +10,8 @@ Changelog
 * [ENHANCEMENT] Restore cli functionality for legacy checkpoints #2511
 * [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend #2513
 * [BUGFIX] force azure to set content_type='text/html' if the file is HTML #2539
-* [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 #2547
+* [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 in requirements-dev-sqlalchemy.txt #2547
+* [BUGFIX] Pinning sqlalchemy < 1.4 in requirements.txt #2553
 * [DOCS] Fix documentation links generated within template #2542
 * [MAINTENANCE] Remove deprecated automerge config #2492
 
