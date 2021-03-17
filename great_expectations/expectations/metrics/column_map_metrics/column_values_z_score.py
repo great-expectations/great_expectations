@@ -1,4 +1,3 @@
-import copy
 from typing import Optional
 
 import pandas as pd
@@ -9,6 +8,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -114,50 +114,19 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
         )
 
         if metric.metric_name == "column_values.z_score.under_threshold.condition":
-            dependencies.update(
-                {
-                    "column_values.z_score.map": MetricConfiguration(
-                        "column_values.z_score.map", metric.metric_domain_kwargs
-                    ),
-                }
+            dependencies["column_values.z_score.map"] = MetricConfiguration(
+                metric_name="column_values.z_score.map",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
             )
 
         if metric.metric_name == "column_values.z_score.map":
-            dependencies.update(
-                {
-                    "column.mean": MetricConfiguration(
-                        "column.mean", metric.metric_domain_kwargs
-                    ),
-                    "column.standard_deviation": MetricConfiguration(
-                        "column.standard_deviation", metric.metric_domain_kwargs
-                    ),
-                }
+            dependencies["column.mean"] = MetricConfiguration(
+                metric_name="column.mean",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
             )
-
-        metric_domain_kwargs: dict = metric.metric_domain_kwargs
-
-        if "column" in metric.metric_domain_kwargs:
-            metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
-            metric_domain_kwargs.pop("column")
-
-        dependencies.update(
-            {
-                "table.columns": MetricConfiguration(
-                    metric_name="table.columns",
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                    metric_dependencies={
-                        "table.column_types": MetricConfiguration(
-                            metric_name="table.column_types",
-                            metric_domain_kwargs=metric.metric_domain_kwargs,
-                            metric_value_kwargs={
-                                "include_nested": True,
-                            },
-                            metric_dependencies=None,
-                        ),
-                    },
-                )
-            }
-        )
+            dependencies["column.standard_deviation"] = MetricConfiguration(
+                metric_name="column.standard_deviation",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
 
         return dependencies

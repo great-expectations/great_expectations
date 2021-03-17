@@ -8,6 +8,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -82,63 +83,48 @@ class ColumnPartition(ColumnMetricProvider):
         )
         allow_relative_error = metric.metric_value_kwargs["allow_relative_error"]
 
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
         if bins == "uniform":
-            return {
-                "column.min": MetricConfiguration(
-                    "column.min", metric.metric_domain_kwargs
-                ),
-                "column.max": MetricConfiguration(
-                    "column.max", metric.metric_domain_kwargs
-                ),
-                "table.columns": MetricConfiguration(
-                    metric_name="table.columns",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                    metric_dependencies=None,
-                ),
-            }
+            dependencies["column.min"] = MetricConfiguration(
+                metric_name="column.min",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
+            dependencies["column.max"] = MetricConfiguration(
+                metric_name="column.max",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
         elif bins in ["ntile", "quantile", "percentile"]:
-            return {
-                "column.quantile_values": MetricConfiguration(
-                    "column.quantile_values",
-                    metric.metric_domain_kwargs,
-                    {
-                        "quantiles": np.linspace(
-                            start=0, stop=1, num=n_bins + 1
-                        ).tolist(),
-                        "allow_relative_error": allow_relative_error,
-                    },
-                ),
-                "table.columns": MetricConfiguration(
-                    metric_name="table.columns",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                    metric_dependencies=None,
-                ),
-            }
+            dependencies["column.quantile_values"] = MetricConfiguration(
+                metric_name="column.quantile_values",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+                metric_value_kwargs={
+                    "quantiles": np.linspace(start=0, stop=1, num=n_bins + 1).tolist(),
+                    "allow_relative_error": allow_relative_error,
+                },
+            )
         elif bins == "auto":
-            return {
-                "column_values.nonnull.count": MetricConfiguration(
-                    "column_values.nonnull.count",
-                    metric.metric_domain_kwargs,
-                ),
-                "column.quantile_values": MetricConfiguration(
-                    "column.quantile_values",
-                    metric.metric_domain_kwargs,
-                    {
-                        "quantiles": (0.0, 0.25, 0.75, 1.0),
-                        "allow_relative_error": allow_relative_error,
-                    },
-                ),
-                "table.columns": MetricConfiguration(
-                    metric_name="table.columns",
-                    metric_domain_kwargs=metric.metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                    metric_dependencies=None,
-                ),
-            }
+            dependencies["column_values.nonnull.count"] = MetricConfiguration(
+                metric_name="column_values.nonnull.count",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
+            dependencies["column.quantile_values"] = MetricConfiguration(
+                metric_name="column.quantile_values",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+                metric_value_kwargs={
+                    "quantiles": (0.0, 0.25, 0.75, 1.0),
+                    "allow_relative_error": allow_relative_error,
+                },
+            )
         else:
             raise ValueError("Invalid parameter for bins argument")
+
+        return dependencies
 
 
 def _get_column_partition_using_metrics(bins, n_bins, _metrics):

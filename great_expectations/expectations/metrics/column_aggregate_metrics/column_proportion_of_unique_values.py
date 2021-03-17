@@ -6,6 +6,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -55,23 +56,38 @@ class ColumnUniqueProportion(ColumnMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        table_domain_kwargs = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
+        table_domain_kwargs: dict = {
+            k: v
+            for k, v in metric.metric_domain_kwargs.items()
+            if k != MetricDomainTypes.COLUMN.value
         }
-        return {
-            "column.distinct_values.count": MetricConfiguration(
-                "column.distinct_values.count", metric.metric_domain_kwargs
-            ),
-            "table.row_count": MetricConfiguration(
-                "table.row_count", table_domain_kwargs
-            ),
-            "column_values.nonnull.unexpected_count": MetricConfiguration(
-                "column_values.nonnull.unexpected_count", metric.metric_domain_kwargs
-            ),
-            "table.columns": MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-                metric_value_kwargs=None,
-                metric_dependencies=None,
-            ),
-        }
+
+        dependencies["column.distinct_values.count"] = MetricConfiguration(
+            metric_name="column.distinct_values.count",
+            metric_domain_kwargs=metric.metric_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+
+        dependencies["column_values.nonnull.unexpected_count"] = MetricConfiguration(
+            metric_name="column_values.nonnull.unexpected_count",
+            metric_domain_kwargs=metric.metric_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+
+        return dependencies

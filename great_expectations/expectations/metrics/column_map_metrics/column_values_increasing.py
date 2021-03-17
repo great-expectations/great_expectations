@@ -1,4 +1,3 @@
-import copy
 from typing import Any, Dict, Optional, Tuple
 
 import pandas as pd
@@ -135,47 +134,23 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
+        table_domain_kwargs: dict = {
+            k: v
+            for k, v in metric.metric_domain_kwargs.items()
+            if k != MetricDomainTypes.COLUMN.value
+        }
+
         if (
             isinstance(execution_engine, SparkDFExecutionEngine)
             and metric.metric_name == "column_values.increasing.condition"
         ):
-            dependencies.update(
-                {
-                    "table.column_types": MetricConfiguration(
-                        metric_name="table.column_types",
-                        metric_domain_kwargs=metric.metric_domain_kwargs,
-                        metric_value_kwargs={
-                            "include_nested": True,
-                        },
-                        metric_dependencies=None,
-                    ),
-                }
+            dependencies["table.column_types"] = MetricConfiguration(
+                metric_name="table.column_types",
+                metric_domain_kwargs=table_domain_kwargs,
+                metric_value_kwargs={
+                    "include_nested": True,
+                },
+                metric_dependencies=None,
             )
-
-        metric_domain_kwargs: dict = metric.metric_domain_kwargs
-
-        if "column" in metric.metric_domain_kwargs:
-            metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
-            metric_domain_kwargs.pop("column")
-
-        dependencies.update(
-            {
-                "table.columns": MetricConfiguration(
-                    metric_name="table.columns",
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                    metric_dependencies={
-                        "table.column_types": MetricConfiguration(
-                            metric_name="table.column_types",
-                            metric_domain_kwargs=metric.metric_domain_kwargs,
-                            metric_value_kwargs={
-                                "include_nested": True,
-                            },
-                            metric_dependencies=None,
-                        ),
-                    },
-                )
-            }
-        )
 
         return dependencies

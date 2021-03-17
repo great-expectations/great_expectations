@@ -1,4 +1,3 @@
-import copy
 import logging
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, Type
@@ -253,31 +252,15 @@ class ColumnMetricProvider(TableMetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-
-        metric_domain_kwargs: dict = metric.metric_domain_kwargs
-
-        if "column" in metric.metric_domain_kwargs:
-            metric_domain_kwargs = copy.deepcopy(metric.metric_domain_kwargs)
-            metric_domain_kwargs.pop("column")
-
-        dependencies.update(
-            {
-                "table.columns": MetricConfiguration(
-                    metric_name="table.columns",
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                    metric_dependencies={
-                        "table.column_types": MetricConfiguration(
-                            metric_name="table.column_types",
-                            metric_domain_kwargs=metric.metric_domain_kwargs,
-                            metric_value_kwargs={
-                                "include_nested": True,
-                            },
-                            metric_dependencies=None,
-                        ),
-                    },
-                )
-            }
+        table_domain_kwargs: dict = {
+            k: v
+            for k, v in metric.metric_domain_kwargs.items()
+            if k != MetricDomainTypes.COLUMN.value
+        }
+        dependencies["table.columns"] = MetricConfiguration(
+            metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
         )
-
         return dependencies

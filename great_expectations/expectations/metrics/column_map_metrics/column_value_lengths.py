@@ -1,4 +1,3 @@
-import copy
 from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration
@@ -54,39 +53,10 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
         )
 
         if metric.metric_name == "column_values.value_length.equals.condition":
-            dependencies.update(
-                {
-                    "column_values.value_length.map": MetricConfiguration(
-                        "column_values.value_length.map", metric.metric_domain_kwargs
-                    ),
-                }
+            dependencies["column_values.value_length.map"] = MetricConfiguration(
+                metric_name="column_values.value_length.map",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
             )
-
-        metric_domain_kwargs: dict = metric.metric_domain_kwargs
-
-        if "column" in metric.metric_domain_kwargs:
-            metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
-            metric_domain_kwargs.pop("column")
-
-        dependencies.update(
-            {
-                "table.columns": MetricConfiguration(
-                    metric_name="table.columns",
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                    metric_dependencies={
-                        "table.column_types": MetricConfiguration(
-                            metric_name="table.column_types",
-                            metric_domain_kwargs=metric.metric_domain_kwargs,
-                            metric_value_kwargs={
-                                "include_nested": True,
-                            },
-                            metric_dependencies=None,
-                        ),
-                    },
-                )
-            }
-        )
 
         return dependencies
 
@@ -252,38 +222,9 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         )
 
         if metric.metric_name == "column_values.value_length.between.condition":
-            dependencies.update(
-                {
-                    "column_values.value_length.map": MetricConfiguration(
-                        "column_values.value_length.map", metric.metric_domain_kwargs
-                    ),
-                }
+            dependencies["column_values.value_length.map"] = MetricConfiguration(
+                metric_name="column_values.value_length.map",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
             )
-
-        metric_domain_kwargs: dict = metric.metric_domain_kwargs
-
-        if "column" in metric.metric_domain_kwargs:
-            metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
-            metric_domain_kwargs.pop("column")
-
-        dependencies.update(
-            {
-                "table.columns": MetricConfiguration(
-                    metric_name="table.columns",
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    metric_value_kwargs=None,
-                    metric_dependencies={
-                        "table.column_types": MetricConfiguration(
-                            metric_name="table.column_types",
-                            metric_domain_kwargs=metric.metric_domain_kwargs,
-                            metric_value_kwargs={
-                                "include_nested": True,
-                            },
-                            metric_dependencies=None,
-                        ),
-                    },
-                )
-            }
-        )
 
         return dependencies
