@@ -268,6 +268,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     desired_metrics = (mean, stdev)
 
     with pytest.raises(MetricProviderError) as e:
+        # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
 
@@ -510,7 +511,7 @@ def test_get_batch_with_split_on_column_value(test_df):
             },
         )
     )
-    assert (split_df).dataframe.shape == (3, 10)
+    assert split_df.dataframe.shape == (3, 10)
 
 
 def test_get_batch_with_split_on_converted_datetime(test_df):
@@ -524,7 +525,7 @@ def test_get_batch_with_split_on_converted_datetime(test_df):
             },
         )
     )
-    assert (split_df).dataframe.shape == (3, 10)
+    assert split_df.dataframe.shape == (3, 10)
 
 
 def test_get_batch_with_split_on_divided_integer(test_df):
@@ -580,6 +581,7 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
     assert (split_df.dataframe.date == datetime.date(2020, 1, 5)).all()
 
     with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
         split_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
@@ -598,6 +600,7 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
 
 def test_get_batch_with_split_on_hashed_column(test_df):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
+        # noinspection PyUnusedLocal
         split_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
@@ -672,6 +675,7 @@ def test_sample_using_a_list(test_df):
 
 def test_sample_using_md5(test_df):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
+        # noinspection PyUnusedLocal
         sampled_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,

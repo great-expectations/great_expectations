@@ -210,11 +210,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
-                # if column_name not in data.columns:
-                #     raise ge_exceptions.ExecutionEngineError(
-                #         message=f'Error: The column "{column_name}" in BatchData does not exist.'
-                #     )
-
                 column = data[column_name]
                 metric_aggregate = metric_fn(
                     cls,
@@ -258,15 +253,31 @@ class ColumnMetricProvider(TableMetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
+
         metric_domain_kwargs: dict = metric.metric_domain_kwargs
-        if "table.columns" not in dependencies:
-            if "column" in metric.metric_domain_kwargs:
-                metric_domain_kwargs = copy.deepcopy(metric.metric_domain_kwargs)
-                metric_domain_kwargs.pop("column")
-            dependencies["table.columns"] = MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs=metric_domain_kwargs,
-                metric_value_kwargs=None,
-                metric_dependencies=None,
-            )
+
+        if "column" in metric.metric_domain_kwargs:
+            metric_domain_kwargs = copy.deepcopy(metric.metric_domain_kwargs)
+            metric_domain_kwargs.pop("column")
+
+        dependencies.update(
+            {
+                "table.columns": MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                    metric_dependencies={
+                        "table.column_types": MetricConfiguration(
+                            metric_name="table.column_types",
+                            metric_domain_kwargs=metric.metric_domain_kwargs,
+                            metric_value_kwargs={
+                                "include_nested": True,
+                            },
+                            metric_dependencies=None,
+                        ),
+                    },
+                )
+            }
+        )
+
         return dependencies

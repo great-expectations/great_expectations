@@ -147,20 +147,35 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
                         metric_value_kwargs={
                             "include_nested": True,
                         },
+                        metric_dependencies=None,
                     ),
                 }
             )
 
         metric_domain_kwargs: dict = metric.metric_domain_kwargs
-        if "table.columns" not in dependencies:
-            if "column" in metric.metric_domain_kwargs:
-                metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
-                metric_domain_kwargs.pop("column")
-            dependencies["table.columns"] = MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs=metric_domain_kwargs,
-                metric_value_kwargs=None,
-                metric_dependencies=None,
-            )
+
+        if "column" in metric.metric_domain_kwargs:
+            metric_domain_kwargs = copy.deepcopy(metric_domain_kwargs)
+            metric_domain_kwargs.pop("column")
+
+        dependencies.update(
+            {
+                "table.columns": MetricConfiguration(
+                    metric_name="table.columns",
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=None,
+                    metric_dependencies={
+                        "table.column_types": MetricConfiguration(
+                            metric_name="table.column_types",
+                            metric_domain_kwargs=metric.metric_domain_kwargs,
+                            metric_value_kwargs={
+                                "include_nested": True,
+                            },
+                            metric_dependencies=None,
+                        ),
+                    },
+                )
+            }
+        )
 
         return dependencies

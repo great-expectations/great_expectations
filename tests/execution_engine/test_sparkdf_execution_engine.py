@@ -15,7 +15,6 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
-from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
