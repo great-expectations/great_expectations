@@ -247,9 +247,9 @@ class UserConfigurableProfiler:
                     semantic_type_fn(
                         profile_dataset=self.profile_dataset, column=column_name
                     )
-                    self._build_expectations_for_all_column_types(
-                        self.profile_dataset, column_name
-                    )
+                self._build_expectations_for_all_column_types(
+                    self.profile_dataset, column_name
+                )
                 pbar.update()
 
         expectation_suite = self._build_column_description_metadata(
