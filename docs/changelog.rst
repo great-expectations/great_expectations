@@ -6,7 +6,7 @@ Changelog
 
 develop
 -----------------
-* [BREAKING] Remove autosave of Checkpoints in test_yaml_config #2549
+* [BUGFIX] Remove autosave of Checkpoints in test_yaml_config #2549
 
 0.13.14
 -----------------
