@@ -11,12 +11,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest,
-    PartitionRequest,
-    RuntimeBatchRequest,
-)
+
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
