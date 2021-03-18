@@ -300,7 +300,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self,
         domain_kwargs: dict,
         domain_type: Union[str, "MetricDomainTypes"],
-        accessor_keys: Optional[Iterable[str]] = [],
+        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -376,17 +376,22 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 for key in accessor_keys:
                     accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
             if len(compute_domain_kwargs.keys()) > 0:
-                for key in compute_domain_kwargs.keys():
-                    # Warning user if kwarg not "normal"
-                    if key not in [
+                # Warn user if kwarg not "normal".
+                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
+                    {
                         "batch_id",
                         "table",
                         "row_condition",
                         "condition_parser",
-                    ]:
-                        logger.warning(
-                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
-                        )
+                    }
+                )
+                if len(unexpected_keys) > 0:
+                    unexpected_keys_str: str = ", ".join(
+                        map(lambda element: f'"{element}"', unexpected_keys)
+                    )
+                    logger.warning(
+                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                    )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and

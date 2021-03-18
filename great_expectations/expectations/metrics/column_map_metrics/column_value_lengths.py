@@ -45,7 +45,7 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        dependencies = super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
@@ -214,7 +214,7 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        dependencies = super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,

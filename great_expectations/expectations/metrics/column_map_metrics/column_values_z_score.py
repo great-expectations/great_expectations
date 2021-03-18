@@ -106,7 +106,7 @@ class ColumnValuesZScore(ColumnMapMetricProvider):
     ):
         """Returns a dictionary of given metric names and their corresponding configuration, specifying the metric
         types and their respective domains"""
-        dependencies = super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,

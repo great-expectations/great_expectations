@@ -63,29 +63,24 @@ class ColumnUniqueProportion(ColumnMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        table_domain_kwargs: dict = {
-            k: v
-            for k, v in metric.metric_domain_kwargs.items()
-            if k != MetricDomainTypes.COLUMN.value
-        }
-
         dependencies["column.distinct_values.count"] = MetricConfiguration(
             metric_name="column.distinct_values.count",
             metric_domain_kwargs=metric.metric_domain_kwargs,
-            metric_value_kwargs=None,
-            metric_dependencies=None,
-        )
-
-        dependencies["table.row_count"] = MetricConfiguration(
-            metric_name="table.row_count",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs=None,
-            metric_dependencies=None,
         )
 
         dependencies["column_values.nonnull.unexpected_count"] = MetricConfiguration(
             metric_name="column_values.nonnull.unexpected_count",
             metric_domain_kwargs=metric.metric_domain_kwargs,
+        )
+
+        table_domain_kwargs: dict = {
+            k: v
+            for k, v in metric.metric_domain_kwargs.items()
+            if k != MetricDomainTypes.COLUMN.value
+        }
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
             metric_dependencies=None,
         )
