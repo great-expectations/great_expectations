@@ -33,11 +33,8 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyBatchData,
-)
 from great_expectations.util import gen_directory_tree_str
-from great_expectations.validator.validator import Validator
+
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
