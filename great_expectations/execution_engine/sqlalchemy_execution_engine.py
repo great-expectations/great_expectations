@@ -433,28 +433,33 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if (
             domain_type != MetricDomainTypes.TABLE
             and accessor_keys is not None
-            and len(accessor_keys) > 0
+            and len(list(accessor_keys)) > 0
         ):
             logger.warning(
                 "Accessor keys ignored since Metric Domain Type is not 'table'"
             )
 
         if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(accessor_keys) > 0:
+            if accessor_keys is not None and len(list(accessor_keys)) > 0:
                 for key in accessor_keys:
                     accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
             if len(domain_kwargs.keys()) > 0:
-                for key in compute_domain_kwargs.keys():
-                    # Warning user if kwarg not "normal"
-                    if key not in [
+                # Warn user if kwarg not "normal".
+                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
+                    {
                         "batch_id",
                         "table",
                         "row_condition",
                         "condition_parser",
-                    ]:
-                        logger.warning(
-                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
-                        )
+                    }
+                )
+                if len(unexpected_keys) > 0:
+                    unexpected_keys_str: str = ", ".join(
+                        map(lambda element: f'"{element}"', unexpected_keys)
+                    )
+                    logger.warning(
+                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                    )
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and
