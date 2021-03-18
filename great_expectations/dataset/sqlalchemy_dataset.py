@@ -77,6 +77,14 @@ except (ImportError, KeyError):
     snowflake = None
 
 try:
+    import ibm_db_sa.ibm_db
+
+    registry.register("db2", "ibm_db_sa.ibm_db", "DB2Dialect_ibm_db")
+    registry.register("db2.ibm_db", "ibm_db_sa.ibm_db", "DB2Dialect_ibm_db")
+except (ImportError, KeyError):
+    ibm_db_sa = None
+
+try:
     import pybigquery.sqlalchemy_bigquery
 
     # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
@@ -117,6 +125,11 @@ try:
     import pyathena.sqlalchemy_athena
 except ImportError:
     pyathena = None
+
+try:
+    import ibm_db_sa
+except ImportError:
+    ibm_db_sa = None
 
 
 class SqlAlchemyBatchReference:
@@ -235,7 +248,8 @@ class MetaSqlAlchemyDataset(Dataset):
                     ignore_values_condition=ignore_values_condition,
                 )
 
-            count_results: dict = dict(self.engine.execute(count_query).fetchone())
+            query_compiled = count_query.compile(compile_kwargs={"literal_binds": True})
+            count_results: dict = dict(self.engine.execute(query_compiled).fetchone())
 
             # Handle case of empty table gracefully:
             if (
@@ -538,11 +552,19 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
             )
+        elif self.engine.dialect.name.lower() == "ibm_db_sa":
+            self.dialect = import_library_module(module_name="ibm_db_sa")
         else:
             self.dialect = None
 
-        if engine and engine.dialect.name.lower() in ["sqlite", "mssql", "snowflake"]:
-            # sqlite/mssql/snowflake temp tables only persist within a connection so override the engine
+        if engine and engine.dialect.name.lower() in [
+            "sqlite",
+            "mssql",
+            "snowflake",
+            "ibm_db_sa",
+        ]:
+            # sqlite/mssql/snowflake/IBM_Db2 temporary tables
+            # only persist within a connection so override the engine
             self.engine = engine.connect()
 
         if schema is not None and custom_sql is not None:
@@ -591,7 +613,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # reflection will not find the temporary schema
             self.columns = self.column_reflection_fallback()
 
-        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
+        # Use fallback because for mssql and IBM_Db2, reflection doesn't
+        # throw an error but returns an empty list
         if len(self.columns) == 0:
             self.columns = self.column_reflection_fallback()
 
@@ -701,7 +724,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 ).label("null_count"),
             ]
         ).select_from(self._table)
-        count_results = dict(self.engine.execute(count_query).fetchone())
+        response = self.engine.execute(
+            count_query.compile(compile_kwargs={"literal_binds": True})
+        )
+        count_results = dict(response.fetchone())
         element_count = int(count_results.get("element_count") or 0)
         null_count = int(count_results.get("null_count") or 0)
         return element_count - null_count
@@ -1292,7 +1318,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
         else:
-            stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
+            # IBM Db2 can't handle quotes around table_name
+            # IBM Db2 requires parenthesis around custom_sql
+            stmt = "CREATE TEMPORARY TABLE {table_name} AS ( {custom_sql} )".format(
                 table_name=table_name, custom_sql=custom_sql
             )
 
@@ -1324,9 +1352,33 @@ WHERE
                 {"name": col_name, "type": getattr(type_module, col_type.upper())()}
                 for col_name, col_type in col_info_tuples_list
             ]
+
+        elif self.sql_engine_dialect.name.lower() == "ibm_db_sa":
+            # Get column names and types from the database
+            # https://www.ibm.com/support/knowledgecenter/en/SSEPGG_10.5.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0054907.html
+            col_info_query: TextClause = sa.text(
+                f"""
+                    SELECT COLNAME, TYPENAME
+                    FROM SYSIBMADM.ADMINTEMPCOLUMNS
+                    WHERE TABNAME = '{self._table.name.upper()}'"""
+            )
+            col_info_tuples_list = self.engine.execute(col_info_query).fetchall()
+            col_info_dict_list = [
+                {
+                    "name": col_name,
+                    "type": getattr(
+                        self._get_dialect_type_module(), col_type.upper()
+                    )(),
+                }
+                for col_name, col_type in col_info_tuples_list
+            ]
         else:
             query: Select = sa.select([sa.text("*")]).select_from(self._table).limit(1)
-            col_names: list = self.engine.execute(query).keys()
+            # IBM Db2 can't process '.limit(1)' without compilation
+            response = self.engine.execute(
+                query.compile(compile_kwargs={"literal_binds": True})
+            )
+            col_names: list = response.keys()
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
         return col_info_dict_list
 
@@ -1875,6 +1927,21 @@ WHERE
             pass
 
         try:
+            # IBM Db2
+            # https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_74/db2/rbafzregexp_like.htm
+            if isinstance(self.sql_engine_dialect, ibm_db_sa.dialect):
+                if positive:
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("REGEXP_LIKE")
+                    )
+                else:
+                    return BinaryExpression(
+                        sa.column(column), literal(regex), custom_op("NOT REGEXP_LIKE")
+                    )
+        except AttributeError:
+            pass
+
+        try:
             # Snowflake
             if isinstance(
                 self.sql_engine_dialect,
@@ -2049,6 +2116,7 @@ WHERE
                 sa.dialects.postgresql.dialect,
                 sa.dialects.mysql.dialect,
                 sa.dialects.mssql.dialect,
+                ibm_db_sa.dialect,
             ),
         ):
             dialect_supported = True

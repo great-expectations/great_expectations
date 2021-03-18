@@ -1,0 +1,21 @@
+version: '3.2'
+services:
+  db2:
+    image: ibmcom/db2
+    container_name: ibmdb2
+    environment:
+      DBNAME: test_ci
+      DB2INST1_PASSWORD: my_db_password
+      LICENSE: accept
+      PERSISTENT_HOME: 'false'
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - ./:/database
+    networks:
+      - dbnet
+    ports:
+      - "50000:50000"
+networks:
+  dbnet:
+    driver: bridge
