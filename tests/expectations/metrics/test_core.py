@@ -6,13 +6,21 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch
 from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.validation_graph import MetricConfiguration
-from tests.test_utils import build_spark_engine
+from great_expectations.expectations.util import (
+    get_test_validator_with_data,
+    build_sa_engine,
+    build_spark_engine,
+    build_pandas_engine,
+    build_pandas_validator_with_data,
+    build_spark_validator_with_data,
+)
 
 
 def _build_sa_engine(df, sa):
@@ -153,7 +161,7 @@ def test_max_metric_sa_column_does_not_exist(sa):
 
 
 def test_max_metric_spark_column_exists(spark_session):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame({"a": [1, 2, 1]}),
         batch_id="my_id",
@@ -179,7 +187,7 @@ def test_max_metric_spark_column_exists(spark_session):
 
 
 def test_max_metric_spark_column_does_not_exist(spark_session):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame({"a": [1, 2, 1]}),
         batch_id="my_id",
@@ -254,7 +262,7 @@ def test_map_of_type_sa(sa):
 
 
 def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 3, None]},
@@ -495,7 +503,7 @@ def test_map_unique_sa_column_does_not_exist(sa):
 
 
 def test_map_unique_spark_column_exists(spark_session):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {
@@ -566,7 +574,7 @@ def test_map_unique_spark_column_exists(spark_session):
 
 
 def test_map_unique_spark_column_does_not_exist(spark_session):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {
@@ -645,7 +653,7 @@ def test_z_score_under_threshold_pd():
 
 
 def test_z_score_under_threshold_spark(spark_session):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 3, None]},
@@ -790,7 +798,7 @@ def test_column_pairs_in_set_metric_pd():
 
 
 def test_table_metric_spark(spark_session):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1]},
@@ -819,7 +827,7 @@ def test_table_metric_spark(spark_session):
 
 
 def test_median_metric_spark(spark_session):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3]},
@@ -855,7 +863,7 @@ def test_median_metric_spark(spark_session):
 
 
 def test_distinct_metric_spark(spark_session):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1, 2, 3, 3, None]},
@@ -1044,7 +1052,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
 def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     import datetime
 
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]},

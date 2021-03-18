@@ -40,8 +40,16 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
 )
 from great_expectations.profile import ColumnsExistProfiler
-from great_expectations.util import import_library_module
 from great_expectations.validator.validator import Validator
+from great_expectations.expectations.util import (
+    get_test_validator_with_data,
+    build_sa_engine,
+    build_spark_engine,
+    build_pandas_engine,
+    build_pandas_validator_with_data,
+    build_spark_validator_with_data,
+)
+from great_expectations.util import import_library_module
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()

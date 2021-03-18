@@ -12,6 +12,7 @@ from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchD
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.expectations.util import get_test_validator_with_data
 from tests.conftest import build_test_backends_list_cfe
 from tests.test_definitions.test_expectations import mssqlDialect as mssqlDialect
 from tests.test_definitions.test_expectations import mysqlDialect as mysqlDialect
@@ -20,7 +21,7 @@ from tests.test_definitions.test_expectations import (
 )
 from tests.test_definitions.test_expectations import sqliteDialect as sqliteDialect
 from tests.test_definitions.test_expectations import tmp_dir
-from tests.test_utils import evaluate_json_test_cfe, get_test_validator_with_data
+from tests.test_utils import evaluate_json_test_cfe
 from tests.test_utils_modular import (
     candidate_test_is_on_temporary_notimplemented_list_cfe,
 )
