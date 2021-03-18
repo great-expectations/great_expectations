@@ -2,12 +2,9 @@ import os
 from collections import OrderedDict
 
 import pytest
-from ruamel.yaml import YAML, YAMLError
-from ruamel.yaml.comments import CommentedMap
-from ruamel.yaml.compat import ordereddict
+from ruamel.yaml import YAML
 
 import great_expectations as ge
-from great_expectations import DataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
@@ -840,74 +837,3 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
 
     assert config_vars_file_contents["escaped"] == r"\$SOME_VAR"
     assert config_vars_file_contents["escaped_curly"] == r"\${SOME_VAR}"
-
-
-def test_get_config_with_variables_substituted_from_yaml_str(
-    monkeypatch, empty_data_context_with_config_variables
-):
-    """
-    What does this test and why?
-    get_config_with_variables_substituted_from_yaml_str should make substitutions from env vars, from config_vars and from env vars IN config_vars
-    """
-
-    context: DataContext = empty_data_context_with_config_variables
-
-    monkeypatch.setenv("DATASOURCE_NAME", "data_dir")
-    monkeypatch.setenv("FOO", "replaced_foo")
-
-    yaml_str_to_be_substituted = """
-name: checkpoint_name
-config_version: 1.0
-class_name: SimpleCheckpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
-validations:
-  - batch_request:
-      datasource_name: $DATASOURCE_NAME
-      data_connector_name: data_dir_example_data_connector
-      data_asset_name: ${replace_me_1}
-      partition_request:
-        index: -1
-    expectation_suite_name: $escaped_password_already_in_config_yml
-"""
-
-    substituted_yaml = context.get_config_with_variables_substituted_from_yaml_str(
-        yaml_config=yaml_str_to_be_substituted
-    )
-
-    assert isinstance(substituted_yaml, CommentedMap)
-
-    assert substituted_yaml == ordereddict(
-        [
-            ("name", "checkpoint_name"),
-            ("config_version", 1.0),
-            ("class_name", "SimpleCheckpoint"),
-            ("run_name_template", "%Y%m%d-%H%M%S-my-run-name-template"),
-            (
-                "validations",
-                [
-                    ordereddict(
-                        [
-                            (
-                                "batch_request",
-                                ordereddict(
-                                    [
-                                        ("datasource_name", "data_dir"),
-                                        (
-                                            "data_connector_name",
-                                            "data_dir_example_data_connector",
-                                        ),
-                                        ("data_asset_name", "replaced_foo"),
-                                        (
-                                            "partition_request",
-                                            ordereddict([("index", -1)]),
-                                        ),
-                                    ]
-                                ),
-                            ),
-                            ("expectation_suite_name", "correct_hor$e_battery_$taple"),
-                        ]
-                    )
-                ],
-            ),
-        ]
-    )

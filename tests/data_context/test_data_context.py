@@ -1969,7 +1969,7 @@ validations:
     )
 
     checkpoint_from_yaml = context.add_checkpoint(
-        name=checkpoint_name, yaml_config=checkpoint_yaml_config
+        **yaml.load(checkpoint_yaml_config),
     )
 
     assert checkpoint_from_test_yaml_config.name == checkpoint_from_yaml.name
@@ -2087,8 +2087,10 @@ validations:
     with pytest.raises(KeyError):
         context.test_yaml_config(checkpoint_yaml_config, name=checkpoint_name)
 
-    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError):
-        context.add_checkpoint(name=checkpoint_name, yaml_config=checkpoint_yaml_config)
+    with pytest.raises(AttributeError):
+        context.add_checkpoint(
+            **yaml.load(checkpoint_yaml_config),
+        )
 
     assert checkpoint_name not in context.list_checkpoints()
     assert len(context.list_checkpoints()) == 0
