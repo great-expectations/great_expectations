@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
 
 0.13.14
 -----------------
