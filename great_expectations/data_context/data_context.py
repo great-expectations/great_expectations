@@ -845,7 +845,9 @@ class BaseDataContext:
         else:
             return {}
 
-    def get_config_with_variables_substituted_from_yaml_str(self, yaml_config: str):
+    def get_config_with_variables_substituted_from_yaml_str(
+        self, yaml_config: str
+    ) -> CommentedMap:
         """
         Substitute config variables into an arbitrary yaml config
         Args:
