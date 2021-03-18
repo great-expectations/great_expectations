@@ -11,7 +11,6 @@ from great_expectations.core.batch import (
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
-# from great_expectations.validator.validator import Validator
 from great_expectations.validator import validator
 from great_expectations.validator.validation_graph import MetricConfiguration
 
