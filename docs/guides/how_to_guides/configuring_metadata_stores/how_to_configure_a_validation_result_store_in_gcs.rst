@@ -52,7 +52,7 @@ Steps
 
     .. code-block:: yaml
 
-        expectations_store_name: validations_GCS_store
+        validations_store_name: validations_GCS_store
         stores:
             validations_GCS_store:
                 class_name: ValidationsStore
