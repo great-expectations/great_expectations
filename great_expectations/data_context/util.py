@@ -49,26 +49,6 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-AWS_SECRET_MANAGER_SLOW_REGEX = re.compile(
-    r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]+):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]+)"
-    r"(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
-)
-GCP_SECRET_MANAGER_FAST_REGEX = re.compile(
-    r"^secret\|projects\/[a-z0-9\_\-]{6,30}\/secrets"
-)
-GCP_SECRET_MANAGER_SLOW_REGEX = re.compile(
-    r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
-    r"(?:\/version\/([a-z0-9]+))?(?:\|([^\|]+))?$"
-)
-AZURE_KEYVAULT_FAST_REGEX = re.compile(
-    r"^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net"
-)
-AZURE_KEYVAULT_SLOW_REGEX = re.compile(
-    r"^secret\|(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
-    r"(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
-)
-
-
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
 # TODO: Improve error messages in this method. Since so much of our workflow is config-driven, this will be a *super* important part of DX.
 def instantiate_class_from_config(config, runtime_environment, config_defaults=None):
@@ -280,9 +260,11 @@ def substitute_value_from_secret_store(value):
     if isinstance(value, str) and value.startswith("secret|"):
         if value.startswith("secret|arn:aws:secretsmanager"):
             return substitute_value_from_aws_secrets_manager(value)
-        elif GCP_SECRET_MANAGER_FAST_REGEX.match(value):
+        elif re.compile(r"^secret\|projects\/[a-z0-9\_\-]{6,30}\/secrets").match(value):
             return substitute_value_from_gcp_secret_manager(value)
-        elif AZURE_KEYVAULT_FAST_REGEX.match(value):
+        elif re.compile(
+            r"^secret\|https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net"
+        ).match(value):
             return substitute_value_from_azure_keyvault(value)
     return value
 
@@ -312,6 +294,10 @@ def substitute_value_from_aws_secrets_manager(value):
 
     :raises: ImportError, ValueError
     """
+    regex = re.compile(
+        r"^secret\|arn:aws:secretsmanager:([a-z\-0-9]+):([0-9]{12}):secret:([a-zA-Z0-9\/_\+=\.@\-]+)"
+        r"(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
+    )
     if not boto3:
         logger.error(
             "boto3 is not installed, please install great_expectations with aws_secrets extra > "
@@ -319,12 +305,10 @@ def substitute_value_from_aws_secrets_manager(value):
         )
         raise ImportError("Could not import boto3")
 
-    matches = AWS_SECRET_MANAGER_SLOW_REGEX.match(value)
+    matches = regex.match(value)
 
     if not matches:
-        raise ValueError(
-            f"Could not match the value with regex {AWS_SECRET_MANAGER_SLOW_REGEX}"
-        )
+        raise ValueError(f"Could not match the value with regex {regex}")
 
     region_name = matches.group(1)
     secret_name = matches.group(3)
@@ -336,7 +320,9 @@ def substitute_value_from_aws_secrets_manager(value):
     client = session.client(service_name="secretsmanager", region_name=region_name)
 
     if secret_version:
-        secret_response = client.get_secret_value(SecretId=secret_name, VersionId=secret_version)
+        secret_response = client.get_secret_value(
+            SecretId=secret_name, VersionId=secret_version
+        )
     else:
         secret_response = client.get_secret_value(SecretId=secret_name)
     # Decrypts secret using the associated KMS CMK.
@@ -357,7 +343,7 @@ def substitute_value_from_gcp_secret_manager(value):
 
     value: string with pattern ``secret|projects/${project_id}/secrets/${secret_name}``
 
-        optional : after the value above, a secret version can be added ``/version/${secret_version}``
+        optional : after the value above, a secret version can be added ``/versions/${secret_version}``
 
         optional : after the value above, a secret key can be added ``|${secret_key}``
 
@@ -371,6 +357,10 @@ def substitute_value_from_gcp_secret_manager(value):
     :return: a string with the value substituted by the secret from the GCP Secret Manager store
     :raises: ImportError, ValueError
     """
+    regex = re.compile(
+        r"^secret\|projects\/([a-z0-9\_\-]{6,30})\/secrets/([a-zA-Z\_\-]{1,255})"
+        r"(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
+    )
     if not secretmanager:
         logger.error(
             "secretmanager is not installed, please install great_expectations with gcp extra > "
@@ -379,12 +369,10 @@ def substitute_value_from_gcp_secret_manager(value):
         raise ImportError("Could not import secretmanager from google.cloud")
 
     client = secretmanager.SecretManagerServiceClient()
-    matches = GCP_SECRET_MANAGER_SLOW_REGEX.match(value)
+    matches = regex.match(value)
 
     if not matches:
-        raise ValueError(
-            f"Could not match the value with regex {GCP_SECRET_MANAGER_SLOW_REGEX}"
-        )
+        raise ValueError(f"Could not match the value with regex {regex}")
 
     project_id = matches.group(1)
     secret_id = matches.group(2)
@@ -392,7 +380,7 @@ def substitute_value_from_gcp_secret_manager(value):
     secret_key = matches.group(4)
     if not secret_version:
         secret_version = "latest"
-    name = f"projects/{project_id}/secrets/{secret_id}/version/{secret_version}"
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/{secret_version}"
     try:
         secret = client.access_secret_version(name=name)._pb.payload.data.decode(
             "utf-8"
@@ -428,18 +416,20 @@ def substitute_value_from_azure_keyvault(value):
     :return: a string with the value substituted by the secret from the Azure Key Vault store
     :raises: ImportError, ValueError
     """
+    regex = re.compile(
+        r"^secret\|(https:\/\/[a-zA-Z0-9\-]{3,24}\.vault\.azure\.net)\/secrets\/([0-9a-zA-Z-]+)"
+        r"(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
+    )
     if not SecretClient:
         logger.error(
             "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
             "pip install great_expectations[azure_secrets]"
         )
         raise ImportError("Could not import SecretClient from azure.keyvault.secrets")
-    matches = AZURE_KEYVAULT_SLOW_REGEX.match(value)
+    matches = regex.match(value)
 
     if not matches:
-        raise ValueError(
-            f"Could not match the value with regex {AZURE_KEYVAULT_SLOW_REGEX}"
-        )
+        raise ValueError(f"Could not match the value with regex {regex}")
 
     keyvault_uri = matches.group(1)
     secret_name = matches.group(2)
