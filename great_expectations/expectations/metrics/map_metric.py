@@ -1553,14 +1553,4 @@ class ColumnMapMetricProvider(MapMetricProvider):
             metric_value_kwargs=None,
             metric_dependencies=None,
         )
-        # TODO: <Alex>ALEX</Alex>
-        # dependencies["table.column_types"] = MetricConfiguration(
-        #     metric_name="table.column_types",
-        #     metric_domain_kwargs=table_domain_kwargs,
-        #     metric_value_kwargs={
-        #         "include_nested": True,
-        #     },
-        #     metric_dependencies=None,
-        # )
-        # TODO: <Alex>ALEX</Alex>
         return dependencies
