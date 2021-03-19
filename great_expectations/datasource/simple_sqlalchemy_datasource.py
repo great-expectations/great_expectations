@@ -73,7 +73,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
             ].items():
 
                 data_connector_name = partitioner_name
-                if not data_connector_name in self.data_connectors:
+                if data_connector_name not in self.data_connectors:
                     data_connector_config = {
                         "class_name": "ConfiguredAssetSqlDataConnector",
                         "data_assets": {},

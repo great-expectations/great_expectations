@@ -57,7 +57,7 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
 # def test_head(sqlite_view_engine):
 #     # Create a larger table so that we can downsample meaningfully
 #     df = pd.DataFrame({"a": range(100)})
-#     df.to_sql("test_table_2", con=sqlite_view_engine)
+#     df.to_sql(name="test_table_2", con=sqlite_view_engine, index=False)
 #
 #     engine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
 #     batch_data = SqlAlchemyBatchData(

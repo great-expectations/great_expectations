@@ -292,7 +292,7 @@ class Checkpoint:
                 ge_exceptions.ExecutionEngineError,
             ) as e:
                 raise ge_exceptions.CheckpointError(
-                    f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}."
+                    f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
                 )
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config

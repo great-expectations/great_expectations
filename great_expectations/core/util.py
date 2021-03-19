@@ -22,6 +22,34 @@ from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 
+
+try:
+    import sqlalchemy
+except ImportError:
+    sqlalchemy = None
+    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+
+
+SCHEMAS = {
+    "api_np": {
+        "NegativeInfinity": -np.inf,
+        "PositiveInfinity": np.inf,
+    },
+    "api_cast": {
+        "NegativeInfinity": -float("inf"),
+        "PositiveInfinity": float("inf"),
+    },
+    "mysql": {
+        "NegativeInfinity": -1.79e308,
+        "PositiveInfinity": 1.79e308,
+    },
+    "mssql": {
+        "NegativeInfinity": -1.79e308,
+        "PositiveInfinity": 1.79e308,
+    },
+}
+
+
 try:
     import pyspark
 except ImportError:
@@ -514,3 +542,19 @@ def get_or_create_spark_session(
         spark_session = None
 
     return spark_session
+
+
+def get_sql_dialect_floating_point_infinity_value(
+    schema: str, negative: bool = False
+) -> float:
+    res: Optional[dict] = SCHEMAS.get(schema)
+    if res is None:
+        if negative:
+            return -np.inf
+        else:
+            return np.inf
+    else:
+        if negative:
+            return res["NegativeInfinity"]
+        else:
+            return res["PositiveInfinity"]
