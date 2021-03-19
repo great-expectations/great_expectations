@@ -73,6 +73,11 @@ except ImportError:
     SparkDataFrame = type(None)
 
 try:
+    from pyspark.sql import DataFrame as spark_DataFrame
+except ImportError:
+    spark_DataFrame = type(None)
+
+try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
     from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 
