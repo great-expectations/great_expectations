@@ -352,18 +352,18 @@ name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:'''
+    data_asset_name_suffix: __whole_table'''
+        yaml_str += self._yaml_innards()
         if self.driver:
             yaml_str += f"""
   drivername: {self.driver}"""
-        yaml_str += self._yaml_innards()
         yaml_str += '"""'
         return yaml_str
 
     def _yaml_innards(self) -> str:
         """Override if needed."""
         return """
+credentials:
   host: {host}
   port: '{port}'
   username: {username}
@@ -533,6 +533,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
 
     def _yaml_innards(self) -> str:
         snippet = """
+credentials:
   host: {host}
   username: {username}
   database: {database}
@@ -542,17 +543,15 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
     role: {role}
 """
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
-            snippet += "  password: {password}\n"
+            snippet += "  password: {password}"
         elif self.auth_method == SnowflakeAuthMethod.SSO:
             snippet += """\
   connect_args:
-    authenticator: {authenticator_url}
-"""
+    authenticator: {authenticator_url}"""
         elif self.auth_method == SnowflakeAuthMethod.KEY_PAIR:
             snippet += """\
   private_key_path: {private_key_path}
-  private_key_passphrase: {private_key_passphrase}
-"""
+  private_key_passphrase: {private_key_passphrase}"""
         return snippet
 
 
@@ -581,10 +580,10 @@ connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
         )
 
     def _yaml_innards(self) -> str:
-        return "\n  connection_string: {connection_string}"
+        return "\nconnection_string: {connection_string}"
 
 
-class GenericConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
+class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
     def __init__(self, datasource_name: Optional[str]):
         super().__init__(
             datasource_name=datasource_name,
@@ -605,7 +604,7 @@ class GenericConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
 connection_string = "YOUR_CONNECTION_STRING"'''
 
     def _yaml_innards(self) -> str:
-        return "\n  connection_string: {connection_string}"
+        return "\nconnection_string: {connection_string}"
 
 
 def _get_sql_yaml_helper_class(
@@ -616,7 +615,7 @@ def _get_sql_yaml_helper_class(
     RedshiftCredentialYamlHelper,
     SnowflakeCredentialYamlHelper,
     BigqueryCredentialYamlHelper,
-    GenericConnectionStringCredentialYamlHelper,
+    ConnectionStringCredentialYamlHelper,
 ]:
     helper_class_by_backend = {
         SupportedDatabaseBackends.POSTGRES: PostgresCredentialYamlHelper,
@@ -624,7 +623,7 @@ def _get_sql_yaml_helper_class(
         SupportedDatabaseBackends.REDSHIFT: RedshiftCredentialYamlHelper,
         SupportedDatabaseBackends.SNOWFLAKE: SnowflakeCredentialYamlHelper,
         SupportedDatabaseBackends.BIGQUERY: BigqueryCredentialYamlHelper,
-        SupportedDatabaseBackends.OTHER: GenericConnectionStringCredentialYamlHelper,
+        SupportedDatabaseBackends.OTHER: ConnectionStringCredentialYamlHelper,
     }
     helper_class = helper_class_by_backend[selected_database]
     return helper_class(datasource_name)

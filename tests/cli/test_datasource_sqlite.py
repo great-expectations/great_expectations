@@ -177,8 +177,11 @@ def test_cli_datasource_new_connection_string(
     # Run notebook
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)
+
+    # mock the user adding a connection string into the notebook by overwriting the right cell
+    assert "connection_string" in nb["cells"][5]["source"]
     nb["cells"][5]["source"] = 'connection_string = "sqlite://"'
-    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     del context
@@ -191,7 +194,7 @@ def test_cli_datasource_new_connection_string(
                 "whole_table": {"data_asset_name_suffix": "__whole_table"}
             },
             "module_name": "great_expectations.datasource",
-            "name": "warehouse",
+            "name": "my_datasource",
         }
     ]
 

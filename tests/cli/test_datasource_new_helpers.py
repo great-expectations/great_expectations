@@ -2,7 +2,7 @@ import mock
 
 from great_expectations.cli.datasource import (
     BigqueryCredentialYamlHelper,
-    GenericConnectionStringCredentialYamlHelper,
+    ConnectionStringCredentialYamlHelper,
     MySQLCredentialYamlHelper,
     PandasYamlHelper,
     PostgresCredentialYamlHelper,
@@ -64,12 +64,12 @@ introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
 credentials:
-  drivername: stuff
   host: {host}
   port: '{port}'
   username: {username}
   password: {password}
-  database: {database}"""'''
+  database: {database}
+  drivername: stuff"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
@@ -98,12 +98,12 @@ introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
 credentials:
-  drivername: mysql+pymysql
   host: {host}
   port: '{port}'
   username: {username}
   password: {password}
-  database: {database}"""'''
+  database: {database}
+  drivername: mysql+pymysql"""'''
     )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -149,12 +149,12 @@ introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
 credentials:
-  drivername: postgresql
   host: {host}
   port: '{port}'
   username: {username}
   password: {password}
-  database: {database}"""'''
+  database: {database}
+  drivername: postgresql"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -198,14 +198,14 @@ introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
 credentials:
-  drivername: postgresql+psycopg2
   host: {host}
   port: '{port}'
   username: {username}
   password: {password}
   database: {database}
   query:
-    sslmode: prefer"""'''
+    sslmode: prefer
+  drivername: postgresql+psycopg2"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -259,7 +259,6 @@ introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
 credentials:
-  drivername: snowflake
   host: {host}
   username: {username}
   database: {database}
@@ -268,7 +267,7 @@ credentials:
     warehouse: {warehouse}
     role: {role}
   password: {password}
-"""'''
+  drivername: snowflake"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -308,7 +307,6 @@ introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
 credentials:
-  drivername: snowflake
   host: {host}
   username: {username}
   database: {database}
@@ -318,7 +316,7 @@ credentials:
     role: {role}
   connect_args:
     authenticator: {authenticator_url}
-"""'''
+  drivername: snowflake"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -357,7 +355,6 @@ introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
 credentials:
-  drivername: snowflake
   host: {host}
   username: {username}
   database: {database}
@@ -367,7 +364,7 @@ credentials:
     role: {role}
   private_key_path: {private_key_path}
   private_key_passphrase: {private_key_passphrase}
-"""'''
+  drivername: snowflake"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -414,8 +411,7 @@ class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
-credentials:
-  connection_string: {connection_string}"""'''
+connection_string: {connection_string}"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -438,10 +434,10 @@ credentials:
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_GenericConnectionStringCredentialYamlHelper(
+def test_ConnectionStringCredentialYamlHelper(
     mock_emit, empty_data_context_stats_enabled
 ):
-    helper = GenericConnectionStringCredentialYamlHelper("my_datasource")
+    helper = ConnectionStringCredentialYamlHelper("my_datasource")
     assert (
         helper.credentials_snippet()
         == '''\
@@ -458,8 +454,7 @@ class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
-credentials:
-  connection_string: {connection_string}"""'''
+connection_string: {connection_string}"""'''
     )
 
     assert helper.verify_libraries_installed() is True
