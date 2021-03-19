@@ -625,12 +625,14 @@ def test__build_batch_spec(basic_datasource):
 
 
 def test__get_data_reference_name(basic_datasource):
-    partition_request: dict = {
+    data_connector_query: dict = {
         "batch_identifiers": {
             "airflow_run_id": 1234567890,
         }
     }
-    partition_definition = PartitionDefinition(partition_request["batch_identifiers"])
+    partition_definition = PartitionDefinition(
+        data_connector_query["batch_identifiers"]
+    )
 
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
@@ -641,13 +643,15 @@ def test__get_data_reference_name(basic_datasource):
         == "1234567890"
     )
 
-    partition_request: dict = {
+    data_connector_query: dict = {
         "batch_identifiers": {
             "run_id_1": 1234567890,
             "run_id_2": 1111111111,
         }
     }
-    partition_definition = PartitionDefinition(partition_request["batch_identifiers"])
+    partition_definition = PartitionDefinition(
+        data_connector_query["batch_identifiers"]
+    )
 
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]

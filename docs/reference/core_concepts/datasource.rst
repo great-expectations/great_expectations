@@ -113,7 +113,7 @@ The Datasource can then query the ExecutionEngine to fetch data and BatchMarkers
             "datasource": "myds"
             "data_connector": "pipeline",
             "data_asset_name": "my_asset",
-            "partition_request" : {
+            "data_connector_query" : {
                 "batch_identifiers" : {
                     "airflow_run_id": "string_airflow_run_id_that_was_provided",
                     "other_key": "string_other_key_that_was_provided",
@@ -151,7 +151,7 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
 1. ``BatchRequest``
 
 - The ``BatchRequest`` is the object a user passes to the ``DataSource`` to request a ``Batch`` (or ``Batches``).
-    - It can include ``partition_request`` params with values relative to the latest batch (e.g. the "latest" slice). Conceptually, this enables "fetch the latest `Batch`" behavior. It is the key thing that differentiates a `BatchRequest`, which does NOT necessarily uniquely identify the `Batch(es)` to be fetched, from a BatchDefinition.
+    - It can include ``data_connector_query`` params with values relative to the latest batch (e.g. the "latest" slice). Conceptually, this enables "fetch the latest `Batch`" behavior. It is the key thing that differentiates a `BatchRequest`, which does NOT necessarily uniquely identify the `Batch(es)` to be fetched, from a BatchDefinition.
     - The BatchRequest can also include a section called ``batch_spec_passthrough`` to make it easy to directly communicate parameters to a specific ExecutionEngine.
     - When resolved, the `BatchRequest` may point to many `BatchDefinitions` and Batches.
 
@@ -163,7 +163,7 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
         "datasource": "myds",
         "data_connector": "pipeline",
         "in_memory_dataset": df,
-        "partition_request" : {
+        "data_connector_query" : {
         "batch_identifiers" : {
             "airflow_run_id": my_run_id,
             "other_key": my_other_key

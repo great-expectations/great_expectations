@@ -10,8 +10,8 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     BatchRequestBase,
+    DataConnectorQuery,
     PartitionDefinition,
-    PartitionRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
@@ -542,7 +542,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        partition_request=PartitionRequest(
+        data_connector_query=DataConnectorQuery(
             **{
                 "batch_identifiers": {
                     "name": "james",
@@ -579,12 +579,12 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     )
     assert my_batch_definition == expected_batch_definition
 
-    # TEST 3: Without partition request, should return all 10
+    # TEST 3: Without data_connector_query, should return all 10
     my_batch_request: BatchRequest = BatchRequest(
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        partition_request=None,
+        data_connector_query=None,
     )
     # should return 10
     my_batch_definition_list = (
@@ -650,7 +650,7 @@ def test_alpha(tmp_path_factory):
         datasource_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="B",
-        partition_request=None,
+        data_connector_query=None,
     )
 
     my_batch_definition_list = (
@@ -664,7 +664,9 @@ def test_alpha(tmp_path_factory):
         datasource_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="A",
-        partition_request=PartitionRequest(**{"batch_identifiers": {"part_1": "B"}}),
+        data_connector_query=DataConnectorQuery(
+            **{"batch_identifiers": {"part_1": "B"}}
+        ),
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -777,7 +779,7 @@ def test_foxtrot(tmp_path_factory):
         datasource_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="A",
-        partition_request=None,
+        data_connector_query=None,
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -865,7 +867,7 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
         datasource_name="BASE",
         data_connector_name="my_configured_asset_filesystem_data_connector",
         data_asset_name="A",
-        partition_request=None,
+        data_connector_query=None,
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -956,7 +958,7 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
         datasource_name="BASE",
         data_connector_name="my_configured_asset_filesystem_data_connector",
         data_asset_name="A",
-        partition_request=None,
+        data_connector_query=None,
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(

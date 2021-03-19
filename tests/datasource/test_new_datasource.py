@@ -322,7 +322,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
             datasource_name="my_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="B1",
-            partition_request={
+            data_connector_query={
                 "batch_identifiers": {
                     "letter": "B",
                     "number": "1",
@@ -339,7 +339,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
             datasource_name="my_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="Titanic",
-            partition_request={
+            data_connector_query={
                 "batch_identifiers": {
                     "letter": "B",
                     "number": "1",
@@ -383,7 +383,7 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
         "datasource_name": datasource_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "partition_request": {
+        "data_connector_query": {
             "batch_identifiers": {"letter": "Titanic", "number": "19120414"}
         },
         # "limit": None,
@@ -453,7 +453,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
     )
 
 
-def test_get_batch_with_pipeline_style_batch_request_missing_partition_request_error(
+def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_query_error(
     basic_pandas_datasource_v013,
 ):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})

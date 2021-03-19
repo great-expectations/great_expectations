@@ -160,12 +160,14 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
-        if batch_request.partition_request is not None:
+        if batch_request.data_connector_query is not None:
             partition_query_obj: PartitionQuery = build_partition_query(
-                partition_request_dict=batch_request.partition_request
+                data_connector_query_dict=batch_request.data_connector_query
             )
-            batch_definition_list = partition_query_obj.select_from_partition_request(
-                batch_definition_list=batch_definition_list
+            batch_definition_list = (
+                partition_query_obj.select_from_data_connector_query(
+                    batch_definition_list=batch_definition_list
+                )
             )
 
         if len(self.sorters) > 0:

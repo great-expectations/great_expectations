@@ -117,7 +117,7 @@ validations:
       datasource_name: {first_datasource_name}
       data_connector_name: {first_data_connector_name}
       data_asset_name: {first_asset_name}
-      partition_request:
+      data_connector_query:
         index: -1
     expectation_suite_name: {first_expectation_suite_name}
 """

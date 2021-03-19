@@ -236,7 +236,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: users.delivery
         action_list:
@@ -268,7 +268,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -1,
                     },
                 },
@@ -353,13 +353,13 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
       - batch_request:
           datasource_name: my_datasource
           data_connector_name: my_other_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -2
     expectation_suite_name: users.delivery
     action_list:
@@ -391,7 +391,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -1,
                     },
                 }
@@ -401,7 +401,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -2,
                     },
                 }
@@ -575,7 +575,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         datasource_name: my_datasource
         data_connector_name: my_special_data_connector
         data_asset_name: users
-        partition_request:
+        data_connector_query:
             index: -1
     validations:
       - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
@@ -622,7 +622,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
             "datasource_name": "my_datasource",
             "data_connector_name": "my_special_data_connector",
             "data_asset_name": "users",
-            "partition_request": {
+            "data_connector_query": {
                 "index": -1,
             },
         },
@@ -796,7 +796,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -1,
                     },
                 },
@@ -807,7 +807,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -2,
                     },
                 },
@@ -829,13 +829,13 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         datasource_name: my_datasource
         data_connector_name: my_special_data_connector
         data_asset_name: users
-        partition_request:
+        data_connector_query:
           index: -1
     - batch_request:
         datasource_name: my_datasource
         data_connector_name: my_other_data_connector
         data_asset_name: users
-        partition_request:
+        data_connector_query:
           index: -2
     expectation_suite_name: users.delivery
     """
@@ -851,7 +851,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -1,
                     },
                 }
@@ -861,7 +861,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {
+                    "data_connector_query": {
                         "index": -2,
                     },
                 }
@@ -1041,7 +1041,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
+                    "data_connector_query": {"partition_index": -1},
                 }
             },
             {
@@ -1049,7 +1049,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
+                    "data_connector_query": {"partition_index": -2},
                 }
             },
         ],
@@ -1102,7 +1102,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
+                    "data_connector_query": {"partition_index": -1},
                 }
             },
             {
@@ -1110,7 +1110,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
+                    "data_connector_query": {"partition_index": -2},
                 }
             },
         ],
@@ -1175,7 +1175,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_special_data_connector",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -1},
+                        "data_connector_query": {"partition_index": -1},
                     }
                 },
                 {
@@ -1183,7 +1183,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -2},
+                        "data_connector_query": {"partition_index": -2},
                     }
                 },
                 {
@@ -1191,7 +1191,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_2",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
+                        "data_connector_query": {"partition_index": -3},
                     }
                 },
                 {
@@ -1199,7 +1199,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_3",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
+                        "data_connector_query": {"partition_index": -4},
                     }
                 },
             ],
@@ -1216,7 +1216,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_other_data_connector_2",
                             "data_asset_name": "users",
-                            "partition_request": {"partition_index": -3},
+                            "data_connector_query": {"partition_index": -3},
                         }
                     },
                     {
@@ -1224,7 +1224,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_other_data_connector_3",
                             "data_asset_name": "users",
-                            "partition_request": {"partition_index": -4},
+                            "data_connector_query": {"partition_index": -4},
                         }
                     },
                 ],
@@ -1298,7 +1298,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
+                    "data_connector_query": {"partition_index": -1},
                 }
             },
             {
@@ -1306,7 +1306,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
+                    "data_connector_query": {"partition_index": -2},
                 }
             },
         ],
@@ -1363,7 +1363,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource_template_1",
                     "data_connector_name": "my_special_data_connector_template_1",
                     "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
+                    "data_connector_query": {"partition_index": -999},
                 }
             },
             {
@@ -1371,7 +1371,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_special_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -1},
+                    "data_connector_query": {"partition_index": -1},
                 }
             },
             {
@@ -1379,7 +1379,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                     "datasource_name": "my_datasource",
                     "data_connector_name": "my_other_data_connector",
                     "data_asset_name": "users",
-                    "partition_request": {"partition_index": -2},
+                    "data_connector_query": {"partition_index": -2},
                 }
             },
         ],
@@ -1454,7 +1454,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource_template_1",
                         "data_connector_name": "my_special_data_connector_template_1",
                         "data_asset_name": "users_from_template_1",
-                        "partition_request": {"partition_index": -999},
+                        "data_connector_query": {"partition_index": -999},
                     }
                 },
                 {
@@ -1462,7 +1462,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_special_data_connector",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -1},
+                        "data_connector_query": {"partition_index": -1},
                     }
                 },
                 {
@@ -1470,7 +1470,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -2},
+                        "data_connector_query": {"partition_index": -2},
                     }
                 },
                 {
@@ -1478,7 +1478,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_2_runtime",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
+                        "data_connector_query": {"partition_index": -3},
                     }
                 },
                 {
@@ -1486,7 +1486,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_3_runtime",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
+                        "data_connector_query": {"partition_index": -4},
                     }
                 },
             ],
@@ -1503,7 +1503,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_2_runtime",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -3},
+                        "data_connector_query": {"partition_index": -3},
                     }
                 },
                 {
@@ -1511,7 +1511,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
                         "datasource_name": "my_datasource",
                         "data_connector_name": "my_other_data_connector_3_runtime",
                         "data_asset_name": "users",
-                        "partition_request": {"partition_index": -4},
+                        "data_connector_query": {"partition_index": -4},
                     }
                 },
             ],

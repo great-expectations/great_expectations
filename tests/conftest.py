@@ -34,14 +34,13 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.util import is_library_loadable
 from great_expectations.self_check.util import (
     LockingConnectionCheck,
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
-from great_expectations.util import import_library_module
+from great_expectations.util import import_library_module, is_library_loadable
 from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
@@ -2639,7 +2638,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                     "datasource_name": "my_datasource_template_1",
                     "data_connector_name": "my_special_data_connector_template_1",
                     "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
+                    "data_connector_query": {"partition_index": -999},
                 }
             }
         ],

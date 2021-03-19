@@ -273,7 +273,7 @@ Additional notes
                     data_connector_name="insert_your_runtime_data_connector_name_here",
                     data_asset_name="insert_your_data_asset_name_here",
                     batch_data=df,
-                    partition_request={
+                    data_connector_query={
                         "batch_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
                             "some_other_key_maybe_run_id": "run 18"

@@ -7,9 +7,9 @@ from typing import Dict, Optional, Union
 from great_expectations.core.id_dict import (
     BatchKwargs,
     BatchSpec,
+    DataConnectorQuery,
     IDDict,
     PartitionDefinition,
-    PartitionRequest,
 )
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
@@ -94,7 +94,7 @@ class BatchDefinition(SerializableDictDot):
             partition_definition, PartitionDefinition
         ):
             raise TypeError(
-                f"""The type of a partition_request must be a PartitionDefinition object.  The type given is
+                f"""The type of batch_identifiers must be a PartitionDefinition object.  The type given is
 "{str(type(partition_definition))}", which is illegal.
                 """
             )
@@ -191,7 +191,7 @@ class BatchRequestBase(DictDot):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
@@ -200,7 +200,7 @@ class BatchRequestBase(DictDot):
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
-        self._partition_request = partition_request
+        self._data_connector_query = data_connector_query
         self._limit = limit
         self._batch_spec_passthrough = batch_spec_passthrough
         self._runtime_parameters = runtime_parameters
@@ -231,8 +231,10 @@ class BatchRequestBase(DictDot):
         self._data_asset_name = data_asset_name
 
     @property
-    def partition_request(self) -> Union[PartitionRequest, dict]:  # PartitionRequest:
-        return self._partition_request
+    def data_connector_query(
+        self,
+    ) -> Union[DataConnectorQuery, dict]:  # DataConnectorQuery:
+        return self._data_connector_query
 
     @property
     def limit(self) -> int:
@@ -243,18 +245,18 @@ class BatchRequestBase(DictDot):
         return self._batch_spec_passthrough
 
     def get_json_dict(self) -> dict:
-        partition_request: Optional[dict] = None
-        if self.partition_request is not None:
-            partition_request = copy.deepcopy(self.partition_request)
-            if partition_request.get("custom_filter_function") is not None:
-                partition_request["custom_filter_function"] = partition_request[
+        data_connector_query: Optional[dict] = None
+        if self.data_connector_query is not None:
+            data_connector_query = copy.deepcopy(self.data_connector_query)
+            if data_connector_query.get("custom_filter_function") is not None:
+                data_connector_query["custom_filter_function"] = data_connector_query[
                     "custom_filter_function"
                 ].__name__
         json_dict = {
             "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_request": partition_request,
+            "data_connector_query": data_connector_query,
         }
         if self.batch_spec_passthrough is not None:
             json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
@@ -297,7 +299,7 @@ class BatchRequest(BatchRequestBase):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -305,14 +307,14 @@ class BatchRequest(BatchRequestBase):
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_request=partition_request,
+            data_connector_query=data_connector_query,
             limit=limit,
         )
         super().__init__(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_request=partition_request,
+            data_connector_query=data_connector_query,
             limit=limit,
             batch_spec_passthrough=batch_spec_passthrough,
         )
@@ -322,7 +324,7 @@ class BatchRequest(BatchRequestBase):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
         limit: Optional[int] = None,
     ):
         # TODO test and check all logic in this validator!
@@ -344,11 +346,11 @@ class BatchRequest(BatchRequestBase):
         "{str(type(data_asset_name))}", which is illegal.
                         """
             )
-        # TODO Abe 20201015: Switch this to PartitionRequest.
-        if partition_request and not isinstance(partition_request, dict):
+        # TODO Abe 20201015: Switch this to DataConnectorQuery.
+        if data_connector_query and not isinstance(data_connector_query, dict):
             raise TypeError(
-                f"""The type of partition_request must be a dict object.  The type given is
-"{str(type(partition_request))}", which is illegal.
+                f"""The type of data_connector_query must be a dict object.  The type given is
+"{str(type(data_connector_query))}", which is illegal.
                 """
             )
         if limit and not isinstance(limit, int):

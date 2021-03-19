@@ -114,7 +114,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
         1. Configure a Datasource
 
-            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Pandas DataFrame, we use the ``PandasExecutionEngine``. You can use ``batch_identifiers`` to define what data you are able to attach as additional metadata to your DataFrame using the ``partition_request`` parameter (shown in step 3).
+            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Pandas DataFrame, we use the ``PandasExecutionEngine``. You can use ``batch_identifiers`` to define what data you are able to attach as additional metadata to your DataFrame using the ``data_connector_query`` parameter (shown in step 3).
 
             .. code-block:: yaml
 
@@ -147,7 +147,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument.
 
-            Attributes inside the ``partition_request`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``batch_identifiers`` to define which keys are allowed.
+            Attributes inside the ``data_connector_query`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``batch_identifiers`` to define which keys are allowed.
 
             .. code-block:: python
 
@@ -158,7 +158,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                     data_connector_name="insert_your_runtime_data_connector_name_here",
                     data_asset_name="insert_your_data_asset_name_here",
                     batch_data=insert_your_dataframe_here,
-                    partition_request={
+                    data_connector_query={
                         "batch_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
                             "some_other_key_maybe_run_id": "run 18"

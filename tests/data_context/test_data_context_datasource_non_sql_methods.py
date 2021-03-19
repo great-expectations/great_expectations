@@ -65,7 +65,7 @@ data_connectors:
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "path",
-        "partition_request": {
+        "data_connector_query": {
             "batch_identifiers": {
                 # "data_asset_name": "path",
                 "letter": "A",
@@ -147,7 +147,7 @@ data_connectors:
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "Titanic",
-        "partition_request": {
+        "data_connector_query": {
             "batch_identifiers": {
                 "name": "Titanic",
                 "timestamp": "19120414",
@@ -291,7 +291,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "YearTest",
-        "partition_request": {
+        "data_connector_query": {
             "custom_filter_function": my_custom_partition_selector,
         },
     }

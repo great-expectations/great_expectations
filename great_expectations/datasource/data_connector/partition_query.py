@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def build_partition_query(
-    partition_request_dict: Optional[
+    data_connector_query_dict: Optional[
         Dict[
             str,
             Optional[
@@ -27,21 +27,21 @@ def build_partition_query(
         ]
     ] = None
 ):
-    if not partition_request_dict:
+    if not data_connector_query_dict:
         return PartitionQuery(
             custom_filter_function=None,
             batch_identifiers=None,
             index=None,
             limit=None,
         )
-    partition_request_keys: set = set(partition_request_dict.keys())
-    if not partition_request_keys <= PartitionQuery.RECOGNIZED_KEYS:
+    data_connector_query_keys: set = set(data_connector_query_dict.keys())
+    if not data_connector_query_keys <= PartitionQuery.RECOGNIZED_KEYS:
         raise ge_exceptions.PartitionQueryError(
-            f"""Unrecognized partition_request key(s):
-"{str(partition_request_keys - PartitionQuery.RECOGNIZED_KEYS)}" detected.
+            f"""Unrecognized data_connector_query key(s):
+"{str(data_connector_query_keys - PartitionQuery.RECOGNIZED_KEYS)}" detected.
             """
         )
-    custom_filter_function: Callable = partition_request_dict.get(
+    custom_filter_function: Callable = data_connector_query_dict.get(
         "custom_filter_function"
     )
     if custom_filter_function and not isinstance(custom_filter_function, Callable):
@@ -50,7 +50,9 @@ def build_partition_query(
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
-    batch_identifiers: Optional[dict] = partition_request_dict.get("batch_identifiers")
+    batch_identifiers: Optional[dict] = data_connector_query_dict.get(
+        "batch_identifiers"
+    )
     if batch_identifiers:
         if not isinstance(batch_identifiers, dict):
             raise ge_exceptions.PartitionQueryError(
@@ -66,10 +68,10 @@ def build_partition_query(
         batch_identifiers: PartitionDefinitionSubset = PartitionDefinitionSubset(
             batch_identifiers
         )
-    index: Optional[Union[int, list, tuple, slice, str]] = partition_request_dict.get(
-        "index"
-    )
-    limit: Optional[int] = partition_request_dict.get("limit")
+    index: Optional[
+        Union[int, list, tuple, slice, str]
+    ] = data_connector_query_dict.get("index")
+    limit: Optional[int] = data_connector_query_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
         raise ge_exceptions.PartitionQueryError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
@@ -167,7 +169,7 @@ class PartitionQuery:
         }
         return str(doc_fields_dict)
 
-    def select_from_partition_request(self, batch_definition_list=None):
+    def select_from_data_connector_query(self, batch_definition_list=None):
         if batch_definition_list is None:
             return []
         filter_function: Callable

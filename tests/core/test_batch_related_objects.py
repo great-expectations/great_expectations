@@ -77,7 +77,7 @@ def test_batch__str__method():
     "datasource_name": "my_datasource",
     "data_connector_name": "my_data_connector",
     "data_asset_name": "my_data_asset_name",
-    "partition_request": null
+    "data_connector_query": null
   },
   "batch_definition": {
     "datasource_name": "my_datasource",
@@ -96,7 +96,7 @@ def test_batch_request_instantiation():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_request={"id": "A"},
+        data_connector_query={"id": "A"},
     )
 
     BatchRequest("A", "a", "aaa", {"id": "A"})
@@ -116,16 +116,16 @@ def test_batch_request_instantiation():
         BatchRequest(
             data_connector_name="a",
             data_asset_name="aaa",
-            partition_request={"id": "A"},
+            data_connector_query={"id": "A"},
         )
 
     # No data_source_name and data_connector_name specified
     with pytest.raises(TypeError):
-        BatchRequest(data_asset_name="aaa", partition_request={"id": "A"})
+        BatchRequest(data_asset_name="aaa", data_connector_query={"id": "A"})
 
     # No data_source_name and data_connector_name and data_asset_name specified
     with pytest.raises(TypeError):
-        BatchRequest(partition_request={"id": "A"})
+        BatchRequest(data_connector_query={"id": "A"})
 
     BatchRequest(datasource_name="A", data_connector_name="a", data_asset_name="aaa")
 

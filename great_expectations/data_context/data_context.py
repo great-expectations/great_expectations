@@ -27,7 +27,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
-    PartitionRequest,
+    DataConnectorQuery,
     RuntimeBatchRequest,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -1159,7 +1159,7 @@ class BaseDataContext:
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
@@ -1183,7 +1183,7 @@ class BaseDataContext:
 
             batch_request
             batch_data
-            partition_request
+            data_connector_query
             batch_identifiers
 
             limit
@@ -1215,7 +1215,7 @@ class BaseDataContext:
             data_asset_name=data_asset_name,
             batch_request=batch_request,
             batch_data=batch_data,
-            partition_request=partition_request,
+            data_connector_query=data_connector_query,
             batch_identifiers=batch_identifiers,
             limit=limit,
             index=index,
@@ -1444,7 +1444,7 @@ class BaseDataContext:
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
@@ -1473,7 +1473,7 @@ class BaseDataContext:
             batch_data
             query
             runtime_parameters
-            partition_request
+            data_connector_query
             batch_identifiers
 
             limit
@@ -1556,23 +1556,23 @@ class BaseDataContext:
             )
 
         else:
-            if partition_request is None:
+            if data_connector_query is None:
                 if batch_identifiers is None:
                     batch_identifiers = kwargs
                 else:
                     # Raise a warning if kwargs exist
                     pass
 
-                partition_request_params: dict = {
+                data_connector_query_params: dict = {
                     "batch_identifiers": batch_identifiers,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
-                partition_request = PartitionRequest(partition_request_params)
+                data_connector_query = DataConnectorQuery(data_connector_query_params)
             else:
                 # Raise a warning if batch_identifiers or kwargs exist
-                partition_request = PartitionRequest(partition_request)
+                data_connector_query = DataConnectorQuery(data_connector_query)
 
             if batch_spec_passthrough is None:
                 batch_spec_passthrough = {}
@@ -1595,7 +1595,7 @@ class BaseDataContext:
                 datasource_name=datasource_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
-                partition_request=partition_request,
+                data_connector_query=data_connector_query,
                 batch_spec_passthrough=batch_spec_passthrough,
             )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
@@ -1608,7 +1608,7 @@ class BaseDataContext:
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
@@ -1661,7 +1661,7 @@ class BaseDataContext:
                 data_asset_name=data_asset_name,
                 batch_request=batch_request,
                 batch_data=batch_data,
-                partition_request=partition_request,
+                data_connector_query=data_connector_query,
                 batch_identifiers=batch_identifiers,
                 limit=limit,
                 index=index,

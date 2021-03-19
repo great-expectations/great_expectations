@@ -66,8 +66,8 @@ def batch_definition_matches_batch_request(
     ):
         return False
 
-    if batch_request.partition_request:
-        batch_identifiers: Any = batch_request.partition_request.get(
+    if batch_request.data_connector_query:
+        batch_identifiers: Any = batch_request.data_connector_query.get(
             "batch_identifiers"
         )
         if batch_identifiers:

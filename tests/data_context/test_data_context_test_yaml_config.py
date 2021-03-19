@@ -497,7 +497,8 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
-        partition_request={"batch_identifiers": {"number": "3"}},
+        data_connector_query={"batch_identifiers": {"number": "3"}},
+        expectation_suite=ExpectationSuite("my_expectation_suite"),
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -506,7 +507,6 @@ data_connectors:
                 "hash_value": "f",
             },
         },
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d", min_value=1, max_value=31
@@ -655,7 +655,8 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
-        partition_request={"batch_identifiers": {"year": "2019"}},
+        data_connector_query={"batch_identifiers": {"year": "2019"}},
+        create_expectation_suite_with_name="my_expectations",
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -664,7 +665,6 @@ data_connectors:
                 "hash_value": "f",
             },
         },
-        create_expectation_suite_with_name="my_expectations",
     )
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d", min_value=1, max_value=31

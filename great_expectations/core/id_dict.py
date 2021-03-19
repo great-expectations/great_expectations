@@ -35,7 +35,7 @@ class PartitionDefinitionSubset(IDDict):
     pass
 
 
-class PartitionRequest(PartitionDefinitionSubset):
+class DataConnectorQuery(PartitionDefinitionSubset):
     pass
 
 
