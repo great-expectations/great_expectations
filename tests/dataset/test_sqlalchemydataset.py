@@ -2,12 +2,13 @@ try:
     from unittest import mock
 except ImportError:
     from unittest import mock
+
 import pandas as pd
 import pytest
 
 from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
+from great_expectations.self_check.util import get_dataset
 from great_expectations.util import is_library_loadable
-from tests.test_utils import get_dataset
 
 
 @pytest.fixture

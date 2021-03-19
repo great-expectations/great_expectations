@@ -49,10 +49,10 @@ def titanic_data_context_with_sql_datasource(
             __file__, os.path.join("..", "test_sets", "Titanic.csv")
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
-        df.to_sql("titanic", con=sqlite_engine)
+        df.to_sql(name="titanic", con=sqlite_engine)
         df = df.sample(frac=0.5, replace=True, random_state=1)
-        df.to_sql("incomplete", con=sqlite_engine)
-        test_df.to_sql("wrong", con=sqlite_engine)
+        df.to_sql(name="incomplete", con=sqlite_engine)
+        test_df.to_sql(name="wrong", con=sqlite_engine)
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
 
@@ -942,7 +942,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     stdout: str = result.stdout
     assert "Exception occurred while running checkpoint" in stdout
     assert (
-        "of checkpoint 'no_suite': validation expectation_suite_name must be specified"
+        "of Checkpoint 'no_suite': validation expectation_suite_name must be specified"
         in stdout
     )
 
