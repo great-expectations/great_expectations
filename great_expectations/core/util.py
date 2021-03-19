@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy
 except ImportError:
+    sqlalchemy = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
