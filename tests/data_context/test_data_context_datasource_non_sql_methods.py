@@ -284,7 +284,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         **config,
     )
 
-    # only select files from on or after 2000
+    # only select files from after 2000
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return int(partition_definition["year"]) > 2000
 

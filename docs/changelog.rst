@@ -6,6 +6,7 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
 
 0.13.14
 -----------------
