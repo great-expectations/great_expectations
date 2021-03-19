@@ -1,8 +1,10 @@
 import datetime
 import os
+import platform
+import subprocess
 import sys
 import warnings
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Optional, Union
 
 import click
@@ -16,7 +18,6 @@ from great_expectations.cli.batch_kwargs import get_batch_kwargs
 from great_expectations.cli.build_docs import build_docs
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
-from great_expectations.cli.python_subprocess import execute_shell_command
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -307,11 +308,9 @@ Great Expectations will create a new Expectation Suite '{:s}' and store it here:
 def launch_jupyter_notebook(notebook_path: str) -> None:
     jupyter_command_override = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
-        execute_shell_command(
-            command=f"{jupyter_command_override} {notebook_path}", shell=True
-        )
+        subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
     else:
-        execute_shell_command(command=f"jupyter notebook {notebook_path}")
+        subprocess.call(["jupyter", "notebook", notebook_path])
 
 
 def load_batch(
