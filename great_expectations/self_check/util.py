@@ -65,6 +65,8 @@ except ImportError:
     SQLAlchemyError = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
+from pandas import DataFrame as pandas_DataFrame
+
 try:
     from pyspark.sql import DataFrame as SparkDataFrame
     from pyspark.sql import SparkSession
