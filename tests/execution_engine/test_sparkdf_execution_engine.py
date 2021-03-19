@@ -17,8 +17,8 @@ from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.self_check.util import build_spark_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.expectations.util import build_spark_engine
 
 try:
     pyspark = pytest.importorskip("pyspark")

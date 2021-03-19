@@ -67,6 +67,7 @@ class BaseYamlConfig(SerializableDictDot):
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
         if hasattr(cls.get_config_class(), "_schema_instance"):
+            # noinspection PyProtectedMember
             schema_instance: Schema = cls.get_config_class()._schema_instance
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
@@ -79,8 +80,15 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap):
         try:
-            config: dict = cls._get_schema_instance().load(commented_map)
-            return cls.get_config_class()(commented_map=commented_map, **config)
+            # TODO: <Alex>ALEX</Alex>
+            # config: dict = cls._get_schema_instance().load(commented_map)
+            # return cls.get_config_class()(commented_map=commented_map, **config)
+            # TODO: <Alex>ALEX</Alex>
+            config: Union[dict, BaseYamlConfig]
+            config = cls._get_schema_instance().load(commented_map)
+            if isinstance(config, dict):
+                return cls.get_config_class()(commented_map=commented_map, **config)
+            return config
         except ValidationError:
             logger.error(
                 "Encountered errors during loading config.  See ValidationError for more details."

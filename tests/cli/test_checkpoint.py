@@ -1,5 +1,4 @@
 import os
-import shutil
 import subprocess
 import unittest
 from typing import List
@@ -17,7 +16,6 @@ from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from tests.cli.utils import (
-    LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE,
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )

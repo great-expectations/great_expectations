@@ -5,36 +5,21 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.execution_engine import SparkDFExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import get_metric_provider
-from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.expectations.util import (
-    get_test_validator_with_data,
+from great_expectations.self_check.util import (
+    build_pandas_engine,
     build_sa_engine,
     build_spark_engine,
-    build_pandas_engine,
-    build_pandas_validator_with_data,
-    build_spark_validator_with_data,
 )
-
-
-def _build_sa_engine(df, sa):
-    eng = sa.create_engine("sqlite://", echo=False)
-    df.to_sql("test", eng, index=False)
-    engine = SqlAlchemyExecutionEngine(engine=eng)
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name="test")
-    engine.load_batch_data("my_id", batch_data)
-    return engine
-
-
-def _build_pandas_engine(df):
-    engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
-    return engine
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 def test_metric_loads():
@@ -57,7 +42,7 @@ def test_basic_metric():
 
 
 def test_mean_metric_pd():
-    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     desired_metric = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
@@ -68,7 +53,7 @@ def test_mean_metric_pd():
 
 
 def test_stdev_metric_pd():
-    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
     desired_metric = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
@@ -113,7 +98,7 @@ def test_max_metric_pd_column_does_not_exist():
 
 
 def test_max_metric_sa_column_exists(sa):
-    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
+    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
 
     partial_metric = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
@@ -136,7 +121,7 @@ def test_max_metric_sa_column_exists(sa):
 
 
 def test_max_metric_sa_column_does_not_exist(sa):
-    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
+    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
 
     partial_metric = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
@@ -209,7 +194,7 @@ def test_max_metric_spark_column_does_not_exist(spark_session):
 
 
 def test_map_value_set_sa(sa):
-    engine = _build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), sa)
+    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), sa)
     desired_metric = MetricConfiguration(
         metric_name="column_values.in_set.condition",
         metric_domain_kwargs={"column": "a"},
@@ -243,7 +228,7 @@ def test_map_value_set_sa(sa):
 def test_map_of_type_sa(sa):
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    df.to_sql("test", eng, index=False)
+    df.to_sql(name="test", con=eng, index=False)
     batch_data = SqlAlchemyBatchData(
         execution_engine=eng, table_name="test", source_table_name="test"
     )
@@ -337,7 +322,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
 
 def test_map_column_value_lengths_between_pd():
-    engine = _build_pandas_engine(
+    engine = build_pandas_engine(
         pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
     )
     desired_metric = MetricConfiguration(
@@ -352,7 +337,7 @@ def test_map_column_value_lengths_between_pd():
 
 
 def test_map_unique_pd_column_exists():
-    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
@@ -364,7 +349,7 @@ def test_map_unique_pd_column_exists():
 
 
 def test_map_unique_pd_column_does_not_exist():
-    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.condition",
@@ -382,7 +367,7 @@ def test_map_unique_pd_column_does_not_exist():
 
 
 def test_map_unique_sa_column_exists(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame(
             {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
         ),
@@ -461,7 +446,7 @@ def test_map_unique_sa_column_exists(sa):
 
 
 def test_map_unique_sa_column_does_not_exist(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame(
             {"a": [1, 2, 3, 3, None], "b": ["foo", "bar", "baz", "qux", "fish"]}
         ),
@@ -894,7 +879,7 @@ def test_distinct_metric_spark(spark_session):
 
 
 def test_distinct_metric_sa(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -935,7 +920,7 @@ def test_distinct_metric_sa(sa):
 
 
 def test_distinct_metric_pd():
-    engine = _build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
     desired_metric = MetricConfiguration(
         metric_name="column.value_counts",
@@ -962,7 +947,7 @@ def test_distinct_metric_pd():
 def test_sa_batch_aggregate_metrics(caplog, sa):
     import datetime
 
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 

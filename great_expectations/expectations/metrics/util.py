@@ -1,8 +1,10 @@
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Dict, List
 
 import numpy as np
 from dateutil.parser import parse
+
+from great_expectations.execution_engine.util import check_sql_engine_dialect
 
 try:
     import psycopg2
@@ -60,42 +62,6 @@ try:
 except ImportError:
     bigquery_types_tuple = None
     pybigquery = None
-from great_expectations.execution_engine.util import check_sql_engine_dialect
-
-SCHEMAS = {
-    "api_np": {
-        "NegativeInfinity": -np.inf,
-        "PositiveInfinity": np.inf,
-    },
-    "api_cast": {
-        "NegativeInfinity": -float("inf"),
-        "PositiveInfinity": float("inf"),
-    },
-    "mysql": {
-        "NegativeInfinity": -1.79e308,
-        "PositiveInfinity": 1.79e308,
-    },
-    "mssql": {
-        "NegativeInfinity": -1.79e308,
-        "PositiveInfinity": 1.79e308,
-    },
-}
-
-
-def get_sql_dialect_floating_point_infinity_value(
-    schema: str, negative: bool = False
-) -> float:
-    res: Optional[Dict] = SCHEMAS.get(schema)
-    if res is None:
-        if negative:
-            return -np.inf
-        else:
-            return np.inf
-    else:
-        if negative:
-            return res["NegativeInfinity"]
-        else:
-            return res["PositiveInfinity"]
 
 
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
