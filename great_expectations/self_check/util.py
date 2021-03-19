@@ -52,9 +52,18 @@ tmp_dir = str(tempfile.mkdtemp())
 
 
 try:
+    import sqlalchemy as sqlalchemy
     from sqlalchemy import create_engine
+
+    # noinspection PyProtectedMember
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
+    sqlalchemy = None
     create_engine = None
+    Engine = None
+    SQLAlchemyError = None
+    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 try:
     from pyspark.sql import DataFrame as SparkDataFrame
@@ -174,16 +183,20 @@ class SqlAlchemyConnectionManager:
         self._connections = dict()
 
     def get_engine(self, connection_string):
-        with self.lock:
-            if connection_string not in self._connections:
-                try:
-                    engine = create_engine(connection_string)
-                    conn = engine.connect()
-                    self._connections[connection_string] = conn
-                except (ImportError, self.sa.exc.SQLAlchemyError):
-                    print(f"Unable to establish connection with {connection_string}")
-                    raise
-            return self._connections[connection_string]
+        if sqlalchemy is not None:
+            with self.lock:
+                if connection_string not in self._connections:
+                    try:
+                        engine = create_engine(connection_string)
+                        conn = engine.connect()
+                        self._connections[connection_string] = conn
+                    except (ImportError, SQLAlchemyError):
+                        print(
+                            f"Unable to establish connection with {connection_string}"
+                        )
+                        raise
+                return self._connections[connection_string]
+        return None
 
 
 connection_manager = SqlAlchemyConnectionManager()
@@ -949,7 +962,7 @@ def build_sa_engine(
     table_name: str = "test"
 
     # noinspection PyUnresolvedReferences
-    sqlalchemy_engine: sa.engine.Engine = sa.create_engine("sqlite://", echo=False)
+    sqlalchemy_engine: Engine = sa.create_engine("sqlite://", echo=False)
     df.to_sql(
         name=table_name,
         con=sqlalchemy_engine,
@@ -1364,10 +1377,10 @@ def build_test_backends_list(
 
         if include_mysql:
             try:
-                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
+                engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
                 conn = engine.connect()
                 conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
+            except (ImportError, SQLAlchemyError):
                 raise ImportError(
                     "mysql tests are requested, but unable to connect to the mysql database at "
                     f"'mysql+pymysql://root@{db_hostname}/test_ci'"
@@ -1376,7 +1389,7 @@ def build_test_backends_list(
 
         if include_mssql:
             try:
-                engine = sa.create_engine(
+                engine = create_engine(
                     f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
                     # echo=True,
