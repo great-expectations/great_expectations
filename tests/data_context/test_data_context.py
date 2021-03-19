@@ -1968,6 +1968,9 @@ validations:
         checkpoint_yaml_config, name=checkpoint_name
     )
 
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
     checkpoint_from_yaml = context.add_checkpoint(
         **yaml.load(checkpoint_yaml_config),
     )
