@@ -265,6 +265,7 @@ class DataConnectorConfig(DictDot):
         delimiter=None,
         max_keys=None,
         boto3_options=None,
+        sorters=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -289,6 +290,8 @@ class DataConnectorConfig(DictDot):
             self.max_keys = max_keys
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if sorters is not None:
+            self.sorters = sorters
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -317,6 +320,11 @@ class DataConnectorConfigSchema(Schema):
 
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
+    sorters = fields.List(
+        fields.Nested(SorterConfigSchema, required=False, allow_none=True),
+        required=False,
+        allow_none=True,
+    )
     default_regex = fields.Dict(required=False, allow_none=True)
     runtime_keys = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
