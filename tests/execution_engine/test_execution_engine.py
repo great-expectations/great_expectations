@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 # Testing ordinary process of adding column row condition

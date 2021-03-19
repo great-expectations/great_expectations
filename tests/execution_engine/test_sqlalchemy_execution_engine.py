@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import pytest
 
-from great_expectations.core.batch import Batch, BatchSpec
+from great_expectations.core.batch import BatchSpec
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.exceptions import InvalidConfigError
@@ -13,17 +13,11 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics import (
-    ColumnMean,
-    ColumnStandardDeviation,
-    ColumnValuesInSet,
-    ColumnValuesZScore,
-)
-from great_expectations.validator.validation_graph import MetricConfiguration
 
 # Function to test for spark dataframe equality
+from great_expectations.self_check.util import build_sa_engine
+from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-from tests.test_utils import _build_sa_engine
 
 
 def test_instantiation_via_connection_string(sa, test_db_connection_string):
@@ -107,7 +101,7 @@ def test_instantiation_error_states(sa, test_db_connection_string):
 def test_sa_batch_aggregate_metrics(caplog, sa):
     import datetime
 
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -232,7 +226,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
 def test_get_compute_domain_with_no_domain_kwargs(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -254,7 +248,7 @@ def test_get_compute_domain_with_no_domain_kwargs(sa):
 
 # Testing for only untested use case - column_pair
 def test_get_compute_domain_with_column_pair(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -281,7 +275,7 @@ def test_get_compute_domain_with_column_pair(sa):
     }, "Accessor kwargs have been modified"
 
     # Building new engine so that values still found
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
     data2, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
@@ -307,7 +301,7 @@ def test_get_compute_domain_with_column_pair(sa):
 
 # Testing for only untested use case - multicolumn
 def test_get_compute_domain_with_multicolumn(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]}),
         sa,
     )
@@ -353,7 +347,7 @@ def test_get_compute_domain_with_multicolumn(sa):
 
 # Testing whether compute domain is properly calculated, but this time obtaining a column
 def test_get_compute_domain_with_column_domain(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -374,7 +368,7 @@ def test_get_compute_domain_with_column_domain(sa):
     assert accessor_kwargs == {"column": "a"}, "Accessor kwargs have been modified"
 
     # Testing for identity
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -397,7 +391,7 @@ def test_get_compute_domain_with_column_domain(sa):
 
 # What happens when we filter such that no value meets the condition?
 def test_get_compute_domain_with_unmeetable_row_condition(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -428,7 +422,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
 
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
 def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -471,7 +465,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
 
     # Ensuring data has been properly queried
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
     raw_data = engine.engine.execute(
@@ -489,7 +483,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
 
 
 def test_get_compute_domain_with_nonexistent_condition_parser(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]}), sa
     )
 
@@ -506,7 +500,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(sa):
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
 def test_resolve_metric_bundle_with_nonexistent_metric(sa):
-    engine = _build_sa_engine(
+    engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
