@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from pandas import DataFrame as pandas_DataFrame
 
 from great_expectations.core import (
     ExpectationConfigurationSchema,
@@ -64,8 +65,6 @@ except ImportError:
     Engine = None
     SQLAlchemyError = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-
-from pandas import DataFrame as pandas_DataFrame
 
 try:
     from pyspark.sql import DataFrame as SparkDataFrame
