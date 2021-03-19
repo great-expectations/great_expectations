@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark
     import pyspark.sql.functions as F
+    from pyspark import SparkContext
     from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.types import (
         BooleanType,
@@ -42,10 +43,9 @@ try:
         StructField,
         StructType,
     )
-
-
 except ImportError:
     pyspark = None
+    SparkContext = None
     SparkSession = None
     DataFrame = None
     F = None
