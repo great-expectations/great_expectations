@@ -1972,6 +1972,66 @@ validations:
         **yaml.load(checkpoint_yaml_config),
     )
 
+    expected_checkpoint_yaml: str = """name: my_new_checkpoint
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: Checkpoint
+run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
+expectation_suite_name:
+batch_request:
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names: []
+evaluation_parameters: {}
+runtime_configuration: {}
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+profilers: []
+"""
+
+    # TODO: read from disk and check especially for action_list
+    checkpoint_dir = os.path.join(
+        context.root_directory,
+        context.checkpoint_store.config["store_backend"]["base_directory"],
+    )
+    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
+
+    with open(checkpoint_file) as cf:
+        checkpoint_from_disk = cf.read()
+
+    assert checkpoint_from_disk == expected_checkpoint_yaml
+
+    checkpoint_from_store = context.get_checkpoint(checkpoint_name)
+    assert checkpoint_from_store.action_list == [
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+        {
+            "name": "update_data_docs",
+            "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+        },
+    ]
+
     assert checkpoint_from_test_yaml_config.name == checkpoint_from_yaml.name
     assert (
         checkpoint_from_test_yaml_config.action_list == checkpoint_from_yaml.action_list
@@ -2016,40 +2076,7 @@ validations:
         ],
         "profilers": [],
     }
-    assert (
-        checkpoint_from_yaml.config.to_yaml_str()
-        == """name: my_new_checkpoint
-config_version: 1.0
-template_name:
-module_name: great_expectations.checkpoint
-class_name: Checkpoint
-run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
-expectation_suite_name:
-batch_request:
-action_list:
-  - name: store_validation_result
-    action:
-      class_name: StoreValidationResultAction
-  - name: store_evaluation_params
-    action:
-      class_name: StoreEvaluationParametersAction
-  - name: update_data_docs
-    action:
-      class_name: UpdateDataDocsAction
-      site_names: []
-evaluation_parameters: {}
-runtime_configuration: {}
-validations:
-  - batch_request:
-      datasource_name: data_dir
-      data_connector_name: data_dir_example_data_connector
-      data_asset_name: DEFAULT_ASSET_NAME
-      partition_request:
-        index: -1
-    expectation_suite_name: newsuite
-profilers: []
-"""
-    )
+    assert checkpoint_from_yaml.config.to_yaml_str() == expected_checkpoint_yaml
 
     assert isinstance(checkpoint_from_yaml, Checkpoint)
 
