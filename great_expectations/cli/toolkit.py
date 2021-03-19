@@ -388,7 +388,7 @@ def run_checkpoint(
     usage_event: str,
 ) -> CheckpointResult:
     """Run a checkpoint or raise helpful errors."""
-    failure_message: str = "Exception occurred while running checkpoint."
+    failure_message: str = "Exception occurred while running Checkpoint."
     validate_checkpoint(
         context=context,
         checkpoint_name=checkpoint_name,
