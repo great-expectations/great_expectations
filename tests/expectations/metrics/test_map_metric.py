@@ -20,7 +20,16 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     dependencies = mp.get_evaluation_dependencies(
         metric, execution_engine=PandasExecutionEngine()
     )
-    assert dependencies == dict()
+
+    table_columns_metric: MetricConfiguration = dependencies["table.columns"]
+    assert dependencies == {
+        "table.columns": table_columns_metric,
+    }
+    assert dependencies["table.columns"].id == (
+        "table.columns",
+        (),
+        (),
+    )
 
 
 def test_get_aggregate_count_aware_metric_dependencies(

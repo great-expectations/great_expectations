@@ -6,6 +6,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -61,8 +62,21 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+        table_domain_kwargs: dict = {
+            k: v
+            for k, v in metric.metric_domain_kwargs.items()
+            if k != MetricDomainTypes.COLUMN.value
         }
+        dependencies["table.columns"] = MetricConfiguration(
+            metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        return dependencies

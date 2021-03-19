@@ -37,7 +37,12 @@ def test_expect_column_value_z_scores_to_be_less_than_impl():
 
 def test_sa_expect_column_value_z_scores_to_be_less_than_impl(postgresql_engine):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10]})
-    df.to_sql("z_score_test_data", postgresql_engine, if_exists="replace")
+    df.to_sql(
+        name="z_score_test_data",
+        con=postgresql_engine,
+        index=False,
+        if_exists="replace",
+    )
     expectationConfiguration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
