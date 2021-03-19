@@ -15,8 +15,7 @@ Here we are creating an example configuration using `SimpleSqlalchemyDatasource`
 
 Credentials will not be saved until you run the last cell. The credentials will be saved in `uncommitted/config_variables.yml` which should not be added to source control."""
 
-    FILES_DOCS = """
-### For files based Datasources:
+    FILES_DOCS = """### For files based Datasources:
 Here we are creating an example configuration using an InferredAssetDataConnector which will add a Data Asset for each file in the base directory you provided. This is just a sample, you may customize this as you wish!
 
 See our docs for other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, etc."""
@@ -28,7 +27,7 @@ See our docs for other methods to organize assets, handle multi-file assets, nam
 **My configuration is not so simple - are there more advanced options?**
 Glad you asked! Datasources are versatile. Please see our [How To Guides](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html)!
 
-Give you datasource a unique name:"""
+Give your datasource a unique name:"""
 
     def __init__(
         self,

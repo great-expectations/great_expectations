@@ -176,12 +176,7 @@ class BaseDatasourceNewYamlHelper:
         raise NotImplementedError
 
     def make_notebook(self, context: DataContext) -> str:
-        renderer = DatasourceNewNotebookRenderer(
-            context,
-            datasource_type=self.datasource_type,
-            datasource_yaml=self.yaml_snippet(),
-            datasource_name=self.datasource_name,
-        )
+        renderer = self.get_notebook_renderer(context)
         notebook_path = os.path.join(
             context.root_directory,
             context.GE_UNCOMMITTED_DIR,
@@ -189,6 +184,15 @@ class BaseDatasourceNewYamlHelper:
         )
         renderer.render_to_disk(notebook_path)
         return notebook_path
+
+    def get_notebook_renderer(self, context):
+        renderer = DatasourceNewNotebookRenderer(
+            context,
+            datasource_type=self.datasource_type,
+            datasource_yaml=self.yaml_snippet(),
+            datasource_name=self.datasource_name,
+        )
+        return renderer
 
     def send_backend_choice_usage_message(self, context: DataContext) -> None:
         toolkit.send_usage_message(
@@ -365,6 +369,16 @@ credentials:'''
   username: {username}
   password: {password}
   database: {database}"""
+
+    def get_notebook_renderer(self, context):
+        renderer = DatasourceNewNotebookRenderer(
+            context,
+            datasource_type=self.datasource_type,
+            datasource_yaml=self.yaml_snippet(),
+            datasource_name=self.datasource_name,
+            sql_credentials_snippet=self.credentials_snippet(),
+        )
+        return renderer
 
 
 class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):

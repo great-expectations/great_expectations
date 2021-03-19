@@ -15,17 +15,15 @@ from great_expectations.cli.datasource import (
 from great_expectations.datasource.types import DatasourceTypes
 
 
-def test_SQLCredentialYamlHelper_defaults():
+def test_SQLCredentialYamlHelper_defaults(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"})
-    assert (
-        helper.credentials_snippet()
-        == '''\
+    expected_credentials_snippet = '''\
 host = "YOUR_HOST"
 port = 
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
-    )
+    assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
@@ -43,18 +41,19 @@ credentials:
   database: {database}"""'''
     )
 
+    renderer = helper.get_notebook_renderer(empty_data_context)
+    assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
-def test_SQLCredentialYamlHelper_driver():
+
+def test_SQLCredentialYamlHelper_driver(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"}, driver="stuff")
-    assert (
-        helper.credentials_snippet()
-        == '''\
+    expected_credentials_snippet = '''\
 host = "YOUR_HOST"
 port = 
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
-    )
+    assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
@@ -73,21 +72,22 @@ credentials:
   database: {database}"""'''
     )
 
+    renderer = helper.get_notebook_renderer(empty_data_context)
+    assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_MySQLCredentialYamlHelper(mock_emit, empty_data_context_stats_enabled):
     helper = MySQLCredentialYamlHelper("my_datasource")
-    assert (
-        helper.credentials_snippet()
-        == '''\
+    expected_credentials_snippet = '''\
 host = "YOUR_HOST"
 port = 3306
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
-    )
+    assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
@@ -123,21 +123,22 @@ credentials:
         ),
     ]
 
+    renderer = helper.get_notebook_renderer(empty_data_context_stats_enabled)
+    assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_PostgresCredentialYamlHelper(mock_emit, empty_data_context_stats_enabled):
     helper = PostgresCredentialYamlHelper("my_datasource")
-    assert (
-        helper.credentials_snippet()
-        == '''\
+    expected_credentials_snippet = '''\
 host = "YOUR_HOST"
 port = 5432
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "postgres"'''
-    )
+    assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
@@ -171,6 +172,8 @@ credentials:
             }
         ),
     ]
+    renderer = helper.get_notebook_renderer(empty_data_context_stats_enabled)
+    assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
 
 @mock.patch(
@@ -178,15 +181,13 @@ credentials:
 )
 def test_RedshiftCredentialYamlHelper(mock_emit, empty_data_context_stats_enabled):
     helper = RedshiftCredentialYamlHelper("my_datasource")
-    assert (
-        helper.credentials_snippet()
-        == '''\
+    expected_credentials_snippet = '''\
 host = "YOUR_HOST"
 port = 5439
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
-    )
+    assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
@@ -223,6 +224,9 @@ credentials:
         ),
     ]
 
+    renderer = helper.get_notebook_renderer(empty_data_context_stats_enabled)
+    assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
+
 
 @mock.patch("click.prompt")
 @mock.patch(
@@ -236,9 +240,7 @@ def test_SnowflakeCredentialYamlHelper_password_auth(
     helper.prompt()
     assert helper.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD
 
-    assert (
-        helper.credentials_snippet()
-        == '''\
+    expected_credentials_snippet = '''\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
 database = ""  # The database name (optional -- leave blank for none)
@@ -246,7 +248,7 @@ schema = ""  # The schema name (optional -- leave blank for none)
 warehouse = ""  # The warehouse name (optional -- leave blank for none)
 role = ""  # The role name (optional -- leave blank for none)
 password = "{self.password}"'''
-    )
+    assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
@@ -271,6 +273,9 @@ credentials:
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
 
+    renderer = helper.get_notebook_renderer(empty_data_context_stats_enabled)
+    assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
+
 
 @mock.patch("click.prompt")
 @mock.patch(
@@ -284,9 +289,7 @@ def test_SnowflakeCredentialYamlHelper_sso_auth(
     helper.prompt()
     assert helper.auth_method == SnowflakeAuthMethod.SSO
 
-    assert (
-        helper.credentials_snippet()
-        == """\
+    expected_credentials_snippet = """\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
 database = ""  # The database name (optional -- leave blank for none)
@@ -294,7 +297,7 @@ schema = ""  # The schema name (optional -- leave blank for none)
 warehouse = ""  # The warehouse name (optional -- leave blank for none)
 role = ""  # The role name (optional -- leave blank for none)
 authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO"""
-    )
+    assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
@@ -319,6 +322,8 @@ credentials:
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
+    renderer = helper.get_notebook_renderer(empty_data_context_stats_enabled)
+    assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
 
 @mock.patch("click.prompt")
@@ -333,9 +338,7 @@ def test_SnowflakeCredentialYamlHelper_key_pair_auth(
     helper.prompt()
     assert helper.auth_method == SnowflakeAuthMethod.KEY_PAIR
 
-    assert (
-        helper.credentials_snippet()
-        == """host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
+    expected_credentials_snippet = """host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
 database = ""  # The database name (optional -- leave blank for none)
 schema = ""  # The schema name (optional -- leave blank for none)
@@ -343,7 +346,7 @@ warehouse = ""  # The warehouse name (optional -- leave blank for none)
 role = ""  # The role name (optional -- leave blank for none)
 private_key_path = "YOUR_KEY_PATH"  # Path to the private key used for authentication
 private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)"""
-    )
+    assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
@@ -368,6 +371,8 @@ credentials:
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
+    renderer = helper.get_notebook_renderer(empty_data_context_stats_enabled)
+    assert renderer.sql_credentials_code_snippet == expected_credentials_snippet
 
 
 def _snowflake_usage_stats_assertions(mock_emit):
