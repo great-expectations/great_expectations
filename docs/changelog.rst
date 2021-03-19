@@ -4,10 +4,21 @@
 Changelog
 #########
 
-Develop
+develop
+-----------------
+* [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
+* [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
+
+0.13.14
 -----------------
 * [BUGFIX] Use temporary paths in tests #2545
 * [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
+* [ENHANCEMENT] Restore cli functionality for legacy checkpoints #2511
+* [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend #2513 (thanks @benoitLebreton-perso)
+* [BUGFIX] force azure to set content_type='text/html' if the file is HTML #2539 (thanks @benoitLebreton-perso)
+* [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 in requirements-dev-sqlalchemy.txt #2547
+* [DOCS] Fix documentation links generated within template #2542 (thanks @thejasraju)
+* [MAINTENANCE] Remove deprecated automerge config #2492
 
 0.13.13
 -----------------
