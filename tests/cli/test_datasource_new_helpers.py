@@ -30,6 +30,7 @@ database = "YOUR_DATABASE"'''
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -58,6 +59,7 @@ database = "YOUR_DATABASE"'''
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -90,6 +92,7 @@ database = "YOUR_DATABASE"'''
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -139,6 +142,7 @@ database = "postgres"'''
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -187,6 +191,7 @@ database = "YOUR_DATABASE"'''
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -246,6 +251,7 @@ password = "{self.password}"'''
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -293,6 +299,7 @@ authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' u
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -341,6 +348,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -396,6 +404,7 @@ connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -439,6 +448,7 @@ connection_string = "YOUR_CONNECTION_STRING"'''
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
@@ -498,6 +508,7 @@ def test_PandasYamlHelper(mock_emit, mock_prompt, empty_data_context_stats_enabl
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: Datasource
 execution_engine:
   class_name: PandasExecutionEngine
@@ -544,6 +555,7 @@ def test_SparkYamlHelper(mock_emit, mock_prompt, empty_data_context_stats_enable
     assert (
         helper.yaml_snippet()
         == '''f"""
+name: {datasource_name}
 class_name: Datasource
 execution_engine:
   class_name: SparkDFExecutionEngine
