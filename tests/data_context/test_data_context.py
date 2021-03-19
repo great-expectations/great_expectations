@@ -1941,6 +1941,9 @@ def test_add_checkpoint_from_yaml(empty_data_context):
     """
     What does this test and why?
     We should be able to add a checkpoint directly from a valid yaml configuration.
+    test_yaml_config() should not automatically save a checkpoint if valid.
+    checkpoint yaml in a store should match the configuration, even if created from SimpleCheckpoints
+    Note: This tests multiple items and could stand to be broken up.
     """
 
     context: DataContext = empty_data_context
@@ -1968,6 +1971,7 @@ validations:
         checkpoint_yaml_config, name=checkpoint_name
     )
 
+    # test_yaml_config() no longer stores checkpoints automatically
     assert checkpoint_name not in context.list_checkpoints()
     assert len(context.list_checkpoints()) == 0
 
@@ -2007,7 +2011,6 @@ validations:
 profilers: []
 """
 
-    # TODO: read from disk and check especially for action_list
     checkpoint_dir = os.path.join(
         context.root_directory,
         context.checkpoint_store.config["store_backend"]["base_directory"],
@@ -2018,9 +2021,12 @@ profilers: []
         checkpoint_from_disk = cf.read()
 
     assert checkpoint_from_disk == expected_checkpoint_yaml
+    assert checkpoint_from_yaml.config.to_yaml_str() == expected_checkpoint_yaml
 
     checkpoint_from_store = context.get_checkpoint(checkpoint_name)
-    assert checkpoint_from_store.action_list == [
+    assert checkpoint_from_store.config.to_yaml_str() == expected_checkpoint_yaml
+
+    expected_action_list = [
         {
             "name": "store_validation_result",
             "action": {"class_name": "StoreValidationResultAction"},
@@ -2034,6 +2040,11 @@ profilers: []
             "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
         },
     ]
+
+    assert checkpoint_from_yaml.action_list == expected_action_list
+    assert checkpoint_from_store.action_list == expected_action_list
+    assert checkpoint_from_test_yaml_config.action_list == expected_action_list
+    assert checkpoint_from_store.action_list == expected_action_list
 
     assert checkpoint_from_test_yaml_config.name == checkpoint_from_yaml.name
     assert (
@@ -2079,7 +2090,6 @@ profilers: []
         ],
         "profilers": [],
     }
-    assert checkpoint_from_yaml.config.to_yaml_str() == expected_checkpoint_yaml
 
     assert isinstance(checkpoint_from_yaml, Checkpoint)
 
