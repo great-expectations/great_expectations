@@ -15,10 +15,10 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
-from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.self_check.util import build_spark_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
+from tests.expectations.test_util import get_table_columns_metric
 
 try:
     pyspark = pytest.importorskip("pyspark")
@@ -764,62 +764,48 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         batch_id="1234",
     )
 
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+
+    metrics.update(results)
+
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
-    metrics = engine.resolve_metrics(
-        metrics_to_resolve=(
-            desired_metric_1,
-            desired_metric_2,
-            desired_metric_3,
-            desired_metric_4,
-        )
-    )
-    desired_metric_1 = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_1},
-    )
-    desired_metric_2 = MetricConfiguration(
-        metric_name="column.min",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_2},
-    )
-    desired_metric_3 = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_3},
-    )
-    desired_metric_4 = MetricConfiguration(
-        metric_name="column.min",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_4},
-    )
-    start = datetime.datetime.now()
-    caplog.clear()
-    caplog.set_level(logging.DEBUG, logger="great_expectations")
-    res = engine.resolve_metrics(
+    results = engine.resolve_metrics(
         metrics_to_resolve=(
             desired_metric_1,
             desired_metric_2,
@@ -828,12 +814,63 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         ),
         metrics=metrics,
     )
+    metrics.update(results)
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_1,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_2,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_3,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_4,
+            "table.columns": table_columns_metric,
+        },
+    )
+    start = datetime.datetime.now()
+    caplog.clear()
+    caplog.set_level(logging.DEBUG, logger="great_expectations")
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
     end = datetime.datetime.now()
     print(end - start)
-    assert res[desired_metric_1.id] == 3
-    assert res[desired_metric_2.id] == 1
-    assert res[desired_metric_3.id] == 4
-    assert res[desired_metric_4.id] == 4
+    assert metrics[desired_metric_1.id] == 3
+    assert metrics[desired_metric_2.id] == 1
+    assert metrics[desired_metric_3.id] == 4
+    assert metrics[desired_metric_4.id] == 4
 
     # Check that all four of these metrics were computed on a single domain
     found_message = False
