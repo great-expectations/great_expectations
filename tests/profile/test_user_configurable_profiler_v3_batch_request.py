@@ -14,9 +14,6 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.expectations.metrics.util import (
-    get_sql_dialect_floating_point_infinity_value,
-)
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
     profiler_semantic_types,
@@ -24,10 +21,13 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
+from great_expectations.self_check.util import (
+    connection_manager,
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-from tests.test_utils import connection_manager
 
 logger = logging.getLogger(__name__)
 

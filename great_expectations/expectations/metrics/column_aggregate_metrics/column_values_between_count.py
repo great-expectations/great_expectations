@@ -2,6 +2,7 @@ from typing import Any, Dict, Tuple
 
 import numpy as np
 
+from great_expectations.core.util import get_sql_dialect_floating_point_infinity_value
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -14,9 +15,6 @@ from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
-)
-from great_expectations.expectations.metrics.util import (
-    get_sql_dialect_floating_point_infinity_value,
 )
 
 
