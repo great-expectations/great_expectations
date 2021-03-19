@@ -148,8 +148,7 @@ class FilePathDataConnector(DataConnector):
 
         """
         self._validate_batch_request(batch_request=batch_request)
-
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = list(
