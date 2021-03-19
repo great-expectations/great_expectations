@@ -59,13 +59,19 @@ def datasource(ctx):
 @datasource.command(name="new")
 @click.pass_context
 @click.option("--name", default=None, help="Datasource name.")
-def datasource_new(ctx, name):
+@click.option(
+    "--jupyter/--no-jupyter",
+    is_flag=True,
+    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
+    default=True,
+)
+def datasource_new(ctx, name, jupyter):
     """Add a new Datasource to the data context."""
     context = ctx.obj.data_context
     toolkit.send_usage_message(
         data_context=context, event="cli.datasource.new", success=True
     )
-    _interactive_datasource_new_flow(context, datasource_name=name)
+    _interactive_datasource_new_flow(context, datasource_name=name, jupyter=jupyter)
 
 
 @datasource.command(name="delete")
@@ -122,7 +128,7 @@ def _build_datasource_intro_string(datasources):
 
 
 def _interactive_datasource_new_flow(
-    context: DataContext, datasource_name: Optional[str] = None
+    context: DataContext, datasource_name: Optional[str] = None, jupyter: bool = True
 ) -> None:
     files_or_sql_selection = click.prompt(
         """
@@ -153,6 +159,12 @@ What data would you like Great Expectations to connect to?
         return None
     helper.prompt()
     notebook_path = helper.make_notebook(context)
+    if jupyter is False:
+        cli_message(
+            f"To continue editing this Datasource, run <green>jupyter notebook {notebook_path}</green>"
+        )
+        return None
+
     if notebook_path:
         cli_message(
             """<green>Because you requested to create a new Datasource, we'll open a notebook for you now to complete it!</green>\n\n"""

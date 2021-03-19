@@ -125,6 +125,40 @@ def test_cli_datasource_new(
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_cli_datasource_new_no_jupyter_writes_notebook(
+    mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
+):
+    context = empty_data_context
+    root_dir = context.root_directory
+    assert context.list_datasources() == []
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(root_dir))
+    result = runner.invoke(
+        cli,
+        "--v3-api datasource new --no-jupyter",
+        input=f"1\n1\n{filesystem_csv_2}\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert context.list_datasources() == []
+
+    assert "What data would you like Great Expectations to connect to?" in stdout
+    assert "What are you processing your files with?" in stdout
+    assert "To continue editing this Datasource" in stdout
+
+    assert result.exit_code == 0
+
+    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    assert os.path.isfile(expected_notebook)
+    assert mock_subprocess.call_count == 0
+    assert len(context.list_datasources()) == 0
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_cli_datasource_new_with_name_param(
     mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
 ):
