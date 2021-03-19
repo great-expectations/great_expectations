@@ -112,11 +112,8 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         assets={"stuff": {}},
     )
 
-    with pytest.raises(ValueError):
-        my_data_connector.get_data_reference_list_count()
-
-    with pytest.raises(ValueError):
-        my_data_connector.get_unmatched_data_references()
+    assert my_data_connector.get_data_reference_list_count() == 0
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
@@ -278,7 +275,7 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_PandasExecuti
 
 
 def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecutionEngine(
-    spark_session, tmp_path_factory
+    spark_session, basic_spark_df_execution_engine, tmp_path_factory
 ):
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -298,7 +295,7 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
         base_directory=base_directory,
         glob_directive="*.csv",
         datasource_name="FAKE_DATASOURCE",
-        execution_engine=SparkDFExecutionEngine(),
+        execution_engine=basic_spark_df_execution_engine,
         default_regex={
             "pattern": "(.+)_(\\d+)_(\\d+)\\.csv",
             "group_names": ["data_asset_name", "timestamp", "size"],

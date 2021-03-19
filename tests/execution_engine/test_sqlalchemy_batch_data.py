@@ -1,9 +1,5 @@
-import pandas as pd
-import pytest
-
 from great_expectations.core.batch import BatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.validator.validator import Validator
 
 try:
     import sqlalchemy
@@ -42,7 +38,7 @@ def test_instantiation_with_table_name(sqlite_view_engine):
 # def test_head(sqlite_view_engine):
 #     # Create a larger table so that we can downsample meaningfully
 #     df = pd.DataFrame({"a": range(100)})
-#     df.to_sql("test_table_2", con=sqlite_view_engine)
+#     df.to_sql(name="test_table_2", con=sqlite_view_engine, index=False)
 #
 #     engine = SqlAlchemyExecutionEngine(engine=sqlite_view_engine)
 #     batch_data = SqlAlchemyBatchData(

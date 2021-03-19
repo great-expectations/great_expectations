@@ -11,13 +11,15 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
-    get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.util import import_library_module
 
@@ -784,36 +786,42 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         )
 
     def get_column_median(self, column):
-        # AWS Athena does not support offset
+        # AWS Athena and presto have an special function that can be used to retrieve the median
         if self.sql_engine_dialect.name.lower() == "awsathena":
-            raise NotImplementedError("AWS Athena does not support OFFSET.")
-        nonnull_count = self.get_column_nonnull_count(column)
-        element_values = self.engine.execute(
-            sa.select([sa.column(column)])
-            .order_by(sa.column(column))
-            .where(sa.column(column) != None)
-            .offset(max(nonnull_count // 2 - 1, 0))
-            .limit(2)
-            .select_from(self._table)
-        )
-
-        column_values = list(element_values.fetchall())
-
-        if len(column_values) == 0:
-            column_median = None
-        elif nonnull_count % 2 == 0:
-            # An even number of column values: take the average of the two center values
-            column_median = (
-                float(
-                    column_values[0][0]
-                    + column_values[1][0]  # left center value  # right center value
-                )
-                / 2.0
-            )  # Average center values
+            element_values = self.engine.execute(
+                f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
+            )
+            return convert_to_json_serializable(element_values.fetchone()[0])
         else:
-            # An odd number of column values, we can just take the center value
-            column_median = column_values[1][0]  # True center value
-        return convert_to_json_serializable(column_median)
+
+            nonnull_count = self.get_column_nonnull_count(column)
+            element_values = self.engine.execute(
+                sa.select([sa.column(column)])
+                .order_by(sa.column(column))
+                .where(sa.column(column) != None)
+                .offset(max(nonnull_count // 2 - 1, 0))
+                .limit(2)
+                .select_from(self._table)
+            )
+
+            column_values = list(element_values.fetchall())
+
+            if len(column_values) == 0:
+                column_median = None
+            elif nonnull_count % 2 == 0:
+                # An even number of column values: take the average of the two center values
+                column_median = (
+                    float(
+                        column_values[0][0]
+                        + column_values[1][0]  # left center value  # right center value
+                    )
+                    / 2.0
+                )  # Average center values
+            else:
+                # An odd number of column values, we can just take the center value
+                column_median = column_values[1][0]  # True center value
+
+            return convert_to_json_serializable(column_median)
 
     def get_column_quantiles(
         self, column: str, quantiles: Iterable, allow_relative_error: bool = False
@@ -1242,11 +1250,20 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # similar, for example.
         ###
 
-        if self.sql_engine_dialect.name.lower() == "bigquery":
+        engine_dialect = self.sql_engine_dialect.name.lower()
+        # handle cases where dialect.name.lower() returns a byte string (e.g. databricks)
+        if isinstance(engine_dialect, bytes):
+            engine_dialect = str(engine_dialect, "utf-8")
+
+        if engine_dialect == "bigquery":
             stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name.lower() == "snowflake":
+        elif engine_dialect == "databricks":
+            stmt = "CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif engine_dialect == "snowflake":
             table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
 
             logger.info("Creating temporary table %s" % table_name)
@@ -1272,7 +1289,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = (
                 custom_sqlmod[0] + "into {table_name} from" + custom_sqlmod[1]
             ).format(table_name=table_name)
-        elif self.sql_engine_dialect.name.lower() == "awsathena":
+        elif engine_dialect == "awsathena":
             stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )

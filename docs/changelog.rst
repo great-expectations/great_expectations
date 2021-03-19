@@ -4,9 +4,24 @@
 Changelog
 #########
 
-Develop
+develop
 -----------------
-* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfilerß
+
+0.13.14
+-----------------
+* [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
+* [ENHANCEMENT] Restore cli functionality for legacy checkpoints #2511
+* [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend #2513 (thanks @benoitLebreton-perso)
+* [BUGFIX] force azure to set content_type='text/html' if the file is HTML #2539 (thanks @benoitLebreton-perso)
+* [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 in requirements-dev-sqlalchemy.txt #2547
+* [DOCS] Fix documentation links generated within template #2542 (thanks @thejasraju)
+* [MAINTENANCE] Remove deprecated automerge config #2492
+
+0.13.13
+-----------------
+* [ENHANCEMENT] Improve support for median calculation in Athena (Thanks @kuhnen!) #2521
+* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfiler #2519
+* [MAINTENANCE] Add support for spark 3 based spark_config #2481
 
 0.13.12
 -----------------

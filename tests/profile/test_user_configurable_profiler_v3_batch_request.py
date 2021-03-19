@@ -8,13 +8,11 @@ import pytest
 
 import great_expectations as ge
 from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
-)
-from great_expectations.expectations.metrics.util import (
-    get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
@@ -23,13 +21,18 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
+from great_expectations.self_check.util import (
+    connection_manager,
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-from tests.test_utils import connection_manager
+
+logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sqlalchemy
     import sqlalchemy.dialects.postgresql as postgresqltypes
 
     POSTGRESQL_TYPES = {
@@ -45,6 +48,7 @@ try:
         "NUMERIC": postgresqltypes.NUMERIC,
     }
 except ImportError:
+    sqlalchemy = None
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
@@ -77,15 +81,18 @@ def get_pandas_runtime_validator(context, df):
 
 
 def get_spark_runtime_validator(context, df):
-    from pyspark import SparkContext, SQLContext
-
-    sc = SparkContext.getOrCreate()
-    sqlCtx = SQLContext(sc)
-    sdf = sqlCtx.createDataFrame(df)
+    spark = get_or_create_spark_application(
+        spark_config={
+            "spark.sql.catalogImplementation": "hive",
+            "spark.executor.memory": "450m",
+            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+        }
+    )
+    df = spark.createDataFrame(df)
     batch_request = BatchRequest(
         datasource_name="my_spark_datasource",
         data_connector_name="my_data_connector",
-        batch_data=sdf,
+        batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
         partition_request={
             "batch_identifiers": {
@@ -115,7 +122,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
         )
-    except sa.exc.OperationalError:
+    except sqlalchemy.exc.OperationalError:
         return None
 
     sql_dtypes = {}
@@ -204,7 +211,7 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
 
 
 @pytest.fixture
-def taxi_validator_spark(titanic_data_context_modular_api):
+def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
@@ -217,7 +224,7 @@ def taxi_validator_spark(titanic_data_context_modular_api):
 
 
 @pytest.fixture
-def taxi_validator_sqlalchemy(titanic_data_context_modular_api):
+def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
