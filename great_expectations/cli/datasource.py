@@ -229,6 +229,7 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
     def _yaml_innards(self) -> str:
         """Override if needed."""
         return f'''f"""
+name: {{datasource_name}}
 class_name: Datasource
 execution_engine:
   class_name: {self.class_name}
@@ -297,10 +298,11 @@ class SparkYamlHelper(FilesYamlHelper):
 
 
 def sanitize_yaml_and_save_datasource(
-    context: DataContext, datasource_yaml: str, datasource_name: str
+    context: DataContext, datasource_yaml: str
 ) -> None:
     """A convenience function used in notebooks to help users save secrets."""
     config = yaml.load(datasource_yaml)
+    datasource_name = config.pop("name")
     if "credentials" in config.keys():
         credentials = config["credentials"]
         config["credentials"] = "${" + datasource_name + "}"
@@ -341,18 +343,19 @@ password = "{self.password}"
 database = "{self.database}"'''
 
     def yaml_snippet(self) -> str:
-        yaml = '''f"""
+        yaml_str = '''f"""
+name: {datasource_name}
 class_name: SimpleSqlalchemyDatasource
 introspection:
   whole_table:
     data_asset_name_suffix: __whole_table
 credentials:'''
         if self.driver:
-            yaml += f"""
+            yaml_str += f"""
   drivername: {self.driver}"""
-        yaml += self._yaml_innards()
-        yaml += '"""'
-        return yaml
+        yaml_str += self._yaml_innards()
+        yaml_str += '"""'
+        return yaml_str
 
     def _yaml_innards(self) -> str:
         """Override if needed."""

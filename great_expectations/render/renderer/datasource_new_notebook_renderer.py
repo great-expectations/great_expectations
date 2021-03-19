@@ -54,8 +54,6 @@ Use this notebook to configure a new {self.datasource_type.value} Datasource and
         self.add_code_cell(
             """import great_expectations as ge
 from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
-from ruamel.yaml import YAML
-yaml = YAML()
 context = ge.get_context()""",
         )
 
@@ -84,16 +82,16 @@ print(example_yaml)""",
 # Test Your Datasource Configuration
 Here we will test your Datasource configuration to make sure it is valid.
 
-This `test_yaml_config()` function is meant to enable fast dev loops. **If your 
-configuration is correct, this cell will show you some snippets of the data 
+This `test_yaml_config()` function is meant to enable fast dev loops. **If your
+configuration is correct, this cell will show you some snippets of the data
 assets in the data source.** You can continually edit your Datasource config
 yaml and re-run the cell to check until the new config is valid.
 
-If you instead wish to use python instead of yaml to configure your Datasource, 
+If you instead wish to use python instead of yaml to configure your Datasource,
 you can use `context.add_datasource()` and specify all the required parameters."""
         )
         self.add_code_cell(
-            "context.test_yaml_config(example_yaml)",
+            "context.test_yaml_config(name=datasource_name, yaml_config=example_yaml)",
             lint=True,
         )
 
@@ -103,7 +101,7 @@ you can use `context.add_datasource()` and specify all the required parameters."
 Here we will save your Datasource in your Data Context once you are satisfied with the configuration. Note that saving comments via `context.add_datasource()` is not yet fully supported, please modify your `great_expectations.yml` config if you wish to add comments."""
         )
         self.add_code_cell(
-            """sanitize_yaml_and_save_datasource(context, example_yaml, datasource_name)
+            """sanitize_yaml_and_save_datasource(context, example_yaml)
 context.list_datasources()""",
             lint=True,
         )

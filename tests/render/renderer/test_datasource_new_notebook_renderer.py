@@ -18,21 +18,21 @@ def construct_datasource_new_notebook_assets():
         pandas_header = [
             {
                 "cell_type": "markdown",
-                "source": f"# Create a new {DatasourceTypes.PANDAS.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.PANDAS.value} Datasource and add it to your project.\n\n**Datasource Name**: `{datasource_name}`",
+                "source": f"# Create a new {DatasourceTypes.PANDAS.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.PANDAS.value} Datasource and add it to your project.",
                 "metadata": {},
             }
         ]
         spark_header = [
             {
                 "cell_type": "markdown",
-                "source": f"# Create a new {DatasourceTypes.SPARK.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.SPARK.value} Datasource and add it to your project.\n\n**Datasource Name**: `{datasource_name}`",
+                "source": f"# Create a new {DatasourceTypes.SPARK.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.SPARK.value} Datasource and add it to your project.",
                 "metadata": {},
             }
         ]
         sql_header = [
             {
                 "cell_type": "markdown",
-                "source": f"# Create a new {DatasourceTypes.SQL.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.SQL.value} Datasource and add it to your project.\n\n**Datasource Name**: `{datasource_name}`",
+                "source": f"# Create a new {DatasourceTypes.SQL.value} Datasource\nUse this notebook to configure a new {DatasourceTypes.SQL.value} Datasource and add it to your project.",
                 "metadata": {},
             }
         ]
@@ -41,7 +41,7 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\nyaml = YAML()\ncontext = ge.get_context()",
+                "source": "import great_expectations as ge\nfrom great_expectations.cli.datasource import sanitize_yaml_and_save_datasource\ncontext = ge.get_context()",
                 "outputs": [],
             },
         ]
@@ -134,7 +134,7 @@ def test_render_datasource_new_notebook_with_pandas_Datasource(
     context: DataContext = empty_data_context
 
     datasource_name = "my_pandas_datasource_name"
-    datasource_yaml = "test_yaml:\n  indented_key: value"
+    datasource_yaml = '"""test_yaml:\n  indented_key: value"""'
 
     datasource_new_notebook_renderer = DatasourceNewNotebookRenderer(
         context=context,

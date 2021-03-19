@@ -76,6 +76,8 @@ def test_cli_datasource_new(
     )
     stdout = result.stdout
 
+    assert context.list_datasources() == []
+
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "What are you processing your files with?" in stdout
 
@@ -94,6 +96,9 @@ def test_cli_datasource_new(
 
     del context
     context = DataContext(root_dir)
+
+    assert len(context.list_datasources()) == 1
+
     assert context.list_datasources() == [
         {
             "name": "my_datasource",
@@ -105,6 +110,72 @@ def test_cli_datasource_new(
             },
             "data_connectors": {
                 "my_datasource_example_data_connector": {
+                    "default_regex": {
+                        "group_names": "data_asset_name",
+                        "pattern": "(.*)",
+                    },
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "base_directory": "../../test_files",
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                }
+            },
+        }
+    ]
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_cli_datasource_new_with_name_param(
+    mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
+):
+    context = empty_data_context
+    root_dir = context.root_directory
+    assert context.list_datasources() == []
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(root_dir))
+    result = runner.invoke(
+        cli,
+        "--v3-api datasource new --name foo",
+        input=f"1\n1\n{filesystem_csv_2}\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert context.list_datasources() == []
+
+    assert "What data would you like Great Expectations to connect to?" in stdout
+    assert "What are you processing your files with?" in stdout
+
+    assert result.exit_code == 0
+
+    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    assert os.path.isfile(expected_notebook)
+    mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
+
+    # Run notebook
+    with open(expected_notebook) as f:
+        nb = nbformat.read(f, as_version=4)
+    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
+
+    del context
+    context = DataContext(root_dir)
+
+    assert len(context.list_datasources()) == 1
+
+    assert context.list_datasources() == [
+        {
+            "name": "foo",
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+            },
+            "data_connectors": {
+                "foo_example_data_connector": {
                     "default_regex": {
                         "group_names": "data_asset_name",
                         "pattern": "(.*)",
