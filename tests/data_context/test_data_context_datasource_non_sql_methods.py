@@ -288,7 +288,6 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     def my_custom_partition_selector(partition_definition: dict) -> bool:
         return int(partition_definition["year"]) > 2000
 
-    # define a sorter here?# sorting using
     batch_request: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
