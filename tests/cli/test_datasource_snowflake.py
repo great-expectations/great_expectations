@@ -30,7 +30,7 @@ def test_snowflake_user_password_credentials_generates_notebook(
         cli,
         "--v3-api datasource new",
         catch_exceptions=False,
-        input="2\n4\nsnowflake\n1\nuser\nABCD.us-east-1\ndefault_db\ndefault_schema\nxsmall\npublic\npassword\n",
+        input="2\n4\n1\n",
     )
 
     stdout = result.output.strip()
@@ -39,7 +39,7 @@ def test_snowflake_user_password_credentials_generates_notebook(
     assert "Which database backend are you using?" in stdout
 
     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(uncommitted_dir, "datasource_new_snowflake.ipynb")
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
@@ -64,58 +64,6 @@ def test_snowflake_auth_method_prompt_SSO(mock_prompt):
 def test_snowflake_auth_method_prompt_keys(mock_prompt):
     mock_prompt.side_effect = ["3"]
     assert _prompt_for_snowflake_auth_method() == SnowflakeAuthMethod.KEY_PAIR
-
-
-@patch("click.prompt")
-def test_snowflake_user_password_credentials(mock_prompt):
-    mock_prompt.side_effect = [
-        "1",
-        "user",
-        "ABCD.us-east-1",
-        "default_db",
-        "default_schema",
-        "xsmall",
-        "public",
-        "password",
-    ]
-
-    credentials = _prompt_for_snowflake_auth_method()
-
-    assert credentials == {
-        "drivername": "snowflake",
-        "database": "default_db",
-        "host": "ABCD.us-east-1",
-        "password": "password",
-        "query": {"role": "public", "schema": "default_schema", "warehouse": "xsmall"},
-        "username": "user",
-    }
-
-
-@patch("click.prompt")
-def test_snowflake_sso_credentials(mock_prompt):
-    mock_prompt.side_effect = [
-        "2",
-        "user",
-        "ABCD.us-east-1",
-        "default_db",
-        "default_schema",
-        "xsmall",
-        "public",
-        "externalbrowser",
-    ]
-
-    credentials = _prompt_for_snowflake_auth_method()
-
-    assert credentials == {
-        "drivername": "snowflake",
-        "database": "default_db",
-        "host": "ABCD.us-east-1",
-        "connect_args": {
-            "authenticator": "externalbrowser",
-        },
-        "query": {"role": "public", "schema": "default_schema", "warehouse": "xsmall"},
-        "username": "user",
-    }
 
 
 @patch("click.prompt")
