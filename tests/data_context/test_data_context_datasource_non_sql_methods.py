@@ -224,3 +224,96 @@ data_connectors:
     }
     assert isinstance(batch.data.dataframe, pd.DataFrame)
     assert batch.data.dataframe.shape == (2, 2)
+
+
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_query(
+    empty_data_context, tmp_path_factory
+):
+    context = empty_data_context
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_queries"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "Test_1998.csv",
+            "Test_1999.csv",
+            "Test_2000.csv",
+            "Test_2010.csv",
+            "Test_2021.csv",
+        ],
+        file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
+    )
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+
+    execution_engine:
+        class_name: PandasExecutionEngine
+
+    data_connectors:
+        my_data_connector:
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: {base_directory}
+            glob_directive: "*.csv"
+
+            default_regex:
+                pattern: (.+)_(\\d.*)\\.csv
+                group_names:
+                    - name
+                    - year
+            sorters:
+                - orderby: desc
+                  class_name: NumericSorter
+                  name: year
+            assets:
+                YearTest:
+                    base_directory: {base_directory}
+                    pattern: (.+)_(\\d.*)\\.csv
+                    group_names:
+                        - name
+                        - year
+
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+
+    # only select files from after 2000
+    def my_custom_partition_selector(partition_definition: dict) -> bool:
+        return int(partition_definition["year"]) > 2000
+
+    batch_request: Union[dict, BatchRequest] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_data_connector",
+        "data_asset_name": "YearTest",
+        "partition_request": {
+            "custom_filter_function": my_custom_partition_selector,
+        },
+    }
+
+    batch_list: List[Batch] = context.get_batch_list(**batch_request)
+    assert len(batch_list) == 2
+
+    # first batch
+    batch: Batch = batch_list[0]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["partition_definition"] == {
+        "name": "Test",
+        "year": "2021",
+    }
+
+    # second batch
+    batch: Batch = batch_list[1]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["partition_definition"] == {
+        "name": "Test",
+        "year": "2010",
+    }
