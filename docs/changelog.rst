@@ -12,6 +12,7 @@ develop
 
 0.13.14
 -----------------
+* [BUGFIX] Use temporary paths in tests #2545
 * [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
 * [ENHANCEMENT] Restore cli functionality for legacy checkpoints #2511
 * [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend #2513 (thanks @benoitLebreton-perso)
