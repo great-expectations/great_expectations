@@ -1,3 +1,4 @@
+import copy
 import logging
 from functools import wraps
 from typing import Callable, Optional, Type, Union
@@ -224,5 +225,4 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     metric.metric_domain_kwargs,
                     metric.metric_value_kwargs,
                 )
-
         return dependencies

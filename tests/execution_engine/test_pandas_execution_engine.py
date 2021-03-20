@@ -25,6 +25,7 @@ from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
+from tests.expectations.test_util import get_table_columns_metric
 
 
 def test_reader_fn():
@@ -208,18 +209,36 @@ def test_resolve_metric_bundle():
 
     # Building engine and configurations in attempt to resolve metrics
     engine = PandasExecutionEngine(batch_data_dict={"made-up-id": df})
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
     mean = MetricConfiguration(
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     desired_metrics = (mean, stdev)
-    metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+    results = engine.resolve_metrics(
+        metrics_to_resolve=desired_metrics, metrics=metrics
+    )
+    metrics.update(results)
 
     # Ensuring metrics have been properly resolved
     assert (
@@ -249,6 +268,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     desired_metrics = (mean, stdev)
 
     with pytest.raises(MetricProviderError) as e:
+        # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
 
@@ -523,7 +543,7 @@ def test_get_batch_with_split_on_column_value(test_df):
             },
         )
     )
-    assert (split_df).dataframe.shape == (3, 10)
+    assert split_df.dataframe.shape == (3, 10)
 
 
 def test_get_batch_with_split_on_converted_datetime(test_df):
@@ -537,7 +557,7 @@ def test_get_batch_with_split_on_converted_datetime(test_df):
             },
         )
     )
-    assert (split_df).dataframe.shape == (3, 10)
+    assert split_df.dataframe.shape == (3, 10)
 
 
 def test_get_batch_with_split_on_divided_integer(test_df):
@@ -593,6 +613,7 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
     assert (split_df.dataframe.date == datetime.date(2020, 1, 5)).all()
 
     with pytest.raises(ValueError):
+        # noinspection PyUnusedLocal
         split_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
@@ -611,6 +632,7 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
 
 def test_get_batch_with_split_on_hashed_column(test_df):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
+        # noinspection PyUnusedLocal
         split_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
@@ -685,6 +707,7 @@ def test_sample_using_a_list(test_df):
 
 def test_sample_using_md5(test_df):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
+        # noinspection PyUnusedLocal
         sampled_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_df,
