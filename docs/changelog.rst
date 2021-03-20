@@ -8,6 +8,7 @@ develop
 -----------------
 * [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
 * [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
+* [BUGFIX] Fix issue for read_method on missing compression param for read_parquet #2557
 
 0.13.14
 -----------------
