@@ -150,7 +150,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
             spark_config = {}
 
         spark: SparkSession = get_or_create_spark_application(spark_config=spark_config)
+
+        spark_config = dict(spark_config)
         spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
+
         self._spark_config = spark_config
         self.spark = spark
 
