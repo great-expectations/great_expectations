@@ -449,8 +449,6 @@ def get_or_create_spark_application(
     # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
     # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
     try:
-        import pyspark
-        from pyspark import SparkContext
         from pyspark.sql import SparkSession
     except ImportError:
         SparkSession = None
@@ -511,8 +509,6 @@ def get_or_create_spark_session(
     # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
     # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
     try:
-        import pyspark
-        from pyspark import SparkContext
         from pyspark.sql import SparkSession
     except ImportError:
         SparkSession = None
