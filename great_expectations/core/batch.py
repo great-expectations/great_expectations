@@ -9,7 +9,7 @@ from great_expectations.core.id_dict import (
     BatchSpec,
     DataConnectorQuery,
     IDDict,
-    PartitionDefinition,
+    BatchIdentifiers,
 )
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
@@ -17,28 +17,17 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class BatchDefinition(SerializableDictDot):
-    def __init__(
-        self,
-        datasource_name: str,
-        data_connector_name: str,
-        data_asset_name: str,
-        partition_definition: PartitionDefinition,
-        batch_spec_passthrough: Optional[dict] = None,
-    ):
-        self._validate_batch_definition(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            partition_definition=partition_definition,
-            # limit=limit,
-        )
+    def __init__(self, datasource_name: str, data_connector_name: str, data_asset_name: str,
+                 batch_identifiers: BatchIdentifiers, batch_spec_passthrough: Optional[dict] = None):
+        self._validate_batch_definition(datasource_name=datasource_name, data_connector_name=data_connector_name,
+                                        data_asset_name=data_asset_name, batch_identifiers=batch_identifiers)
 
-        assert type(partition_definition) == PartitionDefinition
+        assert type(batch_identifiers) == BatchIdentifiers
 
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
-        self._partition_definition = partition_definition
+        self._batch_identifiers = batch_identifiers
         self._batch_spec_passthrough = batch_spec_passthrough
 
     def to_json_dict(self) -> Dict:
@@ -46,7 +35,7 @@ class BatchDefinition(SerializableDictDot):
             "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_definition": self._partition_definition,
+            "batch_identifiers": self._batch_identifiers,
         }
 
     def __repr__(self) -> str:
@@ -54,18 +43,13 @@ class BatchDefinition(SerializableDictDot):
             "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_definition": repr(self._partition_definition),
+            "batch_identifiers": repr(self._batch_identifiers),
         }
         return str(doc_fields_dict)
 
     @staticmethod
-    def _validate_batch_definition(
-        datasource_name: str,
-        data_connector_name: str,
-        data_asset_name: str,
-        partition_definition: PartitionDefinition,
-        # limit: Optional[int] = None,
-    ):
+    def _validate_batch_definition(datasource_name: str, data_connector_name: str, data_asset_name: str,
+                                   batch_identifiers: BatchIdentifiers):
         if datasource_name is None:
             raise ValueError("A valid datasource must be specified.")
         if datasource_name and not isinstance(datasource_name, str):
@@ -90,12 +74,12 @@ class BatchDefinition(SerializableDictDot):
 "{str(type(data_asset_name))}", which is illegal.
                 """
             )
-        if partition_definition and not isinstance(
-            partition_definition, PartitionDefinition
+        if batch_identifiers and not isinstance(
+            batch_identifiers, BatchIdentifiers
         ):
             raise TypeError(
-                f"""The type of batch_identifiers must be a PartitionDefinition object.  The type given is
-"{str(type(partition_definition))}", which is illegal.
+                f"""The type of batch_identifiers must be a BatchIdentifiers object.  The type given is
+"{str(type(batch_identifiers))}", which is illegal.
                 """
             )
 
@@ -119,8 +103,8 @@ class BatchDefinition(SerializableDictDot):
         return self._data_asset_name
 
     @property
-    def partition_definition(self) -> PartitionDefinition:
-        return self._partition_definition
+    def batch_identifiers(self) -> BatchIdentifiers:
+        return self._batch_identifiers
 
     @property
     def batch_spec_passthrough(self) -> dict:
@@ -135,7 +119,7 @@ class BatchDefinition(SerializableDictDot):
             "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_definition": self.partition_definition,
+            "batch_identifiers": self.batch_identifiers,
         }
 
     @property
@@ -160,8 +144,8 @@ class BatchDefinition(SerializableDictDot):
             ^ hash(self.data_connector_name)
             ^ hash(self.data_asset_name)
         )
-        if self.partition_definition is not None:
-            for key, value in self.partition_definition.items():
+        if self.batch_identifiers is not None:
+            for key, value in self.batch_identifiers.items():
                 _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
         return _result_hash
 

@@ -7,7 +7,7 @@ from great_expectations.core.batch import (
     BatchMarkers,
     BatchRequest,
     BatchSpec,
-    PartitionDefinition,
+    BatchIdentifiers,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError
@@ -15,11 +15,11 @@ from great_expectations.exceptions import InvalidBatchSpecError
 
 def test_batch_definition_id():
     # noinspection PyUnusedLocal,PyPep8Naming
-    A = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
+    A = BatchDefinition("A", "a", "aaa", BatchIdentifiers({"id": "A"}))
     print(A.id)
 
     # noinspection PyUnusedLocal,PyPep8Naming
-    B = BatchDefinition("B", "b", "bbb", PartitionDefinition({"id": "B"}))
+    B = BatchDefinition("B", "b", "bbb", BatchIdentifiers({"id": "B"}))
     print(B.id)
 
     assert A.id != B.id
@@ -30,22 +30,22 @@ def test_batch_definition_instantiation():
         # noinspection PyTypeChecker,PyUnusedLocal,PyPep8Naming
         A = BatchDefinition("A", "a", "aaa", {"id": "A"})
 
-    A = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
+    A = BatchDefinition("A", "a", "aaa", BatchIdentifiers({"id": "A"}))
 
     print(A.id)
 
 
 def test_batch_definition_equality():
     # noinspection PyUnusedLocal,PyPep8Naming
-    A = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
+    A = BatchDefinition("A", "a", "aaa", BatchIdentifiers({"id": "A"}))
 
     # noinspection PyUnusedLocal,PyPep8Naming
-    B = BatchDefinition("B", "b", "bbb", PartitionDefinition({"id": "B"}))
+    B = BatchDefinition("B", "b", "bbb", BatchIdentifiers({"id": "B"}))
 
     assert A != B
 
     # noinspection PyUnusedLocal,PyPep8Naming
-    A2 = BatchDefinition("A", "a", "aaa", PartitionDefinition({"id": "A"}))
+    A2 = BatchDefinition("A", "a", "aaa", BatchIdentifiers({"id": "A"}))
 
     assert A == A2
 
@@ -58,12 +58,8 @@ def test_batch__str__method():
             data_connector_name="my_data_connector",
             data_asset_name="my_data_asset_name",
         ),
-        batch_definition=BatchDefinition(
-            datasource_name="my_datasource",
-            data_connector_name="my_data_connector",
-            data_asset_name="my_data_asset_name",
-            partition_definition=PartitionDefinition({}),
-        ),
+        batch_definition=BatchDefinition(datasource_name="my_datasource", data_connector_name="my_data_connector",
+                                         data_asset_name="my_data_asset_name", batch_identifiers=BatchIdentifiers({})),
         batch_spec=BatchSpec(path="/some/path/some.file"),
         batch_markers=BatchMarkers(ge_load_time="FAKE_LOAD_TIME"),
     )
@@ -83,7 +79,7 @@ def test_batch__str__method():
     "datasource_name": "my_datasource",
     "data_connector_name": "my_data_connector",
     "data_asset_name": "my_data_asset_name",
-    "partition_definition": {}
+    "batch_identifiers": {}
   },
   "batch_spec": "{'path': '/some/path/some.file'}",
   "batch_markers": "{'ge_load_time': 'FAKE_LOAD_TIME'}"
@@ -106,7 +102,7 @@ def test_batch_request_instantiation():
     #         "A",
     #         "a",
     #         "aaa",
-    #         PartitionDefinition({
+    #         BatchIdentifiers({
     #             "id": "A"
     #         })
     #     )

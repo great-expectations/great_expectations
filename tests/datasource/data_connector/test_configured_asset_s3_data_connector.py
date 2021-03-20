@@ -13,7 +13,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchRequestBase,
     DataConnectorQuery,
-    PartitionDefinition,
+    BatchIdentifiers,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
@@ -295,86 +295,46 @@ def test_return_all_batch_definitions_unsorted():
         )
     )
     expected = [
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
-        ),
+            )),
     ]
     assert expected == unsorted_batch_definition_list
 
@@ -476,86 +436,46 @@ def test_return_all_batch_definitions_sorted():
     )
 
     expected = [
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
-            ),
-        ),
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_s3_data_connector",
-            data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            )),
+        BatchDefinition(datasource_name="test_environment", data_connector_name="general_s3_data_connector",
+                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
-            ),
-        ),
+            )),
     ]
 
     # TEST 1: Sorting works
@@ -588,18 +508,16 @@ def test_return_all_batch_definitions_sorted():
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition: BatchDefinition = BatchDefinition(
-        datasource_name="test_environment",
-        data_connector_name="general_s3_data_connector",
-        data_asset_name="TestFiles",
-        partition_definition=PartitionDefinition(
-            **{
-                "name": "james",
-                "timestamp": "20200713",
-                "price": "1567",
-            }
-        ),
-    )
+    expected_batch_definition: BatchDefinition = BatchDefinition(datasource_name="test_environment",
+                                                                 data_connector_name="general_s3_data_connector",
+                                                                 data_asset_name="TestFiles",
+                                                                 batch_identifiers=BatchIdentifiers(
+                                                                     **{
+                                                                         "name": "james",
+                                                                         "timestamp": "20200713",
+                                                                         "price": "1567",
+                                                                     }
+                                                                 ))
     assert my_batch_definition == expected_batch_definition
 
     # TEST 3: Without data_connector_query, should return all 10

@@ -18,8 +18,8 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import (
-    PartitionDefinition,
-    PartitionDefinitionSubset,
+    BatchIdentifiers,
+    BatchIdentifiersSubset,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.execution_engine import ExecutionEngine
@@ -155,12 +155,10 @@ class RuntimeDataConnector(DataConnector):
             batch_identifiers = {}
 
         batch_definition_list: List[BatchDefinition]
-        batch_definition: BatchDefinition = BatchDefinition(
-            datasource_name=self.datasource_name,
-            data_connector_name=self.name,
-            data_asset_name=batch_request.data_asset_name,
-            partition_definition=PartitionDefinition(batch_identifiers),
-        )
+        batch_definition: BatchDefinition = BatchDefinition(datasource_name=self.datasource_name,
+                                                            data_connector_name=self.name,
+                                                            data_asset_name=batch_request.data_asset_name,
+                                                            batch_identifiers=BatchIdentifiers(batch_identifiers))
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(
             batch_request.data_asset_name, batch_definition_list, batch_identifiers
@@ -171,7 +169,7 @@ class RuntimeDataConnector(DataConnector):
         self,
         data_asset_name: str,
         batch_definition_list: List,
-        batch_identifiers: PartitionDefinitionSubset,
+        batch_identifiers: BatchIdentifiersSubset,
     ):
         data_reference = self._get_data_reference_name(batch_identifiers)
 
@@ -227,10 +225,10 @@ class RuntimeDataConnector(DataConnector):
 
     @staticmethod
     def _get_data_reference_name(
-        batch_identifiers: PartitionDefinitionSubset,
+        batch_identifiers: BatchIdentifiersSubset,
     ) -> str:
         if batch_identifiers is None:
-            batch_identifiers = PartitionDefinitionSubset({})
+            batch_identifiers = BatchIdentifiersSubset({})
         data_reference_name = DEFAULT_DELIMITER.join(
             [str(value) for value in batch_identifiers.values()]
         )

@@ -250,7 +250,7 @@ class FilePathDataConnector(DataConnector):
         if not path:
             raise ValueError(
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
+batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
                 """
             )
         path = self._get_full_file_path(

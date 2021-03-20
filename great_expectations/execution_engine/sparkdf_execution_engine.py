@@ -566,21 +566,13 @@ Please check your config."""
         return df
 
     @staticmethod
-    def _split_on_column_value(
-        df,
-        column_name: str,
-        partition_definition: dict,
-    ):
-        return df.filter(F.col(column_name) == partition_definition[column_name])
+    def _split_on_column_value(df, column_name: str, batch_identifiers: dict):
+        return df.filter(F.col(column_name) == batch_identifiers[column_name])
 
     @staticmethod
-    def _split_on_converted_datetime(
-        df,
-        column_name: str,
-        partition_definition: dict,
-        date_format_string: str = "yyyy-MM-dd",
-    ):
-        matching_string = partition_definition[column_name]
+    def _split_on_converted_datetime(df, column_name: str, batch_identifiers: dict,
+                                     date_format_string: str = "yyyy-MM-dd"):
+        matching_string = batch_identifiers[column_name]
         res = (
             df.withColumn(
                 "date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)
@@ -591,14 +583,9 @@ Please check your config."""
         return res
 
     @staticmethod
-    def _split_on_divided_integer(
-        df,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
-    ):
+    def _split_on_divided_integer(df, column_name: str, divisor: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
-        matching_divisor = partition_definition[column_name]
+        matching_divisor = batch_identifiers[column_name]
         res = (
             df.withColumn(
                 "div_temp", (F.col(column_name) / divisor).cast(IntegerType())
@@ -609,14 +596,9 @@ Please check your config."""
         return res
 
     @staticmethod
-    def _split_on_mod_integer(
-        df,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
-    ):
+    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
-        matching_mod_value = partition_definition[column_name]
+        matching_mod_value = batch_identifiers[column_name]
         res = (
             df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
             .filter(F.col("mod_temp") == matching_mod_value)
@@ -625,31 +607,22 @@ Please check your config."""
         return res
 
     @staticmethod
-    def _split_on_multi_column_values(
-        df,
-        column_names: list,
-        partition_definition: dict,
-    ):
+    def _split_on_multi_column_values(df, column_names: list, batch_identifiers: dict):
         """Split on the joint values in the named columns"""
         for column_name in column_names:
-            value = partition_definition.get(column_name)
+            value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
                     f"In order for SparkExecutionEngine to `_split_on_multi_column_values`, "
-                    f"all values in  column_names must also exist in partition_definition. "
-                    f"{column_name} was not found in partition_definition."
+                    f"all values in  column_names must also exist in batch_identifiers. "
+                    f"{column_name} was not found in batch_identifiers."
                 )
             df = df.filter(F.col(column_name) == value)
         return df
 
     @staticmethod
-    def _split_on_hashed_column(
-        df,
-        column_name: str,
-        hash_digits: int,
-        partition_definition: dict,
-        hash_function_name: str = "sha256",
-    ):
+    def _split_on_hashed_column(df, column_name: str, hash_digits: int, batch_identifiers: dict,
+                                hash_function_name: str = "sha256"):
         """Split on the hashed value of the named column"""
         try:
             getattr(hashlib, hash_function_name)
@@ -669,7 +642,7 @@ Please check your config."""
         encrypt_udf = F.udf(_encrypt_value, StringType())
         res = (
             df.withColumn("encrypted_value", encrypt_udf(column_name))
-            .filter(F.col("encrypted_value") == partition_definition["hash_value"])
+            .filter(F.col("encrypted_value") == batch_identifiers["hash_value"])
             .drop("encrypted_value")
         )
         return res

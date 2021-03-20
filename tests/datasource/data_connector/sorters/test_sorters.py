@@ -2,7 +2,7 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.id_dict import PartitionDefinition
+from great_expectations.core.id_dict import BatchIdentifiers
 from great_expectations.datasource.data_connector.sorter import (
     CustomListSorter,
     DateTimeSorter,
@@ -94,21 +94,13 @@ def test_sorter_instantiation_custom_list_with_periodic_table(
     # noinspection PyProtectedMember
     assert my_custom_sorter._reference_list == periodic_table_of_elements
     # This element exists : Hydrogen
-    test_batch_def = BatchDefinition(
-        datasource_name="test",
-        data_connector_name="fake",
-        data_asset_name="nowhere",
-        partition_definition=PartitionDefinition({"element": "Hydrogen"}),
-    )
-    returned_partition_key = my_custom_sorter.get_partition_key(test_batch_def)
+    test_batch_def = BatchDefinition(datasource_name="test", data_connector_name="fake", data_asset_name="nowhere",
+                                     batch_identifiers=BatchIdentifiers({"element": "Hydrogen"}))
+    returned_partition_key = my_custom_sorter.get_batch_key(test_batch_def)
     assert returned_partition_key == 0
 
     # This element does not : Vibranium
-    test_batch_def = BatchDefinition(
-        datasource_name="test",
-        data_connector_name="fake",
-        data_asset_name="nowhere",
-        partition_definition=PartitionDefinition({"element": "Vibranium"}),
-    )
+    test_batch_def = BatchDefinition(datasource_name="test", data_connector_name="fake", data_asset_name="nowhere",
+                                     batch_identifiers=BatchIdentifiers({"element": "Vibranium"}))
     with pytest.raises(ge_exceptions.SorterError):
-        my_custom_sorter.get_partition_key(test_batch_def)
+        my_custom_sorter.get_batch_key(test_batch_def)

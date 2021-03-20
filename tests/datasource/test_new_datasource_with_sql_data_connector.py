@@ -89,7 +89,7 @@ data_connectors:
                 "example_data_reference": {
                     "batch_spec": {
                         "table_name": "table_partitioned_by_date_column__A",
-                        "partition_definition": {"date": "2020-01"},
+                        "batch_identifiers": {"date": "2020-01"},
                         "splitter_method": "_split_on_converted_datetime",
                         "splitter_kwargs": {
                             "column_name": "date",
@@ -704,7 +704,7 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(
             "batch_spec": {
                 "schema_name": "main",
                 "table_name": "table_containing_id_spacers_for_D",
-                "partition_definition": {},
+                "batch_identifiers": {},
             },
             "n_rows": 30,
         },
@@ -788,7 +788,7 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
         ],
         "example_data_reference": {
             "batch_spec": {
-                "partition_definition": {},
+                "batch_identifiers": {},
                 "schema_name": "main",
                 "table_name": "table_containing_id_spacers_for_D",
             },

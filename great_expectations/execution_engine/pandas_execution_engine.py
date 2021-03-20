@@ -449,38 +449,25 @@ Please check your config."""
         return df
 
     @staticmethod
-    def _split_on_column_value(
-        df,
-        column_name: str,
-        partition_definition: dict,
-    ) -> pd.DataFrame:
+    def _split_on_column_value(df, column_name: str, batch_identifiers: dict) -> pd.DataFrame:
 
-        return df[df[column_name] == partition_definition[column_name]]
+        return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
-    def _split_on_converted_datetime(
-        df,
-        column_name: str,
-        partition_definition: dict,
-        date_format_string: str = "%Y-%m-%d",
-    ):
+    def _split_on_converted_datetime(df, column_name: str, batch_identifiers: dict,
+                                     date_format_string: str = "%Y-%m-%d"):
         """Convert the values in the named column to the given date_format, and split on that"""
         stringified_datetime_series = df[column_name].map(
             lambda x: x.strftime(date_format_string)
         )
-        matching_string = partition_definition[column_name]
+        matching_string = batch_identifiers[column_name]
         return df[stringified_datetime_series == matching_string]
 
     @staticmethod
-    def _split_on_divided_integer(
-        df,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
-    ):
+    def _split_on_divided_integer(df, column_name: str, divisor: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        matching_divisor = partition_definition[column_name]
+        matching_divisor = batch_identifiers[column_name]
         matching_rows = df[column_name].map(
             lambda x: int(x / divisor) == matching_divisor
         )
@@ -488,47 +475,33 @@ Please check your config."""
         return df[matching_rows]
 
     @staticmethod
-    def _split_on_mod_integer(
-        df,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
-    ):
+    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        matching_mod_value = partition_definition[column_name]
+        matching_mod_value = batch_identifiers[column_name]
         matching_rows = df[column_name].map(lambda x: x % mod == matching_mod_value)
 
         return df[matching_rows]
 
     @staticmethod
-    def _split_on_multi_column_values(
-        df,
-        column_names: List[str],
-        partition_definition: dict,
-    ):
+    def _split_on_multi_column_values(df, column_names: List[str], batch_identifiers: dict):
         """Split on the joint values in the named columns"""
 
         subset_df = df.copy()
         for column_name in column_names:
-            value = partition_definition.get(column_name)
+            value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
                     f"In order for PandasExecution to `_split_on_multi_column_values`, "
-                    f"all values in column_names must also exist in partition_definition. "
-                    f"{column_name} was not found in partition_definition."
+                    f"all values in column_names must also exist in batch_identifiers. "
+                    f"{column_name} was not found in batch_identifiers."
                 )
             subset_df = subset_df[subset_df[column_name] == value]
         return subset_df
 
     @staticmethod
-    def _split_on_hashed_column(
-        df,
-        column_name: str,
-        hash_digits: int,
-        partition_definition: dict,
-        hash_function_name: str = "md5",
-    ):
+    def _split_on_hashed_column(df, column_name: str, hash_digits: int, batch_identifiers: dict,
+                                hash_function_name: str = "md5"):
         """Split on the hashed value of the named column"""
         try:
             hash_method = getattr(hashlib, hash_function_name)
@@ -541,7 +514,7 @@ Please check your config."""
             )
         matching_rows = df[column_name].map(
             lambda x: hash_method(str(x).encode()).hexdigest()[-1 * hash_digits :]
-            == partition_definition["hash_value"]
+                      == batch_identifiers["hash_value"]
         )
         return df[matching_rows]
 

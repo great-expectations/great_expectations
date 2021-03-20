@@ -31,15 +31,16 @@ class BatchSpec(IDDict):
     pass
 
 
-class PartitionDefinitionSubset(IDDict):
+class BatchIdentifiersSubset(IDDict):
     pass
 
 
-class DataConnectorQuery(PartitionDefinitionSubset):
+class DataConnectorQuery(BatchIdentifiersSubset):
     pass
 
 
-class PartitionDefinition(PartitionDefinitionSubset):
+class BatchIdentifiers(BatchIdentifiersSubset):
+    pass
 
 
 class BatchIdentifierQuery(IDDict):

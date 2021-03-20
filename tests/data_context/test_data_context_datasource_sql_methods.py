@@ -351,5 +351,5 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
         batch.batch_definition["data_asset_name"]
         == "table_partitioned_by_date_column__A"
     )
-    assert batch.batch_definition["partition_definition"] == {"date": "2020-01-15"}
+    assert batch.batch_definition["batch_identifiers"] == {"date": "2020-01-15"}
     assert isinstance(batch.data, SqlAlchemyBatchData)

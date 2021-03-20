@@ -6,7 +6,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     BatchRequestBase,
-    PartitionDefinition,
+    BatchIdentifiers,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
@@ -157,16 +157,12 @@ def test_available_data_asset_names():
 # TODO: <Alex>This test should be moved to the test module that is dedicated to BatchRequest and BatchDefinition testing.</Alex>
 def test__batch_definition_matches_batch_request():
     # TODO: <Alex>We need to cleanup PyCharm warnings.</Alex>
-    A = BatchDefinition(
-        datasource_name="A",
-        data_connector_name="a",
-        data_asset_name="aaa",
-        partition_definition=PartitionDefinition(
-            {
-                "id": "A",
-            }
-        ),
-    )
+    A = BatchDefinition(datasource_name="A", data_connector_name="a", data_asset_name="aaa",
+                        batch_identifiers=BatchIdentifiers(
+                            {
+                                "id": "A",
+                            }
+                        ))
 
     assert batch_definition_matches_batch_request(
         batch_definition=A, batch_request=BatchRequestBase(datasource_name="A")
@@ -217,14 +213,12 @@ def test__batch_definition_matches_batch_request():
     )
 
     assert batch_definition_matches_batch_request(
-        batch_definition=BatchDefinition(
-            **{
-                "datasource_name": "FAKE_DATASOURCE",
-                "data_connector_name": "TEST_DATA_CONNECTOR",
-                "data_asset_name": "DEFAULT_ASSET_NAME",
-                "partition_definition": PartitionDefinition({"index": "3"}),
-            }
-        ),
+        batch_definition=BatchDefinition(**{
+            "datasource_name": "FAKE_DATASOURCE",
+            "data_connector_name": "TEST_DATA_CONNECTOR",
+            "data_asset_name": "DEFAULT_ASSET_NAME",
+            "batch_identifiers": BatchIdentifiers({"index": "3"}),
+        }),
         batch_request=BatchRequest(
             **{
                 "datasource_name": "FAKE_DATASOURCE",

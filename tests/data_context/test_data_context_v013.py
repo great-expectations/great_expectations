@@ -325,7 +325,7 @@ data_connectors:
             "splitter_method": "_split_on_multi_column_values",
             "splitter_kwargs": {
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {"y": 2020, "m": 1, "d": 5},
+                "batch_identifiers": {"y": 2020, "m": 1, "d": 5},
             },
         },
     )

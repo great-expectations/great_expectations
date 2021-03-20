@@ -3,7 +3,7 @@
 Partitioning Data Assets in Data Connectors
 #############################################
 
-To maintain their guarantees for the relationship between Batches, Data Connectors provide configuration options that allow them to partition data assets. We use the term "DataReference" below to describe a general pointer to data, like a filesystem path or database view. Partition Definitions then define a conversion process:
+To maintain their guarantees for the relationship between Batches, Data Connectors provide configuration options that allow them to partition data assets. We use the term "DataReference" below to describe a general pointer to data, like a filesystem path or database view. Batch Identifiers then define a conversion process:
 
 	1. Convert a DataReference to a BatchRequest, and
 	2. Convert a BatchRequest back into DataReference (or WildcardDataReference, when searching)
@@ -30,7 +30,7 @@ The regex for this naming convention would be something like
 
 with capturing groups for YYYY, MM, and DD, and a non-capturing groups for the random hash.
 
-As a result, the PartitionDefinition keys will Y, M, D. Given a specific PartitionDefinition:
+As a result, the BatchIdentifiers keys will Y, M, D. Given a specific BatchIdentifiers:
 
 .. code-block:: python
 
@@ -71,4 +71,4 @@ In that case, the user would probably specify regex capture groups something lik
 
 The WildcardDataReference is how Great Expecations Data Connectors deal with that problem, making it easy to search external stores and understand data.
 
-Under the hood, when processing a batch request, the Data Connector may find multiple matching partitions. The DataConnector will generally simply return a list of all matching PartitionDefinition objects.
+Under the hood, when processing a batch request, the Data Connector may find multiple matching partitions. The DataConnector will generally simply return a list of all matching BatchIdentifiers objects.

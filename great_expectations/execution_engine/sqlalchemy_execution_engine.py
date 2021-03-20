@@ -642,96 +642,58 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     ### Splitter methods for partitioning tables ###
 
-    def _split_on_whole_table(
-        self,
-        table_name: str,
-        # column_name: str,
-        partition_definition: dict,
-    ):
+    def _split_on_whole_table(self, table_name: str, batch_identifiers: dict):
         """'Split' by returning the whole table"""
 
-        # return sa.column(column_name) == partition_definition[column_name]
+        # return sa.column(column_name) == batch_identifiers[column_name]
         return 1 == 1
 
-    def _split_on_column_value(
-        self,
-        table_name: str,
-        column_name: str,
-        partition_definition: dict,
-    ):
+    def _split_on_column_value(self, table_name: str, column_name: str, batch_identifiers: dict):
         """Split using the values in the named column"""
 
-        return sa.column(column_name) == partition_definition[column_name]
+        return sa.column(column_name) == batch_identifiers[column_name]
 
-    def _split_on_converted_datetime(
-        self,
-        table_name: str,
-        column_name: str,
-        partition_definition: dict,
-        date_format_string: str = "%Y-%m-%d",
-    ):
+    def _split_on_converted_datetime(self, table_name: str, column_name: str, batch_identifiers: dict,
+                                     date_format_string: str = "%Y-%m-%d"):
         """Convert the values in the named column to the given date_format, and split on that"""
 
         return (
-            sa.func.strftime(
+                sa.func.strftime(
                 date_format_string,
                 sa.column(column_name),
             )
-            == partition_definition[column_name]
+                == batch_identifiers[column_name]
         )
 
-    def _split_on_divided_integer(
-        self,
-        table_name: str,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
-    ):
+    def _split_on_divided_integer(self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
 
         return (
-            sa.cast(sa.column(column_name) / divisor, sa.Integer)
-            == partition_definition[column_name]
+                sa.cast(sa.column(column_name) / divisor, sa.Integer)
+                == batch_identifiers[column_name]
         )
 
-    def _split_on_mod_integer(
-        self,
-        table_name: str,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
-    ):
+    def _split_on_mod_integer(self, table_name: str, column_name: str, mod: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        return sa.column(column_name) % mod == partition_definition[column_name]
+        return sa.column(column_name) % mod == batch_identifiers[column_name]
 
-    def _split_on_multi_column_values(
-        self,
-        table_name: str,
-        column_names: List[str],
-        partition_definition: dict,
-    ):
+    def _split_on_multi_column_values(self, table_name: str, column_names: List[str], batch_identifiers: dict):
         """Split on the joint values in the named columns"""
 
         return sa.and_(
             *[
                 sa.column(column_name) == column_value
-                for column_name, column_value in partition_definition.items()
+                for column_name, column_value in batch_identifiers.items()
             ]
         )
 
-    def _split_on_hashed_column(
-        self,
-        table_name: str,
-        column_name: str,
-        hash_digits: int,
-        partition_definition: dict,
-    ):
+    def _split_on_hashed_column(self, table_name: str, column_name: str, hash_digits: int, batch_identifiers: dict):
         """Split on the hashed value of the named column"""
 
         return (
-            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
-            == partition_definition[column_name]
+                sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
+                == batch_identifiers[column_name]
         )
 
     ### Sampling methods ###
@@ -790,7 +752,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             splitter_fn = getattr(self, batch_spec["splitter_method"])
             split_clause = splitter_fn(
                 table_name=table_name,
-                partition_definition=batch_spec["partition_definition"],
+                batch_identifiers=batch_spec["batch_identifiers"],
                 **batch_spec["splitter_kwargs"],
             )
 

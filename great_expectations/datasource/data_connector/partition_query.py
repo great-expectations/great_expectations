@@ -3,7 +3,7 @@ import logging
 from typing import Callable, Dict, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.id_dict import PartitionDefinitionSubset
+from great_expectations.core.id_dict import BatchIdentifiersSubset
 from great_expectations.util import is_int
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ def build_partition_query(
                     tuple,
                     slice,
                     str,
-                    Union[Dict, PartitionDefinitionSubset],
+                    Union[Dict, BatchIdentifiersSubset],
                     Callable,
                 ]
             ],
@@ -62,10 +62,10 @@ def build_partition_query(
             )
         if not all([isinstance(key, str) for key in batch_identifiers.keys()]):
             raise ge_exceptions.PartitionQueryError(
-                'All partition_definition keys must strings (Python "str").'
+                'All batch_identifiers keys must strings (Python "str").'
             )
     if batch_identifiers is not None:
-        batch_identifiers: PartitionDefinitionSubset = PartitionDefinitionSubset(
+        batch_identifiers: BatchIdentifiersSubset = BatchIdentifiersSubset(
             batch_identifiers
         )
     index: Optional[
@@ -135,7 +135,7 @@ class PartitionQuery:
     def __init__(
         self,
         custom_filter_function: Callable = None,
-        batch_identifiers: Optional[PartitionDefinitionSubset] = None,
+        batch_identifiers: Optional[BatchIdentifiersSubset] = None,
         index: Optional[Union[int, slice]] = None,
         limit: int = None,
     ):
@@ -149,7 +149,7 @@ class PartitionQuery:
         return self._custom_filter_function
 
     @property
-    def batch_identifiers(self) -> Optional[PartitionDefinitionSubset]:
+    def batch_identifiers(self) -> Optional[BatchIdentifiersSubset]:
         return self._batch_identifiers
 
     @property
@@ -180,7 +180,7 @@ class PartitionQuery:
         selected_batch_definitions = list(
             filter(
                 lambda batch_definition: filter_function(
-                    partition_definition=batch_definition.partition_definition,
+                    batch_identifiers=batch_definition.batch_identifiers,
                 ),
                 batch_definition_list,
             )
@@ -199,18 +199,18 @@ class PartitionQuery:
         return selected_batch_definitions
 
     def best_effort_partition_matcher(self) -> Callable:
-        def match_partition_to_query_params(partition_definition: dict) -> bool:
+        def match_partition_to_query_params(batch_identifiers: dict) -> bool:
             if self.batch_identifiers:
-                if not partition_definition:
+                if not batch_identifiers:
                     return False
-                partition_definition_keys: set = set(self.batch_identifiers.keys())
+                batch_identifiers_keys: set = set(self.batch_identifiers.keys())
 
-                if not partition_definition_keys:
+                if not batch_identifiers_keys:
                     return False
-                for key in partition_definition_keys:
+                for key in batch_identifiers_keys:
                     if not (
-                        key in partition_definition
-                        and partition_definition[key] == self.batch_identifiers[key]
+                            key in batch_identifiers
+                            and batch_identifiers[key] == self.batch_identifiers[key]
                     ):
                         return False
             return True

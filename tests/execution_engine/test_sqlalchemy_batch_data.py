@@ -131,7 +131,7 @@ def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     my_batch_spec = SqlAlchemyDatasourceBatchSpec(
         **{
             "table_name": "test_table",
-            "partition_definition": {},
+            "batch_identifiers": {},
             "schema_name": "main",
         }
     )
