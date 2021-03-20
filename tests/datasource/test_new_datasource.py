@@ -197,9 +197,11 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
 
 def test_basic_spark_datasource_self_check(basic_spark_datasource):
     report = basic_spark_datasource.self_check()
+    print(f"\n[ALEX_TEST] SELF_CHECK_REPORT-0: {report} ; TYPE: {str(type(report))}")
     report["execution_engine"]["spark_config"].pop("spark.app.id")
     report["execution_engine"]["spark_config"].pop("spark.driver.host")
     report["execution_engine"]["spark_config"].pop("spark.driver.port")
+    print(f"\n[ALEX_TEST] SELF_CHECK_REPORT-1: {report} ; TYPE: {str(type(report))}")
     assert report == {
         "execution_engine": {
             "caching": True,
