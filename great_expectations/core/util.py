@@ -5,7 +5,7 @@ import logging
 import sys
 from collections import OrderedDict
 from collections.abc import Mapping
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
 import numpy as np
@@ -476,7 +476,10 @@ def get_or_create_spark_application(
 
     # noinspection PyProtectedMember
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
-    if ("spark.app.name", name) not in spark_session.sparkContext.getConf().getAll():
+    if spark_restart_required(
+        current_spark_config=spark_session.sparkContext.getConf().getAll(),
+        desired_spark_config=spark_config,
+    ):
         if not sc_stopped:
             try:
                 # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
@@ -544,6 +547,23 @@ def get_or_create_spark_session(
         spark_session = None
 
     return spark_session
+
+
+def spark_restart_required(
+    current_spark_config: List[tuple], desired_spark_config: dict
+) -> bool:
+    current_spark_config_dict: dict = {k: v for (k, v) in current_spark_config}
+    if desired_spark_config.get("spark.app.name") != current_spark_config_dict.get(
+        "spark.app.name"
+    ):
+        return True
+
+    if not set([(k, v) for k, v in desired_spark_config.items()]).issubset(
+        current_spark_config
+    ):
+        return True
+
+    return False
 
 
 def get_sql_dialect_floating_point_infinity_value(
