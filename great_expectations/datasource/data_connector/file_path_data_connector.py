@@ -10,9 +10,9 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.datasource.data_connector.data_connector import DataConnector
-from great_expectations.datasource.data_connector.partition_query import (
-    PartitionQuery,
-    build_partition_query,
+from great_expectations.datasource.data_connector.batch_filter import (
+    BatchFilter,
+    build_batch_filter,
 )
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.datasource.data_connector.util import (
@@ -114,7 +114,7 @@ class FilePathDataConnector(DataConnector):
         Retrieve batch_definitions and that match batch_request.
 
         First retrieves all batch_definitions that match batch_request
-            - if batch_request also has a partition_query, then select batch_definitions that match partition_query.
+            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.
             - if data_connector has sorters configured, then sort the batch_definition list before returning.
 
         Args:
@@ -137,7 +137,7 @@ class FilePathDataConnector(DataConnector):
         Retrieve batch_definitions that match batch_request.
 
         First retrieves all batch_definitions that match batch_request
-            - if batch_request also has a partition_query, then select batch_definitions that match partition_query.
+            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.
             - if data_connector has sorters configured, then sort the batch_definition list before returning.
 
         Args:
@@ -161,11 +161,11 @@ class FilePathDataConnector(DataConnector):
         )
 
         if batch_request.data_connector_query is not None:
-            partition_query_obj: PartitionQuery = build_partition_query(
+            batch_filter_obj: BatchFilter = build_batch_filter(
                 data_connector_query_dict=batch_request.data_connector_query
             )
             batch_definition_list = (
-                partition_query_obj.select_from_data_connector_query(
+                batch_filter_obj.select_from_data_connector_query(
                     batch_definition_list=batch_definition_list
                 )
             )

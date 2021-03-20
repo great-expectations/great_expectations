@@ -9,7 +9,7 @@ from great_expectations.util import is_int
 logger = logging.getLogger(__name__)
 
 
-def build_partition_query(
+def build_batch_filter(
     data_connector_query_dict: Optional[
         Dict[
             str,
@@ -28,24 +28,24 @@ def build_partition_query(
     ] = None
 ):
     if not data_connector_query_dict:
-        return PartitionQuery(
+        return BatchFilter(
             custom_filter_function=None,
             batch_identifiers=None,
             index=None,
             limit=None,
         )
     data_connector_query_keys: set = set(data_connector_query_dict.keys())
-    if not data_connector_query_keys <= PartitionQuery.RECOGNIZED_KEYS:
-        raise ge_exceptions.PartitionQueryError(
+    if not data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS:
+        raise ge_exceptions.BatchFilterError(
             f"""Unrecognized data_connector_query key(s):
-"{str(data_connector_query_keys - PartitionQuery.RECOGNIZED_KEYS)}" detected.
+"{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
             """
         )
     custom_filter_function: Callable = data_connector_query_dict.get(
         "custom_filter_function"
     )
     if custom_filter_function and not isinstance(custom_filter_function, Callable):
-        raise ge_exceptions.PartitionQueryError(
+        raise ge_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{str(type(custom_filter_function))}", which is illegal.
             """
@@ -55,13 +55,13 @@ def build_partition_query(
     )
     if batch_identifiers:
         if not isinstance(batch_identifiers, dict):
-            raise ge_exceptions.PartitionQueryError(
+            raise ge_exceptions.BatchFilterError(
                 f"""The type of a batch_identifiers must be a dictionary (Python "dict").  The type given is
 "{str(type(batch_identifiers))}", which is illegal.
                 """
             )
         if not all([isinstance(key, str) for key in batch_identifiers.keys()]):
-            raise ge_exceptions.PartitionQueryError(
+            raise ge_exceptions.BatchFilterError(
                 'All batch_identifiers keys must strings (Python "str").'
             )
     if batch_identifiers is not None:
@@ -73,17 +73,17 @@ def build_partition_query(
     ] = data_connector_query_dict.get("index")
     limit: Optional[int] = data_connector_query_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
-        raise ge_exceptions.PartitionQueryError(
+        raise ge_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
 type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
             """
         )
     if index is not None and limit is not None:
-        raise ge_exceptions.PartitionQueryError(
-            "Only one of partition_index or limit, but not both, can be specified (specifying both is illegal)."
+        raise ge_exceptions.BatchFilterError(
+            "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
     index = _parse_index(index=index)
-    return PartitionQuery(
+    return BatchFilter(
         custom_filter_function=custom_filter_function,
         batch_identifiers=batch_identifiers,
         limit=limit,
@@ -100,8 +100,8 @@ def _parse_index(
         return index
     elif isinstance(index, (list, tuple)):
         if len(index) > 3:
-            raise ge_exceptions.PartitionQueryError(
-                f"""The number of partition_index slice components must be between 1 and 3 (the given number is
+            raise ge_exceptions.BatchFilterError(
+                f"""The number of index slice components must be between 1 and 3 (the given number is
 {len(index)}).
                 """
             )
@@ -116,15 +116,15 @@ def _parse_index(
             return _parse_index(index=int(index))
         return _parse_index(index=[int(idx_str) for idx_str in index.split(":")])
     else:
-        raise ge_exceptions.PartitionQueryError(
-            f"""The type of a partition_index must be an integer (Python "int"), or a list (Python "list") or a tuple
+        raise ge_exceptions.BatchFilterError(
+            f"""The type of index must be an integer (Python "int"), or a list (Python "list") or a tuple
 (Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument.
 The type given is "{str(type(index))}", which is illegal.
             """
         )
 
 
-class PartitionQuery:
+class BatchFilter:
     RECOGNIZED_KEYS: set = {
         "custom_filter_function",
         "batch_identifiers",
@@ -176,7 +176,7 @@ class PartitionQuery:
         if self.custom_filter_function:
             filter_function = self.custom_filter_function
         else:
-            filter_function = self.best_effort_partition_matcher()
+            filter_function = self.best_effort_batch_matcher()
         selected_batch_definitions = list(
             filter(
                 lambda batch_definition: filter_function(
@@ -198,8 +198,8 @@ class PartitionQuery:
                 )
         return selected_batch_definitions
 
-    def best_effort_partition_matcher(self) -> Callable:
-        def match_partition_to_query_params(batch_identifiers: dict) -> bool:
+    def best_effort_batch_matcher(self) -> Callable:
+        def match_batch_to_query_params(batch_identifiers: dict) -> bool:
             if self.batch_identifiers:
                 if not batch_identifiers:
                     return False
@@ -215,4 +215,4 @@ class PartitionQuery:
                         return False
             return True
 
-        return match_partition_to_query_params
+        return match_batch_to_query_params

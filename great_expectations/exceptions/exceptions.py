@@ -347,7 +347,7 @@ class ExecutionEngineError(DataContextError):
         super().__init__(self.message)
 
 
-class PartitionQueryError(DataContextError):
+class BatchFilterError(DataContextError):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)

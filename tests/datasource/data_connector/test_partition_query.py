@@ -89,7 +89,7 @@ def test_data_connector_query_non_recognized_param(
     my_data_connector = create_files_and_instantiate_data_connector
 
     # Test 1: non valid_batch_identifiers_limit
-    with pytest.raises(ge_exceptions.PartitionQueryError):
+    with pytest.raises(ge_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
@@ -103,7 +103,7 @@ def test_data_connector_query_non_recognized_param(
         )
 
     # Test 2: Unrecognized custom_filter is not a function
-    with pytest.raises(ge_exceptions.PartitionQueryError):
+    with pytest.raises(ge_exceptions.BatchFilterError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="test_environment",
@@ -114,7 +114,7 @@ def test_data_connector_query_non_recognized_param(
         )
 
     # Test 3: batch_identifiers is not dict
-    with pytest.raises(ge_exceptions.PartitionQueryError):
+    with pytest.raises(ge_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
@@ -167,7 +167,7 @@ def test_data_connector_query_limit(create_files_and_instantiate_data_connector)
     assert len(sorted_batch_definition_list) == 3
 
     # illegal limit
-    with pytest.raises(ge_exceptions.PartitionQueryError):
+    with pytest.raises(ge_exceptions.BatchFilterError):
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
@@ -184,7 +184,7 @@ def test_data_connector_query_illegal_index_and_limit_combination(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
-    with pytest.raises(ge_exceptions.PartitionQueryError):
+    with pytest.raises(ge_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
