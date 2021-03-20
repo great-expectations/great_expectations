@@ -40,6 +40,9 @@ class DataConnectorQuery(PartitionDefinitionSubset):
 
 
 class PartitionDefinition(PartitionDefinitionSubset):
+
+
+class BatchIdentifierQuery(IDDict):
     pass
 
 
