@@ -386,7 +386,7 @@ def test_s3_files_parquet(tmpdir, s3, s3_bucket, test_df_small, test_df_small_cs
         "alpha-2.csv",
     ]
     path = Path(tmpdir) / "file.parquet"
-    test_df_small.to_parquet(path=path)
+    test_df_small.to_parquet(path)
     with open(path, "rb") as infile:
         parquet = infile.read()
     for key in keys:
