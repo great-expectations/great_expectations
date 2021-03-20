@@ -17,10 +17,7 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     RuntimeBatchRequest,
 )
-from great_expectations.core.id_dict import (
-    BatchIdentifiers,
-    BatchIdentifiersSubset,
-)
+from great_expectations.core.id_dict import BatchIdentifiers, BatchIdentifiersSubset
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -118,8 +115,12 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
         data_asset_name = data_asset_name_from_batch_identifiers
 
     return [
-        BatchDefinition(datasource_name=datasource_name, data_connector_name=data_connector_name,
-                        data_asset_name=data_asset_name, batch_identifiers=BatchIdentifiers(batch_identifiers))
+        BatchDefinition(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_identifiers=BatchIdentifiers(batch_identifiers),
+        )
     ]
 
 
@@ -158,21 +159,24 @@ def map_batch_definition_to_data_reference_string_using_regex(
     data_asset_name: str = batch_definition.data_asset_name
     batch_identifiers: BatchIdentifiers = batch_definition.batch_identifiers
     data_reference: str = (
-        convert_batch_identifiers_to_data_reference_string_using_regex(batch_identifiers=batch_identifiers,
-                                                                       regex_pattern=regex_pattern,
-                                                                       group_names=group_names,
-                                                                       data_asset_name=data_asset_name)
+        convert_batch_identifiers_to_data_reference_string_using_regex(
+            batch_identifiers=batch_identifiers,
+            regex_pattern=regex_pattern,
+            group_names=group_names,
+            data_asset_name=data_asset_name,
+        )
     )
     return data_reference
 
 
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
-def convert_batch_identifiers_to_data_reference_string_using_regex(batch_identifiers: BatchIdentifiers,
-                                                                   regex_pattern: str, group_names: List[str],
-                                                                   data_asset_name: Optional[str] = None) -> str:
-    if not isinstance(
-        batch_identifiers, (BatchIdentifiersSubset, BatchIdentifiers)
-    ):
+def convert_batch_identifiers_to_data_reference_string_using_regex(
+    batch_identifiers: BatchIdentifiers,
+    regex_pattern: str,
+    group_names: List[str],
+    data_asset_name: Optional[str] = None,
+) -> str:
+    if not isinstance(batch_identifiers, (BatchIdentifiersSubset, BatchIdentifiers)):
         raise TypeError(
             "batch_identifiers is not "
             "an instance of type BatchIdentifiersSubset or BatchIdentifiers"

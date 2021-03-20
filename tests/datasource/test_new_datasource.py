@@ -11,8 +11,8 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
-    BatchRequest,
     BatchIdentifiers,
+    BatchRequest,
     RuntimeBatchRequest,
 )
 from great_expectations.data_context.util import (
@@ -287,27 +287,33 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
     )
 
     batch: Batch = basic_pandas_datasource_v013.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition(datasource_name="my_datasource",
-                                         data_connector_name="my_filesystem_data_connector", data_asset_name="B1",
-                                         batch_identifiers=BatchIdentifiers(
-                                             {
-                                                 "letter": "B",
-                                                 "number": "1",
-                                             }
-                                         ))
+        batch_definition=BatchDefinition(
+            datasource_name="my_datasource",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="B1",
+            batch_identifiers=BatchIdentifiers(
+                {
+                    "letter": "B",
+                    "number": "1",
+                }
+            ),
+        )
     )
 
     # TODO Abe 20201104: Make sure this is what we truly want to do.
     assert batch.batch_request == {}
     assert isinstance(batch.data.dataframe, pd.DataFrame)
-    assert batch.batch_definition == BatchDefinition(datasource_name="my_datasource",
-                                                     data_connector_name="my_filesystem_data_connector",
-                                                     data_asset_name="B1", batch_identifiers=BatchIdentifiers(
+    assert batch.batch_definition == BatchDefinition(
+        datasource_name="my_datasource",
+        data_connector_name="my_filesystem_data_connector",
+        data_asset_name="B1",
+        batch_identifiers=BatchIdentifiers(
             {
                 "letter": "B",
                 "number": "1",
             }
-        ))
+        ),
+    )
 
     batch_list: List[
         Batch
@@ -346,8 +352,12 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
 
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
     batch: Batch = basic_pandas_datasource_v013.get_batch_from_batch_definition(
-        batch_definition=BatchDefinition("my_datasource", "_pipeline", "_pipeline",
-                                         batch_identifiers=BatchIdentifiers({"some_random_id": 1})),
+        batch_definition=BatchDefinition(
+            "my_datasource",
+            "_pipeline",
+            "_pipeline",
+            batch_identifiers=BatchIdentifiers({"some_random_id": 1}),
+        ),
         batch_data=my_df,
     )
     # TODO Abe 20201104: Make sure this is what we truly want to do.

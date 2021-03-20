@@ -2,9 +2,9 @@ from typing import Dict, List, Optional
 
 from great_expectations.core.batch import (
     BatchDefinition,
+    BatchIdentifiers,
     BatchRequest,
     BatchSpec,
-    BatchIdentifiers,
 )
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector.data_connector import DataConnector
@@ -150,11 +150,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
         for batch_identifiers in sub_cache:
-            batch_definition: BatchDefinition = BatchDefinition(datasource_name=self.datasource_name,
-                                                                data_connector_name=self.name,
-                                                                data_asset_name=batch_request.data_asset_name,
-                                                                batch_identifiers=BatchIdentifiers(
-                                                                    batch_identifiers))
+            batch_definition: BatchDefinition = BatchDefinition(
+                datasource_name=self.datasource_name,
+                data_connector_name=self.name,
+                data_asset_name=batch_request.data_asset_name,
+                batch_identifiers=BatchIdentifiers(batch_identifiers),
+            )
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
 
@@ -171,8 +172,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
         # allowing us to invoke `BatchIdentifiers(data_reference)`
         return [
-            BatchDefinition(datasource_name=self.datasource_name, data_connector_name=self.name,
-                            data_asset_name=data_asset_name, batch_identifiers=BatchIdentifiers(data_reference))
+            BatchDefinition(
+                datasource_name=self.datasource_name,
+                data_connector_name=self.name,
+                data_asset_name=data_asset_name,
+                batch_identifiers=BatchIdentifiers(data_reference),
+            )
         ]
 
     def build_batch_spec(

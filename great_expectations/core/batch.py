@@ -5,11 +5,11 @@ import json
 from typing import Dict, Optional, Union
 
 from great_expectations.core.id_dict import (
+    BatchIdentifiers,
     BatchKwargs,
     BatchSpec,
     DataConnectorQuery,
     IDDict,
-    BatchIdentifiers,
 )
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
@@ -17,10 +17,20 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 
 
 class BatchDefinition(SerializableDictDot):
-    def __init__(self, datasource_name: str, data_connector_name: str, data_asset_name: str,
-                 batch_identifiers: BatchIdentifiers, batch_spec_passthrough: Optional[dict] = None):
-        self._validate_batch_definition(datasource_name=datasource_name, data_connector_name=data_connector_name,
-                                        data_asset_name=data_asset_name, batch_identifiers=batch_identifiers)
+    def __init__(
+        self,
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        batch_identifiers: BatchIdentifiers,
+        batch_spec_passthrough: Optional[dict] = None,
+    ):
+        self._validate_batch_definition(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_identifiers=batch_identifiers,
+        )
 
         assert type(batch_identifiers) == BatchIdentifiers
 
@@ -48,8 +58,12 @@ class BatchDefinition(SerializableDictDot):
         return str(doc_fields_dict)
 
     @staticmethod
-    def _validate_batch_definition(datasource_name: str, data_connector_name: str, data_asset_name: str,
-                                   batch_identifiers: BatchIdentifiers):
+    def _validate_batch_definition(
+        datasource_name: str,
+        data_connector_name: str,
+        data_asset_name: str,
+        batch_identifiers: BatchIdentifiers,
+    ):
         if datasource_name is None:
             raise ValueError("A valid datasource must be specified.")
         if datasource_name and not isinstance(datasource_name, str):
@@ -74,9 +88,7 @@ class BatchDefinition(SerializableDictDot):
 "{str(type(data_asset_name))}", which is illegal.
                 """
             )
-        if batch_identifiers and not isinstance(
-            batch_identifiers, BatchIdentifiers
-        ):
+        if batch_identifiers and not isinstance(batch_identifiers, BatchIdentifiers):
             raise TypeError(
                 f"""The type of batch_identifiers must be a BatchIdentifiers object.  The type given is
 "{str(type(batch_identifiers))}", which is illegal.

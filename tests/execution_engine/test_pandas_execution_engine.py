@@ -425,24 +425,32 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
         prefix="",
         assets={"alpha": {}},
     )
-    batch_def = BatchDefinition(datasource_name="FAKE_DATASOURCE_NAME", data_connector_name="my_data_connector",
-                                data_asset_name="alpha", batch_identifiers=BatchIdentifiers(index=1),
-                                batch_spec_passthrough={
-                                    "reader_method": "read_csv",
-                                    "splitter_method": "_split_on_whole_table",
-                                })
+    batch_def = BatchDefinition(
+        datasource_name="FAKE_DATASOURCE_NAME",
+        data_connector_name="my_data_connector",
+        data_asset_name="alpha",
+        batch_identifiers=BatchIdentifiers(index=1),
+        batch_spec_passthrough={
+            "reader_method": "read_csv",
+            "splitter_method": "_split_on_whole_table",
+        },
+    )
     test_df = PandasExecutionEngine().get_batch_data(
         batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def)
     )
     assert test_df.dataframe.shape == expected_df.shape
 
     # if key does not exist
-    batch_def_no_key = BatchDefinition(datasource_name="FAKE_DATASOURCE_NAME", data_connector_name="my_data_connector",
-                                       data_asset_name="alpha", batch_identifiers=BatchIdentifiers(index=9),
-                                       batch_spec_passthrough={
-                                           "reader_method": "read_csv",
-                                           "splitter_method": "_split_on_whole_table",
-                                       })
+    batch_def_no_key = BatchDefinition(
+        datasource_name="FAKE_DATASOURCE_NAME",
+        data_connector_name="my_data_connector",
+        data_asset_name="alpha",
+        batch_identifiers=BatchIdentifiers(index=9),
+        batch_spec_passthrough={
+            "reader_method": "read_csv",
+            "splitter_method": "_split_on_whole_table",
+        },
+    )
     with pytest.raises(ClientError):
         PandasExecutionEngine().get_batch_data(
             batch_spec=my_data_connector.build_batch_spec(

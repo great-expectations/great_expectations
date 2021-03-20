@@ -10,8 +10,8 @@ from ruamel.yaml import YAML
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
-    BatchRequest,
     BatchIdentifiers,
+    BatchRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
@@ -238,11 +238,15 @@ def test_complex_regex_example_with_implicit_data_asset_names():
             },
         )
     ) == [
-        BatchDefinition(datasource_name="FAKE_DATASOURCE_NAME", data_connector_name="my_data_connector",
-                        data_asset_name="alpha", batch_identifiers=BatchIdentifiers(
+        BatchDefinition(
+            datasource_name="FAKE_DATASOURCE_NAME",
+            data_connector_name="my_data_connector",
+            data_asset_name="alpha",
+            batch_identifiers=BatchIdentifiers(
                 year_dir="2020",
                 month_dir="03",
-            ))
+            ),
+        )
     ]
 
 
@@ -788,41 +792,62 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
     )
 
     expected = [
-        BatchDefinition(datasource_name="test_environment",
-                        data_connector_name="my_inferred_asset_filesystem_data_connector",
-                        data_asset_name="some_bucket", batch_identifiers=BatchIdentifiers(
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
+            batch_identifiers=BatchIdentifiers(
                 {"year": "2021", "month": "01", "day": "07", "full_date": "20210107"}
-            )),
-        BatchDefinition(datasource_name="test_environment",
-                        data_connector_name="my_inferred_asset_filesystem_data_connector",
-                        data_asset_name="some_bucket", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
+            batch_identifiers=BatchIdentifiers(
                 {"year": "2021", "month": "01", "day": "06", "full_date": "20210106"}
-            )),
-        BatchDefinition(datasource_name="test_environment",
-                        data_connector_name="my_inferred_asset_filesystem_data_connector",
-                        data_asset_name="some_bucket", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
+            batch_identifiers=BatchIdentifiers(
                 {"year": "2021", "month": "01", "day": "05", "full_date": "20210105"}
-            )),
-        BatchDefinition(datasource_name="test_environment",
-                        data_connector_name="my_inferred_asset_filesystem_data_connector",
-                        data_asset_name="some_bucket", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
+            batch_identifiers=BatchIdentifiers(
                 {"year": "2021", "month": "01", "day": "04", "full_date": "20210104"}
-            )),
-        BatchDefinition(datasource_name="test_environment",
-                        data_connector_name="my_inferred_asset_filesystem_data_connector",
-                        data_asset_name="some_bucket", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
+            batch_identifiers=BatchIdentifiers(
                 {"year": "2021", "month": "01", "day": "03", "full_date": "20210103"}
-            )),
-        BatchDefinition(datasource_name="test_environment",
-                        data_connector_name="my_inferred_asset_filesystem_data_connector",
-                        data_asset_name="some_bucket", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
+            batch_identifiers=BatchIdentifiers(
                 {"year": "2021", "month": "01", "day": "02", "full_date": "20210102"}
-            )),
-        BatchDefinition(datasource_name="test_environment",
-                        data_connector_name="my_inferred_asset_filesystem_data_connector",
-                        data_asset_name="some_bucket", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="my_inferred_asset_filesystem_data_connector",
+            data_asset_name="some_bucket",
+            batch_identifiers=BatchIdentifiers(
                 {"year": "2021", "month": "01", "day": "01", "full_date": "20210101"}
-            )),
+            ),
+        ),
     ]
     assert expected == sorted_batch_definition_list
 

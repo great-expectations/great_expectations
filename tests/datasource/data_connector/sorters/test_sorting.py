@@ -15,56 +15,108 @@ from great_expectations.datasource.data_connector.sorter import (
 
 @pytest.fixture()
 def example_batch_def_list():
-    a = BatchDefinition(datasource_name="A", data_connector_name="a", data_asset_name="james_20200810_1003",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "james", "timestamp": "20200810", "price": "1003"}
-                        ))
-    b = BatchDefinition(datasource_name="A", data_connector_name="b", data_asset_name="abe_20200809_1040",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "abe", "timestamp": "20200809", "price": "1040"}
-                        ))
-    c = BatchDefinition(datasource_name="A", data_connector_name="c", data_asset_name="eugene_20200809_1500",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-                        ))
-    d = BatchDefinition(datasource_name="A", data_connector_name="d", data_asset_name="alex_20200819_1300",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "alex", "timestamp": "20200819", "price": "1300"}
-                        ))
-    e = BatchDefinition(datasource_name="A", data_connector_name="e", data_asset_name="alex_20200809_1000",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "alex", "timestamp": "20200809", "price": "1000"}
-                        ))
-    f = BatchDefinition(datasource_name="A", data_connector_name="f", data_asset_name="will_20200810_1001",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "will", "timestamp": "20200810", "price": "1001"}
-                        ))
-    g = BatchDefinition(datasource_name="A", data_connector_name="g", data_asset_name="eugene_20201129_1900",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-                        ))
-    h = BatchDefinition(datasource_name="A", data_connector_name="h", data_asset_name="will_20200809_1002",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "will", "timestamp": "20200809", "price": "1002"}
-                        ))
-    i = BatchDefinition(datasource_name="A", data_connector_name="i", data_asset_name="james_20200811_1009",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "james", "timestamp": "20200811", "price": "1009"}
-                        ))
-    j = BatchDefinition(datasource_name="A", data_connector_name="j", data_asset_name="james_20200713_1567",
-                        batch_identifiers=BatchIdentifiers(
-                            {"name": "james", "timestamp": "20200713", "price": "1567"}
-                        ))
+    a = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="a",
+        data_asset_name="james_20200810_1003",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "james", "timestamp": "20200810", "price": "1003"}
+        ),
+    )
+    b = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="b",
+        data_asset_name="abe_20200809_1040",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "abe", "timestamp": "20200809", "price": "1040"}
+        ),
+    )
+    c = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="c",
+        data_asset_name="eugene_20200809_1500",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+        ),
+    )
+    d = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="d",
+        data_asset_name="alex_20200819_1300",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "alex", "timestamp": "20200819", "price": "1300"}
+        ),
+    )
+    e = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="e",
+        data_asset_name="alex_20200809_1000",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "alex", "timestamp": "20200809", "price": "1000"}
+        ),
+    )
+    f = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="f",
+        data_asset_name="will_20200810_1001",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "will", "timestamp": "20200810", "price": "1001"}
+        ),
+    )
+    g = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="g",
+        data_asset_name="eugene_20201129_1900",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+        ),
+    )
+    h = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="h",
+        data_asset_name="will_20200809_1002",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "will", "timestamp": "20200809", "price": "1002"}
+        ),
+    )
+    i = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="i",
+        data_asset_name="james_20200811_1009",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "james", "timestamp": "20200811", "price": "1009"}
+        ),
+    )
+    j = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="j",
+        data_asset_name="james_20200713_1567",
+        batch_identifiers=BatchIdentifiers(
+            {"name": "james", "timestamp": "20200713", "price": "1567"}
+        ),
+    )
     return [a, b, c, d, e, f, g, h, i, j]
 
 
 def test_create_three_batch_definitions_sort_lexicographically():
-    a = BatchDefinition(datasource_name="A", data_connector_name="a", data_asset_name="aaa",
-                        batch_identifiers=BatchIdentifiers({"id": "A"}))
-    b = BatchDefinition(datasource_name="B", data_connector_name="b", data_asset_name="bbb",
-                        batch_identifiers=BatchIdentifiers({"id": "B"}))
-    c = BatchDefinition(datasource_name="C", data_connector_name="c", data_asset_name="ccc",
-                        batch_identifiers=BatchIdentifiers({"id": "C"}))
+    a = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        batch_identifiers=BatchIdentifiers({"id": "A"}),
+    )
+    b = BatchDefinition(
+        datasource_name="B",
+        data_connector_name="b",
+        data_asset_name="bbb",
+        batch_identifiers=BatchIdentifiers({"id": "B"}),
+    )
+    c = BatchDefinition(
+        datasource_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        batch_identifiers=BatchIdentifiers({"id": "C"}),
+    )
 
     batch_list = [a, b, c]
 
@@ -84,12 +136,24 @@ def test_create_three_batch_definitions_sort_lexicographically():
 
 
 def test_create_three_batch_definitions_sort_numerically():
-    one = BatchDefinition(datasource_name="A", data_connector_name="a", data_asset_name="aaa",
-                          batch_identifiers=BatchIdentifiers({"id": 1}))
-    two = BatchDefinition(datasource_name="B", data_connector_name="b", data_asset_name="bbb",
-                          batch_identifiers=BatchIdentifiers({"id": 2}))
-    three = BatchDefinition(datasource_name="C", data_connector_name="c", data_asset_name="ccc",
-                            batch_identifiers=BatchIdentifiers({"id": 3}))
+    one = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        batch_identifiers=BatchIdentifiers({"id": 1}),
+    )
+    two = BatchDefinition(
+        datasource_name="B",
+        data_connector_name="b",
+        data_asset_name="bbb",
+        batch_identifiers=BatchIdentifiers({"id": 2}),
+    )
+    three = BatchDefinition(
+        datasource_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        batch_identifiers=BatchIdentifiers({"id": 3}),
+    )
 
     batch_list = [one, two, three]
     my_sorter = NumericSorter(name="id", orderby="desc")
@@ -101,8 +165,12 @@ def test_create_three_batch_definitions_sort_numerically():
     assert sorted_batch_list == [one, two, three]
 
     # testing a non-numeric, which should throw an error
-    i_should_not_work = BatchDefinition(datasource_name="C", data_connector_name="c", data_asset_name="ccc",
-                                        batch_identifiers=BatchIdentifiers({"id": "aaa"}))
+    i_should_not_work = BatchDefinition(
+        datasource_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        batch_identifiers=BatchIdentifiers({"id": "aaa"}),
+    )
 
     batch_list = [one, two, three, i_should_not_work]
     with pytest.raises(ge_exceptions.SorterError):
@@ -110,12 +178,24 @@ def test_create_three_batch_definitions_sort_numerically():
 
 
 def test_date_time():
-    first = BatchDefinition(datasource_name="A", data_connector_name="a", data_asset_name="aaa",
-                            batch_identifiers=BatchIdentifiers({"date": "20210101"}))
-    second = BatchDefinition(datasource_name="B", data_connector_name="b", data_asset_name="bbb",
-                             batch_identifiers=BatchIdentifiers({"date": "20210102"}))
-    third = BatchDefinition(datasource_name="C", data_connector_name="c", data_asset_name="ccc",
-                            batch_identifiers=BatchIdentifiers({"date": "20210103"}))
+    first = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        batch_identifiers=BatchIdentifiers({"date": "20210101"}),
+    )
+    second = BatchDefinition(
+        datasource_name="B",
+        data_connector_name="b",
+        data_asset_name="bbb",
+        batch_identifiers=BatchIdentifiers({"date": "20210102"}),
+    )
+    third = BatchDefinition(
+        datasource_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        batch_identifiers=BatchIdentifiers({"date": "20210103"}),
+    )
 
     batch_list = [first, second, third]
     my_sorter = DateTimeSorter(name="date", datetime_format="%Y%m%d", orderby="desc")
@@ -130,8 +210,12 @@ def test_date_time():
         # numeric date_time_format
         i_dont_work = DateTimeSorter(name="date", datetime_format=12345, orderby="desc")
 
-    my_date_is_not_a_string = BatchDefinition(datasource_name="C", data_connector_name="c", data_asset_name="ccc",
-                                              batch_identifiers=BatchIdentifiers({"date": 20210103}))
+    my_date_is_not_a_string = BatchDefinition(
+        datasource_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        batch_identifiers=BatchIdentifiers({"date": 20210103}),
+    )
 
     batch_list = [first, second, third, my_date_is_not_a_string]
     my_sorter = DateTimeSorter(name="date", datetime_format="%Y%m%d", orderby="desc")
@@ -141,12 +225,24 @@ def test_date_time():
 
 
 def test_custom_list(periodic_table_of_elements):
-    Hydrogen = BatchDefinition(datasource_name="A", data_connector_name="a", data_asset_name="aaa",
-                               batch_identifiers=BatchIdentifiers({"element": "Hydrogen"}))
-    Helium = BatchDefinition(datasource_name="B", data_connector_name="b", data_asset_name="bbb",
-                             batch_identifiers=BatchIdentifiers({"element": "Helium"}))
-    Lithium = BatchDefinition(datasource_name="C", data_connector_name="c", data_asset_name="ccc",
-                              batch_identifiers=BatchIdentifiers({"element": "Lithium"}))
+    Hydrogen = BatchDefinition(
+        datasource_name="A",
+        data_connector_name="a",
+        data_asset_name="aaa",
+        batch_identifiers=BatchIdentifiers({"element": "Hydrogen"}),
+    )
+    Helium = BatchDefinition(
+        datasource_name="B",
+        data_connector_name="b",
+        data_asset_name="bbb",
+        batch_identifiers=BatchIdentifiers({"element": "Helium"}),
+    )
+    Lithium = BatchDefinition(
+        datasource_name="C",
+        data_connector_name="c",
+        data_asset_name="ccc",
+        batch_identifiers=BatchIdentifiers({"element": "Lithium"}),
+    )
 
     batch_list = [Hydrogen, Helium, Lithium]
     my_sorter = CustomListSorter(

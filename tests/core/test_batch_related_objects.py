@@ -4,10 +4,10 @@ import pytest
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
+    BatchIdentifiers,
     BatchMarkers,
     BatchRequest,
     BatchSpec,
-    BatchIdentifiers,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError
@@ -58,8 +58,12 @@ def test_batch__str__method():
             data_connector_name="my_data_connector",
             data_asset_name="my_data_asset_name",
         ),
-        batch_definition=BatchDefinition(datasource_name="my_datasource", data_connector_name="my_data_connector",
-                                         data_asset_name="my_data_asset_name", batch_identifiers=BatchIdentifiers({})),
+        batch_definition=BatchDefinition(
+            datasource_name="my_datasource",
+            data_connector_name="my_data_connector",
+            data_asset_name="my_data_asset_name",
+            batch_identifiers=BatchIdentifiers({}),
+        ),
         batch_spec=BatchSpec(path="/some/path/some.file"),
         batch_markers=BatchMarkers(ge_load_time="FAKE_LOAD_TIME"),
     )

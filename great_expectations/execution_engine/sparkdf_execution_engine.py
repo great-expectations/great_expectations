@@ -570,8 +570,12 @@ Please check your config."""
         return df.filter(F.col(column_name) == batch_identifiers[column_name])
 
     @staticmethod
-    def _split_on_converted_datetime(df, column_name: str, batch_identifiers: dict,
-                                     date_format_string: str = "yyyy-MM-dd"):
+    def _split_on_converted_datetime(
+        df,
+        column_name: str,
+        batch_identifiers: dict,
+        date_format_string: str = "yyyy-MM-dd",
+    ):
         matching_string = batch_identifiers[column_name]
         res = (
             df.withColumn(
@@ -583,7 +587,9 @@ Please check your config."""
         return res
 
     @staticmethod
-    def _split_on_divided_integer(df, column_name: str, divisor: int, batch_identifiers: dict):
+    def _split_on_divided_integer(
+        df, column_name: str, divisor: int, batch_identifiers: dict
+    ):
         """Divide the values in the named column by `divisor`, and split on that"""
         matching_divisor = batch_identifiers[column_name]
         res = (
@@ -621,8 +627,13 @@ Please check your config."""
         return df
 
     @staticmethod
-    def _split_on_hashed_column(df, column_name: str, hash_digits: int, batch_identifiers: dict,
-                                hash_function_name: str = "sha256"):
+    def _split_on_hashed_column(
+        df,
+        column_name: str,
+        hash_digits: int,
+        batch_identifiers: dict,
+        hash_function_name: str = "sha256",
+    ):
         """Split on the hashed value of the named column"""
         try:
             getattr(hashlib, hash_function_name)

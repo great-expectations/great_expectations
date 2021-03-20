@@ -9,11 +9,11 @@ from great_expectations.core.batch import (
     BatchSpec,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )
+from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
@@ -164,10 +164,8 @@ class FilePathDataConnector(DataConnector):
             batch_filter_obj: BatchFilter = build_batch_filter(
                 data_connector_query_dict=batch_request.data_connector_query
             )
-            batch_definition_list = (
-                batch_filter_obj.select_from_data_connector_query(
-                    batch_definition_list=batch_definition_list
-                )
+            batch_definition_list = batch_filter_obj.select_from_data_connector_query(
+                batch_definition_list=batch_definition_list
             )
 
         if len(self.sorters) > 0:

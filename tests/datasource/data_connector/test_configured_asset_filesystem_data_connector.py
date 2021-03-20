@@ -8,10 +8,10 @@ from ruamel.yaml import YAML
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
+    BatchIdentifiers,
     BatchRequest,
     BatchRequestBase,
     DataConnectorQuery,
-    BatchIdentifiers,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
@@ -275,46 +275,86 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         )
     )
     expected = [
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
-            )),
+            ),
+        ),
     ]
     assert expected == unsorted_batch_definition_list
 
@@ -413,46 +453,86 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     )
 
     expected = [
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
-            )),
-        BatchDefinition(datasource_name="test_environment", data_connector_name="general_filesystem_data_connector",
-                        data_asset_name="TestFiles", batch_identifiers=BatchIdentifiers(
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=BatchIdentifiers(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
-            )),
+            ),
+        ),
     ]
 
     # TEST 1: Sorting works
@@ -485,16 +565,18 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition: BatchDefinition = BatchDefinition(datasource_name="test_environment",
-                                                                 data_connector_name="general_filesystem_data_connector",
-                                                                 data_asset_name="TestFiles",
-                                                                 batch_identifiers=BatchIdentifiers(
-                                                                     **{
-                                                                         "name": "james",
-                                                                         "timestamp": "20200713",
-                                                                         "price": "1567",
-                                                                     }
-                                                                 ))
+    expected_batch_definition: BatchDefinition = BatchDefinition(
+        datasource_name="test_environment",
+        data_connector_name="general_filesystem_data_connector",
+        data_asset_name="TestFiles",
+        batch_identifiers=BatchIdentifiers(
+            **{
+                "name": "james",
+                "timestamp": "20200713",
+                "price": "1567",
+            }
+        ),
+    )
     assert my_batch_definition == expected_batch_definition
 
     # TEST 3: Without data_connector_query, should return all 10

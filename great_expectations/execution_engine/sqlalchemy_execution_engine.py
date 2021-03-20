@@ -648,37 +648,50 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # return sa.column(column_name) == batch_identifiers[column_name]
         return 1 == 1
 
-    def _split_on_column_value(self, table_name: str, column_name: str, batch_identifiers: dict):
+    def _split_on_column_value(
+        self, table_name: str, column_name: str, batch_identifiers: dict
+    ):
         """Split using the values in the named column"""
 
         return sa.column(column_name) == batch_identifiers[column_name]
 
-    def _split_on_converted_datetime(self, table_name: str, column_name: str, batch_identifiers: dict,
-                                     date_format_string: str = "%Y-%m-%d"):
+    def _split_on_converted_datetime(
+        self,
+        table_name: str,
+        column_name: str,
+        batch_identifiers: dict,
+        date_format_string: str = "%Y-%m-%d",
+    ):
         """Convert the values in the named column to the given date_format, and split on that"""
 
         return (
-                sa.func.strftime(
+            sa.func.strftime(
                 date_format_string,
                 sa.column(column_name),
             )
-                == batch_identifiers[column_name]
+            == batch_identifiers[column_name]
         )
 
-    def _split_on_divided_integer(self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict):
+    def _split_on_divided_integer(
+        self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict
+    ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
         return (
-                sa.cast(sa.column(column_name) / divisor, sa.Integer)
-                == batch_identifiers[column_name]
+            sa.cast(sa.column(column_name) / divisor, sa.Integer)
+            == batch_identifiers[column_name]
         )
 
-    def _split_on_mod_integer(self, table_name: str, column_name: str, mod: int, batch_identifiers: dict):
+    def _split_on_mod_integer(
+        self, table_name: str, column_name: str, mod: int, batch_identifiers: dict
+    ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
         return sa.column(column_name) % mod == batch_identifiers[column_name]
 
-    def _split_on_multi_column_values(self, table_name: str, column_names: List[str], batch_identifiers: dict):
+    def _split_on_multi_column_values(
+        self, table_name: str, column_names: List[str], batch_identifiers: dict
+    ):
         """Split on the joint values in the named columns"""
 
         return sa.and_(
@@ -688,12 +701,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ]
         )
 
-    def _split_on_hashed_column(self, table_name: str, column_name: str, hash_digits: int, batch_identifiers: dict):
+    def _split_on_hashed_column(
+        self,
+        table_name: str,
+        column_name: str,
+        hash_digits: int,
+        batch_identifiers: dict,
+    ):
         """Split on the hashed value of the named column"""
 
         return (
-                sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
-                == batch_identifiers[column_name]
+            sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
+            == batch_identifiers[column_name]
         )
 
     ### Sampling methods ###

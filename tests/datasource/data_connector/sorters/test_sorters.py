@@ -94,13 +94,21 @@ def test_sorter_instantiation_custom_list_with_periodic_table(
     # noinspection PyProtectedMember
     assert my_custom_sorter._reference_list == periodic_table_of_elements
     # This element exists : Hydrogen
-    test_batch_def = BatchDefinition(datasource_name="test", data_connector_name="fake", data_asset_name="nowhere",
-                                     batch_identifiers=BatchIdentifiers({"element": "Hydrogen"}))
+    test_batch_def = BatchDefinition(
+        datasource_name="test",
+        data_connector_name="fake",
+        data_asset_name="nowhere",
+        batch_identifiers=BatchIdentifiers({"element": "Hydrogen"}),
+    )
     returned_partition_key = my_custom_sorter.get_batch_key(test_batch_def)
     assert returned_partition_key == 0
 
     # This element does not : Vibranium
-    test_batch_def = BatchDefinition(datasource_name="test", data_connector_name="fake", data_asset_name="nowhere",
-                                     batch_identifiers=BatchIdentifiers({"element": "Vibranium"}))
+    test_batch_def = BatchDefinition(
+        datasource_name="test",
+        data_connector_name="fake",
+        data_asset_name="nowhere",
+        batch_identifiers=BatchIdentifiers({"element": "Vibranium"}),
+    )
     with pytest.raises(ge_exceptions.SorterError):
         my_custom_sorter.get_batch_key(test_batch_def)

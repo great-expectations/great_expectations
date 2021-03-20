@@ -356,8 +356,12 @@ def test_get_batch_definitions_and_get_batch_basics(
     my_df: pd.DataFrame = pd.DataFrame({"x": range(10), "y": range(10)})
     batch: Batch = (
         basic_datasource_with_runtime_data_connector.get_batch_from_batch_definition(
-            batch_definition=BatchDefinition("my_datasource", "_pipeline", "_pipeline",
-                                             batch_identifiers=BatchIdentifiers({"some_random_id": 1})),
+            batch_definition=BatchDefinition(
+                "my_datasource",
+                "_pipeline",
+                "_pipeline",
+                batch_identifiers=BatchIdentifiers({"some_random_id": 1}),
+            ),
             batch_data=my_df,
         )
     )

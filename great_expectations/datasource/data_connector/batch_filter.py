@@ -209,8 +209,8 @@ class BatchFilter:
                     return False
                 for key in batch_identifiers_keys:
                     if not (
-                            key in batch_identifiers
-                            and batch_identifiers[key] == self.batch_identifiers[key]
+                        key in batch_identifiers
+                        and batch_identifiers[key] == self.batch_identifiers[key]
                     ):
                         return False
             return True
