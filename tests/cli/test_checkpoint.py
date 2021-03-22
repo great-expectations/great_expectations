@@ -622,7 +622,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
 batch_request:
