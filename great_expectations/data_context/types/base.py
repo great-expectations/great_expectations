@@ -67,6 +67,7 @@ class BaseYamlConfig(SerializableDictDot):
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
         if hasattr(cls.get_config_class(), "_schema_instance"):
+            # noinspection PyProtectedMember
             schema_instance: Schema = cls.get_config_class()._schema_instance
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
@@ -79,8 +80,11 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap):
         try:
-            config: dict = cls._get_schema_instance().load(commented_map)
-            return cls.get_config_class()(commented_map=commented_map, **config)
+            config: Union[dict, BaseYamlConfig]
+            config = cls._get_schema_instance().load(commented_map)
+            if isinstance(config, dict):
+                return cls.get_config_class()(commented_map=commented_map, **config)
+            return config
         except ValidationError:
             logger.error(
                 "Encountered errors during loading config.  See ValidationError for more details."
@@ -265,6 +269,7 @@ class DataConnectorConfig(DictDot):
         delimiter=None,
         max_keys=None,
         boto3_options=None,
+        sorters=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -289,6 +294,8 @@ class DataConnectorConfig(DictDot):
             self.max_keys = max_keys
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if sorters is not None:
+            self.sorters = sorters
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -317,6 +324,11 @@ class DataConnectorConfigSchema(Schema):
 
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
+    sorters = fields.List(
+        fields.Nested(SorterConfigSchema, required=False, allow_none=True),
+        required=False,
+        allow_none=True,
+    )
     default_regex = fields.Dict(required=False, allow_none=True)
     runtime_keys = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
