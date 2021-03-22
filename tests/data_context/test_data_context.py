@@ -2038,16 +2038,22 @@ def test_add_datasource_from_yaml_sql_datasource(empty_data_context):
       password: ''
       database: postgres
     """
-    datasource_from_test_yaml_config = context.test_yaml_config(
-        example_yaml, name=datasource_name
-    )
+    skip_test_yaml_config = False
+    try:
+        datasource_from_test_yaml_config = context.test_yaml_config(
+            example_yaml, name=datasource_name
+        )
+    except ge_exceptions.DatasourceInitializationError:
+        # Currently test_yaml_config connects to the database so skip this part of the test for CI stages without a postgres db
+        skip_test_yaml_config = True
 
     datasource_from_yaml = context.add_datasource(
         name=datasource_name, **yaml.load(example_yaml)
     )
 
     # .config not implemented for SimpleSqlalchemyDatasource
-    assert datasource_from_test_yaml_config.config == {}
+    if not skip_test_yaml_config:
+        assert datasource_from_test_yaml_config.config == {}
     assert datasource_from_yaml.config == {}
 
     assert datasource_from_yaml.name == datasource_name
