@@ -831,7 +831,7 @@ class BaseDataContext:
                 if not os.path.isabs(defined_path):
                     # A BaseDataContext will not have a root directory; in that case use the current directory
                     # for any non-absolute path
-                    root_directory = self.root_directory or os.curdir()
+                    root_directory = self.root_directory or os.curdir
                 else:
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
