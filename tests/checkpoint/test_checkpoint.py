@@ -121,6 +121,8 @@ def test_basic_checkpoint_config_validation(
         ]
     )
 
+    assert len(empty_data_context.list_checkpoints()) == 0
+    empty_data_context.add_checkpoint(**yaml.load(yaml_config_erroneous))
     assert len(empty_data_context.list_checkpoints()) == 1
 
     yaml_config: str = f"""
@@ -195,6 +197,8 @@ def test_basic_checkpoint_config_validation(
         == expected_checkpoint_config
     )
 
+    assert len(empty_data_context.list_checkpoints()) == 1
+    empty_data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(empty_data_context.list_checkpoints()) == 2
 
     empty_data_context.create_expectation_suite(
@@ -317,6 +321,8 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         properties=expected_checkpoint_config,
     )
 
+    assert len(data_context.list_checkpoints()) == 0
+    data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
@@ -443,6 +449,8 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         properties=expected_checkpoint_config,
     )
 
+    assert len(data_context.list_checkpoints()) == 0
+    data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
@@ -533,6 +541,8 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         properties=expected_checkpoint_config,
     )
 
+    assert len(data_context.list_checkpoints()) == 0
+    data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
@@ -680,6 +690,8 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         properties=expected_checkpoint_config,
     )
 
+    assert len(data_context.list_checkpoints()) == 0
+    data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
     data_context.create_expectation_suite(expectation_suite_name="users.warning")
@@ -775,6 +787,8 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         properties=expected_checkpoint_config,
     )
 
+    assert len(data_context.list_checkpoints()) == 0
+    data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
     with pytest.raises(
@@ -887,6 +901,8 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         properties=expected_checkpoint_config,
     )
 
+    assert len(data_context.list_checkpoints()) == 1
+    data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 2
 
     result: CheckpointResult = data_context.run_checkpoint(
