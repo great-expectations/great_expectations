@@ -1,10 +1,9 @@
 import datetime
 import os
-import platform
 import subprocess
 import sys
 import warnings
-from pathlib import Path, PosixPath, PurePosixPath, PureWindowsPath, WindowsPath
+from pathlib import Path
 from typing import Optional, Union
 
 import click
