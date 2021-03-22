@@ -16,9 +16,9 @@ from great_expectations.core.batch_spec import (
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.self_check.util import build_spark_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
-from tests.test_utils import build_spark_engine
 
 try:
     pyspark = pytest.importorskip("pyspark")
@@ -756,7 +756,7 @@ def dataframes_equal(first_table, second_table):
 def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     import datetime
 
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]},
@@ -887,7 +887,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
 def test_get_compute_domain_with_no_domain_kwargs_alt(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -912,7 +912,7 @@ def test_get_compute_domain_with_no_domain_kwargs_alt(
 def test_get_compute_domain_with_column_pair(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -954,7 +954,7 @@ def test_get_compute_domain_with_column_pair(
 def test_get_compute_domain_with_multicolumn(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]},
@@ -996,7 +996,7 @@ def test_get_compute_domain_with_multicolumn(
 def test_get_compute_domain_with_column_domain_alt(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -1021,7 +1021,7 @@ def test_get_compute_domain_with_column_domain_alt(
 def test_get_compute_domain_with_row_condition_alt(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -1055,7 +1055,7 @@ def test_get_compute_domain_with_row_condition_alt(
 def test_get_compute_domain_with_unmeetable_row_condition_alt(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -1108,7 +1108,7 @@ def test_get_compute_domain_with_unmeetable_row_condition_alt(
 def test_get_compute_domain_with_ge_experimental_condition_parser(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -1167,7 +1167,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(
 def test_get_compute_domain_with_nonexistent_condition_parser(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -1195,7 +1195,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(
 def test_resolve_metric_bundle_with_nonexistent_metric(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]},
@@ -1242,7 +1242,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(
 def test_dataframe_property_given_loaded_batch(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 5, 22, 3, 5, 10]},

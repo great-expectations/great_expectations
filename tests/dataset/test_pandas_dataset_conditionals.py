@@ -1,12 +1,9 @@
-import datetime
-import json
-
 import numpy as np
 import pandas as pd
 import pytest
 
 import great_expectations as ge
-from tests.test_utils import (
+from great_expectations.self_check.util import (
     expectationConfigurationSchema,
     expectationValidationResultSchema,
 )
