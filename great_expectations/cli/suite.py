@@ -370,7 +370,7 @@ def suite_delete(ctx, suite):
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
         toolkit.send_usage_message(
-            data_context=context, event="cli.suite.delete", success=False
+            data_context=context, event=usage_event, success=False
         )
         raise e
     if not suite_names:
@@ -387,10 +387,9 @@ def suite_delete(ctx, suite):
             message=f"No expectation suite named {suite} found.",
         )
 
-    if not ctx.obj.assume_yes:
-        if not toolkit.confirm_proceed_or_exit(exit_on_no=False):
-            cli_message(f"Suite `{suite}` was not deleted.")
-            sys.exit(0)
+    if not(ctx.obj.assume_yes or toolkit.confirm_proceed_or_exit(exit_on_no=False)):
+        cli_message(f"Suite `{suite}` was not deleted.")
+        sys.exit(0)
 
     context.delete_expectation_suite(suite)
     cli_message(f"Deleted the expectation suite named: {suite}")
@@ -466,7 +465,7 @@ def suite_list(ctx):
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
         toolkit.send_usage_message(
-            data_context=context, event="cli.suite.list", success=False
+            data_context=context, event=usage_event, success=False
         )
         raise e
 
