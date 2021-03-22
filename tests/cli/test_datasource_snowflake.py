@@ -33,7 +33,7 @@ def test_snowflake_user_password_credentials_generates_notebook(
         input="2\n4\n1\n",
     )
 
-    stdout = result.stdout
+    stdout = result.stdout.strip()
 
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "Which database backend are you using?" in stdout
