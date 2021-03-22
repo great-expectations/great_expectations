@@ -3,24 +3,22 @@ This module specifically tests for combinations of paths for datasource new.
 
 Tests are named according to the matrix of possible states is as follows:
 
-run from            data path
------------------------------
- ge dir             absolute
- ge dir             relative
- adjacent           absolute
- adjacent           relative
- misc + --config    absolute
- misc + --config    relative
+run from                    data path
+-------------------------------------
+within the ge dir           absolute
+within the ge dir           relative
+adjacent to the ge dir      absolute
+adjacent to the ge dir      relative
+misc + --config             absolute
+misc + --config             relative
 
 Please note that all tests have the same expected result, hence the consolidation.
 """
 
 import os
-import shutil
 from unittest import mock
 
 import nbformat
-import pytest
 from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
 
@@ -105,8 +103,8 @@ def test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
     context = empty_data_context
-    root_dir = context.root_directory
-    monkeypatch.chdir(os.path.dirname(root_dir))
+    adjacent_dir = os.path.dirname(context.root_directory)
+    monkeypatch.chdir(adjacent_dir)
     invocation = "--v3-api datasource new"
     invocation_input = f"1\n1\n{filesystem_csv_2}\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
@@ -117,18 +115,11 @@ def test_cli_datasource_new_run_from_adjacent_dir_relative_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
     context = empty_data_context
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    adjacent_dir = os.path.dirname(context.root_directory)
+    monkeypatch.chdir(adjacent_dir)
     invocation = "--v3-api datasource new"
-    invocation_input = "1\n1\n../../test_files\n"
+    invocation_input = "1\n1\n../test_files\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
-
-
-@pytest.fixture
-def misc_directory(tmp_path_factory):
-    misc_dir = tmp_path_factory.mktemp("random", numbered=False)
-    assert os.path.isabs(misc_dir)
-    yield misc_dir
-    shutil.rmtree(misc_dir)
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -149,5 +140,5 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_pa
     context = empty_data_context
     monkeypatch.chdir(misc_directory)
     invocation = f"--config {context.root_directory} --v3-api datasource new"
-    invocation_input = "1\n1\n../../test_files\n"
+    invocation_input = "1\n1\n../test_files\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
