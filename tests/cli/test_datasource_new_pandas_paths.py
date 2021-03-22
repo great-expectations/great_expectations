@@ -12,13 +12,13 @@ run from            data path
  misc + --config    absolute
  misc + --config    relative
 
-Please note that all tests have the same excpected result, hence the consolidation.
+Please note that all tests have the same expected result, hence the consolidation.
 """
 
 import os
 import shutil
+from unittest import mock
 
-import mock
 import nbformat
 import pytest
 from click.testing import CliRunner
@@ -28,11 +28,9 @@ from great_expectations import DataContext
 from great_expectations.cli import cli
 
 
-def _run_notebook(context: DataContext, datasource_name: str) -> None:
+def _run_notebook(context: DataContext) -> None:
     uncommitted_dir = os.path.join(context.root_directory, context.GE_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(
-        uncommitted_dir, f"datasource_new_{datasource_name}.ipynb"
-    )
+    expected_notebook = os.path.join(uncommitted_dir, f"datasource_new.ipynb")
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)
     ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
@@ -51,14 +49,14 @@ def _run_cli_datasource_new_path_test(
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    _run_notebook(context, "foo")
+    _run_notebook(context)
 
     # Renew a context since we executed a notebook in a different process
     del context
     context = DataContext(root_dir)
     assert context.list_datasources() == [
         {
-            "name": "foo",
+            "name": "my_datasource",
             "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
             "execution_engine": {
@@ -66,7 +64,7 @@ def _run_cli_datasource_new_path_test(
                 "class_name": "PandasExecutionEngine",
             },
             "data_connectors": {
-                "foo_example_data_connector": {
+                "my_datasource_example_data_connector": {
                     "default_regex": {
                         "group_names": "data_asset_name",
                         "pattern": "(.*)",
@@ -87,7 +85,7 @@ def test_cli_datasource_new_run_from_ge_dir_absolute_data_path(
     context = empty_data_context
     monkeypatch.chdir(context.root_directory)
     invocation = "--v3-api datasource new"
-    invocation_input = f"1\n1\n{filesystem_csv_2}\nfoo\n"
+    invocation_input = f"1\n1\n{filesystem_csv_2}\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
 
 
@@ -98,7 +96,7 @@ def test_cli_datasource_new_run_from_ge_dir_relative_data_path(
     context = empty_data_context
     monkeypatch.chdir(context.root_directory)
     invocation = "--v3-api datasource new"
-    invocation_input = "1\n1\n../../test_files\nfoo\n"
+    invocation_input = "1\n1\n../../test_files\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
 
 
@@ -110,7 +108,7 @@ def test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path(
     root_dir = context.root_directory
     monkeypatch.chdir(os.path.dirname(root_dir))
     invocation = "--v3-api datasource new"
-    invocation_input = f"1\n1\n{filesystem_csv_2}\nfoo\n"
+    invocation_input = f"1\n1\n{filesystem_csv_2}\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
 
 
@@ -121,7 +119,7 @@ def test_cli_datasource_new_run_from_adjacent_dir_relative_data_path(
     context = empty_data_context
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     invocation = "--v3-api datasource new"
-    invocation_input = "1\n1\n../../test_files\nfoo\n"
+    invocation_input = "1\n1\n../../test_files\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
 
 
@@ -140,7 +138,7 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_absolute_data_pa
     context = empty_data_context
     monkeypatch.chdir(misc_directory)
     invocation = f"--config {context.root_directory} --v3-api datasource new"
-    invocation_input = f"1\n1\n{filesystem_csv_2}\nfoo\n"
+    invocation_input = f"1\n1\n{filesystem_csv_2}\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
 
 
@@ -151,5 +149,5 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_pa
     context = empty_data_context
     monkeypatch.chdir(misc_directory)
     invocation = f"--config {context.root_directory} --v3-api datasource new"
-    invocation_input = "1\n1\n../../test_files\nfoo\n"
+    invocation_input = "1\n1\n../../test_files\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
