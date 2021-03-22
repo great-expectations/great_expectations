@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark
     import pyspark.sql.functions as F
+    from pyspark import SparkContext
     from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.types import (
         BooleanType,
@@ -42,10 +43,9 @@ try:
         StructField,
         StructType,
     )
-
-
 except ImportError:
     pyspark = None
+    SparkContext = None
     SparkSession = None
     DataFrame = None
     F = None
@@ -150,8 +150,12 @@ class SparkDFExecutionEngine(ExecutionEngine):
             spark_config = {}
 
         spark: SparkSession = get_or_create_spark_application(spark_config=spark_config)
-        self.spark = spark
+
+        spark_config = dict(spark_config)
+        spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
+
         self._spark_config = spark_config
+        self.spark = spark
 
         super().__init__(*args, **kwargs)
 

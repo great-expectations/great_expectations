@@ -31,10 +31,9 @@ def test_spark_config_datasource(spark_session_v012):
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
     source: SparkDFDatasource = SparkDFDatasource(spark_config=spark_config)
-    sess: SparkSession = source.spark
-    sc: SparkContext = sess.sparkContext
+    spark_session: SparkSession = source.spark
     # noinspection PyProtectedMember
-    sc_stopped: bool = sc._jsc.sc().isStopped()
+    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     assert not sc_stopped
 
     # Test that our values were set
@@ -55,10 +54,9 @@ def test_spark_config_execution_engine(spark_session):
     execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
         spark_config=spark_config
     )
-    sess: SparkSession = execution_engine.spark
-    sc: SparkContext = sess.sparkContext
+    spark_session: SparkSession = execution_engine.spark
     # noinspection PyProtectedMember
-    sc_stopped: bool = sc._jsc.sc().isStopped()
+    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     assert not sc_stopped
 
     # Test that our values were set

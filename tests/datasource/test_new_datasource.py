@@ -226,6 +226,10 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
 
 def test_basic_spark_datasource_self_check(basic_spark_datasource):
     report = basic_spark_datasource.self_check()
+    report["execution_engine"]["spark_config"].pop("spark.app.id", None)
+    report["execution_engine"]["spark_config"].pop("spark.driver.host", None)
+    report["execution_engine"]["spark_config"].pop("spark.driver.port", None)
+    report["execution_engine"]["spark_config"].pop("spark.submit.pyFiles", None)
     assert report == {
         "data_connectors": {
             "count": 2,
@@ -253,12 +257,28 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
             "persist": True,
             "spark_config": {
                 "spark.app.name": "default_great_expectations_spark_application",
-                "spark.default.parallelism": 4,
-                "spark.driver.memory": "6g",
-                "spark.executor.memory": "6g",
                 "spark.master": "local[*]",
-                "spark.sql.shuffle.partitions": 2,
-                "spark.ui.showConsoleProgress": False,
+                "spark.executor.id": "driver",
+                "spark.executor.memory": "6g",
+                "spark.driver.memory": "6g",
+                "spark.ui.showConsoleProgress": "False",
+                "spark.serializer.objectStreamReset": "100",
+                "spark.sql.catalogImplementation": "hive",
+                "spark.sql.shuffle.partitions": "2",
+                "spark.default.parallelism": "4",
+                "spark.rdd.compress": "True",
+                "spark.submit.deployMode": "client",
+            },
+        },
+        "data_connectors": {
+            "count": 1,
+            "simple_filesystem_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "data_asset_count": 0,
+                "example_data_asset_names": [],
+                "data_assets": {},
+                "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
             },
         },
     }

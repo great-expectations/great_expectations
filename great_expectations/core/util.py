@@ -1,10 +1,11 @@
+import copy
 import datetime
 import decimal
 import logging
 import sys
 from collections import OrderedDict
 from collections.abc import Mapping
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
 import numpy as np
@@ -448,10 +449,8 @@ def get_or_create_spark_application(
     # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
     # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
     try:
-        from pyspark import SparkContext
         from pyspark.sql import SparkSession
     except ImportError:
-        SparkContext = None
         SparkSession = None
         # TODO: review logging more detail here
         logger.debug(
@@ -460,6 +459,8 @@ def get_or_create_spark_application(
 
     if spark_config is None:
         spark_config = {}
+    else:
+        spark_config = copy.deepcopy(spark_config)
     name: Optional[str] = spark_config.get("spark.app.name")
     if not name:
         name = "default_great_expectations_spark_application"
@@ -471,15 +472,17 @@ def get_or_create_spark_application(
     if spark_session is None:
         raise ValueError("SparkContext could not be started.")
 
-    sc: SparkContext = spark_session.sparkContext
     # noinspection PyProtectedMember
-    sc_stopped: bool = sc._jsc.sc().isStopped()
-    if ("spark.app.name", name) not in sc.getConf().getAll():
+    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
+    if spark_restart_required(
+        current_spark_config=spark_session.sparkContext.getConf().getAll(),
+        desired_spark_config=spark_config,
+    ):
         if not sc_stopped:
             try:
                 # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
                 logger.info("Stopping existing spark context to reconfigure.")
-                sc.stop()
+                spark_session.sparkContext.stop()
             except AttributeError:
                 logger.error(
                     "Unable to load spark context; install optional spark dependency for support."
@@ -487,9 +490,8 @@ def get_or_create_spark_application(
         spark_session = get_or_create_spark_session(spark_config=spark_config)
         if spark_session is None:
             raise ValueError("SparkContext could not be started.")
-        sc = spark_session.sparkContext
         # noinspection PyProtectedMember
-        sc_stopped = sc._jsc.sc().isStopped()
+        sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
 
     if sc_stopped:
         raise ValueError("SparkContext stopped unexpectedly.")
@@ -507,10 +509,8 @@ def get_or_create_spark_session(
     # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
     # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
     try:
-        from pyspark import SparkContext
         from pyspark.sql import SparkSession
     except ImportError:
-        SparkContext = None
         SparkSession = None
         # TODO: review logging more detail here
         logger.debug(
@@ -521,6 +521,8 @@ def get_or_create_spark_session(
     try:
         if spark_config is None:
             spark_config = {}
+        else:
+            spark_config = copy.deepcopy(spark_config)
 
         builder = SparkSession.builder
 
@@ -531,9 +533,8 @@ def get_or_create_spark_session(
             if k != "spark.app.name":
                 builder.config(k, v)
         spark_session = builder.getOrCreate()
-        sc: SparkContext = spark_session.sparkContext
         # noinspection PyProtectedMember
-        if sc._jsc.sc().isStopped():
+        if spark_session.sparkContext._jsc.sc().isStopped():
             raise ValueError("SparkContext stopped unexpectedly.")
     except AttributeError:
         logger.error(
@@ -542,6 +543,23 @@ def get_or_create_spark_session(
         spark_session = None
 
     return spark_session
+
+
+def spark_restart_required(
+    current_spark_config: List[tuple], desired_spark_config: dict
+) -> bool:
+    current_spark_config_dict: dict = {k: v for (k, v) in current_spark_config}
+    if desired_spark_config.get("spark.app.name") != current_spark_config_dict.get(
+        "spark.app.name"
+    ):
+        return True
+
+    if not set([(k, v) for k, v in desired_spark_config.items()]).issubset(
+        current_spark_config
+    ):
+        return True
+
+    return False
 
 
 def get_sql_dialect_floating_point_infinity_value(
