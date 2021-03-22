@@ -8,7 +8,10 @@ from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from great_expectations.cli.datasource import _collect_snowflake_credentials
+from great_expectations.cli.datasource import (
+    SnowflakeAuthMethod,
+    _prompt_for_snowflake_auth_method,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DatasourceKeyPairAuthBadPassphraseError
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
@@ -21,85 +24,46 @@ def test_snowflake_user_password_credentials_generates_notebook(
     root_dir = empty_data_context.root_directory
     context = DataContext(root_dir)
 
-    print("test_snowflake_user_password_credentials_generates_notebook 1")
-
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
         "--v3-api datasource new",
         catch_exceptions=False,
-        input="2\n4\nsnowflake\n1\nuser\nABCD.us-east-1\ndefault_db\ndefault_schema\nxsmall\npublic\npassword\n",
+        input="2\n4\n1\n",
     )
-    print("test_snowflake_user_password_credentials_generates_notebook 2")
+
     stdout = result.stdout
-    print("test_snowflake_user_password_credentials_generates_notebook 3")
+
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "Which database backend are you using?" in stdout
-    assert "Give your new Datasource a short name." in stdout
-    print("test_snowflake_user_password_credentials_generates_notebook 4")
 
     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(uncommitted_dir, "datasource_new_snowflake.ipynb")
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
-    print("test_snowflake_user_password_credentials_generates_notebook 5")
+
     # We don't have a snowflake account to use for testing, therefore we do not
     # want to run the notebook, as it will hang as it tries to connect.
     assert_no_logging_messages_or_tracebacks(caplog, result)
-    print("test_snowflake_user_password_credentials_generates_notebook 6")
 
 
 @patch("click.prompt")
-def test_snowflake_user_password_credentials(mock_prompt):
-    mock_prompt.side_effect = [
-        "1",
-        "user",
-        "ABCD.us-east-1",
-        "default_db",
-        "default_schema",
-        "xsmall",
-        "public",
-        "password",
-    ]
-
-    credentials = _collect_snowflake_credentials()
-
-    assert credentials == {
-        "drivername": "snowflake",
-        "database": "default_db",
-        "host": "ABCD.us-east-1",
-        "password": "password",
-        "query": {"role": "public", "schema": "default_schema", "warehouse": "xsmall"},
-        "username": "user",
-    }
+def test_snowflake_auth_method_prompt_user_and_password(mock_prompt):
+    mock_prompt.side_effect = ["1"]
+    assert _prompt_for_snowflake_auth_method() == SnowflakeAuthMethod.USER_AND_PASSWORD
 
 
 @patch("click.prompt")
-def test_snowflake_sso_credentials(mock_prompt):
-    mock_prompt.side_effect = [
-        "2",
-        "user",
-        "ABCD.us-east-1",
-        "default_db",
-        "default_schema",
-        "xsmall",
-        "public",
-        "externalbrowser",
-    ]
+def test_snowflake_auth_method_prompt_SSO(mock_prompt):
+    mock_prompt.side_effect = ["2"]
+    assert _prompt_for_snowflake_auth_method() == SnowflakeAuthMethod.SSO
 
-    credentials = _collect_snowflake_credentials()
 
-    assert credentials == {
-        "drivername": "snowflake",
-        "database": "default_db",
-        "host": "ABCD.us-east-1",
-        "connect_args": {
-            "authenticator": "externalbrowser",
-        },
-        "query": {"role": "public", "schema": "default_schema", "warehouse": "xsmall"},
-        "username": "user",
-    }
+@patch("click.prompt")
+def test_snowflake_auth_method_prompt_keys(mock_prompt):
+    mock_prompt.side_effect = ["3"]
+    assert _prompt_for_snowflake_auth_method() == SnowflakeAuthMethod.KEY_PAIR
 
 
 @patch("click.prompt")
@@ -120,7 +84,7 @@ def test_snowflake_key_pair_credentials(mock_prompt, basic_sqlalchemy_datasource
         "test123",
     ]
 
-    credentials = _collect_snowflake_credentials()
+    credentials = _prompt_for_snowflake_auth_method()
 
     assert credentials == {
         "drivername": "snowflake",

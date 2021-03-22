@@ -1,9 +1,8 @@
 import enum
 import logging
 import os
-import platform
 import sys
-from typing import Optional
+from typing import Optional, Union
 
 import click
 
@@ -32,7 +31,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-class SupportedDatabases(enum.Enum):
+class SupportedDatabaseBackends(enum.Enum):
     MYSQL = "MySQL"
     POSTGRES = "Postgres"
     REDSHIFT = "Redshift"
@@ -59,13 +58,20 @@ def datasource(ctx):
 
 @datasource.command(name="new")
 @click.pass_context
-def datasource_new(ctx):
+@click.option("--name", default=None, help="Datasource name.")
+@click.option(
+    "--jupyter/--no-jupyter",
+    is_flag=True,
+    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
+    default=True,
+)
+def datasource_new(ctx, name, jupyter):
     """Add a new Datasource to the data context."""
     context = ctx.obj.data_context
     toolkit.send_usage_message(
         data_context=context, event="cli.datasource.new", success=True
     )
-    _interactive_datasource_new_flow(context)
+    _interactive_datasource_new_flow(context, datasource_name=name, jupyter=jupyter)
 
 
 @datasource.command(name="delete")
@@ -121,7 +127,9 @@ def _build_datasource_intro_string(datasources):
     return f"{datasource_count} Datasources found:"
 
 
-def _interactive_datasource_new_flow(context: DataContext) -> None:
+def _interactive_datasource_new_flow(
+    context: DataContext, datasource_name: Optional[str] = None, jupyter: bool = True
+) -> None:
     files_or_sql_selection = click.prompt(
         """
 What data would you like Great Expectations to connect to?
@@ -131,35 +139,31 @@ What data would you like Great Expectations to connect to?
         type=click.Choice(["1", "2"]),
         show_choices=False,
     )
-    notebook_path: Optional[str] = None
     if files_or_sql_selection == "1":
-        execution_engine_selection = click.prompt(
-            """
-What are you processing your files with?
-    1. Pandas
-    2. PySpark
-""",
-            type=click.Choice(["1", "2"]),
-            show_choices=False,
+        selected_files_backend = _prompt_for_execution_engine()
+        helper = _get_files_helper(
+            selected_files_backend,
+            context_root_dir=context.root_directory,
+            datasource_name=datasource_name,
         )
-
-        # TODO taylor consider forking here to select remote (s3, etc) or local to allow Click to verify existence
-        file_url_or_path: str = click.prompt(PROMPT_FILES_BASE_PATH, type=click.Path())
-        if not toolkit.is_cloud_file_url(file_url_or_path):
-            file_url_or_path = toolkit.get_path_to_data_relative_to_context_root(
-                context.root_directory, file_url_or_path
-            )
-        datasource_name = click.prompt(PROMPT_DATASOURCE_NAME)
-        if execution_engine_selection == "1":  # pandas
-            notebook_path = _create_pandas_datasource_notebook(
-                context, datasource_name, file_url_or_path
-            )
-        elif execution_engine_selection == "2":  # Spark
-            notebook_path = _create_spark_datasource_notebook(
-                context, datasource_name, file_url_or_path
-            )
     elif files_or_sql_selection == "2":
-        notebook_path = _create_sqlalchemy_datasource_notebook(context)
+        if not _verify_sqlalchemy_dependent_modules():
+            return None
+        # TODO taylor not sure if this is for testing or what...
+        # db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        selected_database = _prompt_user_for_database_backend()
+        helper = _get_sql_yaml_helper_class(selected_database, datasource_name)
+
+    helper.send_backend_choice_usage_message(context)
+    if not helper.verify_libraries_installed():
+        return None
+    helper.prompt()
+    notebook_path = helper.make_notebook(context)
+    if jupyter is False:
+        cli_message(
+            f"To continue editing this Datasource, run <green>jupyter notebook {notebook_path}</green>"
+        )
+        return None
 
     if notebook_path:
         cli_message(
@@ -168,136 +172,510 @@ What are you processing your files with?
         toolkit.launch_jupyter_notebook(notebook_path)
 
 
-def _build_file_like_datasource_config(
-    class_name: str, datasource_name: str, base_path: str
-) -> dict:
-    return {
-        "class_name": "Datasource",
-        "execution_engine": {"class_name": class_name},
-        "data_connectors": {
-            f"{datasource_name}_example_data_connector": {
-                "class_name": "InferredAssetFilesystemDataConnector",
-                "datasource_name": datasource_name,
-                "base_directory": base_path,
-                "default_regex": {
-                    "group_names": "data_asset_name",
-                    "pattern": "(.*)",
-                },
-            }
-        },
+class BaseDatasourceNewYamlHelper:
+    def __init__(
+        self,
+        datasource_type: DatasourceTypes,
+        usage_stats_payload: dict,
+        datasource_name: Optional[str] = None,
+    ):
+        self.datasource_type: DatasourceTypes = datasource_type
+        self.datasource_name: Optional[str] = datasource_name
+        self.usage_stats_payload: dict = usage_stats_payload
+
+    def verify_libraries_installed(self) -> bool:
+        """Used in the interactive CLI to help users install dependencies."""
+        raise NotImplementedError
+
+    def make_notebook(self, context: DataContext) -> str:
+        renderer = self.get_notebook_renderer(context)
+        notebook_path = os.path.join(
+            context.root_directory,
+            context.GE_UNCOMMITTED_DIR,
+            "datasource_new.ipynb",
+        )
+        renderer.render_to_disk(notebook_path)
+        return notebook_path
+
+    def get_notebook_renderer(self, context):
+        renderer = DatasourceNewNotebookRenderer(
+            context,
+            datasource_type=self.datasource_type,
+            datasource_yaml=self.yaml_snippet(),
+            datasource_name=self.datasource_name,
+        )
+        return renderer
+
+    def send_backend_choice_usage_message(self, context: DataContext) -> None:
+        toolkit.send_usage_message(
+            data_context=context,
+            event="cli.new_ds_choice",
+            event_payload={
+                "type": self.datasource_type.value,
+                **self.usage_stats_payload,
+            },
+            success=True,
+        )
+
+    def prompt(self) -> None:
+        """Optional prompt if more information is needed before making a notebook."""
+        pass
+
+    def yaml_snippet(self) -> str:
+        pass
+
+
+class FilesYamlHelper(BaseDatasourceNewYamlHelper):
+    def __init__(
+        self,
+        datasource_type: DatasourceTypes,
+        usage_stats_payload: dict,
+        class_name: str,
+        context_root_dir: str,
+        datasource_name: Optional[str] = None,
+    ):
+        super().__init__(datasource_type, usage_stats_payload, datasource_name)
+        self.class_name: str = class_name
+        self.base_path: str = ""
+        self.context_root_dir: str = context_root_dir
+
+    def yaml_snippet(self) -> str:
+        return self._yaml_innards()
+
+    def _yaml_innards(self) -> str:
+        """Override if needed."""
+        return f'''f"""
+name: {{datasource_name}}
+class_name: Datasource
+execution_engine:
+  class_name: {self.class_name}
+data_connectors:
+  {{datasource_name}}_example_data_connector:
+    class_name: InferredAssetFilesystemDataConnector
+    datasource_name: {{datasource_name}}
+    base_directory: {self.base_path}
+    default_regex:
+      group_names: data_asset_name
+      pattern: (.*)
+"""'''
+
+    def prompt(self) -> None:
+        # TODO taylor consider forking here to select remote (s3, etc) or local to allow Click to verify existence
+        file_url_or_path: str = click.prompt(PROMPT_FILES_BASE_PATH, type=click.Path())
+        if not toolkit.is_cloud_file_url(file_url_or_path):
+            file_url_or_path = toolkit.get_path_to_data_relative_to_context_root(
+                self.context_root_dir, file_url_or_path
+            )
+        self.base_path = file_url_or_path
+
+
+class PandasYamlHelper(FilesYamlHelper):
+    def __init__(
+        self,
+        context_root_dir: str,
+        datasource_name: Optional[str] = None,
+    ):
+        super().__init__(
+            datasource_type=DatasourceTypes.PANDAS,
+            usage_stats_payload={
+                "type": DatasourceTypes.PANDAS.value,
+                "api_version": "v3",
+            },
+            context_root_dir=context_root_dir,
+            class_name="PandasExecutionEngine",
+            datasource_name=datasource_name,
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        return True
+
+
+class SparkYamlHelper(FilesYamlHelper):
+    def __init__(
+        self,
+        context_root_dir: str,
+        datasource_name: Optional[str] = None,
+    ):
+        super().__init__(
+            datasource_type=DatasourceTypes.SPARK,
+            usage_stats_payload={
+                "type": DatasourceTypes.SPARK.value,
+                "api_version": "v3",
+            },
+            context_root_dir=context_root_dir,
+            class_name="SparkDFExecutionEngine",
+            datasource_name=datasource_name,
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        return verify_library_dependent_modules(
+            python_import_name="pyspark", pip_library_name="pyspark"
+        )
+
+
+def sanitize_yaml_and_save_datasource(
+    context: DataContext, datasource_yaml: str
+) -> None:
+    """A convenience function used in notebooks to help users save secrets."""
+    config = yaml.load(datasource_yaml)
+    datasource_name = config.pop("name")
+    if "credentials" in config.keys():
+        credentials = config["credentials"]
+        config["credentials"] = "${" + datasource_name + "}"
+        context.save_config_variable(datasource_name, credentials)
+    context.add_datasource(name=datasource_name, **config)
+
+
+class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
+    def __init__(
+        self,
+        usage_stats_payload: dict,
+        datasource_name: Optional[str] = None,
+        driver: str = "",
+        port: Union[int, str] = "",
+        host: str = "YOUR_HOST",
+        username: str = "YOUR_USERNAME",
+        password: str = "YOUR_PASSWORD",
+        database: str = "YOUR_DATABASE",
+    ):
+        super().__init__(
+            datasource_type=DatasourceTypes.SQL,
+            usage_stats_payload=usage_stats_payload,
+            datasource_name=datasource_name,
+        )
+        self.driver = driver
+        self.host = host
+        self.port = str(port)
+        self.username = username
+        self.password = password
+        self.database = database
+
+    def credentials_snippet(self) -> str:
+        return f'''\
+host = "{self.host}"
+port = {self.port}
+username = "{self.username}"
+password = "{self.password}"
+database = "{self.database}"'''
+
+    def yaml_snippet(self) -> str:
+        yaml_str = '''f"""
+name: {datasource_name}
+class_name: SimpleSqlalchemyDatasource
+introspection:
+  whole_table:
+    data_asset_name_suffix: __whole_table'''
+        yaml_str += self._yaml_innards()
+        if self.driver:
+            yaml_str += f"""
+  drivername: {self.driver}"""
+        yaml_str += '"""'
+        return yaml_str
+
+    def _yaml_innards(self) -> str:
+        """Override if needed."""
+        return """
+credentials:
+  host: {host}
+  port: '{port}'
+  username: {username}
+  password: {password}
+  database: {database}"""
+
+    def get_notebook_renderer(self, context):
+        renderer = DatasourceNewNotebookRenderer(
+            context,
+            datasource_type=self.datasource_type,
+            datasource_yaml=self.yaml_snippet(),
+            datasource_name=self.datasource_name,
+            sql_credentials_snippet=self.credentials_snippet(),
+        )
+        return renderer
+
+
+class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]):
+        # We are insisting on pymysql driver when adding a MySQL datasource
+        # through the CLI to avoid over-complication of this flow. If user wants
+        # to use another driver, they must use a sqlalchemy connection string.
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": DatasourceTypes.SQL.value,
+                "db": SupportedDatabaseBackends.MYSQL.value,
+                "api_version": "v3",
+            },
+            driver="mysql+pymysql",
+            port=3306,
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        return verify_library_dependent_modules(
+            python_import_name="pymysql",
+            pip_library_name="pymysql",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+
+
+class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]):
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.POSTGRES.value,
+                "api_version": "v3",
+            },
+            driver="postgresql",
+            port=5432,
+            database="postgres",
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        psycopg2_success: bool = verify_library_dependent_modules(
+            python_import_name="psycopg2",
+            pip_library_name="psycopg2-binary",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        # noinspection SpellCheckingInspection
+        postgresql_psycopg2_success: bool = verify_library_dependent_modules(
+            python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
+            pip_library_name="psycopg2-binary",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        return psycopg2_success and postgresql_psycopg2_success
+
+
+class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]):
+        # We are insisting on psycopg2 driver when adding a Redshift datasource
+        # through the CLI to avoid over-complication of this flow. If user wants
+        # to use another driver, they must use a sqlalchemy connection string.
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.REDSHIFT.value,
+                "api_version": "v3",
+            },
+            driver="postgresql+psycopg2",
+            port=5439,
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        # noinspection SpellCheckingInspection
+        psycopg2_success: bool = verify_library_dependent_modules(
+            python_import_name="psycopg2",
+            pip_library_name="psycopg2-binary",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        # noinspection SpellCheckingInspection
+        postgresql_psycopg2_success: bool = verify_library_dependent_modules(
+            python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
+            pip_library_name="psycopg2-binary",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        postgresql_success: bool = psycopg2_success and postgresql_psycopg2_success
+        redshift_success: bool = verify_library_dependent_modules(
+            python_import_name="sqlalchemy_redshift.dialect",
+            pip_library_name="sqlalchemy-redshift",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        return redshift_success or postgresql_success
+
+    def _yaml_innards(self) -> str:
+        return (
+            super()._yaml_innards()
+            + """
+  query:
+    sslmode: prefer"""
+        )
+
+
+class SnowflakeAuthMethod(enum.IntEnum):
+    USER_AND_PASSWORD = 0
+    SSO = 1
+    KEY_PAIR = 2
+
+
+class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]):
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.SNOWFLAKE.value,
+                "api_version": "v3",
+            },
+            driver="snowflake",
+        )
+        self.auth_method = SnowflakeAuthMethod.USER_AND_PASSWORD
+
+    def verify_libraries_installed(self) -> bool:
+        return verify_library_dependent_modules(
+            python_import_name="snowflake.sqlalchemy.snowdialect",
+            pip_library_name="snowflake-sqlalchemy",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+
+    def prompt(self) -> None:
+        self.auth_method = _prompt_for_snowflake_auth_method()
+
+    def credentials_snippet(self) -> str:
+        snippet = f"""\
+host = "{self.host}"  # The account name (include region -- ex 'ABCD.us-east-1')
+username = "{self.username}"
+database = ""  # The database name (optional -- leave blank for none)
+schema = ""  # The schema name (optional -- leave blank for none)
+warehouse = ""  # The warehouse name (optional -- leave blank for none)
+role = ""  # The role name (optional -- leave blank for none)"""
+
+        if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
+            snippet += '''
+password = "{self.password}"'''
+        elif self.auth_method == SnowflakeAuthMethod.SSO:
+            snippet += """
+authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO"""
+        elif self.auth_method == SnowflakeAuthMethod.KEY_PAIR:
+            snippet += """
+private_key_path = "YOUR_KEY_PATH"  # Path to the private key used for authentication
+private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)"""
+
+        return snippet
+
+    def _yaml_innards(self) -> str:
+        snippet = """
+credentials:
+  host: {host}
+  username: {username}
+  database: {database}
+  query:
+    schema: {schema}
+    warehouse: {warehouse}
+    role: {role}
+"""
+        if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
+            snippet += "  password: {password}"
+        elif self.auth_method == SnowflakeAuthMethod.SSO:
+            snippet += """\
+  connect_args:
+    authenticator: {authenticator_url}"""
+        elif self.auth_method == SnowflakeAuthMethod.KEY_PAIR:
+            snippet += """\
+  private_key_path: {private_key_path}
+  private_key_passphrase: {private_key_passphrase}"""
+        return snippet
+
+
+class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]):
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": "BigQuery",
+                "api_version": "v3",
+            },
+        )
+
+    def credentials_snippet(self) -> str:
+        return '''\
+# The SQLAlchemy url/connection string for the BigQuery connection
+# (reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)"""
+connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
+
+    def verify_libraries_installed(self) -> bool:
+        return verify_library_dependent_modules(
+            python_import_name="pybigquery.sqlalchemy_bigquery",
+            pip_library_name="pybigquery",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+
+    def _yaml_innards(self) -> str:
+        return "\nconnection_string: {connection_string}"
+
+
+class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]):
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": "other",
+                "api_version": "v3",
+            },
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        return True
+
+    def credentials_snippet(self) -> str:
+        return '''\
+# The url/connection string for the sqlalchemy connection
+# (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
+connection_string = "YOUR_CONNECTION_STRING"'''
+
+    def _yaml_innards(self) -> str:
+        return "\nconnection_string: {connection_string}"
+
+
+def _get_sql_yaml_helper_class(
+    selected_database: SupportedDatabaseBackends, datasource_name: Optional[str]
+) -> Union[
+    MySQLCredentialYamlHelper,
+    PostgresCredentialYamlHelper,
+    RedshiftCredentialYamlHelper,
+    SnowflakeCredentialYamlHelper,
+    BigqueryCredentialYamlHelper,
+    ConnectionStringCredentialYamlHelper,
+]:
+    helper_class_by_backend = {
+        SupportedDatabaseBackends.POSTGRES: PostgresCredentialYamlHelper,
+        SupportedDatabaseBackends.MYSQL: MySQLCredentialYamlHelper,
+        SupportedDatabaseBackends.REDSHIFT: RedshiftCredentialYamlHelper,
+        SupportedDatabaseBackends.SNOWFLAKE: SnowflakeCredentialYamlHelper,
+        SupportedDatabaseBackends.BIGQUERY: BigqueryCredentialYamlHelper,
+        SupportedDatabaseBackends.OTHER: ConnectionStringCredentialYamlHelper,
     }
+    helper_class = helper_class_by_backend[selected_database]
+    return helper_class(datasource_name)
 
 
-def _create_pandas_datasource_notebook(
-    context, datasource_name: str, base_path: str
-) -> str:
-    toolkit.send_usage_message(
-        data_context=context,
-        event="cli.new_ds_choice",
-        event_payload={"type": "pandas"},
-        success=True,
+def _prompt_for_execution_engine() -> str:
+    selection = str(
+        click.prompt(
+            """
+What are you processing your files with?
+1. Pandas
+2. PySpark
+""",
+            type=click.Choice(["1", "2"]),
+            show_choices=False,
+        )
     )
-
-    pandas_config = _build_file_like_datasource_config(
-        "PandasExecutionEngine", datasource_name, base_path
-    )
-    notebook_path = _build_notebook_from_datasource_config_dict_and_write_to_disk(
-        context, DatasourceTypes.PANDAS, datasource_name, pandas_config
-    )
-    return notebook_path
+    return selection
 
 
-def _build_notebook_from_datasource_config_dict_and_write_to_disk(
-    context: DataContext,
-    datasource_type: DatasourceTypes,
-    datasource_name: str,
-    json_dict: dict,
-) -> str:
-    renderer = DatasourceNewNotebookRenderer(
-        context,
-        datasource_name,
-        datasource_type=datasource_type,
-        datasource_yaml=yaml.dump(json_dict),
-    )
-    notebook_path = os.path.join(
-        context.root_directory,
-        context.GE_UNCOMMITTED_DIR,
-        f"datasource_new_{datasource_name}.ipynb",
-    )
-    renderer.render_to_disk(notebook_path)
-    return notebook_path
-
-
-def _create_sqlalchemy_datasource_notebook(context: DataContext) -> Optional[str]:
-    if not _verify_sqlalchemy_dependent_modules():
-        return None
-
-    selected_database = _prompt_user_for_database_backend()
-    toolkit.send_usage_message(
-        data_context=context,
-        event="cli.new_ds_choice",
-        event_payload={"type": "sqlalchemy", "db": selected_database.name},
-        success=True,
-    )
-    datasource_name = _prompt_user_for_db_datasource_name(selected_database)
-
-    datasource_config: dict = {
-        "class_name": "SimpleSqlalchemyDatasource",
-        "introspection": {"whole_table": {"data_asset_name_suffix": "__whole_table"}},
+def _get_files_helper(
+    selection: str, context_root_dir: str, datasource_name: Optional[str] = None
+) -> Union[PandasYamlHelper, SparkYamlHelper,]:
+    helper_class_by_selection = {
+        "1": PandasYamlHelper,
+        "2": SparkYamlHelper,
     }
-
-    if selected_database == SupportedDatabases.MYSQL:
-        if not _verify_mysql_dependent_modules():
-            return None
-        credentials = _collect_mysql_credentials()
-        datasource_config["credentials"] = credentials
-    elif selected_database == SupportedDatabases.POSTGRES:
-        if not _verify_postgresql_dependent_modules():
-            return None
-        credentials = _collect_postgres_credentials()
-        datasource_config["credentials"] = credentials
-    elif selected_database == SupportedDatabases.REDSHIFT:
-        if not _verify_redshift_dependent_modules():
-            return None
-        credentials = _collect_redshift_credentials()
-        datasource_config["credentials"] = credentials
-    elif selected_database == SupportedDatabases.SNOWFLAKE:
-        if not _verify_snowflake_dependent_modules():
-            return None
-        credentials = _collect_snowflake_credentials()
-        datasource_config["credentials"] = credentials
-    elif selected_database == SupportedDatabases.BIGQUERY:
-        if not _verify_bigquery_dependent_modules():
-            return None
-        datasource_config["connection_string"] = _collect_bigquery_connection_string()
-    elif selected_database == SupportedDatabases.OTHER:
-        datasource_config["connection_string"] = _collect_sqlalchemy_connection_string()
-
-    notebook_path = _build_notebook_from_datasource_config_dict_and_write_to_disk(
-        context, DatasourceTypes.SQL, datasource_name, datasource_config
-    )
-    return notebook_path
+    helper_class = helper_class_by_selection[selection]
+    return helper_class(context_root_dir, datasource_name)
 
 
-def _prompt_user_for_db_datasource_name(selected_database: SupportedDatabases) -> str:
-    default_datasource_name = f"my_{selected_database.value.lower()}_db"
-    if selected_database == SupportedDatabases.OTHER:
-        default_datasource_name = "my_database"
-    datasource_name = click.prompt(
-        PROMPT_DATASOURCE_NAME, default=default_datasource_name
-    )
-    return datasource_name
-
-
-def _prompt_user_for_database_backend() -> SupportedDatabases:
+def _prompt_user_for_database_backend() -> SupportedDatabaseBackends:
     enumerated_list = "\n".join(
-        [f"    {i}. {db.value}" for i, db in enumerate(SupportedDatabases, 1)]
+        [f"    {i}. {db.value}" for i, db in enumerate(SupportedDatabaseBackends, 1)]
     )
     msg_prompt_choose_database = f"""
 Which database backend are you using?
 {enumerated_list}
 """
-    db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabases)))]
+    db_choices = [str(x) for x in list(range(1, 1 + len(SupportedDatabaseBackends)))]
     selected_database_index = (
         int(
             click.prompt(
@@ -308,58 +686,14 @@ Which database backend are you using?
         )
         - 1
     )  # don't show user a zero index list :)
-    selected_database = list(SupportedDatabases)[selected_database_index]
+    selected_database = list(SupportedDatabaseBackends)[selected_database_index]
     return selected_database
 
 
-def _should_hide_input():
-    """
-    This is a workaround to help identify Windows and adjust the prompts accordingly
-    since hidden prompts may freeze in certain Windows terminals
-    """
-    if "windows" in platform.platform().lower():
-        return False
-    return True
-
-
-def _collect_postgres_credentials() -> dict:
-    credentials = {"drivername": "postgresql"}
-
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-    credentials["host"] = click.prompt(
-        "What is the host for the postgres connection?",
-        default=db_hostname,
-    ).strip()
-    credentials["port"] = click.prompt(
-        "What is the port for the postgres connection?",
-        default="5432",
-    ).strip()
-    credentials["username"] = click.prompt(
-        "What is the username for the postgres connection?",
-        default="postgres",
-    ).strip()
-    # This is a minimal workaround we're doing to deal with hidden input problems using Git Bash on Windows
-    # TODO: Revisit this if we decide to fully support Windows and identify if there is a better solution
-    credentials["password"] = click.prompt(
-        "What is the password for the postgres connection?",
-        default="",
-        show_default=False,
-        hide_input=_should_hide_input(),
-    )
-    credentials["database"] = click.prompt(
-        "What is the database name for the postgres connection?",
-        default="postgres",
-        show_default=True,
-    ).strip()
-
-    return credentials
-
-
-def _collect_snowflake_credentials() -> dict:
-    credentials: dict = {"drivername": "snowflake", "query": {}}
-
+def _prompt_for_snowflake_auth_method() -> SnowflakeAuthMethod:
     auth_method = click.prompt(
-        """What authentication method would you like to use?
+        """\
+What authentication method would you like to use?
     1. User and Password
     2. Single sign-on (SSO)
     3. Key pair authentication
@@ -367,210 +701,7 @@ def _collect_snowflake_credentials() -> dict:
         type=click.Choice(["1", "2", "3"]),
         show_choices=False,
     )
-
-    credentials["username"] = click.prompt(
-        "What is the user login name for the snowflake connection?",
-    ).strip()
-
-    credentials["host"] = click.prompt(
-        "What is the account name for the snowflake connection (include region -- ex "
-        "'ABCD.us-east-1')?",
-    ).strip()
-
-    database = click.prompt(
-        "What is database name for the snowflake connection? (optional -- leave blank for none)",
-    ).strip()
-    if len(database) > 0:
-        credentials["database"] = database
-
-    schema = click.prompt(
-        "What is schema name for the snowflake connection? (optional -- leave "
-        "blank for none)",
-    ).strip()
-
-    if len(schema) > 0:
-        credentials["query"]["schema"] = schema
-    warehouse = click.prompt(
-        "What is warehouse name for the snowflake connection? (optional "
-        "-- leave blank for none)",
-    ).strip()
-
-    if len(warehouse) > 0:
-        credentials["query"]["warehouse"] = warehouse
-
-    role = click.prompt(
-        "What is role name for the snowflake connection? (optional -- leave blank for none)",
-    ).strip()
-    if len(role) > 0:
-        credentials["query"]["role"] = role
-
-    if auth_method == "1":
-        credentials = {**credentials, **_collect_snowflake_credentials_user_password()}
-    elif auth_method == "2":
-        credentials = {**credentials, **_collect_snowflake_credentials_sso()}
-    elif auth_method == "3":
-        credentials = {**credentials, **_collect_snowflake_credentials_key_pair()}
-    return credentials
-
-
-def _collect_snowflake_credentials_user_password():
-    credentials = {}
-
-    credentials["password"] = click.prompt(
-        "What is the password for the snowflake connection?",
-        default="",
-        show_default=False,
-        hide_input=True,
-    )
-
-    return credentials
-
-
-def _collect_snowflake_credentials_sso():
-    credentials = {}
-
-    credentials["connect_args"] = {}
-    credentials["connect_args"]["authenticator"] = click.prompt(
-        "Valid okta URL or 'externalbrowser' used to connect through SSO",
-        default="externalbrowser",
-        show_default=False,
-    )
-
-    return credentials
-
-
-def _collect_snowflake_credentials_key_pair():
-    credentials = {}
-
-    credentials["private_key_path"] = click.prompt(
-        "Path to the private key used for authentication",
-        show_default=False,
-    )
-
-    credentials["private_key_passphrase"] = click.prompt(
-        "Passphrase for the private key used for authentication (optional -- leave blank for none)",
-        default="",
-        show_default=False,
-    )
-
-    return credentials
-
-
-def _collect_bigquery_connection_string() -> str:
-    sqlalchemy_url = click.prompt(
-        """What is the SQLAlchemy url/connection string for the BigQuery connection?
-(reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)
-""",
-        show_default=False,
-    ).strip()
-    return sqlalchemy_url
-
-
-def _collect_sqlalchemy_connection_string() -> str:
-    sqlalchemy_url = click.prompt(
-        """What is the url/connection string for the sqlalchemy connection?
-(reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
-""",
-        show_default=False,
-    ).strip()
-    return sqlalchemy_url
-
-
-def _collect_mysql_credentials() -> dict:
-    # We are insisting on pymysql driver when adding a MySQL datasource through the CLI
-    # to avoid overcomplication of this flow.
-    # If user wants to use another driver, they must create the sqlalchemy connection
-    # URL by themselves in config_variables.yml
-
-    credentials = {"drivername": "mysql+pymysql"}
-
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-    credentials["host"] = click.prompt(
-        "What is the host for the MySQL connection?",
-        default=db_hostname,
-    ).strip()
-    credentials["port"] = click.prompt(
-        "What is the port for the MySQL connection?",
-        default="3306",
-    ).strip()
-    credentials["username"] = click.prompt(
-        "What is the username for the MySQL connection?",
-    ).strip()
-    credentials["password"] = click.prompt(
-        "What is the password for the MySQL connection?",
-        show_default=False,
-        hide_input=True,
-    )
-    credentials["database"] = click.prompt(
-        "What is the database name for the MySQL connection?",
-    ).strip()
-
-    return credentials
-
-
-def _collect_redshift_credentials() -> dict:
-    # We are insisting on psycopg2 driver when adding a Redshift datasource through the CLI
-    # to avoid overcomplication of this flow.
-    # If user wants to use another driver, they must create the sqlalchemy connection
-    # URL by themselves in config_variables.yml
-
-    # required
-    credentials: dict = {
-        "drivername": "postgresql+psycopg2",
-        "query": {},
-        "host": click.prompt(
-            "What is the host for the Redshift connection?",
-        ).strip(),
-        "port": click.prompt(
-            "What is the port for the Redshift connection?",
-            default="5439",
-        ).strip(),
-        "username": click.prompt(
-            "What is the username for the Redshift connection?",
-        ).strip(),
-        # This is a minimal workaround we're doing to deal with hidden input
-        # problems using Git Bash on Windows
-        # TODO: Revisit this if we decide to fully support Windows and identify
-        #  if there is a better solution
-        "password": click.prompt(
-            "What is the password for the Redshift connection?",
-            default="",
-            show_default=False,
-            hide_input=_should_hide_input(),
-        ),
-        "database": click.prompt(
-            "What is the database name for the Redshift connection?",
-        ).strip(),
-    }
-
-    # optional
-    credentials["query"]["sslmode"] = click.prompt(
-        "What is sslmode name for the Redshift connection?",
-        default="prefer",
-    )
-
-    return credentials
-
-
-def _create_spark_datasource_notebook(
-    context: DataContext, datasource_name: str, base_path: str
-) -> Optional[str]:
-    toolkit.send_usage_message(
-        data_context=context,
-        event="cli.new_ds_choice",
-        event_payload={"type": "spark"},
-        success=True,
-    )
-    if not _verify_pyspark_dependent_modules():
-        return None
-
-    spark_config = _build_file_like_datasource_config(
-        "SparkDFExecutionEngine", datasource_name, base_path
-    )
-    notebook_path = _build_notebook_from_datasource_config_dict_and_write_to_disk(
-        context, DatasourceTypes.SPARK, datasource_name, spark_config
-    )
-    return notebook_path
+    return SnowflakeAuthMethod(int(auth_method) - 1)
 
 
 def _verify_sqlalchemy_dependent_modules() -> bool:
@@ -579,68 +710,10 @@ def _verify_sqlalchemy_dependent_modules() -> bool:
     )
 
 
-def _verify_mysql_dependent_modules() -> bool:
-    return verify_library_dependent_modules(
-        python_import_name="pymysql",
-        pip_library_name="pymysql",
-        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-    )
-
-
-def _verify_postgresql_dependent_modules() -> bool:
-    psycopg2_success: bool = verify_library_dependent_modules(
-        python_import_name="psycopg2",
-        pip_library_name="psycopg2-binary",
-        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-    )
-    # noinspection SpellCheckingInspection
-    postgresql_psycopg2_success: bool = verify_library_dependent_modules(
-        python_import_name="sqlalchemy.dialects.postgresql.psycopg2",
-        pip_library_name="psycopg2-binary",
-        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-    )
-    return psycopg2_success and postgresql_psycopg2_success
-
-
-def _verify_redshift_dependent_modules() -> bool:
-    # noinspection SpellCheckingInspection
-    postgresql_success: bool = _verify_postgresql_dependent_modules()
-    redshift_success: bool = verify_library_dependent_modules(
-        python_import_name="sqlalchemy_redshift.dialect",
-        pip_library_name="sqlalchemy-redshift",
-        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-    )
-    return redshift_success or postgresql_success
-
-
-def _verify_snowflake_dependent_modules() -> bool:
-    return verify_library_dependent_modules(
-        python_import_name="snowflake.sqlalchemy.snowdialect",
-        pip_library_name="snowflake-sqlalchemy",
-        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-    )
-
-
-def _verify_bigquery_dependent_modules() -> bool:
-    return verify_library_dependent_modules(
-        python_import_name="pybigquery.sqlalchemy_bigquery",
-        pip_library_name="pybigquery",
-        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-    )
-
-
-def _verify_pyspark_dependent_modules() -> bool:
-    return verify_library_dependent_modules(
-        python_import_name="pyspark", pip_library_name="pyspark"
-    )
-
-
 # TODO taylor it might be nice to hint that remote urls can be entered here!
 PROMPT_FILES_BASE_PATH = """
 Enter the path of the root directory where the data files are stored. If files are on a local disk then enter either a path relative to great_expectations.yml or an absolute path.
 """
-
-PROMPT_DATASOURCE_NAME = "Give your new Datasource a short name."
 
 CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
     # 'great_expectations.datasource.batch_kwargs_generator.query_batch_kwargs_generator',

@@ -160,26 +160,28 @@ def test_cli_datasource_new_connection_string(
     result = runner.invoke(
         cli,
         "--v3-api datasource new",
-        input=f"2\n6\nwarehouse\n{empty_sqlite_db.url}\n",
+        input=f"2\n6\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert "What data would you like Great Expectations to connect to?" in stdout
-    assert "Give your new Datasource a short name." in stdout
-    assert "What is the url/connection string for the sqlalchemy connection?" in stdout
 
     assert result.exit_code == 0
 
     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
-    expected_notebook = os.path.join(uncommitted_dir, "datasource_new_warehouse.ipynb")
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
     # Run notebook
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)
-    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+
+    # mock the user adding a connection string into the notebook by overwriting the right cell
+    assert "connection_string" in nb["cells"][5]["source"]
+    nb["cells"][5]["source"] = 'connection_string = "sqlite://"'
+    ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     del context
@@ -192,7 +194,7 @@ def test_cli_datasource_new_connection_string(
                 "whole_table": {"data_asset_name_suffix": "__whole_table"}
             },
             "module_name": "great_expectations.datasource",
-            "name": "warehouse",
+            "name": "my_datasource",
         }
     ]
 
