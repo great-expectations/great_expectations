@@ -23,7 +23,7 @@ from great_expectations.validator.validator import Validator
 
 def test_parse_validation_graph():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
@@ -32,11 +32,13 @@ def test_parse_validation_graph():
             "double_sided": True,
         },
     )
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
+    # noinspection PyUnusedLocal
+    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
+    # noinspection PyUnusedLocal
     batch = Batch(data=df)
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
-    for configuration in [expectationConfiguration]:
+    for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
         )
@@ -51,14 +53,13 @@ def test_parse_validation_graph():
     ready_metrics, needed_metrics = Validator(engine)._parse_validation_graph(
         validation_graph=graph, metrics=dict()
     )
-
-    assert len(ready_metrics) == 4 and len(needed_metrics) == 5
+    assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
 # Should be passing tests even if given incorrect MetricProvider data
 def test_parse_validation_graph_with_bad_metrics_args():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
@@ -70,7 +71,7 @@ def test_parse_validation_graph_with_bad_metrics_args():
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
     validator = Validator(execution_engine=engine)
-    for configuration in [expectationConfiguration]:
+    for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
         )
@@ -88,12 +89,12 @@ def test_parse_validation_graph_with_bad_metrics_args():
     ready_metrics, needed_metrics = validator._parse_validation_graph(
         validation_graph=graph, metrics=("nonexistent", "NONE")
     )
-    assert len(ready_metrics) == 4 and len(needed_metrics) == 5
+    assert len(ready_metrics) == 2 and len(needed_metrics) == 9
 
 
 def test_populate_dependencies():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
@@ -102,11 +103,13 @@ def test_populate_dependencies():
             "double_sided": True,
         },
     )
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
+    # noinspection PyUnusedLocal
+    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
+    # noinspection PyUnusedLocal
     batch = Batch(data=df)
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
-    for configuration in [expectationConfiguration]:
+    for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
         )
@@ -121,12 +124,12 @@ def test_populate_dependencies():
             Validator(execution_engine=engine).build_metric_dependency_graph(
                 graph, metric_configuration, configuration, execution_engine=engine
             )
-    assert len(graph.edges) == 10
+    assert len(graph.edges) == 17
 
 
 def test_populate_dependencies_with_incorrect_metric_name():
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, 6]})
-    expectationConfiguration = ExpectationConfiguration(
+    expectation_configuration = ExpectationConfiguration(
         expectation_type="expect_column_value_z_scores_to_be_less_than",
         kwargs={
             "column": "a",
@@ -135,11 +138,13 @@ def test_populate_dependencies_with_incorrect_metric_name():
             "double_sided": True,
         },
     )
-    expectation = ExpectColumnValueZScoresToBeLessThan(expectationConfiguration)
+    # noinspection PyUnusedLocal
+    expectation = ExpectColumnValueZScoresToBeLessThan(expectation_configuration)
+    # noinspection PyUnusedLocal
     batch = Batch(data=df)
     graph = ValidationGraph()
     engine = PandasExecutionEngine()
-    for configuration in [expectationConfiguration]:
+    for configuration in [expectation_configuration]:
         expectation_impl = get_expectation_impl(
             "expect_column_value_z_scores_to_be_less_than"
         )
@@ -175,7 +180,7 @@ def test_graph_validate(basic_datasource):
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "pipeline_stage_name": 0,
                             "airflow_run_id": 0,
                             "custom_key_0": 0,
@@ -230,7 +235,7 @@ def test_graph_validate_with_bad_config(basic_datasource):
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "pipeline_stage_name": 0,
                             "airflow_run_id": 0,
                             "custom_key_0": 0,
@@ -271,7 +276,7 @@ def test_graph_validate_with_runtime_config(basic_datasource):
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "pipeline_stage_name": 0,
                             "airflow_run_id": 0,
                             "custom_key_0": 0,
@@ -330,7 +335,7 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
                 "batch_data": df,
                 "partition_request": PartitionRequest(
                     **{
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "pipeline_stage_name": 0,
                             "airflow_run_id": 0,
                             "custom_key_0": 0,
@@ -355,7 +360,7 @@ def test_validator_default_expectation_args__sql(
         datasource_name="my_sqlite_db",
         data_connector_name="daily",
         data_asset_name="table_partitioned_by_date_column__A",
-        partition_identifiers={"date": "2020-01-15"},
+        batch_identifiers={"date": "2020-01-15"},
         create_expectation_suite_with_name="test_suite",
     )
 
@@ -363,20 +368,22 @@ def test_validator_default_expectation_args__sql(
 
     with pytest.raises(ge_exceptions.InvalidDataContextKeyError):
         # expectation_suite_name is a number not str
+        # noinspection PyUnusedLocal
         my_validator = context.get_validator(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            partition_identifiers={"date": "2020-01-15"},
+            batch_identifiers={"date": "2020-01-15"},
             expectation_suite_name=1,
         )
 
     with pytest.raises(TypeError):
         # expectation_suite is a string not an ExpectationSuite
+        # noinspection PyUnusedLocal
         my_validator = context.get_validator(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            partition_identifiers={"date": "2020-01-15"},
+            batch_identifiers={"date": "2020-01-15"},
             expectation_suite="I_am_not_an_expectation_suite",
         )

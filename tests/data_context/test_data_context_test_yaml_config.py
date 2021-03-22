@@ -457,7 +457,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
+        batch_identifiers={
             "number": "2",
         },
         batch_spec_passthrough={
@@ -497,7 +497,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
-        partition_request={"partition_identifiers": {"number": "3"}},
+        partition_request={"batch_identifiers": {"number": "3"}},
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -613,7 +613,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="A",
-        partition_identifiers={
+        batch_identifiers={
             "number": "2",
         },
         batch_spec_passthrough={
@@ -655,7 +655,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
-        partition_request={"partition_identifiers": {"year": "2019"}},
+        partition_request={"batch_identifiers": {"year": "2019"}},
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {

@@ -63,17 +63,17 @@ def batch_definition_matches_batch_request(
         return False
 
     if batch_request.partition_request:
-        partition_identifiers: Any = batch_request.partition_request.get(
-            "partition_identifiers"
+        batch_identifiers: Any = batch_request.partition_request.get(
+            "batch_identifiers"
         )
-        if partition_identifiers:
-            if not isinstance(partition_identifiers, dict):
+        if batch_identifiers:
+            if not isinstance(batch_identifiers, dict):
                 return False
-            for key in partition_identifiers.keys():
+            for key in batch_identifiers.keys():
                 if not (
                     key in batch_definition.partition_definition
                     and batch_definition.partition_definition[key]
-                    == partition_identifiers[key]
+                    == batch_identifiers[key]
                 ):
                     return False
     return True

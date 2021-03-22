@@ -281,6 +281,7 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize("test_case", parametrized_tests, ids=ids)
 
 
+@pytest.mark.order(index=0)
 def test_case_runner_cfe(test_case):
     if test_case["skip"]:
         pytest.skip()

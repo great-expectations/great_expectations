@@ -26,6 +26,8 @@ from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
+from tqdm.auto import tqdm
+
 
 class UserConfigurableProfiler:
 
@@ -129,8 +131,13 @@ class UserConfigurableProfiler:
         self.excluded_expectations = excluded_expectations or []
         assert isinstance(self.excluded_expectations, list)
 
+        assert isinstance(
+            value_set_threshold, str
+        ), "value_set_threshold must be a string"
         self.value_set_threshold = value_set_threshold.upper()
-        assert isinstance(self.value_set_threshold, str)
+        assert (
+            self.value_set_threshold in OrderedProfilerCardinality.__members__
+        ), f"value_set_threshold must be one of {[i for i in OrderedProfilerCardinality.__members__]}"
 
         self.not_null_only = not_null_only
         assert isinstance(self.not_null_only, bool)
@@ -229,18 +236,21 @@ class UserConfigurableProfiler:
                 self.profile_dataset, self.primary_or_compound_key
             )
 
-        for column_name, column_info in self.column_info.items():
-            semantic_types = column_info.get("semantic_types")
-            for semantic_type in semantic_types:
-                semantic_type_fn = self.semantic_type_functions.get(semantic_type)
-                semantic_type_fn(
-                    profile_dataset=self.profile_dataset, column=column_name
+        with tqdm(
+            desc="Profiling Columns", total=len(self.column_info), delay=5
+        ) as pbar:
+            for column_name, column_info in self.column_info.items():
+                pbar.set_postfix_str(f"Column={column_name}")
+                semantic_types = column_info.get("semantic_types")
+                for semantic_type in semantic_types:
+                    semantic_type_fn = self.semantic_type_functions.get(semantic_type)
+                    semantic_type_fn(
+                        profile_dataset=self.profile_dataset, column=column_name
+                    )
+                self._build_expectations_for_all_column_types(
+                    self.profile_dataset, column_name
                 )
-
-        for column_name in self.column_info.keys():
-            self._build_expectations_for_all_column_types(
-                self.profile_dataset, column_name
-            )
+                pbar.update()
 
         expectation_suite = self._build_column_description_metadata(
             self.profile_dataset
@@ -262,33 +272,36 @@ class UserConfigurableProfiler:
                 column_list=self.primary_or_compound_key,
             )
         self._build_expectations_table(profile_dataset=self.profile_dataset)
-        for column_name, column_info in self.column_info.items():
-            data_type = column_info.get("type")
-            cardinality = column_info.get("cardinality")
+        with tqdm(desc="Profiling", total=len(self.column_info), delay=5) as pbar:
+            for column_name, column_info in self.column_info.items():
+                pbar.set_postfix_str(f"Column={column_name}")
+                data_type = column_info.get("type")
+                cardinality = column_info.get("cardinality")
 
-            if data_type in ("FLOAT", "INT", "NUMERIC"):
-                self._build_expectations_numeric(
-                    profile_dataset=self.profile_dataset,
-                    column=column_name,
-                )
+                if data_type in ("FLOAT", "INT", "NUMERIC"):
+                    self._build_expectations_numeric(
+                        profile_dataset=self.profile_dataset,
+                        column=column_name,
+                    )
 
-            if data_type == "DATETIME":
-                self._build_expectations_datetime(
-                    profile_dataset=self.profile_dataset,
-                    column=column_name,
-                )
+                if data_type == "DATETIME":
+                    self._build_expectations_datetime(
+                        profile_dataset=self.profile_dataset,
+                        column=column_name,
+                    )
 
-            if (
-                OrderedProfilerCardinality[self.value_set_threshold]
-                >= OrderedProfilerCardinality[cardinality]
-            ):
-                self._build_expectations_value_set(
+                if (
+                    OrderedProfilerCardinality[self.value_set_threshold]
+                    >= OrderedProfilerCardinality[cardinality]
+                ):
+                    self._build_expectations_value_set(
+                        profile_dataset=self.profile_dataset, column=column_name
+                    )
+
+                self._build_expectations_for_all_column_types(
                     profile_dataset=self.profile_dataset, column=column_name
                 )
-
-            self._build_expectations_for_all_column_types(
-                profile_dataset=self.profile_dataset, column=column_name
-            )
+                pbar.update()
 
         expectation_suite = self._build_column_description_metadata(
             self.profile_dataset
@@ -897,7 +910,16 @@ class UserConfigurableProfiler:
             len(column_list) > 1
             and "expect_compound_columns_to_be_unique" not in self.excluded_expectations
         ):
-            profile_dataset.expect_compound_columns_to_be_unique(column_list)
+            if isinstance(profile_dataset, Validator) and not hasattr(
+                profile_dataset, "expect_compound_columns_to_be_unique"
+            ):
+                # TODO: Remove this upon implementation of this expectation for V3
+                logger.warning(
+                    "expect_compound_columns_to_be_unique is not currently available in the V3 (Batch Request) API. Specifying a compound key will not add any expectations. This will be updated when that expectation becomes available."
+                )
+                return profile_dataset
+            else:
+                profile_dataset.expect_compound_columns_to_be_unique(column_list)
         elif len(column_list) < 1:
             raise ValueError(
                 "When specifying a primary or compound key, column_list must not be empty"

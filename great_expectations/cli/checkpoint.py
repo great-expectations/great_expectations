@@ -161,7 +161,6 @@ def _get_notebook_path(context, notebook_name):
     )
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="list")
 @click.pass_context
 def checkpoint_list(ctx):
@@ -184,7 +183,6 @@ def checkpoint_list(ctx):
     toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="delete")
 @click.argument("checkpoint")
 @click.pass_context
@@ -213,7 +211,6 @@ def checkpoint_delete(ctx, checkpoint):
     sys.exit(0)
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
 @click.pass_context
