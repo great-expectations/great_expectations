@@ -204,6 +204,7 @@ class RuntimeDataConnector(DataConnector):
         batch_definition: BatchDefinition,
         runtime_parameters: dict,
     ) -> Union[RuntimeDataBatchSpec, RuntimeQueryBatchSpec, PathBatchSpec]:
+        self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
