@@ -149,7 +149,7 @@ What data would you like Great Expectations to connect to?
     elif files_or_sql_selection == "2":
         if not _verify_sqlalchemy_dependent_modules():
             return None
-        # TODO taylor not sure if this is for testing or what...
+        # TODO taylor this looks like it might be for testing. Investigate.
         # db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         selected_database = _prompt_user_for_database_backend()
         helper = _get_sql_yaml_helper_class(selected_database, datasource_name)
@@ -158,7 +158,7 @@ What data would you like Great Expectations to connect to?
     if not helper.verify_libraries_installed():
         return None
     helper.prompt()
-    notebook_path = helper.make_notebook(context)
+    notebook_path = helper.create_notebook(context)
     if jupyter is False:
         cli_message(
             f"To continue editing this Datasource, run <green>jupyter notebook {notebook_path}</green>"
@@ -173,6 +173,11 @@ What data would you like Great Expectations to connect to?
 
 
 class BaseDatasourceNewYamlHelper:
+    """
+    This base class defines the interface for helpers used in the datasource new
+    flow.
+    """
+
     def __init__(
         self,
         datasource_type: DatasourceTypes,
@@ -187,7 +192,8 @@ class BaseDatasourceNewYamlHelper:
         """Used in the interactive CLI to help users install dependencies."""
         raise NotImplementedError
 
-    def make_notebook(self, context: DataContext) -> str:
+    def create_notebook(self, context: DataContext) -> str:
+        """Create a datasource_new notebook and save it to disk."""
         renderer = self.get_notebook_renderer(context)
         notebook_path = os.path.join(
             context.root_directory,
@@ -197,14 +203,9 @@ class BaseDatasourceNewYamlHelper:
         renderer.render_to_disk(notebook_path)
         return notebook_path
 
-    def get_notebook_renderer(self, context):
-        renderer = DatasourceNewNotebookRenderer(
-            context,
-            datasource_type=self.datasource_type,
-            datasource_yaml=self.yaml_snippet(),
-            datasource_name=self.datasource_name,
-        )
-        return renderer
+    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+        """Get a renderer specifically constructed for the datasource type."""
+        raise NotImplementedError
 
     def send_backend_choice_usage_message(self, context: DataContext) -> None:
         toolkit.send_usage_message(
@@ -222,10 +223,13 @@ class BaseDatasourceNewYamlHelper:
         pass
 
     def yaml_snippet(self) -> str:
-        pass
+        """Override to create the yaml for the notebook."""
+        raise NotImplementedError
 
 
 class FilesYamlHelper(BaseDatasourceNewYamlHelper):
+    """The base class for pandas/spark helpers used in the datasource new flow."""
+
     def __init__(
         self,
         datasource_type: DatasourceTypes,
@@ -239,11 +243,20 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
         self.base_path: str = ""
         self.context_root_dir: str = context_root_dir
 
-    def yaml_snippet(self) -> str:
-        return self._yaml_innards()
+    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+        return DatasourceNewNotebookRenderer(
+            context,
+            datasource_type=self.datasource_type,
+            datasource_yaml=self.yaml_snippet(),
+            datasource_name=self.datasource_name,
+        )
 
-    def _yaml_innards(self) -> str:
-        """Override if needed."""
+    def yaml_snippet(self) -> str:
+        """
+        Note the InferredAssetFilesystemDataConnector was selected to get users
+        to data assets with minimal configuration. Other DataConnectors are
+        available.
+        """
         return f'''f"""
 name: {{datasource_name}}
 class_name: Datasource
@@ -260,7 +273,6 @@ data_connectors:
 """'''
 
     def prompt(self) -> None:
-        # TODO taylor consider forking here to select remote (s3, etc) or local to allow Click to verify existence
         file_url_or_path: str = click.prompt(PROMPT_FILES_BASE_PATH, type=click.Path())
         if not toolkit.is_cloud_file_url(file_url_or_path):
             file_url_or_path = toolkit.get_path_to_data_relative_to_context_root(
@@ -313,27 +325,9 @@ class SparkYamlHelper(FilesYamlHelper):
         )
 
 
-def sanitize_yaml_and_save_datasource(
-    context: DataContext, datasource_yaml: str
-) -> None:
-    """A convenience function used in notebooks to help users save secrets."""
-    if not datasource_yaml:
-        raise ValueError("Please verify the yaml and try again.")
-    if not isinstance(datasource_yaml, str):
-        raise TypeError("Please pass in a valid yaml string.")
-    config = yaml.load(datasource_yaml)
-    try:
-        datasource_name = config.pop("name")
-    except KeyError:
-        raise ValueError("The datasource yaml is missing a `name` attribute.")
-    if "credentials" in config.keys():
-        credentials = config["credentials"]
-        config["credentials"] = "${" + datasource_name + "}"
-        context.save_config_variable(datasource_name, credentials)
-    context.add_datasource(name=datasource_name, **config)
-
-
 class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
+    """The base class for SQL helpers used in the datasource new flow."""
+
     def __init__(
         self,
         usage_stats_payload: dict,
@@ -389,15 +383,14 @@ credentials:
   password: {password}
   database: {database}"""
 
-    def get_notebook_renderer(self, context):
-        renderer = DatasourceNewNotebookRenderer(
+    def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
+        return DatasourceNewNotebookRenderer(
             context,
             datasource_type=self.datasource_type,
             datasource_yaml=self.yaml_snippet(),
             datasource_name=self.datasource_name,
             sql_credentials_snippet=self.credentials_snippet(),
         )
-        return renderer
 
 
 class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
@@ -717,7 +710,27 @@ def _verify_sqlalchemy_dependent_modules() -> bool:
     )
 
 
-# TODO taylor it might be nice to hint that remote urls can be entered here!
+def sanitize_yaml_and_save_datasource(
+    context: DataContext, datasource_yaml: str
+) -> None:
+    """A convenience function used in notebooks to help users save secrets."""
+    if not datasource_yaml:
+        raise ValueError("Please verify the yaml and try again.")
+    if not isinstance(datasource_yaml, str):
+        raise TypeError("Please pass in a valid yaml string.")
+    config = yaml.load(datasource_yaml)
+    try:
+        datasource_name = config.pop("name")
+    except KeyError:
+        raise ValueError("The datasource yaml is missing a `name` attribute.")
+    if "credentials" in config.keys():
+        credentials = config["credentials"]
+        config["credentials"] = "${" + datasource_name + "}"
+        context.save_config_variable(datasource_name, credentials)
+    context.add_datasource(name=datasource_name, **config)
+
+
+# TODO it might be nice to hint that remote urls can be entered here!
 PROMPT_FILES_BASE_PATH = """
 Enter the path of the root directory where the data files are stored. If files are on a local disk then enter either a path relative to great_expectations.yml or an absolute path.
 """
