@@ -31,21 +31,23 @@ def test_snowflake_user_password_credentials_generates_notebook(
         catch_exceptions=False,
         input="2\n4\nsnowflake\n1\nuser\nABCD.us-east-1\ndefault_db\ndefault_schema\nxsmall\npublic\npassword\n",
     )
-
-    stdout = result.stdout
     print("test_snowflake_user_password_credentials_generates_notebook 2")
+    stdout = result.stdout
+    print("test_snowflake_user_password_credentials_generates_notebook 3")
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "Which database backend are you using?" in stdout
     assert "Give your new Datasource a short name." in stdout
+    print("test_snowflake_user_password_credentials_generates_notebook 4")
 
     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new_snowflake.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
-    print("test_snowflake_user_password_credentials_generates_notebook 3")
+    print("test_snowflake_user_password_credentials_generates_notebook 5")
     # We don't have a snowflake account to use for testing, therefore we do not
     # want to run the notebook, as it will hang as it tries to connect.
     assert_no_logging_messages_or_tracebacks(caplog, result)
+    print("test_snowflake_user_password_credentials_generates_notebook 6")
 
 
 @patch("click.prompt")
