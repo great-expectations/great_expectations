@@ -317,8 +317,15 @@ def sanitize_yaml_and_save_datasource(
     context: DataContext, datasource_yaml: str
 ) -> None:
     """A convenience function used in notebooks to help users save secrets."""
+    if not datasource_yaml:
+        raise ValueError("Please verify the yaml and try again.")
+    if not isinstance(datasource_yaml, str):
+        raise TypeError("Please pass in a valid yaml string.")
     config = yaml.load(datasource_yaml)
-    datasource_name = config.pop("name")
+    try:
+        datasource_name = config.pop("name")
+    except KeyError:
+        raise ValueError("The datasource yaml is missing a `name` attribute.")
     if "credentials" in config.keys():
         credentials = config["credentials"]
         config["credentials"] = "${" + datasource_name + "}"
