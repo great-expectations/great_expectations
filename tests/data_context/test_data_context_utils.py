@@ -224,17 +224,13 @@ def test_password_masker_mask_db_url(tmp_path_factory):
 
     # SQLite
     # relative path
-    path_to_sqlite_db = str(tmp_path_factory.mktemp("path_to_sqlite_db"))
-    Path(os.path.join(path_to_sqlite_db, "foo.db")).touch()
     assert (
-        PasswordMasker.mask_db_url(f"sqlite://{path_to_sqlite_db}/foo.db")
-        == f"sqlite://{path_to_sqlite_db}/foo.db"
+        PasswordMasker.mask_db_url(f"sqlite:///something/foo.db")
+        == f"sqlite:///something/foo.db"
     )
     assert (
-        PasswordMasker.mask_db_url(
-            f"sqlite://{path_to_sqlite_db}/foo.db", use_urlparse=True
-        )
-        == f"sqlite://{path_to_sqlite_db}/foo.db"
+        PasswordMasker.mask_db_url(f"sqlite:///something/foo.db", use_urlparse=True)
+        == f"sqlite:///something/foo.db"
     )
 
     # absolute path
