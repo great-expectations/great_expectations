@@ -74,7 +74,6 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
 #     assert validator.head(n_rows=20, fetch_all=True).shape == (100, 2)
 
 
-# TODO: <Alex>ALEX Duplicate?</Alex>
 def test_instantiation_with_and_without_temp_table(sqlite_view_engine, sa):
     print(get_sqlite_temp_table_names(sqlite_view_engine))
     assert len(get_sqlite_temp_table_names(sqlite_view_engine)) == 1
