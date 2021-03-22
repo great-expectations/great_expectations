@@ -1935,3 +1935,202 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
         expectation_suite_name=expectation_suite,
     )
     assert len(batch) == 3
+
+
+def test_add_checkpoint_from_yaml(empty_data_context):
+    """
+    What does this test and why?
+    We should be able to add a checkpoint directly from a valid yaml configuration.
+    test_yaml_config() should not automatically save a checkpoint if valid.
+    checkpoint yaml in a store should match the configuration, even if created from SimpleCheckpoints
+    Note: This tests multiple items and could stand to be broken up.
+    """
+
+    context: DataContext = empty_data_context
+    checkpoint_name: str = "my_new_checkpoint"
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_yaml_config = f"""
+name: {checkpoint_name}
+config_version: 1.0
+class_name: SimpleCheckpoint
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+    """
+
+    checkpoint_from_test_yaml_config = context.test_yaml_config(
+        checkpoint_yaml_config, name=checkpoint_name
+    )
+
+    # test_yaml_config() no longer stores checkpoints automatically
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_from_yaml = context.add_checkpoint(
+        **yaml.load(checkpoint_yaml_config),
+    )
+
+    expected_checkpoint_yaml: str = """name: my_new_checkpoint
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: Checkpoint
+run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
+expectation_suite_name:
+batch_request:
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names: []
+evaluation_parameters: {}
+runtime_configuration: {}
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+profilers: []
+"""
+
+    checkpoint_dir = os.path.join(
+        context.root_directory,
+        context.checkpoint_store.config["store_backend"]["base_directory"],
+    )
+    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
+
+    with open(checkpoint_file) as cf:
+        checkpoint_from_disk = cf.read()
+
+    assert checkpoint_from_disk == expected_checkpoint_yaml
+    assert checkpoint_from_yaml.config.to_yaml_str() == expected_checkpoint_yaml
+
+    checkpoint_from_store = context.get_checkpoint(checkpoint_name)
+    assert checkpoint_from_store.config.to_yaml_str() == expected_checkpoint_yaml
+
+    expected_action_list = [
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+        {
+            "name": "update_data_docs",
+            "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+        },
+    ]
+
+    assert checkpoint_from_yaml.action_list == expected_action_list
+    assert checkpoint_from_store.action_list == expected_action_list
+    assert checkpoint_from_test_yaml_config.action_list == expected_action_list
+    assert checkpoint_from_store.action_list == expected_action_list
+
+    assert checkpoint_from_test_yaml_config.name == checkpoint_from_yaml.name
+    assert (
+        checkpoint_from_test_yaml_config.action_list == checkpoint_from_yaml.action_list
+    )
+
+    assert checkpoint_from_yaml.name == checkpoint_name
+    assert checkpoint_from_yaml.config.to_json_dict() == {
+        "name": "my_new_checkpoint",
+        "config_version": 1.0,
+        "template_name": None,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
+        "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
+        "expectation_suite_name": None,
+        "batch_request": None,
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+            },
+        ],
+        "evaluation_parameters": {},
+        "runtime_configuration": {},
+        "validations": [
+            {
+                "batch_request": {
+                    "datasource_name": "data_dir",
+                    "data_connector_name": "data_dir_example_data_connector",
+                    "data_asset_name": "DEFAULT_ASSET_NAME",
+                    "partition_request": {"index": -1},
+                },
+                "expectation_suite_name": "newsuite",
+            }
+        ],
+        "profilers": [],
+    }
+
+    assert isinstance(checkpoint_from_yaml, Checkpoint)
+
+    assert checkpoint_name in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 1
+
+
+def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(empty_data_context):
+    """
+    What does this test and why?
+    Checkpoint yaml should have a valid class_name
+    """
+
+    context: DataContext = empty_data_context
+    checkpoint_name: str = "my_new_checkpoint"
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_yaml_config = f"""
+name: {checkpoint_name}
+config_version: 1.0
+class_name: NotAValidCheckpointClassName
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+    """
+
+    with pytest.raises(KeyError):
+        context.test_yaml_config(checkpoint_yaml_config, name=checkpoint_name)
+
+    with pytest.raises(AttributeError):
+        context.add_checkpoint(
+            **yaml.load(checkpoint_yaml_config),
+        )
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
