@@ -21,6 +21,8 @@ def test_snowflake_user_password_credentials_generates_notebook(
     root_dir = empty_data_context.root_directory
     context = DataContext(root_dir)
 
+    print("test_snowflake_user_password_credentials_generates_notebook 1")
+
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
@@ -31,7 +33,7 @@ def test_snowflake_user_password_credentials_generates_notebook(
     )
 
     stdout = result.stdout
-
+    print("test_snowflake_user_password_credentials_generates_notebook 2")
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "Which database backend are you using?" in stdout
     assert "Give your new Datasource a short name." in stdout
@@ -40,7 +42,7 @@ def test_snowflake_user_password_credentials_generates_notebook(
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new_snowflake.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
-
+    print("test_snowflake_user_password_credentials_generates_notebook 3")
     # We don't have a snowflake account to use for testing, therefore we do not
     # want to run the notebook, as it will hang as it tries to connect.
     assert_no_logging_messages_or_tracebacks(caplog, result)
