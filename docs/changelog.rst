@@ -6,9 +6,13 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
+* [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
+* [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
 
 0.13.14
 -----------------
+* [BUGFIX] Use temporary paths in tests #2545
 * [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
 * [ENHANCEMENT] Restore cli functionality for legacy checkpoints #2511
 * [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend #2513 (thanks @benoitLebreton-perso)

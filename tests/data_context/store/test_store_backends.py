@@ -114,7 +114,6 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     tuple_filesystem_store_backend = TupleFilesystemStoreBackend(
         root_directory=project_path,
         base_directory=os.path.join(project_path, path),
-        # filepath_template="my_file_{0}",
     )
     # Check that store_backend_id is created on instantiation, before being accessed
     desired_directory_tree_str = """\
