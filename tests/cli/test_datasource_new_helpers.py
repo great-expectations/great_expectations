@@ -112,7 +112,6 @@ credentials:
         mock.call(
             {
                 "event": "cli.new_ds_choice",
-                # TODO taylor not sure what the expected message is since I could not find a test that checked for this
                 "event_payload": {
                     "type": "sqlalchemy",
                     "db": "MySQL",
@@ -162,7 +161,6 @@ credentials:
         mock.call(
             {
                 "event": "cli.new_ds_choice",
-                # TODO taylor not sure what the expected message is since I could not find a test that checked for this
                 "event_payload": {
                     "type": "sqlalchemy",
                     "db": "Postgres",
@@ -213,7 +211,6 @@ credentials:
         mock.call(
             {
                 "event": "cli.new_ds_choice",
-                # TODO taylor not sure what the expected message is since I could not find a test that checked for this
                 "event_payload": {
                     "type": "sqlalchemy",
                     "db": "Redshift",
@@ -378,7 +375,6 @@ def _snowflake_usage_stats_assertions(mock_emit):
         mock.call(
             {
                 "event": "cli.new_ds_choice",
-                # TODO taylor not sure what the expected message is since I could not find a test that checked for this
                 "event_payload": {
                     "type": "sqlalchemy",
                     "db": "Snowflake",
@@ -419,7 +415,6 @@ connection_string: {connection_string}"""'''
         mock.call(
             {
                 "event": "cli.new_ds_choice",
-                # TODO taylor not sure what the expected message is since I could not find a test that checked for this
                 "event_payload": {
                     "type": "sqlalchemy",
                     "db": "BigQuery",
@@ -464,7 +459,6 @@ connection_string: {connection_string}"""'''
         mock.call(
             {
                 "event": "cli.new_ds_choice",
-                # TODO taylor not sure what the expected message is since I could not find a test that checked for this
                 "event_payload": {
                     "type": "sqlalchemy",
                     "db": "other",
@@ -503,7 +497,7 @@ def test_PandasYamlHelper(mock_emit, mock_prompt, empty_data_context_stats_enabl
     assert helper.base_path == ""
     mock_prompt.side_effect = ["path/to/data"]
     helper.prompt()
-    assert helper.base_path == "path/to/data"
+    assert helper.base_path == "../path/to/data"
 
     assert (
         helper.yaml_snippet()
@@ -516,7 +510,7 @@ data_connectors:
   {datasource_name}_example_data_connector:
     class_name: InferredAssetFilesystemDataConnector
     datasource_name: {datasource_name}
-    base_directory: path/to/data
+    base_directory: ../path/to/data
     default_regex:
       group_names: data_asset_name
       pattern: (.*)
@@ -550,7 +544,7 @@ def test_SparkYamlHelper(mock_emit, mock_prompt, empty_data_context_stats_enable
     assert helper.base_path == ""
     mock_prompt.side_effect = ["path/to/data"]
     helper.prompt()
-    assert helper.base_path == "path/to/data"
+    assert helper.base_path == "../path/to/data"
 
     assert (
         helper.yaml_snippet()
@@ -563,7 +557,7 @@ data_connectors:
   {datasource_name}_example_data_connector:
     class_name: InferredAssetFilesystemDataConnector
     datasource_name: {datasource_name}
-    base_directory: path/to/data
+    base_directory: ../path/to/data
     default_regex:
       group_names: data_asset_name
       pattern: (.*)
