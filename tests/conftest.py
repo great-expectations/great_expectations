@@ -4236,3 +4236,11 @@ execution_engine:
     )
 
     return basic_datasource
+
+
+@pytest.fixture
+def misc_directory(tmp_path_factory):
+    misc_dir = tmp_path_factory.mktemp("random", numbered=False)
+    assert os.path.isabs(misc_dir)
+    yield misc_dir
+    shutil.rmtree(misc_dir)

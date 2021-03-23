@@ -149,8 +149,6 @@ What data would you like Great Expectations to connect to?
     elif files_or_sql_selection == "2":
         if not _verify_sqlalchemy_dependent_modules():
             return None
-        # TODO taylor this looks like it might be for testing. Investigate.
-        # db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
         selected_database = _prompt_user_for_database_backend()
         helper = _get_sql_yaml_helper_class(selected_database, datasource_name)
 
@@ -275,7 +273,7 @@ data_connectors:
     def prompt(self) -> None:
         file_url_or_path: str = click.prompt(PROMPT_FILES_BASE_PATH, type=click.Path())
         if not toolkit.is_cloud_file_url(file_url_or_path):
-            file_url_or_path = toolkit.get_path_to_data_relative_to_context_root(
+            file_url_or_path = toolkit.get_relative_path_from_config_file_to_base_path(
                 self.context_root_dir, file_url_or_path
             )
         self.base_path = file_url_or_path

@@ -768,15 +768,18 @@ def is_cloud_file_url(file_path: str) -> bool:
     return False
 
 
-def get_path_to_data_relative_to_context_root(context_root_directory, data_path):
-    """Base directory paths in v3 API are relative to the great_expectations.yml file."""
-    if os.path.isabs(data_path):
-        absolute_data_path = data_path
-    else:
-        # Note a simple os.path.abs() can't be used due to the user having an unusual cwd
-        absolute_data_path = os.path.normpath(
-            os.path.join(context_root_directory, data_path)
-        )
+def get_relative_path_from_config_file_to_base_path(
+    context_root_directory: str, data_path: str
+) -> str:
+    """
+    This function determines the relative path from a given data path relative
+    to the great_expectations.yml file independent of the current working
+    directory.
 
-    relpath = os.path.relpath(absolute_data_path, start=context_root_directory)
-    return relpath
+    This allows a user to use the CLI from any directory, type a relative path
+    from their current working directory and have the correct relative path be
+    put in the great_expectations.yml file.
+    """
+    data_from_working_dir = os.path.relpath(data_path)
+    context_dir_from_working_dir = os.path.relpath(context_root_directory)
+    return os.path.relpath(data_from_working_dir, context_dir_from_working_dir)
