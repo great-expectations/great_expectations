@@ -10,30 +10,70 @@ from great_expectations import __version__ as ge_version
 
 HUMBUG_TOKEN = "e10fbd54-71b0-4e68-80b0-d59ec3d99a81"
 HUMBUG_KB_ID = "2e995d6c-95a9-4a35-8ee6-49846ac7fc63"
-REPORT_CONSENT_ENV_VAR = "GREATE_EXPECTATION_REPORTING_ENABLED"
-REPORT_CLIENT_ID = "GREATE_EXPECTATION_CLIENT_ID"
+GE_REPORTING_CONFIG_FILE_NAME = "reporting_config.json"
+GE_REPORTING_CONFIG_DIR = os.path.expanduser("~/.greate_expectations")
 
 
-def save_reporting_config(consent, client_id = None):
+
+def get_reporting_config_path():
+    return os.path.join(GE_REPORTING_CONFIG_DIR, GE_REPORTING_CONFIG_FILE_NAME)
+
+def chek_config_path():
+    if not os.path.exists(GE_REPORTING_CONFIG_DIR):
+        os.makedirs(GE_REPORTING_CONFIG_DIR)
+        return False
+    return True
+
+
+
+def save_reporting_config(consent: bool, client_id = None):
     """
     Allow or disallow Aim reporting.
     """
-    os.environ[REPORT_CONSENT_ENV_VAR] = consent
+    config_report_path = get_reporting_config_path()
+    if config_report_path is None:
+        raise Exception(
+            'Config report file not found, use "aim init" to initialize a new repository'
+        )
+
+    reporting_config = {}
+    if os.path.isfile(config_report_path):
+        try:
+            with open(config_report_path, "r") as ifp:
+                reporting_config = json.load(ifp)
+        except Exception:
+            pass
+
+    if client_id is not None and reporting_config.get("client_id") is None:
+        reporting_config["client_id"] = client_id
+
+    if reporting_config.get("client_id") is None:
+        reporting_config["client_id"] = str(uuid.uuid4())
+
+    reporting_config["consent"] = consent
+
+    try:
+        with open(config_report_path, "w") as ofp:
+            json.dump(reporting_config, ofp)
+    except Exception:
+        pass
 
 
 def get_reporting_config():
     reporting_config = {}
 
-    try:
-        if REPORT_CONSENT_ENV_VAR not in os.environ:
-            os.environ[REPORT_CONSENT_ENV_VAR] = True
-            if REPORT_CLIENT_ID not in os.environ:
+    config_report_path = get_reporting_config_path()
+    if config_report_path is not None:
+        try:
+            if not os.path.exists(config_report_path):
                 client_id = str(uuid.uuid4())
-                os.environ[REPORT_CLIENT_ID] = client_id
-        reporting_config["client_id"] = os.environ.get(REPORT_CLIENT_ID)
-        reporting_config["consent"] = os.environ.get(REPORT_CONSENT_ENV_VAR)
-    except Exception as err:
-        print(err)
+                reporting_config["client_id"] = client_id
+                save_reporting_config(True, client_id)
+            else:
+                with open(config_report_path, "r") as ifp:
+                    reporting_config = json.load(ifp)
+        except Exception:
+            pass
     return reporting_config
 
 @click.command()
@@ -54,6 +94,7 @@ def reporting(on: bool) -> None:
 def ge_consent_from_reporting_config_file() -> bool:
     reporting_config = get_reporting_config()
     return reporting_config.get("consent", False)
+    
 
 client_id = None
 
