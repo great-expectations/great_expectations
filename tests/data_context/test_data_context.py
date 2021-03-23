@@ -2011,11 +2011,14 @@ def test_add_datasource_from_yaml(empty_data_context):
     assert datasource_name in context.get_config()["datasources"]
 
 
-def test_add_datasource_from_yaml_sql_datasource(sa, empty_data_context):
+def test_add_datasource_from_yaml_sql_datasource(sa, test_backends, empty_data_context):
     """
     What does this test and why?
     Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
     """
+
+    if "postgresql" not in test_backends:
+        pytest.skip("test_add_datasource_from_yaml_sql_datasource requires postgresql")
 
     context: DataContext = empty_data_context
 
