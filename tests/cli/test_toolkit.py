@@ -391,9 +391,9 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_g
     assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, "../../data/pipeline1"
+        ge_dir, os.path.join("..", "..", "data", "pipeline1")
     )
-    assert obs == "../../data/pipeline1"
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_absolute_data_path(
@@ -414,9 +414,9 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_g
     monkeypatch.chdir(ge_dir)
     assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)
 
-    absolute_path = os.path.abspath("../../data/pipeline1")
+    absolute_path = os.path.abspath(os.path.join("..", "..", "data", "pipeline1"))
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
-    assert obs == "../../data/pipeline1"
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_relative_data_path(
@@ -438,8 +438,10 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent
     monkeypatch.chdir(adjacent_dir)
     assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)
 
-    obs = get_relative_path_from_config_file_to_base_path(ge_dir, "../data/pipeline1")
-    assert obs == "../../data/pipeline1"
+    obs = get_relative_path_from_config_file_to_base_path(
+        ge_dir, os.path.join("..", "data", "pipeline1")
+    )
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_absolute_data_path(
@@ -461,9 +463,9 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent
     monkeypatch.chdir(adjacent_dir)
     assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)
 
-    absolute_path = os.path.abspath("../data/pipeline1")
+    absolute_path = os.path.abspath(os.path.join("..", "data", "pipeline1"))
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
-    assert obs == "../../data/pipeline1"
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_relative_data_path(
@@ -486,9 +488,9 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, "../projects/data/pipeline1"
+        ge_dir, os.path.join("..", "projects", "data", "pipeline1")
     )
-    assert obs == "../../data/pipeline1"
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
 
 
 def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_absolute_data_path(
@@ -510,6 +512,6 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     monkeypatch.chdir(misc_directory)
     assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
 
-    absolute_path = os.path.abspath("../projects/data/pipeline1")
+    absolute_path = os.path.abspath(os.path.join("..", "projects", "data", "pipeline1"))
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
-    assert obs == "../../data/pipeline1"
+    assert obs == os.path.join("..", "..", "data", "pipeline1")
