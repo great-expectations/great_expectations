@@ -12,6 +12,7 @@ from great_expectations.cli.v012.project import project
 from great_expectations.cli.v012.store import store
 from great_expectations.cli.v012.suite import suite
 from great_expectations.cli.v012.validation_operator import validation_operator
+from great_expectations.cli.v012.reporting import reporting
 
 try:
     from colorama import init as init_colorama
@@ -65,6 +66,7 @@ cli.add_command(suite)
 cli.add_command(validation_operator)
 cli.add_command(store)
 cli.add_command(checkpoint)
+cli.add_command(reporting)
 
 
 def main():

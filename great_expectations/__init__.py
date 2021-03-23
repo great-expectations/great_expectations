@@ -6,6 +6,11 @@ del get_versions  # isort:skip
 
 from great_expectations.data_context import DataContext
 
+from great_expectations.cli.reporting import ge_reporter, ge_tags
+
+ge_reporter.system_report(publish=True, tags=ge_tags)
+ge_reporter.setup_excepthook(publish=True, tags=ge_tags)
+
 from .util import (
     from_pandas,
     get_context,
