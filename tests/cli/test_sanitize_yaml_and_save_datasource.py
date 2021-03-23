@@ -33,6 +33,7 @@ connection_string: sqlite://"""
 
 
 def test_sanitize_yaml_and_save_datasource_works_without_credentials(
+    sa,
     empty_data_context,
 ):
     context = empty_data_context
@@ -65,6 +66,7 @@ connection_string: sqlite://"""
 
 
 def test_sanitize_yaml_and_save_datasource_works_with_credentials(
+    sa,
     empty_data_context,
 ):
     context = empty_data_context

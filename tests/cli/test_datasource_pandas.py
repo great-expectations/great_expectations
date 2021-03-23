@@ -24,7 +24,7 @@ def test_cli_datasource_list_on_project_with_no_datasources(
         catch_exceptions=False,
     )
 
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
@@ -53,7 +53,7 @@ def test_cli_datasource_list_on_project_with_one_datasource(
  - [36mname:[0m my_datasource[0m
    [36mclass_name:[0m Datasource[0m
 """.strip()
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert stdout == expected_output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 

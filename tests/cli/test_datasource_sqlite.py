@@ -24,7 +24,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkey
         catch_exceptions=False,
     )
 
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
@@ -47,7 +47,7 @@ Using v3 (Batch Request) API\x1b[0m
  - [36mname:[0m wow_a_datasource[0m
    [36mclass_name:[0m SqlAlchemyDatasource[0m
 """.strip()
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
 
     assert stdout == expected_output
 
