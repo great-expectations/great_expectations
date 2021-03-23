@@ -41,7 +41,7 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "import great_expectations as ge\nfrom great_expectations.cli.datasource import sanitize_yaml_and_save_datasource\ncontext = ge.get_context()",
+                "source": "import great_expectations as ge\nfrom great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists\ncontext = ge.get_context()",
                 "outputs": [],
             },
         ]
@@ -146,7 +146,7 @@ you can use `context.add_datasource()` and specify all the required parameters."
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "sanitize_yaml_and_save_datasource(context, example_yaml)\ncontext.list_datasources()",
+                "source": "check_if_datasource_name_exists(context, datasource_name)\nsanitize_yaml_and_save_datasource(context, example_yaml)\ncontext.list_datasources()",
                 "outputs": [],
             },
             {

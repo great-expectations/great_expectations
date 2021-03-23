@@ -1,5 +1,9 @@
-import mock
+from unittest import mock
 
+import pytest
+
+import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext
 from great_expectations.cli.datasource import (
     BigqueryCredentialYamlHelper,
     ConnectionStringCredentialYamlHelper,
@@ -11,6 +15,7 @@ from great_expectations.cli.datasource import (
     SnowflakeCredentialYamlHelper,
     SparkYamlHelper,
     SQLCredentialYamlHelper,
+    check_if_datasource_name_exists,
 )
 from great_expectations.datasource.types import DatasourceTypes
 
@@ -19,8 +24,7 @@ def test_SQLCredentialYamlHelper_defaults(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"})
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"
-port = 
-username = "YOUR_USERNAME"
+port = \nusername = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
@@ -49,8 +53,7 @@ def test_SQLCredentialYamlHelper_driver(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"}, driver="stuff")
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"
-port = 
-username = "YOUR_USERNAME"
+port = \nusername = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
@@ -562,4 +565,24 @@ data_connectors:
       group_names: data_asset_name
       pattern: (.*)
 """'''
+    )
+
+
+def test_check_if_datasource_name_exists(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert [d["name"] for d in context.list_datasources()] == ["my_datasource"]
+    assert len(context.list_datasources()) == 1
+
+    # Exists
+    with pytest.raises(ge_exceptions.DatasourceConfigurationError):
+        check_if_datasource_name_exists(
+            context=context, datasource_name="my_datasource"
+        )
+
+    # Doesn't exist
+    check_if_datasource_name_exists(
+        context=context, datasource_name="nonexistent_datasource"
     )

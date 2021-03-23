@@ -7,6 +7,7 @@ from typing import Optional, Union
 import click
 
 from great_expectations import DataContext
+from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
@@ -742,3 +743,22 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
     "great_expectations.validator.validator",
     "great_expectations.datasource.sqlalchemy_datasource",
 ]
+
+
+def check_if_datasource_name_exists(context: DataContext, datasource_name: str) -> None:
+    """
+    Check if a Datasource name already exists in the given DataContext and if so raise an error
+    Args:
+        context: DataContext to check for existing Datasource
+        datasource_name: name of the proposed Datasource
+    """
+
+    # TODO: Note this is a temporary fix, test_yaml_config() should update a copy of the in-memory data context
+    #  to eliminate side effects from running it.
+    context_on_disk: DataContext = DataContext(context.root_directory)
+
+    if datasource_name in [d["name"] for d in context_on_disk.list_datasources()]:
+        raise ge_exceptions.DatasourceConfigurationError(
+            datasource_name=datasource_name,
+            message=f"A Datasource named {datasource_name} already exists in this data context. Please use a different name.",
+        )

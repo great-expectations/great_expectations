@@ -52,7 +52,7 @@ Use this notebook to configure a new {self.datasource_type.value} Datasource and
         )
         self.add_code_cell(
             """import great_expectations as ge
-from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
+from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists
 context = ge.get_context()""",
         )
 
@@ -100,7 +100,8 @@ you can use `context.add_datasource()` and specify all the required parameters."
 Here we will save your Datasource in your Data Context once you are satisfied with the configuration. Please note that if you wish to include comments in your Datasource yaml you must add them directly to your `great_expectations.yml`."""
         )
         self.add_code_cell(
-            """sanitize_yaml_and_save_datasource(context, example_yaml)
+            """check_if_datasource_name_exists(context, datasource_name)
+sanitize_yaml_and_save_datasource(context, example_yaml)
 context.list_datasources()""",
             lint=True,
         )
