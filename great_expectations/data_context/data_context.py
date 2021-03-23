@@ -367,10 +367,10 @@ class BaseDataContext:
     def _init_datasources(self, config):
         if not config.datasources:
             return
-        for datasource in config.datasources:
+        for datasource_name, data_source_config in config.datasources.items():
             try:
-                self._cached_datasources[datasource] = self.get_datasource(
-                    datasource_name=datasource
+                self._cached_datasources[datasource_name] = self.get_datasource(
+                    datasource_name=datasource_name
                 )
             except ge_exceptions.DatasourceInitializationError:
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
