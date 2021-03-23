@@ -28,7 +28,12 @@ def build_batch_filter(
     ] = None
 ):
     if not data_connector_query_dict:
-        return BatchFilter(custom_filter_function=None, batch_filter_parameters=None, index=None, limit=None)
+        return BatchFilter(
+            custom_filter_function=None,
+            batch_filter_parameters=None,
+            index=None,
+            limit=None,
+        )
     data_connector_query_keys: set = set(data_connector_query_dict.keys())
     if not data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS:
         raise ge_exceptions.BatchFilterError(
@@ -78,8 +83,12 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
     index = _parse_index(index=index)
-    return BatchFilter(custom_filter_function=custom_filter_function, batch_filter_parameters=batch_filter_parameters,
-                       index=index, limit=limit)
+    return BatchFilter(
+        custom_filter_function=custom_filter_function,
+        batch_filter_parameters=batch_filter_parameters,
+        index=index,
+        limit=limit,
+    )
 
 
 def _parse_index(
@@ -123,9 +132,13 @@ class BatchFilter:
         "limit",
     }
 
-    def __init__(self, custom_filter_function: Callable = None,
-                 batch_filter_parameters: Optional[BatchIdentifiersSubset] = None,
-                 index: Optional[Union[int, slice]] = None, limit: int = None):
+    def __init__(
+        self,
+        custom_filter_function: Callable = None,
+        batch_filter_parameters: Optional[BatchIdentifiersSubset] = None,
+        index: Optional[Union[int, slice]] = None,
+        limit: int = None,
+    ):
         self._custom_filter_function = custom_filter_function
         self._batch_filter_parameters = batch_filter_parameters
         self._index = index
@@ -186,7 +199,9 @@ class BatchFilter:
         return selected_batch_definitions
 
     def best_effort_batch_definition_matcher(self) -> Callable:
-        def match_batch_definition_to_batch_filter_params(batch_identifiers: dict) -> bool:
+        def match_batch_definition_to_batch_filter_params(
+            batch_identifiers: dict,
+        ) -> bool:
             if self.batch_filter_parameters:
                 if not batch_identifiers:
                     return False

@@ -735,7 +735,10 @@ def test_data_connector_query_data_connector_query_batch_identifiers_2_key_name_
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 data_connector_query={
-                    "batch_filter_parameters": {"timestamp": "20200809", "name": "will"},
+                    "batch_filter_parameters": {
+                        "timestamp": "20200809",
+                        "name": "will",
+                    },
                 },
             )
         )

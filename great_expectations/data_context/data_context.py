@@ -1562,13 +1562,20 @@ class BaseDataContext:
 
         else:
             if data_connector_query is None:
-                if batch_filter_parameters is not None and batch_identifiers is not None:
-                    raise ValueError('Must provide either "batch_filter_parameters" or "batch_identifiers", not both.')
+                if (
+                    batch_filter_parameters is not None
+                    and batch_identifiers is not None
+                ):
+                    raise ValueError(
+                        'Must provide either "batch_filter_parameters" or "batch_identifiers", not both.'
+                    )
                 elif batch_filter_parameters is None and batch_identifiers is not None:
-                    logger.warning('Attempting to build DataConnectorQuery but "batch_identifiers" was provided '
-                                   'instead of "batch_filter_parameters". The "batch_identifiers" key on '
-                                   'DataConnectorQuery has been renamed to "batch_filter_parameters". Please update '
-                                   'your code. Falling back on provided "batch_identifiers".')
+                    logger.warning(
+                        'Attempting to build DataConnectorQuery but "batch_identifiers" was provided '
+                        'instead of "batch_filter_parameters". The "batch_identifiers" key on '
+                        'DataConnectorQuery has been renamed to "batch_filter_parameters". Please update '
+                        'your code. Falling back on provided "batch_identifiers".'
+                    )
                     batch_filter_parameters = batch_identifiers
                 elif batch_filter_parameters is None and batch_identifiers is None:
                     batch_filter_parameters = kwargs

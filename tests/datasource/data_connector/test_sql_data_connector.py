@@ -99,7 +99,9 @@ def test_get_batch_definition_list_from_batch_request(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query={"batch_filter_parameters": {"date": "2020-01-01"}},
+                data_connector_query={
+                    "batch_filter_parameters": {"date": "2020-01-01"}
+                },
             )
         )
     )
