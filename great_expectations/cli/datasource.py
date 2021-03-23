@@ -334,7 +334,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         usage_stats_payload: dict,
         datasource_name: Optional[str] = None,
         driver: str = "",
-        port: Union[int, str] = "",
+        port: Union[int, str] = "YOUR_PORT",
         host: str = "YOUR_HOST",
         username: str = "YOUR_USERNAME",
         password: str = "YOUR_PASSWORD",
@@ -355,7 +355,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
     def credentials_snippet(self) -> str:
         return f'''\
 host = "{self.host}"
-port = {self.port}
+port = "{self.port}"
 username = "{self.username}"
 password = "{self.password}"
 database = "{self.database}"'''

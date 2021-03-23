@@ -24,7 +24,8 @@ def test_SQLCredentialYamlHelper_defaults(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"})
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"
-port = \nusername = "YOUR_USERNAME"
+port = "YOUR_PORT"
+username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
@@ -53,7 +54,8 @@ def test_SQLCredentialYamlHelper_driver(empty_data_context):
     helper = SQLCredentialYamlHelper(usage_stats_payload={"foo": "bar"}, driver="stuff")
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"
-port = \nusername = "YOUR_USERNAME"
+port = "YOUR_PORT"
+username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
@@ -86,7 +88,7 @@ def test_MySQLCredentialYamlHelper(mock_emit, empty_data_context_stats_enabled):
     helper = MySQLCredentialYamlHelper("my_datasource")
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"
-port = 3306
+port = "3306"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
@@ -136,7 +138,7 @@ def test_PostgresCredentialYamlHelper(mock_emit, empty_data_context_stats_enable
     helper = PostgresCredentialYamlHelper("my_datasource")
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"
-port = 5432
+port = "5432"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "postgres"'''
@@ -184,7 +186,7 @@ def test_RedshiftCredentialYamlHelper(mock_emit, empty_data_context_stats_enable
     helper = RedshiftCredentialYamlHelper("my_datasource")
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"
-port = 5439
+port = "5439"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
 database = "YOUR_DATABASE"'''
