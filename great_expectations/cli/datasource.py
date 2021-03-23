@@ -81,9 +81,11 @@ def delete_datasource(ctx, datasource):
     """Delete the datasource specified as an argument"""
     context: DataContext = ctx.obj.data_context
     if not ctx.obj.assume_yes:
-        if not toolkit.confirm_proceed_or_exit(exit_on_no=False):
-            cli_message(f"Datasource `{datasource}` was not deleted.")
-            sys.exit(0)
+        toolkit.confirm_proceed_or_exit(
+            confirm_prompt=f"""\nAre you sure you want to delete the Datasource "{datasource}" (this action is irreversible)?" """,
+            continuation_message=f"Datasource `{datasource}` was not deleted.",
+            exit_on_no=True,
+        )
 
     try:
         context.delete_datasource(datasource)
@@ -730,7 +732,7 @@ def sanitize_yaml_and_save_datasource(
 
 # TODO it might be nice to hint that remote urls can be entered here!
 PROMPT_FILES_BASE_PATH = """
-Enter the path of the root directory where the data files are stored. If files are on a local disk then enter either a path relative to great_expectations.yml or an absolute path.
+Enter the path of the root directory where the data files are stored. If files are on local disk enter a path relative to your current working directory or an absolute path.
 """
 
 CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
