@@ -622,7 +622,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
 config_version: 1.0
 template_name:
 module_name: great_expectations.checkpoint
-class_name: SimpleCheckpoint
+class_name: Checkpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
 batch_request:
@@ -940,7 +940,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     assert result.exit_code == 1
 
     stdout: str = result.stdout
-    assert "Exception occurred while running checkpoint" in stdout
+    assert "Exception occurred while running Checkpoint" in stdout
     assert (
         "of Checkpoint 'no_suite': validation expectation_suite_name must be specified"
         in stdout
@@ -1943,7 +1943,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     assert result.exit_code == 1
 
     stdout: str = result.stdout
-    assert "Exception occurred while running checkpoint." in stdout
+    assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
     assert mock_emit.call_count == 4
@@ -2065,7 +2065,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     assert result.exit_code == 1
 
     stdout: str = result.stdout
-    assert "Exception occurred while running checkpoint." in stdout
+    assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
     assert mock_emit.call_count == 4
@@ -2198,7 +2198,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     assert result.exit_code == 1
 
     stdout: str = result.stdout
-    assert "Exception occurred while running checkpoint." in stdout
+    assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
     assert mock_emit.call_count == 4
