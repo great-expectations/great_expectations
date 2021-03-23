@@ -182,11 +182,12 @@ Notes:
     def _drop_unsupported_option_keys_for_reader(self, reader_fn, reader_options):
         available_keys = reader_fn.__code__.co_varnames
         current_keys = list(reader_options.keys())
-        dropped_option_keys = [
-            reader_options.pop(key, None)
-            for key in current_keys
-            if key not in available_keys
-        ]
+        dropped_option_keys = []
+        for key in current_keys:
+            if key not in available_keys:
+                reader_options.pop(key, None)
+                dropped_option_keys.append(key)
+
         if dropped_option_keys:
             logger.warning(
                 "Some reader option keys have been dropped as {reader_fn_name} does not support them: {dropped_option_keys}".format(

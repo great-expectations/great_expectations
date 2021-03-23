@@ -338,7 +338,7 @@ def test_drop_unsupported_option_keys_for_reader(caplog):
         == {}
     )
     assert (
-        "Some reader option keys have been dropped as read_parquet does not support them: ['infer']"
+        "Some reader option keys have been dropped as read_parquet does not support them: ['compression']"
         in caplog.text
     )
 
