@@ -99,7 +99,7 @@ def checkpoint_new(ctx, name, jupyter):
 def _checkpoint_new(ctx, checkpoint_name, jupyter):
 
     usage_event: str = "cli.checkpoint.new"
-    context = ctx.obj.data_context
+    context: DataContext = ctx.obj.data_context
 
     try:
         _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event)
