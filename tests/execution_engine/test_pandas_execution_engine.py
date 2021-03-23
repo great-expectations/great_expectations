@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import random
 from pathlib import Path
@@ -317,6 +318,29 @@ def test_get_batch_with_split_on_whole_table_filesystem(
         )
     )
     assert test_df.dataframe.shape == (5, 2)
+
+
+def test_drop_unsupported_option_keys_for_reader(caplog):
+    caplog.set_level(logging.WARNING)
+
+    engine = PandasExecutionEngine()
+
+    reader_fn = engine._get_reader_fn(reader_method="read_csv")
+    assert engine._drop_unsupported_option_keys_for_reader(
+        reader_fn, {"compression": "infer"}
+    ) == {"compression": "infer"}
+
+    reader_fn = engine._get_reader_fn(reader_method="read_parquet")
+    assert (
+        engine._drop_unsupported_option_keys_for_reader(
+            reader_fn, {"compression": "infer"}
+        )
+        == {}
+    )
+    assert (
+        "Some reader option keys have been dropped as read_parquet does not support them: ['infer']"
+        in caplog.text
+    )
 
 
 @pytest.fixture(scope="function")
