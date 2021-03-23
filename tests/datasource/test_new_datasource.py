@@ -332,7 +332,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="B1",
             data_connector_query={
-                "batch_identifiers": {
+                "batch_filter_parameters": {
                     "letter": "B",
                     "number": "1",
                 }
@@ -349,7 +349,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="Titanic",
             data_connector_query={
-                "batch_identifiers": {
+                "batch_filter_parameters": {
                     "letter": "B",
                     "number": "1",
                 }

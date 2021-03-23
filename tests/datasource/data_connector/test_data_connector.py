@@ -202,7 +202,7 @@ def test__batch_definition_matches_batch_request():
             data_connector_name="a",
             data_asset_name="aaa",
             data_connector_query={
-                "batch_identifiers": {"id": "B"},
+                "batch_filter_parameters": {"id": "B"},
             },
         ),
     )
@@ -211,7 +211,7 @@ def test__batch_definition_matches_batch_request():
         batch_definition=A,
         batch_request=BatchRequestBase(
             data_connector_query={
-                "batch_identifiers": {"id": "A"},
+                "batch_filter_parameters": {"id": "A"},
             }
         ),
     )

@@ -1172,6 +1172,7 @@ class BaseDataContext:
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict],
         **kwargs,
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -1185,6 +1186,7 @@ class BaseDataContext:
             batch_data
             data_connector_query
             batch_identifiers
+            batch_filter_parameters
 
             limit
             index
@@ -1228,6 +1230,7 @@ class BaseDataContext:
             runtime_parameters=runtime_parameters,
             query=query,
             path=path,
+            batch_filter_parameters=batch_filter_parameters,
             **kwargs,
         )
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
@@ -1457,6 +1460,7 @@ class BaseDataContext:
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
         **kwargs,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -1475,6 +1479,7 @@ class BaseDataContext:
             runtime_parameters
             data_connector_query
             batch_identifiers
+            batch_filter_parameters
 
             limit
             index
@@ -1557,21 +1562,29 @@ class BaseDataContext:
 
         else:
             if data_connector_query is None:
-                if batch_identifiers is None:
-                    batch_identifiers = kwargs
+                if batch_filter_parameters is not None and batch_identifiers is not None:
+                    raise ValueError('Must provide either "batch_filter_parameters" or "batch_identifiers", not both.')
+                elif batch_filter_parameters is None and batch_identifiers is not None:
+                    logger.warning('Attempting to build DataConnectorQuery but "batch_identifiers" was provided '
+                                   'instead of "batch_filter_parameters". The "batch_identifiers" key on '
+                                   'DataConnectorQuery has been renamed to "batch_filter_parameters". Please update '
+                                   'your code. Falling back on provided "batch_identifiers".')
+                    batch_filter_parameters = batch_identifiers
+                elif batch_filter_parameters is None and batch_identifiers is None:
+                    batch_filter_parameters = kwargs
                 else:
                     # Raise a warning if kwargs exist
                     pass
 
                 data_connector_query_params: dict = {
-                    "batch_identifiers": batch_identifiers,
+                    "batch_filter_parameters": batch_filter_parameters,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
                 data_connector_query = DataConnectorQuery(data_connector_query_params)
             else:
-                # Raise a warning if batch_identifiers or kwargs exist
+                # Raise a warning if batch_filter_parameters or kwargs exist
                 data_connector_query = DataConnectorQuery(data_connector_query)
 
             if batch_spec_passthrough is None:
@@ -1624,6 +1637,7 @@ class BaseDataContext:
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -1674,6 +1688,7 @@ class BaseDataContext:
                 runtime_parameters=runtime_parameters,
                 query=query,
                 path=path,
+                batch_filter_parameters=batch_filter_parameters,
                 **kwargs,
             ),
         )

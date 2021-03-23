@@ -64,17 +64,17 @@ def batch_definition_matches_batch_request(
         return False
 
     if batch_request.data_connector_query:
-        batch_identifiers: Any = batch_request.data_connector_query.get(
-            "batch_identifiers"
+        batch_filter_parameters: Any = batch_request.data_connector_query.get(
+            "batch_filter_parameters"
         )
-        if batch_identifiers:
-            if not isinstance(batch_identifiers, dict):
+        if batch_filter_parameters:
+            if not isinstance(batch_filter_parameters, dict):
                 return False
-            for key in batch_identifiers.keys():
+            for key in batch_filter_parameters.keys():
                 if not (
                     key in batch_definition.batch_identifiers
                     and batch_definition.batch_identifiers[key]
-                    == batch_identifiers[key]
+                    == batch_filter_parameters[key]
                 ):
                     return False
 

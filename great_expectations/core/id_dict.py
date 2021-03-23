@@ -43,9 +43,5 @@ class BatchIdentifiers(BatchIdentifiersSubset):
     pass
 
 
-class BatchIdentifierQuery(IDDict):
-    pass
-
-
 class MetricKwargs(IDDict):
     pass

@@ -122,7 +122,7 @@ def test_data_connector_query_non_recognized_param(
                     datasource_name="test_environment",
                     data_connector_name="general_filesystem_data_connector",
                     data_asset_name="TestFiles",
-                    data_connector_query={"batch_identifiers": 1},
+                    data_connector_query={"batch_filter_parameters": 1},
                 )
             )
         )
@@ -132,7 +132,7 @@ def test_data_connector_query_non_recognized_param(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            data_connector_query={"batch_identifiers": {"name": "alex"}},
+            data_connector_query={"batch_filter_parameters": {"name": "alex"}},
         )
     )
     assert len(returned) == 2
@@ -646,7 +646,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 data_connector_query={
-                    "batch_identifiers": {"timestamp": "20200809"},
+                    "batch_filter_parameters": {"timestamp": "20200809"},
                 },
             )
         )
@@ -702,7 +702,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key_and_i
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 data_connector_query={
-                    "batch_identifiers": {"name": "james"},
+                    "batch_filter_parameters": {"name": "james"},
                     "index": 0,
                 },
             )
@@ -735,7 +735,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_2_key_name_
                 data_connector_name="general_filesystem_data_connector",
                 data_asset_name="TestFiles",
                 data_connector_query={
-                    "batch_identifiers": {"timestamp": "20200809", "name": "will"},
+                    "batch_filter_parameters": {"timestamp": "20200809", "name": "will"},
                 },
             )
         )

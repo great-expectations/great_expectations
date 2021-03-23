@@ -66,7 +66,7 @@ data_connectors:
         "data_connector_name": "my_data_connector",
         "data_asset_name": "path",
         "data_connector_query": {
-            "batch_identifiers": {
+            "batch_filter_parameters": {
                 # "data_asset_name": "path",
                 "letter": "A",
                 "number": "101",
@@ -148,7 +148,7 @@ data_connectors:
         "data_connector_name": "my_data_connector",
         "data_asset_name": "Titanic",
         "data_connector_query": {
-            "batch_identifiers": {
+            "batch_filter_parameters": {
                 "name": "Titanic",
                 "timestamp": "19120414",
                 "size": "1313",

@@ -77,12 +77,12 @@ def test_batch_definition_matches_batch_request():
         is False
     )
 
-    # batch_request.data_connector_query.batch_identifiers is not dict
+    # batch_request.data_connector_query.batch_filter_parameters is not dict
     my_batch_request = BatchRequest(
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        data_connector_query={"batch_identifiers": 1},
+        data_connector_query={"batch_filter_parameters": 1},
     )
     assert (
         batch_definition_matches_batch_request(my_batch_definition, my_batch_request)
@@ -94,7 +94,7 @@ def test_batch_definition_matches_batch_request():
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        data_connector_query={"batch_identifiers": {"i": "wont_work"}},
+        data_connector_query={"batch_filter_parameters": {"i": "wont_work"}},
     )
     assert (
         batch_definition_matches_batch_request(my_batch_definition, my_batch_request)

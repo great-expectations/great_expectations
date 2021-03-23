@@ -544,7 +544,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         data_asset_name="TestFiles",
         data_connector_query=DataConnectorQuery(
             **{
-                "batch_identifiers": {
+                "batch_filter_parameters": {
                     "name": "james",
                     "timestamp": "20200713",
                     "price": "1567",
@@ -665,7 +665,7 @@ def test_alpha(tmp_path_factory):
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="A",
         data_connector_query=DataConnectorQuery(
-            **{"batch_identifiers": {"part_1": "B"}}
+            **{"batch_filter_parameters": {"part_1": "B"}}
         ),
     )
     my_batch_definition_list = (

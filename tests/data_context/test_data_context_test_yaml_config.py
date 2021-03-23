@@ -497,7 +497,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
-        data_connector_query={"batch_identifiers": {"number": "3"}},
+        data_connector_query={"batch_filter_parameters": {"number": "3"}},
         expectation_suite=ExpectationSuite("my_expectation_suite"),
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
@@ -655,7 +655,7 @@ data_connectors:
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="C",
-        data_connector_query={"batch_identifiers": {"year": "2019"}},
+        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
         create_expectation_suite_with_name="my_expectations",
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",

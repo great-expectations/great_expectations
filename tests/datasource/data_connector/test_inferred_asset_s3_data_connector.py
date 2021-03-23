@@ -231,7 +231,7 @@ def test_complex_regex_example_with_implicit_data_asset_names():
             data_connector_name="my_data_connector",
             data_asset_name="alpha",
             data_connector_query={
-                "batch_identifiers": {
+                "batch_filter_parameters": {
                     "year_dir": "2020",
                     "month_dir": "03",
                 }

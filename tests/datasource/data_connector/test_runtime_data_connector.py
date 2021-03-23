@@ -614,11 +614,11 @@ def test__build_batch_spec(basic_datasource):
 
 def test__get_data_reference_name(basic_datasource):
     data_connector_query: dict = {
-        "batch_identifiers": {
+        "batch_filter_parameters": {
             "airflow_run_id": 1234567890,
         }
     }
-    batch_identifiers = BatchIdentifiers(data_connector_query["batch_identifiers"])
+    batch_identifiers = BatchIdentifiers(data_connector_query["batch_filter_parameters"])
 
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]
@@ -630,12 +630,12 @@ def test__get_data_reference_name(basic_datasource):
     )
 
     data_connector_query: dict = {
-        "batch_identifiers": {
+        "batch_filter_parameters": {
             "run_id_1": 1234567890,
             "run_id_2": 1111111111,
         }
     }
-    batch_identifiers = BatchIdentifiers(data_connector_query["batch_identifiers"])
+    batch_identifiers = BatchIdentifiers(data_connector_query["batch_filter_parameters"])
 
     test_runtime_data_connector: RuntimeDataConnector = (
         basic_datasource.data_connectors["test_runtime_data_connector"]

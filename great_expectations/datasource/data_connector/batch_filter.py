@@ -28,12 +28,7 @@ def build_batch_filter(
     ] = None
 ):
     if not data_connector_query_dict:
-        return BatchFilter(
-            custom_filter_function=None,
-            batch_identifiers=None,
-            index=None,
-            limit=None,
-        )
+        return BatchFilter(custom_filter_function=None, batch_filter_parameters=None, index=None, limit=None)
     data_connector_query_keys: set = set(data_connector_query_dict.keys())
     if not data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS:
         raise ge_exceptions.BatchFilterError(
@@ -50,23 +45,23 @@ def build_batch_filter(
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
-    batch_identifiers: Optional[dict] = data_connector_query_dict.get(
-        "batch_identifiers"
+    batch_filter_parameters: Optional[dict] = data_connector_query_dict.get(
+        "batch_filter_parameters"
     )
-    if batch_identifiers:
-        if not isinstance(batch_identifiers, dict):
+    if batch_filter_parameters:
+        if not isinstance(batch_filter_parameters, dict):
             raise ge_exceptions.BatchFilterError(
-                f"""The type of a batch_identifiers must be a dictionary (Python "dict").  The type given is
-"{str(type(batch_identifiers))}", which is illegal.
+                f"""The type of batch_filter_parameters must be a dictionary (Python "dict").  The type given is
+"{str(type(batch_filter_parameters))}", which is illegal.
                 """
             )
-        if not all([isinstance(key, str) for key in batch_identifiers.keys()]):
+        if not all([isinstance(key, str) for key in batch_filter_parameters.keys()]):
             raise ge_exceptions.BatchFilterError(
-                'All batch_identifiers keys must strings (Python "str").'
+                'All batch_filter_parameters keys must strings (Python "str").'
             )
-    if batch_identifiers is not None:
-        batch_identifiers: BatchIdentifiersSubset = BatchIdentifiersSubset(
-            batch_identifiers
+    if batch_filter_parameters is not None:
+        batch_filter_parameters: BatchIdentifiersSubset = BatchIdentifiersSubset(
+            batch_filter_parameters
         )
     index: Optional[
         Union[int, list, tuple, slice, str]
@@ -83,12 +78,8 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
     index = _parse_index(index=index)
-    return BatchFilter(
-        custom_filter_function=custom_filter_function,
-        batch_identifiers=batch_identifiers,
-        limit=limit,
-        index=index,
-    )
+    return BatchFilter(custom_filter_function=custom_filter_function, batch_filter_parameters=batch_filter_parameters,
+                       index=index, limit=limit)
 
 
 def _parse_index(
@@ -127,20 +118,16 @@ The type given is "{str(type(index))}", which is illegal.
 class BatchFilter:
     RECOGNIZED_KEYS: set = {
         "custom_filter_function",
-        "batch_identifiers",
+        "batch_filter_parameters",
         "index",
         "limit",
     }
 
-    def __init__(
-        self,
-        custom_filter_function: Callable = None,
-        batch_identifiers: Optional[BatchIdentifiersSubset] = None,
-        index: Optional[Union[int, slice]] = None,
-        limit: int = None,
-    ):
+    def __init__(self, custom_filter_function: Callable = None,
+                 batch_filter_parameters: Optional[BatchIdentifiersSubset] = None,
+                 index: Optional[Union[int, slice]] = None, limit: int = None):
         self._custom_filter_function = custom_filter_function
-        self._batch_identifiers = batch_identifiers
+        self._batch_filter_parameters = batch_filter_parameters
         self._index = index
         self._limit = limit
 
@@ -149,8 +136,8 @@ class BatchFilter:
         return self._custom_filter_function
 
     @property
-    def batch_identifiers(self) -> Optional[BatchIdentifiersSubset]:
-        return self._batch_identifiers
+    def batch_filter_parameters(self) -> Optional[BatchIdentifiersSubset]:
+        return self._batch_filter_parameters
 
     @property
     def index(self) -> Optional[Union[int, slice]]:
@@ -163,7 +150,7 @@ class BatchFilter:
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "custom_filter_function": self._custom_filter_function,
-            "batch_identifiers": self.batch_identifiers,
+            "batch_filter_parameters": self.batch_filter_parameters,
             "index": self.index,
             "limit": self.limit,
         }
@@ -176,11 +163,11 @@ class BatchFilter:
         if self.custom_filter_function:
             filter_function = self.custom_filter_function
         else:
-            filter_function = self.best_effort_batch_matcher()
+            filter_function = self.best_effort_batch_definition_matcher()
         selected_batch_definitions = list(
             filter(
                 lambda batch_definition: filter_function(
-                    batch_identifiers=batch_definition.batch_identifiers,
+                    batch_filter_parameters=batch_definition.batch_filter_parameters,
                 ),
                 batch_definition_list,
             )
@@ -198,21 +185,21 @@ class BatchFilter:
                 )
         return selected_batch_definitions
 
-    def best_effort_batch_matcher(self) -> Callable:
-        def match_batch_to_query_params(batch_identifiers: dict) -> bool:
-            if self.batch_identifiers:
+    def best_effort_batch_definition_matcher(self) -> Callable:
+        def match_batch_definition_to_batch_filter_params(batch_identifiers: dict) -> bool:
+            if self.batch_filter_parameters:
                 if not batch_identifiers:
                     return False
-                batch_identifiers_keys: set = set(self.batch_identifiers.keys())
+                batch_identifiers_keys: set = set(self.batch_filter_parameters.keys())
 
                 if not batch_identifiers_keys:
                     return False
                 for key in batch_identifiers_keys:
                     if not (
                         key in batch_identifiers
-                        and batch_identifiers[key] == self.batch_identifiers[key]
+                        and batch_identifiers[key] == self.batch_filter_parameters[key]
                     ):
                         return False
             return True
 
-        return match_batch_to_query_params
+        return match_batch_definition_to_batch_filter_params

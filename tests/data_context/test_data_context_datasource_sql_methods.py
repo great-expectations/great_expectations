@@ -36,7 +36,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             data_connector_query=DataConnectorQuery(
-                batch_identifiers={"date": "2020-01-15"}
+                batch_filter_parameters={"date": "2020-01-15"}
             ),
         )
     )
@@ -48,7 +48,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
                 "datasource_name": "my_sqlite_db",
                 "data_connector_name": "daily",
                 "data_asset_name": "table_partitioned_by_date_column__A",
-                "data_connector_query": {"batch_identifiers": {"date": "2020-01-15"}},
+                "data_connector_query": {"batch_filter_parameters": {"date": "2020-01-15"}},
             }
         )
 
@@ -59,7 +59,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
                 datasource_name="my_sqlite_db",
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=DataConnectorQuery(batch_identifiers={}),
+                data_connector_query=DataConnectorQuery(batch_filter_parameters={}),
             )
         )
 
@@ -88,7 +88,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
             batch_request=BatchRequest(
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=DataConnectorQuery(batch_identifiers={}),
+                data_connector_query=DataConnectorQuery(batch_filter_parameters={}),
             )
         )
 
@@ -123,7 +123,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
         "daily",
         "table_partitioned_by_date_column__A",
         data_connector_query=DataConnectorQuery(
-            {"batch_identifiers": {"date": "2020-01-15"}}
+            {"batch_filter_parameters": {"date": "2020-01-15"}}
         ),
     )
 
@@ -154,7 +154,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             data_connector_query=DataConnectorQuery(
-                batch_identifiers={"date": "2020-01-15"}
+                batch_filter_parameters={"date": "2020-01-15"}
             ),
         ),
         expectation_suite_name="my_expectations",
@@ -167,7 +167,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
                 "datasource_name": "my_sqlite_db",
                 "data_connector_name": "daily",
                 "data_asset_name": "table_partitioned_by_date_column__A",
-                "data_connector_query": {"batch_identifiers": {"date": "2020-01-15"}},
+                "data_connector_query": {"batch_filter_parameters": {"date": "2020-01-15"}},
             },
             expectation_suite_name="my_expectations",
         )
@@ -179,7 +179,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
                 datasource_name="my_sqlite_db",
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=DataConnectorQuery(batch_identifiers={}),
+                data_connector_query=DataConnectorQuery(batch_filter_parameters={}),
             ),
             expectation_suite_name="my_expectations",
         )
@@ -211,7 +211,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
             batch_request=BatchRequest(
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=DataConnectorQuery(batch_identifiers={}),
+                data_connector_query=DataConnectorQuery(batch_filter_parameters={}),
             ),
             expectation_suite_name="my_expectations",
         )
@@ -250,7 +250,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
         "daily",
         "table_partitioned_by_date_column__A",
         data_connector_query=DataConnectorQuery(
-            {"batch_identifiers": {"date": "2020-01-15"}}
+            {"batch_filter_parameters": {"date": "2020-01-15"}}
         ),
         expectation_suite_name="my_expectations",
     )
@@ -309,7 +309,7 @@ def test_get_validator_expectation_suite_options(
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
             data_connector_query=DataConnectorQuery(
-                batch_identifiers={"date": "2020-01-15"}
+                batch_filter_parameters={"date": "2020-01-15"}
             ),
         ),
         create_expectation_suite_with_name="yet_more_expectations",
@@ -339,7 +339,7 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
         "datasource_name": "my_sqlite_db",
         "data_connector_name": "daily",
         "data_asset_name": "table_partitioned_by_date_column__A",
-        "data_connector_query": {"batch_identifiers": {"date": "2020-01-15"}},
+        "data_connector_query": {"batch_filter_parameters": {"date": "2020-01-15"}},
     }
     batch_list: List[Batch] = context.get_batch_list(**batch_request)
 
