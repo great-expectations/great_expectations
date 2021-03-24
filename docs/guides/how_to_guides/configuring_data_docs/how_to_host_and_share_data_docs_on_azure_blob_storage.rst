@@ -57,6 +57,7 @@ Data Docs will be served using an Azure Blob Storage static website with restric
              class_name: DefaultSiteIndexBuilder
 
   You may also replace the default ``local_site`` if you would only like to maintain a single Azure Data Docs site.
+  
   .. note::
      Since the container is called ``$web``, if we set ``container: $web`` in ``great_expectations.yml`` then Great Expectations would unsuccefully try to find the variable called ``web`` in ``config_variables.yml``. 
      We use an escape char ``\`` before the ``$`` so the `substitute_config_variable <https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/util/index.html?highlight=substitute_config_variable#great_expectations.data_context.util.substitute_config_variable>`_  method will allow us to reach the ``$web`` container.
