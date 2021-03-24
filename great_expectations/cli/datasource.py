@@ -728,7 +728,7 @@ def sanitize_yaml_and_save_datasource(
         context=context, datasource_name=datasource_name
     ):
         print(
-            f"A Datasource named {datasource_name} already exists in this data context, save has been cancelled. Please use a different name or set overwrite_existing=True if you want to overwrite."
+            f'**WARNING** A Datasource named "{datasource_name}" already exists in this Data Context. The Datasource has *not* been saved. Please use a different name or set overwrite_existing=True if you want to overwrite!'
         )
         return
     if "credentials" in config.keys():
