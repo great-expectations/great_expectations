@@ -16,6 +16,7 @@ from great_expectations.expectations.expectation import (
     Expectation,
     ExpectationConfiguration,
 )
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -64,6 +65,12 @@ def complies_to_level(edtf_object, level=None):
     return True
 
 def is_parseable(val, level = None):
+
+    if level is not None and type(level) != int:
+        raise TypeError(
+            "level must be of type int."
+        )
+
     try:
         if type(val) != str:
             raise TypeError(
@@ -81,13 +88,13 @@ class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, level = None, **kwargs):
-
-        if type(level) != int:
-            raise TypeError(
-                "level must be of type int."
-            )
-
         return column.map(is_parseable)
+
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+
+        is_parseable_udf = F.udf(is_parseable, sparktypes.BooleanType())
+        return is_parseable_udf(column)
 
 
 class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
