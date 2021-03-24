@@ -445,6 +445,7 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
 def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
+    print(f"cwd: {os.getcwd()}")
 
     # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
@@ -662,17 +663,19 @@ data_docs/
             f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
         )
     )
+    # TODO taylor remove this
+    assert os.getcwd() == "foo"
 
-    # save data_docs locally
-    os.makedirs("./tests/data_context/output", exist_ok=True)
-    os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
-
-    if os.path.isdir("./tests/data_context/output/data_docs"):
-        shutil.rmtree("./tests/data_context/output/data_docs")
-    shutil.copytree(
-        os.path.join(ge_directory, "uncommitted/data_docs/"),
-        "./tests/data_context/output/data_docs",
-    )
+    # save data_docs locally if you need to inspect the files manually
+    # os.makedirs("./tests/data_context/output", exist_ok=True)
+    # os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
+    #
+    # if os.path.isdir("./tests/data_context/output/data_docs"):
+    #     shutil.rmtree("./tests/data_context/output/data_docs")
+    # shutil.copytree(
+    #     os.path.join(ge_directory, "uncommitted/data_docs/"),
+    #     "./tests/data_context/output/data_docs",
+    # )
 
 
 def test_add_store(empty_data_context):
