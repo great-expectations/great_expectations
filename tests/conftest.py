@@ -4096,6 +4096,43 @@ SELECT EXISTS (
 
 
 @pytest.fixture
+def data_context_with_sql_datasource_for_testing_get_batch_configured(sa, empty_data_context):
+    context = empty_data_context
+
+    db_file = file_relative_path(
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    print(db_file)
+    print("^^^")
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+    data_connectors:
+        my_configured_data_connector:
+            class_name: ConfiguredAssetSqlDataConnector
+            assets:
+                table_partitioned_by_date_column__A:
+                    splitter_method: _split_on_converted_datetime
+                    splitter_kwargs:
+                        column_name: date
+                        date_format_string: "%Y-%W"
+    """,
+    )
+
+    try:
+        context.add_datasource("my_sql_datasource", **config)
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
+    return context
+
+
+@pytest.fixture
 def data_context_with_sql_datasource_for_testing_get_batch(sa, empty_data_context):
     context = empty_data_context
 
