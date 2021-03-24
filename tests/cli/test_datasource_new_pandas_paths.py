@@ -68,7 +68,7 @@ def _run_cli_datasource_new_path_test(
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
-                    "base_directory": "../../test_files",
+                    "base_directory": "../../test_files0",
                     "class_name": "InferredAssetFilesystemDataConnector",
                 }
             },
@@ -94,7 +94,7 @@ def test_cli_datasource_new_run_from_ge_dir_relative_data_path(
     context = empty_data_context
     monkeypatch.chdir(context.root_directory)
     invocation = "--v3-api datasource new"
-    invocation_input = "1\n1\n../../test_files\n"
+    invocation_input = "1\n1\n../../test_files0\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
 
 
@@ -118,7 +118,7 @@ def test_cli_datasource_new_run_from_adjacent_dir_relative_data_path(
     adjacent_dir = os.path.dirname(context.root_directory)
     monkeypatch.chdir(adjacent_dir)
     invocation = "--v3-api datasource new"
-    invocation_input = "1\n1\n../test_files\n"
+    invocation_input = "1\n1\n../test_files0\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)
 
 
@@ -140,5 +140,5 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_pa
     context = empty_data_context
     monkeypatch.chdir(misc_directory)
     invocation = f"--config {context.root_directory} --v3-api datasource new"
-    invocation_input = "1\n1\n../test_files\n"
+    invocation_input = "1\n1\n../test_files0\n"
     _run_cli_datasource_new_path_test(context, invocation, invocation_input)

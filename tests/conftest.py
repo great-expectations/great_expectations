@@ -3712,7 +3712,9 @@ def filesystem_csv(tmp_path_factory):
 
 @pytest.fixture
 def filesystem_csv_2(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files", numbered=False)
+    # TODO taylor maybe this generic
+    base_dir = tmp_path_factory.mktemp("test_files")
+    print(f"basedir: {base_dir}")
     base_dir = str(base_dir)
 
     # Put a file in the directory
