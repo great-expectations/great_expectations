@@ -212,8 +212,6 @@ class BatchFilter:
                         and batch_identifiers[batch_filter_parameter] == val
                     ):
                         return False
-            else:
-                return False
 
             return True
 
