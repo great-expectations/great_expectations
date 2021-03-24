@@ -33,6 +33,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
+        # to be renamed data_assets
         data_assets: Optional[Dict[str, dict]] = None,
     ):
         if data_assets is None:
