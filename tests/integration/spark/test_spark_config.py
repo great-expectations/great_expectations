@@ -80,4 +80,7 @@ def test_spark_config_execution_engine(spark_session, databricks_runtime):
     else:
         # spark context should not be stopped, i.e. the spark app id is kept
         assert old_app_id == execution_engine.spark.sparkContext.applicationId
-        assert ("spark.app.name", "default_great_expectations_spark_application") in conf
+        assert (
+            "spark.app.name",
+            "default_great_expectations_spark_application",
+        ) in conf
