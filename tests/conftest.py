@@ -4096,7 +4096,9 @@ SELECT EXISTS (
 
 
 @pytest.fixture
-def data_context_with_sql_datasource_for_testing_get_batch_configured(sa, empty_data_context):
+def data_context_with_sql_datasource_for_testing_get_batch_configured(
+    sa, empty_data_context
+):
     context = empty_data_context
 
     db_file = file_relative_path(

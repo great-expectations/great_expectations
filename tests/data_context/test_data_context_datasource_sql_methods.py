@@ -366,6 +366,6 @@ def test_get_batch_list_sorting(
         "datasource_name": "my_sql_datasource",
         "data_connector_name": "my_configured_data_connector",
         "data_asset_name": "table_partitioned_by_date_column__A",
-#        "data_connector_query": {"batch_identifiers": {"date": "2020-01-15"}}, ## this means that we are getting all 30
+        #        "data_connector_query": {"batch_identifiers": {"date": "2020-01-15"}}, ## this means that we are getting all 30
     }
     batch_list: List[Batch] = context.get_batch_list(**batch_request)
