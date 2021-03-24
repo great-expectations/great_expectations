@@ -180,7 +180,7 @@ class BatchFilter:
         selected_batch_definitions = list(
             filter(
                 lambda batch_definition: filter_function(
-                    batch_filter_parameters=batch_definition.batch_filter_parameters,
+                    batch_identifiers=batch_definition.batch_identifiers,
                 ),
                 batch_definition_list,
             )
