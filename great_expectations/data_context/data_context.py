@@ -1172,7 +1172,7 @@ class BaseDataContext:
         runtime_parameters: Optional[dict] = None,
         query: Optional[str] = None,
         path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict],
+        batch_filter_parameters: Optional[dict] = None,
         **kwargs,
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
