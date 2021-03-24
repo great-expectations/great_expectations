@@ -2,10 +2,10 @@ import copy
 import datetime
 import decimal
 import logging
+import os
 import sys
 from collections import OrderedDict
 from collections.abc import Mapping
-import os
 from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 

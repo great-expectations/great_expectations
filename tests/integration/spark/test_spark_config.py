@@ -2,9 +2,7 @@ import logging
 import os
 from typing import Dict, List
 
-
 import pytest
-import unittest.mock as mock
 
 logger = logging.getLogger(__name__)
 
