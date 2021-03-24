@@ -74,7 +74,7 @@ def test_spark_config_execution_engine(spark_session, databricks_runtime):
     # Test that our values were set if not running in a Databricks runtime
     conf: List[tuple] = execution_engine.spark.sparkContext.getConf().getAll()
     if not databricks_runtime:
-        # spark context should restarted, i.e. the spark app id will change
+        # spark context should be restarted, i.e. the spark app id will change
         assert old_app_id != execution_engine.spark.sparkContext.applicationId
         assert ("spark.app.name", "great_expectations-ee-config") in conf
         assert ("spark.sql.catalogImplementation", "hive") in conf
