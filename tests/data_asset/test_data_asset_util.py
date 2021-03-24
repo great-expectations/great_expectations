@@ -38,23 +38,40 @@ def test_will_this_work_on_azure(monkeypatch, tmp_path_factory):
         test_output.append(f"2 cwd: error: {e}")
     try:
         os.makedirs("./foo/bar/stuff")
-    except e:
+    except Exception as e:
         test_output.append(f'os.makedirs("./foo/bar/stuff"): error: {e}')
     assert dir_is_dir
     try:
         test_output.append(
             f'os.path.isdir("./foo/bar/stuff"): {os.path.isdir("./foo/bar/stuff")}'
         )
-    except e:
+    except Exception as e:
         test_output.append(
             f"""f'os.path.isdir("./foo/bar/stuff"): {os.path.isdir("./foo/bar/stuff")}': error: {e}"""
         )
     try:
         assert os.path.isdir("./foo/bar/stuff")
-    except e:
+    except Exception as e:
         test_output.append(f'assert os.path.isdir("./foo/bar/stuff") FAILED error: {e}')
     # fail to show test_output
     assert test_output == []
+
+
+# TODO remove this
+def test_check_azure_cwd():
+    assert str(os.getcwd()) == "/home/vsts/work/1/s"
+
+
+def test_fixture_cwd(empty_data_context):
+    assert str(empty_data_context.root_directory) == ""
+
+
+def test_fixture_cwd2(filesystem_csv_2):
+    assert str(filesystem_csv_2) == ""
+
+
+def test_fixture_cwd3(filesystem_csv_3):
+    assert str(filesystem_csv_3) == ""
 
 
 def test_recursively_convert_to_json_serializable():
