@@ -218,6 +218,7 @@ Steps
 
             **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
 
+            **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
 
 
 Additional notes
