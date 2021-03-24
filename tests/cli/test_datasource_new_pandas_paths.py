@@ -36,7 +36,7 @@ def _run_notebook(context: DataContext) -> None:
 
 
 def _run_cli_datasource_new_path_test(
-    context: DataContext, args: str, invocation_input: str
+    context: DataContext, args: str, invocation_input: str, base_path: str
 ) -> None:
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=True)
@@ -68,7 +68,7 @@ def _run_cli_datasource_new_path_test(
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
-                    "base_directory": "../../test_files0",
+                    f"base_directory": f"../../{base_path}",
                     "class_name": "InferredAssetFilesystemDataConnector",
                 }
             },
@@ -81,10 +81,13 @@ def test_cli_datasource_new_run_from_ge_dir_absolute_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
     context = empty_data_context
+    files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(context.root_directory)
     invocation = "--v3-api datasource new"
     invocation_input = f"1\n1\n{filesystem_csv_2}\n"
-    _run_cli_datasource_new_path_test(context, invocation, invocation_input)
+    _run_cli_datasource_new_path_test(
+        context, invocation, invocation_input, files_directory
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -92,10 +95,13 @@ def test_cli_datasource_new_run_from_ge_dir_relative_data_path(
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2
 ):
     context = empty_data_context
+    files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(context.root_directory)
     invocation = "--v3-api datasource new"
-    invocation_input = "1\n1\n../../test_files0\n"
-    _run_cli_datasource_new_path_test(context, invocation, invocation_input)
+    invocation_input = f"1\n1\n../../{files_directory}\n"
+    _run_cli_datasource_new_path_test(
+        context, invocation, invocation_input, files_directory
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -104,10 +110,13 @@ def test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path(
 ):
     context = empty_data_context
     adjacent_dir = os.path.dirname(context.root_directory)
+    files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(adjacent_dir)
     invocation = "--v3-api datasource new"
     invocation_input = f"1\n1\n{filesystem_csv_2}\n"
-    _run_cli_datasource_new_path_test(context, invocation, invocation_input)
+    _run_cli_datasource_new_path_test(
+        context, invocation, invocation_input, files_directory
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -116,10 +125,13 @@ def test_cli_datasource_new_run_from_adjacent_dir_relative_data_path(
 ):
     context = empty_data_context
     adjacent_dir = os.path.dirname(context.root_directory)
+    files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(adjacent_dir)
     invocation = "--v3-api datasource new"
-    invocation_input = "1\n1\n../test_files0\n"
-    _run_cli_datasource_new_path_test(context, invocation, invocation_input)
+    invocation_input = f"1\n1\n../{files_directory}\n"
+    _run_cli_datasource_new_path_test(
+        context, invocation, invocation_input, files_directory
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -127,10 +139,13 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_absolute_data_pa
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2, misc_directory
 ):
     context = empty_data_context
+    files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(misc_directory)
     invocation = f"--config {context.root_directory} --v3-api datasource new"
     invocation_input = f"1\n1\n{filesystem_csv_2}\n"
-    _run_cli_datasource_new_path_test(context, invocation, invocation_input)
+    _run_cli_datasource_new_path_test(
+        context, invocation, invocation_input, files_directory
+    )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -138,7 +153,10 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_pa
     mock_subprocess, monkeypatch, empty_data_context, filesystem_csv_2, misc_directory
 ):
     context = empty_data_context
+    files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(misc_directory)
     invocation = f"--config {context.root_directory} --v3-api datasource new"
-    invocation_input = "1\n1\n../test_files0\n"
-    _run_cli_datasource_new_path_test(context, invocation, invocation_input)
+    invocation_input = f"1\n1\n../{files_directory}\n"
+    _run_cli_datasource_new_path_test(
+        context, invocation, invocation_input, files_directory
+    )
