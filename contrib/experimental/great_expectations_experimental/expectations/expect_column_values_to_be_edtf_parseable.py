@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-from edtf import parse_edtf
+import edtf
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -29,24 +29,63 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 
+def complies_to_level(edtf_object, level=None):
+    parsed_level = None
+    # Level 0
+    if isinstance(edtf_object, (
+        edtf.Date, 
+        edtf.DateAndTime, 
+        edtf.Interval)):
+        parsed_level = 0
+
+    # Level 1
+    elif isinstance(edtf_object, (
+        edtf.UncertainOrApproximate, 
+        edtf.Unspecified, 
+        edtf.Level1Interval, 
+        edtf.LongYear, 
+        edtf.Season)):
+        parsed_level = 1
+
+    # Level 2
+    elif isinstance(edtf_object, (
+    edtf.PartialUncertainOrApproximate,
+    edtf.PartialUnspecified,
+    edtf.OneOfASet,
+    edtf.MultipleDates,
+    edtf.MaskedPrecision,
+    edtf.Level2Interval,
+    edtf.ExponentialYear)):
+        parsed_level = 2
+
+    if parsed_level is not None and level is not None and level <= 2:
+        return parsed_level <= level
+        
+    return True
+
+def is_parseable(val, level = None):
+    try:
+        if type(val) != str:
+            raise TypeError(
+                "Values passed to expect_column_values_to_be_edtf_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
+            )
+
+        parsed = edtf.parse_edtf(val)
+        return complies_to_level(parsed, level)
+
+    except (ValueError, OverflowError):
+        return False
 
 class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
     condition_metric_name = "column_values.edtf_parseable"
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
-        def is_parseable(val):
-            try:
-                if type(val) != str:
-                    raise TypeError(
-                        "Values passed to expect_column_values_to_be_edtf_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
-                    )
+    def _pandas(cls, column, level = None, **kwargs):
 
-                parse_edtf(val)
-                return True
-
-            except (ValueError, OverflowError):
-                return False
+        if type(level) != int:
+            raise TypeError(
+                "level must be of type int."
+            )
 
         return column.map(is_parseable)
 
@@ -61,6 +100,8 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
+        level (int or None): \
+            The EDTF level to comply to.
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
@@ -117,6 +158,7 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                         "success": True,
                         "unexpected_index_list": [6, 7],
                         "unexpected_list": [2, -1],
+                        "unexpected_count": 2,
                     },
                 }
             ],
