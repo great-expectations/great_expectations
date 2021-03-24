@@ -155,13 +155,6 @@ def test_recursively_convert_to_json_serializable():
         y = {"p": np.DataSource()}
         ge.data_asset.util.recursively_convert_to_json_serializable(y)
 
-    try:
-        x = unicode("abcdefg")
-        x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
-        assert isinstance(x, unicode)
-    except NameError:
-        pass
-
 
 """
 The following Parent and Child classes are used for testing documentation inheritance.
