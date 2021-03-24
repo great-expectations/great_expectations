@@ -35,30 +35,28 @@ Data Docs will be served using an Azure Blob Storage static website with restric
      AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
    
 3. **Add a new Azure site to the data_docs_sites section of your great_expectations.yml.**
+  
+   .. code-block:: yaml
+
+      data_docs_sites:
+        local_site:
+          class_name: SiteBuilder
+          show_how_to_buttons: true
+          store_backend:
+            class_name: TupleFilesystemStoreBackend
+            base_directory: uncommitted/data_docs/local_site/
+          site_index_builder:
+            class_name: DefaultSiteIndexBuilder
+        az_site:  # this is a user-selected name - you may select your own
+          class_name: SiteBuilder
+          store_backend:
+             class_name: TupleAzureBlobStoreBackend
+             container: \$web
+             connection_string: ${AZURE_STORAGE_WEB_CONNECTION_STRING}
+          site_index_builder:
+             class_name: DefaultSiteIndexBuilder
 
   You may also replace the default ``local_site`` if you would only like to maintain a single Azure Data Docs site.
-  
-  .. code-block:: yaml
-    :linenos:
-
-    data_docs_sites:
-      local_site:
-        class_name: SiteBuilder
-        show_how_to_buttons: true
-        store_backend:
-          class_name: TupleFilesystemStoreBackend
-          base_directory: uncommitted/data_docs/local_site/
-        site_index_builder:
-          class_name: DefaultSiteIndexBuilder
-      az_site:  # this is a user-selected name - you may select your own
-        class_name: SiteBuilder
-        store_backend:
-           class_name: TupleAzureBlobStoreBackend
-           container: \$web
-           connection_string: ${AZURE_STORAGE_WEB_CONNECTION_STRING}
-        site_index_builder:
-           class_name: DefaultSiteIndexBuilder
-  
   .. note::
      Since the container is called ``$web``, if we set ``container: $web`` in ``great_expectations.yml`` then Great Expectations would unsuccefully try to find the variable called ``web`` in ``config_variables.yml``. 
      We use an escape char ``\`` before the ``$`` so the `substitute_config_variable <https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/util/index.html?highlight=substitute_config_variable#great_expectations.data_context.util.substitute_config_variable>`_  method will allow us to reach the ``$web`` container.
