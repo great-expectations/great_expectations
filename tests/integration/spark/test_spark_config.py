@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Dict, List
+from packaging.version import parse as parse_version
 
 import pytest
 
@@ -48,8 +49,13 @@ def test_spark_config_datasource(spark_session_v012):
 
 @pytest.mark.parametrize("databricks_runtime", [False, True])
 def test_spark_config_execution_engine(spark_session, databricks_runtime):
+    # we observe different behaviour depending on Spark version:
+    # https://spark.apache.org/docs/3.0.0/pyspark-migration-guide.html#upgrading-from-pyspark-24-to-30
+    pyspark_version = parse_version(pyspark.__version__)
+
     # keep track of spark app id
     old_app_id = spark_session.sparkContext.applicationId
+
     if databricks_runtime:
         # simulate a databricks runtime environment by setting the databricks runtime version
         os.environ["DATABRICKS_RUNTIME_VERSION"] = "7.3"
@@ -72,15 +78,27 @@ def test_spark_config_execution_engine(spark_session, databricks_runtime):
     # Test that our values were set if not running in a Databricks runtime
     conf: List[tuple] = execution_engine.spark.sparkContext.getConf().getAll()
     if not databricks_runtime:
-        # spark context should be restarted, i.e. the spark app id will change
-        assert old_app_id != execution_engine.spark.sparkContext.applicationId
+        # we can safely "restart" the SparkContext
+        if pyspark_version.major >= 3:
+            # spark context is restarted because the "spark.app.name" is not the one desired
+            # this happens because from Spark 3, the SparkSession builder won't update config values
+            assert old_app_id != execution_engine.spark.sparkContext.applicationId
         assert ("spark.app.name", "great_expectations-ee-config") in conf
         assert ("spark.sql.catalogImplementation", "hive") in conf
         assert ("spark.executor.memory", "512m") in conf
     else:
-        # spark context should not be stopped, i.e. the spark app id is kept
-        assert old_app_id == execution_engine.spark.sparkContext.applicationId
-        assert (
-            "spark.app.name",
-            "default_great_expectations_spark_application",
-        ) in conf
+        # we should not "restart" the SparkContext
+        if pyspark_version.major >= 3:
+            assert old_app_id == execution_engine.spark.sparkContext.applicationId
+            # spark context config values are not changed
+            assert (
+                "spark.app.name",
+                "default_great_expectations_spark_application",
+            ) in conf
+        else:
+            # spark context config values are changed by the builder no matter what
+            assert ("spark.app.name", "great_expectations-ee-config") in conf
+            assert ("spark.sql.catalogImplementation", "hive") in conf
+            assert ("spark.executor.memory", "512m") in conf
+
+            
