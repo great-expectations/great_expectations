@@ -681,7 +681,7 @@ class BaseDataContext:
         self,
         resource_identifier: Optional[str] = None,
         site_name: Optional[str] = None,
-        only_if_exists=True,
+        only_if_exists: Optional[bool] = True,
     ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -693,13 +693,14 @@ class BaseDataContext:
                 URL of the index page.
             site_name: Optionally specify which site to open. If not specified,
                 open all docs found in the project.
+            only_if_exists: Optionally specify flag to pass to "self.get_docs_sites_urls()".
         """
-        data_docs_urls = self.get_docs_sites_urls(
+        data_docs_urls: List[Dict[str, str]] = self.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
             only_if_exists=only_if_exists,
         )
-        urls_to_open = [site["site_url"] for site in data_docs_urls]
+        urls_to_open: List[str] = [site["site_url"] for site in data_docs_urls]
 
         for url in urls_to_open:
             if url is not None:
