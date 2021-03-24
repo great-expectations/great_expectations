@@ -786,31 +786,25 @@ def test__normalize_absolute_or_relative_path(
 
 
 def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypatch):
-    try:
-        project_path = str(tmp_path_factory.mktemp("data_context"))
-        context_path = os.path.join(project_path, "great_expectations")
-        os.makedirs(context_path, exist_ok=True)
-        print(context_path)
-        assert os.path.isdir(context_path)
-        monkeypatch.chdir(context_path)
-        with pytest.raises(ge_exceptions.DataContextError) as err:
-            DataContext.find_context_root_dir()
-        assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
+    project_path = str(tmp_path_factory.mktemp("data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(context_path, exist_ok=True)
+    print(context_path)
+    assert os.path.isdir(context_path)
+    monkeypatch.chdir(context_path)
+    with pytest.raises(ge_exceptions.DataContextError) as err:
+        DataContext.find_context_root_dir()
+    assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
 
-        shutil.copy(
-            file_relative_path(
-                __file__, "../test_fixtures/great_expectations_basic.yml"
-            ),
-            str(os.path.join(context_path, "great_expectations.yml")),
-        )
-        monkeypatch.setenv("GE_HOME", context_path)
-        assert DataContext.find_context_root_dir() == context_path
-    except Exception:
-        raise
-    finally:
-        # Make sure we unset the environment variable we're using
-        if os.getenv("GE_HOME"):
-            monkeypatch.delenv("GE_HOME")
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join("..", "test_fixtures", "great_expectations_basic.yml"),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    monkeypatch.setenv("GE_HOME", context_path)
+    assert DataContext.find_context_root_dir() == context_path
 
 
 def test_data_context_updates_expectation_suite_names(
