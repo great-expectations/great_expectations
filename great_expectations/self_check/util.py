@@ -1,23 +1,19 @@
-# TODO: This util module contains methods required to execute expectations examples as tests.
-# The methods were pretty hastily copied from test_utils and conftest. It is very possible
-# that some are not even needed. A cleanup pass is required.
-
-
 import copy
 import locale
+import logging
 import os
 import random
 import string
 import tempfile
 import threading
-import uuid
 from functools import wraps
 from types import ModuleType
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 from dateutil.parser import parse
+from pandas import DataFrame as pandas_DataFrame
 
 from great_expectations.core import (
     ExpectationConfigurationSchema,
@@ -27,17 +23,19 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.core.batch import Batch
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
-from great_expectations.dataset.util import (
+from great_expectations.core.util import (
+    get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
+from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.util import import_library_module
@@ -49,36 +47,30 @@ expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
 
 
-try:
-    from sqlalchemy.dialects.mssql import dialect as mssqlDialect
-except (ImportError, KeyError):
-    mssqlDialect = None
-try:
-    from sqlalchemy.dialects.mysql import dialect as mysqlDialect
-except (ImportError, KeyError):
-    mysqlDialect = None
-try:
-    from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
-except (ImportError, KeyError):
-    postgresqlDialect = None
-try:
-    from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
-except (ImportError, KeyError):
-    sqliteDialect = None
-
+logger = logging.getLogger(__name__)
 
 tmp_dir = str(tempfile.mkdtemp())
 
-try:
-    from sqlalchemy import create_engine
-except ImportError:
-    create_engine = None
 
-from pandas import DataFrame as pandas_DataFrame
+try:
+    import sqlalchemy as sqlalchemy
+    from sqlalchemy import create_engine
+
+    # noinspection PyProtectedMember
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.exc import SQLAlchemyError
+except ImportError:
+    sqlalchemy = None
+    create_engine = None
+    Engine = None
+    SQLAlchemyError = None
+    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 try:
     from pyspark.sql import DataFrame as SparkDataFrame
+    from pyspark.sql import SparkSession
 except ImportError:
+    SparkSession = None
     SparkDataFrame = type(None)
 
 try:
@@ -86,9 +78,9 @@ try:
 except ImportError:
     spark_DataFrame = type(None)
 
-
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
+    from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
 
     SQLITE_TYPES = {
         "VARCHAR": sqlitetypes.VARCHAR,
@@ -101,12 +93,14 @@ try:
         "BOOLEAN": sqlitetypes.BOOLEAN,
         "TIMESTAMP": sqlitetypes.TIMESTAMP,
     }
-except ImportError:
+except (ImportError, KeyError):
     sqlitetypes = None
+    sqliteDialect = None
     SQLITE_TYPES = {}
 
 try:
     import sqlalchemy.dialects.postgresql as postgresqltypes
+    from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -120,12 +114,14 @@ try:
         "BOOLEAN": postgresqltypes.BOOLEAN,
         "NUMERIC": postgresqltypes.NUMERIC,
     }
-except ImportError:
+except (ImportError, KeyError):
     postgresqltypes = None
+    postgresqlDialect = None
     POSTGRESQL_TYPES = {}
 
 try:
     import sqlalchemy.dialects.mysql as mysqltypes
+    from sqlalchemy.dialects.mysql import dialect as mysqlDialect
 
     MYSQL_TYPES = {
         "TEXT": mysqltypes.TEXT,
@@ -141,12 +137,14 @@ try:
         "BOOLEAN": mysqltypes.BOOLEAN,
         "TINYINT": mysqltypes.TINYINT,
     }
-except ImportError:
+except (ImportError, KeyError):
     mysqltypes = None
+    mysqlDialect = None
     MYSQL_TYPES = {}
 
 try:
     import sqlalchemy.dialects.mssql as mssqltypes
+    from sqlalchemy.dialects.mssql import dialect as mssqlDialect
 
     MSSQL_TYPES = {
         "BIGINT": mssqltypes.BIGINT,
@@ -179,8 +177,9 @@ try:
         "VARBINARY": mssqltypes.VARBINARY,
         "VARCHAR": mssqltypes.VARCHAR,
     }
-except ImportError:
+except (ImportError, KeyError):
     mssqltypes = None
+    mssqlDialect = None
     MSSQL_TYPES = {}
 
 
@@ -190,37 +189,44 @@ class SqlAlchemyConnectionManager:
         self._connections = dict()
 
     def get_engine(self, connection_string):
-        with self.lock:
-            if connection_string not in self._connections:
-                try:
-                    engine = create_engine(connection_string)
-                    conn = engine.connect()
-                    self._connections[connection_string] = conn
-                except (ImportError, self.sa.exc.SQLAlchemyError):
-                    print(f"Unable to establish connection with {connection_string}")
-                    raise
-            return self._connections[connection_string]
+        if sqlalchemy is not None:
+            with self.lock:
+                if connection_string not in self._connections:
+                    try:
+                        engine = create_engine(connection_string)
+                        conn = engine.connect()
+                        self._connections[connection_string] = conn
+                    except (ImportError, SQLAlchemyError):
+                        print(
+                            f"Unable to establish connection with {connection_string}"
+                        )
+                        raise
+                return self._connections[connection_string]
+        return None
 
 
 connection_manager = SqlAlchemyConnectionManager()
 
 
-def modify_locale(func):
-    @wraps(func)
-    def locale_wrapper(*args, **kwargs):
-        old_locale = locale.setlocale(locale.LC_TIME, None)
-        print(old_locale)
-        # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
-        try:
-            new_locale = locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
-            assert new_locale == "en_US.UTF-8"
-            func(*args, **kwargs)
-        except Exception:
-            raise
-        finally:
-            locale.setlocale(locale.LC_TIME, old_locale)
+class LockingConnectionCheck:
+    def __init__(self, sa, connection_string):
+        self.lock = threading.Lock()
+        self.sa = sa
+        self.connection_string = connection_string
+        self._is_valid = None
 
-    return locale_wrapper
+    def is_valid(self):
+        with self.lock:
+            if self._is_valid is None:
+                try:
+                    engine = self.sa.create_engine(self.connection_string)
+                    conn = engine.connect()
+                    conn.close()
+                    self._is_valid = True
+                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
+                    print(f"{str(e)}")
+                    self._is_valid = False
+            return self._is_valid
 
 
 def get_dataset(
@@ -265,6 +271,7 @@ def get_dataset(
             return None
 
         if sqlite_db_path is not None:
+            # Create a new database
             engine = create_engine(f"sqlite:////{sqlite_db_path}")
         else:
             engine = create_engine("sqlite://")
@@ -439,9 +446,14 @@ def get_dataset(
             if_exists="replace",
         )
 
-        # Build a SqlAlchemyDataset using that database
+        # Will - 20210126
+        # For mysql we want our tests to know when a temp_table is referred to more than once in the
+        # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
+        # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
+        # rather than referring the table by name.
+        custom_sql = "SELECT * FROM " + table_name
         return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
+            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
 
     elif dataset_type == "mssql":
@@ -513,7 +525,6 @@ def get_dataset(
 
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
-        from pyspark.sql import SparkSession
 
         SPARK_TYPES = {
             "StringType": sparktypes.StringType,
@@ -527,8 +538,13 @@ def get_dataset(
             "DataType": sparktypes.DataType,
             "NullType": sparktypes.NullType,
         }
-
-        spark = SparkSession.builder.getOrCreate()
+        spark = get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+            }
+        )
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -658,12 +674,12 @@ def get_test_validator_with_data(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return _build_pandas_validator_with_data(df=df)
+        return build_pandas_validator_with_data(df=df)
 
     elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql"]:
         if not create_engine:
             return None
-        return _build_sa_validator_with_data(
+        return build_sa_validator_with_data(
             df=df,
             sa_engine_name=execution_engine,
             schemas=schemas,
@@ -674,7 +690,6 @@ def get_test_validator_with_data(
 
     elif execution_engine == "spark":
         import pyspark.sql.types as sparktypes
-        from pyspark.sql import SparkSession
 
         SPARK_TYPES = {
             "StringType": sparktypes.StringType,
@@ -689,7 +704,13 @@ def get_test_validator_with_data(
             "NullType": sparktypes.NullType,
         }
 
-        spark = SparkSession.builder.getOrCreate()
+        spark = get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+            }
+        )
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
@@ -774,82 +795,23 @@ def get_test_validator_with_data(
             spark_df = spark.createDataFrame(data_reshaped, columns)
 
         if table_name is None:
+            # noinspection PyUnusedLocal
             table_name = "test_data_" + "".join(
                 [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
             )
 
-        return _build_spark_validator_with_data(df=spark_df)
+        return build_spark_validator_with_data(df=spark_df, spark=spark)
 
     else:
         raise ValueError("Unknown dataset_type " + str(execution_engine))
 
 
-def _build_spark_engine(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
-    if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
-    batch = Batch(data=df)
-    engine = SparkDFExecutionEngine(batch_data_dict={batch.id: batch.data})
-    return engine
-
-
-def _build_spark_validator_with_data(df):
-    from pyspark.sql import SparkSession
-
-    spark = SparkSession.builder.getOrCreate()
-    if isinstance(df, pd.DataFrame):
-        df = spark.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in df.to_records(index=False)
-            ],
-            df.columns.tolist(),
-        )
-    batch = Batch(data=df)
-
-    return Validator(execution_engine=SparkDFExecutionEngine(), batches=(batch,))
-
-
-def _build_sa_engine(df):
-    import sqlalchemy as sa
-
-    eng = sa.create_engine("sqlite://", echo=False)
-    df.to_sql("test", eng)
-    batch_data = SqlAlchemyBatchData(engine=eng, table_name="test")
-    batch = Batch(data=batch_data)
-    engine = SqlAlchemyExecutionEngine(
-        engine=eng, batch_data_dict={batch.id: batch_data}
-    )
-    return engine
-
-
-def _build_pandas_engine(df):
-    batch = Batch(data=df)
-    engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
-    return engine
-
-
-def _build_pandas_validator_with_data(df):
-    batch = Batch(data=df)
-
+def build_pandas_validator_with_data(df: pd.DataFrame) -> Validator:
+    batch: Batch = Batch(data=df)
     return Validator(execution_engine=PandasExecutionEngine(), batches=(batch,))
 
 
-def _build_sa_validator_with_data(
+def build_sa_validator_with_data(
     df, sa_engine_name, schemas=None, caching=True, table_name=None, sqlite_db_path=None
 ):
     dialect_classes = {
@@ -941,11 +903,118 @@ def _build_sa_validator_with_data(
         if_exists="replace",
     )
 
-    batch_data = SqlAlchemyBatchData(engine=engine, table_name=table_name)
+    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
     return Validator(execution_engine=execution_engine, batches=(batch,))
+
+
+def modify_locale(func):
+    @wraps(func)
+    def locale_wrapper(*args, **kwargs):
+        old_locale = locale.setlocale(locale.LC_TIME, None)
+        print(old_locale)
+        # old_locale = locale.getlocale(locale.LC_TIME) Why not getlocale? not sure
+        try:
+            new_locale = locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
+            assert new_locale == "en_US.UTF-8"
+            func(*args, **kwargs)
+        except Exception:
+            raise
+        finally:
+            locale.setlocale(locale.LC_TIME, old_locale)
+
+    return locale_wrapper
+
+
+def build_spark_validator_with_data(
+    df: Union[pd.DataFrame, SparkDataFrame], spark: SparkSession
+) -> Validator:
+    if isinstance(df, pd.DataFrame):
+        df = spark.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in df.to_records(index=False)
+            ],
+            df.columns.tolist(),
+        )
+    batch: Batch = Batch(data=df)
+    execution_engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark, df=df, batch_id=batch.id
+    )
+    return Validator(execution_engine=execution_engine, batches=(batch,))
+
+
+def build_pandas_engine(df: pd.DataFrame) -> PandasExecutionEngine:
+    batch: Batch = Batch(data=df)
+    execution_engine: PandasExecutionEngine = PandasExecutionEngine(
+        batch_data_dict={batch.id: batch.data}
+    )
+    return execution_engine
+
+
+def build_sa_engine(
+    df: pd.DataFrame,
+    sa: ModuleType,
+    schema: Optional[str] = None,
+    if_exists: Optional[str] = "fail",
+    index: Optional[bool] = False,
+    dtype: Optional[dict] = None,
+) -> SqlAlchemyExecutionEngine:
+    table_name: str = "test"
+
+    # noinspection PyUnresolvedReferences
+    sqlalchemy_engine: Engine = sa.create_engine("sqlite://", echo=False)
+    df.to_sql(
+        name=table_name,
+        con=sqlalchemy_engine,
+        schema=schema,
+        if_exists=if_exists,
+        index=index,
+        dtype=dtype,
+    )
+
+    execution_engine: SqlAlchemyExecutionEngine
+
+    execution_engine = SqlAlchemyExecutionEngine(engine=sqlalchemy_engine)
+    batch_data: SqlAlchemyBatchData = SqlAlchemyBatchData(
+        execution_engine=execution_engine, table_name=table_name
+    )
+    batch: Batch = Batch(data=batch_data)
+
+    execution_engine = SqlAlchemyExecutionEngine(
+        engine=sqlalchemy_engine, batch_data_dict={batch.id: batch_data}
+    )
+
+    return execution_engine
+
+
+# Builds a Spark Execution Engine
+def build_spark_engine(
+    spark: SparkSession, df: Union[pd.DataFrame, SparkDataFrame], batch_id: str
+) -> SparkDFExecutionEngine:
+    if isinstance(df, pd.DataFrame):
+        df = spark.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in df.to_records(index=False)
+            ],
+            df.columns.tolist(),
+        )
+    conf: List[tuple] = spark.sparkContext.getConf().getAll()
+    spark_config: Dict[str, str] = dict(conf)
+    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+        spark_config=spark_config
+    )
+    execution_engine.load_batch_data(batch_id=batch_id, batch_data=df)
+    return execution_engine
 
 
 def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
@@ -1075,379 +1144,6 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_table_row_count_to_equal_other_table",
         ]
     return False
-
-
-def evaluate_json_test(data_asset, expectation_type, test):
-    """
-    This method will evaluate the result of a test build using the Great Expectations json test format.
-
-    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
-        of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
-
-    :param data_asset: (DataAsset) A great expectations DataAsset
-    :param expectation_type: (string) the name of the expectation to be run using the test input
-    :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
-        - title: (string) the name of the test
-        - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
-        - in: (dict or list) a dictionary of keyword arguments to use to evaluate the expectation or a list of positional arguments
-        - out: (dict) the dictionary keys against which to make assertions. Unless exact_match_out is true, keys must\
-            come from the following list:
-              - success
-              - observed_value
-              - unexpected_index_list
-              - unexpected_list
-              - details
-              - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
-    :return: None. asserts correctness of results.
-    """
-
-    data_asset.set_default_expectation_argument("result_format", "COMPLETE")
-    data_asset.set_default_expectation_argument("include_config", False)
-
-    if "title" not in test:
-        raise ValueError("Invalid test configuration detected: 'title' is required.")
-
-    if "exact_match_out" not in test:
-        raise ValueError(
-            "Invalid test configuration detected: 'exact_match_out' is required."
-        )
-
-    if "in" not in test:
-        raise ValueError("Invalid test configuration detected: 'in' is required.")
-
-    if "out" not in test:
-        raise ValueError("Invalid test configuration detected: 'out' is required.")
-
-    # Support tests with positional arguments
-    if isinstance(test["in"], list):
-        result = getattr(data_asset, expectation_type)(*test["in"])
-    # As well as keyword arguments
-    else:
-        result = getattr(data_asset, expectation_type)(**test["in"])
-
-    check_json_test_result(test=test, result=result, data_asset=data_asset)
-
-
-def evaluate_json_test_cfe(validator, expectation_type, test):
-    """
-    This method will evaluate the result of a test build using the Great Expectations json test format.
-
-    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
-        of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
-
-    :param data_asset: (DataAsset) A great expectations DataAsset
-    :param expectation_type: (string) the name of the expectation to be run using the test input
-    :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
-        - title: (string) the name of the test
-        - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
-        - in: (dict or list) a dictionary of keyword arguments to use to evaluate the expectation or a list of positional arguments
-        - out: (dict) the dictionary keys against which to make assertions. Unless exact_match_out is true, keys must\
-            come from the following list:
-              - success
-              - observed_value
-              - unexpected_index_list
-              - unexpected_list
-              - details
-              - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
-    :return: None. asserts correctness of results.
-    """
-    expectation_suite = ExpectationSuite("json_test_suite")
-    validator._initialize_expectations(expectation_suite=expectation_suite)
-    # validator.set_default_expectation_argument("result_format", "COMPLETE")
-    # validator.set_default_expectation_argument("include_config", False)
-
-    if "title" not in test:
-        raise ValueError("Invalid test configuration detected: 'title' is required.")
-
-    if "exact_match_out" not in test:
-        raise ValueError(
-            "Invalid test configuration detected: 'exact_match_out' is required."
-        )
-
-    if "in" not in test:
-        raise ValueError("Invalid test configuration detected: 'in' is required.")
-
-    if "out" not in test:
-        raise ValueError("Invalid test configuration detected: 'out' is required.")
-
-    kwargs = copy.deepcopy(test["in"])
-
-    if isinstance(test["in"], list):
-        result = getattr(validator, expectation_type)(*kwargs)
-    # As well as keyword arguments
-    else:
-        runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
-        runtime_kwargs.update(kwargs)
-        result = getattr(validator, expectation_type)(**runtime_kwargs)
-
-    check_json_test_result(
-        test=test,
-        result=result,
-        data_asset=validator.execution_engine.active_batch_data,
-    )
-
-
-def check_json_test_result(test, result, data_asset=None):
-    # Check results
-    if test["exact_match_out"] is True:
-        assert result == expectationValidationResultSchema.load(test["out"])
-    else:
-        # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
-        # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
-        # representations, serializations, and objects should interact and how much of that is shown to the user.
-        result = result.to_json_dict()
-        for key, value in test["out"].items():
-            # Apply our great expectations-specific test logic
-
-            if key == "success":
-                assert result["success"] == value
-
-            elif key == "observed_value":
-                if "tolerance" in test:
-                    if isinstance(value, dict):
-                        assert set(result["result"]["observed_value"].keys()) == set(
-                            value.keys()
-                        )
-                        for k, v in value.items():
-                            assert np.allclose(
-                                result["result"]["observed_value"][k],
-                                v,
-                                rtol=test["tolerance"],
-                            )
-                    else:
-                        assert np.allclose(
-                            result["result"]["observed_value"],
-                            value,
-                            rtol=test["tolerance"],
-                        )
-                else:
-                    assert result["result"]["observed_value"] == value, (
-                        "observed_value expected "
-                        + str(value)
-                        + " but got "
-                        + str(result["result"]["observed_value"])
-                    )
-
-            # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
-            # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
-            elif key == "observed_value_list":
-                assert result["result"]["observed_value"] in value
-
-            elif key == "unexpected_index_list":
-                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
-                    pass
-                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDataFrame)):
-                    pass
-                else:
-                    assert result["result"]["unexpected_index_list"] == value, (
-                        "unexpected_index_list expected "
-                        + str(value)
-                        + " but got "
-                        + str(result["result"]["unexpected_index_list"])
-                    )
-
-            elif key == "unexpected_list":
-                # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
-                if (isinstance(value, list)) & (len(value) >= 1):
-                    if type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = value.sort()
-                        result["result"]["unexpected_list"] = result["result"][
-                            "unexpected_list"
-                        ].sort()
-
-                assert result["result"]["unexpected_list"] == value, (
-                    "unexpected_list expected "
-                    + str(value)
-                    + " but got "
-                    + str(result["result"]["unexpected_list"])
-                )
-
-            elif key == "details":
-                assert result["result"]["details"] == value
-
-            elif key == "value_counts":
-                for val_count in value:
-                    assert val_count in result["result"]["details"]["value_counts"]
-
-            elif key.startswith("observed_cdf"):
-                if "x_-1" in key:
-                    if key.endswith("gt"):
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][-1] > value
-                        )
-                    else:
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][-1]
-                            == value
-                        )
-                elif "x_0" in key:
-                    if key.endswith("lt"):
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][0] < value
-                        )
-                    else:
-                        assert (
-                            result["result"]["details"]["observed_cdf"]["x"][0] == value
-                        )
-                else:
-                    raise ValueError(
-                        "Invalid test specification: unknown key " + key + " in 'out'"
-                    )
-
-            elif key == "traceback_substring":
-                assert result["exception_info"]["raised_exception"]
-                assert value in result["exception_info"]["exception_traceback"], (
-                    "expected to find "
-                    + value
-                    + " in "
-                    + result["exception_info"]["exception_traceback"]
-                )
-
-            elif key == "expected_partition":
-                assert np.allclose(
-                    result["result"]["details"]["expected_partition"]["bins"],
-                    value["bins"],
-                )
-                assert np.allclose(
-                    result["result"]["details"]["expected_partition"]["weights"],
-                    value["weights"],
-                )
-                if "tail_weights" in result["result"]["details"]["expected_partition"]:
-                    assert np.allclose(
-                        result["result"]["details"]["expected_partition"][
-                            "tail_weights"
-                        ],
-                        value["tail_weights"],
-                    )
-
-            elif key == "observed_partition":
-                assert np.allclose(
-                    result["result"]["details"]["observed_partition"]["bins"],
-                    value["bins"],
-                )
-                assert np.allclose(
-                    result["result"]["details"]["observed_partition"]["weights"],
-                    value["weights"],
-                )
-                if "tail_weights" in result["result"]["details"]["observed_partition"]:
-                    assert np.allclose(
-                        result["result"]["details"]["observed_partition"][
-                            "tail_weights"
-                        ],
-                        value["tail_weights"],
-                    )
-
-            else:
-                raise ValueError(
-                    "Invalid test specification: unknown key " + key + " in 'out'"
-                )
-
-
-def safe_remove(path):
-    if path is not None:
-        try:
-            os.remove(path)
-        except OSError as e:
-            print(e)
-
-
-def create_files_for_regex_partitioner(
-    root_directory_path: str, directory_paths: list = None, test_file_names: list = None
-):
-    if not directory_paths:
-        return
-
-    if not test_file_names:
-        test_file_names: list = [
-            "alex_20200809_1000.csv",
-            "eugene_20200809_1500.csv",
-            "james_20200811_1009.csv",
-            "abe_20200809_1040.csv",
-            "will_20200809_1002.csv",
-            "james_20200713_1567.csv",
-            "eugene_20201129_1900.csv",
-            "will_20200810_1001.csv",
-            "james_20200810_1003.csv",
-            "alex_20200819_1300.csv",
-        ]
-
-    base_directories = []
-    for dir_path in directory_paths:
-        if dir_path is None:
-            base_directories.append(dir_path)
-        else:
-            data_dir_path = os.path.join(root_directory_path, dir_path)
-            os.makedirs(data_dir_path, exist_ok=True)
-            base_dir = str(data_dir_path)
-            # Put test files into the directories.
-            for file_name in test_file_names:
-                file_path = os.path.join(base_dir, file_name)
-                with open(file_path, "w") as fp:
-                    fp.writelines([f'The name of this file is: "{file_path}".\n'])
-            base_directories.append(base_dir)
-
-
-def create_files_in_directory(
-    directory: str, file_name_list: List[str], file_content_fn=lambda: "x,y\n1,2\n2,3"
-):
-    subdirectories = []
-    for file_name in file_name_list:
-        splits = file_name.split("/")
-        for i in range(1, len(splits)):
-            subdirectories.append(os.path.join(*splits[:i]))
-    subdirectories = set(subdirectories)
-
-    for subdirectory in subdirectories:
-        os.makedirs(os.path.join(directory, subdirectory), exist_ok=True)
-
-    for file_name in file_name_list:
-        file_path = os.path.join(directory, file_name)
-        with open(file_path, "w") as f_:
-            f_.write(file_content_fn())
-
-
-def create_fake_data_frame():
-    return pd.DataFrame(
-        {
-            "x": range(10),
-            "y": list("ABCDEFGHIJ"),
-        }
-    )
-
-
-def validate_uuid4(uuid_string: str) -> bool:
-    """
-    Validate that a UUID string is in fact a valid uuid4.
-    Happily, the uuid module does the actual checking for us.
-    It is vital that the 'version' kwarg be passed
-    to the UUID() call, otherwise any 32-character
-    hex string is considered valid.
-    From https://gist.github.com/ShawnMilo/7777304
-
-    Args:
-        uuid_string: string to check whether it is a valid UUID or not
-
-    Returns:
-        True if uuid_string is a valid UUID or False if not
-    """
-    try:
-        val = uuid.UUID(uuid_string, version=4)
-    except ValueError:
-        # If it's a value error, then the string
-        # is not a valid hex code for a UUID.
-        return False
-
-    # If the uuid_string is a valid hex code,
-    # but an invalid uuid4,
-    # the UUID.__init__ will convert it to a
-    # valid uuid4. This is bad for validation purposes.
-
-    return val.hex == uuid_string.replace("-", "")
-
-
-##################
-##################
-##################
 
 
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
@@ -1634,28 +1330,6 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
     return False
 
 
-# TODO: this is a dup of the class defined in conftest.py
-class LockingConnectionCheck:
-    def __init__(self, sa, connection_string):
-        self.lock = threading.Lock()
-        self.sa = sa
-        self.connection_string = connection_string
-        self._is_valid = None
-
-    def is_valid(self):
-        with self.lock:
-            if self._is_valid is None:
-                try:
-                    engine = self.sa.create_engine(self.connection_string)
-                    conn = engine.connect()
-                    conn.close()
-                    self._is_valid = True
-                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
-                    print(f"{str(e)}")
-                    self._is_valid = False
-            return self._is_valid
-
-
 def build_test_backends_list(
     include_pandas=True,
     include_spark=True,
@@ -1709,10 +1383,10 @@ def build_test_backends_list(
 
         if include_mysql:
             try:
-                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
+                engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
                 conn = engine.connect()
                 conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
+            except (ImportError, SQLAlchemyError):
                 raise ImportError(
                     "mysql tests are requested, but unable to connect to the mysql database at "
                     f"'mysql+pymysql://root@{db_hostname}/test_ci'"
@@ -1721,7 +1395,7 @@ def build_test_backends_list(
 
         if include_mssql:
             try:
-                engine = sa.create_engine(
+                engine = create_engine(
                     f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
                     # echo=True,
@@ -1765,12 +1439,12 @@ def generate_expectation_tests(
                 "PandasExecutionEngine"
             )
             == True,
-            include_sqlalchemy=expectation_execution_engines_dict.get(
-                "SqlAlchemyExecutionEngine"
-            )
-            == True,
             include_spark=expectation_execution_engines_dict.get(
                 "SparkDFExecutionEngine"
+            )
+            == True,
+            include_sqlalchemy=expectation_execution_engines_dict.get(
+                "SqlAlchemyExecutionEngine"
             )
             == True,
         )
@@ -2021,3 +1695,260 @@ def generate_expectation_tests(
                     )
 
     return parametrized_tests
+
+
+def evaluate_json_test(data_asset, expectation_type, test):
+    """
+    This method will evaluate the result of a test build using the Great Expectations json test format.
+
+    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
+        of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
+
+    :param data_asset: (DataAsset) A great expectations DataAsset
+    :param expectation_type: (string) the name of the expectation to be run using the test input
+    :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
+        - title: (string) the name of the test
+        - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
+        - in: (dict or list) a dictionary of keyword arguments to use to evaluate the expectation or a list of positional arguments
+        - out: (dict) the dictionary keys against which to make assertions. Unless exact_match_out is true, keys must\
+            come from the following list:
+              - success
+              - observed_value
+              - unexpected_index_list
+              - unexpected_list
+              - details
+              - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
+    :return: None. asserts correctness of results.
+    """
+
+    data_asset.set_default_expectation_argument("result_format", "COMPLETE")
+    data_asset.set_default_expectation_argument("include_config", False)
+
+    if "title" not in test:
+        raise ValueError("Invalid test configuration detected: 'title' is required.")
+
+    if "exact_match_out" not in test:
+        raise ValueError(
+            "Invalid test configuration detected: 'exact_match_out' is required."
+        )
+
+    if "in" not in test:
+        raise ValueError("Invalid test configuration detected: 'in' is required.")
+
+    if "out" not in test:
+        raise ValueError("Invalid test configuration detected: 'out' is required.")
+
+    # Support tests with positional arguments
+    if isinstance(test["in"], list):
+        result = getattr(data_asset, expectation_type)(*test["in"])
+    # As well as keyword arguments
+    else:
+        result = getattr(data_asset, expectation_type)(**test["in"])
+
+    check_json_test_result(test=test, result=result, data_asset=data_asset)
+
+
+def evaluate_json_test_cfe(validator, expectation_type, test):
+    """
+    This method will evaluate the result of a test build using the Great Expectations json test format.
+
+    NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
+        of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
+
+    :param data_asset: (DataAsset) A great expectations DataAsset
+    :param expectation_type: (string) the name of the expectation to be run using the test input
+    :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
+        - title: (string) the name of the test
+        - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
+        - in: (dict or list) a dictionary of keyword arguments to use to evaluate the expectation or a list of positional arguments
+        - out: (dict) the dictionary keys against which to make assertions. Unless exact_match_out is true, keys must\
+            come from the following list:
+              - success
+              - observed_value
+              - unexpected_index_list
+              - unexpected_list
+              - details
+              - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
+    :return: None. asserts correctness of results.
+    """
+    expectation_suite = ExpectationSuite("json_test_suite")
+    # noinspection PyProtectedMember
+    validator._initialize_expectations(expectation_suite=expectation_suite)
+    # validator.set_default_expectation_argument("result_format", "COMPLETE")
+    # validator.set_default_expectation_argument("include_config", False)
+
+    if "title" not in test:
+        raise ValueError("Invalid test configuration detected: 'title' is required.")
+
+    if "exact_match_out" not in test:
+        raise ValueError(
+            "Invalid test configuration detected: 'exact_match_out' is required."
+        )
+
+    if "in" not in test:
+        raise ValueError("Invalid test configuration detected: 'in' is required.")
+
+    if "out" not in test:
+        raise ValueError("Invalid test configuration detected: 'out' is required.")
+
+    kwargs = copy.deepcopy(test["in"])
+
+    if isinstance(test["in"], list):
+        result = getattr(validator, expectation_type)(*kwargs)
+    # As well as keyword arguments
+    else:
+        runtime_kwargs = {"result_format": "COMPLETE", "include_config": False}
+        runtime_kwargs.update(kwargs)
+        result = getattr(validator, expectation_type)(**runtime_kwargs)
+
+    check_json_test_result(
+        test=test,
+        result=result,
+        data_asset=validator.execution_engine.active_batch_data,
+    )
+
+
+def check_json_test_result(test, result, data_asset=None):
+    # Check results
+    if test["exact_match_out"] is True:
+        assert result == expectationValidationResultSchema.load(test["out"])
+    else:
+        # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
+        # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
+        # representations, serializations, and objects should interact and how much of that is shown to the user.
+        result = result.to_json_dict()
+        for key, value in test["out"].items():
+            # Apply our great expectations-specific test logic
+
+            if key == "success":
+                assert result["success"] == value
+
+            elif key == "observed_value":
+                if "tolerance" in test:
+                    if isinstance(value, dict):
+                        assert set(result["result"]["observed_value"].keys()) == set(
+                            value.keys()
+                        )
+                        for k, v in value.items():
+                            assert np.allclose(
+                                result["result"]["observed_value"][k],
+                                v,
+                                rtol=test["tolerance"],
+                            )
+                    else:
+                        assert np.allclose(
+                            result["result"]["observed_value"],
+                            value,
+                            rtol=test["tolerance"],
+                        )
+                else:
+                    assert result["result"]["observed_value"] == value
+
+            # NOTE: This is a key used ONLY for testing cases where an expectation is legitimately allowed to return
+            # any of multiple possible observed_values. expect_column_values_to_be_of_type is one such expectation.
+            elif key == "observed_value_list":
+                assert result["result"]["observed_value"] in value
+
+            elif key == "unexpected_index_list":
+                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
+                    pass
+                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
+                    pass
+                else:
+                    assert result["result"]["unexpected_index_list"] == value
+
+            elif key == "unexpected_list":
+                # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
+                if (isinstance(value, list)) & (len(value) >= 1):
+                    if type(value[0].__lt__(value[0])) != type(NotImplemented):
+                        value = value.sort()
+                        result["result"]["unexpected_list"] = result["result"][
+                            "unexpected_list"
+                        ].sort()
+
+                assert result["result"]["unexpected_list"] == value, (
+                    "expected "
+                    + str(value)
+                    + " but got "
+                    + str(result["result"]["unexpected_list"])
+                )
+
+            elif key == "details":
+                assert result["result"]["details"] == value
+
+            elif key == "value_counts":
+                for val_count in value:
+                    assert val_count in result["result"]["details"]["value_counts"]
+
+            elif key.startswith("observed_cdf"):
+                if "x_-1" in key:
+                    if key.endswith("gt"):
+                        assert (
+                            result["result"]["details"]["observed_cdf"]["x"][-1] > value
+                        )
+                    else:
+                        assert (
+                            result["result"]["details"]["observed_cdf"]["x"][-1]
+                            == value
+                        )
+                elif "x_0" in key:
+                    if key.endswith("lt"):
+                        assert (
+                            result["result"]["details"]["observed_cdf"]["x"][0] < value
+                        )
+                    else:
+                        assert (
+                            result["result"]["details"]["observed_cdf"]["x"][0] == value
+                        )
+                else:
+                    raise ValueError(
+                        "Invalid test specification: unknown key " + key + " in 'out'"
+                    )
+
+            elif key == "traceback_substring":
+                assert result["exception_info"]["raised_exception"]
+                assert value in result["exception_info"]["exception_traceback"], (
+                    "expected to find "
+                    + value
+                    + " in "
+                    + result["exception_info"]["exception_traceback"]
+                )
+
+            elif key == "expected_partition":
+                assert np.allclose(
+                    result["result"]["details"]["expected_partition"]["bins"],
+                    value["bins"],
+                )
+                assert np.allclose(
+                    result["result"]["details"]["expected_partition"]["weights"],
+                    value["weights"],
+                )
+                if "tail_weights" in result["result"]["details"]["expected_partition"]:
+                    assert np.allclose(
+                        result["result"]["details"]["expected_partition"][
+                            "tail_weights"
+                        ],
+                        value["tail_weights"],
+                    )
+
+            elif key == "observed_partition":
+                assert np.allclose(
+                    result["result"]["details"]["observed_partition"]["bins"],
+                    value["bins"],
+                )
+                assert np.allclose(
+                    result["result"]["details"]["observed_partition"]["weights"],
+                    value["weights"],
+                )
+                if "tail_weights" in result["result"]["details"]["observed_partition"]:
+                    assert np.allclose(
+                        result["result"]["details"]["observed_partition"][
+                            "tail_weights"
+                        ],
+                        value["tail_weights"],
+                    )
+
+            else:
+                raise ValueError(
+                    "Invalid test specification: unknown key " + key + " in 'out'"
+                )

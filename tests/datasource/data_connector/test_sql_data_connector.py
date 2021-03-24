@@ -94,7 +94,7 @@ def test_get_batch_definition_list_from_batch_request(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request={"partition_identifiers": {"date": "2020-01-01"}},
+                partition_request={"batch_identifiers": {"date": "2020-01-01"}},
             )
         )
     )
@@ -106,14 +106,14 @@ def test_get_batch_definition_list_from_batch_request(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request={"partition_identifiers": {}},
+                partition_request={"batch_identifiers": {}},
             )
         )
     )
     assert len(batch_definition_list) == 30
 
     # Note: Abe 20201109: It would be nice to put in safeguards for mistakes like this.
-    # In this case, "date" should go inside "partition_identifiers".
+    # In this case, "date" should go inside "batch_identifiers".
     # Currently, the method ignores "date" entirely, and matches on too many partitions.
     # I don't think this is unique to ConfiguredAssetSqlDataConnector.
     # with pytest.raises(ge_exceptions.DataConnectorError) as e:
@@ -123,7 +123,7 @@ def test_get_batch_definition_list_from_batch_request(
     #             data_connector_name="my_sql_data_connector",
     #             data_asset_name="table_partitioned_by_date_column__A",
     #             partition_request={
-    #                 "partition_identifiers": {},
+    #                 "batch_identifiers": {},
     #                 "date" : "2020-01-01",
     #             }
     #         )
@@ -759,7 +759,7 @@ def test_default_behavior_with_no_splitter(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request={"partition_identifiers": {}},
+                partition_request={"batch_identifiers": {}},
             )
         )
     )
@@ -820,7 +820,7 @@ def test_behavior_with_whole_table_splitter(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                partition_request={"partition_identifiers": {}},
+                partition_request={"batch_identifiers": {}},
             )
         )
     )

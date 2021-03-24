@@ -271,10 +271,10 @@ Additional notes
                 batch_request = BatchRequest(
                     datasource_name="insert_your_datasource_name_here",
                     data_connector_name="insert_your_runtime_data_connector_name_here",
+                    data_asset_name="insert_your_data_asset_name_here",
                     batch_data=df,
-                    data_asset_name="IN_MEMORY_DATA_ASSET",
                     partition_request={
-                        "partition_identifiers": {
+                        "batch_identifiers": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
                             "some_other_key_maybe_run_id": "run 18"
                         }

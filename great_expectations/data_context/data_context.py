@@ -831,7 +831,7 @@ class BaseDataContext:
                 if not os.path.isabs(defined_path):
                     # A BaseDataContext will not have a root directory; in that case use the current directory
                     # for any non-absolute path
-                    root_directory = self.root_directory or os.curdir()
+                    root_directory = self.root_directory or os.curdir
                 else:
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
@@ -1155,7 +1155,7 @@ class BaseDataContext:
         batch_request: Optional[BatchRequest] = None,
         batch_data: Optional[Any] = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        partition_identifiers: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
@@ -1176,7 +1176,7 @@ class BaseDataContext:
             batch_request
             batch_data
             partition_request
-            partition_identifiers
+            batch_identifiers
 
             limit
             index
@@ -1208,7 +1208,7 @@ class BaseDataContext:
             batch_request=batch_request,
             batch_data=batch_data,
             partition_request=partition_request,
-            partition_identifiers=partition_identifiers,
+            batch_identifiers=batch_identifiers,
             limit=limit,
             index=index,
             custom_filter_function=custom_filter_function,
@@ -1434,7 +1434,7 @@ class BaseDataContext:
         batch_request: Optional[BatchRequest] = None,
         batch_data: Optional[Any] = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        partition_identifiers: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
@@ -1458,7 +1458,7 @@ class BaseDataContext:
             batch_request
             batch_data
             partition_request
-            partition_identifiers
+            batch_identifiers
 
             limit
             index
@@ -1501,21 +1501,21 @@ class BaseDataContext:
             )
         else:
             if partition_request is None:
-                if partition_identifiers is None:
-                    partition_identifiers = kwargs
+                if batch_identifiers is None:
+                    batch_identifiers = kwargs
                 else:
                     # Raise a warning if kwargs exist
                     pass
 
                 partition_request_params: dict = {
-                    "partition_identifiers": partition_identifiers,
+                    "batch_identifiers": batch_identifiers,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
                 partition_request = PartitionRequest(partition_request_params)
             else:
-                # Raise a warning if partition_identifiers or kwargs exist
+                # Raise a warning if batch_identifiers or kwargs exist
                 partition_request = PartitionRequest(partition_request)
 
             if batch_spec_passthrough is None:
@@ -1556,7 +1556,7 @@ class BaseDataContext:
         batch_request: Optional[BatchRequest] = None,
         batch_data: Optional[Any] = None,
         partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        partition_identifiers: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
@@ -1606,7 +1606,7 @@ class BaseDataContext:
                 batch_request=batch_request,
                 batch_data=batch_data,
                 partition_request=partition_request,
-                partition_identifiers=partition_identifiers,
+                batch_identifiers=batch_identifiers,
                 limit=limit,
                 index=index,
                 custom_filter_function=custom_filter_function,
@@ -2799,7 +2799,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         notify_on: Optional[str] = None,
         notify_with: Optional[Union[str, List[str]]] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
+
         checkpoint_config: Union[CheckpointConfig, dict]
+
         checkpoint_config = {
             "name": name,
             "config_version": config_version,
@@ -2823,6 +2825,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "notify_on": notify_on,
             "notify_with": notify_with,
         }
+
         checkpoint_config = filter_properties_dict(properties=checkpoint_config)
         new_checkpoint: Union[
             Checkpoint, LegacyCheckpoint
@@ -2838,7 +2841,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         key: ConfigurationIdentifier = ConfigurationIdentifier(
             configuration_key=name,
         )
-        checkpoint_config = CheckpointConfig(**checkpoint_config)
+        checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
         self.checkpoint_store.set(key=key, value=checkpoint_config)
         return new_checkpoint
 
@@ -3102,15 +3105,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
                 instantiated_class = Checkpoint(data_context=self, **checkpoint_config)
 
-                checkpoint_config = CheckpointConfig.from_commented_map(
-                    commented_map=instantiated_class.config.commented_map
-                )
-                checkpoint_config = checkpoint_config.to_json_dict()
-
-                # noinspection PyUnusedLocal
-                checkpoint: Checkpoint = self.add_checkpoint(
-                    **checkpoint_config,
-                )
             elif class_name == "SimpleCheckpoint":
                 print(
                     f"\tInstantiating as a SimpleCheckpoint, since class_name is {class_name}"
@@ -3130,15 +3124,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     data_context=self, **checkpoint_config
                 )
 
-                checkpoint_config = CheckpointConfig.from_commented_map(
-                    commented_map=instantiated_class.config.commented_map
-                )
-                checkpoint_config = checkpoint_config.to_json_dict()
-
-                # noinspection PyUnusedLocal
-                checkpoint: Checkpoint = self.add_checkpoint(
-                    **checkpoint_config,
-                )
             else:
                 print(
                     "\tNo matching class found. Attempting to instantiate class from the raw config..."

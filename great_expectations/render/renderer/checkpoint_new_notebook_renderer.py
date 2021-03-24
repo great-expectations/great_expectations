@@ -38,14 +38,17 @@ class CheckpointNewNotebookRenderer(BaseNotebookRenderer):
     def _add_header(self):
         self.add_markdown_cell(
             f"""# Create Your Checkpoint
-Use this notebook to create your Checkpoint:
+Use this notebook to configure a new Checkpoint and add it to your project:
 
 **Checkpoint Name**: `{self.checkpoint_name}`"""
         )
 
     def _add_imports(self):
         self.add_code_cell(
-            """import great_expectations as ge
+            """from ruamel.yaml import YAML
+import great_expectations as ge
+
+yaml = YAML()
 context = ge.get_context()
 """,
             lint=True,
@@ -136,14 +139,12 @@ validations:
 
     def _add_test_and_save_your_checkpoint_configuration(self):
         self.add_markdown_cell(
-            """# Test and Store Your Checkpoint Configuration
+            """# Test Your Checkpoint Configuration
 Here we will test your Checkpoint configuration to make sure it is valid.
 
-Note that if it is valid, it will be automatically saved to your Checkpoint Store.
+This `test_yaml_config()` function is meant to enable fast dev loops. If your configuration is correct, this cell will show a message that you successfully instantiated a Checkpoint. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.
 
-This `test_yaml_config()` function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.
-
-If you instead wish to use python instead of yaml to configure your Checkpoint, you can always use context.add_checkpoint() and specify all the required parameters."""
+If you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters."""
         )
         self.add_code_cell(
             f"""my_checkpoint = context.test_yaml_config(
@@ -161,6 +162,17 @@ You can run the following cell to print out the full yaml configuration. For exa
         )
         self.add_code_cell(
             "print(my_checkpoint.get_substituted_config().to_yaml_str())", lint=True
+        )
+
+    def _add_add_checkpoint(self):
+        self.add_markdown_cell(
+            """# Add Your Checkpoint
+
+Run the following cell to save this Checkpoint to your Checkpoint Store."""
+        )
+        self.add_code_cell(
+            f"context.add_checkpoint(**yaml.load({self.checkpoint_name}_config))",
+            lint=True,
         )
 
     def _add_optional_run_checkpoint(self):
@@ -182,6 +194,7 @@ You may wish to run the Checkpoint now and review its output in Data Docs. If so
         self._add_optional_customize_your_config()
         self._add_test_and_save_your_checkpoint_configuration()
         self._add_review_checkpoint()
+        self._add_add_checkpoint()
         self._add_optional_run_checkpoint()
 
         return self._notebook
