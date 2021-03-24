@@ -15,14 +15,32 @@ from great_expectations.self_check.util import expectationSuiteSchema
 
 # TODO remove this
 def test_will_this_work_on_azure(monkeypatch, tmp_path_factory):
+    test_output = []
     dir = tmp_path_factory.mktemp("project")
-    print(f"cwd: {os.getcwd()}")
-    project_dir = os.path.isdir(dir)
+    test_output.append(str(dir))
+    try:
+        cwd = f"1 cwd: {os.getcwd()}"
+        test_output.append(cwd)
+        print(cwd)
+    except FileNotFoundError as e:
+        test_output.append(f"1 cwd: error: {e}")
+    dir_is_dir = os.path.isdir(dir)
+    test_output.append(f"dir_is_dir: {dir_is_dir}")
     monkeypatch.chdir(dir)
-    print(f"cwd: {os.getcwd()}")
+    try:
+        cwd = f"2 cwd: {os.getcwd()}"
+        test_output.append(cwd)
+        print(cwd)
+    except FileNotFoundError as e:
+        test_output.append(f"2 cwd: error: {e}")
     os.makedirs("./foo/bar/stuff")
-    assert project_dir
+    assert dir_is_dir
+    test_output.append(
+        f'os.path.isdir("./foo/bar/stuff"): {os.path.isdir("./foo/bar/stuff")}'
+    )
     assert os.path.isdir("./foo/bar/stuff")
+    # fail to show test_output
+    assert test_output == []
 
 
 def test_recursively_convert_to_json_serializable():
