@@ -192,9 +192,9 @@ Steps
                   drivername: postgresql+psycopg2
                   username: YOUR_REDSHIFT_USERNAME
                   password: YOUR_REDSHIFT_PASSWORD
-                  host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
+                  host: YOUR_REDSHIFT_HOSTNAME
                   port: 5439
-                  database: dev
+                  database: YOUR_REDSHIFT_DATABASE
                   query:
                       sslmode: prefer
                 introspection:
