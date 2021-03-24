@@ -86,7 +86,7 @@ attribute allows to include (``eq`` for exact match) or exclude (``ne``) validat
 Limiting Validation Results
 ============================
 
-If you would like to limit rendered Validation Results to the n most-recent, you may
+If you would like to limit rendered Validation Results to the n most-recent (per Expectation Suite), you may
 do so by setting the `validation_results_limit` key in your Data Docs configuration:
 
 .. code-block:: yaml
