@@ -712,7 +712,7 @@ def _verify_sqlalchemy_dependent_modules() -> bool:
 
 
 def sanitize_yaml_and_save_datasource(
-    context: DataContext, datasource_yaml: str
+    context: DataContext, datasource_yaml: str, overwrite_existing: bool = False
 ) -> None:
     """A convenience function used in notebooks to help users save secrets."""
     if not datasource_yaml:
@@ -724,6 +724,13 @@ def sanitize_yaml_and_save_datasource(
         datasource_name = config.pop("name")
     except KeyError:
         raise ValueError("The datasource yaml is missing a `name` attribute.")
+    if not overwrite_existing and check_if_datasource_name_exists(
+        context=context, datasource_name=datasource_name
+    ):
+        print(
+            f"A Datasource named {datasource_name} already exists in this data context, save has been cancelled. Please use a different name or set overwrite_existing=True if you want to overwrite."
+        )
+        return
     if "credentials" in config.keys():
         credentials = config["credentials"]
         config["credentials"] = "${" + datasource_name + "}"
@@ -745,12 +752,14 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
 ]
 
 
-def check_if_datasource_name_exists(context: DataContext, datasource_name: str) -> None:
+def check_if_datasource_name_exists(context: DataContext, datasource_name: str) -> bool:
     """
     Check if a Datasource name already exists in the on-disk version of the given DataContext and if so raise an error
     Args:
         context: DataContext to check for existing Datasource
         datasource_name: name of the proposed Datasource
+    Returns:
+        boolean True if datasource name exists in on-disk config, else False
     """
 
     # TODO: 20210324 Anthony: Note reading the context from disk is a temporary fix to allow use in a notebook
@@ -758,8 +767,4 @@ def check_if_datasource_name_exists(context: DataContext, datasource_name: str) 
     #  making changes directly to the in-memory context.
     context_on_disk: DataContext = DataContext(context.root_directory)
 
-    if datasource_name in [d["name"] for d in context_on_disk.list_datasources()]:
-        raise ge_exceptions.DatasourceConfigurationError(
-            datasource_name=datasource_name,
-            message=f"A Datasource named {datasource_name} already exists in this data context. Please use a different name.",
-        )
+    return datasource_name in [d["name"] for d in context_on_disk.list_datasources()]

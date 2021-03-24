@@ -97,11 +97,10 @@ you can use `context.add_datasource()` and specify all the required parameters."
     def _add_save_datasource_cell(self):
         self.add_markdown_cell(
             """## Save Your Datasource Configuration
-Here we will save your Datasource in your Data Context once you are satisfied with the configuration. Please note that if you wish to include comments in your Datasource yaml you must add them directly to your `great_expectations.yml`."""
+Here we will save your Datasource in your Data Context once you are satisfied with the configuration. Note that overwrite_existing defaults to False, but you may change it to True if you wish to overwrite. Please note that if you wish to include comments in your Datasource yaml you must add them directly to your `great_expectations.yml`."""
         )
         self.add_code_cell(
-            """check_if_datasource_name_exists(context, datasource_name)
-sanitize_yaml_and_save_datasource(context, example_yaml)
+            """sanitize_yaml_and_save_datasource(context, example_yaml, overwrite_existing=False)
 context.list_datasources()""",
             lint=True,
         )

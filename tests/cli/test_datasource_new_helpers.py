@@ -579,12 +579,14 @@ def test_check_if_datasource_name_exists(
     assert len(context.list_datasources()) == 1
 
     # Exists
-    with pytest.raises(ge_exceptions.DatasourceConfigurationError):
-        check_if_datasource_name_exists(
-            context=context, datasource_name="my_datasource"
-        )
+    assert check_if_datasource_name_exists(
+        context=context, datasource_name="my_datasource"
+    )
 
     # Doesn't exist
-    check_if_datasource_name_exists(
-        context=context, datasource_name="nonexistent_datasource"
+    assert (
+        check_if_datasource_name_exists(
+            context=context, datasource_name="nonexistent_datasource"
+        )
+        is False
     )
