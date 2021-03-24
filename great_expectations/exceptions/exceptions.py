@@ -232,6 +232,10 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "S3Generator": "S3GlobReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
+            "PartitionDefinitionSubset": "BatchIdentifiersSubset",
+            "PartitionRequest": "DataConnectorQuery",
+            "PartitionDefinition": "BatchIdentifiers",
+            "PartitionQuery": "BatchFilter"
         }
 
         if class_name_changes.get(class_name):
