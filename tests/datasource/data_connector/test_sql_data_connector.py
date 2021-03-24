@@ -56,6 +56,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
             "n_rows": 8,
             "batch_spec": {
                 "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {"date": "2020-01-02"},
                 "splitter_method": "_split_on_column_value",
                 "splitter_kwargs": {"column_name": "date"},
@@ -206,6 +207,7 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "n_rows": 8,
             "batch_spec": {
                 "table_name": "table_partitioned_by_date_column__A",
+                "data_asset_name": "table_partitioned_by_date_column__A",
                 "partition_definition": {"date": "2020-01-02"},
                 "splitter_method": "_split_on_column_value",
                 "splitter_kwargs": {"column_name": "date"},
@@ -257,6 +259,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "n_rows": 8,
             "batch_spec": {
                 "table_name": "table_partitioned_by_timestamp_column__B",
+                "data_asset_name": "table_partitioned_by_timestamp_column__B",
                 "partition_definition": {"timestamp": "2020-01-02"},
                 "splitter_method": "_split_on_converted_datetime",
                 "splitter_kwargs": {"column_name": "timestamp"},
@@ -311,6 +314,7 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "n_rows": 10,
             "batch_spec": {
                 "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                "data_asset_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
                 "partition_definition": {"id": 1},
                 "splitter_method": "_split_on_divided_integer",
                 "splitter_kwargs": {"column_name": "id", "divisor": 10},
@@ -362,6 +366,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "n_rows": 9,
             "batch_spec": {
                 "table_name": "table_partitioned_by_incrementing_batch_id__E",
+                "data_asset_name": "table_partitioned_by_incrementing_batch_id__E",
                 "partition_definition": {"batch_id": 1},
                 "splitter_method": "_split_on_column_value",
                 "splitter_kwargs": {"column_name": "batch_id"},
@@ -414,6 +419,7 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "n_rows": 2,
             "batch_spec": {
                 "table_name": "table_partitioned_by_foreign_key__F",
+                "data_asset_name": "table_partitioned_by_foreign_key__F",
                 "partition_definition": {"session_id": 2},
                 "splitter_method": "_split_on_column_value",
                 "splitter_kwargs": {"column_name": "session_id"},
@@ -469,6 +475,7 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
             "n_rows": 8,
             "batch_spec": {
                 "table_name": "table_partitioned_by_multiple_columns__G",
+                "data_asset_name": "table_partitioned_by_multiple_columns__G",
                 "partition_definition": {
                     "y": 2020,
                     "m": 1,
