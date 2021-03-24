@@ -1041,6 +1041,8 @@ class UserConfigurableProfiler:
                 unexpected_percent = float(not_null_result.result["unexpected_percent"])
                 if unexpected_percent >= 50 and not self.not_null_only:
                     potential_mostly_value = math.floor(unexpected_percent) / 100.0
+                    # A safe_mostly_value of 0.001 gives us a rough way of ensuring that we don't wind up with a mostly
+                    # value of 0 when we round
                     safe_mostly_value = max(0.001, potential_mostly_value)
                     profile_dataset._expectation_suite.remove_expectation(
                         ExpectationConfiguration(
@@ -1060,6 +1062,9 @@ class UserConfigurableProfiler:
                     potential_mostly_value = (
                         100.0 - math.ceil(unexpected_percent)
                     ) / 100.0
+
+                    # A safe_mostly_value of 0.001 gives us a rough way of ensuring that we don't wind up with a mostly
+                    # value of 0 when we round
                     safe_mostly_value = max(0.001, potential_mostly_value)
                     profile_dataset.expect_column_values_to_not_be_null(
                         column, mostly=safe_mostly_value
