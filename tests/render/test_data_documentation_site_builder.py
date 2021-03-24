@@ -237,21 +237,17 @@ def test_configuration_driven_site_builder(
     assert len(index_links_dict["profiling_links"]) == 5
 
     # save documentation locally
-    output_dir = os.path.join(context.root_directory, "tests/render/output")
-    documentation_dir = os.path.join(
-        context.root_directory, "tests/render/output/documentation"
-    )
-    os.makedirs(output_dir, exist_ok=True)
-    os.makedirs(documentation_dir, exist_ok=True)
+    os.makedirs("./tests/render/output", exist_ok=True)
+    os.makedirs("./tests/render/output/documentation", exist_ok=True)
 
-    if os.path.isdir(documentation_dir):
-        shutil.rmtree(documentation_dir)
+    if os.path.isdir("./tests/render/output/documentation"):
+        shutil.rmtree("./tests/render/output/documentation")
     shutil.copytree(
         os.path.join(
             site_builder_data_context_v013_with_html_store_titanic_random.root_directory,
             "uncommitted/data_docs/",
         ),
-        documentation_dir,
+        "./tests/render/output/documentation",
     )
 
     # let's create another validation result and run the site builder to add it
