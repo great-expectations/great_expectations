@@ -783,12 +783,11 @@ def test__normalize_absolute_or_relative_path(
 
 
 def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypatch):
-    curdir = os.path.abspath(os.getcwd())
     try:
         project_path = str(tmp_path_factory.mktemp("data_context"))
         context_path = os.path.join(project_path, "great_expectations")
         os.makedirs(context_path, exist_ok=True)
-        os.chdir(context_path)
+        monkeypatch.chdir(context_path)
         with pytest.raises(ge_exceptions.DataContextError) as err:
             DataContext.find_context_root_dir()
         assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
@@ -807,7 +806,6 @@ def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypa
         # Make sure we unset the environment variable we're using
         if os.getenv("GE_HOME"):
             monkeypatch.delenv("GE_HOME")
-        os.chdir(curdir)
 
 
 def test_data_context_updates_expectation_suite_names(
