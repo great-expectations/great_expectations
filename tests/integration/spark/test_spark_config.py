@@ -100,5 +100,3 @@ def test_spark_config_execution_engine(spark_session, databricks_runtime):
             assert ("spark.app.name", "great_expectations-ee-config") in conf
             assert ("spark.sql.catalogImplementation", "hive") in conf
             assert ("spark.executor.memory", "512m") in conf
-
-            
