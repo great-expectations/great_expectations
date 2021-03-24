@@ -1,6 +1,7 @@
 import datetime
 import decimal
 import json
+import os
 import platform
 import sys
 from functools import wraps
@@ -10,6 +11,18 @@ import pytest
 
 import great_expectations as ge
 from great_expectations.self_check.util import expectationSuiteSchema
+
+
+# TODO remove this
+def test_will_this_work_on_azure(monkeypatch, tmp_path_factory):
+    dir = tmp_path_factory.mktemp("project")
+    print(f"cwd: {os.getcwd()}")
+    project_dir = os.path.isdir(dir)
+    monkeypatch.chdir(dir)
+    print(f"cwd: {os.getcwd()}")
+    os.makedirs("./foo/bar/stuff")
+    assert project_dir
+    assert os.path.isdir("./foo/bar/stuff")
 
 
 def test_recursively_convert_to_json_serializable():

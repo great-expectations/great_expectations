@@ -790,6 +790,8 @@ def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypa
         project_path = str(tmp_path_factory.mktemp("data_context"))
         context_path = os.path.join(project_path, "great_expectations")
         os.makedirs(context_path, exist_ok=True)
+        print(context_path)
+        assert os.path.isdir(context_path)
         monkeypatch.chdir(context_path)
         with pytest.raises(ge_exceptions.DataContextError) as err:
             DataContext.find_context_root_dir()
