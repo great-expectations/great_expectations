@@ -26,19 +26,33 @@ def test_will_this_work_on_azure(monkeypatch, tmp_path_factory):
         test_output.append(f"1 cwd: error: {e}")
     dir_is_dir = os.path.isdir(dir)
     test_output.append(f"dir_is_dir: {dir_is_dir}")
-    monkeypatch.chdir(dir)
+    try:
+        monkeypatch.chdir(dir)
+    except FileNotFoundError as e:
+        test_output.append(f"monkeypatch.chdir(dir): error: {e}")
     try:
         cwd = f"2 cwd: {os.getcwd()}"
         test_output.append(cwd)
         print(cwd)
     except FileNotFoundError as e:
         test_output.append(f"2 cwd: error: {e}")
-    os.makedirs("./foo/bar/stuff")
+    try:
+        os.makedirs("./foo/bar/stuff")
+    except e:
+        test_output.append(f'os.makedirs("./foo/bar/stuff"): error: {e}')
     assert dir_is_dir
-    test_output.append(
-        f'os.path.isdir("./foo/bar/stuff"): {os.path.isdir("./foo/bar/stuff")}'
-    )
-    assert os.path.isdir("./foo/bar/stuff")
+    try:
+        test_output.append(
+            f'os.path.isdir("./foo/bar/stuff"): {os.path.isdir("./foo/bar/stuff")}'
+        )
+    except e:
+        test_output.append(
+            f"""f'os.path.isdir("./foo/bar/stuff"): {os.path.isdir("./foo/bar/stuff")}': error: {e}"""
+        )
+    try:
+        assert os.path.isdir("./foo/bar/stuff")
+    except e:
+        test_output.append(f'assert os.path.isdir("./foo/bar/stuff") FAILED error: {e}')
     # fail to show test_output
     assert test_output == []
 
