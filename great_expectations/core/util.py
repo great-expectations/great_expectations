@@ -107,7 +107,7 @@ def in_databricks() -> bool:
     Returns:
         bool
     """
-    return 'DATABRICKS_RUNTIME_VERSION' in os.environ
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
 def convert_to_json_serializable(data):

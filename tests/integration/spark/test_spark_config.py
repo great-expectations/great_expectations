@@ -52,7 +52,7 @@ def test_spark_config_execution_engine(spark_session, databricks_runtime):
     old_app_id = spark_session.sparkContext.applicationId
     if databricks_runtime:
         # simulate a databricks runtime environment by setting the databricks runtime version
-        os.environ['DATABRICKS_RUNTIME_VERSION'] = '7.3'
+        os.environ["DATABRICKS_RUNTIME_VERSION"] = "7.3"
 
     name: str = "great_expectations-ee-config"
     spark_config: Dict[str, str] = {
