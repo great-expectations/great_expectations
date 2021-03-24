@@ -235,7 +235,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "PartitionDefinitionSubset": "BatchIdentifiersSubset",
             "PartitionRequest": "DataConnectorQuery",
             "PartitionDefinition": "BatchIdentifiers",
-            "PartitionQuery": "BatchFilter"
+            "PartitionQuery": "BatchFilter",
         }
 
         if class_name_changes.get(class_name):
