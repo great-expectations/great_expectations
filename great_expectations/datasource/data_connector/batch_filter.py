@@ -199,22 +199,22 @@ class BatchFilter:
         return selected_batch_definitions
 
     def best_effort_batch_definition_matcher(self) -> Callable:
-        def match_batch_definition_to_batch_filter_params(
+        def match_batch_identifiers_to_batch_filter_params(
             batch_identifiers: dict,
         ) -> bool:
             if self.batch_filter_parameters:
                 if not batch_identifiers:
                     return False
-                batch_identifiers_keys: set = set(self.batch_filter_parameters.keys())
 
-                if not batch_identifiers_keys:
-                    return False
-                for key in batch_identifiers_keys:
+                for batch_filter_parameter, val in self.batch_filter_parameters.items():
                     if not (
-                        key in batch_identifiers
-                        and batch_identifiers[key] == self.batch_filter_parameters[key]
+                        batch_filter_parameter in batch_identifiers
+                        and batch_identifiers[batch_filter_parameter] == val
                     ):
                         return False
+            else:
+                return False
+
             return True
 
-        return match_batch_definition_to_batch_filter_params
+        return match_batch_identifiers_to_batch_filter_params
