@@ -12,6 +12,7 @@ develop
 * [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
 * [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
 * [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource
+* [ENHANCE] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
 
 0.13.14
 -----------------
