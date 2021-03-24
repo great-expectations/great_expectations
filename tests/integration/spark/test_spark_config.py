@@ -1,9 +1,9 @@
 import logging
 import os
 from typing import Dict, List
-from packaging.version import parse as parse_version
 
 import pytest
+from packaging.version import parse as parse_version
 
 logger = logging.getLogger(__name__)
 
