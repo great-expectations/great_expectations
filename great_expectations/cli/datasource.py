@@ -747,14 +747,15 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
 
 def check_if_datasource_name_exists(context: DataContext, datasource_name: str) -> None:
     """
-    Check if a Datasource name already exists in the given DataContext and if so raise an error
+    Check if a Datasource name already exists in the on-disk version of the given DataContext and if so raise an error
     Args:
         context: DataContext to check for existing Datasource
         datasource_name: name of the proposed Datasource
     """
 
-    # TODO: Note this is a temporary fix, test_yaml_config() should update a copy of the in-memory data context
-    #  to eliminate side effects from running it.
+    # TODO: 20210324 Anthony: Note reading the context from disk is a temporary fix to allow use in a notebook
+    #  after test_yaml_config(). test_yaml_config() should update a copy of the in-memory data context rather than
+    #  making changes directly to the in-memory context.
     context_on_disk: DataContext = DataContext(context.root_directory)
 
     if datasource_name in [d["name"] for d in context_on_disk.list_datasources()]:
