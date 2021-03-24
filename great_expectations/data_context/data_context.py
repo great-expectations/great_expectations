@@ -3062,7 +3062,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "CheckpointStore",
             ]:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                store_name: str = name or "my_temp_store"
+                store_name: str = name or config.get("name") or "my_temp_store"
                 instantiated_class = cast(
                     Store,
                     self._build_store_from_config(
@@ -3079,7 +3079,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 print(
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
-                datasource_name: str = name or "my_temp_datasource"
+                datasource_name: str = (
+                    name or config.get("name") or "my_temp_datasource"
+                )
                 instantiated_class = cast(
                     Datasource,
                     self._instantiate_datasource_from_config_and_update_project_config(
@@ -3093,7 +3095,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
                 )
 
-                checkpoint_name: str = name or "my_temp_checkpoint"
+                checkpoint_name: str = (
+                    name or config.get("name") or "my_temp_checkpoint"
+                )
 
                 checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -3110,7 +3114,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a SimpleCheckpoint, since class_name is {class_name}"
                 )
 
-                checkpoint_name: str = name or "my_temp_checkpoint"
+                checkpoint_name: str = (
+                    name or config.get("name") or "my_temp_checkpoint"
+                )
 
                 checkpoint_config: Union[CheckpointConfig, dict]
 

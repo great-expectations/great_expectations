@@ -131,7 +131,7 @@ you can use `context.add_datasource()` and specify all the required parameters."
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "context.test_yaml_config(name=datasource_name, yaml_config=example_yaml)",
+                "source": "context.test_yaml_config(yaml_config=example_yaml)",
                 "outputs": [],
             },
         ]

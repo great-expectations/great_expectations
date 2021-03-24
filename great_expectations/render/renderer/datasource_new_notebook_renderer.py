@@ -90,7 +90,7 @@ If you instead wish to use python instead of yaml to configure your Datasource,
 you can use `context.add_datasource()` and specify all the required parameters."""
         )
         self.add_code_cell(
-            "context.test_yaml_config(name=datasource_name, yaml_config=example_yaml)",
+            "context.test_yaml_config(yaml_config=example_yaml)",
             lint=True,
         )
 
