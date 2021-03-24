@@ -156,7 +156,9 @@ Steps
 
                 .. code-block:: python
 
+                    datasource_name = "my_mssql_datasource"
                     config = f"""
+                    name: {datasource_name}
                     class_name: SimpleSqlalchemyDatasource
                     connection_string: mssql+pyodbc://YOUR_MSSQL_USERNAME:YOUR_MSSQL_PASSWORD@YOUR_MSSQL_HOST:YOUR_MSSQL_PORT/YOUR_MSSQL_DATABASE?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true
                     introspection:
@@ -169,7 +171,6 @@ Steps
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_mssql_datasource",
                     yaml_config=config
                 )
 
@@ -209,12 +210,14 @@ Steps
             This means all has went well and you can proceed with exploring datasets in your new MSSQL datasource.
 
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_mssql_datasource`` in our example).
-            Next, copy the yml snippet from Step 4 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
+
 
 
 Additional notes

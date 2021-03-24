@@ -130,6 +130,7 @@ Steps
             Use a utility like ``tree`` on the command line or ``glob`` to list files, so that you can see how paths and filenames are formatted. Our example will use the following 3 files in the ``test_directory/`` folder, which is a sibling of the ``great_expectations/`` folder in our project directory:
 
             .. code-block:: bash
+
                 - my_ge_project
                     |- great_expectations
                     |- test_directory
@@ -140,52 +141,46 @@ Steps
 
         #.  **Create or copy a yaml config.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetFilesystemDataConnector`` and a ``PandasExecutionEngine``.
-                The example yaml config will take the 3 files shown above and create 1 asset named ``TestAsset``, with ``name``, ``timestamp`` and ``size`` as the group names.
-
-                **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences.  More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with an ``InferredAssetFilesystemDataConnector`` and a ``PandasExecutionEngine``.
 
                 **Note**: The ``base_directory`` path needs to be specified either as an absolute path or relative to the ``great_expectations/`` directory.
 
                 .. code-block:: python
 
+                    datasource_name = "my_file_datasource"
                     config = f"""
+                            name: {datasource_name}
                             class_name: Datasource
                             execution_engine:
                               class_name: PandasExecutionEngine
                             data_connectors:
                               my_data_connector:
-                                class_name: ConfiguredAssetFilesystemDataConnector
+                                datasource_name: {datasource_name}
+                                class_name: InferredAssetFilesystemDataConnector
                                 base_directory: ../test_directory/
-                                glob_directive: "*.csv"
-                                assets:
-                                  MyAsset:
-                                    pattern: (.+)\\.csv
-                                    group_names:
-                                      - filename
+                                default_regex:
+                                  group_names: data_asset_name
+                                  pattern: (.*)
                             """
 
-                A more complex version of the ``MyAsset`` regex definition that takes into account the naming structure of the CSV files in the ``base_directory/`` would look like this:
+               You can modify the group names and regex pattern to take into account the naming structure of the CSV files in the directory, e.g.
 
                 .. code-block:: python
 
-                    config = f"""
-                            ... see the config above ..
-                                  MyAsset:
-                                    pattern: (.+)_(\\d+)_(\\d+)\\.csv
-                                    group_names:
-                                      - name
-                                      - timestamp
-                                      - size
+                        group_names:
+                          - name
+                          - timestamp
+                          - size
+                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
 
-                Additional examples of yaml configurations can be found in the following document: :ref:`how_to_guides_how_to_configure_a_configuredassetdataconnector`
+
+                Additional examples of yaml configurations can be found in  :ref:`how_to_guides_how_to_configure_a_inferredassetdataconnector` and :ref:`how_to_guides_how_to_configure_a_configuredassetdataconnector`.
 
         #. **Run context.test_yaml_config.**
 
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_pandas_datasource",
                     yaml_config=config
                 )
 
@@ -203,7 +198,7 @@ Steps
 
                 Execution engine: PandasExecutionEngine
                 Data connectors:
-                    my_data_connector : ConfiguredAssetFilesystemDataConnector
+                    my_data_connector : InferredAssetFilesystemDataConnector
 
                     Available data_asset_names (1 of 1):
                         TestAsset (3 of 3): ['abe_20201119_200.csv', 'alex_20201212_300.csv', 'will_20201008_100.csv']
@@ -222,12 +217,14 @@ Steps
             Pay attention to the "Available data_asset_names" and "Unmatched data_references" output to ensure that the regex pattern you specified matches your desired data files.
 
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup:
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_pandas_datasource`` in our example).
-            Next, copy the yml snippet from Step 3 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
+
 
 ----------------
 Additional Notes

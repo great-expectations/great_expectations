@@ -154,36 +154,36 @@ Steps
 
         #. **Create or copy a yaml config.**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as strings.
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``InferredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as strings.
 
-            **Note**: The ``ConfiguredAssetS3DataConnector`` used in this example is closely related to the ``InferreddAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
             .. code-block:: python
 
+                datasource_name = "my_pandas_s3_datasource"
                 config = f"""
                         class_name: Datasource
                         execution_engine:
                           class_name: PandasExecutionEngine
                         data_connectors:
                           my_data_connector:
-                            class_name: ConfiguredAssetS3DataConnector
-                            bucket: YOUR_S3_BUCKET_NAME
-                            prefix: YOUR_S3_PREFIX_NAME
-                            assets:
-                              test_asset:
-                                pattern: (.+)\\.csv
-                                group_names:
-                                  - full_name
+                            datasource_name: {datasource_name}
+                            class_name: InferredAssetS3DataConnector
+                            bucket: my_s3_bucket
+                            prefix: my_s3_directory/
+                            default_regex:
+                              group_names: data_asset_name
+                              pattern: (.*)
                         """
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            **Note**: The ``InferredAssetS3DataConnector`` used in this example is closely related to the ``ConfiguredAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+
+            **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         #. **Run context.test_yaml_config.**
 
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_pandas_s3_datasource",
                     yaml_config=config
                 )
 
@@ -230,12 +230,14 @@ Steps
                 botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the ListObjectsV2 operation: Access Denied
 
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_pandas_s3_datasource`` in our example).
-            Next, copy the yml snippet from Step 3 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
+
 
 ----------------
 Additional Notes
