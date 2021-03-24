@@ -1,5 +1,10 @@
 import logging
+import os
 from typing import Dict, List
+
+
+import pytest
+import unittest.mock as mock
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +48,14 @@ def test_spark_config_datasource(spark_session_v012):
     assert ("spark.executor.memory", "768m") in conf
 
 
-def test_spark_config_execution_engine(spark_session):
+@pytest.mark.parametrize("databricks_runtime", [False, True])
+def test_spark_config_execution_engine(spark_session, databricks_runtime):
+    # keep track of spark app id
+    old_app_id = spark_session.sparkContext.applicationId
+    if databricks_runtime:
+        # simulate a databricks runtime environment by setting the databricks runtime version
+        os.environ['DATABRICKS_RUNTIME_VERSION'] = '7.3'
+
     name: str = "great_expectations-ee-config"
     spark_config: Dict[str, str] = {
         "spark.app.name": name,
@@ -59,8 +71,15 @@ def test_spark_config_execution_engine(spark_session):
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     assert not sc_stopped
 
-    # Test that our values were set
+    # Test that our values were set if not running in a Databricks runtime
     conf: List[tuple] = execution_engine.spark.sparkContext.getConf().getAll()
-    assert ("spark.app.name", "great_expectations-ee-config") in conf
-    assert ("spark.sql.catalogImplementation", "hive") in conf
-    assert ("spark.executor.memory", "512m") in conf
+    if not databricks_runtime:
+        # spark context should restarted, i.e. the spark app id will change
+        assert old_app_id != execution_engine.spark.sparkContext.applicationId
+        assert ("spark.app.name", "great_expectations-ee-config") in conf
+        assert ("spark.sql.catalogImplementation", "hive") in conf
+        assert ("spark.executor.memory", "512m") in conf
+    else:
+        # spark context should not be stopped, i.e. the spark app id is kept
+        assert old_app_id == execution_engine.spark.sparkContext.applicationId
+        assert ("spark.app.name", "default_great_expectations_spark_application") in conf

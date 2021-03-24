@@ -5,6 +5,7 @@ import logging
 import sys
 from collections import OrderedDict
 from collections.abc import Mapping
+import os
 from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
@@ -97,6 +98,16 @@ def in_jupyter_notebook():
             return False  # Other type (?)
     except NameError:
         return False  # Probably standard Python interpreter
+
+
+def in_databricks() -> bool:
+    """
+    Tests whether we are in a Databricks environment.
+
+    Returns:
+        bool
+    """
+    return 'DATABRICKS_RUNTIME_VERSION' in os.environ
 
 
 def convert_to_json_serializable(data):
@@ -548,6 +559,11 @@ def get_or_create_spark_session(
 def spark_restart_required(
     current_spark_config: List[tuple], desired_spark_config: dict
 ) -> bool:
+
+    # we can't change spark context config values within databricks runtimes
+    if in_databricks():
+        return False
+
     current_spark_config_dict: dict = {k: v for (k, v) in current_spark_config}
     if desired_spark_config.get("spark.app.name") != current_spark_config_dict.get(
         "spark.app.name"
