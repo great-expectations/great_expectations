@@ -63,8 +63,8 @@ Data Docs will be served using an Azure Blob Storage static website with restric
      Since the container is called ``$web``, if we simply set ``container: $web`` in ``great_expectations.yml`` then Great Expectations would unsuccefully try to find the variable called ``web`` in ``config_variables.yml``. 
      We use an escape char ``\`` before the ``$`` so the `substitute_config_variable <https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/util/index.html?highlight=substitute_config_variable#great_expectations.data_context.util.substitute_config_variable>`_  method will allow us to reach the ``$web`` container.
   
-  You also may configure Great Expectations to store your expectations and validations in this Azure Storage account. 
-  You can follow the documentation from the guides :ref:`here for expectations <_how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_azure_blob_storage>` and :ref:`here for validations <_how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_azure_blob_storage>` but unsure you set ``container: \$web`` inplace of other container name.
+  You also may configure Great Expectations to store your expectations and validations in this Azure Storage account.
+  You can follow the documentation from the guides :ref:`for expectations <how_to_guides__configuring_metadata_stores__how_to_configure_an_expectation_store_in_azure_blob_storage>` and :ref:`validations <how_to_guides__configuring_metadata_stores__how_to_configure_a_validation_result_store_in_azure_blob_storage>` but unsure you set ``container: \$web`` inplace of other container name.
 
 
 4. **Build the Azure Blob Data Docs site.**

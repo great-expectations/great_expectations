@@ -12,7 +12,7 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
     - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>`.
     - Configured a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>`.
     - Configured an Azure `storage account <https://docs.microsoft.com/en-us/azure/storage>`_ and get the `connection string <https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal>`_
-    - Create the Azure Blob container. If you also wish to :ref:`host and share data docs on azure blob storage <_how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage>` then you may setup this first and then use the ``$web`` existing container to store your expectations.
+    - Create the Azure Blob container. If you also wish to :ref:`host and share data docs on azure blob storage <how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage>` then you may setup this first and then use the ``$web`` existing container to store your expectations.
     - Identify the prefix (folder) where Validations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
 
 Steps
@@ -61,7 +61,7 @@ Steps
                     connection_string: ${AZURE_STORAGE_CONNECTION_STRING}    
 
     .. note::
-        If the container is called ``$web`` (for :ref:`hosting and sharing data docs on azure blob storage <_how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage>`) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
+        If the container is called ``$web`` (for :ref:`hosting and sharing data docs on azure blob storage <how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage>`) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
 
 4. **Copy existing Validations JSON files to the Azure blob**. (This step is optional).
 
