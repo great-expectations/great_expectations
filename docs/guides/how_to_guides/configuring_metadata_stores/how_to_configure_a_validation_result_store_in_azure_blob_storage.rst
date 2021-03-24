@@ -12,7 +12,7 @@ By default, Validations are stored in JSON format in the ``uncommitted/validatio
     - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>`.
     - Configured a :ref:`Checkpoint <tutorials__getting_started__validate_your_data>`.
     - Configured an Azure `storage account <https://docs.microsoft.com/en-us/azure/storage>`_ and get the `connection string <https://docs.microsoft.com/en-us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal>`_
-    - Create the Azure Blob container (for this example we called it great-expectations-store) 
+    - Create the Azure Blob container. If you also wish to :ref:`host and share data docs on azure blob storage <_how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage>` then you may do this first and then use the ``$web`` existing container to store your expectations.
     - Identify the prefix (folder) where Validations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
 
 Steps
@@ -56,10 +56,12 @@ Steps
                 class_name: ValidationsStore
                 store_backend:
                     class_name: TupleAzureBlobStoreBackend
-                    container: great-expectations-store
+                    container: <blob-container>
                     prefix: validations
                     connection_string: ${AZURE_STORAGE_CONNECTION_STRING}    
 
+    .. note::
+        If the container is called ``$web`` (for :ref:`hosting and sharing data docs on azure blob storage <_how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage>`) then set ``container: \$web`` so the escape char will allow us to reach the ``$web``container.
 
 4. **Copy existing Validations JSON files to the Azure blob**. (This step is optional).
 
@@ -70,7 +72,7 @@ Steps
         export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
         az storage blob upload -f <local/path/to/validation.json> -c <GREAT-EXPECTATION-DEDICATED-AZURE-BLOB-CONTAINER-NAME> -n <PREFIX>/<validation.json>
         example with a validation related to the exp1 expectation: 
-        az storage blob upload -f great_expectations/uncommitted/validations/exp1/20210306T104406.877327Z/20210306T104406.877327Z/8313fb37ca59375eb843adf388d4f882.json -c great-expectations-store -n validations/exp1/20210306T104406.877327Z/20210306T104406.877327Z/8313fb37ca59375eb843adf388d4f882.json
+        az storage blob upload -f great_expectations/uncommitted/validations/exp1/20210306T104406.877327Z/20210306T104406.877327Z/8313fb37ca59375eb843adf388d4f882.json -c <blob-container> -n validations/exp1/20210306T104406.877327Z/20210306T104406.877327Z/8313fb37ca59375eb843adf388d4f882.json
         Finished[#############################################################]  100.0000%
         {
           "etag": "\"0x8D8E09F894650C7\"",
@@ -98,7 +100,7 @@ Steps
            store_backend:
              class_name: TupleAzureBlobStoreBackend
              connection_string: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
-             container: great-expectations-store
+             container: <blob-container>
              prefix: validations
              
 
