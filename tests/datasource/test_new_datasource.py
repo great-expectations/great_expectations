@@ -393,11 +393,10 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
         "data_connector_query": {
-            "batch_identifiers": {"letter": "Titanic", "number": "19120414"}
+            "batch_filter_parameters": {"letter": "Titanic", "number": "19120414"}
         },
         # "limit": None,
         # "batch_spec_passthrough": {
-        #     "path": titanic_csv_destination_file_path,
         #     "reader_method": "read_csv",
         #     "reader_options": None,
         #     "limit": 2000
