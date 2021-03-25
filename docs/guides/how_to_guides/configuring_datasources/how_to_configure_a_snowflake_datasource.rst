@@ -230,7 +230,9 @@ Steps
 
                 .. code-block:: python
 
+                    datasource_name = "my_snowflake_datasource"
                     config = f"""
+                        name: {datasource_name}
                         class_name: SimpleSqlalchemyDatasource
                         credentials:
                           drivername: snowflake
@@ -250,7 +252,6 @@ Steps
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_snowflake_datasource",
                     yaml_config=config
                 )
 
@@ -289,13 +290,17 @@ Steps
 
             This means all has went well and you can proceed with exploring data with your new Snowflake datasource.
 
+
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_snowflake_datasource`` in our example).
-            Next, copy the yml snippet from Step 3 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
+
+            **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
 
 ----------------
 Additional Notes
