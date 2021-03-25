@@ -150,7 +150,7 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Redshift datasource, do the following:
 
@@ -167,9 +167,9 @@ Steps
                 # or if on macOS:
                 pip install psycopg2-binary
 
-        #. **Instantiate a DataContext.**
+        #. **Instantiate a Data Context.**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
 
             .. code-block:: python
 
@@ -179,8 +179,6 @@ Steps
         #. **Create or copy a yaml config.**
 
             Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials.  Username, password, host, port, and database are set as strings.
-
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
             .. code-block:: python
 
@@ -201,6 +199,8 @@ Steps
                   whole_table:
                     data_asset_name_suffix: __whole_table
                 """
+
+            **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         #. **Run context.test_yaml_config.**
 
@@ -229,29 +229,8 @@ Steps
 
                 Unmatched data_references (0 of 0): []
 
-                Choosing an example data reference...
-                    Reference chosen: {}
 
-                    Fetching batch data...
-
-                    Showing 5 rows
-                   movieid                               title                                       genres
-                    0        1                    Toy Story (1995)  Adventure|Animation|Children|Comedy|Fantasy
-                    1        3             Grumpier Old Men (1995)                               Comedy|Romance
-                    2        5  Father of the Bride Part II (1995)                                       Comedy
-                    3        7                      Sabrina (1995)                               Comedy|Romance
-                    4        9                 Sudden Death (1995)                                       Action
-
-
-
-            If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, ``test_yaml_config`` provides helpful warnings and error messages, like the example below. It can't solve every problem, but it can solve many.
-
-            .. code-block:: bash
-
-                ...
-
-                psycopg2.OperationalError: FATAL:  password authentication failed for user "my_username"
-                FATAL:  password authentication failed for user "my_username"
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
         #. **Save the config.**
             Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
