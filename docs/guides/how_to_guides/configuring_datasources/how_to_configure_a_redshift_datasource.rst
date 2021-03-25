@@ -230,7 +230,7 @@ Steps
                 Unmatched data_references (0 of 0): []
 
 
-            This means all has gone well and you can proceed with configuring your new Datasource.             If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
         #. **Save the config.**
             Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:

@@ -207,7 +207,7 @@ Steps
                     Unmatched data_references (0 of 0): []
 
 
-            This means all has gone well and you can proceed with configuring your new Datasource.             If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
             **Note:** Pay attention to the "Available data_asset_names" and "Unmatched data_references" output to ensure that the regex pattern you specified matches your desired data files.
 
