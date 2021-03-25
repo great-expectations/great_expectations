@@ -6,9 +6,13 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
 * [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
 * [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
 * [BUGFIX] Fix issue for read_method on missing compression param for read_parquet #2557
+* [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
+* [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource
+* [ENHANCE] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
 
 0.13.14
 -----------------
