@@ -444,13 +444,12 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
-def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
-    print(f"cwd: {os.getcwd()}")
+def test_render_full_static_site_from_empty_project(tmpdir, filesystem_csv_3):
 
-    # TODO : Use a standard test fixture
+    # TODO : Use a standard test fixture that cleans up after itself
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
 
-    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    base_dir = str(tmpdir.mkdir("project_dir"))
     project_dir = os.path.join(base_dir, "project_path")
     os.mkdir(project_dir)
 
@@ -663,8 +662,6 @@ data_docs/
             f1_profiled_batch_id, f2_profiled_batch_id, titanic_profiled_batch_id
         )
     )
-    # TODO taylor remove this
-    assert os.getcwd() == "foo"
 
     # save data_docs locally if you need to inspect the files manually
     # os.makedirs("./tests/data_context/output", exist_ok=True)
@@ -785,11 +782,11 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
-def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypatch):
-    project_path = str(tmp_path_factory.mktemp("data_context"))
+# TODO taylor fix this with an existing fixture or make a new one here just for this test
+def test_load_data_context_from_environment_variables(tmpdir, monkeypatch):
+    project_path = str(tmpdir.mkdir("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(context_path, exist_ok=True)
-    print(context_path)
     assert os.path.isdir(context_path)
     monkeypatch.chdir(context_path)
     with pytest.raises(ge_exceptions.DataContextError) as err:
@@ -805,6 +802,7 @@ def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypa
     )
     monkeypatch.setenv("GE_HOME", context_path)
     assert DataContext.find_context_root_dir() == context_path
+    # TODO taylor remove files
 
 
 def test_data_context_updates_expectation_suite_names(

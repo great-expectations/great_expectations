@@ -2275,8 +2275,10 @@ def postgresql_engine(test_backend):
 
 
 @pytest.fixture(scope="function")
-def empty_data_context(tmpdir) -> DataContext:
-    project_path = str(tmpdir.mkdir("empty_data_context"))
+def empty_data_context(tmp_path) -> DataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
@@ -3167,12 +3169,14 @@ def site_builder_data_context_with_html_store_titanic_random(
     return context
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 @freeze_time("09/26/2019 13:42:41")
 def site_builder_data_context_v013_with_html_store_titanic_random(
-    tmp_path_factory, filesystem_csv_3
+    tmp_path, filesystem_csv_3
 ):
-    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    base_dir = tmp_path / "project_dir"
+    base_dir.mkdir()
+    base_dir = str(base_dir)
     project_dir = os.path.join(base_dir, "project_path")
     os.mkdir(project_dir)
 
@@ -3233,18 +3237,19 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
         "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
     }
 
-    return context
+    yield context
+    shutil.rmtree(base_dir)
 
 
-@pytest.fixture
-def titanic_multibatch_data_context(tmp_path_factory):
+@pytest.fixture(scope="function")
+def titanic_multibatch_data_context(tmp_path):
     """
     Based on titanic_data_context, but with 2 identical batches of
     data asset "titanic"
-    :param tmp_path_factory:
-    :return:
     """
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    project_path = tmp_path / "titanic_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "..", "data", "titanic")
@@ -3261,7 +3266,8 @@ def titanic_multibatch_data_context(tmp_path_factory):
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    return ge.data_context.DataContext(context_path)
+    yield ge.data_context.DataContext(context_path)
+    shutil.rmtree(project_path)
 
 
 @pytest.fixture
@@ -3711,9 +3717,9 @@ def filesystem_csv(tmp_path_factory):
 
 
 @pytest.fixture(scope="function")
-def filesystem_csv_2(tmpdir):
-    base_dir = tmpdir.mkdir("filesystem_csv_2")
-    print(f"basedir: {base_dir}")
+def filesystem_csv_2(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_2"
+    base_dir.mkdir()
     base_dir = str(base_dir)
 
     # Put a file in the directory
@@ -3726,9 +3732,10 @@ def filesystem_csv_2(tmpdir):
     shutil.rmtree(base_dir)
 
 
-@pytest.fixture
-def filesystem_csv_3(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files")
+@pytest.fixture(scope="function")
+def filesystem_csv_3(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_3"
+    base_dir.mkdir()
     base_dir = str(base_dir)
 
     # Put a file in the directory
@@ -3738,12 +3745,14 @@ def filesystem_csv_3(tmp_path_factory):
     toy_dataset_2 = PandasDataset({"y": [1, 2, 3]})
     toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
 
-    return base_dir
+    yield base_dir
+    shutil.rmtree(base_dir)
 
 
-@pytest.fixture()
-def filesystem_csv_4(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files")
+@pytest.fixture(scope="function")
+def filesystem_csv_4(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_4"
+    base_dir.mkdir()
     base_dir = str(base_dir)
 
     # Put a file in the directory
@@ -3755,7 +3764,8 @@ def filesystem_csv_4(tmp_path_factory):
     )
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
 
-    return base_dir
+    yield base_dir
+    shutil.rmtree(base_dir)
 
 
 @pytest.fixture
@@ -4239,9 +4249,10 @@ execution_engine:
     return basic_datasource
 
 
-@pytest.fixture
-def misc_directory(tmp_path_factory):
-    misc_dir = tmp_path_factory.mktemp("random", numbered=False)
+@pytest.fixture(scope="function")
+def misc_directory(tmp_path):
+    misc_dir = tmp_path / "random"
+    misc_dir.mkdir()
     assert os.path.isabs(misc_dir)
     yield misc_dir
     shutil.rmtree(misc_dir)

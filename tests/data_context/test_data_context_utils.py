@@ -48,7 +48,7 @@ def test_load_class_raises_error_when_module_name_is_not_string():
             load_class(bad_input, "great_expectations.datasource")
 
 
-def test_password_masker_mask_db_url():
+def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     """
     What does this test and why?
     The PasswordMasker.mask_db_url() should mask passwords consistently in database urls. The output of mask_db_url should be the same whether user_urlparse is set to True or False.
@@ -223,6 +223,9 @@ def test_password_masker_mask_db_url():
 
     # SQLite
     # relative path
+    temp_dir = tmp_path / "sqllite_tests"
+    temp_dir.mkdir()
+    monkeypatch.chdir(temp_dir)
     assert (
         PasswordMasker.mask_db_url(f"sqlite:///something/foo.db")
         == f"sqlite:///something/foo.db"
