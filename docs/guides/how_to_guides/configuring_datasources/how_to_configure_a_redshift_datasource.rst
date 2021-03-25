@@ -184,15 +184,17 @@ Steps
 
             .. code-block:: python
 
+                datasource_name = "my_redshift_datasource"
                 config = f"""
+                name: {datasource_name}
                 class_name: SimpleSqlalchemyDatasource
                 credentials:
                   drivername: postgresql+psycopg2
                   username: YOUR_REDSHIFT_USERNAME
                   password: YOUR_REDSHIFT_PASSWORD
-                  host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
+                  host: YOUR_REDSHIFT_HOSTNAME
                   port: 5439
-                  database: dev
+                  database: YOUR_REDSHIFT_DATABASE
                   query:
                       sslmode: prefer
                 introspection:
@@ -205,7 +207,6 @@ Steps
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_redshift_datasource",
                     yaml_config=config
                 )
 
@@ -253,13 +254,15 @@ Steps
                 FATAL:  password authentication failed for user "my_username"
 
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_redshift_datasource`` in our example).
-            Next, copy the yml snippet from Step 3 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
 
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
+
+            **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
 
 ----------------
 Additional Notes
