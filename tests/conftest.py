@@ -2284,8 +2284,7 @@ def empty_data_context(tmp_path) -> DataContext:
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
     assert context.list_datasources() == []
-    yield context
-    shutil.rmtree(project_path)
+    return context
 
 
 @pytest.fixture
