@@ -2274,9 +2274,9 @@ def postgresql_engine(test_backend):
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
 
-@pytest.fixture
-def empty_data_context(tmp_path_factory) -> DataContext:
-    project_path = str(tmp_path_factory.mktemp("empty_data_context", numbered=False))
+@pytest.fixture(scope="function")
+def empty_data_context(tmpdir) -> DataContext:
+    project_path = str(tmpdir.mkdir("empty_data_context"))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
@@ -3710,10 +3710,9 @@ def filesystem_csv(tmp_path_factory):
     return base_dir
 
 
-@pytest.fixture
-def filesystem_csv_2(tmp_path_factory):
-    # TODO taylor maybe this generic
-    base_dir = tmp_path_factory.mktemp("test_files")
+@pytest.fixture(scope="function")
+def filesystem_csv_2(tmpdir):
+    base_dir = tmpdir.mkdir("filesystem_csv_2")
     print(f"basedir: {base_dir}")
     base_dir = str(base_dir)
 
