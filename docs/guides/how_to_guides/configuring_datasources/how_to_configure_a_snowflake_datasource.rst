@@ -195,7 +195,7 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Snowflake datasource, do the following:
 
@@ -209,9 +209,9 @@ Steps
                 pip install snowflake-connector-python
                 pip install snowflake-sqlalchemy
 
-        #. **Instantiate a DataContext.**
+        #. **Instantiate a Data Context.**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
 
             .. code-block:: python
 
@@ -221,12 +221,7 @@ Steps
         #.  **Create or copy a yaml config.**
 
                 Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials using username and password authentication.  Username, password, host, database and query are set as strings.
-                ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``
-                in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
-                This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
-
-                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`. Examples of yaml configurations for Key pair and SSO authentication can be found in the **Additional Notes** section below.
 
                 .. code-block:: python
 
@@ -246,6 +241,9 @@ Steps
                           whole_table:
                             data_asset_name_suffix: __whole_table
                         """
+
+            **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+
 
         #. **Run context.test_yaml_config.**
 
@@ -274,21 +272,8 @@ Steps
 
                     Unmatched data_references (0 of 0): []
 
-                    Choosing an example data reference...
-                        Reference chosen: {}
 
-                        Fetching batch data...
-                        [(50832,)]
-
-                Showing 5 rows
-               movieid                               title                                       genres
-                0        1                    Toy Story (1995)  Adventure|Animation|Children|Comedy|Fantasy
-                1        2                      Jumanji (1995)                   Adventure|Children|Fantasy
-                2        3             Grumpier Old Men (1995)                               Comedy|Romance
-                3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance
-                4        5  Father of the Bride Part II (1995)                                       Comedy
-
-            This means all has went well and you can proceed with exploring data with your new Snowflake datasource.
+            This means all has gone well and you can proceed with configuring your new Datasource.             If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
 
         #. **Save the config.**

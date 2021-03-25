@@ -111,13 +111,13 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Pandas filesystem datasource, do the following:
 
-        #. **Instantiate a DataContext.**
+        #. **Instantiate a Data Context.**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
 
             .. code-block:: python
 
@@ -174,7 +174,8 @@ Steps
                         pattern: (.+)_(\\d+)_(\\d+)\\.csv
 
 
-                Additional examples of yaml configurations can be found in  :ref:`how_to_guides_how_to_configure_a_inferredassetdataconnector` and :ref:`how_to_guides_how_to_configure_a_configuredassetdataconnector`.
+            **Note**: The ``InferredAssetS3DataConnector`` used in this example is closely related to the ``ConfiguredAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+
 
         #. **Run context.test_yaml_config.**
 
@@ -205,16 +206,10 @@ Steps
 
                     Unmatched data_references (0 of 0): []
 
-                    Choosing an example data reference...
-                        Reference chosen: abe_20201119_200.csv
+            This means all has gone well and you can proceed with configuring your new Datasource.             If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
-                        Fetching batch data...
+            **Note:** Pay attention to the "Available data_asset_names" and "Unmatched data_references" output to ensure that the regex pattern you specified matches your desired data files.
 
-                        Showing 5 rows
-                        ...
-
-
-            Pay attention to the "Available data_asset_names" and "Unmatched data_references" output to ensure that the regex pattern you specified matches your desired data files.
 
         #. **Save the config.**
             Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:

@@ -114,13 +114,13 @@ Steps
             - Setup ``SPARK_HOME`` and ``JAVA_HOME`` variables for runtime environment.
             - :ref:`Set up a working deployment of Great Expectations. <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources. <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Pandas filesystem datasource, do the following:
 
-        #. **Instantiate a DataContext.**
+        #. **Instantiate a Data Context.**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
 
             .. code-block:: python
 
@@ -141,8 +141,6 @@ Steps
         #.  **Create or copy a yaml config.**
 
                 Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``Datasource``, with a ``InferredFilesystemDataConnector`` and ``SparkDFExecutionEngine``.
-
-                The config also defines ``TestAsset``, which has ``name``, ``timestamp`` and ``size`` as ``group_names``, which are informative fields of the filename that are extracted by the regex ``pattern``.
 
 
                 .. code-block:: python
@@ -165,7 +163,6 @@ Steps
 
                 **Note**: The ``InferredAssetFilesystemDataConnector`` used in this example is closely related to the ``ConfiguredAssetFilesystemDataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
-                **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         #. **Run context.test_yaml_config.**
 
@@ -196,19 +193,8 @@ Steps
 
                     Unmatched data_references (0 of 0): []
 
-                    Choosing an example data reference...
-                        Reference chosen: abe_20201119_200.csv
 
-                        Fetching batch data...
-
-                        Showing 5 rows
-                0  None                                           Name  PClass  Age     Sex  Survived  SexCode
-                1     1                   Allen, Miss Elisabeth Walton     1st   29  female         1        1
-                2     2                    Allison, Miss Helen Loraine     1st    2  female         0        1
-                3     3            Allison, Mr Hudson Joshua Creighton     1st   30    male         0        0
-                4     4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)     1st   25  female         0        1
-
-            This means all has gone well and you can proceed with exploring data with your new filesystem-backed Pandas data source.
+            This means all has gone well and you can proceed with configuring your new Datasource.             If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
 
         #. **Save the config.**
