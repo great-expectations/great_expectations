@@ -477,9 +477,9 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     - open Data Docs
     - NOT open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = next(
+        site_builder_data_context_v013_with_html_store_titanic_random
+    ).root_directory
     os.chdir(root_dir)
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
@@ -562,9 +562,9 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     - open Data Docs
     - NOT open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = next(
+        site_builder_data_context_v013_with_html_store_titanic_random
+    ).root_directory
     os.chdir(root_dir)
     context = DataContext(root_dir)
     runner = CliRunner(mix_stderr=False)
@@ -795,9 +795,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = next(
+        site_builder_data_context_v013_with_html_store_titanic_random
+    ).root_directory
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -880,9 +880,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     - NOT open Data Docs
     - NOT open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = next(
+        site_builder_data_context_v013_with_html_store_titanic_random
+    ).root_directory
     os.chdir(root_dir)
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -958,9 +958,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
     - NOT open Data Docs
     - open jupyter
     """
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = next(
+        site_builder_data_context_v013_with_html_store_titanic_random
+    ).root_directory
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
