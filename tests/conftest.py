@@ -3266,8 +3266,7 @@ def titanic_multibatch_data_context(tmp_path):
         file_relative_path(__file__, "./test_sets/Titanic.csv"),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    yield ge.data_context.DataContext(context_path)
-    shutil.rmtree(project_path)
+    return ge.data_context.DataContext(context_path)
 
 
 @pytest.fixture
