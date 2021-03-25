@@ -782,9 +782,10 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
-# TODO taylor fix this with an existing fixture or make a new one here just for this test
-def test_load_data_context_from_environment_variables(tmpdir, monkeypatch):
-    project_path = str(tmpdir.mkdir("data_context"))
+def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
+    project_path = tmp_path / "data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(context_path, exist_ok=True)
     assert os.path.isdir(context_path)
@@ -802,7 +803,6 @@ def test_load_data_context_from_environment_variables(tmpdir, monkeypatch):
     )
     monkeypatch.setenv("GE_HOME", context_path)
     assert DataContext.find_context_root_dir() == context_path
-    # TODO taylor remove files
 
 
 def test_data_context_updates_expectation_suite_names(
