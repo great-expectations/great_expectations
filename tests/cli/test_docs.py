@@ -36,7 +36,7 @@ def test_docs_build_view(
     monkeypatch,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    context = site_builder_data_context_v013_with_html_store_titanic_random
+    context = next(site_builder_data_context_v013_with_html_store_titanic_random)
     root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
@@ -92,7 +92,7 @@ def test_docs_build_no_view(
     monkeypatch,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    context = site_builder_data_context_v013_with_html_store_titanic_random
+    context = next(site_builder_data_context_v013_with_html_store_titanic_random)
     root_dir = context.root_directory
 
     runner = CliRunner(mix_stderr=False)
@@ -144,7 +144,7 @@ def test_docs_build_no_view(
 def test_docs_build_assume_yes(
     caplog, monkeypatch, site_builder_data_context_v013_with_html_store_titanic_random
 ):
-    context = site_builder_data_context_v013_with_html_store_titanic_random
+    context = next(site_builder_data_context_v013_with_html_store_titanic_random)
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))

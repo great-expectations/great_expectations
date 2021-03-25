@@ -29,9 +29,9 @@ def test_docs_build_view(
     caplog,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = next(
+        site_builder_data_context_v013_with_html_store_titanic_random
+    ).root_directory
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -72,9 +72,9 @@ def test_docs_build_no_view(
     caplog,
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = next(
+        site_builder_data_context_v013_with_html_store_titanic_random
+    ).root_directory
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -115,9 +115,9 @@ def test_docs_build_no_view(
 def test_docs_build_assume_yes(
     caplog, site_builder_data_context_v013_with_html_store_titanic_random
 ):
-    root_dir = (
-        site_builder_data_context_v013_with_html_store_titanic_random.root_directory
-    )
+    root_dir = next(
+        site_builder_data_context_v013_with_html_store_titanic_random
+    ).root_directory
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
