@@ -93,7 +93,7 @@ stages:
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
-          GE_pytest_opts: '--no-sqlalchemy --no-spark'
+          GE_pytest_opts: '--no-sqlalchemy --no-spark -svv'
         strategy:
           matrix:
             Python36-Pandas023:
@@ -155,7 +155,7 @@ stages:
 
         variables:
           GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
-          GE_pytest_opts: ''
+          GE_pytest_opts: '-svv'
 
         strategy:
           matrix:
