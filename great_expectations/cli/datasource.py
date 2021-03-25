@@ -533,7 +533,7 @@ role = ""  # The role name (optional -- leave blank for none)"""
 
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
             snippet += '''
-password = "{self.password}"'''
+password = "YOUR_PASSWORD"'''
         elif self.auth_method == SnowflakeAuthMethod.SSO:
             snippet += """
 authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO"""
