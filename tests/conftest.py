@@ -2281,7 +2281,9 @@ def empty_data_context(tmp_path_factory) -> DataContext:
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
-    return context
+    assert context.list_datasources() == []
+    yield context
+    shutil.rmtree(project_path)
 
 
 @pytest.fixture
@@ -3716,8 +3718,11 @@ def filesystem_csv_2(tmp_path_factory):
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    assert os.path.isabs(base_dir)
+    assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
 
-    return base_dir
+    yield base_dir
+    shutil.rmtree(base_dir)
 
 
 @pytest.fixture
@@ -4231,3 +4236,11 @@ execution_engine:
     )
 
     return basic_datasource
+
+
+@pytest.fixture
+def misc_directory(tmp_path_factory):
+    misc_dir = tmp_path_factory.mktemp("random", numbered=False)
+    assert os.path.isabs(misc_dir)
+    yield misc_dir
+    shutil.rmtree(misc_dir)
