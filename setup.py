@@ -22,7 +22,7 @@ config = {
     "install_requires": required,
     "extras_require": {
         "spark": ["pyspark>=2.3.2"],
-        "sqlalchemy": ["sqlalchemy>=1.2"],
+        "sqlalchemy": ["sqlalchemy>=1.2,<1.4.0"],
         "airflow": ["apache-airflow[s3]>=1.9.0", "boto3>=1.7.3"],
         "gcp": [
             "google-cloud>=0.34.0",
