@@ -32,6 +32,8 @@ config = {
         ],
         "redshift": ["psycopg2>=2.8"],
         "s3": ["boto3>=1.14"],
+        "aws_secrets": ["boto3>=1.8.7"],
+        "azure_secrets": ["azure-identity>=1.0.0", "azure-keyvault-secrets>=4.0.0"],
         "snowflake": ["snowflake-sqlalchemy>=1.2"],
     },
     "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),

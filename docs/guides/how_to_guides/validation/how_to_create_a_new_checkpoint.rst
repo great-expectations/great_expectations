@@ -110,13 +110,24 @@ Steps
 
         If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
-        4. **Check your stored Checkpoint config.**
+        4. **Store your Checkpoint config.**
+
+        After you are satisfied with your configuration, save it using the following snippet:
+
+        .. code-block:: python
+
+
+            from ruamel.yaml import YAML
+            yaml = YAML()
+            context.add_checkpoint(**yaml.load(config))
+
+        5. **Check your stored Checkpoint config.**
 
         If the Store Backend of your Checkpoint Store is on the local filesystem, you can navigate to the ``checkpoints`` store directory that is configured in ``great_expectations.yml`` and find the configuration files corresponding to the Checkpoints you created.
 
-        5. **(Optional:) Test running the new Checkpoint.**
+        6. **(Optional:) Test running the new Checkpoint.**
 
-        Note that when ``test_yaml_config`` runs successfully, it saves the specified Checkpoint configuration to the Store backend configured for the Checkpoint Configuration store of your Data Context. This means that you can also test ``context.run_checkpoint``, right within your notebook:
+        Now that you have stored your Checkpoint configuration to the Store backend configured for the Checkpoint Configuration store of your Data Context, you can also test ``context.run_checkpoint``, right within your notebook:
 
         .. code-block:: python
 
