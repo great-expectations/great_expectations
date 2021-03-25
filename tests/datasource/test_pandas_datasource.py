@@ -1,5 +1,6 @@
 import os
 import shutil
+from functools import partial
 from tempfile import mkstemp
 
 import boto3
@@ -421,3 +422,14 @@ def test_pandas_datasource_processes_dataset_options(test_folder_connection_path
     validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False
+
+
+@pytest.mark.parametrize(
+    "reader_fn", [pd.read_csv, pd.read_excel, pd.read_parquet, pd.read_pickle]
+)
+def test_infer_default_options_partial_functions(reader_fn):
+    datasource = PandasDatasource()
+    reader_fn_partial = partial(reader_fn)
+    assert datasource._infer_default_options(
+        reader_fn_partial, {}
+    ) == datasource._infer_default_options(reader_fn, {})

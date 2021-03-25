@@ -236,7 +236,21 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     return get_sqlalchemy_runtime_validator_postgresql(df)
 
 
-@pytest.fixture
+@pytest.fixture()
+def nulls_validator(titanic_data_context_modular_api):
+    df = pd.DataFrame(
+        {
+            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
+            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
+        }
+    )
+
+    validator = get_pandas_runtime_validator(titanic_data_context_modular_api, df)
+
+    return validator
+
+
+@pytest.fixture()
 def cardinality_validator(titanic_data_context_modular_api):
     """
     What does this test do and why?
@@ -628,7 +642,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
 
 
 def test_config_with_not_null_only(
-    titanic_data_context_modular_api, possible_expectations_set
+    titanic_data_context_modular_api, nulls_validator, possible_expectations_set
 ):
     """
     What does this test do and why?
@@ -637,14 +651,7 @@ def test_config_with_not_null_only(
 
     excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
 
-    df = pd.DataFrame(
-        {
-            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
-            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
-        }
-    )
-
-    validator = get_pandas_runtime_validator(titanic_data_context_modular_api, df)
+    validator = nulls_validator
 
     profiler_without_not_null_only = UserConfigurableProfiler(
         validator, excluded_expectations, not_null_only=False
@@ -671,6 +678,22 @@ def test_config_with_not_null_only(
     no_config_suite = no_config_profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(no_config_suite)
     assert "expect_column_values_to_be_null" in expectations
+
+
+def test_nullity_expectations_mostly_tolerance(
+    nulls_validator, possible_expectations_set
+):
+    excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
+
+    validator = nulls_validator
+
+    profiler = UserConfigurableProfiler(
+        validator, excluded_expectations, not_null_only=False
+    )
+    suite = profiler.build_suite()
+
+    for i in suite.expectations:
+        assert i["kwargs"]["mostly"] == 0.66
 
 
 def test_profiled_dataset_passes_own_validation(
