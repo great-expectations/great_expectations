@@ -95,9 +95,6 @@ def assert_how_to_buttons(
 def test_configuration_driven_site_builder(
     site_builder_data_context_v013_with_html_store_titanic_random,
 ):
-    site_builder_data_context_v013_with_html_store_titanic_random = next(
-        site_builder_data_context_v013_with_html_store_titanic_random
-    )
     context = site_builder_data_context_v013_with_html_store_titanic_random
 
     context.add_validation_operator(

@@ -3236,8 +3236,7 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
         "data_context_id": "f43d4897-385f-4366-82b0-1a8eda2bf79c",
     }
 
-    yield context
-    shutil.rmtree(base_dir)
+    return context
 
 
 @pytest.fixture(scope="function")
@@ -3726,8 +3725,7 @@ def filesystem_csv_2(tmp_path):
     assert os.path.isabs(base_dir)
     assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
 
-    yield base_dir
-    shutil.rmtree(base_dir)
+    return base_dir
 
 
 @pytest.fixture(scope="function")
@@ -3743,8 +3741,7 @@ def filesystem_csv_3(tmp_path):
     toy_dataset_2 = PandasDataset({"y": [1, 2, 3]})
     toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
 
-    yield base_dir
-    shutil.rmtree(base_dir)
+    return base_dir
 
 
 @pytest.fixture(scope="function")
@@ -3762,8 +3759,7 @@ def filesystem_csv_4(tmp_path):
     )
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
 
-    yield base_dir
-    shutil.rmtree(base_dir)
+    return base_dir
 
 
 @pytest.fixture
@@ -4252,5 +4248,4 @@ def misc_directory(tmp_path):
     misc_dir = tmp_path / "random"
     misc_dir.mkdir()
     assert os.path.isabs(misc_dir)
-    yield misc_dir
-    shutil.rmtree(misc_dir)
+    return misc_dir
