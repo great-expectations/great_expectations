@@ -477,10 +477,10 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
 
     /projects/pipeline1/great_expectations
     /projects/data/pipeline1
-    /projects/misc
+    /tmp_path/misc
 
-    cwd: /projects/misc
-    data: ../projects/data/pipeline1
+    cwd: /tmp_path/random
+    data: ../../projects/data/pipeline1
     expected results in yaml: ../../data/pipeline1
     """
     ge_dir, data_dir = simulated_project_directories
@@ -488,7 +488,7 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, os.path.join("..", "projects", "data", "pipeline1")
+        ge_dir, os.path.join("..", "..", "projects", "data", "pipeline1")
     )
     assert obs == os.path.join("..", "..", "data", "pipeline1")
 
@@ -502,9 +502,9 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
 
     /projects/pipeline1/great_expectations
     /projects/data/pipeline1
-    /projects/misc
+    /tmp_path/misc
 
-    cwd: /projects/misc
+    cwd: /tmp_path/misc
     data: /projects/data/pipeline1
     expected results in yaml: ../../data/pipeline1
     """
@@ -512,6 +512,8 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     monkeypatch.chdir(misc_directory)
     assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
 
-    absolute_path = os.path.abspath(os.path.join("..", "projects", "data", "pipeline1"))
+    absolute_path = os.path.abspath(
+        os.path.join("..", "..", "projects", "data", "pipeline1")
+    )
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
     assert obs == os.path.join("..", "..", "data", "pipeline1")
