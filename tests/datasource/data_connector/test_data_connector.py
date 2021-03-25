@@ -304,4 +304,5 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
     )
     self_check_results = my_data_connector.self_check()
     assert self_check_results["data_asset_count"] == 3
-    assert self_check_results["example_data_reference"]["n_rows"] == 3
+    # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+    # assert self_check_results["example_data_reference"]["n_rows"] == 3
