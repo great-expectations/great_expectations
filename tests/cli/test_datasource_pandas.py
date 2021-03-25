@@ -115,7 +115,7 @@ def test_cli_datasource_new(
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
-                    "base_directory": "../../test_files",
+                    "base_directory": "../../filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
                 }
             },
@@ -215,7 +215,7 @@ def test_cli_datasource_new_with_name_param(
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
-                    "base_directory": "../../test_files",
+                    "base_directory": "../../filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
                 }
             },
@@ -282,7 +282,7 @@ def test_cli_datasource_new_from_misc_directory(
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
-                    "base_directory": "../../test_files",
+                    "base_directory": "../../filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
                 }
             },
