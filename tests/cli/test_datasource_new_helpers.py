@@ -249,7 +249,7 @@ database = ""  # The database name (optional -- leave blank for none)
 schema = ""  # The schema name (optional -- leave blank for none)
 warehouse = ""  # The warehouse name (optional -- leave blank for none)
 role = ""  # The role name (optional -- leave blank for none)
-password = "{self.password}"'''
+password = "YOUR_PASSWORD"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
