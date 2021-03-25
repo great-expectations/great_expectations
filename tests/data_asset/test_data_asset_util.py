@@ -1,6 +1,7 @@
 import datetime
 import decimal
 import json
+import os
 import platform
 import sys
 from functools import wraps
@@ -10,6 +11,67 @@ import pytest
 
 import great_expectations as ge
 from great_expectations.self_check.util import expectationSuiteSchema
+
+
+# TODO remove this
+def test_will_this_work_on_azure(monkeypatch, tmp_path_factory):
+    test_output = []
+    dir = tmp_path_factory.mktemp("project")
+    test_output.append(str(dir))
+    dir_is_dir = os.path.isdir(dir)
+    test_output.append(f"dir_is_dir: {dir_is_dir}")
+    try:
+        cwd = f"1 cwd: {os.getcwd()}"
+        test_output.append(cwd)
+        print(cwd)
+    except FileNotFoundError as e:
+        test_output.append(f"1 cwd: error: {e}")
+    try:
+        monkeypatch.chdir(dir)
+    except FileNotFoundError as e:
+        test_output.append(f"monkeypatch.chdir(dir): error: {e}")
+    try:
+        cwd = f"2 cwd: {os.getcwd()}"
+        test_output.append(cwd)
+        print(cwd)
+    except FileNotFoundError as e:
+        test_output.append(f"2 cwd: error: {e}")
+    try:
+        os.makedirs("./foo/bar/stuff")
+    except Exception as e:
+        test_output.append(f'os.makedirs("./foo/bar/stuff"): error: {e}')
+    assert dir_is_dir
+    try:
+        test_output.append(
+            f'os.path.isdir("./foo/bar/stuff"): {os.path.isdir("./foo/bar/stuff")}'
+        )
+    except Exception as e:
+        test_output.append(
+            f"""f'os.path.isdir("./foo/bar/stuff"): {os.path.isdir("./foo/bar/stuff")}': error: {e}"""
+        )
+    try:
+        assert os.path.isdir("./foo/bar/stuff")
+    except Exception as e:
+        test_output.append(f'assert os.path.isdir("./foo/bar/stuff") FAILED error: {e}')
+    # fail to show test_output
+    assert test_output == []
+
+
+# TODO remove this
+def test_check_azure_cwd():
+    assert str(os.getcwd()) == "/home/vsts/work/1/s"
+
+
+def test_fixture_cwd(empty_data_context):
+    assert str(empty_data_context.root_directory) == ""
+
+
+def test_fixture_cwd2(filesystem_csv_2):
+    assert str(filesystem_csv_2) == ""
+
+
+def test_fixture_cwd3(filesystem_csv_3):
+    assert str(filesystem_csv_3) == ""
 
 
 def test_recursively_convert_to_json_serializable():
