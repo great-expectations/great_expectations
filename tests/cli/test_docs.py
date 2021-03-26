@@ -376,7 +376,7 @@ def test_docs_clean_no_site_specified_raises_helpful_error(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_docs_clean_vali_site_name_and_all_flag_combinations_clean_sites(
+def test_docs_clean_valid_site_name_and_all_flag_combinations_clean_sites(
     mock_emit, invocation, caplog, monkeypatch, context_with_site_built
 ):
     context = context_with_site_built
