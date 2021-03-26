@@ -99,6 +99,7 @@ def clean_data_docs(ctx, site_name=None, all_sites=False):
             usage_event="cli.docs.clean",
             message="<red>Please specify --all to remove all sites or specify a specific site using --site_name</red>",
         )
+    # if site_name is None, context.clean_data_docs(site_name=site_name) will clean all sites.
     context.clean_data_docs(site_name=site_name)
     toolkit.send_usage_message(
         data_context=context, event="cli.docs.clean", success=True
