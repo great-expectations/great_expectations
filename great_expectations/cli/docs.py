@@ -40,8 +40,7 @@ def docs(ctx):
 )
 @click.pass_context
 def docs_build(ctx, site_name, view=True):
-    """ Build Data Docs for a project."""
-    display_not_implemented_message_and_exit()
+    """Build Data Docs for a project."""
     context: DataContext = ctx.obj.data_context
     build_docs(context, site_name=site_name, view=view, assume_yes=ctx.obj.assume_yes)
     toolkit.send_usage_message(
