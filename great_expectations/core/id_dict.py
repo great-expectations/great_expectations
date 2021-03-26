@@ -37,11 +37,5 @@ class BatchIdentifiersSubset(IDDict):
 
 class DataConnectorQuery(BatchIdentifiersSubset):
     pass
-
-
-class BatchIdentifiers(BatchIdentifiersSubset):
-    pass
-
-
 class MetricKwargs(IDDict):
     pass

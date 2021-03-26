@@ -3,7 +3,7 @@ import pytest
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
-    BatchIdentifiers,
+    IDDict,
     BatchRequest,
 )
 
@@ -24,7 +24,7 @@ def test_batch_definition_matches_batch_request():
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        batch_identifiers=BatchIdentifiers(
+        batch_identifiers=IDDict(
             {"name": "eugene", "timestamp": "20200809", "price": "1500"}
         ),
     )
@@ -138,7 +138,7 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
             datasource_name="test_datasource",
             data_connector_name="test_data_connector",
             data_asset_name="DEFAULT_ASSET_NAME",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {
                     "name": "alex",
                     "timestamp": "20200809",
@@ -164,7 +164,7 @@ def test_map_data_reference_string_to_batch_definition_list_using_regex():
             datasource_name="test_datasource",
             data_connector_name="test_data_connector",
             data_asset_name="test_data_asset",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {
                     "name": "alex",
                     "timestamp": "20200809",
@@ -183,7 +183,7 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex():
         data_reference=data_reference, regex_pattern=pattern, group_names=group_names
     ) == (
         "DEFAULT_ASSET_NAME",
-        BatchIdentifiers(
+        IDDict(
             {
                 "name": "alex",
                 "timestamp": "20200809",
@@ -199,7 +199,7 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex():
         data_reference=data_reference, regex_pattern=pattern, group_names=group_names
     ) == (
         "DEFAULT_ASSET_NAME",
-        BatchIdentifiers(
+        IDDict(
             {
                 "name": "eugene",
                 "timestamp": "20200810",
@@ -250,7 +250,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        batch_identifiers=BatchIdentifiers(
+        batch_identifiers=IDDict(
             {"name": "eugene", "timestamp": "20200809", "price": "1500"}
         ),
     )
@@ -268,7 +268,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        batch_identifiers=BatchIdentifiers(
+        batch_identifiers=IDDict(
             {"name": "eugene", "timestamp": "20200809", "price": "1500"}
         ),
     )
@@ -286,7 +286,7 @@ def test_map_batch_definition_to_data_reference_string_using_regex():
 def test_convert_batch_identifiers_to_data_reference_string_using_regex():
     pattern = r"^(.+)_(\d+)_(\d+)\.csv$"
     group_names = ["name", "timestamp", "price"]
-    batch_identifiers = BatchIdentifiers(
+    batch_identifiers = IDDict(
         **{
             "name": "alex",
             "timestamp": "20200809",
@@ -305,7 +305,7 @@ def test_convert_batch_identifiers_to_data_reference_string_using_regex():
     # Test an example with an uncaptured regex group (should return a WildcardDataReference)
     pattern = r"^(.+)_(\d+)_\d+\.csv$"
     group_names = ["name", "timestamp"]
-    batch_identifiers = BatchIdentifiers(
+    batch_identifiers = IDDict(
         **{
             "name": "alex",
             "timestamp": "20200809",
@@ -324,7 +324,7 @@ def test_convert_batch_identifiers_to_data_reference_string_using_regex():
     # Test an example with an uncaptured regex group (should return a WildcardDataReference)
     pattern = r"^.+_(\d+)_(\d+)\.csv$"
     group_names = ["timestamp", "price"]
-    batch_identifiers = BatchIdentifiers(
+    batch_identifiers = IDDict(
         **{
             "name": "alex",
             "timestamp": "20200809",

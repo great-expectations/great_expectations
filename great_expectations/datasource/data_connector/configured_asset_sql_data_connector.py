@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 
 from great_expectations.core.batch import (
     BatchDefinition,
-    BatchIdentifiers,
+    IDDict,
     BatchRequest,
     BatchSpec,
 )
@@ -154,7 +154,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
-                batch_identifiers=BatchIdentifiers(batch_identifiers),
+                batch_identifiers=IDDict(batch_identifiers),
             )
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
@@ -170,13 +170,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, data_reference, data_asset_name: Optional[str] = None  #: Any,
     ) -> Optional[List[BatchDefinition]]:
         # Note: This is a bit hacky, but it works. In sql_data_connectors, data references *are* dictionaries,
-        # allowing us to invoke `BatchIdentifiers(data_reference)`
+        # allowing us to invoke `IDDict(data_reference)`
         return [
             BatchDefinition(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
                 data_asset_name=data_asset_name,
-                batch_identifiers=BatchIdentifiers(data_reference),
+                batch_identifiers=IDDict(data_reference),
             )
         ]
 

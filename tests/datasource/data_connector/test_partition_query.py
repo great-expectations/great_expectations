@@ -7,7 +7,7 @@ from ruamel.yaml import YAML
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
-    BatchIdentifiers,
+    IDDict,
     BatchRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -231,7 +231,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
@@ -239,7 +239,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
@@ -247,7 +247,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
@@ -255,7 +255,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
@@ -263,7 +263,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
@@ -306,7 +306,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
@@ -314,7 +314,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
@@ -322,7 +322,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
@@ -330,7 +330,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
@@ -374,7 +374,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_int
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
@@ -417,7 +417,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_str
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
@@ -462,7 +462,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_lis
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
@@ -470,7 +470,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_lis
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
@@ -514,7 +514,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_tup
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
@@ -522,7 +522,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_tup
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
@@ -566,7 +566,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_str
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
@@ -574,7 +574,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_str
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
@@ -618,7 +618,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_obj(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
@@ -626,7 +626,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_obj(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
@@ -658,7 +658,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
@@ -666,7 +666,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
@@ -674,7 +674,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
@@ -682,7 +682,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
@@ -715,7 +715,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key_and_i
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
@@ -750,7 +750,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_2_key_name_
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
@@ -779,7 +779,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
@@ -787,7 +787,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
@@ -795,7 +795,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
@@ -803,7 +803,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
@@ -811,7 +811,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
@@ -819,7 +819,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
@@ -827,7 +827,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
@@ -835,7 +835,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
@@ -843,7 +843,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
@@ -851,7 +851,7 @@ def test_data_connector_query_for_data_asset_name(
             datasource_name="test_environment",
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),

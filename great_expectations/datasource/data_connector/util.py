@@ -17,7 +17,7 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     RuntimeBatchRequest,
 )
-from great_expectations.core.id_dict import BatchIdentifiers, BatchIdentifiersSubset
+from great_expectations.core.id_dict import IDDict, BatchIdentifiersSubset
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -119,7 +119,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            batch_identifiers=BatchIdentifiers(batch_identifiers),
+            batch_identifiers=IDDict(batch_identifiers),
         )
     ]
 
@@ -139,7 +139,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     )
 
     # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
-    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that BatchIdentifiers never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
+    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
     if "data_asset_name" in batch_identifiers:
         data_asset_name = batch_identifiers.pop("data_asset_name")
@@ -157,7 +157,7 @@ def map_batch_definition_to_data_reference_string_using_regex(
         )
 
     data_asset_name: str = batch_definition.data_asset_name
-    batch_identifiers: BatchIdentifiers = batch_definition.batch_identifiers
+    batch_identifiers: IDDict = batch_definition.batch_identifiers
     data_reference: str = (
         convert_batch_identifiers_to_data_reference_string_using_regex(
             batch_identifiers=batch_identifiers,
@@ -171,15 +171,15 @@ def map_batch_definition_to_data_reference_string_using_regex(
 
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
 def convert_batch_identifiers_to_data_reference_string_using_regex(
-    batch_identifiers: BatchIdentifiers,
+    batch_identifiers: IDDict,
     regex_pattern: str,
     group_names: List[str],
     data_asset_name: Optional[str] = None,
 ) -> str:
-    if not isinstance(batch_identifiers, (BatchIdentifiersSubset, BatchIdentifiers)):
+    if not isinstance(batch_identifiers, (BatchIdentifiersSubset, IDDict)):
         raise TypeError(
             "batch_identifiers is not "
-            "an instance of type BatchIdentifiersSubset or BatchIdentifiers"
+            "an instance of type BatchIdentifiersSubset or IDDict"
         )
 
     template_arguments: dict = copy.deepcopy(batch_identifiers)

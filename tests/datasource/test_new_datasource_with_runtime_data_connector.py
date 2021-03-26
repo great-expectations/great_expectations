@@ -8,7 +8,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
-    BatchIdentifiers,
+    IDDict,
     RuntimeBatchRequest,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -360,7 +360,7 @@ def test_get_batch_definitions_and_get_batch_basics(
                 "my_datasource",
                 "_pipeline",
                 "_pipeline",
-                batch_identifiers=BatchIdentifiers({"some_random_id": 1}),
+                batch_identifiers=IDDict({"some_random_id": 1}),
             ),
             batch_data=my_df,
         )

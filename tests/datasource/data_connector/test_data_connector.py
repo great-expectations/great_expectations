@@ -4,7 +4,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import (
     BatchDefinition,
-    BatchIdentifiers,
+    IDDict,
     BatchRequest,
     BatchRequestBase,
 )
@@ -161,7 +161,7 @@ def test__batch_definition_matches_batch_request():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        batch_identifiers=BatchIdentifiers(
+        batch_identifiers=IDDict(
             {
                 "id": "A",
             }
@@ -222,7 +222,7 @@ def test__batch_definition_matches_batch_request():
                 "datasource_name": "FAKE_DATASOURCE",
                 "data_connector_name": "TEST_DATA_CONNECTOR",
                 "data_asset_name": "DEFAULT_ASSET_NAME",
-                "batch_identifiers": BatchIdentifiers({"index": "3"}),
+                "batch_identifiers": IDDict({"index": "3"}),
             }
         ),
         batch_request=BatchRequest(

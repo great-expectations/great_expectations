@@ -16,7 +16,7 @@ class NumericSorter(Sorter):
         if not is_numeric(value=batch_value):
             raise ge_exceptions.SorterError(
                 # what is the identifying characteristic of batch_definition?
-                f"""BatchDefinition with BatchIdentifiers "{self.name}" with value "{batch_value}" has value
+                f"""BatchDefinition with IDDict "{self.name}" with value "{batch_value}" has value
 "{batch_value}" which cannot be part of numeric sort.
 """
             )

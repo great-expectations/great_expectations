@@ -17,7 +17,7 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.id_dict import BatchIdentifiers
+from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector import RuntimeDataConnector
 
 yaml = YAML()
@@ -312,7 +312,7 @@ def test_data_references_cache_updating_after_batch_request(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
-                    batch_identifiers=BatchIdentifiers({"airflow_run_id": 1234567890}),
+                    batch_identifiers=IDDict({"airflow_run_id": 1234567890}),
                 )
             ],
         }
@@ -347,7 +347,7 @@ def test_data_references_cache_updating_after_batch_request(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
-                    batch_identifiers=BatchIdentifiers({"airflow_run_id": 1234567890}),
+                    batch_identifiers=IDDict({"airflow_run_id": 1234567890}),
                 )
             ],
             "987654321": [
@@ -355,7 +355,7 @@ def test_data_references_cache_updating_after_batch_request(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
-                    batch_identifiers=BatchIdentifiers({"airflow_run_id": 987654321}),
+                    batch_identifiers=IDDict({"airflow_run_id": 987654321}),
                 )
             ],
         },
@@ -392,7 +392,7 @@ def test_data_references_cache_updating_after_batch_request(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
-                    batch_identifiers=BatchIdentifiers({"airflow_run_id": 1234567890}),
+                    batch_identifiers=IDDict({"airflow_run_id": 1234567890}),
                 )
             ],
             "987654321": [
@@ -400,7 +400,7 @@ def test_data_references_cache_updating_after_batch_request(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_1",
-                    batch_identifiers=BatchIdentifiers({"airflow_run_id": 987654321}),
+                    batch_identifiers=IDDict({"airflow_run_id": 987654321}),
                 )
             ],
         },
@@ -410,7 +410,7 @@ def test_data_references_cache_updating_after_batch_request(
                     datasource_name="my_datasource",
                     data_connector_name="test_runtime_data_connector",
                     data_asset_name="my_data_asset_2",
-                    batch_identifiers=BatchIdentifiers({"airflow_run_id": 5555555}),
+                    batch_identifiers=IDDict({"airflow_run_id": 5555555}),
                 )
             ]
         },
@@ -451,7 +451,7 @@ def test_get_batch_definition_list_from_batch_request_length_one(
             datasource_name="my_datasource",
             data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
-            batch_identifiers=BatchIdentifiers(batch_identifiers),
+            batch_identifiers=IDDict(batch_identifiers),
         )
     ]
 
@@ -552,7 +552,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
             datasource_name="my_datasource",
             data_connector_name="test_runtime_data_connector",
             data_asset_name="my_data_asset",
-            batch_identifiers=BatchIdentifiers(batch_identifiers),
+            batch_identifiers=IDDict(batch_identifiers),
         )
     )
 
@@ -573,7 +573,7 @@ def test__build_batch_spec(basic_datasource):
         datasource_name="my_datasource",
         data_connector_name="test_runtime_data_connector",
         data_asset_name="my_data_asset",
-        batch_identifiers=BatchIdentifiers(batch_identifiers),
+        batch_identifiers=IDDict(batch_identifiers),
     )
 
     batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
@@ -618,7 +618,7 @@ def test__get_data_reference_name(basic_datasource):
             "airflow_run_id": 1234567890,
         }
     }
-    batch_identifiers = BatchIdentifiers(
+    batch_identifiers = IDDict(
         data_connector_query["batch_filter_parameters"]
     )
 
@@ -637,7 +637,7 @@ def test__get_data_reference_name(basic_datasource):
             "run_id_2": 1111111111,
         }
     }
-    batch_identifiers = BatchIdentifiers(
+    batch_identifiers = IDDict(
         data_connector_query["batch_filter_parameters"]
     )
 

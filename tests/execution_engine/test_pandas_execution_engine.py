@@ -17,7 +17,7 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.id_dict import BatchIdentifiers
+from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -429,7 +429,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
         datasource_name="FAKE_DATASOURCE_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="alpha",
-        batch_identifiers=BatchIdentifiers(index=1),
+        batch_identifiers=IDDict(index=1),
         batch_spec_passthrough={
             "reader_method": "read_csv",
             "splitter_method": "_split_on_whole_table",
@@ -445,7 +445,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
         datasource_name="FAKE_DATASOURCE_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="alpha",
-        batch_identifiers=BatchIdentifiers(index=9),
+        batch_identifiers=IDDict(index=9),
         batch_spec_passthrough={
             "reader_method": "read_csv",
             "splitter_method": "_split_on_whole_table",

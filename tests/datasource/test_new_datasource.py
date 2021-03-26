@@ -11,7 +11,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
-    BatchIdentifiers,
+    IDDict,
     BatchRequest,
     RuntimeBatchRequest,
 )
@@ -300,7 +300,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
             datasource_name="my_datasource",
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="B1",
-            batch_identifiers=BatchIdentifiers(
+            batch_identifiers=IDDict(
                 {
                     "letter": "B",
                     "number": "1",
@@ -316,7 +316,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
         datasource_name="my_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="B1",
-        batch_identifiers=BatchIdentifiers(
+        batch_identifiers=IDDict(
             {
                 "letter": "B",
                 "number": "1",
@@ -365,7 +365,7 @@ def test_get_batch_definitions_and_get_batch_basics(basic_pandas_datasource_v013
             "my_datasource",
             "_pipeline",
             "_pipeline",
-            batch_identifiers=BatchIdentifiers({"some_random_id": 1}),
+            batch_identifiers=IDDict({"some_random_id": 1}),
         ),
         batch_data=my_df,
     )

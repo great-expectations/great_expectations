@@ -5,7 +5,7 @@ import json
 from typing import Dict, Optional, Union
 
 from great_expectations.core.id_dict import (
-    BatchIdentifiers,
+    IDDict,
     BatchKwargs,
     BatchSpec,
     DataConnectorQuery,
@@ -22,7 +22,7 @@ class BatchDefinition(SerializableDictDot):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        batch_identifiers: BatchIdentifiers,
+        batch_identifiers: IDDict,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_definition(
@@ -32,7 +32,7 @@ class BatchDefinition(SerializableDictDot):
             batch_identifiers=batch_identifiers,
         )
 
-        assert type(batch_identifiers) == BatchIdentifiers
+        assert type(batch_identifiers) == IDDict
 
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
@@ -62,7 +62,7 @@ class BatchDefinition(SerializableDictDot):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        batch_identifiers: BatchIdentifiers,
+        batch_identifiers: IDDict,
     ):
         if datasource_name is None:
             raise ValueError("A valid datasource must be specified.")
@@ -88,9 +88,9 @@ class BatchDefinition(SerializableDictDot):
 "{str(type(data_asset_name))}", which is illegal.
                 """
             )
-        if batch_identifiers and not isinstance(batch_identifiers, BatchIdentifiers):
+        if batch_identifiers and not isinstance(batch_identifiers, IDDict):
             raise TypeError(
-                f"""The type of batch_identifiers must be a BatchIdentifiers object.  The type given is
+                f"""The type of batch_identifiers must be a IDDict object.  The type given is
 "{str(type(batch_identifiers))}", which is illegal.
                 """
             )
@@ -115,7 +115,7 @@ class BatchDefinition(SerializableDictDot):
         return self._data_asset_name
 
     @property
-    def batch_identifiers(self) -> BatchIdentifiers:
+    def batch_identifiers(self) -> IDDict:
         return self._batch_identifiers
 
     @property

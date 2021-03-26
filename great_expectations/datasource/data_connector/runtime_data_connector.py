@@ -17,7 +17,7 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.id_dict import BatchIdentifiers, BatchIdentifiersSubset
+from great_expectations.core.id_dict import IDDict, BatchIdentifiersSubset
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -156,7 +156,7 @@ class RuntimeDataConnector(DataConnector):
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
             data_asset_name=batch_request.data_asset_name,
-            batch_identifiers=BatchIdentifiers(batch_identifiers),
+            batch_identifiers=IDDict(batch_identifiers),
         )
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(

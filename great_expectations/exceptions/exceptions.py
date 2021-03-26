@@ -234,7 +234,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "StoreAction": "StoreValidationResultAction",
             "PartitionDefinitionSubset": "BatchIdentifiersSubset",
             "PartitionRequest": "DataConnectorQuery",
-            "PartitionDefinition": "BatchIdentifiers",
+            "PartitionDefinition": "IDDict",
             "PartitionQuery": "BatchFilter",
         }
 
