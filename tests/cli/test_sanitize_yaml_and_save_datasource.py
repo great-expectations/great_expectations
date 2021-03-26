@@ -176,6 +176,7 @@ execution_engine:
 
 
 def test_sanitize_yaml_and_save_datasource_does_overwrite_duplicate_when_overwrite_existing_is_true(
+    sa,
     capsys,
     empty_data_context,
 ):
