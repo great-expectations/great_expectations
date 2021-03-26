@@ -84,35 +84,26 @@ def docs_list(ctx):
 @click.option(
     "--all",
     "-a",
+    "all_sites",
     is_flag=True,
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
 @click.pass_context
-def clean_data_docs(ctx, site_name=None, all=None):
+def clean_data_docs(ctx, site_name=None, all_sites=False):
     """Delete data docs"""
-    display_not_implemented_message_and_exit()
     context = ctx.obj.data_context
-    failed = True
-    if site_name is None and all is None:
-        cli_message(
-            "<red>{}</red>".format(
-                "Please specify --all to remove all sites or specify a specific site using "
-                "--site_name"
-            )
-        )
-        sys.exit(1)
-    context.clean_data_docs(site_name=site_name)
-    failed = False
-    if not failed and context is not None:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.docs.clean", success=True
-        )
-        cli_message("<green>{}</green>".format("Cleaned data docs"))
 
-    if failed and context is not None:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.docs.clean", success=False
+    if site_name is None and all_sites is False:
+        toolkit.exit_with_failure_message_and_stats(
+            context,
+            usage_event="cli.docs.clean",
+            message="<red>Please specify --all to remove all sites or specify a specific site using --site_name</red>",
         )
+    context.clean_data_docs(site_name=site_name)
+    toolkit.send_usage_message(
+        data_context=context, event="cli.docs.clean", success=True
+    )
+    cli_message("<green>{}</green>".format("Cleaned data docs"))
 
 
 def _build_intro_string(docs_sites_strings):

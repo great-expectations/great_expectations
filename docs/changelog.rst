@@ -8,6 +8,7 @@ Develop
 -----------------
 * [ENHANCEMENT] CLI `docs list` command implemented for v3 api
 * [ENHANCEMENT] CLI `docs build` command implemented for v3 api
+* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api
 
 0.13.15
 -----------------
