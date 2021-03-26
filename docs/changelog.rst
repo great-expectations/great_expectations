@@ -7,6 +7,7 @@ Changelog
 0.13.15
 -----------------
 * [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
+* [ENHANCEMENT] Datasource CLI functionality for v3 api and global --assume-yes flag #2590
 * [ENHANCEMENT] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
 * [ENHANCEMENT] Adding tqdm to Profiler (Thanks @peterdhansen). New library in requirements.txt
 * [ENHANCEMENT][MAINTENANCE] Use Metrics to Protect Against Wrong Column Names
