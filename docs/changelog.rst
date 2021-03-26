@@ -12,6 +12,8 @@ develop
 * [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
 * [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource
 * [ENHANCE] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
+* [MAINTENANCE] Oracle listed twice in list of sqlalchemy dialects
+* [FEATURE] Oracle support added to sqlalchemy datasource and dataset
 
 0.13.14
 -----------------
