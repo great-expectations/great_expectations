@@ -1298,6 +1298,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
+        elif engine_dialect == "oracle":
+            stmt = 'CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}'.format(
+                table_name=table_name, custom_sql=custom_sql
+            )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
                 table_name=table_name, custom_sql=custom_sql
