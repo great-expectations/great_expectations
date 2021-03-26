@@ -11,7 +11,6 @@ from great_expectations.core.batch import (
     IDDict,
     BatchRequest,
     BatchRequestBase,
-    DataConnectorQuery,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
@@ -542,7 +541,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         datasource_name="test_environment",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="TestFiles",
-        data_connector_query=DataConnectorQuery(
+        data_connector_query=IDDict(
             **{
                 "batch_filter_parameters": {
                     "name": "james",
@@ -664,7 +663,7 @@ def test_alpha(tmp_path_factory):
         datasource_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="A",
-        data_connector_query=DataConnectorQuery(
+        data_connector_query=IDDict(
             **{"batch_filter_parameters": {"part_1": "B"}}
         ),
     )

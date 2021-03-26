@@ -233,7 +233,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
             "PartitionDefinitionSubset": "IDDict",
-            "PartitionRequest": "DataConnectorQuery",
+            "PartitionRequest": "IDDict",
             "PartitionDefinition": "IDDict",
             "PartitionQuery": "BatchFilter",
         }

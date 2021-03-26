@@ -5,10 +5,8 @@ import json
 from typing import Dict, Optional, Union
 
 from great_expectations.core.id_dict import (
-    IDDict,
     BatchKwargs,
     BatchSpec,
-    DataConnectorQuery,
     IDDict,
 )
 from great_expectations.exceptions import InvalidBatchIdError
@@ -187,7 +185,7 @@ class BatchRequestBase(DictDot):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
         runtime_parameters: Optional[dict] = None,
@@ -229,7 +227,7 @@ class BatchRequestBase(DictDot):
     @property
     def data_connector_query(
         self,
-    ) -> Union[DataConnectorQuery, dict]:  # DataConnectorQuery:
+    ) -> Union[IDDict, dict]:
         return self._data_connector_query
 
     @property
@@ -295,7 +293,7 @@ class BatchRequest(BatchRequestBase):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -320,7 +318,7 @@ class BatchRequest(BatchRequestBase):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
     ):
         # TODO test and check all logic in this validator!
@@ -343,9 +341,9 @@ class BatchRequest(BatchRequestBase):
                         """
             )
         # TODO Abe 20201015: Switch this to DataConnectorQuery.
-        if data_connector_query and not isinstance(data_connector_query, dict):
+        if data_connector_query and not isinstance(data_connector_query, (dict, IDDict)):
             raise TypeError(
-                f"""The type of data_connector_query must be a dict object.  The type given is
+                f"""The type of data_connector_query must be a dict or IDDict object.  The type given is
 "{str(type(data_connector_query))}", which is illegal.
                 """
             )

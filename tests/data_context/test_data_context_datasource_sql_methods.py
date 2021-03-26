@@ -4,7 +4,7 @@ from typing import List, Union
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import Batch, BatchRequest, DataConnectorQuery
+from great_expectations.core.batch import Batch, BatchRequest, IDDict
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -35,7 +35,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            data_connector_query=DataConnectorQuery(
+            data_connector_query=IDDict(
                 batch_filter_parameters={"date": "2020-01-15"}
             ),
         )
@@ -61,7 +61,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
                 datasource_name="my_sqlite_db",
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=DataConnectorQuery(batch_filter_parameters={}),
+                data_connector_query=IDDict(batch_filter_parameters={}),
             )
         )
 
@@ -90,7 +90,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
             batch_request=BatchRequest(
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=DataConnectorQuery(batch_filter_parameters={}),
+                data_connector_query=IDDict(batch_filter_parameters={}),
             )
         )
 
@@ -124,7 +124,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
         "my_sqlite_db",
         "daily",
         "table_partitioned_by_date_column__A",
-        data_connector_query=DataConnectorQuery(
+        data_connector_query=IDDict(
             {"batch_filter_parameters": {"date": "2020-01-15"}}
         ),
     )
@@ -155,7 +155,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            data_connector_query=DataConnectorQuery(
+            data_connector_query=IDDict(
                 batch_filter_parameters={"date": "2020-01-15"}
             ),
         ),
@@ -183,7 +183,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
                 datasource_name="my_sqlite_db",
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=DataConnectorQuery(batch_filter_parameters={}),
+                data_connector_query=IDDict(batch_filter_parameters={}),
             ),
             expectation_suite_name="my_expectations",
         )
@@ -215,7 +215,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
             batch_request=BatchRequest(
                 data_connector_name="daily",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=DataConnectorQuery(batch_filter_parameters={}),
+                data_connector_query=IDDict(batch_filter_parameters={}),
             ),
             expectation_suite_name="my_expectations",
         )
@@ -253,7 +253,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
         "my_sqlite_db",
         "daily",
         "table_partitioned_by_date_column__A",
-        data_connector_query=DataConnectorQuery(
+        data_connector_query=IDDict(
             {"batch_filter_parameters": {"date": "2020-01-15"}}
         ),
         expectation_suite_name="my_expectations",
@@ -312,7 +312,7 @@ def test_get_validator_expectation_suite_options(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            data_connector_query=DataConnectorQuery(
+            data_connector_query=IDDict(
                 batch_filter_parameters={"date": "2020-01-15"}
             ),
         ),

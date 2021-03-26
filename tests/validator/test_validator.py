@@ -6,7 +6,7 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
-    DataConnectorQuery,
+    IDDict,
     RuntimeBatchRequest,
 )
 from great_expectations.core.expectation_configuration import ExpectationConfiguration

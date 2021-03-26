@@ -27,7 +27,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
-    DataConnectorQuery,
+    IDDict,
     RuntimeBatchRequest,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -1159,7 +1159,7 @@ class BaseDataContext:
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
@@ -1447,7 +1447,7 @@ class BaseDataContext:
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
@@ -1571,9 +1571,9 @@ class BaseDataContext:
                     )
                 elif batch_filter_parameters is None and batch_identifiers is not None:
                     logger.warning(
-                        'Attempting to build DataConnectorQuery but "batch_identifiers" was provided '
+                        'Attempting to build data_connector_query but "batch_identifiers" was provided '
                         'instead of "batch_filter_parameters". The "batch_identifiers" key on '
-                        'DataConnectorQuery has been renamed to "batch_filter_parameters". Please update '
+                        'data_connector_query has been renamed to "batch_filter_parameters". Please update '
                         'your code. Falling back on provided "batch_identifiers".'
                     )
                     batch_filter_parameters = batch_identifiers
@@ -1589,10 +1589,10 @@ class BaseDataContext:
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
-                data_connector_query = DataConnectorQuery(data_connector_query_params)
+                data_connector_query = IDDict(data_connector_query_params)
             else:
                 # Raise a warning if batch_filter_parameters or kwargs exist
-                data_connector_query = DataConnectorQuery(data_connector_query)
+                data_connector_query = IDDict(data_connector_query)
 
             if batch_spec_passthrough is None:
                 batch_spec_passthrough = {}
@@ -1628,7 +1628,7 @@ class BaseDataContext:
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[DataConnectorQuery, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
