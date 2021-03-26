@@ -516,7 +516,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "sqlite",
             "oracle",
             "mssql",
-            "oracle",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
