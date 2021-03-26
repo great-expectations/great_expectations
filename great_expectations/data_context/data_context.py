@@ -977,7 +977,7 @@ class BaseDataContext:
                 del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
-                raise ValueError("Datasource {} not found".format(datasource_name))
+                raise ValueError(f"Datasource {datasource_name} not found")
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -1746,7 +1746,7 @@ class BaseDataContext:
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
-        config: dict
+        config: Union[CommentedMap, dict]
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
         else:
@@ -1759,7 +1759,7 @@ class BaseDataContext:
         )
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: dict, initialize: bool = True
+        self, name: str, config: Union[CommentedMap, dict], initialize: bool = True
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
@@ -3143,7 +3143,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "CheckpointStore",
             ]:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                store_name: str = name or "my_temp_store"
+                store_name: str = name or config.get("name") or "my_temp_store"
                 instantiated_class = cast(
                     Store,
                     self._build_store_from_config(
@@ -3160,7 +3160,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 print(
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
-                datasource_name: str = name or "my_temp_datasource"
+                datasource_name: str = (
+                    name or config.get("name") or "my_temp_datasource"
+                )
                 instantiated_class = cast(
                     Datasource,
                     self._instantiate_datasource_from_config_and_update_project_config(
@@ -3174,7 +3176,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
                 )
 
-                checkpoint_name: str = name or "my_temp_checkpoint"
+                checkpoint_name: str = (
+                    name or config.get("name") or "my_temp_checkpoint"
+                )
 
                 checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -3191,7 +3195,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a SimpleCheckpoint, since class_name is {class_name}"
                 )
 
-                checkpoint_name: str = name or "my_temp_checkpoint"
+                checkpoint_name: str = (
+                    name or config.get("name") or "my_temp_checkpoint"
+                )
 
                 checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -3521,7 +3527,7 @@ class DataContext(BaseDataContext):
         return new_datasource
 
     def delete_datasource(self, name: str):
-        logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
+        logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
 
         super().delete_datasource(datasource_name=name)
         self._save_project_config()

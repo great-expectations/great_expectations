@@ -38,20 +38,12 @@ def docs(ctx):
     help="By default open in browser unless you specify the --no-view flag",
     default=True,
 )
-@click.option(
-    "--assume-yes",
-    "--yes",
-    "-y",
-    is_flag=True,
-    help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
-    default=False,
-)
 @click.pass_context
-def docs_build(ctx, site_name, view=True, assume_yes=False):
+def docs_build(ctx, site_name, view=True):
     """ Build Data Docs for a project."""
     display_not_implemented_message_and_exit()
-    context = ctx.obj.data_context
-    build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
+    context: DataContext = ctx.obj.data_context
+    build_docs(context, site_name=site_name, view=view, assume_yes=ctx.obj.assume_yes)
     toolkit.send_usage_message(
         data_context=context, event="cli.docs.build", success=True
     )

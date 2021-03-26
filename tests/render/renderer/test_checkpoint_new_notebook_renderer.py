@@ -205,9 +205,7 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": """my_checkpoint = context.test_yaml_config(
-    name=my_checkpoint_name, yaml_config=my_checkpoint_name_config
-)""",
+            "source": """my_checkpoint = context.test_yaml_config(yaml_config=my_checkpoint_name_config)""",
             "outputs": [],
         },
     ]

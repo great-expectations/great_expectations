@@ -70,7 +70,8 @@ def test_basic_instantiation():
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
     # noinspection PyProtectedMember
@@ -148,7 +149,8 @@ def test_instantiation_from_a_config(empty_data_context):
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -211,7 +213,8 @@ assets:
             "alpha-3.csv",
         ],
         "unmatched_data_reference_count": 3,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -800,7 +803,8 @@ def test_foxtrot():
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition

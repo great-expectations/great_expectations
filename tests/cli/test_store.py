@@ -17,7 +17,7 @@ def test_store_list_with_zero_stores(caplog, empty_data_context, monkeypatch):
     monkeypatch.chdir(os.path.dirname(project_dir))
     result = runner.invoke(
         cli,
-        f"--v3-api store list".format(project_dir),
+        "--v3-api store list",
         catch_exceptions=False,
     )
     assert result.exit_code == 1

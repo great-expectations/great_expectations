@@ -61,7 +61,8 @@ def test_basic_instantiation(tmp_path_factory):
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
     # noinspection PyProtectedMember
@@ -134,7 +135,8 @@ assets:
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -194,7 +196,8 @@ assets:
             "alpha-3.csv",
         ],
         "unmatched_data_reference_count": 3,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -768,7 +771,8 @@ def test_foxtrot(tmp_path_factory):
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -855,7 +859,8 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
     my_batch_definition_list: List[BatchDefinition]
@@ -946,7 +951,8 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
     my_batch_definition_list: List[BatchDefinition]
@@ -1235,7 +1241,8 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
     my_data_connector = ConfiguredAssetFilesystemDataConnector(
@@ -1267,7 +1274,8 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
     my_data_connector = ConfiguredAssetFilesystemDataConnector(
@@ -1299,5 +1307,6 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
         },
         "example_unmatched_data_references": ["foo"],
         "unmatched_data_reference_count": 1,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }

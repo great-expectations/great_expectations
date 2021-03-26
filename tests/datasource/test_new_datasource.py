@@ -211,7 +211,8 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
                 "data_assets": {},
                 "example_data_asset_names": [],
                 "example_unmatched_data_references": [],
-                "unmatched_data_reference_count": 0,
+                # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+                # "example_data_reference": {},
             },
         },
         "execution_engine": {
@@ -855,16 +856,17 @@ data_connectors:
 
     print(json.dumps(report_obj, indent=2))
 
-    assert (
-        report_obj["data_connectors"]["my_configured_data_connector"][
-            "example_data_reference"
-        ]["n_rows"]
-        == 10
-    )
-
-    assert (
-        report_obj["data_connectors"]["my_inferred_data_connector"][
-            "example_data_reference"
-        ]["n_rows"]
-        == 10
-    )
+    # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+    # assert (
+    #     report_obj["data_connectors"]["my_configured_data_connector"][
+    #         "example_data_reference"
+    #     ]["n_rows"]
+    #     == 10
+    # )
+    #
+    # assert (
+    #     report_obj["data_connectors"]["my_inferred_data_connector"][
+    #         "example_data_reference"
+    #     ]["n_rows"]
+    #     == 10
+    # )
