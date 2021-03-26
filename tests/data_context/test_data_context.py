@@ -444,13 +444,12 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
-def test_render_full_static_site_from_empty_project(tmpdir, filesystem_csv_3):
+def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
 
-    # TODO : Use a standard test fixture that cleans up after itself
+    # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
 
-    base_dir = str(tmpdir.mkdir("project_dir"))
-    project_dir = os.path.join(base_dir, "project_path")
+    project_dir = os.path.join(tmp_path, "project_path")
     os.mkdir(project_dir)
 
     os.makedirs(os.path.join(project_dir, "data"))
@@ -484,7 +483,6 @@ project_path/
     )
 
     context = DataContext.create(project_dir)
-    ge_directory = os.path.join(project_dir, "great_expectations")
     context.add_datasource(
         "titanic",
         module_name="great_expectations.datasource",
@@ -522,7 +520,6 @@ project_path/
     ).to_id()
 
     tree_str = gen_directory_tree_str(project_dir)
-    # print(tree_str)
     assert (
         tree_str
         == """project_path/
@@ -595,7 +592,6 @@ project_path/
         project_dir, "great_expectations/uncommitted/data_docs"
     )
     observed = gen_directory_tree_str(data_docs_dir)
-    print(observed)
     assert (
         observed
         == """\

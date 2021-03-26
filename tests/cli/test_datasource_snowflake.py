@@ -12,6 +12,8 @@ from great_expectations.cli.datasource import (
 )
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
+# TODO this test errors out in CI with a bash 137. It was deemed low enough risk
+#  to comment out. A backlog task was created to address this after release.
 # @mock.patch("subprocess.call", return_value=True, side_effect=None)
 # def test_snowflake_user_password_credentials_generates_notebook(
 #     mock_subprocess, caplog, empty_data_context, monkeypatch

@@ -2,7 +2,6 @@ import datetime
 import decimal
 import json
 import platform
-import shutil
 import sys
 from functools import wraps
 
@@ -90,12 +89,9 @@ def test_recursively_convert_to_json_serializable(tmp_path):
         )
 
     # TypeError when non-serializable numpy object is in dataset.
-    temp_dir = tmp_path / "numpy_non_serializable"
-    temp_dir.mkdir()
     with pytest.raises(TypeError):
-        y = {"p": np.DataSource(temp_dir)}
+        y = {"p": np.DataSource(tmp_path)}
         ge.data_asset.util.recursively_convert_to_json_serializable(y)
-    shutil.rmtree(temp_dir)
 
 
 """
