@@ -6,7 +6,8 @@ Changelog
 
 Develop
 -----------------
-* [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource
+* [ENHANCEMENT] CLI `docs list` command implemented for v3 api
+* [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource #2613
 
 0.13.15
 -----------------

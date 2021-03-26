@@ -52,24 +52,22 @@ def docs_build(ctx, site_name, view=True):
 @docs.command(name="list")
 @click.pass_context
 def docs_list(ctx):
-    """List known Data Docs Sites."""
-    display_not_implemented_message_and_exit()
+    """List known Data Docs sites."""
     context = ctx.obj.data_context
-
     docs_sites_url_dicts = context.get_docs_sites_urls()
-    docs_sites_strings = [
-        " - <cyan>{}</cyan>: {}".format(
-            docs_site_dict["site_name"],
-            docs_site_dict.get("site_url")
-            or f"site configured but does not exist. Run the following command to build site: great_expectations "
-            f'docs build --site-name {docs_site_dict["site_name"]}',
-        )
-        for docs_site_dict in docs_sites_url_dicts
-    ]
 
-    if len(docs_sites_strings) == 0:
+    if len(docs_sites_url_dicts) == 0:
         cli_message("No Data Docs sites found")
     else:
+        docs_sites_strings = [
+            " - <cyan>{}</cyan>: {}".format(
+                docs_site_dict["site_name"],
+                docs_site_dict.get("site_url")
+                or f"site configured but does not exist. Run the following command to build site: great_expectations "
+                f'docs build --site-name {docs_site_dict["site_name"]}',
+            )
+            for docs_site_dict in docs_sites_url_dicts
+        ]
         list_intro_string = _build_intro_string(docs_sites_strings)
         cli_message_list(docs_sites_strings, list_intro_string)
 
