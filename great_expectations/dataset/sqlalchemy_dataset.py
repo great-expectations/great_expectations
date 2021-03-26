@@ -651,7 +651,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
             # Limit doesn't work in oracle either
             if self.engine.dialect.name.lower() == "oracle":
-                head_sql_str = 'select * from {table} WHERE ROWNUM <= {n}'.format(
+                head_sql_str = "select * from {table} WHERE ROWNUM <= {n}".format(
                     table=self._table.name, n=n
                 )
 
@@ -1299,7 +1299,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 table_name=table_name, custom_sql=custom_sql
             )
         elif engine_dialect == "oracle":
-            stmt = 'CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}'.format(
+            stmt = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         else:

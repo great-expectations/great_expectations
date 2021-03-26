@@ -425,12 +425,9 @@ class SqlAlchemyDatasource(LegacyDatasource):
                     schema = batch_kwargs.get("schema")
                 # limit doesn't compile properly for oracle so we will append rownum to query string later
                 if self.engine.dialect.name.lower() == "oracle":
-                    raw_query = (
-                        sqlalchemy.select([sqlalchemy.text("*")])
-                        .select_from(
-                            sqlalchemy.schema.Table(
-                                table, sqlalchemy.MetaData(), schema=schema
-                            )
+                    raw_query = sqlalchemy.select([sqlalchemy.text("*")]).select_from(
+                        sqlalchemy.schema.Table(
+                            table, sqlalchemy.MetaData(), schema=schema
                         )
                     )
                 else:
