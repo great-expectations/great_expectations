@@ -649,6 +649,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     n=n, table=self._table.name
                 )
 
+            # Limit doesn't work in oracle either
+            if self.engine.dialect.name.lower() == "oracle":
+                head_sql_str = 'select * from {table} WHERE ROWNUM <= {n}'.format(
+                    table=self._table.name, n=n
+                )
+
             df = pd.read_sql(head_sql_str, con=self.engine)
         except StopIteration:
             df = pd.DataFrame(columns=self.get_table_columns())
