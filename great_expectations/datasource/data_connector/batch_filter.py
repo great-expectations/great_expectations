@@ -65,9 +65,7 @@ def build_batch_filter(
                 'All batch_filter_parameters keys must strings (Python "str").'
             )
     if batch_filter_parameters is not None:
-        batch_filter_parameters: IDDict = IDDict(
-            batch_filter_parameters
-        )
+        batch_filter_parameters: IDDict = IDDict(batch_filter_parameters)
     index: Optional[
         Union[int, list, tuple, slice, str]
     ] = data_connector_query_dict.get("index")

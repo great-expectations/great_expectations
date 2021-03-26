@@ -1,11 +1,7 @@
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchDefinition,
-    IDDict,
-    BatchRequest,
-)
+from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 
 # noinspection PyProtectedMember
 from great_expectations.datasource.data_connector.util import (

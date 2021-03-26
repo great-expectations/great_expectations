@@ -4,10 +4,10 @@ import pytest
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
-    IDDict,
     BatchMarkers,
     BatchRequest,
     BatchSpec,
+    IDDict,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError

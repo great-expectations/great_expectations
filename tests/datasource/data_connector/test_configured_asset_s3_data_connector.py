@@ -10,9 +10,9 @@ from ruamel.yaml import YAML
 import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
-    IDDict,
     BatchRequest,
     BatchRequestBase,
+    IDDict,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
@@ -691,9 +691,7 @@ def test_alpha():
         datasource_name="BASE",
         data_connector_name="general_s3_data_connector",
         data_asset_name="A",
-        data_connector_query=IDDict(
-            **{"batch_filter_parameters": {"part_1": "B"}}
-        ),
+        data_connector_query=IDDict(**{"batch_filter_parameters": {"part_1": "B"}}),
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(

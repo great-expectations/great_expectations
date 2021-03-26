@@ -35,9 +35,7 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            data_connector_query=IDDict(
-                batch_filter_parameters={"date": "2020-01-15"}
-            ),
+            data_connector_query=IDDict(batch_filter_parameters={"date": "2020-01-15"}),
         )
     )
 
@@ -155,9 +153,7 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            data_connector_query=IDDict(
-                batch_filter_parameters={"date": "2020-01-15"}
-            ),
+            data_connector_query=IDDict(batch_filter_parameters={"date": "2020-01-15"}),
         ),
         expectation_suite_name="my_expectations",
     )
@@ -312,9 +308,7 @@ def test_get_validator_expectation_suite_options(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            data_connector_query=IDDict(
-                batch_filter_parameters={"date": "2020-01-15"}
-            ),
+            data_connector_query=IDDict(batch_filter_parameters={"date": "2020-01-15"}),
         ),
         create_expectation_suite_with_name="yet_more_expectations",
     )

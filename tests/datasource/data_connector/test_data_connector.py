@@ -4,9 +4,9 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import (
     BatchDefinition,
-    IDDict,
     BatchRequest,
     BatchRequestBase,
+    IDDict,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (

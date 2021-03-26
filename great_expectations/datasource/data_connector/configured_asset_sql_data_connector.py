@@ -2,9 +2,9 @@ from typing import Dict, List, Optional
 
 from great_expectations.core.batch import (
     BatchDefinition,
-    IDDict,
     BatchRequest,
     BatchSpec,
+    IDDict,
 )
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector.data_connector import DataConnector

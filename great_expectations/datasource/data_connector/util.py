@@ -134,9 +134,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     if matches is None:
         return None
     groups: list = list(matches.groups())
-    batch_identifiers: IDDict = IDDict(
-        dict(zip(group_names, groups))
-    )
+    batch_identifiers: IDDict = IDDict(dict(zip(group_names, groups)))
 
     # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
     # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
@@ -177,10 +175,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
     data_asset_name: Optional[str] = None,
 ) -> str:
     if not isinstance(batch_identifiers, IDDict):
-        raise TypeError(
-            "batch_identifiers is not "
-            "an instance of type IDDict"
-        )
+        raise TypeError("batch_identifiers is not " "an instance of type IDDict")
 
     template_arguments: dict = copy.deepcopy(batch_identifiers)
     # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>

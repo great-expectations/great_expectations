@@ -4,11 +4,7 @@ import hashlib
 import json
 from typing import Dict, Optional, Union
 
-from great_expectations.core.id_dict import (
-    BatchKwargs,
-    BatchSpec,
-    IDDict,
-)
+from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -341,7 +337,9 @@ class BatchRequest(BatchRequestBase):
                         """
             )
         # TODO Abe 20201015: Switch this to DataConnectorQuery.
-        if data_connector_query and not isinstance(data_connector_query, (dict, IDDict)):
+        if data_connector_query and not isinstance(
+            data_connector_query, (dict, IDDict)
+        ):
             raise TypeError(
                 f"""The type of data_connector_query must be a dict or IDDict object.  The type given is
 "{str(type(data_connector_query))}", which is illegal.
