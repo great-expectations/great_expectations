@@ -152,10 +152,10 @@ def test_docs_build_assume_yes(
         cli,
         [
             "--v3-api",
+            "--assume-yes",
             "docs",
             "build",
             "--no-view",
-            "--assume-yes",
         ],
         catch_exceptions=False,
     )
@@ -163,6 +163,9 @@ def test_docs_build_assume_yes(
 
     assert result.exit_code == 0
     assert "Would you like to proceed? [Y/n]:" not in stdout
+    # This assertion is extra assurance since this test is too permissive if we change the confirmation message
+    assert "[Y/n]" not in stdout
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,

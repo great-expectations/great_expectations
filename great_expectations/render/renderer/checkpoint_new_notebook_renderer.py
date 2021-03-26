@@ -147,10 +147,7 @@ This `test_yaml_config()` function is meant to enable fast dev loops. If your co
 If you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters."""
         )
         self.add_code_cell(
-            f"""my_checkpoint = context.test_yaml_config(
-    name=my_checkpoint_name,
-    yaml_config={self.checkpoint_name}_config
-)""",
+            f"""my_checkpoint = context.test_yaml_config(yaml_config={self.checkpoint_name}_config)""",
             lint=True,
         )
 
