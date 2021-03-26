@@ -3,7 +3,7 @@ import logging
 from typing import Callable, Dict, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.id_dict import BatchIdentifiersSubset
+from great_expectations.core.id_dict import IDDict
 from great_expectations.util import is_int
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ def build_batch_filter(
                     tuple,
                     slice,
                     str,
-                    Union[Dict, BatchIdentifiersSubset],
+                    Union[Dict, IDDict],
                     Callable,
                 ]
             ],
@@ -65,7 +65,7 @@ def build_batch_filter(
                 'All batch_filter_parameters keys must strings (Python "str").'
             )
     if batch_filter_parameters is not None:
-        batch_filter_parameters: BatchIdentifiersSubset = BatchIdentifiersSubset(
+        batch_filter_parameters: IDDict = IDDict(
             batch_filter_parameters
         )
     index: Optional[
@@ -135,7 +135,7 @@ class BatchFilter:
     def __init__(
         self,
         custom_filter_function: Callable = None,
-        batch_filter_parameters: Optional[BatchIdentifiersSubset] = None,
+        batch_filter_parameters: Optional[IDDict] = None,
         index: Optional[Union[int, slice]] = None,
         limit: int = None,
     ):
@@ -149,7 +149,7 @@ class BatchFilter:
         return self._custom_filter_function
 
     @property
-    def batch_filter_parameters(self) -> Optional[BatchIdentifiersSubset]:
+    def batch_filter_parameters(self) -> Optional[IDDict]:
         return self._batch_filter_parameters
 
     @property

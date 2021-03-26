@@ -31,10 +31,6 @@ class BatchSpec(IDDict):
     pass
 
 
-class BatchIdentifiersSubset(IDDict):
-    pass
-
-
 class DataConnectorQuery(BatchIdentifiersSubset):
     pass
 class MetricKwargs(IDDict):

@@ -232,7 +232,7 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "S3Generator": "S3GlobReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
-            "PartitionDefinitionSubset": "BatchIdentifiersSubset",
+            "PartitionDefinitionSubset": "IDDict",
             "PartitionRequest": "DataConnectorQuery",
             "PartitionDefinition": "IDDict",
             "PartitionQuery": "BatchFilter",

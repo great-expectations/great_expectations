@@ -17,7 +17,7 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     RuntimeBatchRequest,
 )
-from great_expectations.core.id_dict import IDDict, BatchIdentifiersSubset
+from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -101,7 +101,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     data_asset_name: Optional[str] = None,
 ) -> Optional[List[BatchDefinition]]:
     processed_data_reference: Optional[
-        Tuple[str, BatchIdentifiersSubset]
+        Tuple[str, IDDict]
     ] = convert_data_reference_string_to_batch_identifiers_using_regex(
         data_reference=data_reference,
         regex_pattern=regex_pattern,
@@ -110,7 +110,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     if processed_data_reference is None:
         return None
     data_asset_name_from_batch_identifiers: str = processed_data_reference[0]
-    batch_identifiers: BatchIdentifiersSubset = processed_data_reference[1]
+    batch_identifiers: IDDict = processed_data_reference[1]
     if data_asset_name is None:
         data_asset_name = data_asset_name_from_batch_identifiers
 
@@ -128,13 +128,13 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
-) -> Optional[Tuple[str, BatchIdentifiersSubset]]:
+) -> Optional[Tuple[str, IDDict]]:
     # noinspection PyUnresolvedReferences
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
     if matches is None:
         return None
     groups: list = list(matches.groups())
-    batch_identifiers: BatchIdentifiersSubset = BatchIdentifiersSubset(
+    batch_identifiers: IDDict = IDDict(
         dict(zip(group_names, groups))
     )
 
@@ -176,10 +176,10 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
     group_names: List[str],
     data_asset_name: Optional[str] = None,
 ) -> str:
-    if not isinstance(batch_identifiers, (BatchIdentifiersSubset, IDDict)):
+    if not isinstance(batch_identifiers, IDDict):
         raise TypeError(
             "batch_identifiers is not "
-            "an instance of type BatchIdentifiersSubset or IDDict"
+            "an instance of type IDDict"
         )
 
     template_arguments: dict = copy.deepcopy(batch_identifiers)

@@ -17,7 +17,7 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.id_dict import IDDict, BatchIdentifiersSubset
+from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -168,7 +168,7 @@ class RuntimeDataConnector(DataConnector):
         self,
         data_asset_name: str,
         batch_definition_list: List,
-        batch_identifiers: BatchIdentifiersSubset,
+        batch_identifiers: IDDict,
     ):
         data_reference = self._get_data_reference_name(batch_identifiers)
 
@@ -225,10 +225,10 @@ class RuntimeDataConnector(DataConnector):
 
     @staticmethod
     def _get_data_reference_name(
-        batch_identifiers: BatchIdentifiersSubset,
+        batch_identifiers: IDDict,
     ) -> str:
         if batch_identifiers is None:
-            batch_identifiers = BatchIdentifiersSubset({})
+            batch_identifiers = IDDict({})
         data_reference_name = DEFAULT_DELIMITER.join(
             [str(value) for value in batch_identifiers.values()]
         )
