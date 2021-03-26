@@ -171,3 +171,65 @@ def test_docs_build_assume_yes(
         click_result=result,
         allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
+
+
+def test_docs_list_with_no_sites(
+    caplog, monkeypatch, titanic_data_context_no_data_docs
+):
+    context = titanic_data_context_no_data_docs
+
+    runner = CliRunner(mix_stderr=True)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        "--v3-api docs list",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "No Data Docs sites found" in stdout
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_docs_list(
+    mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled_config_version_3
+):
+    context = titanic_data_context_stats_enabled_config_version_3
+    runner = CliRunner(mix_stderr=True)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        "--v3-api docs list",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+    assert result.exit_code == 0
+    assert "1 Data Docs site configured:" in stdout
+    assert "local_site" in stdout
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.docs.list",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
