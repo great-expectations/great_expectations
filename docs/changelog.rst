@@ -6,7 +6,7 @@ Changelog
 
 Develop
 -----------------
-
+* [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource
 
 0.13.15
 -----------------
