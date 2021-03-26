@@ -301,8 +301,8 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
 
     with pytest.raises(StoreBackendError) as e:
         TupleFilesystemStoreBackend(
-            root_directory=os.path.abspath(path),
-            base_directory=project_path,
+            root_directory=project_path,
+            base_directory=os.path.join(project_path, path),
             filepath_prefix="invalid_prefix_ends_with/",
         )
     assert "filepath_prefix may not end with" in e.value.message

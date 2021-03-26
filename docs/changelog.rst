@@ -4,16 +4,26 @@
 Changelog
 #########
 
-develop
+Develop
 -----------------
-* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
+
+
+0.13.15
+-----------------
 * [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
+* [ENHANCEMENT] Datasource CLI functionality for v3 api and global --assume-yes flag #2590
+* [ENHANCEMENT] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
+* [ENHANCEMENT] Adding tqdm to Profiler (Thanks @peterdhansen). New library in requirements.txt
+* [ENHANCEMENT][MAINTENANCE] Use Metrics to Protect Against Wrong Column Names
+* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
 * [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
 * [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
-* [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource
 * [ENHANCE] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
-* [MAINTENANCE] Oracle listed twice in list of sqlalchemy dialects
-* [FEATURE] Oracle support added to sqlalchemy datasource and dataset
+* [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource (Thanks @xaniasd)
+* [BUGFIX] pandas partial read_ functions not being unwrapped (Thanks @luke321321)
+* [BUGFIX] Don't stop SparkContext when running in Databricks (#2587) (Thanks @jarandaf)
+* [MAINTENANCE] Oracle listed twice in list of sqlalchemy dialects #2609
+* [FEATURE] Oracle support added to sqlalchemy datasource and dataset #2609
 
 0.13.14
 -----------------
