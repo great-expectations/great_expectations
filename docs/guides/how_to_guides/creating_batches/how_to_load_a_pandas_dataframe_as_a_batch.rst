@@ -84,8 +84,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
 
-
-        What used to be called a “batch” in the old API was replaced with :ref:`Validator <reference__core_concepts__validation>`. A Validator knows how to validate a particular batch of data on a particular :ref:`Execution Engine <reference__core_concepts>` against a particular :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
+        What used to be called a “Batch” in the old API was replaced with :ref:`Validator <reference__core_concepts__validation>`. A Validator knows how to validate a particular Batch of data on a particular :ref:`Execution Engine <reference__core_concepts>` against a particular :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
 
         You can read more about the core classes that make Great Expectations run in our :ref:`Core Concepts reference guide <reference__core_concepts>`.
 
@@ -93,97 +92,166 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Configured and loaded a DataContext <how_to_guides__configuring_data_contexts>`
-            - Identified a Pandas DataFrame that you would like to use as the data to validate.
+            - Configured a :ref:`Pandas/filesystem<how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>` or :ref:`Pandas/S3<how_to_guides__configuring_datasources__how_to_configure_a_pandas_s3_datasource>` Datasource with a :ref:`Runtime Data Connector<how_to_guides__creating_batches__how_to_configure_a_runtime_data_connector>`.
+            - Identified an in-memory Pandas DataFrame that you would like to use as the data to validate. **OR**
+            - Identified a filesystem or S3 path to a file that contains the data you would like to use to validate.
 
         Steps
-        -----
+        ------
 
         0. Load or create a Data Context
 
-            The ``context`` referenced below can be loaded from disk or configured in code.
+          The ``context`` referenced below can be loaded from disk or configured in code.
 
-            Load an on-disk Data Context via:
+          Load an on-disk Data Context via:
 
-            .. code-block:: python
+          .. code-block:: python
 
-                import great_expectations as ge
-                context = ge.get_context()
+              import great_expectations as ge
+              context: DataContext = ge.get_context()
 
-            Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
+          Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
 
+        1. Obtain an Expectation Suite
 
-        1. Configure a Datasource
+          .. code-block:: python
 
-            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Pandas DataFrame, we use the ``PandasExecutionEngine``. You can use ``batch_identifiers`` to define what data you are able to attach as additional metadata to your DataFrame using the ``data_connector_query`` parameter (shown in step 3).
+            suite: ExpectationSuite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
 
-            .. code-block:: yaml
+          Alternatively, you can simply use the name of the Expectation Suite.
 
-                insert_your_pandas_datasource_name_here:
-                  class_name: Datasource
-                  execution_engine:
-                    class_name: PandasExecutionEngine
-                  data_connectors:
-                    insert_your_runtime_data_connector_name_here:
-                      module_name: great_expectations.datasource.data_connector
-                      class_name: RuntimeDataConnector
-                      batch_identifiers:
-                        - some_key_maybe_pipeline_stage
-                        - some_other_key_maybe_run_id
+          .. code-block:: python
 
+            suite_name: str = "insert_your_expectation_suite_name_here"
 
-        2. Obtain an Expectation Suite
+          If you have not already created a suite, you can do so now.
 
-            .. code-block:: python
+          .. code-block:: python
 
-                suite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
+            suite: ExpectationSuite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
 
-            Alternatively, if you have not already created a suite, you can do so now.
+        2. Construct a Runtime Batch Request
 
-            .. code-block:: python
+          We will create a ``RuntimeBatchRequest`` and pass it our DataFrame or path via the ``runtime_parameters`` argument, under either the ``batch_data`` or ``path`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
 
-                suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
+          If you are providing a filesystem path instead of a materialized DataFrame, you may use either an absolute or relative path (with respect to the current working directory). Under the hood, Great Expectations will instantiate a Pandas Dataframe using the appropriate ``pandas.read_*`` method, which will be inferred from the file extension. If your file names do not have extensions, you can specify the appropriate reader method explicitly via the ``batch_spec_passthrough`` argument. Any Pandas reader options (i.e. ``sep`` or ``header``) that are required to properly read your data can also be specified with the ``batch_spec_passthrough`` argument, in a dictionary nested under a key named ``reader_options``.
 
-        3. Construct a BatchRequest
+          Example ``great_expectations.yml`` Datsource configuration:
 
-            We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument.
+          .. code-block:: yaml
 
-            Attributes inside the ``data_connector_query`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``batch_identifiers`` to define which keys are allowed.
+            my_pandas_datasource:
+              execution_engine:
+                module_name: great_expectations.execution_engine
+                class_name: PandasExecutionEngine
+              module_name: great_expectations.datasource
+              class_name: Datasource
+              data_connectors:
+                my_runtime_data_connector:
+                  class_name: RuntimeDataConnector
+                  batch_identifiers:
+                    - some_key_maybe_pipeline_stage
+                    - some_other_key_maybe_airflow_run_id
 
-            .. code-block:: python
+          Example Runtime Batch Request using an in-memory DataFrame:
 
-                from great_expectations.core.batch import BatchRequest
+          .. code-block:: python
 
-                batch_request = BatchRequest(
-                    datasource_name="insert_your_pandas_datasource_name_here",
-                    data_connector_name="insert_your_runtime_data_connector_name_here",
-                    data_asset_name="insert_your_data_asset_name_here",
-                    batch_data=insert_your_dataframe_here,
-                    data_connector_query={
-                        "batch_identifiers": {
-                            "some_key_maybe_pipeline_stage": "ingestion step 1",
-                            "some_other_key_maybe_run_id": "run 18"
-                        }
+            from great_expectations.core.batch import RuntimeBatchRequest
+            import pandas as pd
+
+            df: pd.DataFrame = pd.read_csv("some_path.csv")
+            runtime_batch_request = RuntimeBatchRequest(
+                datasource_name="my_pandas_datasource",
+                data_connector_name="my_runtime_data_connector",
+                data_asset_name="insert_your_data_asset_name_here",
+                runtime_parameters={
+                  "batch_data": df
+                },
+                batch_identifiers={
+                    "some_key_maybe_pipeline_stage": "ingestion step 1",
+                    "some_other_key_maybe_run_id": "run 18"
+                }
+            )
+
+          Example Runtime Batch Request using a path:
+
+          .. code-block:: python
+
+            from great_expectations.core.batch import RuntimeBatchRequest
+
+            path = "some_csv_file_with_no_file_extension"
+            runtime_batch_request = RuntimeBatchRequest(
+                datasource_name="my_pandas_datasource",
+                data_connector_name="my_runtime_data_connector",
+                data_asset_name="insert_your_data_asset_name_here",
+                runtime_parameters={
+                    "path": path
+                },
+                batch_identifiers={
+                    "some_key_maybe_pipeline_stage": "ingestion step 1",
+                    "some_other_key_maybe_run_id": "run 18"
+                },
+                batch_spec_passthrough={
+                    "reader_method": "read_csv",
+                    "reader_options": {
+                        "sep": ",",
+                        "header": 0
                     }
-                )
+                }
+            )
 
+          .. admonition:: Best Practice
 
-        4. Construct a Validator
+            Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
 
-            .. code-block:: python
+        3. Construct a Validator
 
-                my_validator = context.get_validator(
-                    batch_request=batch_request,
-                    expectation_suite=suite
-                )
+          .. code-block:: python
 
+            from great_expectation.validator.validator import Validator
 
-        5. Check your data
+            my_validator: Validator = context.get_validator(
+                batch_request=runtime_batch_request,
+                expectation_suite=suite,  # OR
+                # expectation_suite_name=suite_name
+            )
 
-            You can check that the first few lines of your Batch are what you expect by running:
+          Alternatively, you may skip step 3 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
 
-            .. code-block:: python
+          .. code-block:: python
 
-                my_validator.active_batch.head()
+            from great_expectation.validator.validator import Validator
+
+            my_validator: Validator = context.get_validator(
+                datasource_name="my_pandas_datasource",
+                data_connector_name="my_runtime_data_connector",
+                data_asset_name="insert_your_data_asset_name_here",
+                runtime_parameters={
+                    "path": path
+                },
+                batch_identifiers={
+                    "some_key_maybe_pipeline_stage": "ingestion step 1",
+                    "some_other_key_maybe_run_id": "run 18"
+                },
+                batch_spec_passthrough={
+                    "reader_method": "read_csv",
+                    "reader_options": {
+                        "sep": ",",
+                        "header": 0
+                    }
+                }
+                expectation_suite=suite,  # OR
+                # expectation_suite_name=suite_name
+            )
+
+        4. Check your data
+
+          You can check that the first few lines of your Batch are what you expect by running:
+
+          .. code-block:: python
+
+            my_validator.head()
 
         Now that you have a Validator, you can use it to create Expectations or validate the data.
 
