@@ -64,31 +64,6 @@ class BaseNotebookRenderer(Renderer):
         """
         Render a notebook from parameters.
         """
-        # Implementation example from `suite edit`:
-
-        # def render(
-        #         self, suite: ExpectationSuite, batch_kwargs=None
-        # ) -> nbformat.NotebookNode:
-        #     """
-        #     Render a notebook dict from an expectation suite.
-        #     """
-        # Check for errors in parameters, get values to be used
-        #     if not isinstance(suite, ExpectationSuite):
-        #         raise RuntimeWarning("render must be given an ExpectationSuite.")
-        #
-        #     self._notebook = nbformat.v4.new_notebook()
-        #
-        #     suite_name = suite.expectation_suite_name
-        #
-        #     batch_kwargs = self.get_batch_kwargs(suite, batch_kwargs)
-        # Add cells
-        #     self.add_header(suite_name, batch_kwargs)
-        #     self.add_authoring_intro()
-        #     self.add_expectation_cells_from_suite(suite.expectations)
-        #     self.add_footer()
-        #
-        # Return notebook
-        #     return self._notebook
         raise NotImplementedError
 
     def render_to_disk(
@@ -98,17 +73,4 @@ class BaseNotebookRenderer(Renderer):
         """
         Render a notebook to disk from arguments
         """
-        # Implementation example from `suite edit`:
-
-        # def render_to_disk(
-        #         self, suite: ExpectationSuite, notebook_file_path: str, batch_kwargs=None
-        # ) -> None:
-        #     """
-        #     Render a notebook to disk from an expectation suite.
-        #
-        #     If batch_kwargs are passed they will override any found in suite
-        #     citations.
-        #     """
-        #     self.render(suite, batch_kwargs)
-        #     self.write_notebook_to_disk(self._notebook, notebook_file_path)
         raise NotImplementedError

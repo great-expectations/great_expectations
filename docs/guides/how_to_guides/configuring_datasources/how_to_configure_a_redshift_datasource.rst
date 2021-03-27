@@ -150,7 +150,7 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Redshift datasource, do the following:
 
@@ -167,9 +167,9 @@ Steps
                 # or if on macOS:
                 pip install psycopg2-binary
 
-        #. **Instantiate a DataContext.**
+        #. **Instantiate a Data Context.**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
 
             .. code-block:: python
 
@@ -180,19 +180,19 @@ Steps
 
             Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials.  Username, password, host, port, and database are set as strings.
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
-
             .. code-block:: python
 
+                datasource_name = "my_redshift_datasource"
                 config = f"""
+                name: {datasource_name}
                 class_name: SimpleSqlalchemyDatasource
                 credentials:
                   drivername: postgresql+psycopg2
                   username: YOUR_REDSHIFT_USERNAME
                   password: YOUR_REDSHIFT_PASSWORD
-                  host: my-datawarehouse-name.abcde1qrstuw.us-east-1.redshift.amazonaws.com
+                  host: YOUR_REDSHIFT_HOSTNAME
                   port: 5439
-                  database: dev
+                  database: YOUR_REDSHIFT_DATABASE
                   query:
                       sslmode: prefer
                 introspection:
@@ -200,12 +200,13 @@ Steps
                     data_asset_name_suffix: __whole_table
                 """
 
+            **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+
         #. **Run context.test_yaml_config.**
 
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_redshift_datasource",
                     yaml_config=config
                 )
 
@@ -228,38 +229,19 @@ Steps
 
                 Unmatched data_references (0 of 0): []
 
-                Choosing an example data reference...
-                    Reference chosen: {}
 
-                    Fetching batch data...
-
-                    Showing 5 rows
-                   movieid                               title                                       genres
-                    0        1                    Toy Story (1995)  Adventure|Animation|Children|Comedy|Fantasy
-                    1        3             Grumpier Old Men (1995)                               Comedy|Romance
-                    2        5  Father of the Bride Part II (1995)                                       Comedy
-                    3        7                      Sabrina (1995)                               Comedy|Romance
-                    4        9                 Sudden Death (1995)                                       Action
-
-
-
-            If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, ``test_yaml_config`` provides helpful warnings and error messages, like the example below. It can't solve every problem, but it can solve many.
-
-            .. code-block:: bash
-
-                ...
-
-                psycopg2.OperationalError: FATAL:  password authentication failed for user "my_username"
-                FATAL:  password authentication failed for user "my_username"
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_redshift_datasource`` in our example).
-            Next, copy the yml snippet from Step 3 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
 
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
+
+            **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
 
 ----------------
 Additional Notes

@@ -38,20 +38,11 @@ def docs(ctx):
     help="By default open in browser unless you specify the --no-view flag",
     default=True,
 )
-@click.option(
-    "--assume-yes",
-    "--yes",
-    "-y",
-    is_flag=True,
-    help="By default request confirmation to build docs unless you specify -y/--yes/--assume-yes flag to skip dialog",
-    default=False,
-)
 @click.pass_context
-def docs_build(ctx, site_name, view=True, assume_yes=False):
-    """ Build Data Docs for a project."""
-    display_not_implemented_message_and_exit()
-    context = ctx.obj.data_context
-    build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
+def docs_build(ctx, site_name, view=True):
+    """Build Data Docs for a project."""
+    context: DataContext = ctx.obj.data_context
+    build_docs(context, site_name=site_name, view=view, assume_yes=ctx.obj.assume_yes)
     toolkit.send_usage_message(
         data_context=context, event="cli.docs.build", success=True
     )
@@ -60,24 +51,22 @@ def docs_build(ctx, site_name, view=True, assume_yes=False):
 @docs.command(name="list")
 @click.pass_context
 def docs_list(ctx):
-    """List known Data Docs Sites."""
-    display_not_implemented_message_and_exit()
+    """List known Data Docs sites."""
     context = ctx.obj.data_context
-
     docs_sites_url_dicts = context.get_docs_sites_urls()
-    docs_sites_strings = [
-        " - <cyan>{}</cyan>: {}".format(
-            docs_site_dict["site_name"],
-            docs_site_dict.get("site_url")
-            or f"site configured but does not exist. Run the following command to build site: great_expectations "
-            f'docs build --site-name {docs_site_dict["site_name"]}',
-        )
-        for docs_site_dict in docs_sites_url_dicts
-    ]
 
-    if len(docs_sites_strings) == 0:
+    if len(docs_sites_url_dicts) == 0:
         cli_message("No Data Docs sites found")
     else:
+        docs_sites_strings = [
+            " - <cyan>{}</cyan>: {}".format(
+                docs_site_dict["site_name"],
+                docs_site_dict.get("site_url")
+                or f"site configured but does not exist. Run the following command to build site: great_expectations "
+                f'docs build --site-name {docs_site_dict["site_name"]}',
+            )
+            for docs_site_dict in docs_sites_url_dicts
+        ]
         list_intro_string = _build_intro_string(docs_sites_strings)
         cli_message_list(docs_sites_strings, list_intro_string)
 
