@@ -124,7 +124,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             suite_name: str = "insert_your_expectation_suite_name_here"
 
-          If you have not already created a suite, you can do so now.
+          If you have not already created an Expectation Suite, you can do so now.
 
           .. code-block:: python
 
@@ -217,7 +217,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                 # expectation_suite_name=suite_name
             )
 
-          Alternatively, you may skip step 3 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
+          Alternatively, you may skip step 2 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
 
           .. code-block:: python
 
@@ -240,7 +240,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
                         "sep": ",",
                         "header": 0
                     }
-                }
+                },
                 expectation_suite=suite,  # OR
                 # expectation_suite_name=suite_name
             )
