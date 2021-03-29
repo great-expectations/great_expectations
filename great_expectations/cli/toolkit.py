@@ -117,9 +117,10 @@ def create_expectation_suite(
             # In this case, we have "consumed" the additional_batch_request_args
             additional_batch_request_args = {}
 
-    batch_request = standardize_batch_request_display_ordering(
-        batch_request=batch_request
-    )
+    if batch_request:
+        batch_request = standardize_batch_request_display_ordering(
+            batch_request=batch_request
+        )
 
     if expectation_suite_name is None:
         default_expectation_suite_name: str = _get_default_expectation_suite_name(
