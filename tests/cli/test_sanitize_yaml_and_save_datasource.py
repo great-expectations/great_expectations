@@ -112,3 +112,135 @@ credentials:
             "username": "user",
         }
     }
+
+
+def test_sanitize_yaml_and_save_datasource_does_not_overwrite_duplicate_when_overwrite_existing_is_false(
+    capsys,
+    empty_data_context,
+):
+    context = empty_data_context
+    pandas_yaml_snippet = """
+name: my_datasource
+class_name: Datasource
+execution_engine:
+  class_name: PandasExecutionEngine
+"""
+
+    assert len(context.list_datasources()) == 0
+    sanitize_yaml_and_save_datasource(
+        context, pandas_yaml_snippet, overwrite_existing=False
+    )
+    assert len(context.list_datasources()) == 1
+    datasource_from_context = [
+        {
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "name": "my_datasource",
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+        }
+    ]
+    assert context.list_datasources() == datasource_from_context
+    sanitize_yaml_and_save_datasource(
+        context, pandas_yaml_snippet, overwrite_existing=False
+    )
+    assert len(context.list_datasources()) == 1
+
+    stdout = capsys.readouterr().out.strip()
+    assert (
+        '**WARNING** A Datasource named "my_datasource" already exists in this Data Context. The Datasource has *not* been saved. Please use a different name or set overwrite_existing=True if you want to overwrite!'.strip()
+        == stdout
+    )
+
+    # retest with a different type of datasource with the same name
+    sql_yaml_snippet = """
+    name: my_datasource
+    class_name: SimpleSqlalchemyDatasource
+    introspection:
+      whole_table:
+        data_asset_name_suffix: __whole_table
+    connection_string: sqlite://"""
+
+    sanitize_yaml_and_save_datasource(
+        context, sql_yaml_snippet, overwrite_existing=False
+    )
+    assert len(context.list_datasources()) == 1
+
+    stdout = capsys.readouterr().out.strip()
+    assert (
+        '**WARNING** A Datasource named "my_datasource" already exists in this Data Context. The Datasource has *not* been saved. Please use a different name or set overwrite_existing=True if you want to overwrite!'.strip()
+        == stdout
+    )
+
+
+def test_sanitize_yaml_and_save_datasource_does_overwrite_duplicate_when_overwrite_existing_is_true(
+    sa,
+    capsys,
+    empty_data_context,
+):
+    context = empty_data_context
+    pandas_yaml_snippet = """
+name: my_datasource
+class_name: Datasource
+execution_engine:
+  class_name: PandasExecutionEngine
+"""
+
+    assert len(context.list_datasources()) == 0
+    sanitize_yaml_and_save_datasource(
+        context, pandas_yaml_snippet, overwrite_existing=True
+    )
+    assert len(context.list_datasources()) == 1
+    pandas_datasource_from_context = [
+        {
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "name": "my_datasource",
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+        }
+    ]
+    assert context.list_datasources() == pandas_datasource_from_context
+    sanitize_yaml_and_save_datasource(
+        context, pandas_yaml_snippet, overwrite_existing=True
+    )
+    assert len(context.list_datasources()) == 1
+    assert context.list_datasources() == pandas_datasource_from_context
+
+    stdout = capsys.readouterr().out.strip()
+    assert stdout == ""
+
+    # retest with a different type of datasource with the same name
+    sql_yaml_snippet = """
+    name: my_datasource
+    class_name: SimpleSqlalchemyDatasource
+    introspection:
+      whole_table:
+        data_asset_name_suffix: __whole_table
+    connection_string: sqlite://"""
+
+    sanitize_yaml_and_save_datasource(
+        context, sql_yaml_snippet, overwrite_existing=True
+    )
+    assert len(context.list_datasources()) == 1
+
+    stdout = capsys.readouterr().out
+    assert stdout == ""
+
+    assert context.list_datasources() != pandas_datasource_from_context
+    sql_datasource_from_context = [
+        {
+            "class_name": "SimpleSqlalchemyDatasource",
+            "connection_string": "sqlite://",
+            "introspection": {
+                "whole_table": {"data_asset_name_suffix": "__whole_table"}
+            },
+            "module_name": "great_expectations.datasource",
+            "name": "my_datasource",
+        }
+    ]
+    assert context.list_datasources() == sql_datasource_from_context
