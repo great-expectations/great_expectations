@@ -92,7 +92,7 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Configured and loaded a DataContext <how_to_guides__configuring_data_contexts>`
-            - Configured a :ref:`Pandas/filesystem<how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>` or :ref:`Pandas/S3<how_to_guides__configuring_datasources__how_to_configure_a_pandas_s3_datasource>` Datasource with a :ref:`Runtime Data Connector<how_to_guides__creating_batches__how_to_configure_a_runtime_data_connector>`.
+            - Configured a :ref:`Pandas Datasource<how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource>` with a :ref:`Runtime Data Connector<how_to_guides__creating_batches__how_to_configure_a_runtime_data_connector>`.
             - Identified an in-memory Pandas DataFrame that you would like to use as the data to validate. **OR**
             - Identified a filesystem or S3 path to a file that contains the data you would like to use to validate.
 
