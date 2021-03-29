@@ -349,7 +349,7 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
 
 
 def test_validator_default_expectation_args__sql(
-        data_context_with_simple_sql_datasource_for_testing_get_batch,
+    data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
 
