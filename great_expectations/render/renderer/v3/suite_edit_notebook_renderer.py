@@ -138,7 +138,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         notebook_config: Optional[NotebookTemplateConfig],
         default_file_name: str,
-        **default_kwargs
+        **default_kwargs,
     ):
         rendered: str
         if notebook_config:

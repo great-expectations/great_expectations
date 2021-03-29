@@ -12,7 +12,10 @@ from ruamel.yaml.compat import StringIO
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.cli.batch_request import get_batch_request
+from great_expectations.cli.batch_request import (
+    get_batch_request,
+    standardize_batch_request_display_ordering,
+)
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
@@ -113,6 +116,10 @@ def create_expectation_suite(
             )
             # In this case, we have "consumed" the additional_batch_request_args
             additional_batch_request_args = {}
+
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
 
     if expectation_suite_name is None:
         default_expectation_suite_name: str = _get_default_expectation_suite_name(

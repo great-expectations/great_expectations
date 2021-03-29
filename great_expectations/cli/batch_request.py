@@ -299,3 +299,21 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     )
     inspector: Inspector = Inspector.from_engine(execution_engine.engine)
     return inspector.default_schema_name
+
+
+def standardize_batch_request_display_ordering(
+    batch_request: Dict[str, Union[str, Dict[str, Any]]]
+) -> Dict[str, Union[str, Dict[str, Any]]]:
+    datasource_name: str = batch_request["datasource_name"]
+    data_connector_name: str = batch_request["data_connector_name"]
+    data_asset_name: str = batch_request["data_asset_name"]
+    batch_request.pop("datasource_name")
+    batch_request.pop("data_connector_name")
+    batch_request.pop("data_asset_name")
+    batch_request = {
+        "datasource_name": datasource_name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        **batch_request,
+    }
+    return batch_request

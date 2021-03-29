@@ -8,7 +8,10 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
-from great_expectations.cli.batch_request import get_batch_request
+from great_expectations.cli.batch_request import (
+    get_batch_request,
+    standardize_batch_request_display_ordering,
+)
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import (
     cli_message,
@@ -359,6 +362,9 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 additional_batch_request_args=additional_batch_request_args,
             )
 
+        batch_request = standardize_batch_request_display_ordering(
+            batch_request=batch_request
+        )
         suite.add_citation(
             comment="Updated suite added via CLI",
             no_dataset=no_dataset,
