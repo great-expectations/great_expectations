@@ -210,7 +210,7 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
                 "data_assets": {},
                 "example_data_asset_names": [],
                 "example_unmatched_data_references": [],
-                'unmatched_data_reference_count': 0,
+                "unmatched_data_reference_count": 0,
             },
         },
         "execution_engine": {
