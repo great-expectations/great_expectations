@@ -198,7 +198,10 @@ Steps
 
         2. **Configure a Datasource**
 
-          In the following configuration, a Datasource is configured with a ``PandasExecutionEngine`` and ``ConfiguredAssetFilesystemDataConnector``. The DataConnector is configured with a single DataAsset named ``my_reports``. It has the ``base_directory`` set to ``reports/`` and the regex ``pattern`` is set to capture two ``group_names``, ``name`` and ``num``.
+          In the following configuration, a Datasource is configured with a ``PandasExecutionEngine`` and ``ConfiguredAssetFilesystemDataConnector``.
+          The DataConnector is configured with a single DataAsset named ``my_reports``. It has the ``base_directory`` set to ``reports/``
+          and the regex ``pattern`` is set to capture two ``group_names``, ``name`` and ``num``. A ``NumericSorter`` is configured for the ``number`` capture group, which
+          captures the section of the file name that looks like : ``111``.
 
           .. code-block:: python
 
@@ -220,11 +223,102 @@ Steps
                               - number
                       sorters:
                           - orderby: desc
-                            class_name: Numeric
+                            class_name: NumericSorter
                             name: number
                       assets:
                           my_data_asset:
               """
+
+        3. **(Optional) run** ``test_yaml_config()`` **to ensure that your configuration is working.**
+
+          .. code-block:: python
+
+            context.test_yaml_config(
+                yaml_config=config
+            )
+
+          If the configuration is correct you should see output similar to this. Notice that the data asset names start with ``test_555.csv``, showing that the Batches have been sorted correctly.
+
+          .. code-block:: bash
+
+            Attempting to instantiate class from config...
+              Instantiating as a Datasource, since class_name is Datasource
+              Successfully instantiated Datasource
+
+            ExecutionEngine class name: PandasExecutionEngine
+            Data Connectors:
+              my_data_connector : ConfiguredAssetFilesystemDataConnector
+
+              Available data_asset_names (1 of 1):
+                my_data_asset (3 of 5): ['test_555.csv', 'test_444.csv', 'test_333.csv']
+
+                Unmatched data_references (0 of 0): []
+
+        4. **Save Configuration**
+
+          .. code-block:: python
+
+            sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+            context = ge.get_context()
+
+
+        5. **Obtain an ExpectationSuite**
+
+          Your DataContext can be used to create or retrieve an ExpectationSuite.
+
+          .. code-block:: python
+
+            suite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
+
+          Alternatively, if you have not already created a suite, you can do so now.
+
+          .. code-block:: python
+
+            suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
+
+
+        6. **Construct a** ``BatchRequest``.
+
+          The following ``BatchRequest`` will retrieve a the first Batch corresponding to ``test_555.csv`` by using index ``0`` as the  ``data_connector_query``.
+
+          .. code-block:: python
+
+            batch_request = BatchRequest(
+              datasource_name="mydatasource",
+              data_connector_name="my_data_connector",
+              data_asset_name="my_reports",
+              data_connector_query={
+                  "index": 0
+                  }
+                )
+
+        7. **Construct a Validator**
+
+          The ``BatchRequest`` and ExpectationSuite can be used to create a Validator.
+
+          .. code-block:: python
+
+            my_validator = context.get_validator(
+              batch_request=batch_request,
+              expectation_suite=suite
+            )
+
+
+        8. **Check your Validator**
+
+          You can check to see if the correct Batch was retrieved by checking the ``active_batch``'s ``batch_definition``.
+
+          .. code-block:: python
+
+            my_validator.active_batch.batch_definition
+
+          The expected output should show ``batch_identifiers`` corresponding to ``test_555.csv`` namely ``"{'name': 'test', 'number': '555'}"}``
+
+          .. code-block:: python
+
+            {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'test', 'number': '555'}"}
+
+
 
 
     .. tab-container:: tab2
@@ -253,7 +347,9 @@ Steps
 
         2. **Configure a Datasource**
 
-          In the following configuration, a Datasource is configured with a ``PandasExecutionEngine`` and ``ConfiguredAssetFilesystemDataConnector``. The DataConnector is configured with a single DataAsset named ``my_reports``. It has the ``base_directory`` set to ``reports/`` and the regex ``pattern`` is set to capture two ``group_names``, ``name`` and ``num``.
+          In the following configuration, a Datasource is configured with a ``PandasExecutionEngine`` and ``ConfiguredAssetFilesystemDataConnector``. The DataConnector is configured with a single DataAsset named ``my_reports``. It has the ``base_directory`` set to ``reports/`` and the
+          regex ``pattern`` is set to capture two ``group_names``, ``name`` and ``date``.  A ``DateTimeSorter`` is configured for the ``date`` capture group, which
+          captures the section of the file name that looks like : ``20210102``. A ``DateTimeSorter`` also includes a ``datetime_format`` parameter, which specifies the pattern in ``datetime`` format.
 
           .. code-block:: python
 
@@ -282,6 +378,94 @@ Steps
                           my_data_asset:
               """
 
+        3. **(Optional) run** ``test_yaml_config()`` **to ensure that your configuration is working.**
+
+          .. code-block:: python
+
+            context.test_yaml_config(
+                yaml_config=config
+            )
+
+          If the configuration is correct you should see output similar to this. Notice that the data asset names start with ``test_20210102.csv``, showing that the Batches have been sorted correctly.
+
+          .. code-block:: bash
+
+            Attempting to instantiate class from config...
+              Instantiating as a Datasource, since class_name is Datasource
+              Successfully instantiated Datasource
+
+            ExecutionEngine class name: PandasExecutionEngine
+            Data Connectors:
+              my_data_connector : ConfiguredAssetFilesystemDataConnector
+
+              Available data_asset_names (1 of 1):
+                my_data_asset (3 of 5): ['test_20210102.csv', 'test_20210101.csv', 'test_20201231.csv']
+
+                Unmatched data_references (0 of 0): []
+
+        4. **Save Configuration**
+
+          .. code-block:: python
+
+            sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+            context = ge.get_context()
+
+
+        5. **Obtain an ExpectationSuite**
+
+          Your DataContext can be used to create or retrieve an ExpectationSuite.
+
+          .. code-block:: python
+
+            suite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
+
+          Alternatively, if you have not already created a suite, you can do so now.
+
+          .. code-block:: python
+
+            suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
+
+
+        6. **Construct a** ``BatchRequest``.
+
+          The following ``BatchRequest`` will retrieve a the first Batch corresponding to ``test_20210102.csv`` by using index ``0`` as the  ``data_connector_query``.
+
+          .. code-block:: python
+
+            batch_request = BatchRequest(
+              datasource_name="mydatasource",
+              data_connector_name="my_data_connector",
+              data_asset_name="my_reports",
+              data_connector_query={
+                  "index": 0
+                  }
+                )
+
+        7. **Construct a Validator**
+
+          The ``BatchRequest`` and ExpectationSuite can be used to create a Validator.
+
+          .. code-block:: python
+
+            my_validator = context.get_validator(
+              batch_request=batch_request,
+              expectation_suite=suite
+            )
+
+
+        8. **Check your Validator**
+
+          You can check to see if the correct Batch was retrieved by checking the ``active_batch``'s ``batch_definition``.
+
+          .. code-block:: python
+
+            my_validator.active_batch.batch_definition
+
+          The expected output should show ``batch_identifiers`` corresponding to ``test_20210102.csv`` namely ``"{'name': 'test', 'date': '20210102'}"}``
+
+          .. code-block:: python
+
+            {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'test', 'date': '20210102'}"}
 
 
     .. tab-container:: tab3
