@@ -9,9 +9,9 @@ GREETING = r"""<cyan>
              ~ Always know what to expect from your data ~
 </cyan>"""
 
-LETS_BEGIN_PROMPT = """Let's configure a new Data Context.
+LETS_BEGIN_PROMPT = """Let's create a new Data Context to hold your project configuration.
 
-First, Great Expectations will create a new directory:
+Great Expectations will create a new directory with the following structure:
 
     great_expectations
     |-- great_expectations.yml
@@ -60,8 +60,6 @@ Great Expectations added some missing files required to run.
   - You may need to add secrets to `<yellow>great_expectations/uncommitted/config_variables.yml</yellow>` to finish onboarding.
 """
 
-BUILD_DOCS_PROMPT = "Would you like to build & view this project's Data Docs!?"
-
 NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please add one by:
   - running `<green>great_expectations datasource new</green>` or
   - by editing the {} file
@@ -69,7 +67,23 @@ NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please ad
     DataContext.GE_YML
 )
 
-SETUP_SUCCESS = "\n<cyan>Congratulations! Great Expectations is now set up.</cyan>"
+READY_FOR_CUSTOMIZATION = """<cyan>Congratulations! You are now ready to customize your Great Expectations configuration.</cyan>"""
+
+HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways. Here are some examples:</cyan>
+
+  <cyan>Use the CLI to:</cyan>
+    - Run `<green>great_expectations datasource new</green>` to connect to your data
+    - Run `<green>great_expectations checkpoint new <checkpoint_name></green>` to bundle data with Expectation Suite(s) in a Checkpoint definition for later re-validation
+    - Create, edit, list, profile Expectation Suites
+    - Manage and customize Data Docs, Stores
+
+  <cyan>Edit your configuration in {DataContext.GE_YML} to:</cyan>
+    - Move Stores to the cloud
+    - Add Slack notifications, PagerDuty alerts, etc.
+    - Customize your Data Docs
+
+<cyan>Please see our documentation for more configuration options!</cyan>
+"""
 
 SECTION_SEPARATOR = "\n================================================================================\n"
 
