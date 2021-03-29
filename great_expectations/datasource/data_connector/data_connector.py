@@ -252,43 +252,47 @@ class DataConnector:
             :max_examples
         ]
 
-        # Choose an example data_reference
-        if pretty_print:
-            print("\n\tChoosing an example data reference...")
-
-        example_data_reference = None
-
-        available_references = report_obj["data_assets"].items()
-        if len(available_references) == 0:
-            if pretty_print:
-                print(f"\t\tNo references available.")
-            return report_obj
-
-        data_asset_name: Optional[str] = None
-        for tmp_data_asset_name, data_asset_return_obj in available_references:
-            if data_asset_return_obj["batch_definition_count"] > 0:
-                example_data_reference = random.choice(
-                    data_asset_return_obj["example_data_references"]
-                )
-                data_asset_name = tmp_data_asset_name
-                break
-
-        if example_data_reference is not None:
-            if pretty_print:
-                print(f"\t\tReference chosen: {example_data_reference}")
-
-            # ...and fetch it.
-            if data_asset_name is None:
-                raise ValueError(
-                    "The data_asset_name for the chosen example data reference cannot be null."
-                )
-            report_obj["example_data_reference"] = self._self_check_fetch_batch(
-                pretty_print=pretty_print,
-                example_data_reference=example_data_reference,
-                data_asset_name=data_asset_name,
-            )
-        else:
-            report_obj["example_data_reference"] = {}
+        # FIXME: (Sam) Removing this temporarily since it's not supported by
+        # some backends (e.g. BigQuery) and returns empty results for some
+        # (e.g. MSSQL) - this needs some more work to be useful for all backends
+        #
+        # # Choose an example data_reference
+        # if pretty_print:
+        #     print("\n\tChoosing an example data reference...")
+        #
+        # example_data_reference = None
+        #
+        # available_references = report_obj["data_assets"].items()
+        # if len(available_references) == 0:
+        #     if pretty_print:
+        #         print(f"\t\tNo references available.")
+        #     return report_obj
+        #
+        # data_asset_name: Optional[str] = None
+        # for tmp_data_asset_name, data_asset_return_obj in available_references:
+        #     if data_asset_return_obj["batch_definition_count"] > 0:
+        #         example_data_reference = random.choice(
+        #             data_asset_return_obj["example_data_references"]
+        #         )
+        #         data_asset_name = tmp_data_asset_name
+        #         break
+        #
+        # if example_data_reference is not None:
+        #     if pretty_print:
+        #         print(f"\t\tReference chosen: {example_data_reference}")
+        #
+        #     # ...and fetch it.
+        #     if data_asset_name is None:
+        #         raise ValueError(
+        #             "The data_asset_name for the chosen example data reference cannot be null."
+        #         )
+        #     report_obj["example_data_reference"] = self._self_check_fetch_batch(
+        #         pretty_print=pretty_print,
+        #         example_data_reference=example_data_reference,
+        #         data_asset_name=data_asset_name,
+        #     )
+        # else:
+        #     report_obj["example_data_reference"] = {}
 
         return report_obj
 
