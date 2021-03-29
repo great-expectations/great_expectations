@@ -130,7 +130,7 @@ def select_data_connector_name(
             for i, data_connector_name in enumerate(data_connector_names, 1)
         ]
     )
-    option_selection: int = click.prompt(
+    option_selection: str = click.prompt(
         msg_prompt_select_data_connector_name + "\n" + choices,
         type=click.Choice(
             [str(i) for i, data_connector_name in enumerate(data_connector_names, 1)]
@@ -170,9 +170,7 @@ def _get_batch_request_from_data_connector(
             ]
         )
         prompt: str = msg_prompt_enter_data_asset_name + choices + "\n"
-
         data_asset_name_selection: str = click.prompt(prompt, show_default=False)
-
         data_asset_name_selection = data_asset_name_selection.strip()
         try:
             data_asset_index: int = int(data_asset_name_selection) - 1

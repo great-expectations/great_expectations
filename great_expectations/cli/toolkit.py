@@ -349,6 +349,8 @@ def load_expectation_suite(
     Load an expectation suite from a given context.
 
     Handles a suite name with or without `.json`
+    :param context:
+    :param suite_name:
     :param usage_event:
     """
     if suite_name.endswith(".json"):
@@ -356,7 +358,7 @@ def load_expectation_suite(
     try:
         suite: ExpectationSuite = context.get_expectation_suite(suite_name)
         return suite
-    except ge_exceptions.DataContextError as e:
+    except ge_exceptions.DataContextError:
         exit_with_failure_message_and_stats(
             context=context,
             usage_event=usage_event,
@@ -480,7 +482,7 @@ def select_datasource(
                 "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
             )
         elif len(data_sources) == 1:
-            datasource_name = data_sources[0].name
+            datasource_name = list(data_sources.keys())[0]
         else:
             choices: str = "\n".join(
                 [
@@ -488,14 +490,14 @@ def select_datasource(
                     for i, data_source in enumerate(data_sources, 1)
                 ]
             )
-            option_selection: int = click.prompt(
+            option_selection: str = click.prompt(
                 "Select a datasource" + "\n" + choices + "\n",
                 type=click.Choice(
                     [str(i) for i, data_source in enumerate(data_sources, 1)]
                 ),
                 show_choices=False,
             )
-            datasource_name = data_sources[int(option_selection) - 1].name
+            datasource_name = list(data_sources.keys())[int(option_selection) - 1]
 
     if datasource_name is not None:
         data_source = context.get_datasource(datasource_name=datasource_name)
