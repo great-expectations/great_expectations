@@ -195,6 +195,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         """
         data_asset_name: str = batch_definition.data_asset_name
         return {
+            "data_asset_name": data_asset_name,
             "table_name": data_asset_name,
             "partition_definition": batch_definition.partition_definition,
             **self.data_assets[data_asset_name],

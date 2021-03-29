@@ -1,10 +1,9 @@
 import datetime
 import os
-import platform
 import subprocess
 import sys
 import warnings
-from pathlib import Path, PurePosixPath, PureWindowsPath
+from pathlib import Path
 from typing import Optional, Union
 
 import click
@@ -363,6 +362,7 @@ def delete_checkpoint(
     context: DataContext,
     checkpoint_name: str,
     usage_event: str,
+    assume_yes: bool,
 ):
     """Delete a Checkpoint or raise helpful errors."""
     validate_checkpoint(
@@ -375,10 +375,11 @@ def delete_checkpoint(
     continuation_message: str = (
         f'The Checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
     )
-    confirm_proceed_or_exit(
-        confirm_prompt=confirm_prompt,
-        continuation_message=continuation_message,
-    )
+    if not assume_yes:
+        confirm_proceed_or_exit(
+            confirm_prompt=confirm_prompt,
+            continuation_message=continuation_message,
+        )
     context.delete_checkpoint(name=checkpoint_name)
 
 
@@ -750,3 +751,35 @@ def send_usage_message(
         event_payload=event_payload,
         success=success,
     )
+
+
+def is_cloud_file_url(file_path: str) -> bool:
+    """Check for commonly used cloud urls."""
+    sanitized = file_path.strip()
+    if sanitized[0:7] == "file://":
+        return False
+    if (
+        sanitized[0:5] in ["s3://", "gs://"]
+        or sanitized[0:6] == "ftp://"
+        or sanitized[0:7] in ["http://", "wasb://"]
+        or sanitized[0:8] == "https://"
+    ):
+        return True
+    return False
+
+
+def get_relative_path_from_config_file_to_base_path(
+    context_root_directory: str, data_path: str
+) -> str:
+    """
+    This function determines the relative path from a given data path relative
+    to the great_expectations.yml file independent of the current working
+    directory.
+
+    This allows a user to use the CLI from any directory, type a relative path
+    from their current working directory and have the correct relative path be
+    put in the great_expectations.yml file.
+    """
+    data_from_working_dir = os.path.relpath(data_path)
+    context_dir_from_working_dir = os.path.relpath(context_root_directory)
+    return os.path.relpath(data_from_working_dir, context_dir_from_working_dir)
