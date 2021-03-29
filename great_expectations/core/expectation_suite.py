@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import Any, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import (
@@ -78,11 +78,17 @@ class ExpectationSuite(SerializableDictDot):
 
     def add_citation(
         self,
-        comment,
-        batch_kwargs=None,
-        batch_markers=None,
-        batch_parameters=None,
-        citation_date=None,
+        comment: str,
+        no_dataset: Optional[bool] = False,
+        batch_request: Optional[
+            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+        ] = None,
+        batch_definition: Optional[dict] = None,
+        batch_spec: Optional[dict] = None,
+        batch_kwargs: Optional[dict] = None,
+        batch_markers: Optional[dict] = None,
+        batch_parameters: Optional[dict] = None,
+        citation_date: Optional[datetime.datetime] = None,
     ):
         if "citations" not in self.meta:
             self.meta["citations"] = []
@@ -92,6 +98,10 @@ class ExpectationSuite(SerializableDictDot):
                 or datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"
                 ),
+                "no_dataset": no_dataset,
+                "batch_request": batch_request,
+                "batch_definition": batch_definition,
+                "batch_spec": batch_spec,
                 "batch_kwargs": batch_kwargs,
                 "batch_markers": batch_markers,
                 "batch_parameters": batch_parameters,
@@ -176,13 +186,29 @@ class ExpectationSuite(SerializableDictDot):
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
-    def get_citations(self, sort=True, require_batch_kwargs=False):
-        citations = self.meta.get("citations", [])
+    def get_citations(
+        self,
+        sort: Optional[bool] = True,
+        require_batch_kwargs: Optional[bool] = False,
+        require_no_dataset: Optional[bool] = False,
+        require_batch_request: Optional[bool] = False,
+    ) -> List[Dict[str, Any]]:
+        citations: List[Dict[str, Any]] = self.meta.get("citations", [])
         if require_batch_kwargs:
-            citations = self._filter_citations(citations, "batch_kwargs")
+            citations = self._filter_citations(
+                citations=citations, filter_key="batch_kwargs"
+            )
+        if require_no_dataset:
+            citations = self._filter_citations(
+                citations=citations, filter_key="no_dataset"
+            )
+        if require_batch_request:
+            citations = self._filter_citations(
+                citations=citations, filter_key="batch_request"
+            )
         if not sort:
             return citations
-        return self._sort_citations(citations)
+        return self._sort_citations(citations=citations)
 
     def get_table_expectations(self):
         """Return a list of table expectations."""
@@ -197,15 +223,17 @@ class ExpectationSuite(SerializableDictDot):
         return [e for e in self.expectations if "column" in e.kwargs]
 
     @staticmethod
-    def _filter_citations(citations, filter_key):
-        citations_with_bk = []
+    def _filter_citations(
+        citations: List[Dict[str, Any]], filter_key
+    ) -> List[Dict[str, Any]]:
+        citations_with_bk: List[Dict[str, Any]] = []
         for citation in citations:
             if filter_key in citation and citation.get(filter_key):
                 citations_with_bk.append(citation)
         return citations_with_bk
 
     @staticmethod
-    def _sort_citations(citations):
+    def _sort_citations(citations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         return sorted(citations, key=lambda x: x["citation_date"])
 
     # CRUD methods #

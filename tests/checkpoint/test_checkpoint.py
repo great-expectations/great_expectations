@@ -9,7 +9,7 @@ from ruamel.yaml.comments import CommentedMap
 
 import great_expectations as ge
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.checkpoint.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CheckpointConfig

@@ -2,12 +2,7 @@ import logging
 import random
 from typing import Any, List, Optional, Tuple
 
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchMarkers,
-    BatchRequest,
-    BatchRequestBase,
-)
+from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -333,19 +328,30 @@ class DataConnector:
         # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
-        validator = Validator(execution_engine=batch_data.execution_engine)
-        df = validator.get_metric(
-            MetricConfiguration(
-                "table.head", {"batch_id": batch_definition.id}, {"n_rows": 5}
+        validator: Validator = Validator(execution_engine=batch_data.execution_engine)
+        data: Any = validator.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.head",
+                metric_domain_kwargs={
+                    "batch_id": batch_definition.id,
+                },
+                metric_value_kwargs={
+                    "n_rows": 5,
+                },
             )
         )
-        n_rows = validator.get_metric(
-            MetricConfiguration("table.row_count", {"batch_id": batch_definition.id})
+        n_rows: int = validator.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.row_count",
+                metric_domain_kwargs={
+                    "batch_id": batch_definition.id,
+                },
+            )
         )
 
         if pretty_print and df is not None:
             print(f"\n\t\tShowing 5 rows")
-            print(df)
+            print(data)
 
         return {
             "batch_spec": batch_spec,

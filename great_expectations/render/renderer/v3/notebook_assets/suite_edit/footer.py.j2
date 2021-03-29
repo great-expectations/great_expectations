@@ -1,0 +1,48 @@
+{%- if batch_request -%}
+print(validator.get_expectation_suite(discard_failed_expectations=False))
+validator.save_expectation_suite(discard_failed_expectations=False)
+
+checkpoint_config: dict = {
+    "config_version": 1.0,
+    "class_name": "Checkpoint",
+    "validations": [
+        {
+            "batch_request": batch_request,
+            "expectation_suite_name": expectation_suite_name,
+            "action_list": [
+                {
+                    "name": "store_validation_result",
+                    "action": {"class_name": "StoreValidationResultAction"},
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {"class_name": "StoreEvaluationParametersAction"},
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {"class_name": "UpdateDataDocsAction"},
+                },
+            ],
+            "runtime_configuration": {
+                "result_format": {
+                    "result_format": "BASIC",
+                    "partial_unexpected_count": 20,
+                }
+            },
+        }
+    ],
+    "module_name": "great_expectations.checkpoint",
+}
+checkpoint: Checkpoint = Checkpoint("_temp_checkpoint", context, **checkpoint_config)
+checkpoint_result: CheckpointResult = checkpoint.run()
+context.build_data_docs()
+validation_result_identifier: ValidationResultIdentifier = checkpoint_result.list_validation_result_identifiers()[0]
+context.open_data_docs(resource_identifier=validation_result_identifier)
+{%- else -%}
+print(context.get_expectation_suite(expectation_suite_name=expectation_suite_name))
+context.save_expectation_suite(expectation_suite=suite, expectation_suite_name=expectation_suite_name)
+
+suite_identifier: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+context.build_data_docs(resource_identifiers=[suite_identifier])
+context.open_data_docs(resource_identifier=suite_identifier)
+{%- endif -%}

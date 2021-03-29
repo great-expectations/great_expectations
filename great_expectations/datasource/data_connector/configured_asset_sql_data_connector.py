@@ -114,7 +114,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         return column_names
 
-    def get_available_data_asset_names(self):
+    def get_available_data_asset_names(self) -> List[str]:
         """
         Return the list of asset names known by this DataConnector.
 

@@ -60,10 +60,8 @@ def titanic_data_context_with_sql_datasource(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file_path}
-"""
-        + """
 introspection:
-    whole_table: {}
+  whole_table: {{}}
 """,
     )
 
