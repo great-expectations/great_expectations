@@ -173,8 +173,6 @@ def get_sqlalchemy_runtime_validator_postgresql(
         dtype=sql_dtypes,
         if_exists="replace",
     )
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
