@@ -501,10 +501,10 @@ def test_in_memory_data_context_configuration(
 
 def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
-    data_context_with_configured_sql_datasource_for_testing_get_batch,
+    data_context_with_runtime_sql_datasource_for_testing_get_batch,
 ):
     context: DataContext = (
-        data_context_with_configured_sql_datasource_for_testing_get_batch
+        data_context_with_runtime_sql_datasource_for_testing_get_batch
     )
 
     batch: Batch
@@ -538,10 +538,10 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
 
 def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
-    data_context_with_configured_sql_datasource_for_testing_get_batch,
+    data_context_with_runtime_sql_datasource_for_testing_get_batch,
 ):
     context: DataContext = (
-        data_context_with_configured_sql_datasource_for_testing_get_batch
+        data_context_with_runtime_sql_datasource_for_testing_get_batch
     )
     my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
         "my_expectations"
