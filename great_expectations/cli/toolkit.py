@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import click
 from ruamel.yaml import YAML
@@ -473,16 +473,18 @@ def select_datasource(
     data_source: Optional[BaseDatasource] = None
 
     if datasource_name is None:
-        data_sources: Dict[str, BaseDatasource] = cast(
-            Dict[str, BaseDatasource],
-            sorted(context.datasources.values(), key=lambda x: x.name),
+        data_sources: List[BaseDatasource] = cast(
+            List[BaseDatasource],
+            list(
+                sorted(context.datasources.values(), key=lambda x: x.name),
+            ),
         )
         if len(data_sources) == 0:
             cli_message(
                 "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
             )
         elif len(data_sources) == 1:
-            datasource_name = list(data_sources.keys())[0]
+            datasource_name = data_sources[0].name
         else:
             choices: str = "\n".join(
                 [
@@ -497,7 +499,7 @@ def select_datasource(
                 ),
                 show_choices=False,
             )
-            datasource_name = list(data_sources.keys())[int(option_selection) - 1]
+            datasource_name = data_sources[int(option_selection) - 1].name
 
     if datasource_name is not None:
         data_source = context.get_datasource(datasource_name=datasource_name)
