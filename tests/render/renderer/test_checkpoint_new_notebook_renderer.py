@@ -21,16 +21,9 @@ def test_find_datasource_with_asset_on_context_with_no_datasources(
 
 def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_dataconnectors(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
-    test_backends,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     context.delete_datasource("my_datasource")
-
-    if any(
-        [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]
-    ):
-        context.delete_datasource("my_runtime_sql_datasource")
-
     assert len(context.list_datasources()) == 0
     context.add_datasource(
         "aaa_datasource",
