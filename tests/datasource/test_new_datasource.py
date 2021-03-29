@@ -211,8 +211,7 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
                 "data_assets": {},
                 "example_data_asset_names": [],
                 "example_unmatched_data_references": [],
-                # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
-                # "example_data_reference": {},
+                "example_data_reference": {},
             },
         },
         "execution_engine": {

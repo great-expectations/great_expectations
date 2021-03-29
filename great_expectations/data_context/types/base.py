@@ -248,6 +248,7 @@ class SorterConfig(DictDot):
     def datetime_format(self):
         return self._datetime_format
 
+
 class SorterConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
@@ -260,7 +261,9 @@ class SorterConfigSchema(Schema):
     orderby = fields.String(required=False, missing="asc", allow_none=False)
 
     # allow_none = True because it is only used by some Sorters
-    reference_list = fields.List( cls_or_instance=fields.Str(), required=False, missing=None, allow_none=True)
+    reference_list = fields.List(
+        cls_or_instance=fields.Str(), required=False, missing=None, allow_none=True
+    )
     datetime_format = fields.String(required=False, missing=None, allow_none=True)
 
     @validates_schema

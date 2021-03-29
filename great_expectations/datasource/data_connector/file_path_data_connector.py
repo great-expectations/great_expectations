@@ -106,7 +106,6 @@ class FilePathDataConnector(DataConnector):
             for batch_definition in batch_definition_list
         ]
 
-
         # path_list.sort()
 
         return path_list
