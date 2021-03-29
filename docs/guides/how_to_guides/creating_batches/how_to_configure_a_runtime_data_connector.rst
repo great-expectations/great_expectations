@@ -3,7 +3,7 @@
 How to configure a RuntimeDataConnector (V3 API only)
 ======================================================
 
-This guide demonstrates how to configure a :ref:`RuntimeDataConnector<runtime_data_connector_and_runtime_batch_request>` and only applies for the V3 (Batch Request) API.
+This guide demonstrates how to configure a :ref:`RuntimeDataConnector<runtime_data_connector_and_runtime_batch_request>` and only applies for the V3 (Batch Request) API. A ``RuntimeDataConnector`` allows you to specify a Batch using a Runtime Batch Request, which is used to create a Validator. A Validator is the key object used to create Expectations and validate datasets.
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
