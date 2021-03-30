@@ -269,23 +269,6 @@ def _suite_edit(
     batch_request = None
 
     try:
-        suite: ExpectationSuite = toolkit.load_expectation_suite(
-            context=context, suite_name=suite_name, usage_event=usage_event
-        )
-        citations: List[Dict[str, Any]]
-        citation: Optional[Dict[str, Any]]
-
-        citations = suite.get_citations()
-        if citations:
-            citation = citations[-1]
-            interactive = interactive or citation.get("interactive")
-            if not interactive:
-                batch_request = None
-            else:
-                batch_request = citation.get("batch_request")
-                if batch_request:
-                    interactive = False
-
         if batch_request_json:
             try:
                 batch_request = json.loads(batch_request_json)
@@ -375,6 +358,9 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 batch_request=batch_request
             )
 
+        suite: ExpectationSuite = toolkit.load_expectation_suite(
+            context=context, suite_name=suite_name, usage_event=usage_event
+        )
         suite.add_citation(
             comment="Updated suite added via CLI",
             interactive=interactive,
