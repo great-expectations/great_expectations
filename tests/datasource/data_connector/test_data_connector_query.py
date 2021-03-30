@@ -270,7 +270,6 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
 def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
     create_files_and_instantiate_data_connector,
 ):
-    # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
 
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
@@ -327,7 +326,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
     ]
@@ -337,7 +336,6 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_limit(
 def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_int(
     create_files_and_instantiate_data_connector,
 ):
-    # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
 
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
@@ -381,7 +379,6 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_int
 def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_string(
     create_files_and_instantiate_data_connector,
 ):
-    # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
 
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
@@ -414,7 +411,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_str
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
     ]
@@ -477,7 +474,6 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_lis
 def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_tuple(
     create_files_and_instantiate_data_connector,
 ):
-    # <TODO> is this behavior correct?
     my_data_connector = create_files_and_instantiate_data_connector
 
     # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
@@ -519,7 +515,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_tup
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
     ]
@@ -712,7 +708,7 @@ def test_data_connector_query_data_connector_query_batch_identifiers_1_key_and_i
             data_connector_name="general_filesystem_data_connector",
             data_asset_name="TestFiles",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
     ]

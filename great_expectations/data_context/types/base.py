@@ -207,6 +207,8 @@ class SorterConfig(DictDot):
         class_name=None,
         module_name=None,
         orderby="asc",
+        reference_list=None,
+        datetime_format=None,
         **kwargs,
     ):
         self._name = name
@@ -215,6 +217,12 @@ class SorterConfig(DictDot):
         self._orderby = orderby
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+        if reference_list is not None:
+            self._reference_list = reference_list
+
+        if datetime_format is not None:
+            self._datetime_format = datetime_format
 
     @property
     def name(self):
@@ -232,6 +240,14 @@ class SorterConfig(DictDot):
     def orderby(self):
         return self._orderby
 
+    @property
+    def reference_list(self):
+        return self._reference_list
+
+    @property
+    def datetime_format(self):
+        return self._datetime_format
+
 
 class SorterConfigSchema(Schema):
     class Meta:
@@ -243,6 +259,12 @@ class SorterConfigSchema(Schema):
         missing="great_expectations.datasource.data_connector.sorter"
     )
     orderby = fields.String(required=False, missing="asc", allow_none=False)
+
+    # allow_none = True because it is only used by some Sorters
+    reference_list = fields.List(
+        cls_or_instance=fields.Str(), required=False, missing=None, allow_none=True
+    )
+    datetime_format = fields.String(required=False, missing=None, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
