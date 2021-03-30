@@ -34,10 +34,6 @@ def test_cli_init_on_new_project(
     project_dir_path = tmp_path / "test_cli_init_diff"
     project_dir_path.mkdir()
     project_dir = str(project_dir_path)
-    os.makedirs(os.path.join(project_dir, "data"))
-    data_path = os.path.join(project_dir, "data", "Titanic.csv")
-    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    shutil.copy(fixture_path, data_path)
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(project_dir)
@@ -150,10 +146,6 @@ def test_cancelled_cli_init_on_new_project(
     project_dir_path = tmp_path / "test_cli_init_diff"
     project_dir_path.mkdir()
     project_dir = str(project_dir_path)
-    os.makedirs(os.path.join(project_dir, "data"))
-    data_path = os.path.join(project_dir, "data", "Titanic.csv")
-    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
-    shutil.copy(fixture_path, data_path)
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(project_dir)
@@ -214,13 +206,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     root_dir_path = tmp_path / "hiya"
     root_dir_path.mkdir()
     root_dir = str(root_dir_path)
-    data_folder_path = os.path.join(root_dir, "data")
-    os.makedirs(data_folder_path)
-    data_path = os.path.join(data_folder_path, "Titanic.csv")
-    fixture_path = file_relative_path(
-        __file__, os.path.join("..", "test_sets", "Titanic.csv")
-    )
-    shutil.copy(fixture_path, data_path)
 
     # Create a new project from scratch that we will use for the test in the next step
 
@@ -321,13 +306,6 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     root_dir_path = tmp_path / "hiya"
     root_dir_path.mkdir()
     root_dir = str(root_dir_path)
-    data_folder_path = os.path.join(root_dir, "data")
-    os.makedirs(os.path.join(root_dir, "data"))
-    data_path: str = os.path.join(data_folder_path, "Titanic.csv")
-    fixture_path: str = file_relative_path(
-        __file__, os.path.join("..", "test_sets", "Titanic.csv")
-    )
-    shutil.copy(fixture_path, data_path)
 
     # Create a new project from scratch that we will use for the test in the next step
 
