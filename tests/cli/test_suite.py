@@ -486,7 +486,7 @@ def test_suite_new_empty_with_no_jupyter(
 # TODO: <Alex>ALEX</Alex>
 @pytest.mark.xfail(
     reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
+    run=False,
     strict=True,
 )
 def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_context):
@@ -604,7 +604,7 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
 # TODO: <Alex>ALEX</Alex>
 @pytest.mark.xfail(
     reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
+    run=False,
     strict=True,
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -644,7 +644,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
 # TODO: <Alex>ALEX</Alex>
 @pytest.mark.xfail(
     reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
+    run=False,
     strict=True,
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
