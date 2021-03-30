@@ -319,7 +319,7 @@ def test_get_citations_not_sorted(baseline_suite):
     assert baseline_suite.get_citations(sort=False) == [
         {
             "citation_date": "2000-01-01",
-            "no_dataset": False,
+            "interactive": False,
             "batch_request": None,
             "batch_definition": None,
             "batch_spec": None,
@@ -330,7 +330,7 @@ def test_get_citations_not_sorted(baseline_suite):
         },
         {
             "citation_date": "2000-01-03",
-            "no_dataset": False,
+            "interactive": False,
             "batch_request": None,
             "batch_definition": None,
             "batch_spec": None,
@@ -341,7 +341,7 @@ def test_get_citations_not_sorted(baseline_suite):
         },
         {
             "citation_date": "2000-01-02",
-            "no_dataset": False,
+            "interactive": False,
             "batch_request": None,
             "batch_definition": None,
             "batch_spec": None,
@@ -361,7 +361,7 @@ def test_get_citations_sorted(baseline_suite):
     assert baseline_suite.get_citations(sort=True) == [
         {
             "citation_date": "2000-01-01",
-            "no_dataset": False,
+            "interactive": False,
             "batch_request": None,
             "batch_definition": None,
             "batch_spec": None,
@@ -372,7 +372,7 @@ def test_get_citations_sorted(baseline_suite):
         },
         {
             "citation_date": "2000-01-02",
-            "no_dataset": False,
+            "interactive": False,
             "batch_request": None,
             "batch_definition": None,
             "batch_spec": None,
@@ -383,7 +383,7 @@ def test_get_citations_sorted(baseline_suite):
         },
         {
             "citation_date": "2000-01-03",
-            "no_dataset": False,
+            "interactive": False,
             "batch_request": None,
             "batch_definition": None,
             "batch_spec": None,
@@ -409,7 +409,7 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
     assert obs == [
         {
             "citation_date": "2000-01-01",
-            "no_dataset": False,
+            "interactive": False,
             "batch_request": None,
             "batch_definition": None,
             "batch_spec": None,
@@ -420,7 +420,7 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
         },
         {
             "citation_date": "2001-01-01",
-            "no_dataset": False,
+            "interactive": False,
             "batch_request": None,
             "batch_definition": None,
             "batch_spec": None,

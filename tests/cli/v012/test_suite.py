@@ -284,7 +284,7 @@ def test_suite_new_creates_empty_suite(
         "batch_request": None,
         "batch_spec": None,
         "comment": "New suite added via CLI",
-        "no_dataset": False,
+        "interactive": False,
     }
 
     assert mock_subprocess.call_count == 1
@@ -373,7 +373,7 @@ def test_suite_new_empty_with_no_jupyter(
         "batch_request": None,
         "batch_spec": None,
         "comment": "New suite added via CLI",
-        "no_dataset": False,
+        "interactive": False,
     }
 
     assert mock_subprocess.call_count == 0

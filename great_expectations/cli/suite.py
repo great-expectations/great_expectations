@@ -62,12 +62,12 @@ def suite(ctx):
     help="Expectation suite name.",
 )
 @click.option(
-    "--no-dataset",
-    "-nd",
+    "--interactive",
+    "-i",
     is_flag=True,
     default=False,
-    help="""By default must be able to specify a batch of data to reason about using the language of expectations,
-unless you specify the --no-dataset flag.  Incompatible with --scaffold flag and --batch-request option.
+    help="""Use to specify a batch of data to create expectations against.  Assumed with --scaffold flag.
+Incompatible with --batch-request option.
 """,
 )
 @click.option(
@@ -76,14 +76,14 @@ unless you specify the --no-dataset flag.  Incompatible with --scaffold flag and
     is_flag=True,
     default=False,
     help="""Generate a starting expectation suite automatically so you can refine it further.
-Incompatible with the --no-dataset flag.
+The interactive mode is assumed.  Incompatible with --batch-request option.
 """,
 )
 @click.option(
-    "--jupyter/--no-jupyter",
-    "-yj/-nj",
+    "--no-jupyter",
+    "-nj",
     is_flag=True,
-    default=True,
+    default=False,
     help="By default launch jupyter notebooks, unless you specify the --no-jupyter flag.",
 )
 # TODO: <Alex>ALEX -- Can we take this option away?  It is difficult to use.</Alex>
@@ -92,12 +92,12 @@ Incompatible with the --no-dataset flag.
     "-br",
     help="""Arguments to be provided to get_batch when loading the data asset.  Must be a valid JSON dictionary.
 Make sure to escape quotes.  Example: "{\"datasource_name\": \"my_ds\", \"data_connector_name\": \"my_connector\", \"data_asset_name\": \"my_asset\"}"
-Incompatible with the --no-dataset flag.
+Incompatible with the interactive mode.
 """,
     default=None,
 )
 @click.pass_context
-def suite_new(ctx, suite, no_dataset, scaffold, jupyter, batch_request):
+def suite_new(ctx, suite, interactive, scaffold, no_jupyter, batch_request):
     """
     Create a new empty Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
@@ -107,9 +107,9 @@ def suite_new(ctx, suite, no_dataset, scaffold, jupyter, batch_request):
     _suite_new(
         context=context,
         suite_name=suite,
-        no_dataset=no_dataset,
+        interactive=interactive,
         scaffold=scaffold,
-        jupyter=jupyter,
+        no_jupyter=no_jupyter,
         usage_event=usage_event,
         batch_request=batch_request,
     )
@@ -118,15 +118,18 @@ def suite_new(ctx, suite, no_dataset, scaffold, jupyter, batch_request):
 def _suite_new(
     context: DataContext,
     suite_name: str,
-    no_dataset: bool,
+    interactive: bool,
     scaffold: bool,
-    jupyter: bool,
+    no_jupyter: bool,
     usage_event: str,
     batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
 ) -> None:
-    if no_dataset and (scaffold or (batch_request is not None)):
+    if not interactive and scaffold:
+        raise ValueError("The --scaffold flag assumes the interactive mode.")
+
+    if interactive and (batch_request is not None):
         raise ValueError(
-            "The --scaffold flag and --batch-request JSON are incompatible with the --no-dataset flag."
+            "The --batch-request JSON option is incompatible the interactive flag."
         )
 
     datasource_name: Optional[str] = None
@@ -146,11 +149,11 @@ def _suite_new(
             data_asset_name=data_asset_name,
             batch_request=batch_request,
             expectation_suite_name=suite_name,
-            no_dataset=no_dataset,
+            interactive=interactive,
             scaffold=scaffold,
             additional_batch_request_args={"limit": 1000},
         )
-        if jupyter:
+        if not no_jupyter:
             cli_message(
                 """<green>Opening a notebook for you now to edit your expectation suite!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
@@ -163,7 +166,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         _suite_edit(
             context=context,
             suite_name=suite_name,
-            jupyter=jupyter,
+            no_jupyter=no_jupyter,
             batch_request=batch_request,
             usage_event=usage_event,
             datasource=datasource_name,
@@ -190,26 +193,27 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 @suite.command(name="edit")
 @click.argument("suite")
 @click.option(
-    "--no-dataset",
-    "-nd",
+    "--interactive",
+    "-i",
     is_flag=True,
-    default=None,
+    default=False,
     help="""Allows to specify explicitly whether or not a batch of data is available to reason about using the language
 of expectations; otherwise, best effort is made to determine this automatically (falling back to False).
-Incompatible with the --datasource and --batch-request options.
+Incompatible with the --batch-request option.
 """,
 )
 @click.option(
     "--datasource",
     "-ds",
     default=None,
-    help="""The name of the datasource.  Incompatible with the --no-dataset flag.""",
+    help="""The name of the datasource.  The interactive mode is assumed.  Incompatible with the --batch-request option.
+""",
 )
 @click.option(
-    "--jupyter/--no-jupyter",
-    "-yj/-nj",
+    "--no-jupyter",
+    "-nj",
     is_flag=True,
-    default=True,
+    default=False,
     help="By default launch jupyter notebooks, unless you specify the --no-jupyter flag.",
 )
 # TODO: <Alex>ALEX -- Can we take this option away?  It is difficult to use.</Alex>
@@ -219,21 +223,19 @@ Incompatible with the --datasource and --batch-request options.
     default=None,
     help="""Arguments to be provided to get_batch when loading the data asset.  Must be a valid JSON dictionary.
 Make sure to escape quotes.  Example: "{\"datasource_name\": \"my_ds\", \"data_connector_name\": \"my_connector\", \"data_asset_name\": \"my_asset\"}"
-Incompatible with the --no-dataset flag.
+Incompatible with the interactive mode.
 """,
 )
 @click.pass_context
-def suite_edit(ctx, suite, no_dataset, datasource, jupyter, batch_request):
+def suite_edit(ctx, suite, interactive, datasource, no_jupyter, batch_request):
     """
     Generate a Jupyter notebook for editing an existing Expectation Suite.
 
     The SUITE argument is required. This is the name you gave to the suite
     when you created it.
 
-    A batch of data is required to edit the suite, which is used as a sample.
-
     The edit command will help you specify a batch interactively. Or you can
-    specify them manually by providing --batch-kwargs in valid JSON format.
+    specify them manually by providing --batch-request in valid JSON format.
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
@@ -242,10 +244,10 @@ def suite_edit(ctx, suite, no_dataset, datasource, jupyter, batch_request):
     _suite_edit(
         context=context,
         suite_name=suite,
-        jupyter=jupyter,
+        no_jupyter=no_jupyter,
         batch_request=batch_request,
         usage_event=usage_event,
-        no_dataset=no_dataset,
+        interactive=interactive,
         datasource=datasource,
         suppress_usage_message=False,
     )
@@ -254,18 +256,13 @@ def suite_edit(ctx, suite, no_dataset, datasource, jupyter, batch_request):
 def _suite_edit(
     context: DataContext,
     suite_name: str,
-    jupyter: bool,
+    no_jupyter: bool,
     usage_event: str,
-    no_dataset: Optional[bool] = None,
+    interactive: Optional[bool] = None,
     datasource: Optional[str] = None,
     suppress_usage_message: Optional[bool] = False,
     batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
 ):
-    if bool(no_dataset) and ((datasource is not None) or (batch_request is not None)):
-        raise ValueError(
-            "The --datasource name and --batch-request JSON are incompatible with the --no-dataset flag."
-        )
-
     # suppress_usage_message flag is for the situation where _suite_edit is called by _suite_new().
     # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
     batch_request_json: Optional[str] = batch_request
@@ -281,19 +278,18 @@ def _suite_edit(
         citations = suite.get_citations()
         if citations:
             citation = citations[-1]
-            if no_dataset is None:
-                no_dataset = citation.get("no_dataset")
-            if no_dataset:
+            interactive = interactive or citation.get("interactive")
+            if not interactive:
                 batch_request = None
             else:
                 batch_request = citation.get("batch_request")
                 if batch_request:
-                    no_dataset = False
+                    interactive = False
 
         if batch_request_json:
             try:
                 batch_request = json.loads(batch_request_json)
-                no_dataset = False
+                interactive = False
                 if datasource:
                     batch_request["datasource_name"] = datasource
             except json_parse_exception as je:
@@ -328,8 +324,15 @@ def _suite_edit(
                     )
                 sys.exit(1)
 
-        no_dataset = no_dataset and (datasource is None)
-        if not (no_dataset or batch_request):
+        if not interactive and datasource:
+            raise ValueError("The --datasource option assumes the interactive mode.")
+
+        if interactive and (batch_request is not None):
+            raise ValueError(
+                "The --batch-request JSON option is incompatible the interactive flag."
+            )
+
+        if interactive or (batch_request is not None):
             cli_message(
                 """
 A batch of data is required to edit the suite - let's help you to specify it."""
@@ -374,7 +377,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
         suite.add_citation(
             comment="Updated suite added via CLI",
-            no_dataset=no_dataset,
+            interactive=interactive,
             batch_request=batch_request,
         )
         context.save_expectation_suite(expectation_suite=suite)
@@ -386,11 +389,11 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         ).render_to_disk(
             suite=suite,
             notebook_file_path=notebook_path,
-            no_dataset=no_dataset,
+            interactive=interactive,
             batch_request=batch_request,
         )
 
-        if not jupyter:
+        if no_jupyter:
             cli_message(
                 f"To continue editing this suite, run <green>jupyter notebook {notebook_path}</green>"
             )
@@ -407,7 +410,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 success=True,
             )
 
-        if jupyter:
+        if not no_jupyter:
             toolkit.launch_jupyter_notebook(notebook_path=notebook_path)
 
     except Exception as e:
@@ -480,16 +483,16 @@ def suite_delete(ctx, suite):
 )
 @mark.cli_as_experimental
 @click.pass_context
-def suite_scaffold(ctx, suite, jupyter):
+def suite_scaffold(ctx, suite, no_jupyter):
     """Scaffold a new Expectation Suite."""
     display_not_implemented_message_and_exit()
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
-    _suite_scaffold(suite, directory, jupyter)
+    _suite_scaffold(suite, directory, no_jupyter)
 
 
-def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
+def _suite_scaffold(suite: str, directory: str, no_jupyter: bool) -> None:
     usage_event = "cli.suite.scaffold"
     suite_name = suite
     context = toolkit.load_data_context_with_error_handling(directory)
@@ -523,7 +526,7 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
 
     toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
 
-    if jupyter:
+    if not no_jupyter:
         toolkit.launch_jupyter_notebook(notebook_path)
     else:
         cli_message(

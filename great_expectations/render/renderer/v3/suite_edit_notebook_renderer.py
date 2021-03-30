@@ -340,7 +340,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def render(
         self,
         suite: ExpectationSuite,
-        no_dataset: Optional[bool] = False,
+        interactive: Optional[bool] = False,
         batch_request: Optional[
             Union[str, Dict[str, Union[str, Dict[str, Any]]]]
         ] = None,
@@ -355,7 +355,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         suite_name: str = suite.expectation_suite_name
 
-        if no_dataset:
+        if not interactive:
             batch_request = None
         self.add_header(suite_name=suite_name, batch_request=batch_request)
         self.add_authoring_intro(batch_request=batch_request)
@@ -371,7 +371,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         suite: ExpectationSuite,
         notebook_file_path: str,
-        no_dataset: Optional[bool] = False,
+        interactive: Optional[bool] = False,
         batch_request: Optional[
             Union[str, Dict[str, Union[str, Dict[str, Any]]]]
         ] = None,
@@ -381,7 +381,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         If batch_request dictionary is passed, its properties will override any found in suite citations.
         """
-        self.render(suite=suite, no_dataset=no_dataset, batch_request=batch_request)
+        self.render(suite=suite, interactive=interactive, batch_request=batch_request)
         self.write_notebook_to_disk(
             notebook=self._notebook, notebook_file_path=notebook_file_path
         )

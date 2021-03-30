@@ -56,7 +56,7 @@ def test_suite_demo_deprecation_message(caplog, monkeypatch, empty_data_context)
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_with_suite_name_prompted_default_with_jupyter_no_dataset(
+def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -73,7 +73,7 @@ def test_suite_new_with_suite_name_prompted_default_with_jupyter_no_dataset(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --no-dataset",
+        f"--v3-api suite new",
         input="\n",
         catch_exceptions=False,
     )
@@ -117,7 +117,7 @@ def test_suite_new_with_suite_name_prompted_default_with_jupyter_no_dataset(
         "batch_request": None,
         "batch_spec": None,
         "comment": "New suite added via CLI",
-        "no_dataset": True,
+        "interactive": False,
     }
 
     assert mock_subprocess.call_count == 1
@@ -136,7 +136,7 @@ def test_suite_new_with_suite_name_prompted_default_with_jupyter_no_dataset(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_with_suite_name_prompted_custom_with_jupyter_no_dataset(
+def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -153,7 +153,7 @@ def test_suite_new_with_suite_name_prompted_custom_with_jupyter_no_dataset(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --no-dataset",
+        f"--v3-api suite new",
         input=f"{expectation_suite_name}\n",
         catch_exceptions=False,
     )
@@ -197,7 +197,7 @@ def test_suite_new_with_suite_name_prompted_custom_with_jupyter_no_dataset(
         "batch_request": None,
         "batch_spec": None,
         "comment": "New suite added via CLI",
-        "no_dataset": True,
+        "interactive": False,
     }
 
     assert mock_subprocess.call_count == 1
@@ -216,7 +216,7 @@ def test_suite_new_with_suite_name_prompted_custom_with_jupyter_no_dataset(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_with_suite_name_arg_custom_with_jupyter_no_dataset(
+def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -233,7 +233,7 @@ def test_suite_new_with_suite_name_arg_custom_with_jupyter_no_dataset(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --suite {expectation_suite_name} --no-dataset",
+        f"--v3-api suite new --suite {expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -275,7 +275,7 @@ def test_suite_new_with_suite_name_arg_custom_with_jupyter_no_dataset(
         "batch_request": None,
         "batch_spec": None,
         "comment": "New suite added via CLI",
-        "no_dataset": True,
+        "interactive": False,
     }
 
     assert mock_subprocess.call_count == 1
@@ -294,7 +294,7 @@ def test_suite_new_with_suite_name_arg_custom_with_jupyter_no_dataset(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_with_suite_name_arg_custom_without_jupyter_no_dataset(
+def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -311,7 +311,7 @@ def test_suite_new_with_suite_name_arg_custom_without_jupyter_no_dataset(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --suite {expectation_suite_name} --no-dataset --no-jupyter",
+        f"--v3-api suite new --suite {expectation_suite_name} --no-jupyter",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -357,7 +357,7 @@ def test_suite_new_with_suite_name_arg_custom_without_jupyter_no_dataset(
         "batch_request": None,
         "batch_spec": None,
         "comment": "New suite added via CLI",
-        "no_dataset": True,
+        "interactive": False,
     }
 
     assert mock_subprocess.call_count == 0
@@ -863,7 +863,7 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
 # TODO: <Alex>ALEX</Alex>
 @pytest.mark.xfail(
     reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
+    run=False,
     strict=True,
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)

@@ -79,7 +79,7 @@ class ExpectationSuite(SerializableDictDot):
     def add_citation(
         self,
         comment: str,
-        no_dataset: Optional[bool] = False,
+        interactive: Optional[bool] = False,
         batch_request: Optional[
             Union[str, Dict[str, Union[str, Dict[str, Any]]]]
         ] = None,
@@ -98,7 +98,7 @@ class ExpectationSuite(SerializableDictDot):
                 or datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"
                 ),
-                "no_dataset": no_dataset,
+                "interactive": interactive,
                 "batch_request": batch_request,
                 "batch_definition": batch_definition,
                 "batch_spec": batch_spec,
@@ -190,7 +190,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         sort: Optional[bool] = True,
         require_batch_kwargs: Optional[bool] = False,
-        require_no_dataset: Optional[bool] = False,
+        require_interactive: Optional[bool] = False,
         require_batch_request: Optional[bool] = False,
     ) -> List[Dict[str, Any]]:
         citations: List[Dict[str, Any]] = self.meta.get("citations", [])
@@ -198,9 +198,9 @@ class ExpectationSuite(SerializableDictDot):
             citations = self._filter_citations(
                 citations=citations, filter_key="batch_kwargs"
             )
-        if require_no_dataset:
+        if require_interactive:
             citations = self._filter_citations(
-                citations=citations, filter_key="no_dataset"
+                citations=citations, filter_key="interactive"
             )
         if require_batch_request:
             citations = self._filter_citations(

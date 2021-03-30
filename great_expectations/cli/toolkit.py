@@ -74,7 +74,7 @@ def create_expectation_suite(
     data_asset_name: Optional[str] = None,
     batch_request: Optional[dict] = None,
     expectation_suite_name: Optional[str] = None,
-    no_dataset: Optional[bool] = False,
+    interactive: Optional[bool] = False,
     scaffold: Optional[bool] = False,
     additional_batch_request_args: Optional[dict] = None,
     # TODO: <Alex>ALEX -- Is this needed?</Alex>
@@ -87,7 +87,7 @@ def create_expectation_suite(
 
     :return: a tuple: (suite name, profiling_results)
     """
-    if not no_dataset:
+    if interactive:
         data_source: Optional[BaseDatasource] = select_datasource(
             context=context, datasource_name=datasource_name
         )
@@ -142,7 +142,7 @@ def create_expectation_suite(
     create_empty_suite(
         context=context,
         expectation_suite_name=expectation_suite_name,
-        no_dataset=no_dataset,
+        interactive=interactive,
         batch_request=batch_request,
     )
     return expectation_suite_name, None
@@ -277,7 +277,7 @@ def tell_user_suite_exists(suite_name: str) -> None:
 def create_empty_suite(
     context: DataContext,
     expectation_suite_name: str,
-    no_dataset: bool,
+    interactive: bool,
     batch_request: dict,
 ) -> None:
     cli_message(
@@ -299,7 +299,7 @@ Great Expectations will create a new Expectation Suite '{:s}' and store it here:
     )
     suite.add_citation(
         comment="New suite added via CLI",
-        no_dataset=no_dataset,
+        interactive=interactive,
         batch_request=batch_request,
     )
     context.save_expectation_suite(
