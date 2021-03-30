@@ -33,9 +33,8 @@ RUN_INIT_AGAIN = (
     "OK. You must run <green>great_expectations init</green> to fix the missing files!"
 )
 
-COMPLETE_ONBOARDING_PROMPT = """To run locally, we need some files that are not in source control.
-  - Anything existing will not be modified.
-  - Would you like to fix this automatically?"""
+COMPLETE_ONBOARDING_PROMPT = """
+It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"""
 
 SLACK_SETUP_INTRO = """
 <cyan>========== Slack Notifications ==========</cyan>

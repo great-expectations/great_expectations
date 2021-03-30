@@ -7,6 +7,7 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
+    COMPLETE_ONBOARDING_PROMPT,
     GREETING,
     HOW_TO_CUSTOMIZE,
     LETS_BEGIN_PROMPT,
@@ -74,14 +75,19 @@ def init(ctx, view, usage_stats):
                 # Ensure the context can be instantiated
                 cli_message(PROJECT_IS_COMPLETE)
                 sys.exit(0)
+            else:
+                # Prompt to modify the project to add missing files
+                if not ctx.obj.assume_yes:
+                    if not click.confirm(COMPLETE_ONBOARDING_PROMPT, default=True):
+                        cli_message(RUN_INIT_AGAIN)
+                        exit(0)
+
         except (DataContextError, DatasourceInitializationError) as e:
             cli_message("<red>{}</red>".format(e.message))
             sys.exit(1)
 
         try:
-            context = DataContext.create(
-                target_directory, usage_statistics_enabled=usage_stats
-            )
+            DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
             cli_message(ONBOARDING_COMPLETE)
             # TODO if this is correct, ensure this is covered by a test
             # cli_message(SETUP_SUCCESS)

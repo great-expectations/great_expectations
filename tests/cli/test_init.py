@@ -15,23 +15,20 @@ from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @freeze_time("09/26/2019 13:42:41")
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_cli_init_on_new_project(
-    mock_emit, mock_webbrowser, caplog, tmp_path_factory, monkeypatch
+    mock_emit, mock_webbrowser, caplog, tmp_path, monkeypatch
 ):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
-    project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
+    project_dir_path = tmp_path / "test_cli_init_diff"
+    project_dir_path.mkdir()
+    project_dir = str(project_dir_path)
     os.makedirs(os.path.join(project_dir, "data"))
     data_path = os.path.join(project_dir, "data", "Titanic.csv")
     fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
@@ -41,7 +38,8 @@ def test_cli_init_on_new_project(
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["--v3-api", "--assume-yes", "init"],
+        ["--v3-api", "init"],
+        input="Y\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -49,6 +47,9 @@ def test_cli_init_on_new_project(
 
     assert len(stdout) < 6000, "CLI output is unreasonably long."
     assert "Always know what to expect from your data" in stdout
+    assert (
+        "Let's create a new Data Context to hold your project configuration." in stdout
+    )
     assert "What data would you like Great Expectations to connect to" not in stdout
     assert "What are you processing your files with" not in stdout
     assert (
@@ -62,9 +63,15 @@ def test_cli_init_on_new_project(
     )
     assert "Generating example Expectation Suite..." not in stdout
     assert "Building" not in stdout
-    assert "Data Docs" not in stdout
     assert "Done generating example Expectation Suite" not in stdout
-    assert "Great Expectations is now set up" in stdout
+    assert (
+        "Congratulations! You are now ready to customize your Great Expectations configuration."
+        in stdout
+    )
+    assert (
+        "You can customize your configuration in many ways. Here are some examples:"
+        in stdout
+    )
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
@@ -121,17 +128,12 @@ def test_cli_init_on_new_project(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
     mock_webbrowser,
     caplog,
     monkeypatch,
-    tmp_path_factory,
+    tmp_path,
 ):
     """
     This test walks through the onboarding experience.
@@ -139,11 +141,12 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     The user just checked an existing project out of source control and does
     not yet have an uncommitted directory.
     """
-    root_dir = tmp_path_factory.mktemp("hiya")
-    root_dir = str(root_dir)
-    os.makedirs(os.path.join(root_dir, "data"))
+    root_dir_path = tmp_path / "hiya"
+    root_dir_path.mkdir()
+    root_dir = str(root_dir_path)
     data_folder_path = os.path.join(root_dir, "data")
-    data_path = os.path.join(root_dir, "data", "Titanic.csv")
+    os.makedirs(data_folder_path)
+    data_path = os.path.join(data_folder_path, "Titanic.csv")
     fixture_path = file_relative_path(
         __file__, os.path.join("..", "test_sets", "Titanic.csv")
     )
@@ -156,27 +159,51 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     result = runner.invoke(
         cli,
         ["--v3-api", "init"],
-        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
+        input=f"Y\n",
         catch_exceptions=False,
     )
     stdout = result.output
     assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 1
-    assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(
-            root_dir
-        )
-        in mock_webbrowser.call_args[0][0]
-    )
+    assert mock_webbrowser.call_count == 0
 
-    assert "Great Expectations is now set up." in stdout
+    assert (
+        "Congratulations! You are now ready to customize your Great Expectations configuration."
+        in stdout
+    )
 
     context = DataContext(os.path.join(root_dir, DataContext.GE_DIR))
     uncommitted_dir = os.path.join(context.root_directory, "uncommitted")
     shutil.rmtree(uncommitted_dir)
     assert not os.path.isdir(uncommitted_dir)
 
-    # Test the second invocation of init
+    # Test the second invocation of init (answer N to update broken init)
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        ["--v3-api", "init"],
+        input="N\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert (
+        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
+        in stdout
+    )
+    assert "Great Expectations added some missing files required to run." not in stdout
+    assert "OK. You must run" in stdout
+    assert "great_expectations init" in stdout
+    assert "to fix the missing files!" in stdout
+    assert "You may see new files in" not in stdout
+    assert "Would you like to build & view this project's Data Docs!?" not in stdout
+
+    assert not os.path.isdir(uncommitted_dir)
+    config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
+    assert not os.path.isfile(config_var_path)
+
+    # Test the third invocation of init (answer Yes to update broken init)
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     with pytest.warns(
@@ -185,19 +212,23 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
         result = runner.invoke(
             cli,
             ["--v3-api", "init"],
-            input="Y\nn\n",
+            input="Y\n",
             catch_exceptions=False,
         )
     stdout = result.stdout
 
     assert result.exit_code == 0
+    assert (
+        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
+        in stdout
+    )
     assert "Great Expectations added some missing files required to run." in stdout
     assert "You may see new files in" in stdout
 
     assert "OK. You must run" not in stdout
     assert "great_expectations init" not in stdout
     assert "to fix the missing files!" not in stdout
-    assert "Would you like to build & view this project's Data Docs!?" in stdout
+    assert "Would you like to build & view this project's Data Docs!?" not in stdout
 
     assert os.path.isdir(uncommitted_dir)
     config_var_path = os.path.join(uncommitted_dir, "config_variables.yml")
