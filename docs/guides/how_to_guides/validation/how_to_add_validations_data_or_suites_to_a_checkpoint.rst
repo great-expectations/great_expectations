@@ -202,7 +202,7 @@ Steps
                   data_connector_name: my_other_data_connector
                   data_asset_name: users
                   data_connector_query:
-                    batch_identifiers:
+                    batch_filter_parameters:
                       name: Titanic
                 action_list:
                   - name: quarantine_failed_data

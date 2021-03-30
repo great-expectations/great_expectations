@@ -9,7 +9,7 @@ Datasources
 Data Connectors
 ===================
 
-A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external data store to *identify available partitions*, *build batch definitions using parameters such as partition names*, and *translate batch definitions to Execution Engine-specific Batch Specs*.
+A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external data store to *identify available Batches*, *build Batch Definitions using Batch Identifiers*, and *translate Batch Definitions to Execution Engine-specific Batch Specs*.
 
 .. admonition:: API Note
 
@@ -23,9 +23,9 @@ Each Data Connector holds configuration for connecting to a different type of ex
 
 The simplest ``RuntimeDataConnector`` may simply store lookup information about Data Assets to facilitate running in a pipeline where you already have a DataFrame in memory or available in a cluster. However, Great Expectations makes it possible to configure Data Connectors that offer stronger guarantees about reproducibility, sampling, and compatibility with other tools.
 
-The Data Connector uses ``Partitions`` to identify the available batches available in a Data Asset.
+The Data Connector uses ``Batch Definitions`` to identify the Batches available in a Data Asset.
 
-A **Partition** is what differentiates a specific ``Batch`` of data that is part of a Data Asset. The partition uniquely identifies a subset of data based on the purpose for which you validate, such as the most recent delivery. The ``ConfiguredAssetFilesystemDataConnector`` can use a regex strring to match files and prouce named match groups that define unique partitions. Data Connectors use **Sorters** to help define a unique order for partitions, such as sorting files by date or alphabetically.
+A **Batch** is what differentiates a specific set of data that is part of a Data Asset. The Batch uniquely identifies a subset of data based on the purpose for which you validate, such as the most recent delivery. The ``ConfiguredAssetFilesystemDataConnector`` can use a regex strring to match files and produce named match groups that define unique Batches. Data Connectors use **Sorters** to help define a unique order for Batches, such as sorting files by date or alphabetically.
 
 .. _specifying_batches:
 Batches
@@ -54,7 +54,7 @@ A **Batch Definition** includes all the information required to precisely identi
 
 - **Batch Identifiers**: contains information that uniquely identifies a specific batch from the Data Asset, such as the delivery date or query time.
 - **Engine Passthrough**: contains information that will be passed directly to the Execution Engine as part of the Batch Spec.
-- **Sample Definition**: contains information about sampling or limiting done on the partition to create a Batch.
+- **Sample Definition**: contains information about sampling or limiting done on the Data Asset to create a Batch.
 
 .. admonition:: Best Practice
 
@@ -114,7 +114,7 @@ The Datasource can then query the ExecutionEngine to fetch data and BatchMarkers
             "data_connector": "pipeline",
             "data_asset_name": "my_asset",
             "data_connector_query" : {
-                "batch_identifiers" : {
+                "batch_filter_parameters" : {
                     "airflow_run_id": "string_airflow_run_id_that_was_provided",
                     "other_key": "string_other_key_that_was_provided",
                 }
@@ -164,13 +164,13 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
         "data_connector": "pipeline",
         "in_memory_dataset": df,
         "data_connector_query" : {
-        "batch_identifiers" : {
-            "airflow_run_id": my_run_id,
-            "other_key": my_other_key
-        }
-        "custom_filter_function": my_filter_fn,
-        "limit": 10,
-        "index": Optional[Union[int, list, tuple, slice, str]],  # examples: 0; "-1"; [3:7]; "[2:4]"
+          "batch_filter_parameters" : {
+              "airflow_run_id": my_run_id,
+              "other_key": my_other_key
+          }
+          "custom_filter_function": my_filter_fn,
+          "limit": 10,
+          "index": Optional[Union[int, list, tuple, slice, str]],  # examples: 0; "-1"; [3:7]; "[2:4]"
         },
         "sampling": {
             "limit": 1000,
@@ -191,7 +191,7 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
         data_asset_name: str
         batch_identifiers:
             ** contents depend on the configuration of the DataConnector **
-            ** provides a persistent, unique identifier for the partition within the context of the data asset **
+            ** provides a persistent, unique identifier for the Batch within the context of the Data Asset **
 
 3. ``BatchSpec``
 
