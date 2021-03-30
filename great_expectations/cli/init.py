@@ -40,18 +40,12 @@ except ImportError:
 
 @click.command()
 @click.option(
-    # Note this --no-view option is mostly here for tests
-    "--view/--no-view",
-    help="By default open in browser unless you specify the --no-view flag.",
-    default=True,
-)
-@click.option(
     "--usage-stats/--no-usage-stats",
     help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
     default=True,
 )
 @click.pass_context
-def init(ctx, view, usage_stats):
+def init(ctx, usage_stats):
     """
     Initialize a new Great Expectations project.
 
