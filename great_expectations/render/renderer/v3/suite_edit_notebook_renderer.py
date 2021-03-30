@@ -17,6 +17,7 @@ from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
+from great_expectations.util import filter_properties_dict
 
 
 class SuiteEditNotebookRenderer(BaseNotebookRenderer):
@@ -249,6 +250,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         expectation: ExpectationConfiguration
         for expectation in expectations_by_column["table_expectations"]:
+            filter_properties_dict(properties=expectation["kwargs"], inplace=True)
             code: str = self.render_with_overwrite(
                 notebook_config=self.table_expectation_code,
                 default_file_name="table_expectation.py.j2",
@@ -289,6 +291,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
             expectation: ExpectationConfiguration
             for expectation in expectations:
+                filter_properties_dict(properties=expectation["kwargs"], inplace=True)
                 code: str = self.render_with_overwrite(
                     notebook_config=self.column_expectation_code,
                     default_file_name="column_expectation.py.j2",
@@ -303,11 +306,13 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     @classmethod
     def _build_kwargs_string(cls, expectation: ExpectationConfiguration) -> str:
         kwargs: List[str] = []
-        for k, v in expectation["kwargs"].items():
+        expectation_kwargs: dict = filter_properties_dict(
+            properties=expectation["kwargs"]
+        )
+        for k, v in expectation_kwargs.items():
             if k == "column":
                 # make the column a positional argument
                 kwargs.insert(0, "{}='{}'".format(k, v))
-
             elif isinstance(v, str):
                 # Put strings in quotes
                 kwargs.append("{}='{}'".format(k, v))
