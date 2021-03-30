@@ -10,6 +10,7 @@ Develop
 * [ENHANCEMENT] CLI `docs build` command implemented for v3 api
 * [ENHANCEMENT] CLI `docs clean` command implemented for v3 api
 * [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource #2613
+* [ENHANCEMENT] DataContext.clean_data_docs now raises helpful errors
 * [ENHANCEMENT] CLI `init` command implemented for v3 api
 
 0.13.15
