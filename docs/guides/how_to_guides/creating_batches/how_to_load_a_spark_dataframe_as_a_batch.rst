@@ -173,7 +173,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
                 },
                 batch_identifiers={
                     "some_key_maybe_pipeline_stage": "ingestion step 1",
-                    "some_other_key_maybe_run_id": "run 18"
+                    "some_other_key_maybe_airflow_run_id": "run 18"
                 }
             )
 
@@ -193,7 +193,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
                 },
                 batch_identifiers={
                     "some_key_maybe_pipeline_stage": "ingestion step 1",
-                    "some_other_key_maybe_run_id": "run 18"
+                    "some_other_key_maybe_airflow_run_id": "run 18"
                 },
                 batch_spec_passthrough={
                     "reader_method": "csv",
@@ -235,7 +235,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
                 },
                 batch_identifiers={
                     "some_key_maybe_pipeline_stage": "ingestion step 1",
-                    "some_other_key_maybe_run_id": "run 18"
+                    "some_other_key_maybe_airflow_run_id": "run 18"
                 },
                 batch_spec_passthrough={
                     "reader_method": "csv",
