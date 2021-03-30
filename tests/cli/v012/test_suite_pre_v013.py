@@ -278,8 +278,12 @@ def test_suite_new_creates_empty_suite(
             "path": csv,
             "reader_method": "read_csv",
         },
-        "batch_markers": None,
+        "batch_request": None,
+        "batch_definition": None,
         "batch_parameters": None,
+        "batch_spec": None,
+        "batch_markers": None,
+        "interactive": False,
         "comment": "New suite added via CLI",
     }
 
@@ -363,8 +367,12 @@ def test_suite_new_empty_with_no_jupyter(
             "path": csv,
             "reader_method": "read_csv",
         },
-        "batch_markers": None,
+        "batch_request": None,
+        "batch_definition": None,
         "batch_parameters": None,
+        "batch_spec": None,
+        "batch_markers": None,
+        "interactive": False,
         "comment": "New suite added via CLI",
     }
 
