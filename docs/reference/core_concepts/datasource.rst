@@ -114,7 +114,7 @@ The Datasource can then query the ExecutionEngine to fetch data and BatchMarkers
             "data_connector": "pipeline",
             "data_asset_name": "my_asset",
             "data_connector_query" : {
-                "batch_identifiers" : {
+                "batch_filter_parameters" : {
                     "airflow_run_id": "string_airflow_run_id_that_was_provided",
                     "other_key": "string_other_key_that_was_provided",
                 }
@@ -164,13 +164,13 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
         "data_connector": "pipeline",
         "in_memory_dataset": df,
         "data_connector_query" : {
-        "batch_identifiers" : {
-            "airflow_run_id": my_run_id,
-            "other_key": my_other_key
-        }
-        "custom_filter_function": my_filter_fn,
-        "limit": 10,
-        "index": Optional[Union[int, list, tuple, slice, str]],  # examples: 0; "-1"; [3:7]; "[2:4]"
+          "batch_filter_parameters" : {
+              "airflow_run_id": my_run_id,
+              "other_key": my_other_key
+          }
+          "custom_filter_function": my_filter_fn,
+          "limit": 10,
+          "index": Optional[Union[int, list, tuple, slice, str]],  # examples: 0; "-1"; [3:7]; "[2:4]"
         },
         "sampling": {
             "limit": 1000,

@@ -275,7 +275,7 @@ Steps
                     batch_request={
                         "batch_data": my_data_frame,
                         "data_connector_query": {
-                            "batch_identifiers": {
+                            "batch_filter_parameters": {
                                 "airflow_run_id": airflow_run_id,
                             }
                         },
