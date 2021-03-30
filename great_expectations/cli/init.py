@@ -1,5 +1,6 @@
 import os
 import sys
+import warnings
 
 import click
 
@@ -71,8 +72,15 @@ def init(ctx, view, usage_stats):
 
     if DataContext.does_config_exist_on_disk(ge_dir):
         try:
-            if DataContext.is_project_initialized(ge_dir):
+            project_filestructure_exists = (
+                DataContext.does_config_exist_on_disk(ge_dir)
+                and DataContext.all_uncommitted_directories_exist(ge_dir)
+                and DataContext.config_variables_yml_exist(ge_dir)
+            )
+            if project_filestructure_exists:
                 # Ensure the context can be instantiated
+                message = f"""Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."""
+                warnings.warn(message)
                 cli_message(PROJECT_IS_COMPLETE)
                 sys.exit(0)
             else:

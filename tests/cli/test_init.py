@@ -188,6 +188,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     stdout = result.stdout
 
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 0
     assert (
         "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
         in stdout
@@ -218,6 +219,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     stdout = result.stdout
 
     assert result.exit_code == 0
+    assert mock_webbrowser.call_count == 0
     assert (
         "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
         in stdout
@@ -239,28 +241,19 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     mock_webbrowser,
     caplog,
     monkeypatch,
-    tmp_path_factory,
+    tmp_path,
 ):
-    """
-    This test walks through the onboarding experience.
-
-    The user just checked an existing project out of source control and does
-    not yet have an uncommitted directory.
-    """
-    root_dir: str = str(tmp_path_factory.mktemp("hiya"))
+    root_dir_path = tmp_path / "hiya"
+    root_dir_path.mkdir()
+    root_dir = str(root_dir_path)
+    data_folder_path = os.path.join(root_dir, "data")
     os.makedirs(os.path.join(root_dir, "data"))
-    data_folder_path: str = os.path.join(root_dir, "data")
-    data_path: str = os.path.join(root_dir, "data", "Titanic.csv")
+    data_path: str = os.path.join(data_folder_path, "Titanic.csv")
     fixture_path: str = file_relative_path(
         __file__, os.path.join("..", "test_sets", "Titanic.csv")
     )
@@ -273,17 +266,11 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     result: Result = runner.invoke(
         cli,
         ["--v3-api", "init"],
-        input=f"\n\n1\n1\n{data_folder_path}\n\n\n\n2\n{data_path}\n\n\n\n",
+        input=f"Y\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 1
-    assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/Titanic/warning/".format(
-            root_dir
-        )
-        in mock_webbrowser.call_args[0][0]
-    )
+    assert mock_webbrowser.call_count == 0
 
     # Now the test begins - rerun the init on an existing project
 
@@ -295,17 +282,17 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
         result = runner.invoke(
             cli,
             ["--v3-api", "init"],
-            input="n\n",
+            input="",
             catch_exceptions=False,
         )
     stdout = result.stdout
-    assert mock_webbrowser.call_count == 1
+    assert mock_webbrowser.call_count == 0
 
     assert result.exit_code == 0
     assert "This looks like an existing project that" in stdout
     assert "appears complete" in stdout
     assert "ready to roll" in stdout
-    assert "Would you like to build & view this project's Data Docs" in stdout
+    assert "Would you like to build & view this project's Data Docs" not in stdout
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
