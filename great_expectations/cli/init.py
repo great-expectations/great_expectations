@@ -101,7 +101,6 @@ def init(ctx, usage_stats):
         if not ctx.obj.assume_yes:
             if not click.confirm(LETS_BEGIN_PROMPT, default=True):
                 cli_message(RUN_INIT_AGAIN)
-                # TODO ensure this is covered by a test
                 exit(0)
 
         try:
