@@ -19,6 +19,7 @@ develop
 * [ENHANCEMENT] CLI `docs build` command implemented for v3 api
 * [ENHANCEMENT] CLI `docs clean` command implemented for v3 api
 * [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource #2613
+* [BUGFIX] Fixed issue where Sorters were not being applied correctly when ``data_connector_query`` contained limit or index  #2617
 
 0.13.15
 -----------------

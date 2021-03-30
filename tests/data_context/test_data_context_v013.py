@@ -501,9 +501,11 @@ def test_in_memory_data_context_configuration(
 
 def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    data_context_with_runtime_sql_datasource_for_testing_get_batch,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = (
+        data_context_with_runtime_sql_datasource_for_testing_get_batch
+    )
 
     batch: Batch
 
@@ -536,9 +538,11 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
 
 def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    data_context_with_runtime_sql_datasource_for_testing_get_batch,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = (
+        data_context_with_runtime_sql_datasource_for_testing_get_batch
+    )
     my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
         "my_expectations"
     )
