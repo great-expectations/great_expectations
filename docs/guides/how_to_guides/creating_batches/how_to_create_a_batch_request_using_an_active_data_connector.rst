@@ -1,6 +1,6 @@
 .. _how_to_guides__creating_batches__create_a_batch_using_an_active_data_connector:
 
-How to load a Batch using an active ``DataConnector``
+How to load a Batch using an active Data Connector
 ===================================================
 
 .. warning::
