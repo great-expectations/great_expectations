@@ -70,12 +70,12 @@ def init(ctx, usage_stats):
         )
         warnings.warn(message)
         try:
-            project_filestructure_exists = (
+            project_file_structure_exists = (
                 DataContext.does_config_exist_on_disk(ge_dir)
                 and DataContext.all_uncommitted_directories_exist(ge_dir)
                 and DataContext.config_variables_yml_exist(ge_dir)
             )
-            if project_filestructure_exists:
+            if project_file_structure_exists:
                 cli_message(PROJECT_IS_COMPLETE)
                 sys.exit(0)
             else:
@@ -92,9 +92,7 @@ def init(ctx, usage_stats):
         try:
             DataContext.create(target_directory, usage_statistics_enabled=usage_stats)
             cli_message(ONBOARDING_COMPLETE)
-            # TODO if this is correct, ensure this is covered by a test
-            # cli_message(SETUP_SUCCESS)
-            # exit(0)
+
         except DataContextError as e:
             cli_message("<red>{}</red>".format(e.message))
             # TODO ensure this is covered by a test

@@ -15,14 +15,10 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
 @pytest.mark.parametrize(
-    "invocation_and_input",
+    "invocation,input",
     [
-        {"test_title": "init", "invocation": "--v3-api init", "input": "Y\n"},
-        {
-            "test_title": "assume_yes_init",
-            "invocation": "--v3-api --assume-yes init",
-            "input": "Y\n",
-        },
+        ("--v3-api init", "Y\n"),
+        ("--v3-api --assume-yes init", ""),
     ],
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -30,7 +26,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_cli_init_on_new_project(
-    mock_emit, mock_webbrowser, invocation_and_input, caplog, tmp_path, monkeypatch
+    mock_emit, mock_webbrowser, invocation, input, caplog, tmp_path, monkeypatch
 ):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
@@ -47,8 +43,8 @@ def test_cli_init_on_new_project(
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        invocation_and_input["invocation"],
-        input=invocation_and_input["input"],
+        invocation,
+        input=input,
         catch_exceptions=False,
     )
     stdout = result.output
@@ -56,25 +52,11 @@ def test_cli_init_on_new_project(
 
     assert len(stdout) < 6000, "CLI output is unreasonably long."
     assert "Always know what to expect from your data" in stdout
-    if invocation_and_input["test_title"] == "init":
+    if invocation == "--v3-api init":
         assert (
             "Let's create a new Data Context to hold your project configuration."
             in stdout
         )
-    assert "What data would you like Great Expectations to connect to" not in stdout
-    assert "What are you processing your files with" not in stdout
-    assert (
-        "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)"
-        not in stdout
-    )
-    assert "Name the new Expectation Suite [Titanic.warning]" not in stdout
-    assert (
-        "Great Expectations will choose a couple of columns and generate expectations about them"
-        not in stdout
-    )
-    assert "Generating example Expectation Suite..." not in stdout
-    assert "Building" not in stdout
-    assert "Done generating example Expectation Suite" not in stdout
     assert (
         "Congratulations! You are now ready to customize your Great Expectations configuration."
         in stdout
@@ -135,6 +117,83 @@ def test_cli_init_on_new_project(
             }
         ),
     ]
+
+    # Assertions to make sure we didn't regress to v2 API
+    assert "What data would you like Great Expectations to connect to" not in stdout
+    assert "What are you processing your files with" not in stdout
+    assert (
+        "Enter the path of a data file (relative or absolute, s3a:// and gs:// paths are ok too)"
+        not in stdout
+    )
+    assert "Name the new Expectation Suite [Titanic.warning]" not in stdout
+    assert (
+        "Great Expectations will choose a couple of columns and generate expectations about them"
+        not in stdout
+    )
+    assert "Generating example Expectation Suite..." not in stdout
+    assert "Building" not in stdout
+    assert "Done generating example Expectation Suite" not in stdout
+
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_cancelled_cli_init_on_new_project(
+    mock_emit, mock_webbrowser, caplog, tmp_path, monkeypatch
+):
+    monkeypatch.delenv(
+        "GE_USAGE_STATS", raising=False
+    )  # Undo the project-wide test default
+    project_dir_path = tmp_path / "test_cli_init_diff"
+    project_dir_path.mkdir()
+    project_dir = str(project_dir_path)
+    os.makedirs(os.path.join(project_dir, "data"))
+    data_path = os.path.join(project_dir, "data", "Titanic.csv")
+    fixture_path = file_relative_path(__file__, "../test_sets/Titanic.csv")
+    shutil.copy(fixture_path, data_path)
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
+    result = runner.invoke(
+        cli,
+        "--v3-api init",
+        input="n\n",
+        catch_exceptions=False,
+    )
+    stdout = result.output
+    assert mock_webbrowser.call_count == 0
+
+    assert len(stdout) < 6000, "CLI output is unreasonably long."
+    assert "Always know what to expect from your data" in stdout
+    assert (
+        "Let's create a new Data Context to hold your project configuration." in stdout
+    )
+    assert "OK. You must run" in stdout
+    assert "great_expectations init" in stdout
+    assert "to fix the missing files!" in stdout
+
+    assert (
+        "Congratulations! You are now ready to customize your Great Expectations configuration."
+        not in stdout
+    )
+    assert (
+        "You can customize your configuration in many ways. Here are some examples:"
+        not in stdout
+    )
+
+    assert not os.path.isdir(os.path.join(project_dir, "great_expectations"))
+    config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
+    assert not os.path.isfile(config_path)
+
+    obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
+
+    assert obs_tree == ""
+
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
