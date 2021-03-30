@@ -97,8 +97,8 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
         Additional Notes
         ----------------
             * If you are using Snowflake, and you have lowercase table or column names:
-            * If you are loading your batch with a table, you can use pass `"use_quoted_name":True` into your `batch_kwargs` dictionary. This will use the SQL Alchemy quoted_name method to ensure case sensitivity for your table and column names.
-            * If you are loading your batch with a query, if you have lowercase column names, you still need to pass `"use_quoted_name":True` into your `batch_kwargs` dictionary. You will also need to wrap your query in single quotes, and your table or column name in double quotes like so:
+                * If you are loading your batch with a table, you can use pass `"use_quoted_name":True` into your `batch_kwargs` dictionary. This will use the SQL Alchemy quoted_name method to ensure case sensitivity for your table and column names.
+                * If you are loading your batch with a query, if you have lowercase column names, you still need to pass `"use_quoted_name":True` into your `batch_kwargs` dictionary. You will also need to wrap your query in single quotes, and your table or column name in double quotes like so:
                 .. code-block:: python
 
                     batch_kwargs = {
@@ -204,9 +204,7 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
 
         3. Construct a BatchRequest
 
-            We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument.
-
-            Attributes inside the ``data_connector_query`` are optional - you can use them to attach additional metadata to your DataFrame. When configuring the Data Connector, you used ``batch_identifiers`` to define which keys are allowed.
+            We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
 
             .. code-block:: python
 
@@ -225,6 +223,9 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
                     }
                 )
 
+            .. admonition:: Best Practice
+
+                Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
 
         4. Construct a Validator
 
@@ -236,6 +237,24 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
                 )
 
 
+            Alternatively, you may skip step 2 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
+
+          .. code-block:: python
+
+            my_validator: Validator = context.get_validator(
+                datasource_name="insert_your_sqlalchemy_datasource_name_here",
+                    data_connector_name="insert_your_runtime_data_connector_name_here",
+                    data_asset_name="insert_your_data_asset_name_here", # this can be anything that identifies this data_asset for you
+                    runtime_parameters={
+                    "query": "SELECT * FROM my_table"
+                    },
+                    batch_identifiers={
+                    "some_key_maybe_pipeline_stage": "validation_stage",
+                    "some_other_key_maybe_run_id": 1234567890
+                    },
+                expectation_suite=suite,  # OR
+                # expectation_suite_name=suite_name
+            )
         5. Check your data
 
             You can check that the first few lines of your Batch are what you expect by running:
