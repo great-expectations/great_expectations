@@ -55,7 +55,12 @@ def suite(ctx):
 
 
 @suite.command(name="new")
-@click.option("--suite", "-es", default=None, help="Expectation suite name.")
+@click.option(
+    "--suite",
+    "-es",
+    default=None,
+    help="Expectation suite name.",
+)
 @click.option(
     "--no-dataset",
     "-nd",
