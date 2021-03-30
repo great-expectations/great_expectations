@@ -65,6 +65,10 @@ def init(ctx, usage_stats):
     cli_message(GREETING)
 
     if DataContext.does_config_exist_on_disk(ge_dir):
+        message = (
+            f"""Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."""
+        )
+        warnings.warn(message)
         try:
             project_filestructure_exists = (
                 DataContext.does_config_exist_on_disk(ge_dir)
@@ -72,9 +76,6 @@ def init(ctx, usage_stats):
                 and DataContext.config_variables_yml_exist(ge_dir)
             )
             if project_filestructure_exists:
-                # Ensure the context can be instantiated
-                message = f"""Warning. An existing `{DataContext.GE_YML}` was found here: {ge_dir}."""
-                warnings.warn(message)
                 cli_message(PROJECT_IS_COMPLETE)
                 sys.exit(0)
             else:
