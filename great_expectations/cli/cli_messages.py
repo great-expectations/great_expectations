@@ -59,13 +59,6 @@ Great Expectations added some missing files required to run.
   - You may need to add secrets to `<yellow>great_expectations/uncommitted/config_variables.yml</yellow>` to finish onboarding.
 """
 
-NO_DATASOURCES_FOUND = """<red>Error: No datasources were found.</red> Please add one by:
-  - running `<green>great_expectations datasource new</green>` or
-  - by editing the {} file
-""".format(
-    DataContext.GE_YML
-)
-
 READY_FOR_CUSTOMIZATION = """<cyan>Congratulations! You are now ready to customize your Great Expectations configuration.</cyan>"""
 
 HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways. Here are some examples:</cyan>
@@ -85,5 +78,3 @@ HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways
 """
 
 SECTION_SEPARATOR = "\n================================================================================\n"
-
-DONE = "Done"
