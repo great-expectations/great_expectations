@@ -5,7 +5,11 @@ def test_data_asset_citations(pandas_dataset):
     assert suite.meta["citations"][0] == {
         "comment": "test citation",
         "batch_kwargs": pandas_dataset.batch_kwargs,
+        "batch_request": None,
+        "batch_definition": None,
+        "batch_spec": None,
         "batch_parameters": pandas_dataset.batch_parameters,
         "batch_markers": pandas_dataset.batch_markers,
         "citation_date": citation_date,
+        "no_dataset": False,
     }

@@ -272,6 +272,7 @@ def test_suite_new_creates_empty_suite(
     citations = suite.get_citations()
     citations[0].pop("citation_date")
     assert citations[0] == {
+        "batch_definition": None,
         "batch_kwargs": {
             "data_asset_name": "f1",
             "datasource": "mydatasource",
@@ -280,7 +281,10 @@ def test_suite_new_creates_empty_suite(
         },
         "batch_markers": None,
         "batch_parameters": None,
+        "batch_request": None,
+        "batch_spec": None,
         "comment": "New suite added via CLI",
+        "no_dataset": False,
     }
 
     assert mock_subprocess.call_count == 1
@@ -357,6 +361,7 @@ def test_suite_new_empty_with_no_jupyter(
     citations = suite.get_citations()
     citations[0].pop("citation_date")
     assert citations[0] == {
+        "batch_definition": None,
         "batch_kwargs": {
             "data_asset_name": "f1",
             "datasource": "mydatasource",
@@ -365,7 +370,10 @@ def test_suite_new_empty_with_no_jupyter(
         },
         "batch_markers": None,
         "batch_parameters": None,
+        "batch_request": None,
+        "batch_spec": None,
         "comment": "New suite added via CLI",
+        "no_dataset": False,
     }
 
     assert mock_subprocess.call_count == 0
