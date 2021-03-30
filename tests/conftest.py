@@ -2874,7 +2874,7 @@ def empty_context_with_checkpoint_v1_stats_enabled(
     )
     checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
     shutil.copy(fixture_path, checkpoints_file)
-    # noinspection PyProtectedMember
+    # # noinspection PyProtectedMember
     context._save_project_config()
     return context
 
@@ -3721,7 +3721,7 @@ def filesystem_csv_2(tmp_path):
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)
     assert os.path.isabs(base_dir)
     assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
 
@@ -3736,10 +3736,10 @@ def filesystem_csv_3(tmp_path):
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)
 
     toy_dataset_2 = PandasDataset({"y": [1, 2, 3]})
-    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
+    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=False)
 
     return base_dir
 
