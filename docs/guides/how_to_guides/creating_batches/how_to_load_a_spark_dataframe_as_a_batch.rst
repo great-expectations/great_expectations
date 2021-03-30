@@ -108,8 +108,16 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
           .. code-block:: python
 
-              import great_expectations as ge
-              context = ge.get_context()
+            import pyspark
+
+            import great_expectations as ge
+            from great_expectations import DataContext
+            from great_expectations.core import ExpectationSuite
+            from great_expectations.core.batch import RuntimeBatchRequest
+            from great_expectations.core.util import get_or_create_spark_application
+            from great_expectations.validator.validator import Validator
+
+            context = ge.get_context()
 
           Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
 
@@ -158,10 +166,6 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
           .. code-block:: python
 
-            from great_expectations.core.batch import RuntimeBatchRequest
-            from great_expectations.core.util import get_or_create_spark_application
-            import pyspark
-
             spark_application: pyspark.sql.session.SparkSession = get_or_create_spark_application()
             df: pyspark.sql.dataframe.DataFrame = spark_application.read.csv("some_path.csv")
             runtime_batch_request = RuntimeBatchRequest(
@@ -180,8 +184,6 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
           Example Runtime Batch Request using a path:
 
           .. code-block:: python
-
-            from great_expectations.core.batch import RuntimeBatchRequest
 
             path = "some_csv_file_with_no_file_extension"
             runtime_batch_request = RuntimeBatchRequest(
@@ -212,8 +214,6 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
 
           .. code-block:: python
 
-            from great_expectation.validator.validator import Validator
-
             my_validator: Validator = context.get_validator(
                 batch_request=runtime_batch_request,
                 expectation_suite=suite,  # OR
@@ -223,8 +223,6 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
           Alternatively, you may skip step 2 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
 
           .. code-block:: python
-
-            from great_expectation.validator.validator import Validator
 
             my_validator: Validator = context.get_validator(
                 datasource_name="my_spark_datasource",

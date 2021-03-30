@@ -107,8 +107,15 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
           .. code-block:: python
 
-              import great_expectations as ge
-              context: DataContext = ge.get_context()
+            import pandas as pd
+
+            import great_expectations as ge
+            from great_expectations import DataContext
+            from great_expectations.core import ExpectationSuite
+            from great_expectations.core.batch import RuntimeBatchRequest
+            from great_expectations.validator.validator import Validator
+
+            context: DataContext = ge.get_context()
 
           Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
 
@@ -157,9 +164,6 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
           .. code-block:: python
 
-            from great_expectations.core.batch import RuntimeBatchRequest
-            import pandas as pd
-
             df: pd.DataFrame = pd.read_csv("some_path.csv")
             runtime_batch_request = RuntimeBatchRequest(
                 datasource_name="my_pandas_datasource",
@@ -177,8 +181,6 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
           Example Runtime Batch Request using a path:
 
           .. code-block:: python
-
-            from great_expectations.core.batch import RuntimeBatchRequest
 
             path = "some_csv_file_with_no_file_extension"
             runtime_batch_request = RuntimeBatchRequest(
@@ -209,8 +211,6 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
 
           .. code-block:: python
 
-            from great_expectation.validator.validator import Validator
-
             my_validator: Validator = context.get_validator(
                 batch_request=runtime_batch_request,
                 expectation_suite=suite,  # OR
@@ -220,8 +220,6 @@ This guide will help you load a Pandas DataFrame as a Batch for use in creating 
           Alternatively, you may skip step 2 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
 
           .. code-block:: python
-
-            from great_expectation.validator.validator import Validator
 
             my_validator: Validator = context.get_validator(
                 datasource_name="my_pandas_datasource",
