@@ -124,7 +124,7 @@ If you have the following ``reports`` directory in your filesystem, and you want
 
 6. **Construct a BatchRequest**.
 
-  The following BatchRequest will retrieve a Batch corresponding to ``yellow_tripdata_sample_2019-01.csv`` by using ``batch_filter_parameters`` as a ``data_connector_query``.  Additional examples of ``data_connector_query`` like ``limit` and ``index`` can be found below.
+  The following BatchRequest will retrieve a Batch corresponding to ``yellow_tripdata_sample_2019-01.csv`` by using ``batch_filter_parameters`` as a ``data_connector_query``.  Additional examples of ``data_connector_query`` like ``index`` can be found below.
 
   .. code-block:: python
 
@@ -181,7 +181,7 @@ If you have the following ``reports`` directory in your filesystem, and you want
 Additional Notes
 ----------------
 
-BatchRequest can also support ``index`` and ``limit`` in the ``data_connector_query``.
+BatchRequest can also support ``index`` in the ``data_connector_query``.
 
   Using the same ``reports`` directory as above:
 
@@ -236,34 +236,6 @@ BatchRequest can also support ``index`` and ``limit`` in the ``data_connector_qu
     # batch corresponding to yellow_tripdata_sample_2019-02.csv
     {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'yellow_tripdata_sample', 'year': '2019', 'month': '02'}"}
 
-
-  The BatchRequest can also be used to retrieve Batches by ``limit``.
-
-  .. code-block:: python
-
-    batch_request = BatchRequest(
-      datasource_name="mydatasource",
-      data_connector_name="my_data_connector",
-      data_asset_name="my_reports",
-      data_connector_query={
-          "limit": 1
-          }
-        )
-
-    my_validator = context.get_validator(
-      batch_request=batch_request,
-      expectation_suite=suite
-    )
-
-
-    print(my_validator.active_batch.batch_definition)
-
-    # batch corresponding to yellow_tripdata_sample_2019-01.csv
-    {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'a', 'num': '1'}"}
-
-  .. note::
-
-    Currently Great Expectations can only support Validations on a single Batch. When multi-Batch Expectations are supported, ``limit > 1`` and ranges of indices like ``index=[1:3]`` will become more powerful ways to interact with Batches.
 
 .. discourse::
     :topic_identifier: 696
