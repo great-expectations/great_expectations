@@ -8,7 +8,6 @@ from click.testing import CliRunner, Result
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.test_cli import yaml
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
@@ -48,11 +47,13 @@ def test_cli_init_on_new_project(
 
     assert len(stdout) < 6000, "CLI output is unreasonably long."
     assert "Always know what to expect from your data" in stdout
+    lets_create_data_context = (
+        "Let's create a new Data Context to hold your project configuration."
+    )
     if invocation == "--v3-api init":
-        assert (
-            "Let's create a new Data Context to hold your project configuration."
-            in stdout
-        )
+        assert lets_create_data_context in stdout
+    if invocation == "--v3-api --assume-yes init":
+        assert lets_create_data_context not in stdout
     assert (
         "Congratulations! You are now ready to customize your Great Expectations configuration."
         in stdout
