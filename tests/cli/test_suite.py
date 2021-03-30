@@ -56,7 +56,7 @@ def test_suite_demo_deprecation_message(caplog, monkeypatch, empty_data_context)
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_with_default_suite_name_with_jupyter_no_dataset(
+def test_suite_new_with_suite_name_prompted_default_with_jupyter_no_dataset(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -89,17 +89,21 @@ def test_suite_new_with_default_suite_name_with_jupyter_no_dataset(
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
-    expected_suite_path: str = os.path.join(project_dir, "expectations", "warning.json")
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
     assert os.path.isfile(expected_suite_path)
 
-    expected_notebook = os.path.join(project_dir, "uncommitted", "edit_warning.ipynb")
+    expected_notebook = os.path.join(
+        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+    )
     assert os.path.isfile(expected_notebook)
 
     context = DataContext(context_root_dir=project_dir)
-    assert "warning" in context.list_expectation_suite_names()
+    assert expectation_suite_name in context.list_expectation_suite_names()
 
     suite: ExpectationSuite = context.get_expectation_suite(
-        expectation_suite_name="warning"
+        expectation_suite_name=expectation_suite_name
     )
     assert suite.expectations == []
 
@@ -132,7 +136,7 @@ def test_suite_new_with_default_suite_name_with_jupyter_no_dataset(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_with_custom_suite_name_prompt_with_jupyter_no_dataset(
+def test_suite_new_with_suite_name_prompted_custom_with_jupyter_no_dataset(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -166,20 +170,20 @@ def test_suite_new_with_custom_suite_name_prompt_with_jupyter_no_dataset(
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
     expected_suite_path: str = os.path.join(
-        project_dir, "expectations", "test_suite_name.json"
+        project_dir, "expectations", f"{expectation_suite_name}.json"
     )
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook = os.path.join(
-        project_dir, "uncommitted", "edit_test_suite_name.ipynb"
+        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook)
 
     context = DataContext(context_root_dir=project_dir)
-    assert "test_suite_name" in context.list_expectation_suite_names()
+    assert expectation_suite_name in context.list_expectation_suite_names()
 
     suite: ExpectationSuite = context.get_expectation_suite(
-        expectation_suite_name="test_suite_name"
+        expectation_suite_name=expectation_suite_name
     )
     assert suite.expectations == []
 
@@ -210,27 +214,15 @@ def test_suite_new_with_custom_suite_name_prompt_with_jupyter_no_dataset(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason=" TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_with_custom_suite_name_arg_with_jupyter_no_dataset(
+def test_suite_new_with_suite_name_arg_custom_with_jupyter_no_dataset(
     mock_webbroser,
     mock_subprocess,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    """
-    Running "suite new" should:
-    - make an empty suite
-    - open jupyter
-    - NOT open data docs
-    """
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -255,17 +247,21 @@ def test_suite_new_with_custom_suite_name_arg_with_jupyter_no_dataset(
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
-    expected_suite_path: str = os.path.join(project_dir, "expectations", "foo.json")
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
     assert os.path.isfile(expected_suite_path)
 
-    expected_notebook = os.path.join(project_dir, "uncommitted", "edit_foo.ipynb")
+    expected_notebook = os.path.join(
+        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+    )
     assert os.path.isfile(expected_notebook)
 
     context = DataContext(context_root_dir=project_dir)
-    assert "foo" in context.list_expectation_suite_names()
+    assert expectation_suite_name in context.list_expectation_suite_names()
 
     suite: ExpectationSuite = context.get_expectation_suite(
-        expectation_suite_name="foo"
+        expectation_suite_name=expectation_suite_name
     )
     assert suite.expectations == []
 
@@ -287,6 +283,84 @@ def test_suite_new_with_custom_suite_name_arg_with_jupyter_no_dataset(
     assert call_args[0] == "jupyter"
     assert call_args[1] == "notebook"
     assert expected_notebook in call_args[2]
+
+    assert mock_webbroser.call_count == 0
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_with_suite_name_arg_custom_without_jupyter_no_dataset(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+
+    expectation_suite_name: str = "test_suite_name"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api suite new --suite {expectation_suite_name} --no-dataset --no-jupyter",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "Select a datasource" not in stdout
+    assert (
+        f"Great Expectations will create a new Expectation Suite '{expectation_suite_name}' and store it here:"
+        in stdout
+    )
+    assert (
+        "Opening a notebook for you now to edit your expectation suite!" not in stdout
+    )
+    assert (
+        "If you wish to avoid this you can add the `--no-jupyter` flag." not in stdout
+    )
+
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook = os.path.join(
+        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+    )
+    assert os.path.isfile(expected_notebook)
+
+    context = DataContext(context_root_dir=project_dir)
+    assert expectation_suite_name in context.list_expectation_suite_names()
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert suite.expectations == []
+
+    citations: List[Dict[str, Any]] = suite.get_citations()
+    citations[0].pop("citation_date")
+    assert citations[0] == {
+        "batch_definition": None,
+        "batch_kwargs": None,
+        "batch_markers": None,
+        "batch_parameters": None,
+        "batch_request": None,
+        "batch_spec": None,
+        "comment": "New suite added via CLI",
+        "no_dataset": True,
+    }
+
+    assert mock_subprocess.call_count == 0
 
     assert mock_webbroser.call_count == 0
 
