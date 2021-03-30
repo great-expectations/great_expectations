@@ -5,10 +5,12 @@ How to load a Batch using an active ``DataConnector``
 
 .. warning::
 
-  ``DataConnector`` is a concept that was introduced in the V3 API, so the following configuration is not supported by the V2 (batch_kwargs) API.
+  Data Connector is a concept that was introduced in the V3 (BatchRequest) API, so the following configuration is not supported by the V2 (batch_kwargs) API.
 
-This guide demonstrates how to get a :ref:`batch <reference__core_concepts__glossary__datasources>` of data that Great Expectations can validate from a filesystem using an active ``DataConnector``.  For this how-to-guide, we will be using a ``ConfiguredAssetFilesystemDataConnector``.
-You can read more about the differences between ``ConfiguredAssetDataConnector`` and ``InferredAssetDataConnectors`` :ref:`here <which_data_connector_to_use>`.
+This guide demonstrates how to get a :ref:`batch <reference__core_concepts__glossary__datasources>` of data that Great Expectations can validate from a filesystem using an active Data Connector. A ``FilesystemDataConnector``, or ``SqlDataConnector``
+becomes active when we load the DataContext into memory and use the configured Datasource to retrieve a Batch of data from a filesystem or database.  For this how-to-guide, we will be using a ``ConfiguredAssetFilesystemDataConnector``.
+
+You can read more about the differences between ``ConfiguredAssetDataConnector`` and ``InferredAssetDataConnectors`` :ref:`here <which_data_connector_to_use>`, and the :ref:`Datasources reference <reference__core_concepts__datasources>` for more information.
 
 
 .. admonition:: Prerequisites: This how-to guide assumes you have already:
@@ -22,13 +24,12 @@ Steps
 
 If you have the following ``reports`` directory in your filesystem, and you want to treat ``*.csv`` files as batches within the ``reports`` DataAsset:
 
+**Note** : In our example, the ``base_directory`` is set to ``../``. If we are running this Notebook in the same folder as Great Expectations home directory (ie ``great_expectations/``), GE will begin looking for the files in the parent directory.
+
   .. code-block:: bash
 
-    reports/a-1.csv
-    reports/b-2.csv
-    reports/c-3.csv
-    reports/d-4.csv
-    reports/e-5.csv
+    reports/yellow_tripdata_sample_2019-01.csv
+    reports/yellow_tripdata_sample_2019-02.csv
 
 
 1. **Load or create a DataContext**
@@ -44,7 +45,7 @@ If you have the following ``reports`` directory in your filesystem, and you want
 
 2. **Configure a Datasource**
 
-  In the following configuration, a Datasource is configured with a ``PandasExecutionEngine`` and ``ConfiguredAssetFilesystemDataConnector``. The DataConnector is configured with a single DataAsset named ``my_reports``. It has the ``base_directory`` set to ``reports/`` and the regex ``pattern`` is set to capture two ``group_names``, ``name`` and ``num``.
+  In the following configuration, a Datasource is configured with a ``PandasExecutionEngine`` and ``ConfiguredAssetFilesystemDataConnector``. The Data Connector is configured with a single DataAsset named ``my_reports``. It has the ``base_directory`` set to ``reports/`` and the regex ``pattern`` is set to capture three ``group_names``, ``name``, ``year`` and ``month``.
 
   .. code-block:: python
 
@@ -57,15 +58,16 @@ If you have the following ``reports`` directory in your filesystem, and you want
         my_data_connector:
           module_name: great_expectations.datasource.data_connector
           class_name: ConfiguredAssetFilesystemDataConnector
-          base_directory: /
+          base_directory: ../
           glob_directive: "*.csv"
           assets:
             my_reports:
-              base_directory: reports/
-              pattern: (.+)-(\\d.*)\\.csv
-              group_names:
-                - name
-                - num
+               base_directory: reports/
+               pattern: (.+)_(\\d.*)-(\\d.*)\\.csv
+               group_names:
+                 - name
+                 - year
+                 - month
 
     """
 
@@ -79,7 +81,7 @@ If you have the following ``reports`` directory in your filesystem, and you want
     )
 
 
-  If the configuration is correct you should see output similar to this.  Also, your DataConnector will now be active.
+  If the configuration is correct you should see output similar to this.
 
   .. code-block:: bash
 
@@ -92,7 +94,7 @@ If you have the following ``reports`` directory in your filesystem, and you want
       my_data_connector : ConfiguredAssetFilesystemDataConnector
 
       Available data_asset_names (1 of 1):
-        my_reports (3 of 5): ['a-1.csv', 'b-2.csv', 'c-3.csv']
+        my_reports (2 of 2): ['yellow_tripdata_sample_2019-01.csv', 'yellow_tripdata_sample_2019-02.csv']
 
         Unmatched data_references (0 of 0): []
 
@@ -101,6 +103,7 @@ If you have the following ``reports`` directory in your filesystem, and you want
 
   .. code-block:: python
 
+    # save the configuration and re-instantiate the data context with our newly configured datasource
     sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
     context = ge.get_context()
 
@@ -119,9 +122,9 @@ If you have the following ``reports`` directory in your filesystem, and you want
     suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
 
 
-6. **Construct a** ``BatchRequest``.
+6. **Construct a BatchRequest**.
 
-  The following ``BatchRequest`` will retrieve a Batch corresponding to ``a-1.csv`` by using ``batch_filter_parameters`` as a ``data_connector_query``.  Additional examples of ``data_connector_query`` like ``limit` and ``index`` can be found below.
+  The following BatchRequest will retrieve a Batch corresponding to ``yellow_tripdata_sample_2019-01.csv`` by using ``batch_filter_parameters`` as a ``data_connector_query``.  Additional examples of ``data_connector_query`` like ``limit` and ``index`` can be found below.
 
   .. code-block:: python
 
@@ -130,8 +133,9 @@ If you have the following ``reports`` directory in your filesystem, and you want
       data_connector_name="my_data_connector",
       data_asset_name="my_reports",
       data_connector_query={
-        "batch_filter_parameters":{
-          "name": "a"
+      "batch_filter_parameters":{
+        "year": "2019",
+        "month": "01"
             }
           }
         )
@@ -139,7 +143,7 @@ If you have the following ``reports`` directory in your filesystem, and you want
 
 7. **Construct a Validator**
 
-  The ``BatchRequest`` and ExpectationSuite can be used to create a Validator.
+  The BatchRequest and ExpectationSuite can be used to create a Validator.
 
   .. code-block:: python
 
@@ -157,11 +161,11 @@ If you have the following ``reports`` directory in your filesystem, and you want
 
     my_validator.active_batch.batch_definition
 
-  The expected output should show ``batch_identifiers`` corresponding to ``a-1.csv`` namely ``"{'name': 'a', 'num': '1'}"}``
+  The expected output should show ``batch_identifiers`` corresponding to ``yellow_tripdata_sample_2019-01.csv`` namely ``"{'name': 'yellow_tripdata_sample', 'year': '2019', 'month': '01'}"}``
 
   .. code-block:: python
 
-    {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'a', 'num': '1'}"}
+    {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'yellow_tripdata_sample', 'year': '2019', 'month': '01'}""}
 
 
   You can also check that the first few lines of your Batch are what you expect by running:
@@ -177,20 +181,17 @@ If you have the following ``reports`` directory in your filesystem, and you want
 Additional Notes
 ----------------
 
-``BatchRequest`` can also support ``index`` and ``limit`` in the ``data_connector_query``.
+BatchRequest can also support ``index`` and ``limit`` in the ``data_connector_query``.
 
   Using the same ``reports`` directory as above:
 
   .. code-block:: bash
 
-    reports/a-1.csv
-    reports/b-2.csv
-    reports/c-3.csv
-    reports/d-4.csv
-    reports/e-5.csv
+    reports/yellow_tripdata_sample_2019-01.csv
+    reports/yellow_tripdata_sample_2019-02.csv
 
 
-  The ``BatchRequest`` can retrieve Batches by ``index``. The following examples retrieve the first (``index = 0``)
+  The BatchRequest can retrieve Batches by ``index``. The following examples retrieve the first (``index = 0``)
 
   .. code-block:: python
 
@@ -209,8 +210,8 @@ Additional Notes
     )
     print(my_validator.active_batch.batch_definition)
 
-    # batch corresponding to a-1.csv
-    {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'a', 'num': '1'}"}
+    # batch corresponding to yellow_tripdata_sample_2019-01.csv
+    {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'yellow_tripdata_sample', 'year': '2019', 'month': '01'}"}
 
   last (``index=-1``) batches.
 
@@ -232,11 +233,11 @@ Additional Notes
 
     print(my_validator.active_batch.batch_definition)
 
-    # batch corresponding to e-5.csv
-    {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'e', 'num': '5'}"}
+    # batch corresponding to yellow_tripdata_sample_2019-02.csv
+    {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'yellow_tripdata_sample', 'year': '2019', 'month': '02'}"}
 
 
-  The ``BatchRequest`` can also be used to retrieve Batches by ``limit``.
+  The BatchRequest can also be used to retrieve Batches by ``limit``.
 
   .. code-block:: python
 
@@ -257,13 +258,12 @@ Additional Notes
 
     print(my_validator.active_batch.batch_definition)
 
-    # batch corresponding to A-1.csv
+    # batch corresponding to yellow_tripdata_sample_2019-01.csv
     {'datasource_name': 'mydatasource', 'data_connector_name': 'my_data_connector', 'data_asset_name': 'my_reports', 'batch_identifiers': "{'name': 'a', 'num': '1'}"}
 
   .. note::
 
-    Currently Great Expectations can only support Validations on a single batch. When multi-Batch Expectations are supported, limits > 1 and ranges of indices index=[1:3] will become more powerful ways to interact with Batches.
-
+    Currently Great Expectations can only support Validations on a single Batch. When multi-Batch Expectations are supported, ``limit > 1`` and ranges of indices like ``index=[1:3]`` will become more powerful ways to interact with Batches.
 
 .. discourse::
-    :topic_identifier: $$$
+    :topic_identifier: 696
