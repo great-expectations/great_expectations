@@ -92,6 +92,11 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
+        if len(self.sorters) > 0:
+            batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list
+            )
+
         path_list: List[str] = [
             map_batch_definition_to_data_reference_string_using_regex(
                 batch_definition=batch_definition,
@@ -100,9 +105,6 @@ class FilePathDataConnector(DataConnector):
             )
             for batch_definition in batch_definition_list
         ]
-
-        # TODO: Sort with a real sorter here
-        path_list.sort()
 
         return path_list
 
@@ -160,6 +162,11 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
+        if len(self.sorters) > 0:
+            batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list
+            )
+
         if batch_request.data_connector_query is not None:
             batch_filter_obj: BatchFilter = build_batch_filter(
                 data_connector_query_dict=batch_request.data_connector_query
@@ -168,13 +175,7 @@ class FilePathDataConnector(DataConnector):
                 batch_definition_list=batch_definition_list
             )
 
-        if len(self.sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(
-                batch_definition_list=batch_definition_list
-            )
-            return sorted_batch_definition_list
-        else:
-            return batch_definition_list
+        return batch_definition_list
 
     def _sort_batch_definition_list(
         self, batch_definition_list: List[BatchDefinition]

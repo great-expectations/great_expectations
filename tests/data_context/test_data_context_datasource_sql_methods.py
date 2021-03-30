@@ -19,8 +19,8 @@ except ImportError:
     sqlalchemy = None
 
 
-def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+def test_get_batch(data_context_with_simple_sql_datasource_for_testing_get_batch):
+    context = data_context_with_simple_sql_datasource_for_testing_get_batch
 
     print(
         json.dumps(
@@ -136,8 +136,8 @@ def test_get_batch(data_context_with_sql_datasource_for_testing_get_batch):
     )
 
 
-def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_batch):
+    context = data_context_with_simple_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("my_expectations")
 
     print(
@@ -266,9 +266,9 @@ def test_get_validator(data_context_with_sql_datasource_for_testing_get_batch):
 
 
 def test_get_validator_expectation_suite_options(
-    data_context_with_sql_datasource_for_testing_get_batch,
+    data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context = data_context_with_simple_sql_datasource_for_testing_get_batch
     context.create_expectation_suite("some_expectations")
 
     # Successful specification with an existing expectation_suite_name
@@ -329,9 +329,9 @@ def test_get_validator_expectation_suite_options(
 
 
 def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
-    sa, data_context_with_sql_datasource_for_testing_get_batch
+    sa, data_context_with_simple_sql_datasource_for_testing_get_batch
 ):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context = data_context_with_simple_sql_datasource_for_testing_get_batch
 
     batch_request: Union[dict, BatchRequest] = {
         "datasource_name": "my_sqlite_db",
