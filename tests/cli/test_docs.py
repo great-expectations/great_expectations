@@ -315,26 +315,45 @@ def context_with_site_built(titanic_data_context_stats_enabled_config_version_3)
     return context
 
 
+@pytest.mark.parametrize(
+    "invocation,expected_error",
+    [
+        (
+            "--v3-api docs clean",
+            "Please specify either --all to remove all sites or a specific site using --site_name",
+        ),
+        (
+            "--v3-api docs clean --site-name local_site --all",
+            "Please specify either --all to remove all sites or a specific site using --site_name",
+        ),
+        (
+            "--v3-api docs clean --site-name fake_site",
+            "The specified site name `fake_site` does not exist in this project.",
+        ),
+    ],
+)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_docs_clean_no_site_specified_raises_helpful_error(
-    mock_emit, caplog, monkeypatch, context_with_site_built
+def test_docs_clean_raises_helpful_errors(
+    mock_emit, invocation, expected_error, caplog, monkeypatch, context_with_site_built
 ):
+    """
+    Test that helpful error messages are raised when:
+        - invalid combinations of the --all and --site-name flags are used
+        - invalid site names are specified
+    """
     context = context_with_site_built
     runner = CliRunner(mix_stderr=True)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api docs clean",
+        invocation,
         catch_exceptions=False,
     )
     stdout = result.stdout
     assert result.exit_code == 1
-    assert (
-        "Please specify --all to remove all sites or specify a specific site using --site_name"
-        in stdout
-    )
+    assert expected_error in stdout
     assert "Cleaned data docs" not in stdout
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
