@@ -266,13 +266,15 @@ Additional notes
 
                 context = BaseDataContext(project_config=project_config)
 
-                # Create a BatchRequest
+                # Create a RuntimeBatchRequest
 
-                batch_request = BatchRequest(
+                batch_request = RuntimeBatchRequest(
                     datasource_name="insert_your_datasource_name_here",
                     data_connector_name="insert_your_runtime_data_connector_name_here",
                     data_asset_name="insert_your_data_asset_name_here",
-                    batch_data=df,
+                    runtime_parameters: {
+                      batch_data=df,
+                    },
                     data_connector_query={
                         "batch_filter_parameters": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
