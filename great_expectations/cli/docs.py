@@ -1,15 +1,10 @@
-import sys
-
 import click
 
 from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.build_docs import build_docs
-from great_expectations.cli.pretty_printing import (
-    cli_message,
-    cli_message_list,
-    display_not_implemented_message_and_exit,
-)
+from great_expectations.cli.pretty_printing import cli_message, cli_message_list
+from great_expectations.exceptions import DataContextError
 
 
 @click.group()
@@ -93,18 +88,26 @@ def clean_data_docs(ctx, site_name=None, all_sites=False):
     """Delete data docs"""
     context = ctx.obj.data_context
 
-    if site_name is None and all_sites is False:
+    if (site_name is None and all_sites is False) or (site_name and all_sites):
         toolkit.exit_with_failure_message_and_stats(
             context,
             usage_event="cli.docs.clean",
-            message="<red>Please specify --all to remove all sites or specify a specific site using --site_name</red>",
+            message="<red>Please specify either --all to remove all sites or a specific site using --site_name</red>",
         )
-    # if site_name is None, context.clean_data_docs(site_name=site_name) will clean all sites.
-    context.clean_data_docs(site_name=site_name)
-    toolkit.send_usage_message(
-        data_context=context, event="cli.docs.clean", success=True
-    )
-    cli_message("<green>{}</green>".format("Cleaned data docs"))
+    try:
+        # if site_name is None, context.clean_data_docs(site_name=site_name)
+        # will clean all sites.
+        context.clean_data_docs(site_name=site_name)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.docs.clean", success=True
+        )
+        cli_message("<green>{}</green>".format("Cleaned data docs"))
+    except DataContextError as de:
+        toolkit.exit_with_failure_message_and_stats(
+            context,
+            usage_event="cli.docs.clean",
+            message=f"<red>{de}</red>",
+        )
 
 
 def _build_intro_string(docs_sites_strings):
