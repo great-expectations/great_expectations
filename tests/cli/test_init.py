@@ -20,12 +20,11 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
         ("--v3-api --assume-yes init", ""),
     ],
 )
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_cli_init_on_new_project(
-    mock_emit, mock_webbrowser, invocation, input, caplog, tmp_path, monkeypatch
+    mock_emit, invocation, input, caplog, tmp_path, monkeypatch
 ):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
@@ -43,7 +42,6 @@ def test_cli_init_on_new_project(
         catch_exceptions=False,
     )
     stdout = result.output
-    assert mock_webbrowser.call_count == 0
 
     assert len(stdout) < 6000, "CLI output is unreasonably long."
     assert "Always know what to expect from your data" in stdout
@@ -134,13 +132,10 @@ def test_cli_init_on_new_project(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_cancelled_cli_init_on_new_project(
-    mock_emit, mock_webbrowser, caplog, tmp_path, monkeypatch
-):
+def test_cancelled_cli_init_on_new_project(mock_emit, caplog, tmp_path, monkeypatch):
     monkeypatch.delenv(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
@@ -157,7 +152,6 @@ def test_cancelled_cli_init_on_new_project(
         catch_exceptions=False,
     )
     stdout = result.output
-    assert mock_webbrowser.call_count == 0
 
     assert len(stdout) < 6000, "CLI output is unreasonably long."
     assert "Always know what to expect from your data" in stdout
@@ -191,9 +185,7 @@ def test_cancelled_cli_init_on_new_project(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then_yes_to_fixing_them(
-    mock_webbrowser,
     caplog,
     monkeypatch,
     tmp_path,
@@ -220,7 +212,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     )
     stdout = result.output
     assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 0
 
     assert (
         "Congratulations! You are now ready to customize your Great Expectations configuration."
@@ -244,7 +235,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 0
     assert (
         "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
         in stdout
@@ -275,7 +265,6 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 0
     assert (
         "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
         in stdout
@@ -297,9 +286,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
-    mock_webbrowser,
     caplog,
     monkeypatch,
     tmp_path,
@@ -319,7 +306,6 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 0
 
     # Now the test begins - rerun the init on an existing project
 
@@ -335,7 +321,6 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
             catch_exceptions=False,
         )
     stdout = result.stdout
-    assert mock_webbrowser.call_count == 0
 
     assert result.exit_code == 0
     assert "This looks like an existing project that" in stdout
