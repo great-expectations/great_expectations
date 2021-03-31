@@ -2,8 +2,6 @@ from typing import List
 
 import datetime
 
-import pandas as pd
-
 import great_expectations as ge
 import great_expectations.jupyter_ux
 from great_expectations import DataContext
@@ -11,7 +9,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 {%- if batch_request %}
 from great_expectations.validator.validator import Validator
-from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 {% else %}
@@ -19,11 +17,6 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
 {% endif -%}
 import great_expectations.exceptions as ge_exceptions
-
-pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
-pd.set_option('display.width', None)
-pd.set_option('display.max_colwidth', -1)
 
 context: DataContext = ge.data_context.DataContext()
 
