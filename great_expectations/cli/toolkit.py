@@ -81,7 +81,7 @@ def create_expectation_suite(
     flag_build_docs: Optional[bool] = True,
     # TODO: <Alex>ALEX -- Is this needed?</Alex>
     profiler_configuration: Optional[str] = "demo",
-) -> Tuple[str, Optional[dict]]:
+) -> Tuple[str, Dict[str, Union[str, Dict[str, Any]]], Optional[dict]]:
     """
     Create a new expectation suite.
 
@@ -145,7 +145,7 @@ def create_expectation_suite(
         interactive=interactive,
         batch_request=batch_request,
     )
-    return expectation_suite_name, None
+    return expectation_suite_name, batch_request, None
 
     # TODO: <Alex>ALEX -- This scaffold.</Alex>
     # TODO: <Alex>ALEX -- How will this be in V3?</Alex>
@@ -166,7 +166,7 @@ def create_expectation_suite(
     #     if open_docs:  # TODO: <Alex>ALEX -- "open_docs" is always False; when is next line called?</Alex>
     #         attempt_to_open_validation_results_in_data_docs(context=context, profiling_results=profiling_results)
     #
-    # return expectation_suite_name, profiling_results
+    # return expectation_suite_name, batch_request, profiling_results
 
 
 # TODO: <Alex>ALEX - Update for V3</Alex>

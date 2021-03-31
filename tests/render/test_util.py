@@ -1,4 +1,8 @@
+import copy
+from typing import List
+
 import pytest
+from nbformat.notebooknode import NotebookNode
 
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
@@ -154,3 +158,31 @@ def test_resource_key_passes_run_name_filter():
             )
             is False
         )
+
+
+def suppress_data_docs_open(nb: NotebookNode) -> NotebookNode:
+    # Delete "context.open_data_docs()" to prevent data docs browser tabs from opening during test.
+    # nb_cells: List[dict] = copy.deepcopy(nb["cells"])
+    open_data_docs_code_cell_as_list: List[dict] = list(
+        filter(
+            lambda cell: (cell["cell_type"] == "code")
+            and (cell["source"].find("open_data_docs") != -1),
+            nb["cells"],
+        )
+    )
+    idx: int = nb["cells"].index(open_data_docs_code_cell_as_list[0])
+    open_data_docs_code_cell: dict = copy.deepcopy(open_data_docs_code_cell_as_list[0])
+    open_data_docs_code_cell["source"] = open_data_docs_code_cell["source"].replace(
+        "context.open_data_docs(resource_identifier=validation_result_identifier)", ""
+    )
+    nb["cells"] = list(
+        filter(
+            lambda cell: not (
+                (cell["cell_type"] == "code")
+                and (cell["source"].find("open_data_docs") != -1)
+            ),
+            nb["cells"],
+        )
+    )
+    nb["cells"].insert(idx, open_data_docs_code_cell)
+    return nb

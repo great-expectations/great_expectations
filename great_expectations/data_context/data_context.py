@@ -2155,7 +2155,6 @@ class BaseDataContext:
         """Get validation results from a configured store.
 
         Args:
-            data_asset_name: name of data asset for which to get validation result
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
             validations_store_name: the name of the store from which to get validation results

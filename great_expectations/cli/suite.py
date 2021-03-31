@@ -19,6 +19,7 @@ from great_expectations.cli.pretty_printing import (
     display_not_implemented_message_and_exit,
 )
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
@@ -129,7 +130,7 @@ def _suite_new(
 
     if interactive and (batch_request is not None):
         raise ValueError(
-            "The --batch-request JSON option is incompatible the interactive flag."
+            "The --batch-request JSON option is incompatible with the interactive flag."
         )
 
     datasource_name: Optional[str] = None
@@ -142,7 +143,7 @@ def _suite_new(
 
         # TODO: <Alex>ALEX -- Can we be more precise about the type of profiling results in V3?</Alex>
         profiling_results: dict
-        suite_name, profiling_results = toolkit.create_expectation_suite(
+        suite_name, batch_request, profiling_results = toolkit.create_expectation_suite(
             context=context,
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -169,6 +170,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             no_jupyter=no_jupyter,
             batch_request=batch_request,
             usage_event=usage_event,
+            interactive=interactive,
             datasource=datasource_name,
             suppress_usage_message=True,  # do not want to actually send usage_message, since the function call is not the result of actual usage
         )
@@ -258,15 +260,27 @@ def _suite_edit(
     suite_name: str,
     no_jupyter: bool,
     usage_event: str,
-    interactive: Optional[bool] = None,
+    interactive: Optional[bool] = False,
     datasource: Optional[str] = None,
     suppress_usage_message: Optional[bool] = False,
     batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
 ):
     # suppress_usage_message flag is for the situation where _suite_edit is called by _suite_new().
     # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
-    batch_request_json: Optional[str] = batch_request
-    batch_request = None
+    valid_batch_request: Optional[bool] = False
+    batch_request_json: Optional[str] = None
+    if isinstance(batch_request, str):
+        batch_request_json = batch_request
+        batch_request = None
+        interactive = False
+
+    if interactive and (batch_request_json is not None):
+        raise ValueError(
+            "The --batch-request JSON option is incompatible with the interactive flag."
+        )
+
+    if not interactive and datasource:
+        raise ValueError("The --datasource option assumes the interactive mode.")
 
     try:
         if batch_request_json:
@@ -307,21 +321,16 @@ def _suite_edit(
                     )
                 sys.exit(1)
 
-        if not interactive and datasource:
-            raise ValueError("The --datasource option assumes the interactive mode.")
-
-        if interactive and (batch_request is not None):
-            raise ValueError(
-                "The --batch-request JSON option is incompatible the interactive flag."
-            )
-
-        if interactive or (batch_request is not None):
+        if interactive and not (
+            batch_request
+            and isinstance(batch_request, dict)
+            and BatchRequest(**batch_request)
+        ):
             cli_message(
                 """
 A batch of data is required to edit the suite - let's help you to specify it."""
             )
 
-            additional_batch_request_args: Optional[Dict[str, Any]] = None
             try:
                 datasource = toolkit.select_datasource(
                     context=context, datasource_name=datasource
@@ -350,10 +359,15 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 context=context,
                 datasource_name=datasource.name,
                 data_connector_name=None,
-                additional_batch_request_args=additional_batch_request_args,
+                additional_batch_request_args=None,
             )
 
-        if batch_request:
+        if (
+            batch_request
+            and isinstance(batch_request, dict)
+            and BatchRequest(**batch_request)
+        ):
+            valid_batch_request = True
             batch_request = standardize_batch_request_display_ordering(
                 batch_request=batch_request
             )
@@ -375,7 +389,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         ).render_to_disk(
             suite=suite,
             notebook_file_path=notebook_path,
-            interactive=interactive,
+            valid_batch_request=valid_batch_request,
             batch_request=batch_request,
         )
 
