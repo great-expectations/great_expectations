@@ -1,10 +1,7 @@
 from typing import Dict, List, Optional
 
 from great_expectations.core import IDDict
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
-)
+from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
@@ -154,7 +151,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 data_connector_name=self.name,
                 data_asset_name=batch_request.data_asset_name,
                 batch_identifiers=IDDict(batch_identifiers),
-                batch_spec_passthrough=batch_request.batch_spec_passthrough
+                batch_spec_passthrough=batch_request.batch_spec_passthrough,
             )
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
@@ -203,9 +200,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 self.assets[data_asset_name].get("batch_spec_passthrough"), dict
             )
         ):
-            batch_spec.update(
-                self.assets[data_asset_name]["batch_spec_passthrough"]
-            )
+            batch_spec.update(self.assets[data_asset_name]["batch_spec_passthrough"])
 
         return SqlAlchemyDatasourceBatchSpec(batch_spec)
 
