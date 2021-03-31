@@ -188,11 +188,7 @@ def _get_batch_request_from_data_connector(
     }
 
     if additional_batch_request_args:
-        batch_request.update(
-            {
-                "batch_spec_passthrough": additional_batch_request_args,
-            }
-        )
+        batch_request.update(additional_batch_request_args)
 
     return data_asset_name, batch_request
 
@@ -282,11 +278,7 @@ You have selected a datasource that is a SQL database. How would you like to spe
     )
 
     if temp_table_kwargs:
-        batch_request.update(
-            {
-                "batch_spec_passthrough": temp_table_kwargs,
-            }
-        )
+        batch_request.update(temp_table_kwargs)
 
     return data_asset_name, batch_request
 
