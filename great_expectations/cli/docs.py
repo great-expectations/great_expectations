@@ -1,15 +1,10 @@
-import sys
-
 import click
 
 from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.build_docs import build_docs
-from great_expectations.cli.pretty_printing import (
-    cli_message,
-    cli_message_list,
-    display_not_implemented_message_and_exit,
-)
+from great_expectations.cli.pretty_printing import cli_message, cli_message_list
+from great_expectations.exceptions import DataContextError
 
 
 @click.group()
@@ -84,34 +79,34 @@ def docs_list(ctx):
 @click.option(
     "--all",
     "-a",
+    "all_sites",
     is_flag=True,
     help="With this, all sites will get their data docs cleaned out. See data_docs section in great_expectations.yml",
 )
 @click.pass_context
-def clean_data_docs(ctx, site_name=None, all=None):
+def clean_data_docs(ctx, site_name=None, all_sites=False):
     """Delete data docs"""
-    display_not_implemented_message_and_exit()
     context = ctx.obj.data_context
-    failed = True
-    if site_name is None and all is None:
-        cli_message(
-            "<red>{}</red>".format(
-                "Please specify --all to remove all sites or specify a specific site using "
-                "--site_name"
-            )
+
+    if (site_name is None and all_sites is False) or (site_name and all_sites):
+        toolkit.exit_with_failure_message_and_stats(
+            context,
+            usage_event="cli.docs.clean",
+            message="<red>Please specify either --all to remove all sites or a specific site using --site_name</red>",
         )
-        sys.exit(1)
-    context.clean_data_docs(site_name=site_name)
-    failed = False
-    if not failed and context is not None:
+    try:
+        # if site_name is None, context.clean_data_docs(site_name=site_name)
+        # will clean all sites.
+        context.clean_data_docs(site_name=site_name)
         toolkit.send_usage_message(
             data_context=context, event="cli.docs.clean", success=True
         )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
-
-    if failed and context is not None:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.docs.clean", success=False
+    except DataContextError as de:
+        toolkit.exit_with_failure_message_and_stats(
+            context,
+            usage_event="cli.docs.clean",
+            message=f"<red>{de}</red>",
         )
 
 
