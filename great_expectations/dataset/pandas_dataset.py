@@ -1195,91 +1195,22 @@ Notes:
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
 
-        def is_between(val):
-            # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
-            # Ensure types can be compared since some types in Python 3 cannot be logically compared.
-            # print type(val), type(min_value), type(max_value), val, min_value, max_value
+        def comparator_factory(comparator, comparison_value):
+            def new_comparator(value):
+                return comparator(value, comparison_value)
+            def always_true(value):
+                return True
+            return always_true if comparison_value is None else new_comparator
 
-            if type(val) is None:
-                return False
+        min_comparator = comparator_factory(gt if strict_min else ge, min_value)
+        max_comparator = comparator_factory(lt if strict_max else le, max_value)
 
-            if min_value is not None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min and strict_max:
-                            return (min_value < val) and (val < max_value)
-                        elif strict_min:
-                            return (min_value < val) and (val <= max_value)
-                        elif strict_max:
-                            return (min_value <= val) and (val < max_value)
-                        else:
-                            return (min_value <= val) and (val <= max_value)
-                    except TypeError:
-                        return False
-
-                else:
-                    if (isinstance(val, str) != isinstance(min_value, str)) or (
-                        isinstance(val, str) != isinstance(max_value, str)
-                    ):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min and strict_max:
-                        return (min_value < val) and (val < max_value)
-                    elif strict_min:
-                        return (min_value < val) and (val <= max_value)
-                    elif strict_max:
-                        return (min_value <= val) and (val < max_value)
-                    else:
-                        return (min_value <= val) and (val <= max_value)
-
-            elif min_value is None and max_value is not None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_max:
-                            return val < max_value
-                        else:
-                            return val <= max_value
-                    except TypeError:
-                        return False
-
-                else:
-                    if isinstance(val, str) != isinstance(max_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_max:
-                        return val < max_value
-                    else:
-                        return val <= max_value
-
-            elif min_value is not None and max_value is None:
-                if allow_cross_type_comparisons:
-                    try:
-                        if strict_min:
-                            return min_value < val
-                        else:
-                            return min_value <= val
-                    except TypeError:
-                        return False
-
-                else:
-                    if isinstance(val, str) != isinstance(min_value, str):
-                        raise TypeError(
-                            "Column values, min_value, and max_value must either be None or of the same type."
-                        )
-
-                    if strict_min:
-                        return min_value < val
-                    else:
-                        return min_value <= val
-
-            else:
-                return False
-
-        return temp_column.map(is_between)
+        try:
+            return min_comparator(temp_column) & max_comparator(temp_column)
+        except TypeError:
+            if allow_cross_type_comparisons:
+                return temp_column & False
+            raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
