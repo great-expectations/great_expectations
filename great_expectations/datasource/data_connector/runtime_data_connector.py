@@ -157,6 +157,7 @@ class RuntimeDataConnector(DataConnector):
             data_connector_name=self.name,
             data_asset_name=batch_request.data_asset_name,
             batch_identifiers=IDDict(batch_identifiers),
+            batch_spec_passthrough=batch_request.batch_spec_passthrough,
         )
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(

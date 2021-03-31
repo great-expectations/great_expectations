@@ -353,7 +353,7 @@ Please check your config."""
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
-                "SparkExecutionEngine does not currently support multiple named tables."
+                "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
         row_condition = domain_kwargs.get("row_condition", None)
@@ -623,7 +623,7 @@ Please check your config."""
             value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
-                    f"In order for SparkExecutionEngine to `_split_on_multi_column_values`, "
+                    f"In order for SparkDFExecutionEngine to `_split_on_multi_column_values`, "
                     f"all values in  column_names must also exist in batch_identifiers. "
                     f"{column_name} was not found in batch_identifiers."
                 )

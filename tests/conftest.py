@@ -2318,6 +2318,12 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(
+            os.path.join(context_path, "..", "data", "titanic", "Titanic_19120414_1313")
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
     )
     shutil.copy(
