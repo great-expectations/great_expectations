@@ -11,6 +11,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.exceptions import BatchSpecError
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -598,6 +599,49 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     assert len(batch.data.dataframe.index) == 1313
     assert batch.batch_markers.get("ge_load_time") is not None
 
+    # using path with no extension
+    data_asset_path_no_extension = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313"
+    )
+
+    # with no reader_method in batch_spec_passthrough
+    with pytest.raises(BatchSpecError):
+        context.get_batch(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_runtime_data_connector",
+                data_asset_name="IN_MEMORY_DATA_ASSET",
+                runtime_parameters={"path": data_asset_path_no_extension},
+                batch_identifiers={
+                    "pipeline_stage_name": "core_processing",
+                    "airflow_run_id": 1234567890,
+                },
+            ),
+        )
+
+    # with reader_method in batch_spec_passthrough
+    batch = context.get_batch(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_runtime_data_connector",
+                data_asset_name="IN_MEMORY_DATA_ASSET",
+                runtime_parameters={"path": data_asset_path_no_extension},
+                batch_identifiers={
+                    "pipeline_stage_name": "core_processing",
+                    "airflow_run_id": 1234567890,
+                },
+                batch_spec_passthrough={
+                    "reader_method": "read_csv"
+                }
+            ),
+        )
+
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
+    assert isinstance(batch.data, PandasBatchData)
+    assert len(batch.data.dataframe.index) == 1313
+    assert batch.batch_markers.get("ge_load_time") is not None
+
 
 def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connector(
     sa,
@@ -623,6 +667,47 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
             },
+        ),
+        expectation_suite=my_expectation_suite,
+    )
+
+    assert len(validator.batches) == 1
+
+    # using path with no extension
+    data_asset_path_no_extension = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313"
+    )
+
+    # with no reader_method in batch_spec_passthrough
+    with pytest.raises(BatchSpecError):
+        context.get_validator(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_runtime_data_connector",
+                data_asset_name="IN_MEMORY_DATA_ASSET",
+                runtime_parameters={"path": data_asset_path_no_extension},
+                batch_identifiers={
+                    "pipeline_stage_name": "core_processing",
+                    "airflow_run_id": 1234567890,
+                },
+            ),
+            expectation_suite=my_expectation_suite,
+        )
+
+    # with reader_method in batch_spec_passthrough
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={"path": data_asset_path_no_extension},
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            batch_spec_passthrough={
+                "reader_method": "read_csv"
+            }
         ),
         expectation_suite=my_expectation_suite,
     )
