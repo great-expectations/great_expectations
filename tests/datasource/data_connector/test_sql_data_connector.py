@@ -10,6 +10,11 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.validator.validator import Validator
 
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
 yaml = YAML()
 
 
@@ -663,7 +668,7 @@ def test_sampling_method__md5(
     # batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
     #     batch_spec=SqlAlchemyDatasourceBatchSpec({
     #         "table_name": "table_partitioned_by_date_column__A",
-    #         "partition_definition": {},
+    #         "batch_identifiers": {},
     #         "splitter_method": "_split_on_whole_table",
     #         "splitter_kwargs": {},
     #         "sampling_method": "_sample_using_md5",
