@@ -4,14 +4,9 @@ import random
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import BatchRequest
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchRequest, BatchSpec
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-
-try:
-    sqlalchemy = pytest.importorskip("sqlalchemy")
-except ImportError:
-    sqlalchemy = None
 from great_expectations.validator.validator import Validator
 
 yaml = YAML()
@@ -26,7 +21,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A:
             #table_name: events # If table_name is omitted, then the table_name defaults to the asset name
             splitter_method: _split_on_column_value
@@ -63,7 +58,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
         #     "batch_spec": {
         #         "table_name": "table_partitioned_by_date_column__A",
         #         "data_asset_name": "table_partitioned_by_date_column__A",
-        #         "batch_identifiers": {"date": "2020-01-02"},
+        #         "partition_definition": {"date": "2020-01-02"},
         #         "splitter_method": "_split_on_column_value",
         #         "splitter_kwargs": {"column_name": "date"},
         #     },
@@ -82,7 +77,7 @@ def test_get_batch_definition_list_from_batch_request(
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -101,9 +96,7 @@ def test_get_batch_definition_list_from_batch_request(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query={
-                    "batch_filter_parameters": {"date": "2020-01-01"}
-                },
+                partition_request={"batch_identifiers": {"date": "2020-01-01"}},
             )
         )
     )
@@ -115,7 +108,7 @@ def test_get_batch_definition_list_from_batch_request(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query={"batch_filter_parameters": {}},
+                partition_request={"batch_identifiers": {}},
             )
         )
     )
@@ -131,8 +124,8 @@ def test_get_batch_definition_list_from_batch_request(
     #             datasource_name="FAKE_Datasource_NAME",
     #             data_connector_name="my_sql_data_connector",
     #             data_asset_name="table_partitioned_by_date_column__A",
-    #             data_connector_query={
-    #                 "batch_filter_parameters": {},
+    #             partition_request={
+    #                 "batch_identifiers": {},
     #                 "date" : "2020-01-01",
     #             }
     #         )
@@ -160,7 +153,9 @@ def test_get_batch_definition_list_from_batch_request(
 
     with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(datasource_name="FAKE_Datasource_NAME")
+            batch_request=BatchRequest(
+                datasource_name="FAKE_Datasource_NAME",
+            )
         )
 
     with pytest.raises(TypeError):
@@ -178,7 +173,7 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -215,7 +210,7 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
         #     "batch_spec": {
         #         "table_name": "table_partitioned_by_date_column__A",
         #         "data_asset_name": "table_partitioned_by_date_column__A",
-        #         "batch_identifiers": {"date": "2020-01-02"},
+        #         "partition_definition": {"date": "2020-01-02"},
         #         "splitter_method": "_split_on_column_value",
         #         "splitter_kwargs": {"column_name": "date"},
         #     },
@@ -232,7 +227,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_timestamp_column__B:
             splitter_method: _split_on_converted_datetime
             splitter_kwargs:
@@ -268,7 +263,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
         #     "batch_spec": {
         #         "table_name": "table_partitioned_by_timestamp_column__B",
         #         "data_asset_name": "table_partitioned_by_timestamp_column__B",
-        #         "batch_identifiers": {"timestamp": "2020-01-02"},
+        #         "partition_definition": {"timestamp": "2020-01-02"},
         #         "splitter_method": "_split_on_converted_datetime",
         #         "splitter_kwargs": {"column_name": "timestamp"},
         #     },
@@ -285,7 +280,7 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_regularly_spaced_incrementing_id_column__C:
             splitter_method: _split_on_divided_integer
             splitter_kwargs:
@@ -324,7 +319,7 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
         #     "batch_spec": {
         #         "table_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
         #         "data_asset_name": "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
-        #         "batch_identifiers": {"id": 1},
+        #         "partition_definition": {"id": 1},
         #         "splitter_method": "_split_on_divided_integer",
         #         "splitter_kwargs": {"column_name": "id", "divisor": 10},
         #     },
@@ -341,7 +336,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_incrementing_batch_id__E:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -377,7 +372,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
         #     "batch_spec": {
         #         "table_name": "table_partitioned_by_incrementing_batch_id__E",
         #         "data_asset_name": "table_partitioned_by_incrementing_batch_id__E",
-        #         "batch_identifiers": {"batch_id": 1},
+        #         "partition_definition": {"batch_id": 1},
         #         "splitter_method": "_split_on_column_value",
         #         "splitter_kwargs": {"column_name": "batch_id"},
         #     },
@@ -394,7 +389,7 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_foreign_key__F:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -431,7 +426,7 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
         #     "batch_spec": {
         #         "table_name": "table_partitioned_by_foreign_key__F",
         #         "data_asset_name": "table_partitioned_by_foreign_key__F",
-        #         "batch_identifiers": {"session_id": 2},
+        #         "partition_definition": {"session_id": 2},
         #         "splitter_method": "_split_on_column_value",
         #         "splitter_kwargs": {"column_name": "session_id"},
         #     },
@@ -448,7 +443,7 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_multiple_columns__G:
             splitter_method: _split_on_multi_column_values
             splitter_kwargs:
@@ -488,7 +483,7 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
         #     "batch_spec": {
         #         "table_name": "table_partitioned_by_multiple_columns__G",
         #         "data_asset_name": "table_partitioned_by_multiple_columns__G",
-        #         "batch_identifiers": {
+        #         "partition_definition": {
         #             "y": 2020,
         #             "m": 1,
         #             "d": 2,
@@ -559,10 +554,10 @@ def test_sampling_method__limit(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=SqlAlchemyDatasourceBatchSpec(
+        batch_spec=BatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
-                "batch_identifiers": {},
+                "partition_definition": {},
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
                 "sampling_method": "_sample_using_limit",
@@ -588,10 +583,10 @@ def test_sampling_method__random(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=SqlAlchemyDatasourceBatchSpec(
+        batch_spec=BatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
-                "batch_identifiers": {},
+                "partition_definition": {},
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
                 "sampling_method": "_sample_using_random",
@@ -611,10 +606,10 @@ def test_sampling_method__mod(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=SqlAlchemyDatasourceBatchSpec(
+        batch_spec=BatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
-                "batch_identifiers": {},
+                "partition_definition": {},
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
                 "sampling_method": "_sample_using_mod",
@@ -637,10 +632,10 @@ def test_sampling_method__a_list(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=SqlAlchemyDatasourceBatchSpec(
+        batch_spec=BatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
-                "batch_identifiers": {},
+                "partition_definition": {},
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
                 "sampling_method": "_sample_using_a_list",
@@ -663,9 +658,9 @@ def test_sampling_method__md5(
 
     # SQlite doesn't support MD5
     # batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-    #     batch_spec=SqlAlchemyDatasourceBatchSpec({
+    #     batch_spec=BatchSpec({
     #         "table_name": "table_partitioned_by_date_column__A",
-    #         "batch_identifiers": {},
+    #         "partition_definition": {},
     #         "splitter_method": "_split_on_whole_table",
     #         "splitter_kwargs": {},
     #         "sampling_method": "_sample_using_md5",
@@ -682,10 +677,10 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=SqlAlchemyDatasourceBatchSpec(
+        batch_spec=BatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
-                "batch_identifiers": {},
+                "partition_definition": {},
                 "sampling_method": "_sample_using_mod",
                 "sampling_kwargs": {
                     "column_name": "id",
@@ -700,10 +695,10 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
     assert len(validator.head(fetch_all=True)) == 12
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=SqlAlchemyDatasourceBatchSpec(
+        batch_spec=BatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
-                "batch_identifiers": {},
+                "partition_definition": {},
             }
         )
     )
@@ -712,10 +707,10 @@ def test_to_make_sure_splitter_and_sampler_methods_are_optional(
     assert len(validator.head(fetch_all=True)) == 120
 
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=SqlAlchemyDatasourceBatchSpec(
+        batch_spec=BatchSpec(
             {
                 "table_name": "table_partitioned_by_date_column__A",
-                "batch_identifiers": {},
+                "partition_definition": {},
                 "splitter_method": "_split_on_whole_table",
                 "splitter_kwargs": {},
             }
@@ -737,7 +732,7 @@ def test_default_behavior_with_no_splitter(
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A: {}
     """,
     )
@@ -757,7 +752,7 @@ def test_default_behavior_with_no_splitter(
         )
     )
     assert len(batch_definition_list) == 1
-    assert batch_definition_list[0]["batch_identifiers"] == {}
+    assert batch_definition_list[0]["partition_definition"] == {}
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -765,12 +760,12 @@ def test_default_behavior_with_no_splitter(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query={},
+                partition_request={},
             )
         )
     )
     assert len(batch_definition_list) == 1
-    assert batch_definition_list[0]["batch_identifiers"] == {}
+    assert batch_definition_list[0]["partition_definition"] == {}
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -778,12 +773,12 @@ def test_default_behavior_with_no_splitter(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query={"batch_filter_parameters": {}},
+                partition_request={"batch_identifiers": {}},
             )
         )
     )
     assert len(batch_definition_list) == 1
-    assert batch_definition_list[0]["batch_identifiers"] == {}
+    assert batch_definition_list[0]["partition_definition"] == {}
 
 
 def test_behavior_with_whole_table_splitter(
@@ -796,7 +791,7 @@ def test_behavior_with_whole_table_splitter(
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A:
             splitter_method : "_split_on_whole_table"
             splitter_kwargs : {}
@@ -818,7 +813,7 @@ def test_behavior_with_whole_table_splitter(
         )
     )
     assert len(batch_definition_list) == 1
-    assert batch_definition_list[0]["batch_identifiers"] == {}
+    assert batch_definition_list[0]["partition_definition"] == {}
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -826,12 +821,12 @@ def test_behavior_with_whole_table_splitter(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query={},
+                partition_request={},
             )
         )
     )
     assert len(batch_definition_list) == 1
-    assert batch_definition_list[0]["batch_identifiers"] == {}
+    assert batch_definition_list[0]["partition_definition"] == {}
 
     batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -839,9 +834,9 @@ def test_behavior_with_whole_table_splitter(
                 datasource_name="FAKE_Datasource_NAME",
                 data_connector_name="my_sql_data_connector",
                 data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query={"batch_filter_parameters": {}},
+                partition_request={"batch_identifiers": {}},
             )
         )
     )
     assert len(batch_definition_list) == 1
-    assert batch_definition_list[0]["batch_identifiers"] == {}
+    assert batch_definition_list[0]["partition_definition"] == {}

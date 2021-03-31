@@ -76,7 +76,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
                 if data_connector_name not in self.data_connectors:
                     data_connector_config = {
                         "class_name": "ConfiguredAssetSqlDataConnector",
-                        "data_assets": {},
+                        "assets": {},
                     }
                     self._build_data_connector_from_config(
                         data_connector_name, data_connector_config
