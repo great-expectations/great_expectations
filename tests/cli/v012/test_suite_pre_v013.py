@@ -7,6 +7,7 @@ from click.testing import CliRunner
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.util import filter_properties_dict
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
@@ -270,20 +271,15 @@ def test_suite_new_creates_empty_suite(
     suite = context.get_expectation_suite("foo")
     assert suite.expectations == []
     citations = suite.get_citations()
-    citations[0].pop("citation_date")
-    assert citations[0] == {
+    citations[0].pop("citation_date", None)
+    citations[0].pop("interactive", None)
+    assert filter_properties_dict(properties=citations[0]) == {
         "batch_kwargs": {
             "data_asset_name": "f1",
             "datasource": "mydatasource",
             "path": csv,
             "reader_method": "read_csv",
         },
-        "batch_request": None,
-        "batch_definition": None,
-        "batch_parameters": None,
-        "batch_spec": None,
-        "batch_markers": None,
-        "interactive": False,
         "comment": "New suite added via CLI",
     }
 
@@ -359,20 +355,15 @@ def test_suite_new_empty_with_no_jupyter(
     suite = context.get_expectation_suite("foo")
     assert suite.expectations == []
     citations = suite.get_citations()
-    citations[0].pop("citation_date")
-    assert citations[0] == {
+    citations[0].pop("citation_date", None)
+    citations[0].pop("interactive", None)
+    assert filter_properties_dict(properties=citations[0]) == {
         "batch_kwargs": {
             "data_asset_name": "f1",
             "datasource": "mydatasource",
             "path": csv,
             "reader_method": "read_csv",
         },
-        "batch_request": None,
-        "batch_definition": None,
-        "batch_parameters": None,
-        "batch_spec": None,
-        "batch_markers": None,
-        "interactive": False,
         "comment": "New suite added via CLI",
     }
 

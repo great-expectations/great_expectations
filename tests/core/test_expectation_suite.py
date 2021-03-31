@@ -1,9 +1,12 @@
+import datetime
 from copy import copy, deepcopy
+from typing import Any, Dict, List
 
 import pytest
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.util import filter_properties_dict
 
 
 @pytest.fixture
@@ -313,41 +316,32 @@ def test_get_citations_with_no_citations(baseline_suite):
 
 def test_get_citations_not_sorted(baseline_suite):
     assert "citations" not in baseline_suite.meta
-    baseline_suite.add_citation("first", citation_date="2000-01-01")
-    baseline_suite.add_citation("third", citation_date="2000-01-03")
-    baseline_suite.add_citation("second", citation_date="2000-01-02")
-    assert baseline_suite.get_citations(sort=False) == [
+
+    dt: datetime.datetime
+
+    dt = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
+    baseline_suite.add_citation("first", citation_date=dt)
+    dt = datetime.datetime.strptime("2000-01-03", "%Y-%m-%d")
+    baseline_suite.add_citation("third", citation_date=dt)
+    dt = datetime.datetime.strptime("2000-01-02", "%Y-%m-%d")
+    baseline_suite.add_citation("second", citation_date=dt)
+    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(
+        sort=False
+    )
+    for properties_dict in properties_dict_list:
+        filter_properties_dict(properties=properties_dict, inplace=True)
+        properties_dict.pop("interactive", None)
+    assert properties_dict_list == [
         {
-            "citation_date": "2000-01-01",
-            "interactive": False,
-            "batch_request": None,
-            "batch_definition": None,
-            "batch_spec": None,
-            "batch_kwargs": None,
-            "batch_markers": None,
-            "batch_parameters": None,
+            "citation_date": datetime.datetime(2000, 1, 1, 0, 0),
             "comment": "first",
         },
         {
-            "citation_date": "2000-01-03",
-            "interactive": False,
-            "batch_request": None,
-            "batch_definition": None,
-            "batch_spec": None,
-            "batch_kwargs": None,
-            "batch_markers": None,
-            "batch_parameters": None,
+            "citation_date": datetime.datetime(2000, 1, 3, 0, 0),
             "comment": "third",
         },
         {
-            "citation_date": "2000-01-02",
-            "interactive": False,
-            "batch_request": None,
-            "batch_definition": None,
-            "batch_spec": None,
-            "batch_kwargs": None,
-            "batch_markers": None,
-            "batch_parameters": None,
+            "citation_date": datetime.datetime(2000, 1, 2, 0, 0),
             "comment": "second",
         },
     ]
@@ -355,41 +349,30 @@ def test_get_citations_not_sorted(baseline_suite):
 
 def test_get_citations_sorted(baseline_suite):
     assert "citations" not in baseline_suite.meta
-    baseline_suite.add_citation("first", citation_date="2000-01-01")
-    baseline_suite.add_citation("third", citation_date="2000-01-03")
-    baseline_suite.add_citation("second", citation_date="2000-01-02")
-    assert baseline_suite.get_citations(sort=True) == [
+
+    dt: datetime.datetime
+
+    dt = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
+    baseline_suite.add_citation("first", citation_date=dt)
+    dt = datetime.datetime.strptime("2000-01-03", "%Y-%m-%d")
+    baseline_suite.add_citation("third", citation_date=dt)
+    dt = datetime.datetime.strptime("2000-01-02", "%Y-%m-%d")
+    baseline_suite.add_citation("second", citation_date=dt)
+    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(sort=True)
+    for properties_dict in properties_dict_list:
+        filter_properties_dict(properties=properties_dict, inplace=True)
+        properties_dict.pop("interactive", None)
+    assert properties_dict_list == [
         {
-            "citation_date": "2000-01-01",
-            "interactive": False,
-            "batch_request": None,
-            "batch_definition": None,
-            "batch_spec": None,
-            "batch_kwargs": None,
-            "batch_markers": None,
-            "batch_parameters": None,
+            "citation_date": datetime.datetime(2000, 1, 1, 0, 0),
             "comment": "first",
         },
         {
-            "citation_date": "2000-01-02",
-            "interactive": False,
-            "batch_request": None,
-            "batch_definition": None,
-            "batch_spec": None,
-            "batch_kwargs": None,
-            "batch_markers": None,
-            "batch_parameters": None,
+            "citation_date": datetime.datetime(2000, 1, 2, 0, 0),
             "comment": "second",
         },
         {
-            "citation_date": "2000-01-03",
-            "interactive": False,
-            "batch_request": None,
-            "batch_definition": None,
-            "batch_spec": None,
-            "batch_kwargs": None,
-            "batch_markers": None,
-            "batch_parameters": None,
+            "citation_date": datetime.datetime(2000, 1, 3, 0, 0),
             "comment": "third",
         },
     ]
@@ -397,36 +380,33 @@ def test_get_citations_sorted(baseline_suite):
 
 def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_suite):
     assert "citations" not in baseline_suite.meta
-    baseline_suite.add_citation(
-        "first", batch_kwargs={"path": "first"}, citation_date="2000-01-01"
-    )
-    baseline_suite.add_citation(
-        "second", batch_kwargs={"path": "second"}, citation_date="2001-01-01"
-    )
-    baseline_suite.add_citation("third", citation_date="2002-01-01")
 
-    obs = baseline_suite.get_citations(sort=True, require_batch_kwargs=True)
-    assert obs == [
+    dt: datetime.datetime
+
+    dt = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
+    baseline_suite.add_citation(
+        "first", batch_kwargs={"path": "first"}, citation_date=dt
+    )
+    dt = datetime.datetime.strptime("2001-01-01", "%Y-%m-%d")
+    baseline_suite.add_citation(
+        "second", batch_kwargs={"path": "second"}, citation_date=dt
+    )
+
+    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(
+        sort=True, require_batch_kwargs=True
+    )
+    for properties_dict in properties_dict_list:
+        filter_properties_dict(properties=properties_dict, inplace=True)
+        properties_dict.pop("interactive", None)
+    assert properties_dict_list == [
         {
-            "citation_date": "2000-01-01",
-            "interactive": False,
-            "batch_request": None,
-            "batch_definition": None,
-            "batch_spec": None,
+            "citation_date": datetime.datetime(2000, 1, 1, 0, 0),
             "batch_kwargs": {"path": "first"},
-            "batch_markers": None,
-            "batch_parameters": None,
             "comment": "first",
         },
         {
-            "citation_date": "2001-01-01",
-            "interactive": False,
-            "batch_request": None,
-            "batch_definition": None,
-            "batch_spec": None,
+            "citation_date": datetime.datetime(2001, 1, 1, 0, 0),
             "batch_kwargs": {"path": "second"},
-            "batch_markers": None,
-            "batch_parameters": None,
             "comment": "second",
         },
     ]
