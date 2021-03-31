@@ -152,7 +152,7 @@ This guide will help you load a Spark DataFrame as a Batch for use in creating E
             my_spark_datasource:
               execution_engine:
                 module_name: great_expectations.execution_engine
-                class_name: SparkExecutionEngine
+                class_name: SparkDFExecutionEngine
               module_name: great_expectations.datasource
               class_name: Datasource
               data_connectors:
