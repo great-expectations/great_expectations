@@ -22,7 +22,7 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
 from great_expectations.validator.validator import Validator
-from tests.render.test_util import suppress_data_docs_open
+from tests.render.test_util import run_notebook
 
 
 @pytest.fixture
@@ -874,17 +874,26 @@ def test_notebook_execution_with_pandas_backend(
     edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
     assert os.path.isfile(edit_notebook_path)
 
-    nb: NotebookNode
-    with open(edit_notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
+    # TODO: <Alex>ALEX</Alex>
+    # nb: NotebookNode
+    # with open(edit_notebook_path) as f:
+    #     nb = nbformat.read(f, as_version=4)
+    #
+    # nb = replace_notebook_content(
+    #     nb=nb,
+    #     pattern="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    # )
+    #
+    # ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    # ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
+    # TODO: <Alex>ALEX</Alex>
 
-    nb = suppress_data_docs_open(
-        nb=nb,
-        pattern="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    run_notebook(
+        notebook_path=edit_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        replacement_string="",
     )
-
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     # Assertions about output
     context = DataContext(context_root_dir=root_dir)

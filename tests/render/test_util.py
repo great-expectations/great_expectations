@@ -1,7 +1,9 @@
 import copy
-from typing import List
+from typing import Dict, List, Optional
 
+import nbformat
 import pytest
+from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat.notebooknode import NotebookNode
 
 from great_expectations.core.run_identifier import RunIdentifier
@@ -160,29 +162,88 @@ def test_resource_key_passes_run_name_filter():
         )
 
 
-def suppress_data_docs_open(nb: NotebookNode, pattern: str) -> NotebookNode:
-    # Delete "context.open_data_docs()" to prevent data docs browser tabs from opening during test.
-    # nb_cells: List[dict] = copy.deepcopy(nb["cells"])
-    open_data_docs_code_cell_as_list: List[dict] = list(
-        filter(
-            lambda cell: (cell["cell_type"] == "code")
-            and (cell["source"].find("open_data_docs") != -1),
-            nb["cells"],
+def run_notebook(
+    notebook_path: str,
+    notebook_dir: str,
+    string_to_be_replaced: Optional[str] = None,
+    replacement_string: Optional[str] = None,
+):
+    if not notebook_path and notebook_dir:
+        raise ValueError(
+            "A path to and the directory containing the valid Jupyter notebook are required."
         )
+
+    nb: NotebookNode
+    with open(notebook_path) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    nb = replace_notebook_content(
+        nb=nb,
+        string_to_be_replaced=string_to_be_replaced,
+        replacement_string=replacement_string,
     )
-    idx: int = nb["cells"].index(open_data_docs_code_cell_as_list[0])
-    open_data_docs_code_cell: dict = copy.deepcopy(open_data_docs_code_cell_as_list[0])
-    open_data_docs_code_cell["source"] = open_data_docs_code_cell["source"].replace(
-        pattern, ""
-    )
+
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": notebook_dir}})
+
+
+# noinspection PyShadowingNames
+def replace_notebook_content(
+    nb: NotebookNode,
+    string_to_be_replaced: Optional[str] = None,
+    replacement_string: Optional[str] = None,
+) -> Optional[NotebookNode]:
+    cond_neither: bool = string_to_be_replaced is None and replacement_string is None
+    cond_both: bool = not (string_to_be_replaced is None or replacement_string is None)
+    if not (cond_neither or cond_both):
+        raise ValueError(
+            "Either both or neither of the string replacement arguments (to/from) are required."
+        )
+
+    if (
+        nb is None
+        or not nb
+        or "cells" not in nb
+        or not nb["cells"]
+        or len(nb["cells"]) == 0
+    ):
+        return None
+
+    idx: int
+    cell: dict
+
+    indices: List[int] = [
+        idx
+        for idx, cell in enumerate(nb["cells"])
+        if (
+            (cell["cell_type"] == "code")
+            and (cell["source"].find(string_to_be_replaced) != -1)
+        )
+    ]
+
+    if len(indices) == 0:
+        return None
+
+    cells_of_interest_dict: Dict[int, dict] = {
+        idx: copy.deepcopy(nb["cells"][idx]) for idx in indices
+    }
+
+    for idx, cell in cells_of_interest_dict.items():
+        cell["source"] = cell["source"].replace(
+            string_to_be_replaced, replacement_string
+        )
+
     nb["cells"] = list(
         filter(
             lambda cell: not (
                 (cell["cell_type"] == "code")
-                and (cell["source"].find("open_data_docs") != -1)
+                and (cell["source"].find(string_to_be_replaced) != -1)
             ),
             nb["cells"],
         )
     )
-    nb["cells"].insert(idx, open_data_docs_code_cell)
+
+    for idx in indices:
+        nb["cells"].insert(idx, cells_of_interest_dict[idx])
+
     return nb

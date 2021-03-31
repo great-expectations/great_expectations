@@ -1,13 +1,10 @@
 import json
 import os
-from typing import Any, Dict, List
+from typing import List
 from unittest import mock
 
-import nbformat
 import pytest
 from click.testing import CliRunner, Result
-from nbconvert.preprocessors import ExecutePreprocessor
-from nbformat.notebooknode import NotebookNode
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -16,7 +13,7 @@ from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
-from tests.render.test_util import suppress_data_docs_open
+from tests.render.test_util import run_notebook
 
 
 def test_suite_help_output(caplog):
@@ -100,16 +97,12 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter
     )
     assert os.path.isfile(expected_notebook_path)
 
-    nb: NotebookNode
-    with open(expected_notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
-
-    nb = suppress_data_docs_open(
-        nb=nb, pattern="context.open_data_docs(resource_identifier=suite_identifier)"
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=suite_identifier)",
+        replacement_string="",
     )
-
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
@@ -175,16 +168,12 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
-    nb: NotebookNode
-    with open(expected_notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
-
-    nb = suppress_data_docs_open(
-        nb=nb, pattern="context.open_data_docs(resource_identifier=suite_identifier)"
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=suite_identifier)",
+        replacement_string="",
     )
-
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
@@ -248,16 +237,12 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
-    nb: NotebookNode
-    with open(expected_notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
-
-    nb = suppress_data_docs_open(
-        nb=nb, pattern="context.open_data_docs(resource_identifier=suite_identifier)"
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=suite_identifier)",
+        replacement_string="",
     )
-
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
@@ -325,16 +310,12 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
-    nb: NotebookNode
-    with open(expected_notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
-
-    nb = suppress_data_docs_open(
-        nb=nb, pattern="context.open_data_docs(resource_identifier=suite_identifier)"
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=suite_identifier)",
+        replacement_string="",
     )
-
-    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
