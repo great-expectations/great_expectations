@@ -1297,24 +1297,6 @@ class Validator:
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
 
-    def row_count(
-        self,
-        domain_kwargs: Optional[Dict[str, Any]] = None,
-    ) -> int:
-        if domain_kwargs is None:
-            domain_kwargs = {
-                "batch_id": self.execution_engine.active_batch_data_id,
-            }
-
-        n_rows: int = self.get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.row_count",
-                metric_domain_kwargs=domain_kwargs,
-            )
-        )
-
-        return n_rows
-
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
         if domain_kwargs is None:
             domain_kwargs = {

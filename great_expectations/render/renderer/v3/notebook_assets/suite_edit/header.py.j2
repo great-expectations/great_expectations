@@ -39,7 +39,6 @@ validator: Validator = context.get_validator(
     batch_request=BatchRequest(**batch_request),
     expectation_suite_name=expectation_suite_name
 )
-print(f"Number of rows: {validator.row_count()}.")
 column_names: List[str] = [f'"{column_name}"' for column_name in validator.columns()]
 print(f"Columns: {', '.join(column_names)}.")
 validator.head(n_rows=5, fetch_all=False)
