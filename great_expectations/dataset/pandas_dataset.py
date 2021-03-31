@@ -1212,7 +1212,7 @@ Notes:
             return min_comparator(temp_column) & max_comparator(temp_column)
         except TypeError:
             if allow_cross_type_comparisons:
-                return temp_column & False
+                return pd.Series(np.zeros(len(temp_column), dtype=bool))
             raise TypeError(
                 "Column values, min_value, and max_value must either be None or of the same type."
             )
