@@ -2,11 +2,7 @@ import click
 
 from great_expectations import DataContext
 from great_expectations.cli import toolkit
-from great_expectations.cli.pretty_printing import (
-    cli_message,
-    cli_message_dict,
-    display_not_implemented_message_and_exit,
-)
+from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 
 
 @click.group()
@@ -28,34 +24,13 @@ def store(ctx):
 @click.pass_context
 def store_list(ctx):
     """List known Stores."""
-    display_not_implemented_message_and_exit()
     context = ctx.obj.data_context
+    stores = context.list_stores()
+    cli_message(f"{len(stores)} Stores found:")
+    for store in stores:
+        cli_message("")
+        cli_message_dict(store)
 
-    try:
-        stores = context.list_stores()
-
-        if len(stores) == 0:
-            cli_message("No Stores found")
-            toolkit.send_usage_message(
-                data_context=context, event="cli.store.list", success=True
-            )
-            return
-        elif len(stores) == 1:
-            list_intro_string = "1 Store found:"
-        else:
-            list_intro_string = "{} Stores found:".format(len(stores))
-
-        cli_message(list_intro_string)
-
-        for store in stores:
-            cli_message("")
-            cli_message_dict(store)
-
-        toolkit.send_usage_message(
-            data_context=context, event="cli.store.list", success=True
-        )
-    except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.store.list", success=False
-        )
-        raise e
+    toolkit.send_usage_message(
+        data_context=context, event="cli.store.list", success=True
+    )
