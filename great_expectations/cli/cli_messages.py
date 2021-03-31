@@ -22,7 +22,7 @@ Great Expectations will create a new directory with the following structure:
     |-- .gitignore
     |-- uncommitted
         |-- config_variables.yml
-        |-- documentation
+        |-- data_docs
         |-- validations
 
 OK to proceed?"""
@@ -34,7 +34,13 @@ RUN_INIT_AGAIN = (
 )
 
 COMPLETE_ONBOARDING_PROMPT = """
-It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"""
+It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the following missing files (existing files will not be modified)?
+
+   great_expectations
+    |-- notebooks
+    |-- plugins
+    |-- uncommitted
+"""
 
 ONBOARDING_COMPLETE = """
 Great Expectations added some missing files required to run.
