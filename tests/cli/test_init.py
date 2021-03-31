@@ -236,7 +236,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
 
     assert result.exit_code == 0
     assert (
-        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
+        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the following missing files (existing files will not be modified)?"
         in stdout
     )
     assert "Great Expectations added some missing files required to run." not in stdout
@@ -266,7 +266,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
 
     assert result.exit_code == 0
     assert (
-        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
+        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the following missing files (existing files will not be modified)?"
         in stdout
     )
     assert "Great Expectations added some missing files required to run." in stdout
