@@ -1208,11 +1208,17 @@ Notes:
         min_comparator = comparator_factory(gt if strict_min else ge, min_value)
         max_comparator = comparator_factory(lt if strict_max else le, max_value)
 
+        def cross_type_comparator(val):
+            try:
+                return min_comparator(val) & max_comparator(val)
+            except TypeError:
+                return False
+
         try:
             return min_comparator(temp_column) & max_comparator(temp_column)
         except TypeError:
             if allow_cross_type_comparisons:
-                return pd.Series(np.zeros(len(temp_column), dtype=bool))
+                return pd.Series(cross_type_comparator(val) for val in temp_column)
             raise TypeError(
                 "Column values, min_value, and max_value must either be None or of the same type."
             )
