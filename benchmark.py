@@ -70,7 +70,11 @@ if __name__ == "__main__":
     measurements_float = time_multiple(benchmark_float, N)
     measurements_dt = time_multiple(benchmark_dt, N)
     results = pd.DataFrame(
-        {"int": measurements_int, "float": measurements_float, "datetime": measurements_dt}
+        {
+            "int": measurements_int,
+            "float": measurements_float,
+            "datetime": measurements_dt,
+        }
     )
     print(results)
     results.to_csv("benchmark.csv", index=False)

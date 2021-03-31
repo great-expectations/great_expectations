@@ -1198,8 +1198,10 @@ Notes:
         def comparator_factory(comparator, comparison_value):
             def new_comparator(value):
                 return comparator(value, comparison_value)
+
             def always_true(value):
                 return True
+
             return always_true if comparison_value is None else new_comparator
 
         min_comparator = comparator_factory(gt if strict_min else ge, min_value)
@@ -1210,7 +1212,9 @@ Notes:
         except TypeError:
             if allow_cross_type_comparisons:
                 return temp_column & False
-            raise TypeError("Column values, min_value, and max_value must either be None or of the same type.")
+            raise TypeError(
+                "Column values, min_value, and max_value must either be None or of the same type."
+            )
 
     @DocInherit
     @MetaPandasDataset.column_map_expectation
