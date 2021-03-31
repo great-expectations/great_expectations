@@ -464,7 +464,7 @@ If you have the following ``datetime_example/`` directory in your filesystem, an
     suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
 
 
-6. **Construct a BatchRequest.
+6. **Construct a BatchRequest.**
 
   The following BatchRequest will retrieve a the first Batch corresponding to ``test_20210102.csv`` by using index ``0`` as the  ``data_connector_query``.
 
@@ -971,7 +971,7 @@ and we only wanted to consider the reports **on or after 2000**, and in **ascend
 
 6. **Construct a** ``BatchRequest``.
 
-  The following ``BatchRequest`` will retrieve a Batch corresponding to ``2000.csv`` by using a ``custom_filter_function`` which takes in  ``batch_identifiers`` as a dictionary, and applies a filter on the ``year`` key.
+  The following ``BatchRequest`` will retrieve a Batch corresponding to ``2000.csv`` by using index ``0` and a ``custom_filter_function`` which takes in  ``batch_identifiers`` as a dictionary, and applies a filter on the ``year`` key.
 
   .. code-block:: python
 
@@ -979,14 +979,15 @@ and we only wanted to consider the reports **on or after 2000**, and in **ascend
     def my_custom_batch_selector(batch_identifiers: dict) -> bool:
       return int(batch_identifiers["year"]) >= 2000
 
-    batch_request: Union[dict, BatchRequest] = {
-      "datasource_name": "my_datasource",
-      "data_connector_name": "my_data_connector",
-      "data_asset_name": "YearTest",
-      "data_connector_query": {
-          "custom_filter_function": my_custom_batch_selector,
-      },
-    }
+    batch_request = BatchRequest(
+      datasource_name="mydatasource",
+      data_connector_name="my_data_connector",
+      data_asset_name="my_data_asset",
+      data_connector_query={
+        "index": 0,
+        "custom_filter_function": my_custom_batch_selector,
+        }
+      )
 
 
 7. **Construct a Validator**
