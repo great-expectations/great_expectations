@@ -375,14 +375,8 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         suite: ExpectationSuite = toolkit.load_expectation_suite(
             context=context, suite_name=suite_name, usage_event=usage_event
         )
-        suite.add_citation(
-            comment="Updated suite added via CLI",
-            interactive=interactive,
-            batch_request=batch_request,
-        )
-        context.save_expectation_suite(expectation_suite=suite)
 
-        notebook_name: str = "edit_{}.ipynb".format(suite.expectation_suite_name)
+        notebook_name: str = "edit_{}.ipynb".format(suite_name)
         notebook_path: str = _get_notebook_path(context, notebook_name)
         SuiteEditNotebookRenderer.from_data_context(
             data_context=context

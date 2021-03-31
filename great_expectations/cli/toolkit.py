@@ -139,12 +139,6 @@ def create_expectation_suite(
         tell_user_suite_exists(expectation_suite_name)
         sys.exit(1)
 
-    create_empty_suite(
-        context=context,
-        expectation_suite_name=expectation_suite_name,
-        interactive=interactive,
-        batch_request=batch_request,
-    )
     return expectation_suite_name, batch_request, None
 
     # TODO: <Alex>ALEX -- This scaffold.</Alex>
@@ -274,39 +268,6 @@ def tell_user_suite_exists(suite_name: str) -> None:
     )
 
 
-def create_empty_suite(
-    context: DataContext,
-    expectation_suite_name: str,
-    interactive: bool,
-    batch_request: dict,
-) -> None:
-    cli_message(
-        """
-Great Expectations will create a new Expectation Suite '{:s}' and store it here:
-
-  {:s}
-""".format(
-            expectation_suite_name,
-            context.expectations_store.store_backend.get_url_for_key(
-                ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite_name
-                ).to_tuple()
-            ),
-        )
-    )
-    suite: ExpectationSuite = context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
-    suite.add_citation(
-        comment="New suite added via CLI",
-        interactive=interactive,
-        batch_request=batch_request,
-    )
-    context.save_expectation_suite(
-        expectation_suite=suite, expectation_suite_name=expectation_suite_name
-    )
-
-
 def launch_jupyter_notebook(notebook_path: str) -> None:
     jupyter_command_override = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
@@ -344,7 +305,8 @@ def load_expectation_suite(
     context: DataContext,
     suite_name: str,
     usage_event: str,
-) -> ExpectationSuite:
+    create_if_not_exist: Optional[bool] = True,
+) -> Optional[ExpectationSuite]:
     """
     Load an expectation suite from a given context.
 
@@ -352,19 +314,28 @@ def load_expectation_suite(
     :param context:
     :param suite_name:
     :param usage_event:
+    :param create_if_not_exist:
     """
     if suite_name.endswith(".json"):
         suite_name = suite_name[:-5]
+
+    suite: Optional[ExpectationSuite]
     try:
-        suite: ExpectationSuite = context.get_expectation_suite(suite_name)
+        suite = context.get_expectation_suite(expectation_suite_name=suite_name)
         return suite
     except ge_exceptions.DataContextError:
-        exit_with_failure_message_and_stats(
-            context=context,
-            usage_event=usage_event,
-            message=f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
-            "the name by running `great_expectations suite list` and try again.",
-        )
+        if create_if_not_exist:
+            suite = context.create_expectation_suite(expectation_suite_name=suite_name)
+            return suite
+        else:
+            suite = None
+            exit_with_failure_message_and_stats(
+                context=context,
+                usage_event=usage_event,
+                message=f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
+                "the name by running `great_expectations suite list` and try again.",
+            )
+    return suite
 
 
 def exit_with_failure_message_and_stats(

@@ -3,8 +3,11 @@ import os
 from typing import Any, Dict, List
 from unittest import mock
 
+import nbformat
 import pytest
 from click.testing import CliRunner, Result
+from nbconvert.preprocessors import ExecutePreprocessor
+from nbformat.notebooknode import NotebookNode
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
@@ -13,6 +16,7 @@ from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
+from tests.render.test_util import suppress_data_docs_open
 
 
 def test_suite_help_output(caplog):
@@ -67,6 +71,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
 
     expectation_suite_name: str = "warning"
 
@@ -82,10 +87,6 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter
     stdout: str = result.stdout
     assert "Select a datasource" not in stdout
     assert f"Name the new Expectation Suite [warning]:" in stdout
-    assert (
-        f"Great Expectations will create a new Expectation Suite '{expectation_suite_name}' and store it here:"
-        in stdout
-    )
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
@@ -94,10 +95,21 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter
     )
     assert os.path.isfile(expected_suite_path)
 
-    expected_notebook = os.path.join(
+    expected_notebook_path: str = os.path.join(
         project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook)
+    assert os.path.isfile(expected_notebook_path)
+
+    nb: NotebookNode
+    with open(expected_notebook_path) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    nb = suppress_data_docs_open(
+        nb=nb, pattern="context.open_data_docs(resource_identifier=suite_identifier)"
+    )
+
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
@@ -107,24 +119,11 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter
     )
     assert suite.expectations == []
 
-    citations: List[Dict[str, Any]] = suite.get_citations()
-    citations[0].pop("citation_date")
-    assert citations[0] == {
-        "batch_definition": None,
-        "batch_kwargs": None,
-        "batch_markers": None,
-        "batch_parameters": None,
-        "batch_request": None,
-        "batch_spec": None,
-        "comment": "New suite added via CLI",
-        "interactive": False,
-    }
-
     assert mock_subprocess.call_count == 1
     call_args: List[str] = mock_subprocess.call_args[0][0]
     assert call_args[0] == "jupyter"
     assert call_args[1] == "notebook"
-    assert expected_notebook in call_args[2]
+    assert expected_notebook_path in call_args[2]
 
     assert mock_webbroser.call_count == 0
 
@@ -147,6 +146,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -162,10 +162,6 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
     stdout: str = result.stdout
     assert "Select a datasource" not in stdout
     assert f"Name the new Expectation Suite [warning]:" in stdout
-    assert (
-        f"Great Expectations will create a new Expectation Suite '{expectation_suite_name}' and store it here:"
-        in stdout
-    )
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
@@ -174,10 +170,21 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
     )
     assert os.path.isfile(expected_suite_path)
 
-    expected_notebook = os.path.join(
+    expected_notebook_path: str = os.path.join(
         project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook)
+    assert os.path.isfile(expected_notebook_path)
+
+    nb: NotebookNode
+    with open(expected_notebook_path) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    nb = suppress_data_docs_open(
+        nb=nb, pattern="context.open_data_docs(resource_identifier=suite_identifier)"
+    )
+
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
@@ -187,24 +194,11 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
     )
     assert suite.expectations == []
 
-    citations: List[Dict[str, Any]] = suite.get_citations()
-    citations[0].pop("citation_date")
-    assert citations[0] == {
-        "batch_definition": None,
-        "batch_kwargs": None,
-        "batch_markers": None,
-        "batch_parameters": None,
-        "batch_request": None,
-        "batch_spec": None,
-        "comment": "New suite added via CLI",
-        "interactive": False,
-    }
-
     assert mock_subprocess.call_count == 1
     call_args: List[str] = mock_subprocess.call_args[0][0]
     assert call_args[0] == "jupyter"
     assert call_args[1] == "notebook"
-    assert expected_notebook in call_args[2]
+    assert expected_notebook_path in call_args[2]
 
     assert mock_webbroser.call_count == 0
 
@@ -227,6 +221,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -240,10 +235,6 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
 
     stdout: str = result.stdout
     assert "Select a datasource" not in stdout
-    assert (
-        f"Great Expectations will create a new Expectation Suite '{expectation_suite_name}' and store it here:"
-        in stdout
-    )
     assert "Opening a notebook for you now to edit your expectation suite!" in stdout
     assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
 
@@ -252,10 +243,21 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
     )
     assert os.path.isfile(expected_suite_path)
 
-    expected_notebook = os.path.join(
+    expected_notebook_path: str = os.path.join(
         project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook)
+    assert os.path.isfile(expected_notebook_path)
+
+    nb: NotebookNode
+    with open(expected_notebook_path) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    nb = suppress_data_docs_open(
+        nb=nb, pattern="context.open_data_docs(resource_identifier=suite_identifier)"
+    )
+
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
@@ -265,24 +267,11 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
     )
     assert suite.expectations == []
 
-    citations: List[Dict[str, Any]] = suite.get_citations()
-    citations[0].pop("citation_date")
-    assert citations[0] == {
-        "batch_definition": None,
-        "batch_kwargs": None,
-        "batch_markers": None,
-        "batch_parameters": None,
-        "batch_request": None,
-        "batch_spec": None,
-        "comment": "New suite added via CLI",
-        "interactive": False,
-    }
-
     assert mock_subprocess.call_count == 1
     call_args: List[str] = mock_subprocess.call_args[0][0]
     assert call_args[0] == "jupyter"
     assert call_args[1] == "notebook"
-    assert expected_notebook in call_args[2]
+    assert expected_notebook_path in call_args[2]
 
     assert mock_webbroser.call_count == 0
 
@@ -305,6 +294,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
 
     expectation_suite_name: str = "test_suite_name"
 
@@ -319,10 +309,6 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     stdout: str = result.stdout
     assert "Select a datasource" not in stdout
     assert (
-        f"Great Expectations will create a new Expectation Suite '{expectation_suite_name}' and store it here:"
-        in stdout
-    )
-    assert (
         "Opening a notebook for you now to edit your expectation suite!" not in stdout
     )
     assert (
@@ -334,10 +320,21 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     )
     assert os.path.isfile(expected_suite_path)
 
-    expected_notebook = os.path.join(
+    expected_notebook_path: str = os.path.join(
         project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
     )
-    assert os.path.isfile(expected_notebook)
+    assert os.path.isfile(expected_notebook_path)
+
+    nb: NotebookNode
+    with open(expected_notebook_path) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    nb = suppress_data_docs_open(
+        nb=nb, pattern="context.open_data_docs(resource_identifier=suite_identifier)"
+    )
+
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name in context.list_expectation_suite_names()
@@ -347,19 +344,6 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     )
     assert suite.expectations == []
 
-    citations: List[Dict[str, Any]] = suite.get_citations()
-    citations[0].pop("citation_date")
-    assert citations[0] == {
-        "batch_definition": None,
-        "batch_kwargs": None,
-        "batch_markers": None,
-        "batch_parameters": None,
-        "batch_request": None,
-        "batch_spec": None,
-        "comment": "New suite added via CLI",
-        "interactive": False,
-    }
-
     assert mock_subprocess.call_count == 0
 
     assert mock_webbroser.call_count == 0
@@ -367,193 +351,6 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-    )
-
-
-# TODO: <Alex>ALEX</Alex>
-# @pytest.mark.xfail(
-#     reason="This command is not yet implemented for the modern API",
-#     run=True,
-#     strict=True,
-# )
-# @mock.patch("subprocess.call", return_value=True, side_effect=None)
-# @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-# def test_suite_new_creates_empty_suite(
-#     mock_webbroser,
-#     mock_subprocess,
-#     caplog,
-#     monkeypatch,
-#     data_context_parameterized_expectation_suite,
-#     filesystem_csv_2,
-# ):
-#     """
-#     Running "suite new" should:
-#     - make an empty suite
-#     - open jupyter
-#     - NOT open data docs
-#     """
-#     context = data_context_parameterized_expectation_suite
-#     project_root_dir = context.root_directory
-#     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
-#     root_dir = project_root_dir
-#     runner = CliRunner(mix_stderr=False)
-#     csv = os.path.join(filesystem_csv_2, "f1.csv")
-#     monkeypatch.chdir(os.path.dirname(context.root_directory))
-#     result = runner.invoke(
-#         cli,
-#         ["--v3-api", "suite", "new", "--suite", "foo"],
-#         input=f"{csv}\n",
-#         catch_exceptions=False,
-#     )
-#     stdout = result.stdout
-#
-#     assert result.exit_code == 0
-#     assert "Enter the path" in stdout
-#     assert "Name the new expectation suite" not in stdout
-#     assert (
-#         "Great Expectations will choose a couple of columns and generate expectations"
-#         not in stdout
-#     )
-#     assert "Generating example Expectation Suite..." not in stdout
-#     assert "The following Data Docs sites were built" not in stdout
-#     assert (
-#         "Great Expectations will create a new Expectation Suite 'foo' and store it here"
-#         in stdout
-#     )
-#     assert (
-#         "Because you requested an empty suite, we'll open a notebook for you now to edit it!"
-#         in stdout
-#     )
-#
-#     expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
-#     assert os.path.isfile(expected_suite_path)
-#
-#     expected_notebook = os.path.join(root_dir, "uncommitted", "edit_foo.ipynb")
-#     assert os.path.isfile(expected_notebook)
-#
-#     context = DataContext(root_dir)
-#     assert "foo" in context.list_expectation_suite_names()
-#     suite = context.get_expectation_suite("foo")
-#     assert suite.expectations == []
-#     citations = suite.get_citations()
-#     citations[0].pop("citation_date")
-#     assert citations[0] == {
-#         "batch_kwargs": {
-#             "data_asset_name": "f1",
-#             "datasource": "mydatasource",
-#             "path": csv,
-#             "reader_method": "read_csv",
-#         },
-#         "batch_markers": None,
-#         "batch_parameters": None,
-#         "comment": "New suite added via CLI",
-#     }
-#
-#     assert mock_subprocess.call_count == 1
-#     call_args = mock_subprocess.call_args[0][0]
-#     assert call_args[0] == "jupyter"
-#     assert call_args[1] == "notebook"
-#     assert expected_notebook in call_args[2]
-#
-#     assert mock_webbroser.call_count == 0
-#
-#     assert_no_logging_messages_or_tracebacks(
-#         my_caplog=caplog,
-#         click_result=result,
-#         allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-#     )
-# TODO: <Alex>ALEX</Alex>
-
-
-# TODO: <Ale>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch("subprocess.call", return_value=True, side_effect=None)
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_empty_with_no_jupyter(
-    mock_webbroser,
-    mock_subprocess,
-    caplog,
-    monkeypatch,
-    data_context_parameterized_expectation_suite,
-    filesystem_csv_2,
-):
-    """
-    Running "suite new --no-jupyter" should:
-    - make an empty suite
-    - NOT open jupyter
-    - NOT open data docs
-    """
-    context = data_context_parameterized_expectation_suite
-    os.mkdir(os.path.join(context.root_directory, "uncommitted"))
-    root_dir = context.root_directory
-    runner = CliRunner(mix_stderr=False)
-    csv = os.path.join(filesystem_csv_2, "f1.csv")
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        [
-            "--v3-api",
-            "suite",
-            "new",
-            "--suite",
-            "foo",
-            "--no-jupyter",
-        ],
-        input=f"{csv}\n",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-
-    assert result.exit_code == 0
-    assert "Enter the path" in stdout
-    assert "Name the new expectation suite" not in stdout
-    assert (
-        "Great Expectations will choose a couple of columns and generate expectations"
-        not in stdout
-    )
-    assert "Generating example Expectation Suite..." not in stdout
-    assert "The following Data Docs sites were built" not in stdout
-    assert (
-        "Great Expectations will create a new Expectation Suite 'foo' and store it here"
-        in stdout
-    )
-    assert "open a notebook for you now" not in stdout
-
-    expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
-    assert os.path.isfile(expected_suite_path)
-
-    expected_notebook = os.path.join(root_dir, "uncommitted", "edit_foo.ipynb")
-    assert os.path.isfile(expected_notebook)
-
-    context = DataContext(root_dir)
-    assert "foo" in context.list_expectation_suite_names()
-    suite = context.get_expectation_suite("foo")
-    assert suite.expectations == []
-    citations = suite.get_citations()
-    citations[0].pop("citation_date")
-    assert citations[0] == {
-        "batch_kwargs": {
-            "data_asset_name": "f1",
-            "datasource": "mydatasource",
-            "path": csv,
-            "reader_method": "read_csv",
-        },
-        "batch_markers": None,
-        "batch_parameters": None,
-        "comment": "New suite added via CLI",
-    }
-
-    assert mock_subprocess.call_count == 0
-    assert mock_webbroser.call_count == 0
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 

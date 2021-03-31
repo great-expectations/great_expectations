@@ -160,7 +160,7 @@ def test_resource_key_passes_run_name_filter():
         )
 
 
-def suppress_data_docs_open(nb: NotebookNode) -> NotebookNode:
+def suppress_data_docs_open(nb: NotebookNode, pattern: str) -> NotebookNode:
     # Delete "context.open_data_docs()" to prevent data docs browser tabs from opening during test.
     # nb_cells: List[dict] = copy.deepcopy(nb["cells"])
     open_data_docs_code_cell_as_list: List[dict] = list(
@@ -173,7 +173,7 @@ def suppress_data_docs_open(nb: NotebookNode) -> NotebookNode:
     idx: int = nb["cells"].index(open_data_docs_code_cell_as_list[0])
     open_data_docs_code_cell: dict = copy.deepcopy(open_data_docs_code_cell_as_list[0])
     open_data_docs_code_cell["source"] = open_data_docs_code_cell["source"].replace(
-        "context.open_data_docs(resource_identifier=validation_result_identifier)", ""
+        pattern, ""
     )
     nb["cells"] = list(
         filter(

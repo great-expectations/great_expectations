@@ -1,12 +1,10 @@
-import copy
 import json
 import os
-from typing import List
-from unittest import mock
 
 import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
+from nbformat.notebooknode import NotebookNode
 
 from great_expectations import DataContext
 
@@ -876,12 +874,16 @@ def test_notebook_execution_with_pandas_backend(
     edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
     assert os.path.isfile(edit_notebook_path)
 
+    nb: NotebookNode
     with open(edit_notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
-    nb = suppress_data_docs_open(nb=nb)
+    nb = suppress_data_docs_open(
+        nb=nb,
+        pattern="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
 
-    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     # Assertions about output
