@@ -621,20 +621,18 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
 
     # with reader_method in batch_spec_passthrough
     batch = context.get_batch(
-            batch_request=RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="my_runtime_data_connector",
-                data_asset_name="IN_MEMORY_DATA_ASSET",
-                runtime_parameters={"path": data_asset_path_no_extension},
-                batch_identifiers={
-                    "pipeline_stage_name": "core_processing",
-                    "airflow_run_id": 1234567890,
-                },
-                batch_spec_passthrough={
-                    "reader_method": "read_csv"
-                }
-            ),
-        )
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={"path": data_asset_path_no_extension},
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            batch_spec_passthrough={"reader_method": "read_csv"},
+        ),
+    )
 
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
@@ -705,9 +703,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
                 "pipeline_stage_name": "core_processing",
                 "airflow_run_id": 1234567890,
             },
-            batch_spec_passthrough={
-                "reader_method": "read_csv"
-            }
+            batch_spec_passthrough={"reader_method": "read_csv"},
         ),
         expectation_suite=my_expectation_suite,
     )
