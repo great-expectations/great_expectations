@@ -350,12 +350,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     )
                 sys.exit(1)
 
-            (
-                datasource_name,
-                data_connector_name,
-                data_asset_name,
-                batch_request,
-            ) = get_batch_request(
+            batch_request = get_batch_request(
                 context=context,
                 datasource_name=datasource.name,
                 data_connector_name=None,

@@ -103,12 +103,7 @@ def create_expectation_suite(
             or data_asset_name is None
             or batch_request is None
         ):
-            (
-                datasource_name,
-                data_connector_name,
-                data_asset_name,
-                batch_request,
-            ) = get_batch_request(
+            batch_request = get_batch_request(
                 context=context,
                 datasource_name=datasource_name,
                 data_connector_name=data_connector_name,

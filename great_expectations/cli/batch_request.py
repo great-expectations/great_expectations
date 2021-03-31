@@ -33,7 +33,7 @@ def get_batch_request(
     datasource_name: Optional[str] = None,
     data_connector_name: Optional[str] = None,
     additional_batch_request_args: Optional[Dict[str, Any]] = None,
-) -> Tuple[str, str, str, Dict[str, Union[str, Dict[str, Any]]],]:
+) -> Dict[str, Union[str, Dict[str, Any]]]:
     """
     This method manages the interaction with user necessary to obtain batch_request for a batch of a data asset.
 
@@ -68,7 +68,6 @@ def get_batch_request(
     )
     if data_connector_name is None:
         data_connector_name = select_data_connector_name(
-            datasource=datasource,
             available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
         )
 
@@ -99,23 +98,20 @@ def get_batch_request(
             )
         )
 
-    return datasource_name, data_connector_name, data_asset_name, batch_request
+    return batch_request
 
 
 def select_data_connector_name(
-    datasource: BaseDatasource,
     available_data_asset_names_by_data_connector_dict: Optional[
         Dict[str, List[str]]
     ] = None,
 ) -> Optional[str]:
     msg_prompt_select_data_connector_name = "Select data_connector"
 
-    if available_data_asset_names_by_data_connector_dict is None:
-        available_data_asset_names_by_data_connector_dict = (
-            datasource.get_available_data_asset_names()
-        )
-
-    if len(available_data_asset_names_by_data_connector_dict) == 0:
+    if (
+        available_data_asset_names_by_data_connector_dict is None
+        or len(available_data_asset_names_by_data_connector_dict) == 0
+    ):
         return None
 
     if len(available_data_asset_names_by_data_connector_dict) == 1:
@@ -138,6 +134,7 @@ def select_data_connector_name(
         show_choices=False,
     )
     data_connector_name: str = data_connector_names[int(option_selection) - 1]
+
     return data_connector_name
 
 
