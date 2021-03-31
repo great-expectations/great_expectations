@@ -940,10 +940,10 @@ def test_get_available_batch_definitions_with_sorting(empty_data_context):
 
     # check that it is decreasing
     batch_definition_1 = batch_definition_list[0]
-    assert batch_definition_1.partition_definition["date"] == "2020-01-30"
+    assert batch_definition_1.batch_identifiers["date"] == "2020-01-30"
 
     batch_definition_2 = batch_definition_list[1]
-    assert batch_definition_2.partition_definition["date"] == "2020-01-29"
+    assert batch_definition_2.batch_identifiers["date"] == "2020-01-29"
 
     batch_definition_3 = batch_definition_list[2]
-    assert batch_definition_3.partition_definition["date"] == "2020-01-28"
+    assert batch_definition_3.batch_identifiers["date"] == "2020-01-28"

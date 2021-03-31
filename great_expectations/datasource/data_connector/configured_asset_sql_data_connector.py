@@ -102,8 +102,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
         for data_asset_name in self.assets:
-            batch_identifiers_list = self.assets[data_asset_name]
-            partition_definition_list = (
+            data_asset = self.assets[data_asset_name]
+            batch_identifiers_list = (
                 self._get_batch_identifiers_list_from_data_asset_config(
                     data_asset_name,
                     data_asset,

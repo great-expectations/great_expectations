@@ -209,16 +209,15 @@ def test_get_batch_definition_list_from_batch_request_sorted(
     )
 
     assert len(batch_definition_list) == 30
-
     # check that it is decreasing
     batch_definition_1 = batch_definition_list[0]
-    assert batch_definition_1.partition_definition["date"] == "2020-01-30"
+    assert batch_definition_1.batch_identifiers["date"] == "2020-01-30"
 
     batch_definition_2 = batch_definition_list[1]
-    assert batch_definition_2.partition_definition["date"] == "2020-01-29"
+    assert batch_definition_2.batch_identifiers["date"] == "2020-01-29"
 
     batch_definition_3 = batch_definition_list[2]
-    assert batch_definition_3.partition_definition["date"] == "2020-01-28"
+    assert batch_definition_3.batch_identifiers["date"] == "2020-01-28"
 
 
 def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
