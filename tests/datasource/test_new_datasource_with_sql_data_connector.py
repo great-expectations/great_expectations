@@ -890,11 +890,9 @@ introspection:
         )
 
 
-# <WILL> Marker this is the new test
-def test_sorting_data_asset(empty_data_context):
+def test_get_available_batch_definitions_with_sorting(empty_data_context):
     context = empty_data_context
     # This test mirrors the likely path to configure a SimpleSqlalchemyDatasource
-
     db_file = file_relative_path(
         __file__,
         os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
@@ -914,13 +912,38 @@ def test_sorting_data_asset(empty_data_context):
                     splitter_method: _split_on_converted_datetime
                     splitter_kwargs:
                         column_name: date
-                        date_format_string: "%Y-%W"
+                        date_format_string: "%Y-%m-%d"
+            sorters:
+                - class_name: DateTimeSorter
+                  name: date
+                  orderby: desc
+                  datetime_format: "%Y-%m-%d"
         """,
     )
 
-    my_data_connector = instantiate_class_from_config(
+    my_datasource = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource"},
         runtime_environment={"name": "my_sql_datasource"},
     )
-    my_data_connector.self_check()
+    batch_request = BatchRequest(
+        datasource_name="my_sql_datasource",
+        data_connector_name="my_configured_data_connector",
+        data_asset_name="table_partitioned_by_date_column__A",
+    )
+
+    batch_definition_list = my_datasource.get_available_batch_definitions(
+        batch_request=batch_request
+    )
+
+    assert len(batch_definition_list) == 30
+
+    # check that it is decreasing
+    batch_definition_1 = batch_definition_list[0]
+    assert batch_definition_1.partition_definition["date"] == "2020-01-30"
+
+    batch_definition_2 = batch_definition_list[1]
+    assert batch_definition_2.partition_definition["date"] == "2020-01-29"
+
+    batch_definition_3 = batch_definition_list[2]
+    assert batch_definition_3.partition_definition["date"] == "2020-01-28"

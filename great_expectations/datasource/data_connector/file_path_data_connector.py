@@ -20,6 +20,7 @@ from great_expectations.datasource.data_connector.util import (
     build_sorters_from_config,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
+    sort_batch_definition_list,
 )
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -175,26 +176,6 @@ class FilePathDataConnector(DataConnector):
                 batch_definition_list=batch_definition_list
             )
 
-        return batch_definition_list
-
-    def _sort_batch_definition_list(
-        self, batch_definition_list: List[BatchDefinition]
-    ) -> List[BatchDefinition]:
-        """
-        Use configured sorters to sort batch_definition
-
-        Args:
-            batch_definition_list (list): list of batch_definitions to sort
-
-        Returns:
-            sorted list of batch_definitions
-
-        """
-        sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))
-        for sorter in sorters:
-            batch_definition_list = sorter.get_sorted_batch_definitions(
-                batch_definitions=batch_definition_list
-            )
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(

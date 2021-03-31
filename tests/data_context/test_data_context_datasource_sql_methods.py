@@ -353,16 +353,25 @@ def test_get_batch_list_from_new_style_datasource_with_sql_datasource(
     assert isinstance(batch.data, SqlAlchemyBatchData)
 
 
-# <WILL> Marker this is the new test
 def test_get_batch_list_sorting(
     sa, data_context_with_sql_datasource_for_testing_get_batch_configured
 ):
     context = data_context_with_sql_datasource_for_testing_get_batch_configured
-
     batch_request: Union[dict, BatchRequest] = {
         "datasource_name": "my_sql_datasource",
         "data_connector_name": "my_configured_data_connector",
         "data_asset_name": "table_partitioned_by_date_column__A",
-        #        "data_connector_query": {"batch_identifiers": {"date": "2020-01-15"}}, ## this means that we are getting all 30
+        "partition_request": {"batch_identifiers": {"date": "2020-01-30"}},
     }
     batch_list: List[Batch] = context.get_batch_list(**batch_request)
+    print(batch_list)
+
+    # # check that it is decreasing
+    # batch_definition_1 = batch_list[0]
+    # assert batch_definition_1.partition_definition["date"] == "2020-01-30"
+    #
+    # batch_definition_2 = batch_list[1]
+    # assert batch_definition_2.partition_definition["date"] == "2020-01-29"
+    #
+    # batch_definition_3 = batch_list[2]
+    # assert batch_definition_3.partition_definition["date"] == "2020-01-28"

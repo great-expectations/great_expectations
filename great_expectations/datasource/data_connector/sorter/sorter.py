@@ -16,7 +16,7 @@ class Sorter:
             reverse: bool = True
         else:
             raise ge_exceptions.SorterError(
-                f'Illegal sort order "{orderby}" for attribute "{name}".'
+                f'Illegal sort order "{orderby}" for attribute "{name}". Values for `orderyby` can be either `asc` or `desc`'
             )
         self._reverse = reverse
 

@@ -1532,7 +1532,6 @@ class BaseDataContext:
             )
 
         if batch_request:
-            # TODO: Raise a warning if any parameters besides batch_requests are specified
             return datasource.get_batch_list_from_batch_request(
                 batch_request=batch_request
             )

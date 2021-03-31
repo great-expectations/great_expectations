@@ -4120,22 +4120,28 @@ def data_context_with_sql_datasource_for_testing_get_batch_configured(
         __file__,
         os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
     )
-
-    datasource_config = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: SqlAlchemyExecutionEngine
-            connection_string: sqlite:///{db_file}
-
-        data_connectors:
-            my_runtime_data_connector:
-                module_name: great_expectations.datasource.data_connector
-                class_name: RuntimeDataConnector
-                batch_identifiers:
-                    - pipeline_stage_name
-                    - airflow_run_id
-        """
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+    data_connectors:
+        my_configured_data_connector:
+            class_name: ConfiguredAssetSqlDataConnector
+            assets:
+                table_partitioned_by_date_column__A:
+                    splitter_method: _split_on_converted_datetime
+                    splitter_kwargs:
+                        column_name: date
+                        date_format_string: "%Y-%m-%d"
+            sorters:
+                - class_name: DateTimeSorter
+                  name: date
+                  orderby: desc
+                  datetime_format: "%Y-%m-%d"
+    """,
+    )
 
     context.test_yaml_config(
         name="my_runtime_sql_datasource", yaml_config=datasource_config

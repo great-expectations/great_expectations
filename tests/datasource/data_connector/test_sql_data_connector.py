@@ -1,5 +1,6 @@
 import json
 import random
+from datetime import datetime
 
 import pytest
 from ruamel.yaml import YAML
@@ -167,6 +168,57 @@ def test_get_batch_definition_list_from_batch_request(
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest()
         )
+
+
+def test_get_batch_definition_list_from_batch_request_sorted(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    random.seed(0)
+    db = test_cases_for_sql_data_connector_sqlite_execution_engine
+
+    config = yaml.load(
+        """
+    name: my_sql_data_connector
+    datasource_name: my_datasource
+    assets:
+        table_partitioned_by_date_column__A:
+            splitter_method: _split_on_converted_datetime
+            splitter_kwargs:
+                column_name: date
+                date_format_string: "%Y-%m-%d"
+    sorters:
+        - class_name: DateTimeSorter
+          name: date
+          orderby: desc
+          datetime_format: "%Y-%m-%d"
+    """,
+    )
+    config["execution_engine"] = db
+
+    my_data_connector = ConfiguredAssetSqlDataConnector(**config)
+    my_data_connector._refresh_data_references_cache()
+
+    batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_sql_data_connector",
+                data_asset_name="table_partitioned_by_date_column__A",
+            )
+        )
+    )
+
+    assert len(batch_definition_list) == 30
+
+    # check that it is decreasing
+    batch_definition_1 = batch_definition_list[0]
+    assert batch_definition_1.partition_definition["date"] == "2020-01-30"
+
+    batch_definition_2 = batch_definition_list[1]
+    assert batch_definition_2.partition_definition["date"] == "2020-01-29"
+
+    batch_definition_3 = batch_definition_list[2]
+    assert batch_definition_3.partition_definition["date"] == "2020-01-28"
 
 
 def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):

@@ -381,3 +381,25 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
         },
     )
     return sorter
+
+
+def sort_batch_definition_list(
+    sorters, batch_definition_list: List[BatchDefinition]
+) -> List[BatchDefinition]:
+    """
+    Use configured sorters to sort batch_definition
+
+    Args:
+        sorters (list)
+        batch_definition_list (list): list of batch_definitions to sort
+
+    Returns:
+        sorted list of batch_definitions
+
+    """
+    sorters: Iterator[Sorter] = reversed(list(sorters.values()))
+    for sorter in sorters:
+        batch_definition_list = sorter.get_sorted_batch_definitions(
+            batch_definitions=batch_definition_list
+        )
+    return batch_definition_list

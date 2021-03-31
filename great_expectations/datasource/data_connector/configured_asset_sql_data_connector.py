@@ -10,6 +10,8 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
+    build_sorters_from_config,
+    sort_batch_definition_list,
 )
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -35,12 +37,14 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        # to be renamed assets
         assets: Optional[Dict[str, dict]] = None,
+        sorters: Optional[list] = None,
     ):
         if assets is None:
             assets = {}
         self._assets = assets
+
+        self._sorters = build_sorters_from_config(config_list=sorters)
 
         super().__init__(
             name=name,
@@ -51,6 +55,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     @property
     def assets(self) -> Dict[str, dict]:
         return self._assets
+
+    @property
+    def sorters(self) -> Optional[dict]:
+        return self._sorters
 
     def add_data_asset(
         self,
@@ -159,8 +167,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
             if batch_definition_matches_batch_request(batch_definition, batch_request):
                 batch_definition_list.append(batch_definition)
-
-        return batch_definition_list
+        if len(self.sorters) > 0:
+            sorted_batch_definition_list = sort_batch_definition_list(
+                sorters=self.sorters, batch_definition_list=batch_definition_list
+            )
+            return sorted_batch_definition_list
+        else:
+            return batch_definition_list
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
