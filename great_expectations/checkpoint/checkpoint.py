@@ -11,7 +11,7 @@ from great_expectations.checkpoint.configurator import SimpleCheckpointConfigura
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -256,9 +256,9 @@ class Checkpoint:
                     substituted_runtime_config=substituted_runtime_config,
                     validation_dict=validation_dict,
                 )
-                batch_request: BatchRequest = substituted_validation_dict.get(
-                    "batch_request"
-                )
+                batch_request: Union[
+                    BatchRequest, RuntimeBatchRequest
+                ] = substituted_validation_dict.get("batch_request")
                 expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )

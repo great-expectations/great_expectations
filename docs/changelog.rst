@@ -6,12 +6,34 @@ Changelog
 
 develop
 -----------------
-* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
+* [BREAKING-EXPERIMENTAL] The ``batch_data`` attribute of ``BatchRequest`` has been removed. To pass in in-memory dataframes at runtime, the new ``RuntimeDataConnector`` should be used
+* [BREAKING-EXPERIMENTAL] ``RuntimeDataConnector`` must now be passed Batch Requests of type ``RuntimeBatchRequest``
+* [BREAKING-EXPERIMENTAL] The ``PartitionDefinitionSubset`` class has been removed - the parent class ``IDDict`` is used in its place
+* [BREAKING-EXPERIMENTAL] ``partition_request`` was renamed ``data_connector_query``. The related ``PartitionRequest`` class has been removed - the parent class ``IDDict`` is used in its place
+* [BREAKING-EXPERIMENTAL] ``partition_definition`` was renamed ``batch_identifiers`. The related ``PartitionDefinition`` class has been removed - the parent class ``IDDict`` is used in its place
+* [BREAKING-EXPERIMENTAL] The ``PartitionQuery`` class has been renamed to ``BatchFilter``
+* [BREAKING-EXPERIMENTAL] The ``batch_identifiers`` key on ``DataConnectorQuery`` (formerly ``PartitionRequest``) has been changed to ``batch_filter_parameters``
+* [ENHANCEMENT] Added a new ``RuntimeBatchRequest`` class, which can be used alongside ``RuntimeDataConnector`` to specify batches at runtime with either an in-memory dataframe, path (filesystem or s3), or sql query
+* [ENHANCEMENT] Added a new ``RuntimeQueryBatchSpec`` class
+* [ENHANCEMENT] CLI `docs list` command implemented for v3 api
+* [ENHANCEMENT] CLI `docs build` command implemented for v3 api
+* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api
+* [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource #2613
+* [BUGFIX] Fixed issue where Sorters were not being applied correctly when ``data_connector_query`` contained limit or index  #2617
+
+0.13.15
+-----------------
 * [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
+* [ENHANCEMENT] Datasource CLI functionality for v3 api and global --assume-yes flag #2590
+* [ENHANCEMENT] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
+* [ENHANCEMENT] Adding tqdm to Profiler (Thanks @peterdhansen). New library in requirements.txt
+* [ENHANCEMENT][MAINTENANCE] Use Metrics to Protect Against Wrong Column Names
+* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
 * [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
 * [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
-* [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource
-* [ENHANCE] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
+* [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource (Thanks @xaniasd)
+* [BUGFIX] pandas partial read_ functions not being unwrapped (Thanks @luke321321)
+* [BUGFIX] Don't stop SparkContext when running in Databricks (#2587) (Thanks @jarandaf)
 
 0.13.14
 -----------------

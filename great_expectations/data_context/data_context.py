@@ -24,7 +24,12 @@ from ruamel.yaml.constructor import DuplicateKeyError
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    IDDict,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -972,7 +977,7 @@ class BaseDataContext:
                 del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
-                raise ValueError("Datasource {} not found".format(datasource_name))
+                raise ValueError(f"Datasource {datasource_name} not found")
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -1152,9 +1157,9 @@ class BaseDataContext:
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[BatchRequest] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
@@ -1164,6 +1169,10 @@ class BaseDataContext:
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
         **kwargs,
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
@@ -1175,8 +1184,9 @@ class BaseDataContext:
 
             batch_request
             batch_data
-            partition_request
+            data_connector_query
             batch_identifiers
+            batch_filter_parameters
 
             limit
             index
@@ -1207,7 +1217,7 @@ class BaseDataContext:
             data_asset_name=data_asset_name,
             batch_request=batch_request,
             batch_data=batch_data,
-            partition_request=partition_request,
+            data_connector_query=data_connector_query,
             batch_identifiers=batch_identifiers,
             limit=limit,
             index=index,
@@ -1217,6 +1227,10 @@ class BaseDataContext:
             sampling_kwargs=sampling_kwargs,
             splitter_method=splitter_method,
             splitter_kwargs=splitter_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
             **kwargs,
         )
         # NOTE: Alex 20201202 - The check below is duplicate of code in Datasource.get_single_batch_from_batch_request()
@@ -1431,9 +1445,9 @@ class BaseDataContext:
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[BatchRequest] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
@@ -1443,6 +1457,10 @@ class BaseDataContext:
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
         **kwargs,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -1457,8 +1475,11 @@ class BaseDataContext:
 
             batch_request
             batch_data
-            partition_request
+            query
+            runtime_parameters
+            data_connector_query
             batch_identifiers
+            batch_filter_parameters
 
             limit
             index
@@ -1494,29 +1515,84 @@ class BaseDataContext:
 
         datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
 
+        if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
+            raise ValueError("Must provide only one of batch_data, query, or path.")
+        if any(
+            [
+                batch_data is not None
+                and runtime_parameters
+                and "batch_data" in runtime_parameters,
+                query and runtime_parameters and "query" in runtime_parameters,
+                path and runtime_parameters and "path" in runtime_parameters,
+            ]
+        ):
+            raise ValueError(
+                "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "
+                "runtime_parameters argument."
+            )
+
         if batch_request:
             # TODO: Raise a warning if any parameters besides batch_requests are specified
             return datasource.get_batch_list_from_batch_request(
                 batch_request=batch_request
             )
+        elif any([batch_data is not None, query, path, runtime_parameters]):
+            runtime_parameters = runtime_parameters or {}
+            if batch_data is not None:
+                runtime_parameters["batch_data"] = batch_data
+            elif query is not None:
+                runtime_parameters["query"] = query
+            elif path is not None:
+                runtime_parameters["path"] = path
+
+            if batch_identifiers is None:
+                batch_identifiers = kwargs
+            else:
+                # Raise a warning if kwargs exist
+                pass
+
+            batch_request = RuntimeBatchRequest(
+                datasource_name=datasource_name,
+                data_connector_name=data_connector_name,
+                data_asset_name=data_asset_name,
+                batch_spec_passthrough=batch_spec_passthrough,
+                runtime_parameters=runtime_parameters,
+                batch_identifiers=batch_identifiers,
+            )
+
         else:
-            if partition_request is None:
-                if batch_identifiers is None:
-                    batch_identifiers = kwargs
+            if data_connector_query is None:
+                if (
+                    batch_filter_parameters is not None
+                    and batch_identifiers is not None
+                ):
+                    raise ValueError(
+                        'Must provide either "batch_filter_parameters" or "batch_identifiers", not both.'
+                    )
+                elif batch_filter_parameters is None and batch_identifiers is not None:
+                    logger.warning(
+                        'Attempting to build data_connector_query but "batch_identifiers" was provided '
+                        'instead of "batch_filter_parameters". The "batch_identifiers" key on '
+                        'data_connector_query has been renamed to "batch_filter_parameters". Please update '
+                        'your code. Falling back on provided "batch_identifiers".'
+                    )
+                    batch_filter_parameters = batch_identifiers
+                elif batch_filter_parameters is None and batch_identifiers is None:
+                    batch_filter_parameters = kwargs
                 else:
                     # Raise a warning if kwargs exist
                     pass
 
-                partition_request_params: dict = {
-                    "batch_identifiers": batch_identifiers,
+                data_connector_query_params: dict = {
+                    "batch_filter_parameters": batch_filter_parameters,
                     "limit": limit,
                     "index": index,
                     "custom_filter_function": custom_filter_function,
                 }
-                partition_request = PartitionRequest(partition_request_params)
+                data_connector_query = IDDict(data_connector_query_params)
             else:
-                # Raise a warning if batch_identifiers or kwargs exist
-                partition_request = PartitionRequest(partition_request)
+                # Raise a warning if batch_filter_parameters or kwargs exist
+                data_connector_query = IDDict(data_connector_query)
 
             if batch_spec_passthrough is None:
                 batch_spec_passthrough = {}
@@ -1539,13 +1615,10 @@ class BaseDataContext:
                 datasource_name=datasource_name,
                 data_connector_name=data_connector_name,
                 data_asset_name=data_asset_name,
-                batch_data=batch_data,
-                partition_request=partition_request,
+                data_connector_query=data_connector_query,
                 batch_spec_passthrough=batch_spec_passthrough,
             )
-            return datasource.get_batch_list_from_batch_request(
-                batch_request=batch_request
-            )
+        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_validator(
         self,
@@ -1553,9 +1626,9 @@ class BaseDataContext:
         data_connector_name: Optional[str] = None,
         data_asset_name: Optional[str] = None,
         *,
-        batch_request: Optional[BatchRequest] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
@@ -1568,6 +1641,10 @@ class BaseDataContext:
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -1605,7 +1682,7 @@ class BaseDataContext:
                 data_asset_name=data_asset_name,
                 batch_request=batch_request,
                 batch_data=batch_data,
-                partition_request=partition_request,
+                data_connector_query=data_connector_query,
                 batch_identifiers=batch_identifiers,
                 limit=limit,
                 index=index,
@@ -1615,6 +1692,10 @@ class BaseDataContext:
                 sampling_kwargs=sampling_kwargs,
                 splitter_method=splitter_method,
                 splitter_kwargs=splitter_kwargs,
+                runtime_parameters=runtime_parameters,
+                query=query,
+                path=path,
+                batch_filter_parameters=batch_filter_parameters,
                 **kwargs,
             ),
         )
@@ -1665,7 +1746,7 @@ class BaseDataContext:
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
-        config: dict
+        config: Union[CommentedMap, dict]
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
         else:
@@ -1678,7 +1759,7 @@ class BaseDataContext:
         )
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: dict, initialize: bool = True
+        self, name: str, config: Union[CommentedMap, dict], initialize: bool = True
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
@@ -3062,7 +3143,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "CheckpointStore",
             ]:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                store_name: str = name or "my_temp_store"
+                store_name: str = name or config.get("name") or "my_temp_store"
                 instantiated_class = cast(
                     Store,
                     self._build_store_from_config(
@@ -3079,7 +3160,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 print(
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
-                datasource_name: str = name or "my_temp_datasource"
+                datasource_name: str = (
+                    name or config.get("name") or "my_temp_datasource"
+                )
                 instantiated_class = cast(
                     Datasource,
                     self._instantiate_datasource_from_config_and_update_project_config(
@@ -3093,7 +3176,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
                 )
 
-                checkpoint_name: str = name or "my_temp_checkpoint"
+                checkpoint_name: str = (
+                    name or config.get("name") or "my_temp_checkpoint"
+                )
 
                 checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -3110,7 +3195,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a SimpleCheckpoint, since class_name is {class_name}"
                 )
 
-                checkpoint_name: str = name or "my_temp_checkpoint"
+                checkpoint_name: str = (
+                    name or config.get("name") or "my_temp_checkpoint"
+                )
 
                 checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -3440,7 +3527,7 @@ class DataContext(BaseDataContext):
         return new_datasource
 
     def delete_datasource(self, name: str):
-        logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
+        logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
 
         super().delete_datasource(datasource_name=name)
         self._save_project_config()
