@@ -43,7 +43,7 @@ Execution Engine Methods
 - ``resolve_metrics``: computes metric values
 - ``get_compute_domain``: gets the compute domain for a particular type of intermediate metric.
 
-SqlAlchemyExecutionEngine and SparkExecutionEngine provide an additional feature that allows deferred resolution of metrics, making it possible to bundle the request for several metrics into a single trip to the backend. Additional Execution Engines may also support this feature in the future.
+SqlAlchemyExecutionEngine and SparkDFExecutionEngine provide an additional feature that allows deferred resolution of metrics, making it possible to bundle the request for several metrics into a single trip to the backend. Additional Execution Engines may also support this feature in the future.
 
 - ``resolve_metric_bundle``: computes values of a bundle of metrics; this function is used internally by resolve_metrics on execution engines that support bundled metrics
 
