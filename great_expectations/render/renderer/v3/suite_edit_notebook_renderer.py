@@ -5,7 +5,11 @@ import jinja2
 import nbformat
 
 from great_expectations import DataContext
+from great_expectations.cli.batch_request import (
+    standardize_batch_request_display_ordering,
+)
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.types.base import (
     NotebookConfig,
@@ -51,6 +55,12 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         if custom_templates_module:
             try:
+                print(
+                    f"\n[ALEX_TEST] PATH: {custom_templates_module} ; TYPE: {str(type(custom_templates_module))}"
+                )
+                print(
+                    f'\n[ALEX_TEST] PATH: {custom_templates_module.rsplit(".", 1)} ; TYPE: {str(type(custom_templates_module.rsplit(".", 1)))}'
+                )
                 custom_loader = [
                     jinja2.PackageLoader(*custom_templates_module.rsplit(".", 1))
                 ]
@@ -340,7 +350,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def render(
         self,
         suite: ExpectationSuite,
-        valid_batch_request: Optional[bool] = False,
         batch_request: Optional[
             Union[str, Dict[str, Union[str, Dict[str, Any]]]]
         ] = None,
@@ -355,8 +364,17 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         suite_name: str = suite.expectation_suite_name
 
-        if not valid_batch_request:
+        if (
+            batch_request
+            and isinstance(batch_request, dict)
+            and BatchRequest(**batch_request)
+        ):
+            batch_request = standardize_batch_request_display_ordering(
+                batch_request=batch_request
+            )
+        else:
             batch_request = None
+
         self.add_header(suite_name=suite_name, batch_request=batch_request)
         self.add_authoring_intro(batch_request=batch_request)
         self.add_expectation_cells_from_suite(
@@ -371,7 +389,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         suite: ExpectationSuite,
         notebook_file_path: str,
-        valid_batch_request: Optional[bool] = False,
         batch_request: Optional[
             Union[str, Dict[str, Union[str, Dict[str, Any]]]]
         ] = None,
@@ -383,7 +400,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         """
         self.render(
             suite=suite,
-            valid_batch_request=valid_batch_request,
             batch_request=batch_request,
         )
         self.write_notebook_to_disk(

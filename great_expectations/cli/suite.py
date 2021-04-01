@@ -8,10 +8,7 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
-from great_expectations.cli.batch_request import (
-    get_batch_request,
-    standardize_batch_request_display_ordering,
-)
+from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import (
     cli_message,
@@ -259,7 +256,6 @@ def _suite_edit(
 ):
     # suppress_usage_message flag is for the situation where _suite_edit is called by _suite_new().
     # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
-    valid_batch_request: Optional[bool] = False
     batch_request_json: Optional[str] = None
     if isinstance(batch_request, str):
         batch_request_json = batch_request
@@ -348,16 +344,6 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 additional_batch_request_args=None,
             )
 
-        if (
-            batch_request
-            and isinstance(batch_request, dict)
-            and BatchRequest(**batch_request)
-        ):
-            valid_batch_request = True
-            batch_request = standardize_batch_request_display_ordering(
-                batch_request=batch_request
-            )
-
         suite: ExpectationSuite = toolkit.load_expectation_suite(
             context=context, suite_name=suite_name, usage_event=usage_event
         )
@@ -369,7 +355,6 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         ).render_to_disk(
             suite=suite,
             notebook_file_path=notebook_path,
-            valid_batch_request=valid_batch_request,
             batch_request=batch_request,
         )
 
