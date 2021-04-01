@@ -18,7 +18,6 @@ try:
         
         Great Expectations version {__version__} is currently incompatible with SqlAlchemy 1.4.0 and higher. 
         You currently have SqlAlchemy version {sa.__version__}. Please downgrade SqlAlchemy < 1.4.0 while we work on a proper fix. 
-        Thank you - GE Core Team
         """)
 except ImportError:
     pass
