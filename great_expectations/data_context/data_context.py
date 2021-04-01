@@ -2313,39 +2313,53 @@ class BaseDataContext:
 
         return index_page_locator_infos
 
-    def clean_data_docs(self, site_name=None):
-        sites123 = self.project_config_with_variables_substituted.data_docs_sites
-        cleaned = False
-        for sname, site_config in sites123.items():
-            if site_name is None:
-                cleaned = False
-                complete_site_config = site_config
-                module_name = "great_expectations.render.renderer.site_builder"
-                site_builder = instantiate_class_from_config(
-                    config=complete_site_config,
-                    runtime_environment={
-                        "data_context": self,
-                        "root_directory": self.root_directory,
-                    },
-                    config_defaults={"module_name": module_name},
+    def clean_data_docs(self, site_name=None) -> bool:
+        """
+        Clean a given data docs site.
+
+        This removes all files from the configured Store.
+
+        Args:
+            site_name (str): Optional, the name of the site to clean. If not
+            specified, all sites will be cleaned.
+        """
+        data_docs_sites = self.project_config_with_variables_substituted.data_docs_sites
+        if not data_docs_sites:
+            raise ge_exceptions.DataContextError(
+                "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",
+            )
+
+        data_docs_site_names = list(data_docs_sites.keys())
+        if site_name:
+            if site_name not in data_docs_site_names:
+                raise ge_exceptions.DataContextError(
+                    f"The specified site name `{site_name}` does not exist in this project."
                 )
-                site_builder.clean_site()
-                cleaned = True
-            else:
-                if site_name == sname:
-                    complete_site_config = site_config
-                    module_name = "great_expectations.render.renderer.site_builder"
-                    site_builder = instantiate_class_from_config(
-                        config=complete_site_config,
-                        runtime_environment={
-                            "data_context": self,
-                            "root_directory": self.root_directory,
-                        },
-                        config_defaults={"module_name": module_name},
-                    )
-                    site_builder.clean_site()
-                    return True
-        return cleaned
+            return self._clean_data_docs_site(site_name)
+
+        cleaned = []
+        for existing_site_name in data_docs_site_names:
+            cleaned.append(self._clean_data_docs_site(existing_site_name))
+        return all(cleaned)
+
+    def _clean_data_docs_site(self, site_name: str) -> bool:
+        sites = self.project_config_with_variables_substituted.data_docs_sites
+        if not sites:
+            return False
+        site_config = sites.get(site_name)
+
+        site_builder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+            },
+            config_defaults={
+                "module_name": "great_expectations.render.renderer.site_builder"
+            },
+        )
+        site_builder.clean_site()
+        return True
 
     def profile_datasource(
         self,

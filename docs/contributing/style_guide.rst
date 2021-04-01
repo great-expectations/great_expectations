@@ -58,6 +58,7 @@ code
 The :ref:`CLI <command_line>` has some conventions of its own.
 
 * The CLI never writes to disk without asking first.
+* When adding, modifying or removing files or configuration, the CLI always shows the user exactly what is being changed before doing so.
 * Questions are always phrased as conversational sentences.
 * Sections are divided by headers: "========== Profiling =========="
 * We use punctuation: Please finish sentences with periods, questions marks, or an occasional exclamation point.
