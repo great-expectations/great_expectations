@@ -47,7 +47,7 @@ class BatchDefinition(SerializableDictDot):
             "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "batch_identifiers": repr(self._batch_identifiers),
+            "batch_identifiers": self._batch_identifiers,
         }
         return str(doc_fields_dict)
 
