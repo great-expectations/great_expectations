@@ -974,10 +974,9 @@ def test_notebook_execution_with_custom_notebooks_wrong_module(
         ).render(suite_with_multiple_citations)
 
 
-# TODO: <Taylor>TAYLOR</Taylor>
 # TODO: <Alex>ALEX</Alex>
 @pytest.mark.xfail(
-    reason="TODO: <Alex>Taylor, please fix this test!  I must be doing something wrong with the location of fixtures and the paths leading to custom modules.  Thanks a lot!</Alex>",
+    reason="Need to update the expected results!",
     run=True,
     strict=True,
 )
@@ -992,10 +991,9 @@ def test_notebook_execution_with_custom_notebooks(
         "data_connector_name": "files_data_connector",
         "data_asset_name": "1k",
     }
-    obs: NotebookNode = SuiteEditNotebookRenderer.from_data_context(
-        data_context=data_context_v3_custom_notebooks
-    ).render(suite=suite_with_multiple_citations, batch_request=batch_request)
-    assert isinstance(obs, dict)
+    renderer = SuiteEditNotebookRenderer.from_data_context(data_context=data_context_v3_custom_notebooks)
+    obs: NotebookNode = renderer.render(suite=suite_with_multiple_citations, batch_request=batch_request)
+    assert isinstance(obs, NotebookNode)
     expected = {
         "nbformat": 4,
         "nbformat_minor": 4,
@@ -1006,13 +1004,7 @@ def test_notebook_execution_with_custom_notebooks(
                 "source": "# Custom header for MyCompany",
                 "metadata": {},
             },
-            {
-                "cell_type": "code",
-                "metadata": {},
-                "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
-                "outputs": [],
-            },
+            {'cell_type': 'code', 'metadata': {}, 'execution_count': None, 'source': 'import datetime\n\nimport pandas as pd\n\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.core.batch import BatchRequest\nfrom great_expectations.checkpoint import SimpleCheckpoint\nfrom great_expectations.exceptions import DataContextError\n\ncontext = ge.data_context.DataContext()\n\nbatch_request = {\n    "datasource_name": "files_datasource",\n    "data_connector_name": "files_data_connector",\n    "data_asset_name": "1k",\n}\n\n\n# Feel free to change the name of your suite here. Renaming this will not remove the other one.\nexpectation_suite_name = "critical"\ntry:\n    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)\n    print(\n        f\'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.\'\n    )\nexcept DataContextError:\n    suite = context.create_expectation_suite(\n        expectation_suite_name=expectation_suite_name\n    )\n    print(f\'Created ExpectationSuite "{suite.expectation_suite_name}".\')\n\n\nvalidator = context.get_validator(\n    batch_request=BatchRequest(**batch_request),\n    expectation_suite_name=expectation_suite_name,\n)\ncolumn_names = [f\'"{column_name}"\' for column_name in validator.columns()]\nprint(f"Columns: {\', \'.join(column_names)}.")\nvalidator.head(n_rows=5, fetch_all=False)', 'outputs': []},
             {
                 "cell_type": "markdown",
                 "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
@@ -1058,7 +1050,7 @@ def test_notebook_execution_with_custom_notebooks(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\nrun_id = {\n    "run_name": "some_string_that_uniquely_identifies_this_run",  # insert your own run_name here\n    "run_time": datetime.datetime.now(datetime.timezone.utc),\n}\nresults = context.run_validation_operator(\n    "local", assets_to_validate=[batch], run_id=run_id\n)\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs(site_names=["site_local"])\ncontext.open_data_docs(validation_result_identifier, site_name="site_local")',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)',
                 "outputs": [],
             },
         ],
@@ -1067,5 +1059,6 @@ def test_notebook_execution_with_custom_notebooks(
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         obs_cell.pop("id", None)
-        assert obs_cell == expected_cell
+        if not obs_cell == expected_cell:
+            print(obs_cell)
     assert obs == expected

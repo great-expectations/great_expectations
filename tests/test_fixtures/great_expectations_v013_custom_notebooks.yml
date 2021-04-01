@@ -103,4 +103,3 @@ notebooks:
             file_name: footer.py
             template_kwargs:
                 site_name: site_local
-                validation_operator_name: local
