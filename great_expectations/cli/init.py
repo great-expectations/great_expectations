@@ -154,12 +154,14 @@ def init(ctx, view, usage_stats):
                     )
                     sys.exit(1)
 
-                (suite_name, profiling_results,) = toolkit.create_expectation_suite(
+                (
+                    suite_name,
+                    batch_request,
+                    profiling_results,
+                ) = toolkit.create_expectation_suite(
                     context=context,
                     datasource_name=datasource_name,
                     additional_batch_request_args={"limit": 1000},
-                    # TODO: <Alex>ALEX -- Is this needed?</Alex>
-                    flag_build_docs=False,
                 )
 
                 cli_message(SECTION_SEPARATOR)

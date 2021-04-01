@@ -14,6 +14,7 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,6 @@ except ImportError:
 def get_batch_request(
     context: DataContext,
     datasource_name: Optional[str] = None,
-    data_connector_name: Optional[str] = None,
     additional_batch_request_args: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Union[str, Dict[str, Any]]]:
     """
@@ -63,40 +63,62 @@ def get_batch_request(
 
     available_data_asset_names_by_data_connector_dict: Dict[
         str, List[str]
-    ] = datasource.get_available_data_asset_names(
-        data_connector_names=data_connector_name
+    ] = datasource.get_available_data_asset_names()
+    data_connector_name: Optional[str] = select_data_connector_name(
+        available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
     )
-    if data_connector_name is None:
-        data_connector_name = select_data_connector_name(
-            available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
-        )
+
+    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
+        "datasource_name": datasource_name,
+        "data_connector_name": data_connector_name,
+    }
 
     data_asset_name: str
-    batch_request: Dict[str, Union[str, Dict[str, Any]]]
 
     if isinstance(datasource, Datasource):
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
-        data_asset_name, batch_request, = _get_batch_request_from_data_connector(
+        data_asset_name = _get_data_asset_name_from_data_connector(
             datasource=datasource,
             data_connector_name=data_connector_name,
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
-            additional_batch_request_args=additional_batch_request_args,
         )
     elif isinstance(datasource, SimpleSqlalchemyDatasource):
-        (
-            data_asset_name,
-            batch_request,
-        ) = _get_batch_request_for_simple_sqlalchemy_datasource(
+        msg_prompt_enter_data_asset_name: str = (
+            "\nWhich table would you like to use? (Choose one)\n"
+        )
+        data_asset_name = _get_data_asset_name_for_simple_sqlalchemy_datasource(
             datasource=datasource,
             data_connector_name=data_connector_name,
-            additional_batch_request_args=additional_batch_request_args,
+            msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
     else:
         raise ge_exceptions.DataContextError(
-            "Datasource {:s} is expected to be a PandasDatasource or SparkDFDatasource, but is {:s}".format(
+            "Datasource {:s} of unsupported type {:s} was encountered.".format(
                 datasource_name, str(type(datasource))
             )
         )
+
+    batch_request.update(
+        {
+            "data_asset_name": data_asset_name,
+        }
+    )
+
+    if additional_batch_request_args and isinstance(
+        additional_batch_request_args, dict
+    ):
+        batch_request.update(additional_batch_request_args)
+
+    batch_spec_passthrough: Dict[str, Union[str, Dict[str, Any]]] = batch_request.get(
+        "batch_spec_passthrough"
+    )
+    if batch_spec_passthrough is None:
+        batch_spec_passthrough = {}
+
+    batch_spec_passthrough.update(_get_batch_spec_passthrough(datasource=datasource))
+    batch_request["batch_spec_passthrough"] = batch_spec_passthrough
+
+    filter_properties_dict(properties=batch_request, inplace=True)
 
     return batch_request
 
@@ -138,71 +160,60 @@ def select_data_connector_name(
     return data_connector_name
 
 
-def _get_batch_request_from_data_connector(
+def _get_data_asset_name_from_data_connector(
     datasource: BaseDatasource,
     data_connector_name: str,
     msg_prompt_enter_data_asset_name: str,
-    data_asset_name: Optional[str] = None,
-    additional_batch_request_args: Optional[Dict[str, Any]] = None,
-) -> Tuple[str, Dict[str, Union[str, Dict[str, Any]]],]:
-    if data_asset_name is None:
-        available_data_asset_names_by_data_connector_dict: Dict[
-            str, List[str]
-        ] = datasource.get_available_data_asset_names(
-            data_connector_names=data_connector_name
-        )
-        available_data_asset_names: List[str] = sorted(
-            available_data_asset_names_by_data_connector_dict[data_connector_name],
-            key=lambda x: x,
-        )
-        available_data_asset_names_str: List[str] = [
-            "{}".format(name) for name in available_data_asset_names
+) -> str:
+    data_asset_name: Optional[str]
+
+    available_data_asset_names_by_data_connector_dict: Dict[
+        str, List[str]
+    ] = datasource.get_available_data_asset_names(
+        data_connector_names=data_connector_name
+    )
+    available_data_asset_names: List[str] = sorted(
+        available_data_asset_names_by_data_connector_dict[data_connector_name],
+        key=lambda x: x,
+    )
+    available_data_asset_names_str: List[str] = [
+        "{}".format(name) for name in available_data_asset_names
+    ]
+
+    data_asset_names_to_display: List[str] = available_data_asset_names_str[:50]
+    choices: str = "\n".join(
+        [
+            "    {}. {}".format(i, name)
+            for i, name in enumerate(data_asset_names_to_display, 1)
         ]
-
-        data_asset_names_to_display: List[str] = available_data_asset_names_str[:50]
-        choices: str = "\n".join(
-            [
-                "    {}. {}".format(i, name)
-                for i, name in enumerate(data_asset_names_to_display, 1)
-            ]
-        )
-        prompt: str = msg_prompt_enter_data_asset_name + choices + "\n"
-        data_asset_name_selection: str = click.prompt(prompt, show_default=False)
-        data_asset_name_selection = data_asset_name_selection.strip()
+    )
+    prompt: str = msg_prompt_enter_data_asset_name + choices + "\n"
+    data_asset_name_selection: str = click.prompt(prompt, show_default=False)
+    data_asset_name_selection = data_asset_name_selection.strip()
+    try:
+        data_asset_index: int = int(data_asset_name_selection) - 1
         try:
-            data_asset_index: int = int(data_asset_name_selection) - 1
-            try:
-                data_asset_name = available_data_asset_names[data_asset_index]
-            except IndexError:
-                pass
-        except ValueError:
-            data_asset_name = data_asset_name_selection
+            data_asset_name = available_data_asset_names[data_asset_index]
+        except IndexError:
+            data_asset_name = None
+    except ValueError:
+        data_asset_name = data_asset_name_selection
 
-    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
-        "datasource_name": datasource.name,
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
-    }
-
-    if additional_batch_request_args:
-        batch_request.update(additional_batch_request_args)
-
-    return data_asset_name, batch_request
+    return data_asset_name
 
 
-def _get_batch_request_for_simple_sqlalchemy_datasource(
+def _get_data_asset_name_for_simple_sqlalchemy_datasource(
     datasource: SimpleSqlalchemyDatasource,
     data_connector_name: str,
-    additional_batch_request_args: Optional[Dict[str, Any]] = None,
-) -> Tuple[str, Dict[str, Union[str, Dict[str, Any]]],]:
-    data_asset_name: Optional[str] = None
-    batch_request: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None
-
+    msg_prompt_enter_data_asset_name: str,
+) -> str:
     msg_prompt_how_to_connect_to_data: str = """
 You have selected a datasource that is a SQL database. How would you like to specify the data?
 1. Enter a table name and schema
 2. List all tables in the database (this may take a very long time)
 """
+    data_asset_name: Optional[str] = None
+
     default_schema: str = _get_default_schema(datasource=datasource)
     if default_schema is None:
         default_schema = ""
@@ -234,50 +245,13 @@ You have selected a datasource that is a SQL database. How would you like to spe
                 msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
             )
             if confirmation == "y":
-                msg_prompt_enter_data_asset_name: str = (
-                    "\nWhich table would you like to use? (Choose one)\n"
-                )
-                data_asset_name, batch_request = _get_batch_request_from_data_connector(
+                data_asset_name = _get_data_asset_name_from_data_connector(
                     datasource=datasource,
                     data_connector_name=data_connector_name,
                     msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
-                    additional_batch_request_args=additional_batch_request_args,
-                    data_asset_name=data_asset_name,
                 )
 
-    if batch_request is None:
-        batch_request = {}
-
-    # Some backends require named temporary table parameters.  We specifically elicit those and add them
-    # where appropriate.
-    temp_table_kwargs: Optional[Dict[str, Any]] = None
-
-    execution_engine: SqlAlchemyExecutionEngine = cast(
-        SqlAlchemyExecutionEngine, datasource.execution_engine
-    )
-    if execution_engine.engine.dialect.name.lower() == "bigquery":
-        # bigquery also requires special handling
-        bigquery_temp_table: str = click.prompt(
-            "Great Expectations will create a table to use for "
-            "validation." + os.linesep + "Please enter a name for this table: ",
-            default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
-        )
-        temp_table_kwargs: dict = {
-            "bigquery_temp_table": bigquery_temp_table,
-        }
-
-    batch_request.update(
-        {
-            "datasource_name": datasource.name,
-            "data_connector_name": data_connector_name,
-            "data_asset_name": data_asset_name,
-        }
-    )
-
-    if temp_table_kwargs:
-        batch_request.update(temp_table_kwargs)
-
-    return data_asset_name, batch_request
+    return data_asset_name
 
 
 def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
@@ -286,6 +260,42 @@ def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     )
     inspector: Inspector = Inspector.from_engine(execution_engine.engine)
     return inspector.default_schema_name
+
+
+def _get_batch_spec_passthrough(
+    datasource: BaseDatasource,
+) -> Dict[str, Union[str, Dict[str, Any]]]:
+    batch_spec_passthrough: Dict[str, Union[str, Dict[str, Any]]] = {}
+
+    if isinstance(datasource, Datasource):
+        pass  # TODO: <Alex>Add parameters for Pandas, Spark, and other SQL as CLI functionality expands.</Alex>
+    elif isinstance(datasource, SimpleSqlalchemyDatasource):
+        # Some backends require named temporary table parameters.  We specifically elicit those and add them
+        # where appropriate.
+        execution_engine: SqlAlchemyExecutionEngine = cast(
+            SqlAlchemyExecutionEngine, datasource.execution_engine
+        )
+        if execution_engine.engine.dialect.name.lower() == "bigquery":
+            # bigquery also requires special handling
+            bigquery_temp_table: str = click.prompt(
+                "Great Expectations will create a table to use for "
+                "validation." + os.linesep + "Please enter a name for this table: ",
+                default="SOME_PROJECT.SOME_DATASET.ge_tmp_" + str(uuid.uuid4())[:8],
+            )
+            if bigquery_temp_table:
+                batch_spec_passthrough.update(
+                    {
+                        "bigquery_temp_table": bigquery_temp_table,
+                    }
+                )
+    else:
+        raise ge_exceptions.DataContextError(
+            "Datasource {:s} of unsupported type {:s} was encountered.".format(
+                datasource.name, str(type(datasource))
+            )
+        )
+
+    return batch_spec_passthrough
 
 
 def standardize_batch_request_display_ordering(

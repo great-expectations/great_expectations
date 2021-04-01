@@ -70,15 +70,11 @@ yaml.default_flow_style = False
 def create_expectation_suite(
     context: DataContext,
     datasource_name: Optional[str] = None,
-    data_connector_name: Optional[str] = None,
-    data_asset_name: Optional[str] = None,
-    batch_request: Optional[dict] = None,
+    batch_request: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None,
     expectation_suite_name: Optional[str] = None,
     interactive: Optional[bool] = False,
     scaffold: Optional[bool] = False,
     additional_batch_request_args: Optional[dict] = None,
-    # TODO: <Alex>ALEX -- Is this needed?</Alex>
-    flag_build_docs: Optional[bool] = True,
     # TODO: <Alex>ALEX -- Is this needed?</Alex>
     profiler_configuration: Optional[str] = "demo",
 ) -> Tuple[str, Dict[str, Union[str, Dict[str, Any]]], Optional[dict]]:
@@ -87,7 +83,7 @@ def create_expectation_suite(
 
     :return: a tuple: (suite name, profiling_results)
     """
-    if interactive:
+    if interactive and not batch_request:
         data_source: Optional[BaseDatasource] = select_datasource(
             context=context, datasource_name=datasource_name
         )
@@ -98,24 +94,20 @@ def create_expectation_suite(
 
         datasource_name = data_source.name
 
-        if (
-            data_connector_name is None
-            or data_asset_name is None
-            or batch_request is None
-        ):
-            batch_request = get_batch_request(
-                context=context,
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                additional_batch_request_args=additional_batch_request_args,
-            )
-            # In this case, we have "consumed" the additional_batch_request_args
-            additional_batch_request_args = {}
+        batch_request = get_batch_request(
+            context=context,
+            datasource_name=datasource_name,
+            additional_batch_request_args=additional_batch_request_args,
+        )
+        # In this case, we have "consumed" the additional_batch_request_args
+        additional_batch_request_args = {}
 
     if batch_request:
         batch_request = standardize_batch_request_display_ordering(
             batch_request=batch_request
         )
+
+    data_asset_name = batch_request["data_asset_name"]
 
     if expectation_suite_name is None:
         default_expectation_suite_name: str = _get_default_expectation_suite_name(
@@ -148,12 +140,6 @@ def create_expectation_suite(
     #     data_asset_name,
     #     profiler_configuration,
     # )
-    #
-    # # TODO: <Alex>ALEX -- When is this used?</Alex>
-    # if flag_build_docs:
-    #     build_docs(context=context, view=False)
-    #     if open_docs:  # TODO: <Alex>ALEX -- "open_docs" is always False; when is next line called?</Alex>
-    #         attempt_to_open_validation_results_in_data_docs(context=context, profiling_results=profiling_results)
     #
     # return expectation_suite_name, batch_request, profiling_results
 
@@ -250,7 +236,7 @@ def _get_default_expectation_suite_name(
     if data_asset_name:
         suite_name = f"{data_asset_name}.warning"
     elif batch_request:
-        suite_name = f"{data_asset_name}.{BatchRequest(**batch_request).id}"
+        suite_name = f"batch-{BatchRequest(**batch_request).id}"
     else:
         suite_name = "warning"
     return suite_name

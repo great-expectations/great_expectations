@@ -133,10 +133,6 @@ def _suite_new(
             "The --batch-request JSON option is incompatible with the interactive flag."
         )
 
-    datasource_name: Optional[str] = None
-    data_connector_name: Optional[str] = None
-    data_asset_name: Optional[str] = None
-
     try:
         if batch_request is not None:
             batch_request = json.loads(batch_request)
@@ -145,9 +141,6 @@ def _suite_new(
         profiling_results: dict
         suite_name, batch_request, profiling_results = toolkit.create_expectation_suite(
             context=context,
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
             batch_request=batch_request,
             expectation_suite_name=suite_name,
             interactive=interactive,
@@ -171,7 +164,6 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             batch_request=batch_request,
             usage_event=usage_event,
             interactive=interactive,
-            datasource=datasource_name,
             suppress_usage_message=True,  # do not want to actually send usage_message, since the function call is not the result of actual usage
         )
     except (
@@ -353,7 +345,6 @@ A batch of data is required to edit the suite - let's help you to specify it."""
             batch_request = get_batch_request(
                 context=context,
                 datasource_name=datasource.name,
-                data_connector_name=None,
                 additional_batch_request_args=None,
             )
 
