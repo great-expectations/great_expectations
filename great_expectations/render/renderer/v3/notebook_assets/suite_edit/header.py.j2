@@ -3,20 +3,18 @@ import datetime
 import pandas as pd
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest
+import great_expectations.jupyter_ux
 {%- if batch_request %}
+from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 {% else %}
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.types.resource_identifiers import ExpectationSuiteIdentifier
 {% endif -%}
-import great_expectations.exceptions as ge_exceptions
-
-import great_expectations.jupyter_ux
+from great_expectations.exceptions import DataContextError
 
 context = ge.data_context.DataContext()
-
-{%- if batch_request %}
+{% if batch_request %}
 batch_request = {{ batch_request }}
 {% endif %}
 
@@ -25,7 +23,7 @@ expectation_suite_name = "{{ suite_name }}"
 try:
     suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
     print(f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.')
-except ge_exceptions.DataContextError:
+except DataContextError:
     suite = context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
     print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
 
