@@ -55,12 +55,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         if custom_templates_module:
             try:
-                print(
-                    f"\n[ALEX_TEST] PATH: {custom_templates_module} ; TYPE: {str(type(custom_templates_module))}"
-                )
-                print(
-                    f'\n[ALEX_TEST] PATH: {custom_templates_module.rsplit(".", 1)} ; TYPE: {str(type(custom_templates_module.rsplit(".", 1)))}'
-                )
                 custom_loader = [
                     jinja2.PackageLoader(*custom_templates_module.rsplit(".", 1))
                 ]
