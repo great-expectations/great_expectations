@@ -4,7 +4,7 @@
 Changelog
 #########
 
-develop
+Develop
 -----------------
 * [BREAKING-EXPERIMENTAL] The ``batch_data`` attribute of ``BatchRequest`` has been removed. To pass in in-memory dataframes at runtime, the new ``RuntimeDataConnector`` should be used
 * [BREAKING-EXPERIMENTAL] ``RuntimeDataConnector`` must now be passed Batch Requests of type ``RuntimeBatchRequest``
@@ -15,14 +15,17 @@ develop
 * [BREAKING-EXPERIMENTAL] The ``batch_identifiers`` key on ``DataConnectorQuery`` (formerly ``PartitionRequest``) has been changed to ``batch_filter_parameters``
 * [ENHANCEMENT] Added a new ``RuntimeBatchRequest`` class, which can be used alongside ``RuntimeDataConnector`` to specify batches at runtime with either an in-memory dataframe, path (filesystem or s3), or sql query
 * [ENHANCEMENT] Added a new ``RuntimeQueryBatchSpec`` class
-* [ENHANCEMENT] CLI `docs list` command implemented for v3 api
-* [ENHANCEMENT] CLI `docs build` command implemented for v3 api
-* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api
-* [ENHANCEMENT] DataContext.clean_data_docs now raises helpful errors
-* [ENHANCEMENT] CLI `init` command implemented for v3 api
-* [ENHANCEMENT] CLI `store list` command implemented for v3 api
 * [BUGFIX] Fixed issue where Sorters were not being applied correctly when ``data_connector_query`` contained limit or index  #2617
+
+0.13.16
+-----------------
+* [ENHANCEMENT] CLI `docs list` command implemented for v3 api #2612
 * [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource #2613
+* [ENHANCEMENT] CLI `docs build` command implemented for v3 api #2614
+* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api #2615
+* [ENHANCEMENT] DataContext.clean_data_docs now raises helpful errors #2621
+* [ENHANCEMENT] CLI `init` command implemented for v3 api #2626
+* [ENHANCEMENT] CLI `store list` command implemented for v3 api #2627
 
 0.13.15
 -----------------
