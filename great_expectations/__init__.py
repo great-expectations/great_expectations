@@ -8,16 +8,15 @@ del get_versions  # isort:skip
 # 20210401 Will - Temporary fix to warn users against current incompatibility with Sqlalchemy 1.4.0
 # To be removed once a better fix is implemented
 
-import sys
+from packaging.version import parse as parse_version
 from great_expectations.exceptions.exceptions import GreatExpectationsError
 try:
     import sqlalchemy as sa
-    sa_version = tuple(map(int, (sa.__version__.split("."))))
-    if sa_version >= (1, 4, 0):
+    if parse_version(sa.__version__) >= parse_version("1.4.0"):
         raise GreatExpectationsError(f"""
-        
-        Great Expectations version {__version__} is currently incompatible with SqlAlchemy 1.4.0 and higher. 
-        You currently have SqlAlchemy version {sa.__version__}. Please downgrade SqlAlchemy < 1.4.0 while we work on a proper fix. 
+
+        Great Expectations version {__version__} is currently incompatible with SqlAlchemy 1.4.0 and higher.
+        You have SqlAlchemy version {sa.__version__}. Please downgrade SqlAlchemy to < 1.4.0 while we work on a proper fix.
         """)
 except ImportError:
     pass
