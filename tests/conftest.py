@@ -3577,17 +3577,17 @@ def data_context_custom_notebooks(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context_v3_custom_notebooks(tmp_path_factory):
+def data_context_v3_custom_notebooks(tmp_path):
     """
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
     """
-    project_path = str(tmp_path_factory.mktemp("data_context"))
+    project_path = tmp_path
     context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    expectations_dir = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
     os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+        os.path.join(expectations_dir, "my_dag_node"),
         exist_ok=True,
     )
     shutil.copy(
@@ -3599,10 +3599,14 @@ def data_context_v3_custom_notebooks(tmp_path_factory):
             fixture_dir,
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
-        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+        os.path.join(expectations_dir, "my_dag_node", "default.json"),
     )
-
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    plugin_dir = os.path.join(context_path, "plugins")
+    os.makedirs(plugin_dir, exist_ok=True)
+    shutil.copytree(
+        os.path.join(fixture_dir, "notebook_assets"),
+        os.path.join(plugin_dir, "notebook_assets"),
+    )
 
     return ge.data_context.DataContext(context_path)
 
