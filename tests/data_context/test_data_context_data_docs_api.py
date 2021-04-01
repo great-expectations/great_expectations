@@ -1,3 +1,4 @@
+import os
 from unittest import mock
 
 import pytest
@@ -43,7 +44,7 @@ def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
 
 
 @pytest.fixture
-def context_with_multiple_sites(empty_data_context):
+def context_with_multiple_built_sites(empty_data_context):
     context = empty_data_context
     config = context.project_config_with_variables_substituted
     multi_sites = {
@@ -66,6 +67,7 @@ def context_with_multiple_sites(empty_data_context):
     }
     config.data_docs_sites = multi_sites
     context._project_config = config
+    context.build_data_docs()
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 2
     assert obs[0]["site_url"].endswith(
@@ -77,6 +79,16 @@ def context_with_multiple_sites(empty_data_context):
         "great_expectations/uncommitted/data_docs/another_local_site/index.html"
     )
     assert obs[1]["site_name"] == "another_local_site"
+    for site in ["local_site", "another_local_site"]:
+        assert os.path.isfile(
+            os.path.join(
+                context.root_directory,
+                context.GE_UNCOMMITTED_DIR,
+                "data_docs",
+                site,
+                "index.html",
+            )
+        )
 
     return context
 
@@ -129,8 +141,10 @@ def context_with_multiple_local_sites_and_s3_site(empty_data_context):
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_open_docs_with_two_local_sites(mock_webbrowser, context_with_multiple_sites):
-    context = context_with_multiple_sites
+def test_open_docs_with_two_local_sites(
+    mock_webbrowser, context_with_multiple_built_sites
+):
+    context = context_with_multiple_built_sites
     context.open_data_docs(only_if_exists=False)
     assert mock_webbrowser.call_count == 2
     first_call = mock_webbrowser.call_args_list[0][0][0]
@@ -147,9 +161,9 @@ def test_open_docs_with_two_local_sites(mock_webbrowser, context_with_multiple_s
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_open_docs_with_two_local_sites_specify_open_one(
-    mock_webbrowser, context_with_multiple_sites
+    mock_webbrowser, context_with_multiple_built_sites
 ):
-    context = context_with_multiple_sites
+    context = context_with_multiple_built_sites
     context.open_data_docs(site_name="another_local_site", only_if_exists=False)
 
     assert mock_webbrowser.call_count == 1
@@ -176,17 +190,17 @@ def test_get_docs_sites_urls_with_no_sites_specify_one(context_with_no_sites):
 
 
 def test_get_docs_sites_urls_with_non_existent_site_raises_error(
-    context_with_multiple_sites,
+    context_with_multiple_built_sites,
 ):
-    context = context_with_multiple_sites
+    context = context_with_multiple_built_sites
     with pytest.raises(DataContextError):
         context.get_docs_sites_urls(site_name="not_a_real_site")
 
 
 def test_get_docs_sites_urls_with_two_local_sites_specify_one(
-    context_with_multiple_sites,
+    context_with_multiple_built_sites,
 ):
-    context = context_with_multiple_sites
+    context = context_with_multiple_built_sites
     obs = context.get_docs_sites_urls(
         site_name="another_local_site", only_if_exists=False
     )
@@ -198,3 +212,50 @@ def test_get_docs_sites_urls_with_two_local_sites_specify_one(
     assert url.endswith(
         "/great_expectations/uncommitted/data_docs/another_local_site/index.html"
     )
+
+
+def test_clean_data_docs_on_context_with_no_sites_raises_error(
+    context_with_no_sites,
+):
+    context = context_with_no_sites
+    with pytest.raises(DataContextError):
+        context.clean_data_docs()
+
+
+def test_clean_data_docs_on_context_with_multiple_sites_with_no_site_name_cleans_all_sites_and_returns_true(
+    context_with_multiple_built_sites,
+):
+    context = context_with_multiple_built_sites
+    assert context.clean_data_docs() is True
+    for site in ["local_site", "another_local_site"]:
+        assert not os.path.isfile(
+            os.path.join(
+                context.root_directory,
+                context.GE_UNCOMMITTED_DIR,
+                "data_docs",
+                site,
+                "index.html",
+            )
+        )
+
+
+def test_clean_data_docs_on_context_with_multiple_sites_with_existing_site_name_cleans_selected_site_and_returns_true(
+    context_with_multiple_built_sites,
+):
+    context = context_with_multiple_built_sites
+    assert context.clean_data_docs(site_name="another_local_site") is True
+    data_docs_dir = os.path.join(
+        context.root_directory, context.GE_UNCOMMITTED_DIR, "data_docs"
+    )
+    assert not os.path.isfile(
+        os.path.join(data_docs_dir, "another_local_site", "index.html")
+    )
+    assert os.path.isfile(os.path.join(data_docs_dir, "local_site", "index.html"))
+
+
+def test_clean_data_docs_on_context_with_multiple_sites_with_non_existent_site_name_raises_error(
+    context_with_multiple_built_sites,
+):
+    context = context_with_multiple_built_sites
+    with pytest.raises(DataContextError):
+        assert context.clean_data_docs(site_name="not_a_real_site")
