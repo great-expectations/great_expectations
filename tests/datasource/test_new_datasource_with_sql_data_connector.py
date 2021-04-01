@@ -42,7 +42,7 @@ data_connectors:
     my_sqlite_db:
         class_name: ConfiguredAssetSqlDataConnector
 
-        data_assets:
+        assets:
 
             table_partitioned_by_date_column__A:
                 splitter_method: _split_on_converted_datetime
