@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from collections import OrderedDict
 
 import pandas as pd
 import pytest
@@ -23,6 +24,7 @@ from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
     DataContextConfigDefaults,
+    DatasourceConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -30,7 +32,11 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import LegacyDatasource
+from great_expectations.datasource import (
+    Datasource,
+    LegacyDatasource,
+    SimpleSqlalchemyDatasource,
+)
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -438,13 +444,12 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
-def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
+def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
 
     # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
 
-    base_dir = str(tmp_path_factory.mktemp("project_dir"))
-    project_dir = os.path.join(base_dir, "project_path")
+    project_dir = os.path.join(tmp_path, "project_path")
     os.mkdir(project_dir)
 
     os.makedirs(os.path.join(project_dir, "data"))
@@ -478,7 +483,6 @@ project_path/
     )
 
     context = DataContext.create(project_dir)
-    ge_directory = os.path.join(project_dir, "great_expectations")
     context.add_datasource(
         "titanic",
         module_name="great_expectations.datasource",
@@ -516,7 +520,6 @@ project_path/
     ).to_id()
 
     tree_str = gen_directory_tree_str(project_dir)
-    # print(tree_str)
     assert (
         tree_str
         == """project_path/
@@ -589,7 +592,6 @@ project_path/
         project_dir, "great_expectations/uncommitted/data_docs"
     )
     observed = gen_directory_tree_str(data_docs_dir)
-    print(observed)
     assert (
         observed
         == """\
@@ -657,16 +659,16 @@ data_docs/
         )
     )
 
-    # save data_docs locally
-    os.makedirs("./tests/data_context/output", exist_ok=True)
-    os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
-
-    if os.path.isdir("./tests/data_context/output/data_docs"):
-        shutil.rmtree("./tests/data_context/output/data_docs")
-    shutil.copytree(
-        os.path.join(ge_directory, "uncommitted/data_docs/"),
-        "./tests/data_context/output/data_docs",
-    )
+    # save data_docs locally if you need to inspect the files manually
+    # os.makedirs("./tests/data_context/output", exist_ok=True)
+    # os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
+    #
+    # if os.path.isdir("./tests/data_context/output/data_docs"):
+    #     shutil.rmtree("./tests/data_context/output/data_docs")
+    # shutil.copytree(
+    #     os.path.join(ge_directory, "uncommitted/data_docs/"),
+    #     "./tests/data_context/output/data_docs",
+    # )
 
 
 def test_add_store(empty_data_context):
@@ -776,32 +778,27 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
-def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypatch):
-    curdir = os.path.abspath(os.getcwd())
-    try:
-        project_path = str(tmp_path_factory.mktemp("data_context"))
-        context_path = os.path.join(project_path, "great_expectations")
-        os.makedirs(context_path, exist_ok=True)
-        os.chdir(context_path)
-        with pytest.raises(ge_exceptions.DataContextError) as err:
-            DataContext.find_context_root_dir()
-        assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
+def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
+    project_path = tmp_path / "data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(context_path, exist_ok=True)
+    assert os.path.isdir(context_path)
+    monkeypatch.chdir(context_path)
+    with pytest.raises(ge_exceptions.DataContextError) as err:
+        DataContext.find_context_root_dir()
+    assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
 
-        shutil.copy(
-            file_relative_path(
-                __file__, "../test_fixtures/great_expectations_basic.yml"
-            ),
-            str(os.path.join(context_path, "great_expectations.yml")),
-        )
-        monkeypatch.setenv("GE_HOME", context_path)
-        assert DataContext.find_context_root_dir() == context_path
-    except Exception:
-        raise
-    finally:
-        # Make sure we unset the environment variable we're using
-        if os.getenv("GE_HOME"):
-            monkeypatch.delenv("GE_HOME")
-        os.chdir(curdir)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join("..", "test_fixtures", "great_expectations_basic.yml"),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    monkeypatch.setenv("GE_HOME", context_path)
+    assert DataContext.find_context_root_dir() == context_path
 
 
 def test_data_context_updates_expectation_suite_names(
@@ -2134,3 +2131,274 @@ validations:
 
     assert checkpoint_name not in context.list_checkpoints()
     assert len(context.list_checkpoints()) == 0
+
+
+def test_add_datasource_from_yaml(empty_data_context):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
+    """
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = f"""
+    class_name: Datasource
+    execution_engine:
+      class_name: PandasExecutionEngine
+    data_connectors:
+      data_dir_example_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        datasource_name: {datasource_name}
+        base_directory: ../data
+        default_regex:
+          group_names: data_asset_name
+          pattern: (.*)
+    """
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
+
+    assert datasource_from_yaml.name == datasource_name
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "data_dir_example_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
+                "base_directory": "../data",
+            }
+        },
+    }
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+
+def test_add_datasource_from_yaml_sql_datasource(sa, test_backends, empty_data_context):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
+    """
+
+    if "postgresql" not in test_backends:
+        pytest.skip("test_add_datasource_from_yaml_sql_datasource requires postgresql")
+
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = f"""
+    class_name: SimpleSqlalchemyDatasource
+    introspection:
+      whole_table:
+        data_asset_name_suffix: __whole_table
+    credentials:
+      drivername: postgresql
+      host: localhost
+      port: '5432'
+      username: postgres
+      password: ''
+      database: postgres
+    """
+
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    # .config not implemented for SimpleSqlalchemyDatasource
+    assert datasource_from_test_yaml_config.config == {}
+    assert datasource_from_yaml.config == {}
+
+    assert datasource_from_yaml.name == datasource_name
+    assert isinstance(datasource_from_yaml, SimpleSqlalchemyDatasource)
+    assert datasource_from_yaml.__class__.__name__ == "SimpleSqlalchemyDatasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        SimpleSqlalchemyDatasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        SimpleSqlalchemyDatasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
+
+
+def test_add_datasource_from_yaml_with_substitution_variables(
+    empty_data_context, monkeypatch
+):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string containing substitution variables should work as expected.
+    """
+
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    monkeypatch.setenv("SUBSTITUTED_BASE_DIRECTORY", "../data")
+
+    example_yaml = f"""
+        class_name: Datasource
+        execution_engine:
+          class_name: PandasExecutionEngine
+        data_connectors:
+          data_dir_example_data_connector:
+            class_name: InferredAssetFilesystemDataConnector
+            datasource_name: {datasource_name}
+            base_directory: ${{SUBSTITUTED_BASE_DIRECTORY}}
+            default_regex:
+              group_names: data_asset_name
+              pattern: (.*)
+        """
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
+
+    assert datasource_from_yaml.name == datasource_name
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "data_dir_example_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
+                "base_directory": "../data",
+            }
+        },
+    }
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]

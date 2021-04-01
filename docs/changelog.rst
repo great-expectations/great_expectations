@@ -4,13 +4,29 @@
 Changelog
 #########
 
-develop
+Develop
 -----------------
-* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
+* [ENHANCEMENT] CLI `docs list` command implemented for v3 api
+* [ENHANCEMENT] CLI `docs build` command implemented for v3 api
+* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api
+* [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource #2613
+* [ENHANCEMENT] DataContext.clean_data_docs now raises helpful errors
+* [ENHANCEMENT] CLI `init` command implemented for v3 api
+* [ENHANCEMENT] CLI `store list` command implemented for v3 api
+
+0.13.15
+-----------------
 * [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
+* [ENHANCEMENT] Datasource CLI functionality for v3 api and global --assume-yes flag #2590
+* [ENHANCEMENT] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
+* [ENHANCEMENT] Adding tqdm to Profiler (Thanks @peterdhansen). New library in requirements.txt
+* [ENHANCEMENT][MAINTENANCE] Use Metrics to Protect Against Wrong Column Names
+* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
 * [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
 * [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
-* [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource
+* [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource (Thanks @xaniasd)
+* [BUGFIX] pandas partial read_ functions not being unwrapped (Thanks @luke321321)
+* [BUGFIX] Don't stop SparkContext when running in Databricks (#2587) (Thanks @jarandaf)
 
 0.13.14
 -----------------

@@ -972,7 +972,7 @@ class BaseDataContext:
                 del self._project_config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
-                raise ValueError("Datasource {} not found".format(datasource_name))
+                raise ValueError(f"Datasource {datasource_name} not found")
 
     def get_available_data_asset_names(
         self, datasource_names=None, batch_kwargs_generator_names=None
@@ -1665,7 +1665,7 @@ class BaseDataContext:
 
         # For any class that should be loaded, it may control its configuration construction
         # by implementing a classmethod called build_configuration
-        config: dict
+        config: Union[CommentedMap, dict]
         if hasattr(datasource_class, "build_configuration"):
             config = datasource_class.build_configuration(**kwargs)
         else:
@@ -1678,7 +1678,7 @@ class BaseDataContext:
         )
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: dict, initialize: bool = True
+        self, name: str, config: Union[CommentedMap, dict], initialize: bool = True
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
@@ -2313,39 +2313,53 @@ class BaseDataContext:
 
         return index_page_locator_infos
 
-    def clean_data_docs(self, site_name=None):
-        sites123 = self.project_config_with_variables_substituted.data_docs_sites
-        cleaned = False
-        for sname, site_config in sites123.items():
-            if site_name is None:
-                cleaned = False
-                complete_site_config = site_config
-                module_name = "great_expectations.render.renderer.site_builder"
-                site_builder = instantiate_class_from_config(
-                    config=complete_site_config,
-                    runtime_environment={
-                        "data_context": self,
-                        "root_directory": self.root_directory,
-                    },
-                    config_defaults={"module_name": module_name},
+    def clean_data_docs(self, site_name=None) -> bool:
+        """
+        Clean a given data docs site.
+
+        This removes all files from the configured Store.
+
+        Args:
+            site_name (str): Optional, the name of the site to clean. If not
+            specified, all sites will be cleaned.
+        """
+        data_docs_sites = self.project_config_with_variables_substituted.data_docs_sites
+        if not data_docs_sites:
+            raise ge_exceptions.DataContextError(
+                "No data docs sites were found on this DataContext, therefore no sites will be cleaned.",
+            )
+
+        data_docs_site_names = list(data_docs_sites.keys())
+        if site_name:
+            if site_name not in data_docs_site_names:
+                raise ge_exceptions.DataContextError(
+                    f"The specified site name `{site_name}` does not exist in this project."
                 )
-                site_builder.clean_site()
-                cleaned = True
-            else:
-                if site_name == sname:
-                    complete_site_config = site_config
-                    module_name = "great_expectations.render.renderer.site_builder"
-                    site_builder = instantiate_class_from_config(
-                        config=complete_site_config,
-                        runtime_environment={
-                            "data_context": self,
-                            "root_directory": self.root_directory,
-                        },
-                        config_defaults={"module_name": module_name},
-                    )
-                    site_builder.clean_site()
-                    return True
-        return cleaned
+            return self._clean_data_docs_site(site_name)
+
+        cleaned = []
+        for existing_site_name in data_docs_site_names:
+            cleaned.append(self._clean_data_docs_site(existing_site_name))
+        return all(cleaned)
+
+    def _clean_data_docs_site(self, site_name: str) -> bool:
+        sites = self.project_config_with_variables_substituted.data_docs_sites
+        if not sites:
+            return False
+        site_config = sites.get(site_name)
+
+        site_builder = instantiate_class_from_config(
+            config=site_config,
+            runtime_environment={
+                "data_context": self,
+                "root_directory": self.root_directory,
+            },
+            config_defaults={
+                "module_name": "great_expectations.render.renderer.site_builder"
+            },
+        )
+        site_builder.clean_site()
+        return True
 
     def profile_datasource(
         self,
@@ -3062,7 +3076,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "CheckpointStore",
             ]:
                 print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                store_name: str = name or "my_temp_store"
+                store_name: str = name or config.get("name") or "my_temp_store"
                 instantiated_class = cast(
                     Store,
                     self._build_store_from_config(
@@ -3079,7 +3093,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 print(
                     f"\tInstantiating as a Datasource, since class_name is {class_name}"
                 )
-                datasource_name: str = name or "my_temp_datasource"
+                datasource_name: str = (
+                    name or config.get("name") or "my_temp_datasource"
+                )
                 instantiated_class = cast(
                     Datasource,
                     self._instantiate_datasource_from_config_and_update_project_config(
@@ -3093,7 +3109,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a Checkpoint, since class_name is {class_name}"
                 )
 
-                checkpoint_name: str = name or "my_temp_checkpoint"
+                checkpoint_name: str = (
+                    name or config.get("name") or "my_temp_checkpoint"
+                )
 
                 checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -3110,7 +3128,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     f"\tInstantiating as a SimpleCheckpoint, since class_name is {class_name}"
                 )
 
-                checkpoint_name: str = name or "my_temp_checkpoint"
+                checkpoint_name: str = (
+                    name or config.get("name") or "my_temp_checkpoint"
+                )
 
                 checkpoint_config: Union[CheckpointConfig, dict]
 
@@ -3440,7 +3460,7 @@ class DataContext(BaseDataContext):
         return new_datasource
 
     def delete_datasource(self, name: str):
-        logger.debug("Starting DataContext.delete_datasource for datasource %s" % name)
+        logger.debug(f"Starting DataContext.delete_datasource for datasource {name}")
 
         super().delete_datasource(datasource_name=name)
         self._save_project_config()

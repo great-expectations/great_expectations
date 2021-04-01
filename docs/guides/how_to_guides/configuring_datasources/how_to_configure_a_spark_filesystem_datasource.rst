@@ -114,13 +114,13 @@ Steps
             - Setup ``SPARK_HOME`` and ``JAVA_HOME`` variables for runtime environment.
             - :ref:`Set up a working deployment of Great Expectations. <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources. <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Pandas filesystem datasource, do the following:
 
-        #. **Instantiate a DataContext.**
+        #. **Instantiate a Data Context.**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
 
             .. code-block:: python
 
@@ -140,40 +140,35 @@ Steps
 
         #.  **Create or copy a yaml config.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``Datasource``, with a ``ConfiguredAssetFilesystemDataConnector`` and ``SparkDFExecutionEngine``.
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``Datasource``, with a ``InferredFilesystemDataConnector`` and ``SparkDFExecutionEngine``.
 
-                The config also defines ``TestAsset``, which has ``name``, ``timestamp`` and ``size`` as ``group_names``, which are informative fields of the filename that are extracted by the regex ``pattern``.
-
-                **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
                 .. code-block:: python
 
+                    datasource_name = "my_spark_datasource"
                     config = f"""
+                    name: {datasource_name}
                     class_name: Datasource
                     execution_engine:
                       class_name: SparkDFExecutionEngine
                     data_connectors:
                       my_data_connector:
-                        class_name: ConfiguredAssetFilesystemDataConnector
+                        datasource_name: {datasource_name}
+                        class_name: InferredAssetFilesystemDataConnector
                         base_directory: test_directory/
-                        glob_directive: "*.csv"
-                        assets:
-                          TestAsset:
-                            pattern: (.+)_(\\d+)_(\\d+)\\.csv
-                            group_names:
-                              - name
-                              - timestamp
-                              - size
+                        default_regex:
+                          group_names: data_asset_name
+                          pattern: (.*)
                     """
 
-                Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+                **Note**: The ``InferredAssetFilesystemDataConnector`` used in this example is closely related to the ``ConfiguredAssetFilesystemDataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+
 
         #. **Run context.test_yaml_config.**
 
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_sparkdf_datasource",
                     yaml_config=config
                 )
 
@@ -198,27 +193,19 @@ Steps
 
                     Unmatched data_references (0 of 0): []
 
-                    Choosing an example data reference...
-                        Reference chosen: abe_20201119_200.csv
 
-                        Fetching batch data...
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
-                        Showing 5 rows
-                0  None                                           Name  PClass  Age     Sex  Survived  SexCode
-                1     1                   Allen, Miss Elisabeth Walton     1st   29  female         1        1
-                2     2                    Allison, Miss Helen Loraine     1st    2  female         0        1
-                3     3            Allison, Mr Hudson Joshua Creighton     1st   30    male         0        0
-                4     4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)     1st   25  female         0        1
-
-            This means all has gone well and you can proceed with exploring data with your new filesystem-backed Pandas data source.
 
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_sparkdf_datasource`` in our example).
-            Next, copy the yml snippet from Step 3 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=False`` to force overwriting.
+
 
 ----------------
 Additional Notes

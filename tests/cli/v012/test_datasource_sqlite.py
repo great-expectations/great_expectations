@@ -23,7 +23,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
         cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
     )
 
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
@@ -54,7 +54,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
 """.format(
         url
     ).strip()
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
 
     assert stdout == expected_output
 
@@ -154,7 +154,7 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     return context
 
 
-def test_cli_datasorce_new_connection_string(
+def test_cli_datasource_new_connection_string(
     empty_data_context, empty_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
