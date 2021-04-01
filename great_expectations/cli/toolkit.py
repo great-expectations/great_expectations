@@ -102,12 +102,13 @@ def create_expectation_suite(
         # In this case, we have "consumed" the additional_batch_request_args
         additional_batch_request_args = {}
 
+    data_asset_name: Optional[str] = None
+
     if batch_request:
         batch_request = standardize_batch_request_display_ordering(
             batch_request=batch_request
         )
-
-    data_asset_name = batch_request["data_asset_name"]
+        data_asset_name = batch_request.get("data_asset_name")
 
     if expectation_suite_name is None:
         default_expectation_suite_name: str = _get_default_expectation_suite_name(
