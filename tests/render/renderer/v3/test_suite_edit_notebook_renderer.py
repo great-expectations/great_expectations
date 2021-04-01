@@ -874,20 +874,6 @@ def test_notebook_execution_with_pandas_backend(
     edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
     assert os.path.isfile(edit_notebook_path)
 
-    # TODO: <Alex>ALEX</Alex>
-    # nb: NotebookNode
-    # with open(edit_notebook_path) as f:
-    #     nb = nbformat.read(f, as_version=4)
-    #
-    # nb = replace_notebook_content(
-    #     nb=nb,
-    #     pattern="context.open_data_docs(resource_identifier=validation_result_identifier)",
-    # )
-    #
-    # ep: ExecutePreprocessor = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    # ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
-    # TODO: <Alex>ALEX</Alex>
-
     run_notebook(
         notebook_path=edit_notebook_path,
         notebook_dir=uncommitted_dir,
