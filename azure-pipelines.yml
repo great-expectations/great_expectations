@@ -115,23 +115,21 @@ stages:
 
           - bash: python -m pip install --upgrade pip==20.2.4
             displayName: 'Update pip'
-        # TODO : ensure compatibility with sqlalchemy > 1.4.0 to remove this line
-          - script: y | pip uninstall sqlalchemy
-            displayName: 'Uninstalling sqlalchemy for non-sqlalchemy tests'
           - bash: pip install  pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
-
           - bash: pip install  pandas==$(pandas.version)
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
-
           - script: |
               pip install  $(GE_pytest_pip_opts)
               pip install  --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
             displayName: 'Install dependencies'
+          # TODO : ensure compatibility with sqlalchemy > 1.4.0 to remove this line
+          - script: y | pip uninstall sqlalchemy
+            displayName: 'Uninstalling sqlalchemy for non-sqlalchemy tests'
 
           - script: |
               pip install  pytest pytest-cov pytest-azurepipelines
