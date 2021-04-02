@@ -116,6 +116,11 @@ stages:
           - bash: python -m pip install --upgrade pip==20.2.4
             displayName: 'Update pip'
 
+          - script: |
+              pip uninstall sqlalchemy
+              y
+            display: 'Uninstalling sqlalchemy for non-sqlalchemy tests`
+            
           - bash: pip install  pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
