@@ -6,13 +6,16 @@ Changelog
 
 Develop
 -----------------
-* [ENHANCEMENT] CLI `docs list` command implemented for v3 api
-* [ENHANCEMENT] CLI `docs build` command implemented for v3 api
-* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api
+
+0.13.16
+-----------------
+* [ENHANCEMENT] CLI `docs list` command implemented for v3 api #2612
 * [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource #2613
-* [ENHANCEMENT] DataContext.clean_data_docs now raises helpful errors
-* [ENHANCEMENT] CLI `init` command implemented for v3 api
-* [ENHANCEMENT] CLI `store list` command implemented for v3 api
+* [ENHANCEMENT] CLI `docs build` command implemented for v3 api #2614
+* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api #2615
+* [ENHANCEMENT] DataContext.clean_data_docs now raises helpful errors #2621
+* [ENHANCEMENT] CLI `init` command implemented for v3 api #2626
+* [ENHANCEMENT] CLI `store list` command implemented for v3 api #2627
 
 0.13.15
 -----------------
