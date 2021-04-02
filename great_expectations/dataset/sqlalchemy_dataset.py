@@ -69,6 +69,7 @@ except ImportError:
 
 try:
     import snowflake.sqlalchemy.snowdialect
+
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
@@ -865,9 +866,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results = self.engine.execute(
-                quantiles_query
-            ).fetchone()
+            quantiles_results = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
             exception_message: str = "An SQL syntax Exception occurred."
@@ -885,9 +884,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results = self.engine.execute(
-                quantiles_query
-            ).fetchone()
+            quantiles_results = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
             exception_message: str = "An SQL syntax Exception occurred."
@@ -941,9 +938,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         )
 
         try:
-            quantiles_results = self.engine.execute(
-                quantiles_query
-            ).fetchone()
+            quantiles_results = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
             exception_message: str = "An SQL syntax Exception occurred."
@@ -966,9 +961,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results = self.engine.execute(
-                quantiles_query
-            ).fetchone()
+            quantiles_results = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError:
             # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
