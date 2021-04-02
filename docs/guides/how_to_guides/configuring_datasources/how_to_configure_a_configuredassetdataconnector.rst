@@ -81,7 +81,7 @@ In that case, the configuration would look like the following:
 
 Notice that we have specified a pattern that captures the number after ``alpha-`` in the filename and assigns it to the ``group_name`` ``index``.
 
-The configuration would also work with a regex capturing entire filename (ie ``pattern: (.*)\\.csv``).  However, capturing the index on its own allows for ``batch_identifiers`` to be used to retrieve a specific partition of the DataAsset.
+The configuration would also work with a regex capturing the entire filename (ie ``pattern: (.*)\\.csv``).  However, capturing the index on its own allows for ``batch_identifiers`` to be used to retrieve a specific Batch of the Data Asset.
 
 Later on we could retrieve the data in ``alpha-2.csv`` of ``alpha`` as its own batch using ``context.get_batch()`` by specifying ``{"index": "2"}`` as the ``batch_identifier``.
 
@@ -95,7 +95,7 @@ Later on we could retrieve the data in ``alpha-2.csv`` of ``alpha`` as its own b
         )
 
 
-This ability to access specific partitions using ``batch_identifiers`` is very useful when validating DataAssets that span multiple files.
+This ability to access specific Batches using ``batch_identifiers`` is very useful when validating DataAssets that span multiple files.
 For more information on ``batches`` and ``batch_identifiers``, please refer to the :ref:`Core Concepts document. <reference__core_concepts>`
 
 A corresponding configuration for ``ConfiguredAssetS3DataConnector`` would look similar but would require ``bucket`` and ``prefix`` values instead of ``base_directory``.

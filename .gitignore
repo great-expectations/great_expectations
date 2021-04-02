@@ -125,3 +125,6 @@ ENV/
 
 # Special "scratchpad" directory for notes, code samples, experiments, etc.
 DO_NOT_COMMIT
+
+# Hive Metastore from Spark
+metastore_db

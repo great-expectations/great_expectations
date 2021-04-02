@@ -65,8 +65,8 @@ data_connectors:
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "path",
-        "partition_request": {
-            "batch_identifiers": {
+        "data_connector_query": {
+            "batch_filter_parameters": {
                 # "data_asset_name": "path",
                 "letter": "A",
                 "number": "101",
@@ -80,7 +80,7 @@ data_connectors:
     batch: Batch = batch_list[0]
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "path"
-    assert batch.batch_definition["partition_definition"] == {
+    assert batch.batch_definition["batch_identifiers"] == {
         "letter": "A",
         "number": "101",
     }
@@ -147,8 +147,8 @@ data_connectors:
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "Titanic",
-        "partition_request": {
-            "batch_identifiers": {
+        "data_connector_query": {
+            "batch_filter_parameters": {
                 "name": "Titanic",
                 "timestamp": "19120414",
                 "size": "1313",
@@ -162,7 +162,7 @@ data_connectors:
     batch: Batch = batch_list[0]
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "Titanic"
-    assert batch.batch_definition["partition_definition"] == {
+    assert batch.batch_definition["batch_identifiers"] == {
         "name": "Titanic",
         "timestamp": "19120414",
         "size": "1313",
@@ -186,7 +186,7 @@ data_connectors:
     test_runtime_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
+        batch_identifiers:
             - airflow_run_id
     """,
     )
@@ -204,13 +204,12 @@ data_connectors:
         "datasource_name": "my_datasource",
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
-        "batch_data": test_df,
-        "partition_request": {
-            "batch_identifiers": {
-                "airflow_run_id": 1234567890,
-            }
+        "runtime_parameters": {
+            "batch_data": test_df,
         },
-        "limit": None,
+        "batch_identifiers": {
+            "airflow_run_id": 1234567890,
+        },
     }
 
     batch_list = context.get_batch_list(**batch_request)
@@ -219,7 +218,7 @@ data_connectors:
     batch: Batch = batch_list[0]
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "test_asset_1"
-    assert batch.batch_definition["partition_definition"] == {
+    assert batch.batch_definition["batch_identifiers"] == {
         "airflow_run_id": 1234567890,
     }
     assert isinstance(batch.data.dataframe, pd.DataFrame)
@@ -285,15 +284,15 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     )
 
     # only select files from after 2000
-    def my_custom_partition_selector(partition_definition: dict) -> bool:
-        return int(partition_definition["year"]) > 2000
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return int(batch_identifiers["year"]) > 2000
 
     batch_request: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
         "data_asset_name": "YearTest",
-        "partition_request": {
-            "custom_filter_function": my_custom_partition_selector,
+        "data_connector_query": {
+            "custom_filter_function": my_custom_batch_selector,
         },
     }
 
@@ -304,7 +303,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     batch: Batch = batch_list[0]
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "YearTest"
-    assert batch.batch_definition["partition_definition"] == {
+    assert batch.batch_definition["batch_identifiers"] == {
         "name": "Test",
         "year": "2021",
     }
@@ -313,7 +312,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     batch: Batch = batch_list[1]
     assert batch.batch_spec is not None
     assert batch.batch_definition["data_asset_name"] == "YearTest"
-    assert batch.batch_definition["partition_definition"] == {
+    assert batch.batch_definition["batch_identifiers"] == {
         "name": "Test",
         "year": "2010",
     }
