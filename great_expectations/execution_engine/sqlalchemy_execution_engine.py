@@ -60,11 +60,11 @@ except ImportError:
 
 try:
     import snowflake.sqlalchemy.snowdialect
-
+    if sa:
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
-except (ImportError, KeyError):
+        sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
+except (ImportError, KeyError, AttributeError):
     snowflake = None
 
 try:
@@ -89,7 +89,7 @@ try:
             "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
         )
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+except (ImportError, AttributeError):
     bigquery_types_tuple = None
     pybigquery = None
 

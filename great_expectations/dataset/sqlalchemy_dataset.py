@@ -33,7 +33,6 @@ try:
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.engine.result import RowProxy
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
     from sqlalchemy.sql.expression import BinaryExpression, literal
@@ -54,7 +53,6 @@ except ImportError:
     Label = None
     WithinGroup = None
     TextClause = None
-    RowProxy = None
     DefaultDialect = None
     ProgrammingError = None
 
@@ -71,11 +69,10 @@ except ImportError:
 
 try:
     import snowflake.sqlalchemy.snowdialect
-
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
-except (ImportError, KeyError):
+except (ImportError, KeyError, AttributeError):
     snowflake = None
 
 try:
@@ -98,7 +95,7 @@ try:
             "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
         )
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+except (ImportError, AttributeError):
     bigquery_types_tuple = None
     pybigquery = None
 
@@ -868,7 +865,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results: RowProxy = self.engine.execute(
+            quantiles_results = self.engine.execute(
                 quantiles_query
             ).fetchone()
             return list(quantiles_results)
@@ -888,7 +885,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results: RowProxy = self.engine.execute(
+            quantiles_results = self.engine.execute(
                 quantiles_query
             ).fetchone()
             return list(quantiles_results)
@@ -944,7 +941,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         )
 
         try:
-            quantiles_results: RowProxy = self.engine.execute(
+            quantiles_results = self.engine.execute(
                 quantiles_query
             ).fetchone()
             return list(quantiles_results)
@@ -969,7 +966,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results: RowProxy = self.engine.execute(
+            quantiles_results = self.engine.execute(
                 quantiles_query
             ).fetchone()
             return list(quantiles_results)
@@ -987,7 +984,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
                 if allow_relative_error:
                     try:
-                        quantiles_results: RowProxy = self.engine.execute(
+                        quantiles_results = self.engine.execute(
                             quantiles_query_approx
                         ).fetchone()
                         return list(quantiles_results)
