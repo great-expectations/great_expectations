@@ -190,8 +190,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
-        batch_data: DataFrame
-
         # We need to build a batch_markers to be used in the dataframe
         batch_markers: BatchMarkers = BatchMarkers(
             {
@@ -201,9 +199,15 @@ class SparkDFExecutionEngine(ExecutionEngine):
             }
         )
 
+        batch_data: Any
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
+            if isinstance(batch_data, str):
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""SparkDFExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
+Please check your config."""
+                )
             batch_spec.batch_data = "SparkDataFrame"
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
@@ -349,7 +353,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
-                "SparkExecutionEngine does not currently support multiple named tables."
+                "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
         row_condition = domain_kwargs.get("row_condition", None)
@@ -566,21 +570,17 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return df
 
     @staticmethod
-    def _split_on_column_value(
-        df,
-        column_name: str,
-        partition_definition: dict,
-    ):
-        return df.filter(F.col(column_name) == partition_definition[column_name])
+    def _split_on_column_value(df, column_name: str, batch_identifiers: dict):
+        return df.filter(F.col(column_name) == batch_identifiers[column_name])
 
     @staticmethod
     def _split_on_converted_datetime(
         df,
         column_name: str,
-        partition_definition: dict,
+        batch_identifiers: dict,
         date_format_string: str = "yyyy-MM-dd",
     ):
-        matching_string = partition_definition[column_name]
+        matching_string = batch_identifiers[column_name]
         res = (
             df.withColumn(
                 "date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)
@@ -592,13 +592,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
     @staticmethod
     def _split_on_divided_integer(
-        df,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
+        df, column_name: str, divisor: int, batch_identifiers: dict
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
-        matching_divisor = partition_definition[column_name]
+        matching_divisor = batch_identifiers[column_name]
         res = (
             df.withColumn(
                 "div_temp", (F.col(column_name) / divisor).cast(IntegerType())
@@ -609,14 +606,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return res
 
     @staticmethod
-    def _split_on_mod_integer(
-        df,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
-    ):
+    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
-        matching_mod_value = partition_definition[column_name]
+        matching_mod_value = batch_identifiers[column_name]
         res = (
             df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
             .filter(F.col("mod_temp") == matching_mod_value)
@@ -625,19 +617,15 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return res
 
     @staticmethod
-    def _split_on_multi_column_values(
-        df,
-        column_names: list,
-        partition_definition: dict,
-    ):
+    def _split_on_multi_column_values(df, column_names: list, batch_identifiers: dict):
         """Split on the joint values in the named columns"""
         for column_name in column_names:
-            value = partition_definition.get(column_name)
+            value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
-                    f"In order for SparkExecutionEngine to `_split_on_multi_column_values`, "
-                    f"all values in  column_names must also exist in partition_definition. "
-                    f"{column_name} was not found in partition_definition."
+                    f"In order for SparkDFExecutionEngine to `_split_on_multi_column_values`, "
+                    f"all values in  column_names must also exist in batch_identifiers. "
+                    f"{column_name} was not found in batch_identifiers."
                 )
             df = df.filter(F.col(column_name) == value)
         return df
@@ -647,7 +635,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         df,
         column_name: str,
         hash_digits: int,
-        partition_definition: dict,
+        batch_identifiers: dict,
         hash_function_name: str = "sha256",
     ):
         """Split on the hashed value of the named column"""
@@ -669,7 +657,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         encrypt_udf = F.udf(_encrypt_value, StringType())
         res = (
             df.withColumn("encrypted_value", encrypt_udf(column_name))
-            .filter(F.col("encrypted_value") == partition_definition["hash_value"])
+            .filter(F.col("encrypted_value") == batch_identifiers["hash_value"])
             .drop("encrypted_value")
         )
         return res

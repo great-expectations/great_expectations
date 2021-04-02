@@ -84,7 +84,7 @@ Steps
                   datasource_name: my_datasource
                   data_connector_name: my_data_connector
                   data_asset_name: users
-                  partition_request:
+                  data_connector_query:
                     index: -1
                 expectation_suite_name: users.warning
                 action_list:
@@ -118,7 +118,7 @@ Steps
                   datasource_name: my_datasource
                   data_connector_name: my_data_connector
                   data_asset_name: users
-                  partition_request:
+                  data_connector_query:
                     index: -1
                 expectation_suite_name: users.warning
                 action_list:
@@ -142,7 +142,7 @@ Steps
                   datasource_name: my_datasource
                   data_connector_name: my_data_connector
                   data_asset_name: users
-                  partition_request:
+                  data_connector_query:
                     index: -1
                 expectation_suite_name: users.error
                 action_list:
@@ -187,22 +187,22 @@ Steps
                   datasource_name: my_datasource
                   data_connector_name: my_data_connector
                   data_asset_name: users
-                  partition_request:
+                  data_connector_query:
                     index: 0
                 expectation_suite_name: users.warning
               - batch_request:
                   datasource_name: my_datasource
                   data_connector_name: my_special_data_connector
                   data_asset_name: users
-                  partition_request:
+                  data_connector_query:
                     index: -1
                 expectation_suite_name: users.error
               - batch_request:
                   datasource_name: my_datasource
                   data_connector_name: my_other_data_connector
                   data_asset_name: users
-                  partition_request:
-                    batch_identifiers:
+                  data_connector_query:
+                    batch_filter_parameters:
                       name: Titanic
                 action_list:
                   - name: quarantine_failed_data

@@ -6,6 +6,19 @@ Changelog
 
 Develop
 -----------------
+* [BREAKING-EXPERIMENTAL] The ``batch_data`` attribute of ``BatchRequest`` has been removed. To pass in in-memory dataframes at runtime, the new ``RuntimeDataConnector`` should be used
+* [BREAKING-EXPERIMENTAL] ``RuntimeDataConnector`` must now be passed Batch Requests of type ``RuntimeBatchRequest``
+* [BREAKING-EXPERIMENTAL] The ``PartitionDefinitionSubset`` class has been removed - the parent class ``IDDict`` is used in its place
+* [BREAKING-EXPERIMENTAL] ``partition_request`` was renamed ``data_connector_query``. The related ``PartitionRequest`` class has been removed - the parent class ``IDDict`` is used in its place
+* [BREAKING-EXPERIMENTAL] ``partition_definition`` was renamed ``batch_identifiers`. The related ``PartitionDefinition`` class has been removed - the parent class ``IDDict`` is used in its place
+* [BREAKING-EXPERIMENTAL] The ``PartitionQuery`` class has been renamed to ``BatchFilter``
+* [BREAKING-EXPERIMENTAL] The ``batch_identifiers`` key on ``DataConnectorQuery`` (formerly ``PartitionRequest``) has been changed to ``batch_filter_parameters``
+* [ENHANCEMENT] Added a new ``RuntimeBatchRequest`` class, which can be used alongside ``RuntimeDataConnector`` to specify batches at runtime with either an in-memory dataframe, path (filesystem or s3), or sql query
+* [ENHANCEMENT] Added a new ``RuntimeQueryBatchSpec`` class
+* [BUGFIX] Fixed issue where Sorters were not being applied correctly when ``data_connector_query`` contained limit or index  #2617
+* [DOCS] Updated docs to reflect above class name changes
+* [DOCS] Added the following docs: "How to configure sorting in Data Connectors", "How to configure a Runtime Data Connector", "How to create a Batch Request using an Active Data Connector", "How to load a database table, view, or query result as a Batch"
+* [DOCS] Updated the V3 API section of the following docs: "How to load a Pandas DataFrame as a Batch", "How to load a Spark DataFrame as a Batch",
 
 0.13.16
 -----------------
