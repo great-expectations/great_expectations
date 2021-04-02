@@ -404,7 +404,7 @@ def test_columns(
     )
     columns: List[str] = validator.columns()
 
-    expected: List[str] == [
+    expected: List[str] = [
         "Unnamed: 0",
         "Name",
         "PClass",
