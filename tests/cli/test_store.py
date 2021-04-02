@@ -23,7 +23,7 @@ def test_store_list_stores(
     )
     assert result.exit_code == 0
     for expected_output in [
-        "4 Stores found",
+        "4 active Stores found",
         "expectations_store",
         "validations_store",
         "evaluation_parameter_store",
