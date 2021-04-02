@@ -974,12 +974,6 @@ def test_notebook_execution_with_custom_notebooks_wrong_module(
         ).render(suite_with_multiple_citations)
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="Need to update the expected results!",
-    run=True,
-    strict=True,
-)
 def test_notebook_execution_with_custom_notebooks(
     suite_with_multiple_citations, data_context_v3_custom_notebooks
 ):
@@ -991,66 +985,92 @@ def test_notebook_execution_with_custom_notebooks(
         "data_connector_name": "files_data_connector",
         "data_asset_name": "1k",
     }
-    renderer = SuiteEditNotebookRenderer.from_data_context(data_context=data_context_v3_custom_notebooks)
-    obs: NotebookNode = renderer.render(suite=suite_with_multiple_citations, batch_request=batch_request)
-    assert isinstance(obs, NotebookNode)
-    expected = {
+    obs: NotebookNode = SuiteEditNotebookRenderer.from_data_context(
+        data_context=data_context_v3_custom_notebooks
+    ).render(suite=suite_with_multiple_citations, batch_request=batch_request)
+    expected: dict = {
         "nbformat": 4,
-        "nbformat_minor": 4,
+        "nbformat_minor": 5,
         "metadata": {},
         "cells": [
             {
+                "id": "indoor-success",
                 "cell_type": "markdown",
                 "source": "# Custom header for MyCompany",
                 "metadata": {},
             },
-            {'cell_type': 'code', 'metadata': {}, 'execution_count': None, 'source': 'import datetime\n\nimport pandas as pd\n\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.core.batch import BatchRequest\nfrom great_expectations.checkpoint import SimpleCheckpoint\nfrom great_expectations.exceptions import DataContextError\n\ncontext = ge.data_context.DataContext()\n\nbatch_request = {\n    "datasource_name": "files_datasource",\n    "data_connector_name": "files_data_connector",\n    "data_asset_name": "1k",\n}\n\n\n# Feel free to change the name of your suite here. Renaming this will not remove the other one.\nexpectation_suite_name = "critical"\ntry:\n    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)\n    print(\n        f\'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.\'\n    )\nexcept DataContextError:\n    suite = context.create_expectation_suite(\n        expectation_suite_name=expectation_suite_name\n    )\n    print(f\'Created ExpectationSuite "{suite.expectation_suite_name}".\')\n\n\nvalidator = context.get_validator(\n    batch_request=BatchRequest(**batch_request),\n    expectation_suite_name=expectation_suite_name,\n)\ncolumn_names = [f\'"{column_name}"\' for column_name in validator.columns()]\nprint(f"Columns: {\', \'.join(column_names)}.")\nvalidator.head(n_rows=5, fetch_all=False)', 'outputs': []},
             {
+                "id": "remarkable-heavy",
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'import datetime\n\nimport pandas as pd\n\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.core.batch import BatchRequest\nfrom great_expectations.checkpoint import SimpleCheckpoint\nfrom great_expectations.exceptions import DataContextError\n\ncontext = ge.data_context.DataContext()\n\nbatch_request = {\n    "datasource_name": "files_datasource",\n    "data_connector_name": "files_data_connector",\n    "data_asset_name": "1k",\n}\n\n\n# Feel free to change the name of your suite here. Renaming this will not remove the other one.\nexpectation_suite_name = "critical"\ntry:\n    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)\n    print(\n        f\'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.\'\n    )\nexcept DataContextError:\n    suite = context.create_expectation_suite(\n        expectation_suite_name=expectation_suite_name\n    )\n    print(f\'Created ExpectationSuite "{suite.expectation_suite_name}".\')\n\n\nvalidator = context.get_validator(\n    batch_request=BatchRequest(**batch_request),\n    expectation_suite_name=expectation_suite_name,\n)\ncolumn_names = [f\'"{column_name}"\' for column_name in validator.columns()]\nprint(f"Columns: {\', \'.join(column_names)}.")\nvalidator.head(n_rows=5, fetch_all=False)',
+                "outputs": [],
+            },
+            {
+                "id": "loose-reader",
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\nAdd expectations by calling specific expectation methods on the `batch` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\n\nAdd expectations by calling specific expectation methods on the `validator` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\n&nbsp;\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
+                "id": "working-poverty",
                 "cell_type": "markdown",
                 "source": "### Table Expectation(s)",
                 "metadata": {},
             },
             {
+                "id": "hollow-census",
                 "cell_type": "markdown",
-                "source": "No table level expectations are in this suite. Feel free to add some here. They all begin with `batch.expect_table_...`.",
+                "source": "No table level expectations are in this suite. Feel free to add some here.\n\nThey all begin with `validator.expect_table_...`.\n",
                 "metadata": {},
             },
             {
+                "id": "armed-sculpture",
                 "cell_type": "markdown",
                 "source": "### Column Expectation(s)\nwrite your column expectations here",
                 "metadata": {},
             },
-            {"cell_type": "markdown", "source": "#### `npi`", "metadata": {}},
             {
-                "cell_type": "code",
-                "metadata": {},
-                "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null(column="npi")',
-                "outputs": [],
-            },
-            {"cell_type": "markdown", "source": "#### `provider_type`", "metadata": {}},
-            {
-                "cell_type": "code",
-                "metadata": {},
-                "execution_count": None,
-                "source": 'batch.expect_column_values_to_not_be_null(column="provider_type")',
-                "outputs": [],
-            },
-            {
+                "id": "missing-steps",
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "#### `npi`",
                 "metadata": {},
             },
             {
+                "id": "broad-medicine",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)',
+                "source": 'validator.expect_column_values_to_not_be_null(column="npi")',
+                "outputs": [],
+            },
+            {
+                "id": "infinite-vaccine",
+                "cell_type": "markdown",
+                "source": "#### `provider_type`",
+                "metadata": {},
+            },
+            {
+                "id": "corrected-defendant",
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'validator.expect_column_values_to_not_be_null(column="provider_type")',
+                "outputs": [],
+            },
+            {
+                "id": "exempt-enhancement",
+                "cell_type": "markdown",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n# TODO: <Alex>ALEX -- The instructions and link must be updated.</Alex>\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "metadata": {},
+            },
+            {
+                "id": "advised-height",
+                "cell_type": "code",
+                "metadata": {},
+                "execution_count": None,
+                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name,\n        }\n    ],\n}\ncheckpoint = SimpleCheckpoint(\n    f"_tmp_checkpoint_{expectation_suite_name}", context, **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -1059,6 +1079,6 @@ def test_notebook_execution_with_custom_notebooks(
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
         obs_cell.pop("id", None)
-        if not obs_cell == expected_cell:
-            print(obs_cell)
+        expected_cell.pop("id", None)
+        assert obs_cell == expected_cell
     assert obs == expected
