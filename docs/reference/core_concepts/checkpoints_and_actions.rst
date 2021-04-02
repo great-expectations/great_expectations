@@ -145,7 +145,7 @@ Checkpoint Configuration Examples
             datasource_name: my_datasource
             data_connector_name: my_special_data_connector
             data_asset_name: users
-            partition_request:
+            data_connector_query:
               index: -1
           expectation_suite_name: users.delivery
           action_list:
@@ -190,13 +190,13 @@ Checkpoint Configuration Examples
             datasource_name: my_datasource
             data_connector_name: my_special_data_connector
             data_asset_name: users
-            partition_request:
+            data_connector_query:
               index: -1
         - batch_request:
             datasource_name: my_datasource
             data_connector_name: my_other_data_connector
             data_asset_name: users
-            partition_request:
+            data_connector_query:
               index: -2
       expectation_suite_name: users.delivery
       action_list:
@@ -266,7 +266,7 @@ Checkpoint Configuration Examples
                       "datasource_name": "my_datasource"
                       "data_connector_name": "my_special_data_connector"
                       "data_asset_name": "users"
-                      "partition_request": {
+                      "data_connector_query": {
                           "index": -1
                       }
                   },
@@ -277,7 +277,7 @@ Checkpoint Configuration Examples
                       "datasource_name": "my_datasource"
                       "data_connector_name": "my_other_data_connector"
                       "data_asset_name": "users"
-                      "partition_request": {
+                      "data_connector_query": {
                           "index": -2
                       }
                   },
@@ -304,14 +304,14 @@ Checkpoint Configuration Examples
             datasource_name: my_datasource
             data_connector_name: my_special_data_connector
             data_asset_name: users
-            partition_request:
+            data_connector_query:
               index: -1
           expectation_suite_name: users.delivery
         - batch_request:
             datasource_name: my_datasource
             data_connector_name: my_other_data_connector
             data_asset_name: users
-            partition_request:
+            data_connector_query:
               index: -2
           expectation_suite_name: users.diagnostic
 
@@ -339,7 +339,7 @@ Checkpoint Configuration Examples
             datasource_name: my_datasource
             data_connector_name: my_data_connector
             data_asset_name: MyDataAsset
-            partition_request:
+            data_connector_query:
               index: -1
           expectation_suite_name: my_suite
       site_names:
@@ -361,7 +361,7 @@ Checkpoint Configuration Examples
             datasource_name: my_datasource
             data_connector_name: my_data_connector
             data_asset_name: MyDataAsset
-            partition_request:
+            data_connector_query:
               index: -1
           expectation_suite_name: my_suite
       action_list:

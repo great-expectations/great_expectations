@@ -3,14 +3,14 @@ import logging
 from typing import Callable, Dict, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.id_dict import PartitionDefinitionSubset
+from great_expectations.core.id_dict import IDDict
 from great_expectations.util import is_int
 
 logger = logging.getLogger(__name__)
 
 
-def build_partition_query(
-    partition_request_dict: Optional[
+def build_batch_filter(
+    data_connector_query_dict: Optional[
         Dict[
             str,
             Optional[
@@ -20,72 +20,72 @@ def build_partition_query(
                     tuple,
                     slice,
                     str,
-                    Union[Dict, PartitionDefinitionSubset],
+                    Union[Dict, IDDict],
                     Callable,
                 ]
             ],
         ]
     ] = None
 ):
-    if not partition_request_dict:
-        return PartitionQuery(
+    if not data_connector_query_dict:
+        return BatchFilter(
             custom_filter_function=None,
-            batch_identifiers=None,
+            batch_filter_parameters=None,
             index=None,
             limit=None,
         )
-    partition_request_keys: set = set(partition_request_dict.keys())
-    if not partition_request_keys <= PartitionQuery.RECOGNIZED_KEYS:
-        raise ge_exceptions.PartitionQueryError(
-            f"""Unrecognized partition_request key(s):
-"{str(partition_request_keys - PartitionQuery.RECOGNIZED_KEYS)}" detected.
+    data_connector_query_keys: set = set(data_connector_query_dict.keys())
+    if not data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS:
+        raise ge_exceptions.BatchFilterError(
+            f"""Unrecognized data_connector_query key(s):
+"{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
             """
         )
-    custom_filter_function: Callable = partition_request_dict.get(
+    custom_filter_function: Callable = data_connector_query_dict.get(
         "custom_filter_function"
     )
     if custom_filter_function and not isinstance(custom_filter_function, Callable):
-        raise ge_exceptions.PartitionQueryError(
+        raise ge_exceptions.BatchFilterError(
             f"""The type of a custom_filter must be a function (Python "Callable").  The type given is
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
-    batch_identifiers: Optional[dict] = partition_request_dict.get("batch_identifiers")
-    if batch_identifiers:
-        if not isinstance(batch_identifiers, dict):
-            raise ge_exceptions.PartitionQueryError(
-                f"""The type of a batch_identifiers must be a dictionary (Python "dict").  The type given is
-"{str(type(batch_identifiers))}", which is illegal.
+    batch_filter_parameters: Optional[dict] = data_connector_query_dict.get(
+        "batch_filter_parameters"
+    )
+    if batch_filter_parameters:
+        if not isinstance(batch_filter_parameters, dict):
+            raise ge_exceptions.BatchFilterError(
+                f"""The type of batch_filter_parameters must be a dictionary (Python "dict").  The type given is
+"{str(type(batch_filter_parameters))}", which is illegal.
                 """
             )
-        if not all([isinstance(key, str) for key in batch_identifiers.keys()]):
-            raise ge_exceptions.PartitionQueryError(
-                'All partition_definition keys must strings (Python "str").'
+        if not all([isinstance(key, str) for key in batch_filter_parameters.keys()]):
+            raise ge_exceptions.BatchFilterError(
+                'All batch_filter_parameters keys must strings (Python "str").'
             )
-    if batch_identifiers is not None:
-        batch_identifiers: PartitionDefinitionSubset = PartitionDefinitionSubset(
-            batch_identifiers
-        )
-    index: Optional[Union[int, list, tuple, slice, str]] = partition_request_dict.get(
-        "index"
-    )
-    limit: Optional[int] = partition_request_dict.get("limit")
+    if batch_filter_parameters is not None:
+        batch_filter_parameters: IDDict = IDDict(batch_filter_parameters)
+    index: Optional[
+        Union[int, list, tuple, slice, str]
+    ] = data_connector_query_dict.get("index")
+    limit: Optional[int] = data_connector_query_dict.get("limit")
     if limit and (not isinstance(limit, int) or limit < 0):
-        raise ge_exceptions.PartitionQueryError(
+        raise ge_exceptions.BatchFilterError(
             f"""The type of a limit must be an integer (Python "int") that is greater than or equal to 0.  The
 type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
             """
         )
     if index is not None and limit is not None:
-        raise ge_exceptions.PartitionQueryError(
-            "Only one of partition_index or limit, but not both, can be specified (specifying both is illegal)."
+        raise ge_exceptions.BatchFilterError(
+            "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
     index = _parse_index(index=index)
-    return PartitionQuery(
+    return BatchFilter(
         custom_filter_function=custom_filter_function,
-        batch_identifiers=batch_identifiers,
-        limit=limit,
+        batch_filter_parameters=batch_filter_parameters,
         index=index,
+        limit=limit,
     )
 
 
@@ -98,8 +98,8 @@ def _parse_index(
         return index
     elif isinstance(index, (list, tuple)):
         if len(index) > 3:
-            raise ge_exceptions.PartitionQueryError(
-                f"""The number of partition_index slice components must be between 1 and 3 (the given number is
+            raise ge_exceptions.BatchFilterError(
+                f"""The number of index slice components must be between 1 and 3 (the given number is
 {len(index)}).
                 """
             )
@@ -114,18 +114,18 @@ def _parse_index(
             return _parse_index(index=int(index))
         return _parse_index(index=[int(idx_str) for idx_str in index.split(":")])
     else:
-        raise ge_exceptions.PartitionQueryError(
-            f"""The type of a partition_index must be an integer (Python "int"), or a list (Python "list") or a tuple
+        raise ge_exceptions.BatchFilterError(
+            f"""The type of index must be an integer (Python "int"), or a list (Python "list") or a tuple
 (Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument.
 The type given is "{str(type(index))}", which is illegal.
             """
         )
 
 
-class PartitionQuery:
+class BatchFilter:
     RECOGNIZED_KEYS: set = {
         "custom_filter_function",
-        "batch_identifiers",
+        "batch_filter_parameters",
         "index",
         "limit",
     }
@@ -133,12 +133,12 @@ class PartitionQuery:
     def __init__(
         self,
         custom_filter_function: Callable = None,
-        batch_identifiers: Optional[PartitionDefinitionSubset] = None,
+        batch_filter_parameters: Optional[IDDict] = None,
         index: Optional[Union[int, slice]] = None,
         limit: int = None,
     ):
         self._custom_filter_function = custom_filter_function
-        self._batch_identifiers = batch_identifiers
+        self._batch_filter_parameters = batch_filter_parameters
         self._index = index
         self._limit = limit
 
@@ -147,8 +147,8 @@ class PartitionQuery:
         return self._custom_filter_function
 
     @property
-    def batch_identifiers(self) -> Optional[PartitionDefinitionSubset]:
-        return self._batch_identifiers
+    def batch_filter_parameters(self) -> Optional[IDDict]:
+        return self._batch_filter_parameters
 
     @property
     def index(self) -> Optional[Union[int, slice]]:
@@ -161,24 +161,24 @@ class PartitionQuery:
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "custom_filter_function": self._custom_filter_function,
-            "batch_identifiers": self.batch_identifiers,
+            "batch_filter_parameters": self.batch_filter_parameters,
             "index": self.index,
             "limit": self.limit,
         }
         return str(doc_fields_dict)
 
-    def select_from_partition_request(self, batch_definition_list=None):
+    def select_from_data_connector_query(self, batch_definition_list=None):
         if batch_definition_list is None:
             return []
         filter_function: Callable
         if self.custom_filter_function:
             filter_function = self.custom_filter_function
         else:
-            filter_function = self.best_effort_partition_matcher()
+            filter_function = self.best_effort_batch_definition_matcher()
         selected_batch_definitions = list(
             filter(
                 lambda batch_definition: filter_function(
-                    partition_definition=batch_definition.partition_definition,
+                    batch_identifiers=batch_definition.batch_identifiers,
                 ),
                 batch_definition_list,
             )
@@ -196,21 +196,21 @@ class PartitionQuery:
                 )
         return selected_batch_definitions
 
-    def best_effort_partition_matcher(self) -> Callable:
-        def match_partition_to_query_params(partition_definition: dict) -> bool:
-            if self.batch_identifiers:
-                if not partition_definition:
+    def best_effort_batch_definition_matcher(self) -> Callable:
+        def match_batch_identifiers_to_batch_filter_params(
+            batch_identifiers: dict,
+        ) -> bool:
+            if self.batch_filter_parameters:
+                if not batch_identifiers:
                     return False
-                partition_definition_keys: set = set(self.batch_identifiers.keys())
 
-                if not partition_definition_keys:
-                    return False
-                for key in partition_definition_keys:
+                for batch_filter_parameter, val in self.batch_filter_parameters.items():
                     if not (
-                        key in partition_definition
-                        and partition_definition[key] == self.batch_identifiers[key]
+                        batch_filter_parameter in batch_identifiers
+                        and batch_identifiers[batch_filter_parameter] == val
                     ):
                         return False
+
             return True
 
-        return match_partition_to_query_params
+        return match_batch_identifiers_to_batch_filter_params

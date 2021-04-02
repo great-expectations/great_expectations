@@ -712,7 +712,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
         "run_name_template": "my_runtime_run_name_template",
         "expectation_suite_name": "my_runtime_suite",
         "batch_request": {
-            "partition_request": {
+            "data_connector_query": {
                 "index": -1,
             },
         },
@@ -779,7 +779,7 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
         run_name_template="my_runtime_run_name_template",
         expectation_suite_name="my_runtime_suite",
         batch_request={
-            "partition_request": {
+            "data_connector_query": {
                 "index": -1,
             },
         },

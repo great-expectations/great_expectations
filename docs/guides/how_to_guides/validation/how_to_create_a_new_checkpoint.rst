@@ -73,7 +73,7 @@ Steps
                   datasource_name: my_datasource
                   data_connector_name: my_data_connector
                   data_asset_name: MyDataAsset
-                  partition_request:
+                  data_connector_query:
                     index: -1
                 expectation_suite_name: my_suite
             """
