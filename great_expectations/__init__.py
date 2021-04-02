@@ -23,7 +23,7 @@ try:
         You currently have SqlAlchemy version {sa.__version__}. Please downgrade SqlAlchemy to < 1.4.0 while we work on a proper fix.
         """
         )
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     pass
 
 from great_expectations.data_context import DataContext
