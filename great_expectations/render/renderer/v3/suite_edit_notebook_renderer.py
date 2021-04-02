@@ -46,8 +46,8 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         column_expectations_markdown: Optional[NotebookTemplateConfig] = None,
         header_code: Optional[NotebookTemplateConfig] = None,
         footer_code: Optional[NotebookTemplateConfig] = None,
-        column_expectation_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
+        column_expectation_code: Optional[NotebookTemplateConfig] = None,
         context: Optional[DataContext] = None,
     ):
         super().__init__(context=context)
@@ -55,8 +55,14 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         if custom_templates_module:
             try:
-                custom_loader = [
-                    jinja2.PackageLoader(*custom_templates_module.rsplit(".", 1))
+                path_info_list: List[str] = custom_templates_module.rsplit(".", 1)
+                package_name: str = path_info_list[0]
+                package_path: str = path_info_list[1]
+                custom_loader: list = [
+                    jinja2.PackageLoader(
+                        package_name=package_name,
+                        package_path=package_path,
+                    ),
                 ]
             except ModuleNotFoundError as e:
                 raise SuiteEditNotebookCustomTemplateModuleNotFoundError(
@@ -65,7 +71,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         loaders: list = custom_loader + [
             jinja2.PackageLoader(
-                package_name="great_expectations.render.renderer.v3.notebook_assets",
+                package_name="great_expectations.render.v3.notebook_assets",
                 package_path="suite_edit",
             ),
         ]

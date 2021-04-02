@@ -994,13 +994,13 @@ def test_notebook_execution_with_custom_notebooks(
         "metadata": {},
         "cells": [
             {
-                "id": "indoor-success",
+                "id": "arabic-memorial",
                 "cell_type": "markdown",
-                "source": "# Custom header for MyCompany",
+                "source": "# Edit Your Expectation Suite\nUse this notebook to recreate and modify your expectation suite:\n\n**Expectation Suite Name**: `critical`\n\nWe'd love it if you **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)",
                 "metadata": {},
             },
             {
-                "id": "remarkable-heavy",
+                "id": "separated-pearl",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
@@ -1008,37 +1008,37 @@ def test_notebook_execution_with_custom_notebooks(
                 "outputs": [],
             },
             {
-                "id": "loose-reader",
+                "id": "imperial-liberty",
                 "cell_type": "markdown",
                 "source": "## Create & Edit Expectations\n\n\nAdd expectations by calling specific expectation methods on the `validator` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\n&nbsp;\n\nYou can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.",
                 "metadata": {},
             },
             {
-                "id": "working-poverty",
+                "id": "failing-sucking",
                 "cell_type": "markdown",
                 "source": "### Table Expectation(s)",
                 "metadata": {},
             },
             {
-                "id": "hollow-census",
+                "id": "italian-complex",
                 "cell_type": "markdown",
                 "source": "No table level expectations are in this suite. Feel free to add some here.\n\nThey all begin with `validator.expect_table_...`.\n",
                 "metadata": {},
             },
             {
-                "id": "armed-sculpture",
+                "id": "divine-cutting",
                 "cell_type": "markdown",
-                "source": "### Column Expectation(s)\nwrite your column expectations here",
+                "source": "### Column Expectation(s)",
                 "metadata": {},
             },
             {
-                "id": "missing-steps",
+                "id": "running-greece",
                 "cell_type": "markdown",
                 "source": "#### `npi`",
                 "metadata": {},
             },
             {
-                "id": "broad-medicine",
+                "id": "fallen-hayes",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
@@ -1046,13 +1046,13 @@ def test_notebook_execution_with_custom_notebooks(
                 "outputs": [],
             },
             {
-                "id": "infinite-vaccine",
+                "id": "designing-start",
                 "cell_type": "markdown",
                 "source": "#### `provider_type`",
                 "metadata": {},
             },
             {
-                "id": "corrected-defendant",
+                "id": "golden-wealth",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
@@ -1060,21 +1060,22 @@ def test_notebook_execution_with_custom_notebooks(
                 "outputs": [],
             },
             {
-                "id": "exempt-enhancement",
+                "id": "inner-alloy",
                 "cell_type": "markdown",
                 "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n# TODO: <Alex>ALEX -- The instructions and link must be updated.</Alex>\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
-                "id": "advised-height",
+                "id": "false-broadcast",
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name,\n        }\n    ],\n}\ncheckpoint = SimpleCheckpoint(\n    f"_tmp_checkpoint_{expectation_suite_name}", context, **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
+                "source": 'print(validator.get_expectation_suite(discard_failed_expectations=False))\nvalidator.save_expectation_suite(discard_failed_expectations=False)\n\ncheckpoint_config = {\n    "class_name": "SimpleCheckpoint",\n    "validations": [\n        {\n            "batch_request": batch_request,\n            "expectation_suite_name": expectation_suite_name\n        }\n    ]\n}\ncheckpoint = SimpleCheckpoint(\n    f"_tmp_checkpoint_{expectation_suite_name}",\n    context,\n    **checkpoint_config\n)\ncheckpoint_result = checkpoint.run()\n\ncontext.build_data_docs()\n\nvalidation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]\ncontext.open_data_docs(resource_identifier=validation_result_identifier)',
                 "outputs": [],
             },
         ],
     }
+
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):

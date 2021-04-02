@@ -3586,6 +3586,7 @@ def data_context_v3_custom_notebooks(tmp_path):
     context_path = os.path.join(project_path, "great_expectations")
     expectations_dir = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    custom_notebook_assets_dir = os.path.join("v3", "notebook_assets")
     os.makedirs(
         os.path.join(expectations_dir, "my_dag_node"),
         exist_ok=True,
@@ -3601,11 +3602,10 @@ def data_context_v3_custom_notebooks(tmp_path):
         ),
         os.path.join(expectations_dir, "my_dag_node", "default.json"),
     )
-    plugin_dir = os.path.join(context_path, "plugins")
-    os.makedirs(plugin_dir, exist_ok=True)
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
     shutil.copytree(
-        os.path.join(fixture_dir, "notebook_assets"),
-        os.path.join(plugin_dir, "notebook_assets"),
+        os.path.join(fixture_dir, custom_notebook_assets_dir),
+        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
     )
 
     return ge.data_context.DataContext(context_path)

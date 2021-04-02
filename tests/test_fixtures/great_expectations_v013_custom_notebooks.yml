@@ -92,14 +92,40 @@ notebooks:
     suite_edit:
         class_name: SuiteEditNotebookRenderer
         module_name: great_expectations.render.renderer.v3.suite_edit_notebook_renderer
-        custom_templates_module: notebook_assets.suite_edit
+        custom_templates_module: v3.notebook_assets.suite_edit
         header_markdown:
             file_name: HEADER.md
             template_kwargs:
                 company_name: MyCompany
+        footer_markdown:
+            file_name: FOOTER.md
+            template_kwargs:
+                company_name: MyCompany
+        table_expectations_header_markdown:
+            file_name: TABLE_EXPECTATIONS_HEADER.md
         column_expectations_header_markdown:
             file_name: COLUMN_EXPECTATIONS_HEADER.md
+        table_expectations_not_found_markdown:
+            file_name: TABLE_EXPECTATIONS_NOT_FOUND.md
+        column_expectations_not_found_markdown:
+            file_name: COLUMN_EXPECTATIONS_NOT_FOUND.md
+        authoring_intro_markdown:
+            file_name: AUTHORING_INTRO.md
+        column_expectations_markdown:
+            file_name: COLUMN_EXPECTATIONS.md
+        header_code:
+            file_name: header.py.j2
+            template_kwargs:
+                site_name: site_local
         footer_code:
-            file_name: footer.py
+            file_name: footer.py.j2
+            template_kwargs:
+                site_name: site_local
+        table_expectation_code:
+            file_name: table_expectation.py.j2
+            template_kwargs:
+                site_name: site_local
+        column_expectation_code:
+            file_name: column_expectation.py.j2
             template_kwargs:
                 site_name: site_local
