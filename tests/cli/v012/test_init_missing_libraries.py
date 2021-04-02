@@ -133,7 +133,7 @@ but the package `{library_name}` containing this library is not installed.
     )
 
     # NOW, IN AN EVIL KNOWN ONLY TO SLEEPLESS PROGRAMMERS, WE USE OUR UTILITY TO INSTALL SQLALCHEMY
-    _ = execute_shell_command_with_progress_polling("pip install sqlalchemy")
+    _ = execute_shell_command_with_progress_polling("pip install `sqlalchemy<1.4.0`")
 
 
 @pytest.mark.skipif(
