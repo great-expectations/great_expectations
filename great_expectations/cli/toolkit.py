@@ -2,9 +2,8 @@ import datetime
 import os
 import subprocess
 import sys
-import warnings
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import click
 from ruamel.yaml import YAML
@@ -13,26 +12,24 @@ from ruamel.yaml.compat import StringIO
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.cli.batch_kwargs import get_batch_kwargs
-from great_expectations.cli.build_docs import build_docs
+from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message as send_usage_stats_message,
 )
-from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
-from great_expectations.datasource import Datasource
+from great_expectations.datasource import BaseDatasource
 from great_expectations.profile import BasicSuiteBuilderProfiler
+from great_expectations.validator.validator import Validator
 
 try:
     from termcolor import colored
@@ -68,112 +65,84 @@ yaml.default_flow_style = False
 
 
 def create_expectation_suite(
-    context,
-    datasource_name=None,
-    batch_kwargs_generator_name=None,
-    generator_asset=None,
-    batch_kwargs=None,
-    expectation_suite_name=None,
-    additional_batch_kwargs=None,
-    empty_suite=False,
-    show_intro_message=False,
-    flag_build_docs=True,
-    open_docs=False,
-    profiler_configuration="demo",
-    data_asset_name=None,
-):
+    context: DataContext,
+    datasource_name: Optional[str] = None,
+    batch_request: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None,
+    expectation_suite_name: Optional[str] = None,
+    interactive: Optional[bool] = False,
+    scaffold: Optional[bool] = False,
+    additional_batch_request_args: Optional[dict] = None,
+    # TODO: <Alex>ALEX -- Is this needed?</Alex>
+    profiler_configuration: Optional[str] = "demo",
+) -> Tuple[str, Dict[str, Union[str, Dict[str, Any]]], Optional[dict]]:
     """
     Create a new expectation suite.
 
-    WARNING: the flow and name of this method and its interaction with _profile_to_create_a_suite
-    require a serious revisiting.
-    :return: a tuple: (success, suite name, profiling_results)
+    :return: a tuple: (suite name, profiling_results)
     """
-    if generator_asset:
-        warnings.warn(
-            "The 'generator_asset' argument will be deprecated and renamed to 'data_asset_name'. "
-            "Please update code accordingly.",
-            DeprecationWarning,
-        )
-        data_asset_name = generator_asset
-
-    if show_intro_message and not empty_suite:
-        cli_message(
-            "\n<cyan>========== Create sample Expectations ==========</cyan>\n\n"
+    if interactive and not batch_request:
+        data_source: Optional[BaseDatasource] = select_datasource(
+            context=context, datasource_name=datasource_name
         )
 
-    data_source = select_datasource(context, datasource_name=datasource_name)
+        if data_source is None:
+            # select_datasource takes care of displaying an error message, so all is left here is to exit.
+            sys.exit(1)
 
-    if data_source is None:
-        # select_datasource takes care of displaying an error message, so all is left here is to exit.
-        sys.exit(1)
+        datasource_name = data_source.name
 
-    datasource_name = data_source.name
-
-    if expectation_suite_name in context.list_expectation_suite_names():
-        tell_user_suite_exists(expectation_suite_name)
-        sys.exit(1)
-
-    if (
-        batch_kwargs_generator_name is None
-        or data_asset_name is None
-        or batch_kwargs is None
-    ):
-        (
-            datasource_name,
-            batch_kwargs_generator_name,
-            data_asset_name,
-            batch_kwargs,
-        ) = get_batch_kwargs(
-            context,
+        batch_request = get_batch_request(
+            context=context,
             datasource_name=datasource_name,
-            batch_kwargs_generator_name=batch_kwargs_generator_name,
-            data_asset_name=data_asset_name,
-            additional_batch_kwargs=additional_batch_kwargs,
+            additional_batch_request_args=additional_batch_request_args,
         )
-        # In this case, we have "consumed" the additional_batch_kwargs
-        additional_batch_kwargs = {}
+        # In this case, we have "consumed" the additional_batch_request_args
+        additional_batch_request_args = {}
+
+    data_asset_name: Optional[str] = None
+
+    if batch_request:
+        data_asset_name = batch_request.get("data_asset_name")
 
     if expectation_suite_name is None:
-        default_expectation_suite_name = _get_default_expectation_suite_name(
-            batch_kwargs, data_asset_name
+        default_expectation_suite_name: str = _get_default_expectation_suite_name(
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
         )
         while True:
             expectation_suite_name = click.prompt(
                 "\nName the new Expectation Suite",
                 default=default_expectation_suite_name,
             )
-            if expectation_suite_name in context.list_expectation_suite_names():
-                tell_user_suite_exists(expectation_suite_name)
-            else:
+            if expectation_suite_name not in context.list_expectation_suite_names():
                 break
+            tell_user_suite_exists(expectation_suite_name)
+    elif expectation_suite_name in context.list_expectation_suite_names():
+        tell_user_suite_exists(expectation_suite_name)
+        sys.exit(1)
 
-    if empty_suite:
-        create_empty_suite(context, expectation_suite_name, batch_kwargs)
-        return True, expectation_suite_name, None
+    return expectation_suite_name, batch_request, None
 
-    profiling_results = _profile_to_create_a_suite(
-        additional_batch_kwargs,
-        batch_kwargs,
-        batch_kwargs_generator_name,
-        context,
-        datasource_name,
-        expectation_suite_name,
-        data_asset_name,
-        profiler_configuration,
-    )
-
-    if flag_build_docs:
-        build_docs(context, view=False)
-        if open_docs:
-            attempt_to_open_validation_results_in_data_docs(context, profiling_results)
-
-    return True, expectation_suite_name, profiling_results
+    # TODO: <Alex>ALEX -- This scaffold.</Alex>
+    # TODO: <Alex>ALEX -- How will this be in V3?</Alex>
+    # profiling_results: dict = _profile_to_create_a_suite(
+    #     additional_batch_request_args,
+    #     batch_request,
+    #     data_connector_name,
+    #     context,
+    #     datasource_name,
+    #     expectation_suite_name,
+    #     data_asset_name,
+    #     profiler_configuration,
+    # )
+    #
+    # return expectation_suite_name, batch_request, profiling_results
 
 
+# TODO: <Alex>ALEX - Update for V3</Alex>
 def _profile_to_create_a_suite(
     additional_batch_kwargs,
-    batch_kwargs,
+    batch_request,
     batch_kwargs_generator_name,
     context,
     datasource_name,
@@ -211,7 +180,7 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
         datasource_name,
         batch_kwargs_generator_name=batch_kwargs_generator_name,
         data_asset_name=data_asset_name,
-        batch_kwargs=batch_kwargs,
+        batch_kwargs=batch_request,
         profiler=BasicSuiteBuilderProfiler,
         profiler_configuration=profiler_configuration,
         expectation_suite_name=expectation_suite_name,
@@ -254,20 +223,15 @@ def attempt_to_open_validation_results_in_data_docs(context, profiling_results):
         context.open_data_docs()
 
 
-def _get_default_expectation_suite_name(batch_kwargs, data_asset_name):
+def _get_default_expectation_suite_name(
+    data_asset_name: str,
+    batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
+) -> str:
+    suite_name: str
     if data_asset_name:
         suite_name = f"{data_asset_name}.warning"
-    elif "query" in batch_kwargs:
-        suite_name = "query.warning"
-    elif "path" in batch_kwargs:
-        try:
-            # Try guessing a filename
-            filename = os.path.split(os.path.normpath(batch_kwargs["path"]))[1]
-            # Take all but the last part after the period
-            filename = ".".join(filename.split(".")[:-1])
-            suite_name = str(filename) + ".warning"
-        except (OSError, IndexError):
-            suite_name = "warning"
+    elif batch_request:
+        suite_name = f"batch-{BatchRequest(**batch_request).id}"
     else:
         suite_name = "warning"
     return suite_name
@@ -280,30 +244,6 @@ def tell_user_suite_exists(suite_name: str) -> None:
     )
 
 
-def create_empty_suite(
-    context: DataContext, expectation_suite_name: str, batch_kwargs
-) -> None:
-    cli_message(
-        """
-Great Expectations will create a new Expectation Suite '{:s}' and store it here:
-
-  {:s}
-""".format(
-            expectation_suite_name,
-            context.stores[
-                context.expectations_store_name
-            ].store_backend.get_url_for_key(
-                ExpectationSuiteIdentifier(
-                    expectation_suite_name=expectation_suite_name
-                ).to_tuple()
-            ),
-        )
-    )
-    suite = context.create_expectation_suite(expectation_suite_name)
-    suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
-    context.save_expectation_suite(suite, expectation_suite_name)
-
-
 def launch_jupyter_notebook(notebook_path: str) -> None:
     jupyter_command_override = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
@@ -312,16 +252,28 @@ def launch_jupyter_notebook(notebook_path: str) -> None:
         subprocess.call(["jupyter", "notebook", notebook_path])
 
 
-def load_batch(
+def get_validator(
     context: DataContext,
+    batch_request: Union[dict, BatchRequest],
     suite: Union[str, ExpectationSuite],
-    batch_kwargs: Union[dict, BatchKwargs],
-) -> Union[Batch, DataAsset]:
-    batch: Union[Batch, DataAsset] = context.get_batch(batch_kwargs, suite)
-    assert isinstance(batch, DataAsset) or isinstance(
-        batch, Batch
-    ), "Batch failed to load. Please check your batch_kwargs"
-    return batch
+) -> Validator:
+    assert isinstance(
+        suite, (str, ExpectationSuite)
+    ), "Invalid suite type (must be ExpectationSuite) or a string."
+
+    if isinstance(batch_request, dict):
+        batch_request = BatchRequest(**batch_request)
+
+    validator: Validator
+    if isinstance(suite, str):
+        validator = context.get_validator(
+            batch_request=batch_request, expectation_suite_name=suite
+        )
+    else:
+        validator = context.get_validator(
+            batch_request=batch_request, expectation_suite=suite
+        )
+    return validator
 
 
 def load_expectation_suite(
@@ -329,25 +281,37 @@ def load_expectation_suite(
     context: DataContext,
     suite_name: str,
     usage_event: str,
-) -> ExpectationSuite:
+    create_if_not_exist: Optional[bool] = True,
+) -> Optional[ExpectationSuite]:
     """
     Load an expectation suite from a given context.
 
     Handles a suite name with or without `.json`
+    :param context:
+    :param suite_name:
     :param usage_event:
+    :param create_if_not_exist:
     """
     if suite_name.endswith(".json"):
         suite_name = suite_name[:-5]
+
+    suite: Optional[ExpectationSuite]
     try:
-        suite = context.get_expectation_suite(suite_name)
+        suite = context.get_expectation_suite(expectation_suite_name=suite_name)
         return suite
-    except ge_exceptions.DataContextError as e:
-        exit_with_failure_message_and_stats(
-            context,
-            usage_event,
-            f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
-            "the name by running `great_expectations suite list` and try again.",
-        )
+    except ge_exceptions.DataContextError:
+        if create_if_not_exist:
+            suite = context.create_expectation_suite(expectation_suite_name=suite_name)
+            return suite
+        else:
+            suite = None
+            exit_with_failure_message_and_stats(
+                context=context,
+                usage_event=usage_event,
+                message=f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
+                "the name by running `great_expectations suite list` and try again.",
+            )
+    return suite
 
 
 def exit_with_failure_message_and_stats(
@@ -448,37 +412,44 @@ def load_checkpoint(
         )
 
 
-def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
+def select_datasource(
+    context: DataContext, datasource_name: str = None
+) -> Optional[BaseDatasource]:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
-    data_source = None
+    data_source: Optional[BaseDatasource] = None
 
     if datasource_name is None:
-        data_sources = sorted(context.list_datasources(), key=lambda x: x["name"])
+        data_sources: List[BaseDatasource] = cast(
+            List[BaseDatasource],
+            list(
+                sorted(context.datasources.values(), key=lambda x: x.name),
+            ),
+        )
         if len(data_sources) == 0:
             cli_message(
                 "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
             )
         elif len(data_sources) == 1:
-            datasource_name = data_sources[0]["name"]
+            datasource_name = data_sources[0].name
         else:
-            choices = "\n".join(
+            choices: str = "\n".join(
                 [
-                    "    {}. {}".format(i, data_source["name"])
+                    "    {}. {}".format(i, data_source.name)
                     for i, data_source in enumerate(data_sources, 1)
                 ]
             )
-            option_selection = click.prompt(
+            option_selection: str = click.prompt(
                 "Select a datasource" + "\n" + choices + "\n",
                 type=click.Choice(
                     [str(i) for i, data_source in enumerate(data_sources, 1)]
                 ),
                 show_choices=False,
             )
-            datasource_name = data_sources[int(option_selection) - 1]["name"]
+            datasource_name = data_sources[int(option_selection) - 1].name
 
     if datasource_name is not None:
-        data_source = context.get_datasource(datasource_name)
+        data_source = context.get_datasource(datasource_name=datasource_name)
 
     return data_source
 

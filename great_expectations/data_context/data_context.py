@@ -372,10 +372,10 @@ class BaseDataContext:
     def _init_datasources(self, config):
         if not config.datasources:
             return
-        for datasource in config.datasources:
+        for datasource_name, data_source_config in config.datasources.items():
             try:
-                self._cached_datasources[datasource] = self.get_datasource(
-                    datasource_name=datasource
+                self._cached_datasources[datasource_name] = self.get_datasource(
+                    datasource_name=datasource_name
                 )
             except ge_exceptions.DatasourceInitializationError:
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
@@ -686,7 +686,7 @@ class BaseDataContext:
         self,
         resource_identifier: Optional[str] = None,
         site_name: Optional[str] = None,
-        only_if_exists=True,
+        only_if_exists: Optional[bool] = True,
     ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -698,13 +698,14 @@ class BaseDataContext:
                 URL of the index page.
             site_name: Optionally specify which site to open. If not specified,
                 open all docs found in the project.
+            only_if_exists: Optionally specify flag to pass to "self.get_docs_sites_urls()".
         """
-        data_docs_urls = self.get_docs_sites_urls(
+        data_docs_urls: List[Dict[str, str]] = self.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
             only_if_exists=only_if_exists,
         )
-        urls_to_open = [site["site_url"] for site in data_docs_urls]
+        urls_to_open: List[str] = [site["site_url"] for site in data_docs_urls]
 
         for url in urls_to_open:
             if url is not None:
@@ -2235,7 +2236,6 @@ class BaseDataContext:
         """Get validation results from a configured store.
 
         Args:
-            data_asset_name: name of data asset for which to get validation result
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
             validations_store_name: the name of the store from which to get validation results

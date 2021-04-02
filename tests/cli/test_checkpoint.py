@@ -60,10 +60,8 @@ def titanic_data_context_with_sql_datasource(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file_path}
-"""
-        + """
 introspection:
-    whole_table: {}
+  whole_table: {{}}
 """,
     )
 
@@ -1831,7 +1829,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
             index: -1
           batch_spec_passthrough:
             reader_options:
-              header: true
+              header: True
         expectation_suite_name: Titanic.warning
         action_list:
             - name: store_validation_result

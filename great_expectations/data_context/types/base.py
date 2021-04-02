@@ -806,8 +806,8 @@ class NotebookConfig(DictDot):
         column_expectations_markdown=None,
         header_code=None,
         footer_code=None,
-        column_expectation_code=None,
         table_expectation_code=None,
+        column_expectation_code=None,
     ):
         self.class_name = class_name
         self.module_name = module_name
@@ -828,8 +828,8 @@ class NotebookConfig(DictDot):
 
         self.header_code = header_code
         self.footer_code = footer_code
-        self.column_expectation_code = column_expectation_code
         self.table_expectation_code = table_expectation_code
+        self.column_expectation_code = column_expectation_code
 
 
 class NotebookConfigSchema(Schema):
@@ -862,10 +862,10 @@ class NotebookConfigSchema(Schema):
 
     header_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     footer_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    column_expectation_code = fields.Nested(
+    table_expectation_code = fields.Nested(
         NotebookTemplateConfigSchema, allow_none=True
     )
-    table_expectation_code = fields.Nested(
+    column_expectation_code = fields.Nested(
         NotebookTemplateConfigSchema, allow_none=True
     )
 

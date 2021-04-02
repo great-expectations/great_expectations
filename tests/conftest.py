@@ -2879,7 +2879,7 @@ def empty_context_with_checkpoint_v1_stats_enabled(
     )
     checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
     shutil.copy(fixture_path, checkpoints_file)
-    # noinspection PyProtectedMember
+    # # noinspection PyProtectedMember
     context._save_project_config()
     return context
 
@@ -3582,6 +3582,41 @@ def data_context_custom_notebooks(tmp_path_factory):
 
 
 @pytest.fixture
+def data_context_v3_custom_notebooks(tmp_path):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = tmp_path
+    context_path = os.path.join(project_path, "great_expectations")
+    expectations_dir = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    custom_notebook_assets_dir = os.path.join("v3", "notebook_assets")
+    os.makedirs(
+        os.path.join(expectations_dir, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_v013_custom_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(expectations_dir, "my_dag_node", "default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copytree(
+        os.path.join(fixture_dir, custom_notebook_assets_dir),
+        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
+    )
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
 def data_context_simple_expectation_suite(tmp_path_factory):
     """
     This data_context is *manually* created to have the config we want, vs
@@ -3726,7 +3761,7 @@ def filesystem_csv_2(tmp_path):
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)
     assert os.path.isabs(base_dir)
     assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
 
@@ -3741,10 +3776,10 @@ def filesystem_csv_3(tmp_path):
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)
 
     toy_dataset_2 = PandasDataset({"y": [1, 2, 3]})
-    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
+    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=False)
 
     return base_dir
 
