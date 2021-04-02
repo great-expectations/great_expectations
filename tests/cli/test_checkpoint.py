@@ -1829,7 +1829,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
             index: -1
           batch_spec_passthrough:
             reader_options:
-              header: true
+              header: 0
         expectation_suite_name: Titanic.warning
         action_list:
             - name: store_validation_result

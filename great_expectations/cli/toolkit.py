@@ -259,7 +259,7 @@ def get_validator(
 ) -> Validator:
     assert isinstance(
         suite, (str, ExpectationSuite)
-    ), "Invalid suite type (must be ExpectationSuite or a string."
+    ), "Invalid suite type (must be ExpectationSuite) or a string."
 
     if isinstance(batch_request, dict):
         batch_request = BatchRequest(**batch_request)

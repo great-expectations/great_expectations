@@ -1317,7 +1317,7 @@ class Validator:
         n_rows: Optional[int] = 5,
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: Optional[bool] = False,
-    ):
+    ) -> pd.DataFrame:
         if domain_kwargs is None:
             domain_kwargs = {
                 "batch_id": self.execution_engine.active_batch_data_id,

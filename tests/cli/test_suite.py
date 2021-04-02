@@ -49,6 +49,9 @@ def test_suite_demo_deprecation_message(caplog, monkeypatch, empty_data_context)
     )
     assert result.exit_code == 0
 
+    stdout: str = result.stdout
+    assert "This command is not supported in the v3 (Batch Request) API." in stdout
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,

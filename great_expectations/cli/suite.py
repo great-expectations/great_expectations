@@ -55,7 +55,7 @@ def suite(ctx):
 @suite.command(name="new")
 @click.option(
     "--suite",
-    "-es",
+    "-e",
     default=None,
     help="Expectation suite name.",
 )
@@ -70,7 +70,7 @@ Incompatible with --batch-request option.
 )
 @click.option(
     "--scaffold",
-    "-sf",
+    "-s",
     is_flag=True,
     default=False,
     help="""Generate a starting expectation suite automatically so you can refine it further.
