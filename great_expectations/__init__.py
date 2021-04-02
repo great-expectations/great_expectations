@@ -14,6 +14,7 @@ from great_expectations.exceptions.exceptions import GreatExpectationsError
 
 try:
     import sqlalchemy as sa
+
     if parse_version(sa.__version__) >= parse_version("1.4.0"):
         raise GreatExpectationsError(
             f"""
