@@ -8,6 +8,7 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -98,7 +99,7 @@ class BaseDatasource:
         return batch_list[0]
 
     def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
+        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> List[Batch]:
         """
         Processes batch_request and returns the (possibly empty) list of batch objects.
@@ -119,7 +120,37 @@ class BaseDatasource:
             batch_request=batch_request
         )
 
-        if batch_request["batch_data"] is None:
+        if isinstance(batch_request, RuntimeBatchRequest):
+            # This is a runtime batch_request
+
+            if len(batch_definition_list) != 1:
+                raise ValueError(
+                    "RuntimeBatchRequests must specify exactly one corresponding BatchDefinition"
+                )
+
+            batch_definition = batch_definition_list[0]
+            runtime_parameters = batch_request.runtime_parameters
+
+            # noinspection PyArgumentList
+            (
+                batch_data,
+                batch_spec,
+                batch_markers,
+            ) = data_connector.get_batch_data_and_metadata(
+                batch_definition=batch_definition,
+                runtime_parameters=runtime_parameters,
+            )
+
+            new_batch: Batch = Batch(
+                data=batch_data,
+                batch_request=batch_request,
+                batch_definition=batch_definition,
+                batch_spec=batch_spec,
+                batch_markers=batch_markers,
+            )
+
+            return [new_batch]
+        else:
             batches: List[Batch] = []
             for batch_definition in batch_definition_list:
                 batch_definition.batch_spec_passthrough = (
@@ -144,37 +175,6 @@ class BaseDatasource:
                 )
                 batches.append(new_batch)
             return batches
-
-        else:
-            # This is a runtime batch_request
-
-            if len(batch_definition_list) != 1:
-                raise ValueError(
-                    "When batch_request includes batch_data, it must specify exactly one corresponding BatchDefinition"
-                )
-
-            batch_definition = batch_definition_list[0]
-            batch_data = batch_request["batch_data"]
-
-            # noinspection PyArgumentList
-            (
-                typed_batch_data,
-                batch_spec,
-                batch_markers,
-            ) = data_connector.get_batch_data_and_metadata(
-                batch_definition=batch_definition,
-                batch_data=batch_data,
-            )
-
-            new_batch: Batch = Batch(
-                data=typed_batch_data,
-                batch_request=batch_request,
-                batch_definition=batch_definition,
-                batch_spec=batch_spec,
-                batch_markers=batch_markers,
-            )
-
-            return [new_batch]
 
     def _build_data_connector_from_config(
         self,

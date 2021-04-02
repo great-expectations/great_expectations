@@ -10,20 +10,20 @@ logger = logging.getLogger(__name__)
 
 
 class NumericSorter(Sorter):
-    def get_partition_key(self, batch_definition: BatchDefinition) -> Any:
-        partition_definition: dict = batch_definition.partition_definition
-        partition_value: Any = partition_definition[self.name]
-        if not is_numeric(value=partition_value):
+    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+        batch_identifiers: dict = batch_definition.batch_identifiers
+        batch_value: Any = batch_identifiers[self.name]
+        if not is_numeric(value=batch_value):
             raise ge_exceptions.SorterError(
                 # what is the identifying characteristic of batch_definition?
-                f"""BatchDefinition with PartitionDefinition "{self.name}" with value "{partition_value}" has value
-"{partition_value}" which cannot be part of numeric sort.
+                f"""BatchDefinition with IDDict "{self.name}" with value "{batch_value}" has value
+"{batch_value}" which cannot be part of numeric sort.
 """
             )
-        if is_int(value=partition_value):
-            return int(partition_value)
+        if is_int(value=batch_value):
+            return int(batch_value)
         # The case of strings having floating point number format used as references to partitions should be rare.
-        return round(float(partition_value))
+        return round(float(batch_value))
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {

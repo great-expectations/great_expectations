@@ -5,8 +5,8 @@ from typing import Any, List, Optional, Tuple
 from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.validator import validator
 from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -315,16 +315,21 @@ class DataConnector:
         if pretty_print:
             print(f"\n\t\tFetching batch data...")
 
-        batch_definition_list = self._map_data_reference_to_batch_definition_list(
+        batch_definition_list: List[
+            BatchDefinition
+        ] = self._map_data_reference_to_batch_definition_list(
             data_reference=example_data_reference,
             data_asset_name=data_asset_name,
         )
         assert len(batch_definition_list) == 1
-        batch_definition = batch_definition_list[0]
+        batch_definition: BatchDefinition = batch_definition_list[0]
 
         # _execution_engine might be None for some tests
         if batch_definition is None or self._execution_engine is None:
             return {}
+
+        batch_data: Any
+        batch_spec: BatchSpec
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(
             batch_definition=batch_definition
         )
