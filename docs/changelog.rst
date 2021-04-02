@@ -4,6 +4,10 @@
 Changelog
 #########
 
+Develop
+-----------------
+
+
 0.13.17
 -----------------
 * [BREAKING-EXPERIMENTAL] The ``batch_data`` attribute of ``BatchRequest`` has been removed. To pass in in-memory dataframes at runtime, the new ``RuntimeDataConnector`` should be used
