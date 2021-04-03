@@ -173,11 +173,9 @@ def run_notebook(
             "A path to and the directory containing the valid Jupyter notebook are required."
         )
 
-    nb: NotebookNode
-    with open(notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
+    nb: NotebookNode = load_notebook_from_path(notebook_path=notebook_path)
 
-    nb = replace_notebook_content(
+    nb = replace_code_in_notebook(
         nb=nb,
         string_to_be_replaced=string_to_be_replaced,
         replacement_string=replacement_string,
@@ -188,7 +186,7 @@ def run_notebook(
 
 
 # noinspection PyShadowingNames
-def replace_notebook_content(
+def replace_code_in_notebook(
     nb: NotebookNode,
     string_to_be_replaced: Optional[str] = None,
     replacement_string: Optional[str] = None,
@@ -212,21 +210,12 @@ def replace_notebook_content(
     idx: int
     cell: dict
 
-    indices: List[int] = [
-        idx
-        for idx, cell in enumerate(nb["cells"])
-        if (
-            (cell["cell_type"] == "code")
-            and (cell["source"].find(string_to_be_replaced) != -1)
-        )
-    ]
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=nb, search_string=string_to_be_replaced
+    )
 
-    if len(indices) == 0:
+    if cells_of_interest_dict is None:
         return None
-
-    cells_of_interest_dict: Dict[int, dict] = {
-        idx: copy.deepcopy(nb["cells"][idx]) for idx in indices
-    }
 
     for idx, cell in cells_of_interest_dict.items():
         cell["source"] = cell["source"].replace(
@@ -243,7 +232,55 @@ def replace_notebook_content(
         )
     )
 
-    for idx in indices:
+    for idx in cells_of_interest_dict.keys():
         nb["cells"].insert(idx, cells_of_interest_dict[idx])
 
     return nb
+
+
+def load_notebook_from_path(
+    notebook_path: str,
+) -> NotebookNode:
+    if not notebook_path:
+        raise ValueError("A path to the valid Jupyter notebook is required.")
+
+    nb: NotebookNode
+    with open(notebook_path) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    return nb
+
+
+# noinspection PyShadowingNames
+def find_code_in_notebook(
+    nb: NotebookNode,
+    search_string: str,
+) -> Optional[Dict[int, dict]]:
+    if (
+        nb is None
+        or not nb
+        or "cells" not in nb
+        or not nb["cells"]
+        or len(nb["cells"]) == 0
+    ):
+        return None
+
+    idx: int
+    cell: dict
+
+    indices: List[int] = [
+        idx
+        for idx, cell in enumerate(nb["cells"])
+        if (
+            (cell["cell_type"] == "code") and (cell["source"].find(search_string) != -1)
+        )
+    ]
+
+    if len(indices) == 0:
+        return None
+
+    cells_of_interest_dict: Dict[int, dict] = {
+        idx: copy.deepcopy(nb["cells"][idx]) for idx in indices
+    }
+
+    return cells_of_interest_dict

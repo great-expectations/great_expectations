@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 from typing import Any, Dict, List, Optional, Union
@@ -15,6 +14,7 @@ from great_expectations.cli.pretty_printing import (
     cli_message_list,
     display_not_implemented_message_and_exit,
 )
+from great_expectations.cli.toolkit import load_json_file_into_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -26,8 +26,6 @@ from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
 from great_expectations.render.renderer.v3.suite_scaffold_notebook_renderer import (
     SuiteScaffoldNotebookRenderer,
 )
-
-json_parse_exception = json.decoder.JSONDecodeError
 
 try:
     from sqlalchemy.exc import SQLAlchemyError
@@ -84,13 +82,11 @@ The interactive mode is assumed.  Incompatible with --batch-request option.
     default=False,
     help="By default launch jupyter notebooks, unless you specify the --no-jupyter flag.",
 )
-# TODO: <Alex>ALEX -- Can we take this option away?  It is difficult to use.</Alex>
 @click.option(
     "--batch-request",
     "-br",
-    help="""Arguments to be provided to get_batch when loading the data asset.  Must be a valid JSON dictionary.
-Make sure to escape quotes.  Example: "{\"datasource_name\": \"my_ds\", \"data_connector_name\": \"my_connector\", \"data_asset_name\": \"my_asset\"}"
-Incompatible with the interactive mode.
+    help="""Arguments to be provided to get_batch when loading the data asset.  Must be a path to a valid JSON file.
+Requires the --interactive flag.
 """,
     default=None,
 )
@@ -123,19 +119,24 @@ def _suite_new(
     batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
 ) -> None:
     if not interactive and scaffold:
-        raise ValueError("The --scaffold flag assumes the interactive mode.")
+        raise ValueError("The --scaffold flag requires the --interactive flag.")
 
-    if interactive and (batch_request is not None):
+    if not (interactive or (batch_request is None)):
         raise ValueError(
-            "The --batch-request JSON option is incompatible with the interactive flag."
+            "The --batch-request <path to JSON file> requires the --interactive flag."
         )
 
     try:
-        if batch_request is not None:
-            batch_request = json.loads(batch_request)
+        if batch_request is not None and isinstance(batch_request, str):
+            batch_request = load_json_file_into_dict(
+                filepath=batch_request,
+                usage_event=usage_event,
+                data_context=context,
+            )
 
         # TODO: <Alex>ALEX -- Can we be more precise about the type of profiling results in V3?</Alex>
         profiling_results: dict
+        # TODO: <Alex>ALEX -- change method name; it does not create expectation suite any more.</Alex>
         suite_name, batch_request, profiling_results = toolkit.create_expectation_suite(
             context=context,
             batch_request=batch_request,
@@ -146,7 +147,7 @@ def _suite_new(
         )
         if not no_jupyter:
             cli_message(
-                """<green>Opening a notebook for you now to edit your expectation suite!
+                string="""<green>Opening a notebook for you now to edit your expectation suite!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             )
         toolkit.send_usage_message(
@@ -166,10 +167,11 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     except (
         ge_exceptions.DataContextError,
         ge_exceptions.ProfilerError,
+        ValueError,
         OSError,
         SQLAlchemyError,
     ) as e:
-        cli_message("<red>{}</red>".format(e))
+        cli_message(string="<red>{}</red>".format(e))
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=False
         )
@@ -207,15 +209,13 @@ Incompatible with the --batch-request option.
     default=False,
     help="By default launch jupyter notebooks, unless you specify the --no-jupyter flag.",
 )
-# TODO: <Alex>ALEX -- Can we take this option away?  It is difficult to use.</Alex>
 @click.option(
     "--batch-request",
     "-br",
-    default=None,
-    help="""Arguments to be provided to get_batch when loading the data asset.  Must be a valid JSON dictionary.
-Make sure to escape quotes.  Example: "{\"datasource_name\": \"my_ds\", \"data_connector_name\": \"my_connector\", \"data_asset_name\": \"my_asset\"}"
-Incompatible with the interactive mode.
+    help="""Arguments to be provided to get_batch when loading the data asset.  Must be a path to a valid JSON file.
+Requires the --interactive flag.
 """,
+    default=None,
 )
 @click.pass_context
 def suite_edit(ctx, suite, interactive, datasource, no_jupyter, batch_request):
@@ -256,66 +256,44 @@ def _suite_edit(
 ):
     # suppress_usage_message flag is for the situation where _suite_edit is called by _suite_new().
     # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
-    batch_request_json: Optional[str] = None
-    if isinstance(batch_request, str):
-        batch_request_json = batch_request
-        batch_request = None
-        interactive = False
-
-    if interactive and (batch_request_json is not None):
+    if not (interactive or (batch_request is None)):
         raise ValueError(
-            "The --batch-request JSON option is incompatible with the interactive flag."
+            "The --batch-request <path to JSON file> requires the --interactive flag."
         )
 
-    if not interactive and datasource:
-        raise ValueError("The --datasource option assumes the interactive mode.")
+    if suppress_usage_message:
+        usage_event = None
 
     try:
-        if batch_request_json:
-            try:
-                batch_request = json.loads(batch_request_json)
-                interactive = False
-                if datasource:
-                    batch_request["datasource_name"] = datasource
-            except json_parse_exception as je:
-                cli_message(
-                    "<red>Please check that your batch_request contains valid JSON.\n{}</red>".format(
-                        je
-                    )
-                )
-                if not suppress_usage_message:
-                    toolkit.send_usage_message(
-                        data_context=context, event=usage_event, success=False
-                    )
-                sys.exit(1)
-            except ge_exceptions.DataContextError:
-                cli_message(
-                    "<red>Please check that your batch_request is able to load a batch.</red>"
-                )
-                if not suppress_usage_message:
-                    toolkit.send_usage_message(
-                        data_context=context, event=usage_event, success=False
-                    )
-                sys.exit(1)
-            except ValueError as ve:
-                cli_message(
-                    "<red>Please check that your batch_request is able to load a batch.\n{}</red>".format(
-                        ve
-                    )
-                )
-                if not suppress_usage_message:
-                    toolkit.send_usage_message(
-                        data_context=context, event=usage_event, success=False
-                    )
-                sys.exit(1)
+        if batch_request is not None and isinstance(batch_request, str):
+            batch_request = load_json_file_into_dict(
+                filepath=batch_request,
+                usage_event=usage_event,
+                data_context=context,
+            )
+    except ValueError as e:
+        cli_message(string="<red>{}</red>".format(e))
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
+        sys.exit(1)
+    except Exception as e:
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
+        raise e
 
+    if not interactive and datasource:
+        raise ValueError("The --datasource option requires the --interactive flag.")
+
+    try:
         if interactive and not (
             batch_request
             and isinstance(batch_request, dict)
             and BatchRequest(**batch_request)
         ):
             cli_message(
-                """
+                string="""
 A batch of data is required to edit the suite - let's help you to specify it."""
             )
 
@@ -324,14 +302,14 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     context=context, datasource_name=datasource
                 )
             except ValueError as ve:
-                cli_message("<red>{}</red>".format(ve))
+                cli_message(string="<red>{}</red>".format(ve))
                 toolkit.send_usage_message(
                     data_context=context, event=usage_event, success=False
                 )
                 sys.exit(1)
 
             if not datasource:
-                cli_message("<red>No datasources found in the context.</red>")
+                cli_message(string="<red>No datasources found in the context.</red>")
                 if not suppress_usage_message:
                     toolkit.send_usage_message(
                         data_context=context, event=usage_event, success=False
@@ -360,7 +338,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
         if no_jupyter:
             cli_message(
-                f"To continue editing this suite, run <green>jupyter notebook {notebook_path}</green>"
+                string=f"To continue editing this suite, run <green>jupyter notebook {notebook_path}</green>"
             )
 
         payload: dict = edit_expectation_suite_usage_statistics(
@@ -394,7 +372,7 @@ def suite_demo(ctx):
     usage_event: str = "cli.suite.demo"
     toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
     cli_message(
-        "This command is not supported in the v3 (Batch Request) API. Please use `suite new` instead."
+        string="This command is not supported in the v3 (Batch Request) API. Please use `suite new` instead."
     )
 
 
@@ -430,11 +408,11 @@ def suite_delete(ctx, suite):
         )
 
     if not (ctx.obj.assume_yes or toolkit.confirm_proceed_or_exit(exit_on_no=False)):
-        cli_message(f"Suite `{suite}` was not deleted.")
+        cli_message(string=f"Suite `{suite}` was not deleted.")
         sys.exit(0)
 
     context.delete_expectation_suite(suite)
-    cli_message(f"Deleted the expectation suite named: {suite}")
+    cli_message(string=f"Deleted the expectation suite named: {suite}")
     toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
 
 
@@ -468,7 +446,7 @@ def _suite_scaffold(suite: str, directory: str, no_jupyter: bool) -> None:
         toolkit.tell_user_suite_exists(suite_name)
         if os.path.isfile(notebook_path):
             cli_message(
-                f"  - If you wish to adjust your scaffolding, you can open this notebook with jupyter: `{notebook_path}` <red>(Please note that if you run that notebook, you will overwrite your existing suite.)</red>"
+                string=f"  - If you wish to adjust your scaffolding, you can open this notebook with jupyter: `{notebook_path}` <red>(Please note that if you run that notebook, you will overwrite your existing suite.)</red>"
             )
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=False
@@ -495,7 +473,7 @@ def _suite_scaffold(suite: str, directory: str, no_jupyter: bool) -> None:
         toolkit.launch_jupyter_notebook(notebook_path)
     else:
         cli_message(
-            f"To continue scaffolding this suite, run `jupyter notebook {notebook_path}`"
+            string=f"To continue scaffolding this suite, run `jupyter notebook {notebook_path}`"
         )
 
 
@@ -517,7 +495,7 @@ def suite_list(ctx):
         f" - <cyan>{suite_name}</cyan>" for suite_name in suite_names
     ]
     if len(suite_names_styled) == 0:
-        cli_message("No Expectation Suites found")
+        cli_message(string="No Expectation Suites found")
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=True
         )
@@ -528,7 +506,9 @@ def suite_list(ctx):
         list_intro_string = "1 Expectation Suite found:"
     else:
         list_intro_string = f"{len(suite_names_styled)} Expectation Suites found:"
-    cli_message_list(suite_names_styled, list_intro_string)
+    cli_message_list(
+        string_list=suite_names_styled, list_intro_string=list_intro_string
+    )
     toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
 
 

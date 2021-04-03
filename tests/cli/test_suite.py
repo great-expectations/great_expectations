@@ -1,6 +1,6 @@
 import json
 import os
-from typing import List
+from typing import Dict, List
 from unittest import mock
 
 import pytest
@@ -8,12 +8,17 @@ from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
-from tests.render.test_util import run_notebook
+from tests.render.test_util import (
+    find_code_in_notebook,
+    load_notebook_from_path,
+    run_notebook,
+)
 
 
 def test_suite_help_output(caplog):
@@ -317,6 +322,198 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
         notebook_path=expected_notebook_path,
         notebook_dir=uncommitted_dir,
         string_to_be_replaced="context.open_data_docs(resource_identifier=suite_identifier)",
+        replacement_string="",
+    )
+
+    context = DataContext(context_root_dir=project_dir)
+    assert expectation_suite_name in context.list_expectation_suite_names()
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert suite.expectations == []
+
+    assert mock_subprocess.call_count == 0
+
+    assert mock_webbroser.call_count == 0
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"""--v3-api suite new --suite {expectation_suite_name} --interactive --batch-request
+nonexistent_file.json --no-jupyter
+""",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
+    assert 'The JSON file with the path "nonexistent_file.json' in stdout
+
+    context = DataContext(context_root_dir=project_dir)
+    assert expectation_suite_name not in context.list_expectation_suite_names()
+
+    assert mock_subprocess.call_count == 0
+
+    assert mock_webbroser.call_count == 0
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    with open(batch_request_file_path, "w") as json_file:
+        json_file.write("not_proper_json")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"""--v3-api suite new --suite {expectation_suite_name} --interactive --batch-request
+{batch_request_file_path} --no-jupyter
+""",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
+    assert "Error" in stdout
+    assert "occurred while attempting to load the JSON file with the path"
+
+    context = DataContext(context_root_dir=project_dir)
+    assert expectation_suite_name not in context.list_expectation_suite_names()
+
+    assert mock_subprocess.call_count == 0
+
+    assert mock_webbroser.call_count == 0
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1912",
+    }
+
+    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    with open(batch_request_file_path, "w") as json_file:
+        json.dump(batch_request, json_file)
+
+    expectation_suite_name: str = "test_suite_name"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"""--v3-api suite new --suite {expectation_suite_name} --interactive --batch-request
+{batch_request_file_path} --no-jupyter
+""",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "Error" not in stdout
+
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook_path: str = os.path.join(
+        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    batch_request_string: str = (
+        str(BatchRequest(**batch_request))
+        .replace("{\n", "{\n  ")
+        .replace(",\n", ",\n  ")
+        .replace("\n}", ",\n}")
+    )
+    batch_request_string = fr"batch_request = {batch_request_string}"
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
         replacement_string="",
     )
 
