@@ -101,7 +101,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook_path: str = os.path.join(
-        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
@@ -172,7 +172,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook_path: str = os.path.join(
-        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
@@ -241,7 +241,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook_path: str = os.path.join(
-        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
@@ -314,7 +314,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook_path: str = os.path.join(
-        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
@@ -452,7 +452,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1912",
+        "data_asset_name": "Titanic_1911",
     }
 
     batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
@@ -480,7 +480,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook_path: str = os.path.join(
-        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
@@ -627,12 +627,12 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations(
+def test_suite_edit_multiple_datasources_with_no_additional_args_without_citations(
     mock_webbrowser,
     mock_subprocess,
     caplog,
     monkeypatch,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify batch_request
@@ -654,7 +654,21 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
-    root_dir: str = context.root_directory
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    batch_request_string: str = (
+        str(BatchRequest(**batch_request))
+        .replace("{\n", "{\n  ")
+        .replace(",\n", ",\n  ")
+        .replace("\n}", ",\n}")
+    )
+    batch_request_string = fr"batch_request = {batch_request_string}"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
@@ -672,17 +686,28 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
         catch_exceptions=False,
     )
     assert result.exit_code == 0
+
+    # TODO: <Alex>ALEX</Alex>
+    stdout: str = result.stdout
+    assert "A batch of data is required to edit the suite" in stdout
+    assert "Select a datasource" in stdout
+
     assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 0
     mock_webbrowser.reset_mock()
+
+    assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
 
     # remove the citations from the suite
-    context = DataContext(root_dir)
-    suite = context.get_expectation_suite("foo_suite")
+    context = DataContext(context_root_dir=project_dir)
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name="foo_suite"
+    )
     assert isinstance(suite, ExpectationSuite)
-    suite.meta.pop("citations")
-    context.save_expectation_suite(suite)
+
+    suite.meta.pop("citations", None)
+    context.save_expectation_suite(expectation_suite=suite)
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
@@ -694,24 +719,50 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
             "suite",
             "edit",
             "foo_suite",
+            "--interactive",
         ],
-        input="2\n1\n1\n\n",
+        input="1\n1\n1\n\n",
         catch_exceptions=False,
     )
 
     assert result.exit_code == 0
+
     stdout = result.stdout
     assert "A batch of data is required to edit the suite" in stdout
     assert "Select a datasource" in stdout
-    assert "Which data would you like to use" in stdout
 
-    expected_notebook_path = os.path.join(
-        root_dir, "uncommitted", "edit_foo_suite.ipynb"
-    )
+    expected_notebook_path: str = os.path.join(uncommitted_dir, "edit_foo_suite.ipynb")
     assert os.path.isfile(expected_notebook_path)
 
-    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", "foo_suite.json"
+    )
     assert os.path.isfile(expected_suite_path)
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        replacement_string="",
+    )
 
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
@@ -719,7 +770,6 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 

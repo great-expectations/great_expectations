@@ -146,6 +146,9 @@ def _suite_new(
             scaffold=scaffold,
             additional_batch_request_args={"limit": 1000},
         )
+        print(
+            f"\n[ALEX_TEST] [SUITE-NEW] BATCH_REQUEST: {batch_request} ; TYPE: {str(type(batch_request))}"
+        )
         if not no_jupyter:
             cli_message(
                 string="""<green>Opening a notebook for you now to edit your expectation suite!
@@ -356,7 +359,6 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     sys.exit(1)
 
                 batch_request = get_batch_request(
-                    context=context,
                     datasource=datasource,
                     additional_batch_request_args=None,
                 )

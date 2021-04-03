@@ -86,6 +86,9 @@ def create_expectation_suite(
 
     if interactive:
         if not batch_request:
+            cli_message(
+                string="""A batch of data is required to edit the suite - let's help you to specify it."""
+            )
             datasource: BaseDatasource = select_datasource(
                 context=context, datasource_name=datasource_name
             )
