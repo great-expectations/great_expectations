@@ -1,4 +1,4 @@
-import copy
+from copy import deepcopy
 import logging
 from typing import Dict, List, Optional, Union
 
@@ -197,7 +197,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return self._get_full_file_path_for_asset(path=path, asset=asset)
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
-        regex_config: dict = copy.deepcopy(self._default_regex)
+        regex_config: dict = deepcopy(self._default_regex)
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
@@ -235,12 +235,24 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
+
+        data_asset_name: str = batch_definition.data_asset_name
+        if (
+                data_asset_name in self.assets
+                and self.assets[data_asset_name].get("batch_spec_passthrough")
+                and isinstance(
+            self.assets[data_asset_name].get("batch_spec_passthrough"), dict
+        )
+        ):
+            # batch_spec_passthrough from data_asset
+            batch_spec_passthrough = deepcopy(self.assets[data_asset_name]["batch_spec_passthrough"])
+            batch_definition_batch_spec_passthrough = deepcopy(batch_definition.batch_spec_passthrough) or {}
+            # batch_spec_passthrough from Batch Definition supercedes batch_spec_passthrough from data_asset
+            batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
+            batch_definition.batch_spec_passthrough = batch_spec_passthrough
+
         batch_spec: PathBatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-
-        data_asset_name: str = batch_definition.data_asset_name
-        if data_asset_name in self.assets:
-            batch_spec.update(self.assets[data_asset_name].batch_spec_passthrough)
 
         return batch_spec

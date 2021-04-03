@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Dict, List, Optional
 
 from great_expectations.core.batch import (
@@ -196,9 +197,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
 
         data_asset_name: str = batch_definition.data_asset_name
         if (
@@ -208,9 +206,16 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 self.data_assets[data_asset_name].get("batch_spec_passthrough"), dict
             )
         ):
-            batch_spec.update(
-                self.data_assets[data_asset_name]["batch_spec_passthrough"]
-            )
+            # batch_spec_passthrough from data_asset
+            batch_spec_passthrough = deepcopy(self.data_assets[data_asset_name]["batch_spec_passthrough"])
+            batch_definition_batch_spec_passthrough = deepcopy(batch_definition.batch_spec_passthrough) or {}
+            # batch_spec_passthrough from Batch Definition supercedes batch_spec_passthrough from data_asset
+            batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
+            batch_definition.batch_spec_passthrough = batch_spec_passthrough
+
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
 
         return SqlAlchemyDatasourceBatchSpec(batch_spec)
 
