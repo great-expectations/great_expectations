@@ -929,6 +929,7 @@ def test_notebook_execution_with_pandas_backend(
         no_jupyter=True,
         batch_request=batch_request,
         usage_event="test_notebook_execution",
+        create_if_not_exist=False,
         interactive=False,
         datasource=None,
         suppress_usage_message=True,

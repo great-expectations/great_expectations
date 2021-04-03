@@ -162,6 +162,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             no_jupyter=no_jupyter,
             batch_request=batch_request,
             usage_event=usage_event,
+            create_if_not_exist=True,
             interactive=interactive,
             suppress_usage_message=True,  # do not want to actually send usage_message, since the function call is not the result of actual usage
         )
@@ -239,6 +240,7 @@ def suite_edit(ctx, suite, interactive, datasource, no_jupyter, batch_request):
         no_jupyter=no_jupyter,
         batch_request=batch_request,
         usage_event=usage_event,
+        create_if_not_exist=False,
         interactive=interactive,
         datasource=datasource,
         suppress_usage_message=False,
@@ -250,6 +252,7 @@ def _suite_edit(
     suite_name: str,
     no_jupyter: bool,
     usage_event: str,
+    create_if_not_exist: Optional[bool] = False,
     interactive: Optional[bool] = False,
     datasource: Optional[str] = None,
     suppress_usage_message: Optional[bool] = False,
@@ -269,7 +272,10 @@ def _suite_edit(
         usage_event = None
 
     suite: ExpectationSuite = toolkit.load_expectation_suite(
-        context=context, suite_name=suite_name, usage_event=usage_event
+        context=context,
+        suite_name=suite_name,
+        usage_event=usage_event,
+        create_if_not_exist=create_if_not_exist,
     )
 
     batch_request_from_citation: Optional[
