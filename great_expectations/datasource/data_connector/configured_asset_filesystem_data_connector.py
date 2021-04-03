@@ -37,6 +37,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         default_regex: Optional[dict] = None,
         glob_directive: str = "**/*",
         sorters: Optional[list] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         Base class for DataConnectors that connect to data on a filesystem. This class supports the configuration of default_regex
@@ -50,6 +51,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             default_regex (dict): Optional dict the filter and organize the data_references.
             glob_directive (str): glob for selecting files in directory (defaults to *)
             sorters (list): Optional list if you want to sort the data_references
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
 
         """
         logger.debug(f'Constructing ConfiguredAssetFilesystemDataConnector "{name}".')
@@ -61,6 +63,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough
         )
 
         self._base_directory = base_directory

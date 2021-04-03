@@ -28,6 +28,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         datasource_name (str): The name of the Datasource that contains it
         execution_engine (ExecutionEngine): An ExecutionEngine
         data_assets (str): data_assets
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
     def __init__(
@@ -36,6 +37,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
         data_assets: Optional[Dict[str, dict]] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         if data_assets is None:
             data_assets = {}
@@ -45,6 +47,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
+            batch_spec_passthrough=batch_spec_passthrough
         )
 
     @property

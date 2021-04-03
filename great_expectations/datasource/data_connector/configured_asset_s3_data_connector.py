@@ -48,6 +48,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         delimiter: Optional[str] = "/",
         max_keys: Optional[int] = 1000,
         boto3_options: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         ConfiguredAssetDataConnector for connecting to S3.
@@ -64,6 +65,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             boto3_options (dict): optional boto3 options
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
 
@@ -74,6 +76,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             assets=assets,
             default_regex=default_regex,
             sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough
         )
         self._bucket = bucket
         self._prefix = os.path.join(prefix, "")

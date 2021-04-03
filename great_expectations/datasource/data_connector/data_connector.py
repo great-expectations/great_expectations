@@ -43,6 +43,7 @@ class DataConnector:
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
+        batch_spec_passthrough: Optional[dict] = None
     ):
         """
         Base class for DataConnectors
@@ -51,7 +52,7 @@ class DataConnector:
             name (str): required name for DataConnector
             datasource_name (str): required name for datasource
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
-
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         self._name = name
         self._datasource_name = datasource_name
@@ -61,6 +62,7 @@ class DataConnector:
         self._data_references_cache = {}
 
         self._data_context_root_directory = None
+        self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
     def name(self) -> str:

@@ -27,12 +27,26 @@ DEFAULT_DELIMITER: str = "-"
 
 
 class RuntimeDataConnector(DataConnector):
+    """
+    A DataConnector that allows users to specify a Batch's data directly using a RuntimeBatchRequest that contains
+    either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path, or an arbitrary SQL query
+
+    Args:
+        name (str): The name of this DataConnector
+        datasource_name (str): The name of the Datasource that contains it
+        execution_engine (ExecutionEngine): An ExecutionEngine
+        batch_identifiers (list): a list of keys that must be defined in the batch_identifiers dict of
+        RuntimeBatchRequest
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+    """
+
     def __init__(
         self,
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
         batch_identifiers: Optional[list] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
@@ -40,6 +54,7 @@ class RuntimeDataConnector(DataConnector):
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
+            batch_spec_passthrough=batch_spec_passthrough
         )
 
         self._batch_identifiers = batch_identifiers
