@@ -129,8 +129,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             batch_definition=batch_definition
         )
 
-        batch_spec.update(self._batch_spec_passthrough)
-
         return PathBatchSpec(batch_spec)
 
     def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
