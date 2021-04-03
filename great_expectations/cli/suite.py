@@ -155,6 +155,10 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             data_context=context, event=usage_event, success=True
         )
 
+        datasource_name: Optional[str] = None
+        if batch_request:
+            datasource_name = batch_request.get("datasource_name")
+
         usage_event = "cli.suite.edit"  # or else we will be sending `cli.suite.new` which is incorrect
         _suite_edit(
             context=context,
@@ -164,6 +168,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             usage_event=usage_event,
             create_if_not_exist=True,
             interactive=interactive,
+            datasource=datasource_name,
             suppress_usage_message=True,  # do not want to actually send usage_message, since the function call is not the result of actual usage
         )
     except (
@@ -352,7 +357,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
                 batch_request = get_batch_request(
                     context=context,
-                    datasource_name=datasource.name,
+                    datasource=datasource,
                     additional_batch_request_args=None,
                 )
 

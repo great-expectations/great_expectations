@@ -68,7 +68,6 @@ yaml.default_flow_style = False
 
 def create_expectation_suite(
     context: DataContext,
-    datasource_name: Optional[str] = None,
     batch_request: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None,
     expectation_suite_name: Optional[str] = None,
     interactive: Optional[bool] = False,
@@ -82,25 +81,26 @@ def create_expectation_suite(
 
     :return: a tuple: (suite name, profiling_results)
     """
+    datasource_name: Optional[str] = None
     data_asset_name: Optional[str] = None
 
     if interactive:
         if not batch_request:
-            data_source: Optional[BaseDatasource] = select_datasource(
+            datasource: BaseDatasource = select_datasource(
                 context=context, datasource_name=datasource_name
             )
 
-            if data_source is None:
+            if datasource is None:
                 # select_datasource takes care of displaying an error message, so all is left here is to exit.
                 sys.exit(1)
 
             batch_request = get_batch_request(
-                context=context,
-                datasource_name=datasource_name,
+                datasource=datasource,
                 additional_batch_request_args=additional_batch_request_args,
             )
             # In this case, we have "consumed" the additional_batch_request_args
             additional_batch_request_args = {}
+
         data_asset_name = batch_request.get("data_asset_name")
     else:
         batch_request = None
@@ -415,7 +415,7 @@ def load_checkpoint(
 
 def select_datasource(
     context: DataContext, datasource_name: str = None
-) -> Optional[BaseDatasource]:
+) -> BaseDatasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source: Optional[BaseDatasource] = None

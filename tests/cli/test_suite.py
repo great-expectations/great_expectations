@@ -625,12 +625,6 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations(
@@ -638,30 +632,32 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     mock_subprocess,
     caplog,
     monkeypatch,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 ):
     """
-    Here we verify that the "suite edit" command helps the user to specify the batch
-    kwargs when it is called without the optional arguments that specify the batch.
+    Here we verify that the "suite edit" command helps the user to specify batch_request
+    when it is called without the optional command-line arguments that specify the batch.
 
     First, we call the "suite new" command to create the expectation suite our test
-    will edit - this step is a just a setup.
+    will edit -- this step is a just a setup.
 
-    We call the "suite edit" command without any optional arguments. This means that
-    the command will help us specify the batch kwargs interactively.
+    We call the "suite edit" command without any optional command-line arguments.  This means that
+    the command will help us specify batch_request interactively.
 
-    The data context has two datasources - we choose one of them. It has a generator
-    configured. We choose to use the generator and select a generator asset from the list.
+    The data context has two datasources -- we choose one of them.
+    We then select a data connector and finally select a data asset from the list.
 
     The command should:
     - NOT open Data Docs
     - open jupyter
     """
-    context = site_builder_data_context_v013_with_html_store_titanic_random
-    root_dir = context.root_directory
-    runner = CliRunner(mix_stderr=False)
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+
+    root_dir: str = context.root_directory
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         [
             "--v3-api",
@@ -669,9 +665,10 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
             "new",
             "--suite",
             "foo_suite",
+            "--interactive",
             "--no-jupyter",
         ],
-        input="2\n1\n1\n\n",
+        input="1\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

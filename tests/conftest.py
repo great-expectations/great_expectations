@@ -2385,12 +2385,44 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                 batch_identifiers:
                     - pipeline_stage_name
                     - airflow_run_id
-        """
+    """
 
     # noinspection PyUnusedLocal
     datasource: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
+
+    if (
+        any(
+            [
+                dbms in test_backends
+                for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
+            ]
+        )
+        and (sa is not None)
+        and is_library_loadable(library_name="sqlalchemy")
+    ):
+        db_file = file_relative_path(
+            __file__,
+            "test_sets/test_cases_for_sql_data_connector.db",
+        )
+        datasource_config = f"""
+            class_name: Datasource
+            execution_engine:
+                class_name: SqlAlchemyExecutionEngine
+                connection_string: sqlite:///{db_file}
+            data_connectors:
+                my_runtime_data_connector:
+                    module_name: great_expectations.datasource.data_connector
+                    class_name: RuntimeDataConnector
+                    batch_identifiers:
+                        - pipeline_stage_name
+                        - airflow_run_id
+        """
+
+        context.test_yaml_config(
+            name="my_runtime_sql_datasource", yaml_config=datasource_config
+        )
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -4204,7 +4236,7 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
                 batch_identifiers:
                     - pipeline_stage_name
                     - airflow_run_id
-        """
+    """
 
     context.test_yaml_config(
         name="my_runtime_sql_datasource", yaml_config=datasource_config
@@ -4335,9 +4367,9 @@ data_connectors:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
         batch_identifiers:
-        - pipeline_stage_name
-        - airflow_run_id
-        - custom_key_0
+            - pipeline_stage_name
+            - airflow_run_id
+            - custom_key_0
 
 execution_engine:
     class_name: PandasExecutionEngine
