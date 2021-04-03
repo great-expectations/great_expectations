@@ -1,3 +1,4 @@
+import copy
 import os
 import sys
 from typing import Any, Dict, List, Optional, Union
@@ -261,8 +262,27 @@ def _suite_edit(
             "The --batch-request <path to JSON file> requires the --interactive flag."
         )
 
+    if not interactive and datasource:
+        raise ValueError("The --datasource option requires the --interactive flag.")
+
     if suppress_usage_message:
         usage_event = None
+
+    suite: ExpectationSuite = toolkit.load_expectation_suite(
+        context=context, suite_name=suite_name, usage_event=usage_event
+    )
+
+    batch_request_from_citation: Optional[
+        Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+    ] = None
+    batch_request_from_citation_is_up_to_date: bool = True
+    if interactive:
+        citations: List[Dict[str, Any]] = suite.get_citations(
+            require_batch_request=True
+        )
+        if citations:
+            citation: Dict[str, Any] = citations[-1]
+            batch_request_from_citation = citation.get("batch_request")
 
     try:
         if batch_request is not None and isinstance(batch_request, str):
@@ -271,6 +291,8 @@ def _suite_edit(
                 usage_event=usage_event,
                 data_context=context,
             )
+            if batch_request != batch_request_from_citation:
+                batch_request_from_citation_is_up_to_date = False
     except ValueError as e:
         cli_message(string="<red>{}</red>".format(e))
         toolkit.send_usage_message(
@@ -283,48 +305,64 @@ def _suite_edit(
         )
         raise e
 
-    if not interactive and datasource:
-        raise ValueError("The --datasource option requires the --interactive flag.")
-
     try:
         if interactive and not (
             batch_request
             and isinstance(batch_request, dict)
             and BatchRequest(**batch_request)
         ):
-            cli_message(
-                string="""
+            if (
+                batch_request_from_citation
+                and isinstance(batch_request_from_citation, dict)
+                and BatchRequest(**batch_request_from_citation)
+            ):
+                batch_request = copy.deepcopy(batch_request_from_citation)
+            else:
+                cli_message(
+                    string="""
 A batch of data is required to edit the suite - let's help you to specify it."""
-            )
-
-            try:
-                datasource = toolkit.select_datasource(
-                    context=context, datasource_name=datasource
                 )
-            except ValueError as ve:
-                cli_message(string="<red>{}</red>".format(ve))
-                toolkit.send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
-                sys.exit(1)
 
-            if not datasource:
-                cli_message(string="<red>No datasources found in the context.</red>")
-                if not suppress_usage_message:
+                try:
+                    datasource = toolkit.select_datasource(
+                        context=context, datasource_name=datasource
+                    )
+                except ValueError as ve:
+                    cli_message(string="<red>{}</red>".format(ve))
                     toolkit.send_usage_message(
                         data_context=context, event=usage_event, success=False
                     )
-                sys.exit(1)
+                    sys.exit(1)
 
-            batch_request = get_batch_request(
-                context=context,
-                datasource_name=datasource.name,
-                additional_batch_request_args=None,
+                if not datasource:
+                    cli_message(
+                        string="<red>No datasources found in the context.</red>"
+                    )
+                    if not suppress_usage_message:
+                        toolkit.send_usage_message(
+                            data_context=context, event=usage_event, success=False
+                        )
+                    sys.exit(1)
+
+                batch_request = get_batch_request(
+                    context=context,
+                    datasource_name=datasource.name,
+                    additional_batch_request_args=None,
+                )
+
+                if batch_request != batch_request_from_citation:
+                    batch_request_from_citation_is_up_to_date = False
+
+        if (
+            not batch_request_from_citation_is_up_to_date
+            and batch_request
+            and isinstance(batch_request, dict)
+            and BatchRequest(**batch_request)
+        ):
+            suite.add_citation(
+                comment="Updated suite added via CLI",
+                batch_request=batch_request,
             )
-
-        suite: ExpectationSuite = toolkit.load_expectation_suite(
-            context=context, suite_name=suite_name, usage_event=usage_event
-        )
 
         notebook_name: str = "edit_{}.ipynb".format(suite_name)
         notebook_path: str = _get_notebook_path(context, notebook_name)
