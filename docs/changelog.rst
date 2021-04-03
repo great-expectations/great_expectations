@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 
 
 0.13.17
