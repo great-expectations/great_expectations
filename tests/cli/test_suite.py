@@ -570,11 +570,11 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
         f"--v3-api suite edit not_a_real_suite",
         catch_exceptions=False,
     )
-    # assert result.exit_code == 1
+    assert result.exit_code == 1
 
     stdout: str = result.stdout
-    assert "Could not find a suite named `not_a_real_suite`." in result.output
-    assert "by running `great_expectations suite list`" in result.output
+    assert "Could not find a suite named `not_a_real_suite`." in stdout
+    assert "by running `great_expectations suite list`" in stdout
 
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
