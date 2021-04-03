@@ -961,7 +961,7 @@ def test_notebook_execution_with_pandas_backend(
 
 
 def test_notebook_execution_with_custom_notebooks_wrong_module(
-    suite_with_multiple_citations, data_context_with_bad_notebooks
+    suite_with_multiple_citations, data_context_v3_custom_bad_notebooks
 ):
     """
     Test the error message in case of "bad" custom module is clear
@@ -970,8 +970,8 @@ def test_notebook_execution_with_custom_notebooks_wrong_module(
         SuiteEditNotebookCustomTemplateModuleNotFoundError, match=r"invalid\.module"
     ):
         SuiteEditNotebookRenderer.from_data_context(
-            data_context_with_bad_notebooks
-        ).render(suite_with_multiple_citations)
+            data_context=data_context_v3_custom_bad_notebooks
+        ).render(suite=suite_with_multiple_citations)
 
 
 def test_notebook_execution_with_custom_notebooks(
