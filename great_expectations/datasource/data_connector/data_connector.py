@@ -122,9 +122,14 @@ class DataConnector:
                 batch_definition=batch_definition
             )
         )
-        batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
-        if isinstance(batch_spec_passthrough, dict):
-            batch_spec_params.update(batch_spec_passthrough)
+        # batch_spec_passthrough via Data Connector config
+        batch_spec_passthrough: dict = self.batch_spec_passthrough
+
+        # batch_spec_passthrough from batch_definition supercedes batch_spec_passthrough from Data Connector config
+        if isinstance(batch_definition.batch_spec_passthrough, dict):
+            batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
+
+        batch_spec_params.update(batch_spec_passthrough)
         batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
         return batch_spec
 
