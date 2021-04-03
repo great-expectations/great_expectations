@@ -65,6 +65,10 @@ class DataConnector:
         self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
+    def batch_spec_passthrough(self) -> dict:
+        return self._batch_spec_passthrough
+
+    @property
     def name(self) -> str:
         return self._name
 
