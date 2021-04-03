@@ -573,7 +573,6 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     # assert result.exit_code == 1
 
     stdout: str = result.stdout
-    print(f"\n[ALEX_TEST] WOUTPUT: {stdout}")
     assert "Could not find a suite named `not_a_real_suite`." in result.output
     assert "by running `great_expectations suite list`" in result.output
 
