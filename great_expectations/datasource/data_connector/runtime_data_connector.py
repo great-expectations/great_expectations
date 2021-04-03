@@ -54,7 +54,7 @@ class RuntimeDataConnector(DataConnector):
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
-            batch_spec_passthrough=batch_spec_passthrough
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         self._batch_identifiers = batch_identifiers

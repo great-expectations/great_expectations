@@ -43,7 +43,7 @@ class DataConnector:
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        batch_spec_passthrough: Optional[dict] = None
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         Base class for DataConnectors

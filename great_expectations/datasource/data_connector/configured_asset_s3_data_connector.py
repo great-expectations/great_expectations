@@ -76,7 +76,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             assets=assets,
             default_regex=default_regex,
             sorters=sorters,
-            batch_spec_passthrough=batch_spec_passthrough
+            batch_spec_passthrough=batch_spec_passthrough,
         )
         self._bucket = bucket
         self._prefix = os.path.join(prefix, "")

@@ -1,5 +1,5 @@
-from copy import deepcopy
 import logging
+from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -62,7 +62,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
-            batch_spec_passthrough=batch_spec_passthrough
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         if assets is None:
@@ -238,15 +238,19 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         data_asset_name: str = batch_definition.data_asset_name
         if (
-                data_asset_name in self.assets
-                and self.assets[data_asset_name].get("batch_spec_passthrough")
-                and isinstance(
-            self.assets[data_asset_name].get("batch_spec_passthrough"), dict
-        )
+            data_asset_name in self.assets
+            and self.assets[data_asset_name].get("batch_spec_passthrough")
+            and isinstance(
+                self.assets[data_asset_name].get("batch_spec_passthrough"), dict
+            )
         ):
             # batch_spec_passthrough from data_asset
-            batch_spec_passthrough = deepcopy(self.assets[data_asset_name]["batch_spec_passthrough"])
-            batch_definition_batch_spec_passthrough = deepcopy(batch_definition.batch_spec_passthrough) or {}
+            batch_spec_passthrough = deepcopy(
+                self.assets[data_asset_name]["batch_spec_passthrough"]
+            )
+            batch_definition_batch_spec_passthrough = (
+                deepcopy(batch_definition.batch_spec_passthrough) or {}
+            )
             # batch_spec_passthrough from Batch Definition supercedes batch_spec_passthrough from data_asset
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough

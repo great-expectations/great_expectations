@@ -74,7 +74,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             data_assets=None,
-            batch_spec_passthrough=batch_spec_passthrough
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         # This cache will contain a "config" for each data_asset discovered via introspection.

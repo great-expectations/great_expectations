@@ -63,7 +63,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
-            batch_spec_passthrough=batch_spec_passthrough
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         self._base_directory = base_directory

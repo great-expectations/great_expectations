@@ -53,7 +53,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
-            batch_spec_passthrough=batch_spec_passthrough
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
     def _refresh_data_references_cache(self):
