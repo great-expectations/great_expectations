@@ -535,12 +535,6 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=False,
-    strict=True,
-)
 def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_context):
     """This is really only testing click missing arguments"""
     runner = CliRunner(mix_stderr=False)
@@ -550,106 +544,6 @@ def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_cont
     assert (
         'Error: Missing argument "SUITE".' in result.stderr
         or "Error: Missing argument 'SUITE'." in result.stderr
-    )
-
-
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch("subprocess.call", return_value=True, side_effect=None)
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
-    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
-):
-    """
-    The command should:
-    - exit with a clear error message
-    - NOT open Data Docs
-    - NOT open jupyter
-    """
-    project_dir: str = empty_data_context.root_directory
-    context: DataContext = DataContext(context_root_dir=project_dir)
-    context.create_expectation_suite(expectation_suite_name="foo")
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-
-    runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        [
-            "--v3-api",
-            "suite",
-            "edit",
-            "foo",
-            "--batch-kwargs",
-            "'{foobar}'",
-        ],
-        catch_exceptions=False,
-    )
-    stdout = result.output
-    assert result.exit_code == 1
-    assert "Please check that your batch_kwargs are valid JSON." in stdout
-
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 0
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch("subprocess.call", return_value=True, side_effect=None)
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error(
-    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
-):
-    """
-    The command should:
-    - exit with a clear error message
-    - NOT open Data Docs
-    - NOT open jupyter
-    """
-    project_dir = empty_data_context.root_directory
-
-    context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
-    context.add_datasource("source", class_name="PandasDatasource")
-
-    runner = CliRunner(mix_stderr=False)
-    batch_kwargs = '{"table": "fake", "datasource": "source"}'
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        [
-            "--v3-api",
-            "suite",
-            "edit",
-            "foo",
-            "--batch-kwargs",
-            batch_kwargs,
-        ],
-        catch_exceptions=False,
-    )
-    stdout = result.output
-    assert result.exit_code == 1
-    assert "To continue editing this suite" not in stdout
-    assert "Please check that your batch_kwargs are able to load a batch." in stdout
-
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 0
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
     )
 
 
