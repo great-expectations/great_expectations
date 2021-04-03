@@ -585,12 +585,6 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=False,
-    strict=True,
-)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
@@ -602,22 +596,24 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     - NOT open Data Docs
     - NOT open jupyter
     """
-    project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
+    context: DataContext = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.create_expectation_suite(expectation_suite_name="foo")
     assert context.list_expectation_suites()[0].expectation_suite_name == "foo"
 
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit foo --datasource not_real",
+        f"--v3-api suite edit foo --interactive --datasource not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "Unable to load datasource `not_real` -- no configuration found or invalid configuration."
-        in result.output
+        in stdout
     )
 
     assert mock_webbrowser.call_count == 0
