@@ -44,7 +44,7 @@ Steps
                 }
                 batch = context.get_batch(batch_kwargs, "existing_expectation_suite_name")
 
-        #. **Optionally, configure a BatchKwargsGenerator that will allow you to generate Data Assets and Partitions from your S3 bucket.**
+        #. **Optionally, configure a BatchKwargsGenerator that will allow you to generate Data Assets and Batches from your S3 bucket.**
 
             Update your datasource configuration to include the new Batch Kwargs Generator:
 
