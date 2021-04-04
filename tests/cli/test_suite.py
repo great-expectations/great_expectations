@@ -537,10 +537,13 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
 
 def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_context):
     """This is really only testing click missing arguments"""
-    monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
+    context: DataContext = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(cli, "--v3-api suite edit", catch_exceptions=False)
     assert result.exit_code == 2
+
     assert (
         'Error: Missing argument "EXPECTATION_SUITE".' in result.stderr
         or "Error: Missing argument 'EXPECTATION_SUITE'." in result.stderr
@@ -549,17 +552,32 @@ def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_cont
 
 def test_suite_edit_datasource_and_batch_request_error(monkeypatch, empty_data_context):
     """This is really only testing click missing arguments"""
-    monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
+    context: DataContext = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    expectation_suite_name: str = "test_suite_name"
+
+    # noinspection PyUnusedLocal
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert (
+        context.list_expectation_suites()[0].expectation_suite_name
+        == expectation_suite_name
+    )
+
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite edit --datasource_name some_datasource_name --batch-request some_file.json --interactive",
+        f"--v3-api suite edit {expectation_suite_name} --datasource_name some_datasource_name --batch-request some_file.json --interactive",
         catch_exceptions=False,
     )
-    assert result.exit_code == 2
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
-        'Error: Missing argument "EXPECTATION_SUITE".' in result.stderr
-        or "Error: Missing argument 'EXPECTATION_SUITE'." in result.stderr
+        "Only one of --datasource_name DATASOURCE_NAME and --batch-request <path to JSON file> options can be used."
+        in stdout
     )
 
 

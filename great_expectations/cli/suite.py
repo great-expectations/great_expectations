@@ -133,7 +133,7 @@ def _suite_new_workflow(
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=False
         )
-        raise ValueError(error_message)
+        sys.exit(1)
 
     try:
         if batch_request is not None and isinstance(batch_request, str):
@@ -291,7 +291,7 @@ def suite_edit(
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=False
         )
-        raise ValueError(error_message)
+        sys.exit(1)
 
     _suite_edit_workflow(
         context=context,
@@ -332,7 +332,7 @@ def _suite_edit_workflow(
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=False
         )
-        raise ValueError(error_message)
+        sys.exit(1)
 
     if suppress_usage_message:
         usage_event = None
