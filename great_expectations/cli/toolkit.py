@@ -283,7 +283,7 @@ def get_validator(
 def load_expectation_suite(
     # TODO consolidate all the myriad CLI tests into this
     context: DataContext,
-    suite_name: str,
+    expectation_suite_name: str,
     usage_event: str,
     create_if_not_exist: Optional[bool] = True,
 ) -> Optional[ExpectationSuite]:
@@ -292,27 +292,31 @@ def load_expectation_suite(
 
     Handles a suite name with or without `.json`
     :param context:
-    :param suite_name:
+    :param expectation_suite_name:
     :param usage_event:
     :param create_if_not_exist:
     """
-    if suite_name.endswith(".json"):
-        suite_name = suite_name[:-5]
+    if expectation_suite_name.endswith(".json"):
+        expectation_suite_name = expectation_suite_name[:-5]
 
     suite: Optional[ExpectationSuite]
     try:
-        suite = context.get_expectation_suite(expectation_suite_name=suite_name)
+        suite = context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
         return suite
     except ge_exceptions.DataContextError:
         if create_if_not_exist:
-            suite = context.create_expectation_suite(expectation_suite_name=suite_name)
+            suite = context.create_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
             return suite
         else:
             suite = None
             exit_with_failure_message_and_stats(
                 context=context,
                 usage_event=usage_event,
-                message=f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
+                message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check "
                 "the name by running `great_expectations suite list` and try again.",
             )
     return suite

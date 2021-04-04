@@ -53,7 +53,7 @@ def suite(ctx):
 
 @suite.command(name="new")
 @click.option(
-    "--suite",
+    "--expectation-suite",
     "-e",
     default=None,
     help="Expectation suite name.",
@@ -92,7 +92,7 @@ Requires the --interactive flag.
     default=None,
 )
 @click.pass_context
-def suite_new(ctx, suite, interactive, scaffold, no_jupyter, batch_request):
+def suite_new(ctx, expectation_suite, interactive, scaffold, no_jupyter, batch_request):
     """
     Create a new empty Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
@@ -101,7 +101,7 @@ def suite_new(ctx, suite, interactive, scaffold, no_jupyter, batch_request):
     usage_event: str = "cli.suite.new"
     _suite_new(
         context=context,
-        suite_name=suite,
+        expectation_suite_name=expectation_suite,
         interactive=interactive,
         scaffold=scaffold,
         no_jupyter=no_jupyter,
@@ -112,7 +112,7 @@ def suite_new(ctx, suite, interactive, scaffold, no_jupyter, batch_request):
 
 def _suite_new(
     context: DataContext,
-    suite_name: str,
+    expectation_suite_name: str,
     interactive: bool,
     scaffold: bool,
     no_jupyter: bool,
@@ -138,17 +138,34 @@ def _suite_new(
         # TODO: <Alex>ALEX -- Can we be more precise about the type of profiling results in V3?</Alex>
         profiling_results: dict
         # TODO: <Alex>ALEX -- change method name; it does not create expectation suite any more.</Alex>
-        suite_name, batch_request, profiling_results = toolkit.create_expectation_suite(
+        (
+            expectation_suite_name,
+            batch_request,
+            profiling_results,
+        ) = toolkit.create_expectation_suite(
             context=context,
             batch_request=batch_request,
-            expectation_suite_name=suite_name,
+            expectation_suite_name=expectation_suite_name,
             interactive=interactive,
             scaffold=scaffold,
             additional_batch_request_args={"limit": 1000},
         )
-        print(
-            f"\n[ALEX_TEST] [SUITE-NEW] BATCH_REQUEST: {batch_request} ; TYPE: {str(type(batch_request))}"
+        suite: ExpectationSuite = toolkit.load_expectation_suite(
+            context=context,
+            expectation_suite_name=expectation_suite_name,
+            usage_event=usage_event,
+            create_if_not_exist=True,
         )
+        if (
+            batch_request
+            and isinstance(batch_request, dict)
+            and BatchRequest(**batch_request)
+        ):
+            suite.add_citation(
+                comment="Created suite added via CLI",
+                batch_request=batch_request,
+            )
+            context.save_expectation_suite(expectation_suite=suite)
         if not no_jupyter:
             cli_message(
                 string="""<green>Opening a notebook for you now to edit your expectation suite!
@@ -165,7 +182,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         usage_event = "cli.suite.edit"  # or else we will be sending `cli.suite.new` which is incorrect
         _suite_edit(
             context=context,
-            suite_name=suite_name,
+            expectation_suite_name=expectation_suite_name,
             no_jupyter=no_jupyter,
             batch_request=batch_request,
             usage_event=usage_event,
@@ -194,7 +211,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
 
 @suite.command(name="edit")
-@click.argument("suite")
+@click.argument("expectation_suite")
 @click.option(
     "--interactive",
     "-i",
@@ -228,7 +245,9 @@ Requires the --interactive flag.
     default=None,
 )
 @click.pass_context
-def suite_edit(ctx, suite, interactive, datasource, no_jupyter, batch_request):
+def suite_edit(
+    ctx, expectation_suite, interactive, datasource, no_jupyter, batch_request
+):
     """
     Generate a Jupyter notebook for editing an existing Expectation Suite.
 
@@ -244,7 +263,7 @@ def suite_edit(ctx, suite, interactive, datasource, no_jupyter, batch_request):
     usage_event: str = "cli.suite.edit"
     _suite_edit(
         context=context,
-        suite_name=suite,
+        expectation_suite_name=expectation_suite,
         no_jupyter=no_jupyter,
         batch_request=batch_request,
         usage_event=usage_event,
@@ -257,7 +276,7 @@ def suite_edit(ctx, suite, interactive, datasource, no_jupyter, batch_request):
 
 def _suite_edit(
     context: DataContext,
-    suite_name: str,
+    expectation_suite_name: str,
     no_jupyter: bool,
     usage_event: str,
     create_if_not_exist: Optional[bool] = False,
@@ -281,7 +300,7 @@ def _suite_edit(
 
     suite: ExpectationSuite = toolkit.load_expectation_suite(
         context=context,
-        suite_name=suite_name,
+        expectation_suite_name=expectation_suite_name,
         usage_event=usage_event,
         create_if_not_exist=create_if_not_exist,
     )
@@ -376,8 +395,9 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 comment="Updated suite added via CLI",
                 batch_request=batch_request,
             )
+            context.save_expectation_suite(expectation_suite=suite)
 
-        notebook_name: str = "edit_{}.ipynb".format(suite_name)
+        notebook_name: str = "edit_{}.ipynb".format(expectation_suite_name)
         notebook_path: str = _get_notebook_path(context, notebook_name)
         SuiteEditNotebookRenderer.from_data_context(
             data_context=context
