@@ -547,6 +547,22 @@ def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_cont
     )
 
 
+def test_suite_edit_datasource_and_batch_request_error(monkeypatch, empty_data_context):
+    """This is really only testing click missing arguments"""
+    monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        "--v3-api suite edit --datasource_name some_datasource_name --batch-request some_file.json --interactive",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 2
+    assert (
+        'Error: Missing argument "EXPECTATION_SUITE".' in result.stderr
+        or "Error: Missing argument 'EXPECTATION_SUITE'." in result.stderr
+    )
+
+
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_suite_name_raises_error(
@@ -613,7 +629,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit {expectation_suite_name} --interactive --datasource not_real",
+        f"--v3-api suite edit {expectation_suite_name} --interactive --datasource_name not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1037,7 +1053,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
             "foo",
             "--batch-kwargs",
             json.dumps(batch_kwargs),
-            "--datasource",
+            "--datasource_name",
             "mydatasource",
         ],
         catch_exceptions=False,

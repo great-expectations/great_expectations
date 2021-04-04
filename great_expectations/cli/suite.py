@@ -99,6 +99,7 @@ def suite_new(ctx, expectation_suite, interactive, scaffold, batch_request, no_j
     """
     context: DataContext = ctx.obj.data_context
     usage_event: str = "cli.suite.new"
+
     _suite_new_workflow(
         context=context,
         expectation_suite_name=expectation_suite,
@@ -119,13 +120,20 @@ def _suite_new_workflow(
     usage_event: str,
     batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
 ) -> None:
-    if not interactive and scaffold:
-        raise ValueError("The --scaffold flag requires the --interactive flag.")
+    error_message: Optional[str] = None
 
     if not (interactive or (batch_request is None)):
-        raise ValueError(
-            "The --batch-request <path to JSON file> requires the --interactive flag."
+        error_message = "The --batch-request <path to JSON file> option requires the --interactive flag."
+
+    if not interactive and scaffold:
+        error_message = "The --scaffold flag requires the --interactive flag."
+
+    if error_message is not None:
+        cli_message(string=f"<red>{error_message}</red>")
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
         )
+        raise ValueError(error_message)
 
     try:
         if batch_request is not None and isinstance(batch_request, str):
@@ -199,7 +207,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             usage_event=usage_event,
             create_if_not_exist=True,
             interactive=interactive,
-            datasource=datasource_name,
+            datasource_name=datasource_name,
             suppress_usage_message=True,  # do not want to actually send usage_message, since the function call is not the result of actual usage
         )
     except (
@@ -234,7 +242,7 @@ Incompatible with the --batch-request option.
 """,
 )
 @click.option(
-    "--datasource",
+    "--datasource_name",
     "-ds",
     default=None,
     help="""The name of the datasource. Requires the --interactive flag.  Incompatible with the --batch-request option.
@@ -257,7 +265,7 @@ Requires the --interactive flag.  Incompatible with the --datasource option.
 )
 @click.pass_context
 def suite_edit(
-    ctx, expectation_suite, interactive, datasource, batch_request, no_jupyter
+    ctx, expectation_suite, interactive, datasource_name, batch_request, no_jupyter
 ):
     """
     Generate a Jupyter notebook for editing an existing Expectation Suite.
@@ -272,6 +280,19 @@ def suite_edit(
     """
     context: DataContext = ctx.obj.data_context
     usage_event: str = "cli.suite.edit"
+
+    error_message: Optional[str] = None
+
+    if not ((datasource_name is None) or (batch_request is None)):
+        error_message = "Only one of --datasource_name DATASOURCE_NAME and --batch-request <path to JSON file> options can be used."
+
+    if error_message is not None:
+        cli_message(string=f"<red>{error_message}</red>")
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
+        raise ValueError(error_message)
+
     _suite_edit_workflow(
         context=context,
         expectation_suite_name=expectation_suite,
@@ -280,7 +301,7 @@ def suite_edit(
         usage_event=usage_event,
         create_if_not_exist=False,
         interactive=interactive,
-        datasource=datasource,
+        datasource_name=datasource_name,
         suppress_usage_message=False,
     )
 
@@ -292,19 +313,26 @@ def _suite_edit_workflow(
     usage_event: str,
     create_if_not_exist: Optional[bool] = False,
     interactive: Optional[bool] = False,
-    datasource: Optional[str] = None,
+    datasource_name: Optional[str] = None,
     suppress_usage_message: Optional[bool] = False,
     batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
 ):
     # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
     # when called by _suite_new_workflow(), the flag will be set to False, otherwise it will default to True
-    if not (interactive or (batch_request is None)):
-        raise ValueError(
-            "The --batch-request <path to JSON file> requires the --interactive flag."
-        )
+    error_message: Optional[str] = None
 
-    if not interactive and datasource:
-        raise ValueError("The --datasource option requires the --interactive flag.")
+    if not interactive and datasource_name:
+        error_message = "The --datasource_name DATASOURCE_NAME option requires the --interactive flag."
+
+    if not (interactive or (batch_request is None)):
+        error_message = "The --batch-request <path to JSON file> option requires the --interactive flag."
+
+    if error_message is not None:
+        cli_message(string=f"<red>{error_message}</red>")
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
+        raise ValueError(error_message)
 
     if suppress_usage_message:
         usage_event = None
@@ -380,7 +408,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
                 try:
                     datasource = toolkit.select_datasource(
-                        context=context, datasource_name=datasource
+                        context=context, datasource_name=datasource_name
                     )
                 except ValueError as ve:
                     cli_message(string="<red>{}</red>".format(ve))

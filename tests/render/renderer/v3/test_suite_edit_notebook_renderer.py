@@ -925,13 +925,13 @@ def test_notebook_execution_with_pandas_backend(
     # Create notebook
     _suite_edit_workflow(
         context=context,
-        suite_name=expectation_suite_name,
+        expectation_suite_name=expectation_suite_name,
         no_jupyter=True,
         batch_request=batch_request,
         usage_event="test_notebook_execution",
         create_if_not_exist=False,
         interactive=False,
-        datasource=None,
+        datasource_name=None,
         suppress_usage_message=True,
         # do not want to actually send usage_message, since the function call is not the result of actual usage
     )
