@@ -77,13 +77,6 @@ The interactive mode is assumed.  Incompatible with --batch-request option.
 """,
 )
 @click.option(
-    "--no-jupyter",
-    "-nj",
-    is_flag=True,
-    default=False,
-    help="By default launch jupyter notebooks, unless you specify the --no-jupyter flag.",
-)
-@click.option(
     "--batch-request",
     "-br",
     help="""Arguments to be provided to get_batch when loading the data asset.  Must be a path to a valid JSON file.
@@ -91,15 +84,22 @@ Requires the --interactive flag.
 """,
     default=None,
 )
+@click.option(
+    "--no-jupyter",
+    "-nj",
+    is_flag=True,
+    default=False,
+    help="By default launch jupyter notebooks, unless you specify the --no-jupyter flag.",
+)
 @click.pass_context
-def suite_new(ctx, expectation_suite, interactive, scaffold, no_jupyter, batch_request):
+def suite_new(ctx, expectation_suite, interactive, scaffold, batch_request, no_jupyter):
     """
     Create a new empty Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
     """
     context: DataContext = ctx.obj.data_context
     usage_event: str = "cli.suite.new"
-    _suite_new(
+    _suite_new_workflow(
         context=context,
         expectation_suite_name=expectation_suite,
         interactive=interactive,
@@ -110,7 +110,7 @@ def suite_new(ctx, expectation_suite, interactive, scaffold, no_jupyter, batch_r
     )
 
 
-def _suite_new(
+def _suite_new_workflow(
     context: DataContext,
     expectation_suite_name: str,
     interactive: bool,
@@ -191,7 +191,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             datasource_name = batch_request.get("datasource_name")
 
         usage_event = "cli.suite.edit"  # or else we will be sending `cli.suite.new` which is incorrect
-        _suite_edit(
+        _suite_edit_workflow(
             context=context,
             expectation_suite_name=expectation_suite_name,
             no_jupyter=no_jupyter,
@@ -237,8 +237,16 @@ Incompatible with the --batch-request option.
     "--datasource",
     "-ds",
     default=None,
-    help="""The name of the datasource.  The interactive mode is assumed.  Incompatible with the --batch-request option.
+    help="""The name of the datasource. Requires the --interactive flag.  Incompatible with the --batch-request option.
 """,
+)
+@click.option(
+    "--batch-request",
+    "-br",
+    help="""Arguments to be provided to get_batch when loading the data asset.  Must be a path to a valid JSON file.
+Requires the --interactive flag.  Incompatible with the --datasource option.
+""",
+    default=None,
 )
 @click.option(
     "--no-jupyter",
@@ -247,17 +255,9 @@ Incompatible with the --batch-request option.
     default=False,
     help="By default launch jupyter notebooks, unless you specify the --no-jupyter flag.",
 )
-@click.option(
-    "--batch-request",
-    "-br",
-    help="""Arguments to be provided to get_batch when loading the data asset.  Must be a path to a valid JSON file.
-Requires the --interactive flag.
-""",
-    default=None,
-)
 @click.pass_context
 def suite_edit(
-    ctx, expectation_suite, interactive, datasource, no_jupyter, batch_request
+    ctx, expectation_suite, interactive, datasource, batch_request, no_jupyter
 ):
     """
     Generate a Jupyter notebook for editing an existing Expectation Suite.
@@ -272,7 +272,7 @@ def suite_edit(
     """
     context: DataContext = ctx.obj.data_context
     usage_event: str = "cli.suite.edit"
-    _suite_edit(
+    _suite_edit_workflow(
         context=context,
         expectation_suite_name=expectation_suite,
         no_jupyter=no_jupyter,
@@ -285,7 +285,7 @@ def suite_edit(
     )
 
 
-def _suite_edit(
+def _suite_edit_workflow(
     context: DataContext,
     expectation_suite_name: str,
     no_jupyter: bool,
@@ -296,8 +296,8 @@ def _suite_edit(
     suppress_usage_message: Optional[bool] = False,
     batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
 ):
-    # suppress_usage_message flag is for the situation where _suite_edit is called by _suite_new().
-    # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
+    # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
+    # when called by _suite_new_workflow(), the flag will be set to False, otherwise it will default to True
     if not (interactive or (batch_request is None)):
         raise ValueError(
             "The --batch-request <path to JSON file> requires the --interactive flag."

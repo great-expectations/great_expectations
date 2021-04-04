@@ -7,7 +7,7 @@ from nbformat.notebooknode import NotebookNode
 from great_expectations import DataContext
 
 # noinspection PyProtectedMember
-from great_expectations.cli.suite import _suite_edit
+from great_expectations.cli.suite import _suite_edit_workflow
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -923,7 +923,7 @@ def test_notebook_execution_with_pandas_backend(
     assert context.get_validation_result(expectation_suite_name="warning") == {}
 
     # Create notebook
-    _suite_edit(
+    _suite_edit_workflow(
         context=context,
         suite_name=expectation_suite_name,
         no_jupyter=True,
