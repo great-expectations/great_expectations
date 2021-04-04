@@ -134,6 +134,17 @@ def _suite_new(
                 usage_event=usage_event,
                 data_context=context,
             )
+            try:
+                batch_request = BatchRequest(**batch_request).get_json_dict()
+            except TypeError as e:
+                cli_message(
+                    string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
+                )
+                cli_message(string="<red>{}</red>".format(e))
+                toolkit.send_usage_message(
+                    data_context=context, event=usage_event, success=False
+                )
+                sys.exit(1)
 
         # TODO: <Alex>ALEX -- Can we be more precise about the type of profiling results in V3?</Alex>
         profiling_results: dict
@@ -324,6 +335,17 @@ def _suite_edit(
                 usage_event=usage_event,
                 data_context=context,
             )
+            try:
+                batch_request = BatchRequest(**batch_request).get_json_dict()
+            except TypeError as e:
+                cli_message(
+                    string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
+                )
+                cli_message(string="<red>{}</red>".format(e))
+                toolkit.send_usage_message(
+                    data_context=context, event=usage_event, success=False
+                )
+                sys.exit(1)
             if batch_request != batch_request_from_citation:
                 batch_request_from_citation_is_up_to_date = False
     except ValueError as e:
