@@ -77,7 +77,7 @@ This how-to-guide assumes that you are using a Databricks Notebook, and using th
                         "insert_your_runtime_data_connector_name_here": {
                             "module_name": "great_expectations.datasource.data_connector",
                             "class_name": "RuntimeDataConnector",
-                            "runtime_keys": [
+                            "batch_identifiers": [
                                 "some_key_maybe_pipeline_stage",
                                 "some_other_key_maybe_run_id"
                             ]
@@ -251,7 +251,7 @@ Additional notes
                       "insert_your_runtime_data_connector_name_here": {
                         "module_name": "great_expectations.datasource.data_connector",
                         "class_name": "RuntimeDataConnector",
-                        "runtime_keys": [
+                        "batch_identifiers": [
                           "some_key_maybe_pipeline_stage",
                           "some_other_key_maybe_run_id"
                         ]
@@ -266,15 +266,17 @@ Additional notes
 
                 context = BaseDataContext(project_config=project_config)
 
-                # Create a BatchRequest
+                # Create a RuntimeBatchRequest
 
-                batch_request = BatchRequest(
+                batch_request = RuntimeBatchRequest(
                     datasource_name="insert_your_datasource_name_here",
                     data_connector_name="insert_your_runtime_data_connector_name_here",
                     data_asset_name="insert_your_data_asset_name_here",
-                    batch_data=df,
-                    partition_request={
-                        "batch_identifiers": {
+                    runtime_parameters: {
+                      batch_data=df,
+                    },
+                    data_connector_query={
+                        "batch_filter_parameters": {
                             "some_key_maybe_pipeline_stage": "ingestion step 1",
                             "some_other_key_maybe_run_id": "run 18"
                         }

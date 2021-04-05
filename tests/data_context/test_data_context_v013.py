@@ -2,11 +2,20 @@ import datetime
 import os
 import re
 
+import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
+from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.exceptions import BatchSpecError
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
 from great_expectations.validator.validator import Validator
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -206,7 +215,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
           my_runtime_data_connector:
             module_name: great_expectations.datasource.data_connector
             class_name: RuntimeDataConnector
-            runtime_keys:
+            batch_identifiers:
             - airflow_run_id
     """
     # noinspection PyUnusedLocal
@@ -223,10 +232,8 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
         data_connector_name="my_runtime_data_connector",
         data_asset_name="IN_MEMORY_DATA_ASSET",
         batch_data=test_df,
-        partition_request={
-            "batch_identifiers": {
-                "airflow_run_id": 1234567890,
-            }
+        batch_identifiers={
+            "airflow_run_id": 1234567890,
         },
         limit=None,
     )
@@ -319,7 +326,7 @@ data_connectors:
             "splitter_method": "_split_on_multi_column_values",
             "splitter_kwargs": {
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {"y": 2020, "m": 1, "d": 5},
+                "batch_identifiers": {"y": 2020, "m": 1, "d": 5},
             },
         },
     )
@@ -422,7 +429,7 @@ data_connectors:
     general_runtime_data_connector:
       module_name: great_expectations.datasource.data_connector
       class_name: RuntimeDataConnector
-      runtime_keys:
+      batch_identifiers:
       - airflow_run_id
 """
     # noinspection PyUnusedLocal
@@ -491,3 +498,214 @@ def test_in_memory_data_context_configuration(
 
     assert my_validator.expect_table_row_count_to_equal(1313)["success"]
     assert my_validator.expect_table_column_count_to_equal(7)["success"]
+
+
+def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector(
+    sa,
+    data_context_with_runtime_sql_datasource_for_testing_get_batch,
+):
+    context: DataContext = (
+        data_context_with_runtime_sql_datasource_for_testing_get_batch
+    )
+
+    batch: Batch
+
+    batch = context.get_batch(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_runtime_sql_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={
+                "query": "SELECT * FROM table_partitioned_by_date_column__A"
+            },
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+        ),
+    )
+
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
+    assert isinstance(batch.data, SqlAlchemyBatchData)
+
+    selectable_table_name = batch.data.selectable.name
+    selectable_count_sql_str = f"select count(*) from {selectable_table_name}"
+    sa_engine = batch.data.execution_engine.engine
+
+    assert sa_engine.execute(selectable_count_sql_str).scalar() == 120
+    assert batch.batch_markers.get("ge_load_time") is not None
+
+
+def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_connector(
+    sa,
+    data_context_with_runtime_sql_datasource_for_testing_get_batch,
+):
+    context: DataContext = (
+        data_context_with_runtime_sql_datasource_for_testing_get_batch
+    )
+    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        "my_expectations"
+    )
+
+    validator: Validator
+
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_runtime_sql_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={
+                "query": "SELECT * FROM table_partitioned_by_date_column__A"
+            },
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+        ),
+        expectation_suite=my_expectation_suite,
+    )
+
+    assert len(validator.batches) == 1
+
+
+def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
+    sa,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_asset_path = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
+
+    batch: Batch
+
+    batch = context.get_batch(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={"path": data_asset_path},
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+        ),
+    )
+
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
+    assert isinstance(batch.data, PandasBatchData)
+    assert len(batch.data.dataframe.index) == 1313
+    assert batch.batch_markers.get("ge_load_time") is not None
+
+    # using path with no extension
+    data_asset_path_no_extension = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313"
+    )
+
+    # with no reader_method in batch_spec_passthrough
+    with pytest.raises(BatchSpecError):
+        context.get_batch(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_runtime_data_connector",
+                data_asset_name="IN_MEMORY_DATA_ASSET",
+                runtime_parameters={"path": data_asset_path_no_extension},
+                batch_identifiers={
+                    "pipeline_stage_name": "core_processing",
+                    "airflow_run_id": 1234567890,
+                },
+            ),
+        )
+
+    # with reader_method in batch_spec_passthrough
+    batch = context.get_batch(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={"path": data_asset_path_no_extension},
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            batch_spec_passthrough={"reader_method": "read_csv"},
+        ),
+    )
+
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
+    assert isinstance(batch.data, PandasBatchData)
+    assert len(batch.data.dataframe.index) == 1313
+    assert batch.batch_markers.get("ge_load_time") is not None
+
+
+def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connector(
+    sa,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_asset_path = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+    )
+    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        "my_expectations"
+    )
+
+    validator: Validator
+
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={"path": data_asset_path},
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+        ),
+        expectation_suite=my_expectation_suite,
+    )
+
+    assert len(validator.batches) == 1
+
+    # using path with no extension
+    data_asset_path_no_extension = os.path.join(
+        context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313"
+    )
+
+    # with no reader_method in batch_spec_passthrough
+    with pytest.raises(BatchSpecError):
+        context.get_validator(
+            batch_request=RuntimeBatchRequest(
+                datasource_name="my_datasource",
+                data_connector_name="my_runtime_data_connector",
+                data_asset_name="IN_MEMORY_DATA_ASSET",
+                runtime_parameters={"path": data_asset_path_no_extension},
+                batch_identifiers={
+                    "pipeline_stage_name": "core_processing",
+                    "airflow_run_id": 1234567890,
+                },
+            ),
+            expectation_suite=my_expectation_suite,
+        )
+
+    # with reader_method in batch_spec_passthrough
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={"path": data_asset_path_no_extension},
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            batch_spec_passthrough={"reader_method": "read_csv"},
+        ),
+        expectation_suite=my_expectation_suite,
+    )
+
+    assert len(validator.batches) == 1
