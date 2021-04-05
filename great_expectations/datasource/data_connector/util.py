@@ -7,16 +7,17 @@ import re
 import sre_constants
 import sre_parse
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequestBase
-from great_expectations.core.id_dict import (
-    PartitionDefinition,
-    PartitionDefinitionSubset,
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchRequestBase,
+    RuntimeBatchRequest,
 )
+from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -62,20 +63,32 @@ def batch_definition_matches_batch_request(
     ):
         return False
 
-    if batch_request.partition_request:
-        batch_identifiers: Any = batch_request.partition_request.get(
-            "batch_identifiers"
+    if batch_request.data_connector_query:
+        batch_filter_parameters: Any = batch_request.data_connector_query.get(
+            "batch_filter_parameters"
         )
-        if batch_identifiers:
-            if not isinstance(batch_identifiers, dict):
+        if batch_filter_parameters:
+            if not isinstance(batch_filter_parameters, dict):
                 return False
-            for key in batch_identifiers.keys():
+            for key in batch_filter_parameters.keys():
                 if not (
-                    key in batch_definition.partition_definition
-                    and batch_definition.partition_definition[key]
-                    == batch_identifiers[key]
+                    key in batch_definition.batch_identifiers
+                    and batch_definition.batch_identifiers[key]
+                    == batch_filter_parameters[key]
                 ):
                     return False
+
+    if batch_request.batch_identifiers:
+        if not isinstance(batch_request.batch_identifiers, dict):
+            return False
+        for key in batch_request.batch_identifiers.keys():
+            if not (
+                key in batch_definition.batch_identifiers
+                and batch_definition.batch_identifiers[key]
+                == batch_request.batch_identifiers[key]
+            ):
+                return False
+
     return True
 
 
@@ -88,49 +101,47 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     data_asset_name: Optional[str] = None,
 ) -> Optional[List[BatchDefinition]]:
     processed_data_reference: Optional[
-        Tuple[str, PartitionDefinitionSubset]
-    ] = convert_data_reference_string_to_partition_definition_using_regex(
+        Tuple[str, IDDict]
+    ] = convert_data_reference_string_to_batch_identifiers_using_regex(
         data_reference=data_reference,
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
     if processed_data_reference is None:
         return None
-    data_asset_name_from_partition_definition: str = processed_data_reference[0]
-    partition_definition: PartitionDefinitionSubset = processed_data_reference[1]
+    data_asset_name_from_batch_identifiers: str = processed_data_reference[0]
+    batch_identifiers: IDDict = processed_data_reference[1]
     if data_asset_name is None:
-        data_asset_name = data_asset_name_from_partition_definition
+        data_asset_name = data_asset_name_from_batch_identifiers
 
     return [
         BatchDefinition(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_definition=PartitionDefinition(partition_definition),
+            batch_identifiers=IDDict(batch_identifiers),
         )
     ]
 
 
-def convert_data_reference_string_to_partition_definition_using_regex(
+def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
-) -> Optional[Tuple[str, PartitionDefinitionSubset]]:
+) -> Optional[Tuple[str, IDDict]]:
     # noinspection PyUnresolvedReferences
     matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
     if matches is None:
         return None
     groups: list = list(matches.groups())
-    partition_definition: PartitionDefinitionSubset = PartitionDefinitionSubset(
-        dict(zip(group_names, groups))
-    )
+    batch_identifiers: IDDict = IDDict(dict(zip(group_names, groups)))
 
-    # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
-    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
+    # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
+    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
     data_asset_name: str = DEFAULT_DATA_ASSET_NAME
-    if "data_asset_name" in partition_definition:
-        data_asset_name = partition_definition.pop("data_asset_name")
-    return data_asset_name, partition_definition
+    if "data_asset_name" in batch_identifiers:
+        data_asset_name = batch_identifiers.pop("data_asset_name")
+    return data_asset_name, batch_identifiers
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
@@ -144,34 +155,29 @@ def map_batch_definition_to_data_reference_string_using_regex(
         )
 
     data_asset_name: str = batch_definition.data_asset_name
-    partition_definition: PartitionDefinition = batch_definition.partition_definition
+    batch_identifiers: IDDict = batch_definition.batch_identifiers
     data_reference: str = (
-        convert_partition_definition_to_data_reference_string_using_regex(
-            data_asset_name=data_asset_name,
-            partition_definition=partition_definition,
+        convert_batch_identifiers_to_data_reference_string_using_regex(
+            batch_identifiers=batch_identifiers,
             regex_pattern=regex_pattern,
             group_names=group_names,
+            data_asset_name=data_asset_name,
         )
     )
     return data_reference
 
 
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
-def convert_partition_definition_to_data_reference_string_using_regex(
-    partition_definition: PartitionDefinition,
+def convert_batch_identifiers_to_data_reference_string_using_regex(
+    batch_identifiers: IDDict,
     regex_pattern: str,
     group_names: List[str],
     data_asset_name: Optional[str] = None,
 ) -> str:
-    if not isinstance(
-        partition_definition, (PartitionDefinitionSubset, PartitionDefinition)
-    ):
-        raise TypeError(
-            "partition_definition is not "
-            "an instance of type PartitionDefinitionSubset or PartitionDefinition"
-        )
+    if not isinstance(batch_identifiers, IDDict):
+        raise TypeError("batch_identifiers is not " "an instance of type IDDict")
 
-    template_arguments: dict = copy.deepcopy(partition_definition)
+    template_arguments: dict = copy.deepcopy(batch_identifiers)
     # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>
     if data_asset_name is not None:
         template_arguments["data_asset_name"] = data_asset_name

@@ -1,21 +1,23 @@
 import logging
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union, cast
+from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
     BatchRequestBase,
+    RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import (
     BatchMarkers,
     BatchSpec,
+    PathBatchSpec,
     RuntimeDataBatchSpec,
+    RuntimeQueryBatchSpec,
+    S3BatchSpec,
 )
-from great_expectations.core.id_dict import (
-    PartitionDefinition,
-    PartitionDefinitionSubset,
-)
+from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -30,7 +32,7 @@ class RuntimeDataConnector(DataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        runtime_keys: Optional[list] = None,
+        batch_identifiers: Optional[list] = None,
     ):
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
@@ -40,7 +42,7 @@ class RuntimeDataConnector(DataConnector):
             execution_engine=execution_engine,
         )
 
-        self._runtime_keys = runtime_keys
+        self._batch_identifiers = batch_identifiers
         self._refresh_data_references_cache()
 
     def _refresh_data_references_cache(self):
@@ -101,11 +103,11 @@ class RuntimeDataConnector(DataConnector):
     def get_batch_data_and_metadata(
         self,
         batch_definition: BatchDefinition,
-        batch_data: Any,
+        runtime_parameters: dict,
     ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
         batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
             batch_definition=batch_definition,
-            batch_data=batch_data,
+            runtime_parameters=runtime_parameters,
         )
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
@@ -118,7 +120,7 @@ class RuntimeDataConnector(DataConnector):
 
     def get_batch_definition_list_from_batch_request(
         self,
-        batch_request: BatchRequest,
+        batch_request: RuntimeBatchRequest,
     ) -> List[BatchDefinition]:
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request
@@ -140,16 +142,22 @@ class RuntimeDataConnector(DataConnector):
         """
         self._validate_batch_request(batch_request=batch_request)
 
-        batch_identifiers = batch_request.partition_request.get("batch_identifiers")
-
-        self._validate_batch_identifiers(batch_identifiers=batch_identifiers)
+        batch_identifiers: Optional[dict] = None
+        if batch_request.batch_identifiers:
+            self._validate_batch_identifiers(
+                batch_identifiers=batch_request.batch_identifiers
+            )
+            batch_identifiers = batch_request.batch_identifiers
+        if not batch_identifiers:
+            batch_identifiers = {}
 
         batch_definition_list: List[BatchDefinition]
         batch_definition: BatchDefinition = BatchDefinition(
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
             data_asset_name=batch_request.data_asset_name,
-            partition_definition=PartitionDefinition(batch_identifiers),
+            batch_identifiers=IDDict(batch_identifiers),
+            batch_spec_passthrough=batch_request.batch_spec_passthrough,
         )
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(
@@ -161,7 +169,7 @@ class RuntimeDataConnector(DataConnector):
         self,
         data_asset_name: str,
         batch_definition_list: List,
-        batch_identifiers: PartitionDefinitionSubset,
+        batch_identifiers: IDDict,
     ):
         data_reference = self._get_data_reference_name(batch_identifiers)
 
@@ -195,61 +203,90 @@ class RuntimeDataConnector(DataConnector):
     def build_batch_spec(
         self,
         batch_definition: BatchDefinition,
-        batch_data: Any,
-    ) -> RuntimeDataBatchSpec:
-        batch_spec = super().build_batch_spec(batch_definition=batch_definition)
-        batch_spec["batch_data"] = batch_data
-        return RuntimeDataBatchSpec(batch_spec)
+        runtime_parameters: dict,
+    ) -> Union[RuntimeDataBatchSpec, RuntimeQueryBatchSpec, PathBatchSpec]:
+        self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+        if runtime_parameters.get("batch_data") is not None:
+            batch_spec["batch_data"] = runtime_parameters.get("batch_data")
+            return RuntimeDataBatchSpec(batch_spec)
+        elif runtime_parameters.get("query"):
+            batch_spec["query"] = runtime_parameters.get("query")
+            return RuntimeQueryBatchSpec(batch_spec)
+        elif runtime_parameters.get("path"):
+            path = runtime_parameters.get("path")
+            batch_spec["path"] = path
+            parsed_url = urlparse(path)
+            if "s3" in parsed_url.scheme:
+                return S3BatchSpec(batch_spec)
+            else:
+                return PathBatchSpec(batch_spec)
 
     @staticmethod
     def _get_data_reference_name(
-        batch_identifiers: PartitionDefinitionSubset,
+        batch_identifiers: IDDict,
     ) -> str:
         if batch_identifiers is None:
-            batch_identifiers = PartitionDefinitionSubset({})
+            batch_identifiers = IDDict({})
         data_reference_name = DEFAULT_DELIMITER.join(
             [str(value) for value in batch_identifiers.values()]
         )
         return data_reference_name
 
+    @staticmethod
+    def _validate_runtime_parameters(runtime_parameters: Union[dict, type(None)]):
+        if not isinstance(runtime_parameters, dict):
+            raise TypeError(
+                f"""The type of runtime_parameters must be a dict object. The type given is
+        "{str(type(runtime_parameters))}", which is illegal.
+                        """
+            )
+        keys_present = [
+            key
+            for key, val in runtime_parameters.items()
+            if val is not None and key in ["batch_data", "query", "path"]
+        ]
+        if len(keys_present) != 1:
+            raise ge_exceptions.InvalidBatchRequestError(
+                "The runtime_parameters dict must have one (and only one) of the following keys: 'batch_data', "
+                "'query', 'path'."
+            )
+
     def _validate_batch_request(self, batch_request: BatchRequestBase):
         super()._validate_batch_request(batch_request=batch_request)
 
-        # Insure that batch_data and batch_request satisfy the "if and only if" condition.
+        runtime_parameters = batch_request.runtime_parameters
+        batch_identifiers = batch_request.batch_identifiers
         if not (
-            (
-                batch_request.batch_data is None
-                and (
-                    batch_request.partition_request is None
-                    or not batch_request.partition_request.get("batch_identifiers")
-                )
-            )
-            or (
-                batch_request.batch_data is not None
-                and batch_request.partition_request
-                and batch_request.partition_request.get("batch_identifiers")
-            )
+            (not runtime_parameters and not batch_identifiers)
+            or (runtime_parameters and batch_identifiers)
         ):
             raise ge_exceptions.DataConnectorError(
-                f"""RuntimeDataConnector "{self.name}" requires batch_data and partition_request to be both present or
+                f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both 
+                present and non-empty or
                 both absent in the batch_request parameter.
                 """
             )
+        if runtime_parameters:
+            self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
 
     def _validate_batch_identifiers(self, batch_identifiers: dict):
         if batch_identifiers is None:
             batch_identifiers = {}
-        self._validate_runtime_keys_configuration(
-            runtime_keys=list(batch_identifiers.keys())
+        self._validate_batch_identifiers_configuration(
+            batch_identifiers=list(batch_identifiers.keys())
         )
 
-    def _validate_runtime_keys_configuration(self, runtime_keys: List[str]):
-        if runtime_keys and len(runtime_keys) > 0:
+    def _validate_batch_identifiers_configuration(self, batch_identifiers: List[str]):
+        if batch_identifiers and len(batch_identifiers) > 0:
             if not (
-                self._runtime_keys and set(runtime_keys) <= set(self._runtime_keys)
+                self._batch_identifiers
+                and set(batch_identifiers) <= set(self._batch_identifiers)
             ):
                 raise ge_exceptions.DataConnectorError(
-                    f"""RuntimeDataConnector "{self.name}" was invoked with one or more runtime keys that do not
-appear among the configured runtime keys.
+                    f"""RuntimeDataConnector "{self.name}" was invoked with one or more batch identifiers that do not
+appear among the configured batch identifiers.
                     """
                 )

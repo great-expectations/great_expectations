@@ -7,7 +7,6 @@ from typing import Optional, Union
 import click
 
 from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
@@ -72,7 +71,7 @@ def datasource_new(ctx, name, jupyter):
     toolkit.send_usage_message(
         data_context=context, event="cli.datasource.new", success=True
     )
-    _interactive_datasource_new_flow(context, datasource_name=name, jupyter=jupyter)
+    _datasource_new_flow(context, datasource_name=name, jupyter=jupyter)
 
 
 @datasource.command(name="delete")
@@ -130,7 +129,7 @@ def _build_datasource_intro_string(datasources):
     return f"{datasource_count} Datasources found:"
 
 
-def _interactive_datasource_new_flow(
+def _datasource_new_flow(
     context: DataContext, datasource_name: Optional[str] = None, jupyter: bool = True
 ) -> None:
     files_or_sql_selection = click.prompt(

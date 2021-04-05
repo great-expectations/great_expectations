@@ -170,7 +170,7 @@ validations:
       datasource_name: my_datasource
       data_connector_name: my_other_data_connector
       data_asset_name: users
-      partition_request:
+      data_connector_query:
         index: -1
     expectation_suite_name: Titanic.warning
 """
