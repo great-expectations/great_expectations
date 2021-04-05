@@ -58,7 +58,7 @@ def get_batch_request(
         available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
     )
 
-    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
+    batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = {
         "datasource_name": datasource.name,
         "data_connector_name": data_connector_name,
     }
@@ -289,7 +289,7 @@ def _get_batch_spec_passthrough(
 
 
 def standardize_batch_request_display_ordering(
-    batch_request: Dict[str, Union[str, Dict[str, Any]]]
+    batch_request: Dict[str, Union[str, int, Dict[str, Any]]]
 ) -> Dict[str, Union[str, Dict[str, Any]]]:
     datasource_name: str = batch_request["datasource_name"]
     data_connector_name: str = batch_request["data_connector_name"]

@@ -21,6 +21,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
+from great_expectations.datasource import BaseDatasource
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -118,7 +119,9 @@ def _suite_new_workflow(
     scaffold: bool,
     no_jupyter: bool,
     usage_event: str,
-    batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
+    batch_request: Optional[
+        Union[str, Dict[str, int, Union[str, Dict[str, Any]]]]
+    ] = None,
 ) -> None:
     error_message: Optional[str] = None
 
@@ -154,21 +157,72 @@ def _suite_new_workflow(
                 )
                 sys.exit(1)
 
-        # TODO: <Alex>ALEX -- Can we be more precise about the type of profiling results in V3?</Alex>
-        profiling_results: dict
-        # TODO: <Alex>ALEX -- change method name; it does not create expectation suite any more.</Alex>
-        (
-            expectation_suite_name,
-            batch_request,
-            profiling_results,
-        ) = toolkit.create_expectation_suite(
-            context=context,
-            batch_request=batch_request,
-            expectation_suite_name=expectation_suite_name,
-            interactive=interactive,
-            scaffold=scaffold,
-            additional_batch_request_args={"limit": 1000},
-        )
+        # TODO: <Alex>ALEX</Alex>
+        datasource_name: Optional[str] = None
+        data_asset_name: Optional[str] = None
+        additional_batch_request_args: Optional[
+            Dict[str, Union[str, int, Dict[str, Any]]]
+        ] = {"limit": 1000}
+
+        if interactive:
+            if not batch_request:
+                cli_message(
+                    string="""A batch of data is required to edit the suite - let's help you to specify it."""
+                )
+                datasource: BaseDatasource = toolkit.select_datasource(
+                    context=context, datasource_name=datasource_name
+                )
+
+                if datasource is None:
+                    # select_datasource takes care of displaying an error message, so all is left here is to exit.
+                    sys.exit(1)
+
+                batch_request = get_batch_request(
+                    datasource=datasource,
+                    additional_batch_request_args=additional_batch_request_args,
+                )
+                # In this case, we have "consumed" the additional_batch_request_args
+                additional_batch_request_args = {}
+
+            data_asset_name = batch_request.get("data_asset_name")
+        else:
+            batch_request = None
+
+        if expectation_suite_name is None:
+            default_expectation_suite_name: str = (
+                toolkit.get_default_expectation_suite_name(
+                    data_asset_name=data_asset_name,
+                    batch_request=batch_request,
+                )
+            )
+            while True:
+                expectation_suite_name = click.prompt(
+                    "\nName the new Expectation Suite",
+                    default=default_expectation_suite_name,
+                )
+                if expectation_suite_name not in context.list_expectation_suite_names():
+                    break
+                toolkit.tell_user_suite_exists(suite_name=expectation_suite_name)
+        elif expectation_suite_name in context.list_expectation_suite_names():
+            toolkit.tell_user_suite_exists(suite_name=expectation_suite_name)
+            sys.exit(1)
+
+        # TODO: <Alex>ALEX</Alex>
+        # # TODO: <Alex>ALEX -- Can we be more precise about the type of profiling results in V3?</Alex>
+        # profiling_results: dict
+        # # TODO: <Alex>ALEX -- change method name; it does not create expectation suite any more.</Alex>
+        # (
+        #     expectation_suite_name,
+        #     batch_request,
+        #     profiling_results,
+        # ) = toolkit.create_expectation_suite(
+        #     context=context,
+        #     batch_request=batch_request,
+        #     expectation_suite_name=expectation_suite_name,
+        #     interactive=interactive,
+        #     scaffold=scaffold,
+        #     additional_batch_request_args={"limit": 1000},
+        # )
         suite: ExpectationSuite = toolkit.load_expectation_suite(
             context=context,
             expectation_suite_name=expectation_suite_name,
@@ -315,7 +369,9 @@ def _suite_edit_workflow(
     interactive: Optional[bool] = False,
     datasource_name: Optional[str] = None,
     suppress_usage_message: Optional[bool] = False,
-    batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
+    batch_request: Optional[
+        Union[str, Dict[str, int, Union[str, Dict[str, Any]]]]
+    ] = None,
 ):
     # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
     # when called by _suite_new_workflow(), the flag will be set to False, otherwise it will default to True

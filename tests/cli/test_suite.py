@@ -419,7 +419,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
 
     stdout: str = result.stdout
     assert "Error" in stdout
-    assert "occurred while attempting to load the JSON file with the path"
+    assert "occurred while attempting to load the JSON file with the path" in stdout
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name not in context.list_expectation_suite_names()

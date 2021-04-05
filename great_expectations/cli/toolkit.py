@@ -66,81 +66,81 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-def create_expectation_suite(
-    context: DataContext,
-    batch_request: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None,
-    expectation_suite_name: Optional[str] = None,
-    interactive: Optional[bool] = False,
-    scaffold: Optional[bool] = False,
-    additional_batch_request_args: Optional[dict] = None,
-    # TODO: <Alex>ALEX -- Is this needed?</Alex>
-    profiler_configuration: Optional[str] = "demo",
-) -> Tuple[str, Dict[str, Union[str, Dict[str, Any]]], Optional[dict]]:
-    """
-    Create a new expectation suite.
-
-    :return: a tuple: (suite name, profiling_results)
-    """
-    datasource_name: Optional[str] = None
-    data_asset_name: Optional[str] = None
-
-    if interactive:
-        if not batch_request:
-            cli_message(
-                string="""A batch of data is required to edit the suite - let's help you to specify it."""
-            )
-            datasource: BaseDatasource = select_datasource(
-                context=context, datasource_name=datasource_name
-            )
-
-            if datasource is None:
-                # select_datasource takes care of displaying an error message, so all is left here is to exit.
-                sys.exit(1)
-
-            batch_request = get_batch_request(
-                datasource=datasource,
-                additional_batch_request_args=additional_batch_request_args,
-            )
-            # In this case, we have "consumed" the additional_batch_request_args
-            additional_batch_request_args = {}
-
-        data_asset_name = batch_request.get("data_asset_name")
-    else:
-        batch_request = None
-
-    if expectation_suite_name is None:
-        default_expectation_suite_name: str = _get_default_expectation_suite_name(
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-        )
-        while True:
-            expectation_suite_name = click.prompt(
-                "\nName the new Expectation Suite",
-                default=default_expectation_suite_name,
-            )
-            if expectation_suite_name not in context.list_expectation_suite_names():
-                break
-            tell_user_suite_exists(expectation_suite_name)
-    elif expectation_suite_name in context.list_expectation_suite_names():
-        tell_user_suite_exists(expectation_suite_name)
-        sys.exit(1)
-
-    return expectation_suite_name, batch_request, None
-
-    # TODO: <Alex>ALEX -- This scaffold.</Alex>
-    # TODO: <Alex>ALEX -- How will this be in V3?</Alex>
-    # profiling_results: dict = _profile_to_create_a_suite(
-    #     additional_batch_request_args,
-    #     batch_request,
-    #     data_connector_name,
-    #     context,
-    #     datasource_name,
-    #     expectation_suite_name,
-    #     data_asset_name,
-    #     profiler_configuration,
-    # )
-    #
-    # return expectation_suite_name, batch_request, profiling_results
+# def create_expectation_suite(
+#     context: DataContext,
+#     batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None,
+#     expectation_suite_name: Optional[str] = None,
+#     interactive: Optional[bool] = False,
+#     scaffold: Optional[bool] = False,
+#     additional_batch_request_args: Optional[dict] = None,
+#     # TODO: <Alex>ALEX -- Is this needed?</Alex>
+#     profiler_configuration: Optional[str] = "demo",
+# ) -> Tuple[str, Dict[str, Union[str, Dict[str, Any]]], Optional[dict]]:
+#     """
+#     Create a new expectation suite.
+#
+#     :return: a tuple: (suite name, profiling_results)
+#     """
+#     datasource_name: Optional[str] = None
+#     data_asset_name: Optional[str] = None
+#
+#     if interactive:
+#         if not batch_request:
+#             cli_message(
+#                 string="""A batch of data is required to edit the suite - let's help you to specify it."""
+#             )
+#             datasource: BaseDatasource = select_datasource(
+#                 context=context, datasource_name=datasource_name
+#             )
+#
+#             if datasource is None:
+#                 # select_datasource takes care of displaying an error message, so all is left here is to exit.
+#                 sys.exit(1)
+#
+#             batch_request = get_batch_request(
+#                 datasource=datasource,
+#                 additional_batch_request_args=additional_batch_request_args,
+#             )
+#             # In this case, we have "consumed" the additional_batch_request_args
+#             additional_batch_request_args = {}
+#
+#         data_asset_name = batch_request.get("data_asset_name")
+#     else:
+#         batch_request = None
+#
+#     if expectation_suite_name is None:
+#         default_expectation_suite_name: str = _get_default_expectation_suite_name(
+#             data_asset_name=data_asset_name,
+#             batch_request=batch_request,
+#         )
+#         while True:
+#             expectation_suite_name = click.prompt(
+#                 "\nName the new Expectation Suite",
+#                 default=default_expectation_suite_name,
+#             )
+#             if expectation_suite_name not in context.list_expectation_suite_names():
+#                 break
+#             tell_user_suite_exists(expectation_suite_name)
+#     elif expectation_suite_name in context.list_expectation_suite_names():
+#         tell_user_suite_exists(expectation_suite_name)
+#         sys.exit(1)
+#
+#     return expectation_suite_name, batch_request, None
+#
+#     # TODO: <Alex>ALEX -- This scaffold.</Alex>
+#     # TODO: <Alex>ALEX -- How will this be in V3?</Alex>
+#     # profiling_results: dict = _profile_to_create_a_suite(
+#     #     additional_batch_request_args,
+#     #     batch_request,
+#     #     data_connector_name,
+#     #     context,
+#     #     datasource_name,
+#     #     expectation_suite_name,
+#     #     data_asset_name,
+#     #     profiler_configuration,
+#     # )
+#     #
+#     # return expectation_suite_name, batch_request, profiling_results
 
 
 # TODO: <Alex>ALEX - Update for V3</Alex>
@@ -227,9 +227,11 @@ def attempt_to_open_validation_results_in_data_docs(context, profiling_results):
         context.open_data_docs()
 
 
-def _get_default_expectation_suite_name(
+def get_default_expectation_suite_name(
     data_asset_name: str,
-    batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
+    batch_request: Optional[
+        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+    ] = None,
 ) -> str:
     suite_name: str
     if data_asset_name:
@@ -811,7 +813,7 @@ def load_json_file_into_dict(
         else:
             raise ValueError(error_message)
 
-    batch_request: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None
+    batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None
     if contents:
         try:
             batch_request = json.loads(contents)
