@@ -15,7 +15,7 @@ Configuring Data Connectors when dividing a Data Asset into Batches can be lossy
 
 The main thing that makes dividing Data Assets into Batches complicated is that converting from a Batch Request to a Data Reference can be lossy.
 
-It’s pretty easy to construct examples where no regex can reasonably capture enough information to allow lossless conversion from a Batc Request to a unique Data Reference:
+It’s pretty easy to construct examples where no regex can reasonably capture enough information to allow lossless conversion from a Batch Request to a unique Data Reference:
 
 Example 1
 ------------
