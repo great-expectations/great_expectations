@@ -10,7 +10,6 @@ def build_docs(
     context: DataContext,
     site_names: Optional[List[str]] = None,
     view: Optional[bool] = True,
-    assume_yes: bool = False,
     assume_yes: Optional[bool] = False,
 ) -> None:
     """Build documentation in a context"""
