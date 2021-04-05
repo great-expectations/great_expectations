@@ -120,7 +120,7 @@ def _suite_new_workflow(
     no_jupyter: bool,
     usage_event: str,
     batch_request: Optional[
-        Union[str, Dict[str, int, Union[str, Dict[str, Any]]]]
+        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None,
 ) -> None:
     error_message: Optional[str] = None
