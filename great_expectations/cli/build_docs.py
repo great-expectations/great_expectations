@@ -11,13 +11,15 @@ def build_docs(
     site_names: Optional[List[str]] = None,
     view: Optional[bool] = True,
     assume_yes: Optional[bool] = False,
-) -> None:
+    assume_yes: Optional[bool] = False,
+):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
     index_page_locator_infos: Dict[str, str] = context.build_data_docs(
         site_names=site_names, dry_run=True
     )
+
     msg: str = "\nThe following Data Docs sites will be built:\n\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
         msg += " - <cyan>{}:</cyan> ".format(site_name)
