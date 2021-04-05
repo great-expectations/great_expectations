@@ -374,7 +374,7 @@ def _suite_edit_workflow(
     ] = None,
 ):
     # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
-    # when called by _suite_new_workflow(), the flag will be set to False, otherwise it will default to True
+    # when called by _suite_new_workflow(), the flag will be set to True, otherwise it will default to False
     error_message: Optional[str] = None
 
     if not interactive and datasource_name:
