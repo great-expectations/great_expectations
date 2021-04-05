@@ -137,6 +137,10 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
 
+        What used to be called a “Batch” in the old API was replaced with :ref:`Validator <reference__core_concepts__validation>`. A Validator knows how to validate a particular Batch of data on a particular :ref:`Execution Engine <reference__core_concepts>` against a particular :ref:`Expectation Suite <reference__core_concepts__expectations__expectation_suites>`. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
+
+        You can read more about the core classes that make Great Expectations run in our :ref:`Core Concepts reference guide <reference__core_concepts>`.
+
         .. admonition:: Prerequisites -- this how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
@@ -146,117 +150,140 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
             - Identified a ``query`` that you would like to use as the data to validate.
 
 
-        Steps
-        -----
+        **Steps**
 
         0. Load or create a Data Context
 
-            The ``context`` referenced below can be loaded from disk or configured in code.
+          The ``context`` referenced below can be loaded from disk or configured in code.
 
-            Load an on-disk Data Context via:
+          Load an on-disk Data Context via:
 
-            .. code-block:: python
+          .. code-block:: python
 
-                import great_expectations as ge
-                context = ge.get_context()
+              import great_expectations as ge
+              from great_expectations import DataContext
+              from great_expectations.core import ExpectationSuite
+              from great_expectations.core.batch import RuntimeBatchRequest
+              from great_expectations.validator.validator import Validator
 
-            Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
+              context: DataContext = ge.get_context()
+
+          Create an in-code Data Context using these instructions: :ref:`How to instantiate a Data Context without a yml file <how_to_guides__configuring_data_contexts__how_to_instantiate_a_data_context_without_a_yml_file>`
 
 
         1. Configure a Datasource
 
-            Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your DataFrame. Since we are reading a Pandas DataFrame, we use the ``PandasExecutionEngine``. You can use ``batch_identifiers`` to define what data you are able to attach as additional metadata to your DataFrame using the ``data_connector_query`` parameter (shown in step 3).
+          Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your SQL database. Since we are using a SQL database, we use the ``SqlAlchemyExecutionEngine``. You can use ``batch_identifiers`` to define what data you are able to attach as additional metadata to your Batch using the ``batch_identifiers`` parameter (shown in step 3).
 
-            .. code-block:: yaml
+          By default, the SqlAlchemy Execution Engine will create a temporary table using a given query (provided in step 3). This has a performance advantage when creating and working with a Batch because the query will only be executed once (when the temporary table is created). If you would like to override this default behavior (for example, if you do not have permissions to create a temporary table), you may do so by setting ``create_temp_table`` to ``False`` in the Execution Engine configuration. You may also override the default behavior at runtime, on a case-by-case basis via the ``batch_spec_passthrough`` argument of a Runtime Batch Request (see step 3 for details).
 
-                insert_your_sqlalchemy_datasource_name_here:
-                  class_name: Datasource
-                  module_name: great_expectations.datasource
-                  execution_engine:
-                    class_name: SqlAlchemyExecutionEngine
-                    module_name: great_expectations.execution_engine
-                    connection_string: sqlite:///my_db_file # Insert your SqlAlchemy connection string here
-                  data_connectors:
-                    insert_your_runtime_data_connector_name_here:
-                      module_name: great_expectations.datasource.data_connector
-                      class_name: RuntimeDataConnector
-                      batch_identifiers:
-                        - some_key_maybe_pipeline_stage
-                        - some_other_key_maybe_run_id
+          .. code-block:: yaml
 
+              insert_your_sqlalchemy_datasource_name_here:
+                class_name: Datasource
+                module_name: great_expectations.datasource
+                execution_engine:
+                  class_name: SqlAlchemyExecutionEngine
+                  module_name: great_expectations.execution_engine
+                  connection_string: sqlite:///my_db_file # Insert your SqlAlchemy connection string here
+                  # create_temp_table is optional and defaults to True - override this behavior here
+                  create_temp_table: False
+                data_connectors:
+                  insert_your_runtime_data_connector_name_here:
+                    module_name: great_expectations.datasource.data_connector
+                    class_name: RuntimeDataConnector
+                    batch_identifiers:
+                      - some_key_maybe_pipeline_stage
+                      - some_other_key_maybe_run_id
 
         2. Obtain an Expectation Suite
 
-            .. code-block:: python
+          .. code-block:: python
 
-                suite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
+            suite: ExpectationSuite = context.get_expectation_suite("insert_your_expectation_suite_name_here")
 
-            Alternatively, if you have not already created a suite, you can do so now.
+          Alternatively, you can simply use the name of the Expectation Suite.
 
-            .. code-block:: python
+          .. code-block:: python
 
-                suite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
+            suite_name: str = "insert_your_expectation_suite_name_here"
 
-        3. Construct a BatchRequest
+          If you have not already created an Expectation Suite, you can do so now.
 
-            We will create a ``BatchRequest`` and pass it our DataFrame via the ``batch_data`` argument. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
+          .. code-block:: python
 
-            .. code-block:: python
+            suite: ExpectationSuite = context.create_expectation_suite("insert_your_expectation_suite_name_here")
 
-                from great_expectations.core.batch import BatchRequest
+        3. Construct a Runtime Batch Request
 
-                batch_request = BatchRequest(
-                    datasource_name="insert_your_sqlalchemy_datasource_name_here",
-                    data_connector_name="insert_your_runtime_data_connector_name_here",
-                    data_asset_name="insert_your_data_asset_name_here", # this can be anything that identifies this data_asset for you
-                    runtime_parameters={
+          We will create a ``RuntimeBatchRequest`` and pass it our query via the ``runtime_parameters`` argument, under the ``query`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
+
+          By default, the associated SqlAlchemy Execution Engine will create a temporary table with your given query unless configured otherwise (see step 1). If you would like to control this behavior at runtime, instead of in configuration, you may do so by setting ``create_temp_table`` to ``False`` via the Runtime Batch Request's ``batch_spec_passthrough`` argument.
+
+          .. code-block:: python
+
+            batch_request = RuntimeBatchRequest(
+                datasource_name="insert_your_sqlalchemy_datasource_name_here",
+                data_connector_name="insert_your_runtime_data_connector_name_here",
+                data_asset_name="insert_your_data_asset_name_here", # this can be anything that identifies this data_asset for you
+                runtime_parameters={
                     "query": "SELECT * FROM my_table"
-                    },
-                    batch_identifiers={
+                },
+                batch_identifiers={
                     "some_key_maybe_pipeline_stage": "validation_stage",
                     "some_other_key_maybe_run_id": 1234567890
-                    }
-                )
+                }
+                # Use batch_spec_passthrough to control whether the associated SqlAlchemy Execution Engine will create
+                # a temporary table
+                batch_spec_passthrough={
+                  "create_temp_table": False  # if not provided, this defaults to True
+                }
+            )
 
-            .. admonition:: Best Practice
+          .. admonition:: Best Practice
 
-                Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
+            Though not strictly required, we recommend that you make every Data Asset Name **unique**. Choosing a unique Data Asset Name makes it easier to navigate quickly through Data Docs and ensures your logical Data Assets are not confused with any particular view of them provided by an Execution Engine.
 
         4. Construct a Validator
 
-            .. code-block:: python
+          .. code-block:: python
 
-                my_validator = context.get_validator(
-                    batch_request=batch_request,
-                    expectation_suite=suite
-                )
+            my_validator = context.get_validator(
+                batch_request=batch_request,
+                expectation_suite=suite
+            )
 
-
-            Alternatively, you may skip step 2 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
+          Alternatively, you may skip step 3 and pass the same Runtime Batch Request instantiation arguments, along with the Expectation Suite (or name), directly to to the ``get_validator`` method.
 
           .. code-block:: python
 
             my_validator: Validator = context.get_validator(
                 datasource_name="insert_your_sqlalchemy_datasource_name_here",
-                    data_connector_name="insert_your_runtime_data_connector_name_here",
-                    data_asset_name="insert_your_data_asset_name_here", # this can be anything that identifies this data_asset for you
-                    runtime_parameters={
+                data_connector_name="insert_your_runtime_data_connector_name_here",
+                data_asset_name="insert_your_data_asset_name_here", # this can be anything that identifies this data_asset for you
+                runtime_parameters={
                     "query": "SELECT * FROM my_table"
-                    },
-                    batch_identifiers={
+                },
+                batch_identifiers={
                     "some_key_maybe_pipeline_stage": "validation_stage",
                     "some_other_key_maybe_run_id": 1234567890
-                    },
+                },
+                # Use batch_spec_passthrough to control whether the associated SqlAlchemy Execution Engine will create
+                # a temporary table
+                batch_spec_passthrough={
+                  "create_temp_table": False  # if not provided, this defaults to True
+                }
                 expectation_suite=suite,  # OR
                 # expectation_suite_name=suite_name
             )
+
         5. Check your data
 
-            You can check that the first few lines of your Batch are what you expect by running:
+          You can check that the first few lines of your Batch are what you expect by running:
 
-            .. code-block:: python
+          .. code-block:: python
 
-                my_validator.active_batch.head()
+              my_validator.active_batch.head()
 
         Now that you have a Validator, you can use it to create Expectations or validate the data.
 
