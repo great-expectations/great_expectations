@@ -370,7 +370,7 @@ def _suite_edit_workflow(
     datasource_name: Optional[str] = None,
     suppress_usage_message: Optional[bool] = False,
     batch_request: Optional[
-        Union[str, Dict[str, int, Union[str, Dict[str, Any]]]]
+        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None,
 ):
     # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
