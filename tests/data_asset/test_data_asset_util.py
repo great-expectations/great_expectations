@@ -9,11 +9,15 @@ import numpy as np
 import pytest
 
 import great_expectations as ge
-from great_expectations.core import expectationSuiteSchema
+from great_expectations.self_check.util import expectationSuiteSchema
 
 
-def test_recursively_convert_to_json_serializable():
-    asset = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],})
+def test_recursively_convert_to_json_serializable(tmp_path):
+    asset = ge.dataset.PandasDataset(
+        {
+            "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        }
+    )
     asset.expect_column_values_to_be_in_set(
         "x", [1, 2, 3, 4, 5, 6, 7, 8, 9], mostly=0.8
     )
@@ -28,9 +32,12 @@ def test_recursively_convert_to_json_serializable():
         "w": ["aaaa", "bbbb", 1.3, 5, 6, 7],
         "x": np.array([1, 2, 3]),
         "y": {"alpha": None, "beta": np.nan, "delta": np.inf, "gamma": -np.inf},
-        "z": set([1, 2, 3, 4, 5]),
+        "z": {1, 2, 3, 4, 5},
         "zz": (1, 2, 3),
-        "zzz": [datetime.datetime(2017, 1, 1), datetime.date(2017, 5, 1),],
+        "zzz": [
+            datetime.datetime(2017, 1, 1),
+            datetime.date(2017, 5, 1),
+        ],
         "np.bool": np.bool_([True, False, True]),
         "np.int_": np.int_([5, 3, 2]),
         "np.int8": np.int8([5, 3, 2]),
@@ -83,15 +90,8 @@ def test_recursively_convert_to_json_serializable():
 
     # TypeError when non-serializable numpy object is in dataset.
     with pytest.raises(TypeError):
-        y = {"p": np.DataSource()}
+        y = {"p": np.DataSource(tmp_path)}
         ge.data_asset.util.recursively_convert_to_json_serializable(y)
-
-    try:
-        x = unicode("abcdefg")
-        x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
-        assert isinstance(x, unicode)
-    except NameError:
-        pass
 
 
 """
@@ -99,14 +99,12 @@ The following Parent and Child classes are used for testing documentation inheri
 """
 
 
-class Parent(object):
-    """Parent class docstring
-    """
+class Parent:
+    """Parent class docstring"""
 
     @classmethod
     def expectation(cls, func):
-        """Manages configuration and running of expectation objects.
-        """
+        """Manages configuration and running of expectation objects."""
 
         @wraps(func)
         def wrapper(*args, **kwargs):

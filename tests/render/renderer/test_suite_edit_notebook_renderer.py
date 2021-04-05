@@ -1,5 +1,6 @@
 import json
 import os
+from unittest import mock
 
 import nbformat
 import pytest
@@ -7,7 +8,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
 from great_expectations.cli.suite import _suite_edit
-from great_expectations.core import ExpectationSuiteSchema
+from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
@@ -26,7 +27,7 @@ def critical_suite_with_citations():
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
-            "great_expectations.__version__": "0.9.1+9.gf17eff1f.dirty",
+            "great_expectations_version": "0.9.1+9.gf17eff1f.dirty",
             "columns": {
                 "npi": {"description": ""},
                 "nppes_provider_last_org_name": {"description": ""},
@@ -100,21 +101,32 @@ def suite_with_multiple_citations():
     critical_suite = {
         "expectation_suite_name": "critical",
         "meta": {
-            "great_expectations.__version__": "0.9.1+9.gf17eff1f.dirty",
+            "great_expectations_version": "0.9.1+9.gf17eff1f.dirty",
             "citations": [
                 {
                     "citation_date": "2001-01-01T00:00:01.000001",
-                    "batch_kwargs": {"path": "3.csv", "datasource": "3",},
+                    "batch_kwargs": {
+                        "path": "3.csv",
+                        "datasource": "3",
+                    },
                 },
                 {
                     "citation_date": "2000-01-01T00:00:01.000001",
-                    "batch_kwargs": {"path": "2.csv", "datasource": "2",},
+                    "batch_kwargs": {
+                        "path": "2.csv",
+                        "datasource": "2",
+                    },
                 },
                 # This citation is the most recent and has no batch_kwargs
-                {"citation_date": "2020-01-01T00:00:01.000001",},
+                {
+                    "citation_date": "2020-01-01T00:00:01.000001",
+                },
                 {
                     "citation_date": "1999-01-01T00:00:01.000001",
-                    "batch_kwargs": {"path": "1.csv", "datasource": "1",},
+                    "batch_kwargs": {
+                        "path": "1.csv",
+                        "datasource": "1",
+                    },
                 },
             ],
         },
@@ -143,7 +155,7 @@ def warning_suite():
     warning_suite = {
         "expectation_suite_name": "warning",
         "meta": {
-            "great_expectations.__version__": "0.8.4.post0",
+            "great_expectations_version": "0.8.4.post0",
             "citations": [
                 {
                     "citation_date": "2020-02-28T17:34:31.307271",
@@ -397,7 +409,7 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -438,14 +450,14 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = LegacyCheckpoint(\n    name="_temp_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -453,6 +465,7 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -477,7 +490,7 @@ def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_c
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -507,14 +520,14 @@ def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_c
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = LegacyCheckpoint(\n    name="_temp_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -522,6 +535,7 @@ def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_c
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -549,7 +563,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -590,14 +604,14 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = LegacyCheckpoint(\n    name="_temp_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -605,6 +619,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -633,7 +648,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -674,14 +689,14 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = LegacyCheckpoint(\n    name="_temp_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -689,6 +704,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -716,7 +732,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -757,14 +773,14 @@ def test_render_with_no_batch_kwargs_and_no_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = LegacyCheckpoint(\n    name="_temp_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -772,6 +788,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -798,7 +815,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -839,14 +856,14 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = LegacyCheckpoint(\n    name="_temp_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -854,8 +871,30 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
+
+
+def test_render_path_fixes_relative_paths():
+    batch_kwargs = {"path": "data.csv"}
+    notebook_renderer = SuiteEditNotebookRenderer()
+    expected = {"path": "../../data.csv"}
+    assert notebook_renderer._fix_path_in_batch_kwargs(batch_kwargs) == expected
+
+
+def test_render_path_ignores_gcs_urls():
+    batch_kwargs = {"path": "gs://a-bucket/data.csv"}
+    notebook_renderer = SuiteEditNotebookRenderer()
+    expected = {"path": "gs://a-bucket/data.csv"}
+    assert notebook_renderer._fix_path_in_batch_kwargs(batch_kwargs) == expected
+
+
+def test_render_path_ignores_s3_urls():
+    batch_kwargs = {"path": "s3://a-bucket/data.csv"}
+    notebook_renderer = SuiteEditNotebookRenderer()
+    expected = {"path": "s3://a-bucket/data.csv"}
+    assert notebook_renderer._fix_path_in_batch_kwargs(batch_kwargs) == expected
 
 
 def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
@@ -879,7 +918,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -920,14 +959,14 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = LegacyCheckpoint(\n    name="_temp_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -935,6 +974,7 @@ def test_render_with_no_batch_kwargs_multiple_batch_kwarg_citations(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
@@ -1012,7 +1052,7 @@ def test_complex_suite(warning_suite, empty_data_context):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "warning"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../foo/data"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "warning"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../foo/data"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -1255,14 +1295,14 @@ def test_complex_suite(warning_suite, empty_data_context):
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = context.run_validation_operator("action_list_operator", assets_to_validate=[batch])\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
+                "source": 'batch.save_expectation_suite(discard_failed_expectations=False)\n\nresults = LegacyCheckpoint(\n    name="_temp_checkpoint",\n    data_context=context,\n    batches=[\n        {\n          "batch_kwargs": batch_kwargs,\n          "expectation_suite_names": [expectation_suite_name]\n        }\n    ]\n).run()\nvalidation_result_identifier = results.list_validation_result_identifiers()[0]\ncontext.build_data_docs()\ncontext.open_data_docs(validation_result_identifier)',
                 "outputs": [],
             },
         ],
@@ -1270,11 +1310,12 @@ def test_complex_suite(warning_suite, empty_data_context):
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
 
 
-def test_notebook_execution_with_pandas_backend(titanic_data_context):
+def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_docs):
     """
     To set this test up we:
 
@@ -1290,7 +1331,10 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    context = titanic_data_context
+    # Since we'll run the notebook, we use a context with no data docs to avoid
+    # the renderer's default behavior of building and opening docs, which is not
+    # part of this test.
+    context = titanic_data_context_no_data_docs
     root_dir = context.root_directory
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "warning"
@@ -1341,16 +1385,12 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context):
     edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
     assert os.path.isfile(edit_notebook_path)
 
-    with open(edit_notebook_path, "r") as f:
+    with open(edit_notebook_path) as f:
         nb = nbformat.read(f, as_version=4)
 
     # Run notebook
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
-
-    # Useful to inspect executed notebook
-    with open(os.path.join(uncommitted_dir, "output.ipynb"), "w") as f:
-        nbformat.write(nb, f)
 
     # Assertions about output
     context = DataContext(root_dir)
@@ -1403,7 +1443,7 @@ def test_notebook_execution_with_custom_notebooks(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as ge\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = ge.data_context.DataContext()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\n\nbatch_kwargs = {"path": "../../3.csv", "datasource": "3"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -1444,7 +1484,7 @@ def test_notebook_execution_with_custom_notebooks(
             },
             {
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/module_docs/data_asset_module.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -1459,5 +1499,6 @@ def test_notebook_execution_with_custom_notebooks(
     del expected["nbformat_minor"]
     del obs["nbformat_minor"]
     for obs_cell, expected_cell in zip(obs["cells"], expected["cells"]):
+        obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected

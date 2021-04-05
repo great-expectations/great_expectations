@@ -73,6 +73,7 @@ class SiteIndexPageRenderer(Renderer):
             }
         )
 
+    # TODO: deprecate dual batch api support in 0.14
     @classmethod
     def _generate_profiling_results_link_table(cls, index_links_dict):
         table_options = {
@@ -126,7 +127,9 @@ class SiteIndexPageRenderer(Renderer):
                     "_run_time_sort": cls._get_timestamp(dict_.get("run_time")),
                     "asset_name": dict_.get("asset_name"),
                     "batch_identifier": cls._render_batch_id_cell(
-                        dict_.get("batch_identifier"), dict_.get("batch_kwargs")
+                        dict_.get("batch_identifier"),
+                        dict_.get("batch_kwargs"),
+                        dict_.get("batch_spec"),
                     ),
                     "_batch_identifier_sort": dict_.get("batch_identifier"),
                     "profiler_name": dict_.get("expectation_suite_name").split(".")[-1],
@@ -148,6 +151,7 @@ class SiteIndexPageRenderer(Renderer):
             }
         )
 
+    # TODO: deprecate dual batch api support in 0.14
     @classmethod
     def _generate_validation_results_link_table(cls, index_links_dict):
         table_options = {
@@ -221,7 +225,9 @@ class SiteIndexPageRenderer(Renderer):
                     "_run_time_sort": cls._get_timestamp(dict_.get("run_time")),
                     "run_name": dict_.get("run_name"),
                     "batch_identifier": cls._render_batch_id_cell(
-                        dict_.get("batch_identifier"), dict_.get("batch_kwargs")
+                        dict_.get("batch_identifier"),
+                        dict_.get("batch_kwargs"),
+                        dict_.get("batch_spec"),
                     ),
                     "_batch_identifier_sort": dict_.get("batch_identifier"),
                     "expectation_suite_name": cls._render_expectation_suite_cell(
@@ -274,16 +280,22 @@ class SiteIndexPageRenderer(Renderer):
             }
         )
 
+    # TODO: deprecate dual batch api support in 0.14
     @classmethod
-    def _render_batch_id_cell(cls, batch_id, batch_kwargs):
+    def _render_batch_id_cell(cls, batch_id, batch_kwargs=None, batch_spec=None):
+        if batch_kwargs:
+            content_title = "Batch Kwargs"
+            content = json.dumps(batch_kwargs, indent=2)
+        else:
+            content_title = "Batch Spec"
+            content = json.dumps(batch_spec, indent=2)
         return RenderedStringTemplateContent(
             **{
                 "content_block_type": "string_template",
                 "string_template": {
                     "template": str(batch_id),
                     "tooltip": {
-                        "content": "Batch Kwargs:\n\n"
-                        + json.dumps(batch_kwargs, indent=2),
+                        "content": f"{content_title}:\n\n{content}",
                         "placement": "top",
                     },
                     "styling": {"classes": ["m-0", "p-0"]},
@@ -295,11 +307,11 @@ class SiteIndexPageRenderer(Renderer):
     def _get_formatted_datetime(cls, _datetime):
         if isinstance(_datetime, datetime.datetime):
             local_datetime = _datetime.astimezone(tz=tzlocal.get_localzone())
-            return local_datetime.strftime("%m/%d/%Y %H:%M:%S %Z")
+            return local_datetime.strftime("%Y-%m-%d %H:%M:%S %Z")
         elif isinstance(_datetime, str):
             dt = parse(_datetime)
             local_datetime = dt.astimezone(tz=tzlocal.get_localzone())
-            return local_datetime.strftime("%m/%d/%Y %H:%M:%S %Z")
+            return local_datetime.strftime("%Y-%m-%d %H:%M:%S %Z")
         else:
             return None
 
@@ -412,7 +424,9 @@ class SiteIndexPageRenderer(Renderer):
             tabs_content_block = RenderedTabsContent(
                 **{
                     "tabs": tabs,
-                    "styling": {"classes": ["col-12", "ge-index-page-tabs-container"],},
+                    "styling": {
+                        "classes": ["col-12", "ge-index-page-tabs-container"],
+                    },
                 }
             )
 
@@ -449,4 +463,4 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
             )
-            logger.error(exception_message, e, exc_info=True)
+            logger.error(exception_message)

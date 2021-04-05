@@ -687,7 +687,7 @@
       },
       {
         "title": "How do you want to trigger validation?",
-        "description": "A [Checkpoint](https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html) makes it possible to easily integrate a validation step into your workflow.",
+        "description": "A [Checkpoint](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html) makes it possible to easily integrate a validation step into your workflow.",
         "id": "checkpoint",
         "cases": [
           {
@@ -696,7 +696,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/checkpoint_notebook.png",
             "short_description": "Run a configured checkpoint from a notebook.",
             "description": "Run a configured checkpoint from a notebook.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html",
             "maturity": "Experimental",
             "maturity_details": {
               "api_stability": "Unstable (expect changes to batch definition; \"assets to validate\" is still totally untyped)",
@@ -713,7 +713,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/checkpoint_command_line.png",
             "short_description": "Run a configured checkpoint from a command line.",
             "description": "Run a configured checkpoint from a command line in a Terminal shell.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html",
             "maturity": "Experimental",
             "maturity_details": {
               "api_stability": "Unstable (expect changes to batch definition; no checkpoint store)",
@@ -730,7 +730,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/checkpoint_cron_job.png",
             "short_description": "Deploy a configured checkpoint as a scheduled task with cron.",
             "description": "Use the Unix crontab command to edit the cron file and add a line that will run checkpoint as a scheduled task.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html",
             "maturity": "Experimental",
             "maturity_details": {
               "api_stability": "Unstable (expect changes to batch validation; no checkpoint store)",
@@ -747,7 +747,7 @@
             "icon": "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/feature_maturity_icons/checkpoint_airflow_dag.png",
             "short_description": "Run a configured checkpoint in Apache Airflow",
             "description": "Running a configured checkpoint in Apache Airflow enables the triggering of data validation using an Expectation Suite directly within an Airflow DAG.",
-            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html",
+            "how_to_guide_url": "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html",
             "maturity": "Beta",
             "maturity_details": {
               "api_stability": "Unstable",

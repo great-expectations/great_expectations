@@ -4,14 +4,18 @@ import sys
 
 import click
 
+from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
-from great_expectations.cli.datasource import get_batch_kwargs
+from great_expectations.cli.batch_kwargs import get_batch_kwargs
 from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.util import cli_message, cli_message_list
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_list,
+    display_not_implemented_message_and_exit,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
-    send_usage_message,
 )
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
@@ -31,9 +35,18 @@ except ImportError:
 
 
 @click.group()
-def suite():
+@click.pass_context
+def suite(ctx):
     """Expectation Suite operations"""
-    pass
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+    # TODO consider moving this all the way up in to the CLIState constructor
+    ctx.obj.data_context = context
 
 
 @suite.command(name="edit")
@@ -52,18 +65,13 @@ Make sure to escape quotes. Example: "{\"datasource\": \"my_db\", \"query\": \"s
 """,
 )
 @click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@click.option(
     "--jupyter/--no-jupyter",
     is_flag=True,
     help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
     default=True,
 )
-def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
+@click.pass_context
+def suite_edit(ctx, suite, datasource, jupyter, batch_kwargs):
     """
     Generate a Jupyter notebook for editing an existing Expectation Suite.
 
@@ -77,6 +85,11 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
 
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
+    display_not_implemented_message_and_exit()
+
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
     _suite_edit(
         suite,
         datasource,
@@ -87,7 +100,17 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs):
     )
 
 
-def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event):
+def _suite_edit(
+    suite,
+    datasource,
+    directory,
+    jupyter,
+    batch_kwargs,
+    usage_event,
+    suppress_usage_message=False,
+):
+    # suppress_usage_message flag is for the situation where _suite_edit is called by _suite_new().
+    # when called by _suite_new(), the flag will be set to False, otherwise it will default to True
     batch_kwargs_json = batch_kwargs
     batch_kwargs = None
     context = toolkit.load_data_context_with_error_handling(directory)
@@ -108,17 +131,19 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event
                         je
                     )
                 )
-                send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
+                if not suppress_usage_message:
+                    toolkit.send_usage_message(
+                        data_context=context, event=usage_event, success=False
+                    )
                 sys.exit(1)
             except ge_exceptions.DataContextError:
                 cli_message(
                     "<red>Please check that your batch_kwargs are able to load a batch.</red>"
                 )
-                send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
+                if not suppress_usage_message:
+                    toolkit.send_usage_message(
+                        data_context=context, event=usage_event, success=False
+                    )
                 sys.exit(1)
             except ValueError as ve:
                 cli_message(
@@ -126,9 +151,10 @@ def _suite_edit(suite, datasource, directory, jupyter, batch_kwargs, usage_event
                         ve
                     )
                 )
-                send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
+                if not suppress_usage_message:
+                    toolkit.send_usage_message(
+                        data_context=context, event=usage_event, success=False
+                    )
                 sys.exit(1)
         elif citations:
             citation = citations[-1]
@@ -147,16 +173,17 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 )
             except ValueError as ve:
                 cli_message("<red>{}</red>".format(ve))
-                send_usage_message(
+                toolkit.send_usage_message(
                     data_context=context, event=usage_event, success=False
                 )
                 sys.exit(1)
 
             if not data_source:
                 cli_message("<red>No datasources found in the context.</red>")
-                send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
+                if not suppress_usage_message:
+                    toolkit.send_usage_message(
+                        data_context=context, event=usage_event, success=False
+                    )
                 sys.exit(1)
 
             if batch_kwargs is None:
@@ -188,60 +215,39 @@ A batch of data is required to edit the suite - let's help you to specify it."""
             data_context=context, expectation_suite_name=suite.expectation_suite_name
         )
 
-        send_usage_message(
-            data_context=context, event=usage_event, event_payload=payload, success=True
-        )
+        if not suppress_usage_message:
+            toolkit.send_usage_message(
+                data_context=context,
+                event=usage_event,
+                event_payload=payload,
+                success=True,
+            )
 
         if jupyter:
             toolkit.launch_jupyter_notebook(notebook_path)
 
     except Exception as e:
-        send_usage_message(data_context=context, event=usage_event, success=False)
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
         raise e
 
 
+@mark.cli_as_deprecation
 @suite.command(name="demo")
-@click.option("--suite", "-es", default=None, help="Expectation suite name.")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-@click.option(
-    "--view/--no-view",
-    help="By default open in browser unless you specify the --no-view flag",
-    default=True,
-)
-@mark.cli_as_beta
-def suite_demo(suite, directory, view):
-    """
-    Create a new demo Expectation Suite.
-
-    Great Expectations will choose a couple of columns and generate expectations
-    about them to demonstrate some examples of assertions you can make about
-    your data.
-    """
-    _suite_new(
-        suite=suite,
-        directory=directory,
-        empty=False,
-        jupyter=False,
-        view=view,
-        batch_kwargs=None,
-        usage_event="cli.suite.demo",
+@click.pass_context
+def suite_demo(ctx):
+    """This command is not supported in the v3 (Batch Request) API."""
+    context = ctx.obj.data_context
+    usage_event = "cli.suite.demo"
+    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
+    cli_message(
+        "This command is not supported in the v3 (Batch Request) API. Please use `suite new` instead."
     )
 
 
 @suite.command(name="new")
 @click.option("--suite", "-es", default=None, help="Expectation suite name.")
-@click.option("--empty", "empty", flag_value=True, help="Create an empty suite.")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @click.option(
     "--jupyter/--no-jupyter",
     is_flag=True,
@@ -249,39 +255,28 @@ def suite_demo(suite, directory, view):
     default=True,
 )
 @click.option(
-    "--view/--no-view",
-    help="By default open in browser unless you specify the --no-view flag",
-    default=True,
-)
-@click.option(
     "--batch-kwargs",
     default=None,
     help="Additional keyword arguments to be provided to get_batch when loading the data asset. Must be a valid JSON dictionary",
 )
-@mark.cli_as_deprecation(
-    """<yellow>In the next major release:
-  - `suite new` will create an empty suite and will no longer have the --empty flag
-  - `suite new` will no longer have a --view/no-view flag. Data Docs will not be opened.
-  - The current behavior of creating a demo suite will transition to the new command `suite demo` which can be used now.
-  - We also suggest using the `suite scaffold` command for faster suite creation.
-</yellow>"""
-)
-def suite_new(suite, directory, empty, jupyter, view, batch_kwargs):
-    # TODO update docstring on next major release
+@click.pass_context
+def suite_new(ctx, suite, jupyter, batch_kwargs):
     """
-    Create a new Expectation Suite.
+    Create a new empty Expectation Suite.
 
-    Great Expectations will choose a couple of columns and generate expectations about them
-    to demonstrate some examples of assertions you can make about your data.
-
-    If you wish to skip the examples, add the `--empty` flag.
+    Edit in jupyter notebooks, or skip with the --no-jupyter flag
     """
+    display_not_implemented_message_and_exit()
+
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
     _suite_new(
         suite=suite,
         directory=directory,
-        empty=empty,
+        empty=True,
         jupyter=jupyter,
-        view=view,
+        view=False,
         batch_kwargs=batch_kwargs,
         usage_event="cli.suite.new",
     )
@@ -296,7 +291,6 @@ def _suite_new(
     batch_kwargs,
     usage_event: str,
 ) -> None:
-    # TODO break this up into demo and new
     context = toolkit.load_data_context_with_error_handling(directory)
 
     datasource_name = None
@@ -326,45 +320,54 @@ def _suite_new(
                         """<green>Because you requested an empty suite, we'll open a notebook for you now to edit it!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
                     )
+            toolkit.send_usage_message(
+                data_context=context, event=usage_event, success=True
+            )
+
             _suite_edit(
                 suite_name,
                 datasource_name,
                 directory,
                 jupyter=jupyter,
                 batch_kwargs=batch_kwargs,
-                usage_event=usage_event,
+                usage_event="cli.suite.edit",  # or else we will be sending `cli.suite.new` which is incorrect
+                suppress_usage_message=True,  # dont want actually send usage_message since the function call is not the result of actual usage
             )
-            send_usage_message(data_context=context, event=usage_event, success=True)
         else:
-            send_usage_message(data_context=context, event=usage_event, success=False)
+            toolkit.send_usage_message(
+                data_context=context, event=usage_event, success=False
+            )
     except (
         ge_exceptions.DataContextError,
         ge_exceptions.ProfilerError,
-        IOError,
+        OSError,
         SQLAlchemyError,
     ) as e:
         cli_message("<red>{}</red>".format(e))
-        send_usage_message(data_context=context, event=usage_event, success=False)
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
         sys.exit(1)
     except Exception as e:
-        send_usage_message(data_context=context, event=usage_event, success=False)
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
         raise e
 
 
 @suite.command(name="delete")
 @click.argument("suite")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @mark.cli_as_experimental
-def suite_delete(suite, directory):
+@click.pass_context
+def suite_delete(ctx, suite):
     """
     Delete an expectation suite from the expectation store.
     """
+    display_not_implemented_message_and_exit()
     usage_event = "cli.suite.delete"
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
     suite_names = context.list_expectation_suite_names()
     if not suite_names:
@@ -381,17 +384,11 @@ def suite_delete(suite, directory):
 
     context.delete_expectation_suite(suite)
     cli_message(f"Deleted the expectation suite named: {suite}")
-    send_usage_message(data_context=context, event=usage_event, success=True)
+    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
 
 
 @suite.command(name="scaffold")
 @click.argument("suite")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
 @click.option(
     "--jupyter/--no-jupyter",
     is_flag=True,
@@ -399,8 +396,13 @@ def suite_delete(suite, directory):
     default=True,
 )
 @mark.cli_as_experimental
-def suite_scaffold(suite, directory, jupyter):
+@click.pass_context
+def suite_scaffold(ctx, suite, jupyter):
     """Scaffold a new Expectation Suite."""
+    display_not_implemented_message_and_exit()
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
     _suite_scaffold(suite, directory, jupyter)
 
 
@@ -417,18 +419,24 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
             cli_message(
                 f"  - If you wish to adjust your scaffolding, you can open this notebook with jupyter: `{notebook_path}` <red>(Please note that if you run that notebook, you will overwrite your existing suite.)</red>"
             )
-        send_usage_message(data_context=context, event=usage_event, success=False)
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
         sys.exit(1)
 
     datasource = toolkit.select_datasource(context)
     if datasource is None:
-        send_usage_message(data_context=context, event=usage_event, success=False)
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
         sys.exit(1)
 
     _suite = context.create_expectation_suite(suite_name)
     _, _, _, batch_kwargs = get_batch_kwargs(context, datasource_name=datasource.name)
     renderer = SuiteScaffoldNotebookRenderer(context, _suite, batch_kwargs)
     renderer.render_to_disk(notebook_path)
+
+    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
 
     if jupyter:
         toolkit.launch_jupyter_notebook(notebook_path)
@@ -437,18 +445,16 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
             f"To continue scaffolding this suite, run `jupyter notebook {notebook_path}`"
         )
 
-    send_usage_message(data_context=context, event=usage_event, success=True)
-
 
 @suite.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-def suite_list(directory):
+@click.pass_context
+def suite_list(ctx):
     """Lists available Expectation Suites."""
+    display_not_implemented_message_and_exit()
+
+    directory = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
     context = toolkit.load_data_context_with_error_handling(directory)
 
     try:
@@ -458,7 +464,7 @@ def suite_list(directory):
         ]
         if len(suite_names) == 0:
             cli_message("No Expectation Suites found")
-            send_usage_message(
+            toolkit.send_usage_message(
                 data_context=context, event="cli.suite.list", success=True
             )
             return
@@ -468,9 +474,13 @@ def suite_list(directory):
             list_intro_string = "{} Expectation Suites found:".format(len(suite_names))
 
         cli_message_list(suite_names, list_intro_string)
-        send_usage_message(data_context=context, event="cli.suite.list", success=True)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.suite.list", success=True
+        )
     except Exception as e:
-        send_usage_message(data_context=context, event="cli.suite.list", success=False)
+        toolkit.send_usage_message(
+            data_context=context, event="cli.suite.list", success=False
+        )
         raise e
 
 

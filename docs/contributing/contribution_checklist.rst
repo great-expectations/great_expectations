@@ -22,8 +22,9 @@ Once your code is ready, please go through the following checklist before submit
 
 **2. Have you followed the Style Guide for code and comments?**
 
-    * The :ref:`contributing_style_guide` is here.
+    * The :ref:`contributing__style_guide` is here.
     * Thanks for helping us keep the codebase and documentation clean and consistent, so that it's easier to maintain it as a community!
+    * If your PR contains **only** changes to ``contrib`` directory (community contributed Expectations), review your PR against this :ref:`Acceptance Checklist <contrib_pull_request_acceptance_checklist>`
 
 **3. Is your branch up to date with upstream/develop?**
 
@@ -40,14 +41,23 @@ Once your code is ready, please go through the following checklist before submit
 
 **4. Have you written and run all the tests you need?**
 
+    .. admonition:: Note:
+
+        If your PR contains **only** changes to ``contrib`` directory (community contributed Expectations), please skip this step - the tests that you included in the Expectation itself are sufficient and you do not need to run ``pytest``.
+
     * See :ref:`contributing_testing__writing_unit_tests` for details on how to write unit tests in Great Expectations.
     * Please make certain to run ``pytest`` to verify that all tests pass locally. See :ref:`contributing_testing__running_tests` for details.
 
-**5. Have you added a bullet with your changes under the "develop" heading in the Changelog?**
+**5. Have you documented all the changes in your PR?**
 
-    * Please add a bullet point to ``docs/changelog/changelog.rst``, in the ``develop`` section.
+    .. admonition:: Note:
+
+        If your PR contains **only** changes to ``contrib`` directory (community contributed Expectations), please skip this step.
+
+    * Please add a bullet point to ``docs/changelog.rst``, in the ``develop`` section.
         * Please group in the following order: [BREAKING], [FEATURE], [ENHANCEMENT], [BUGFIX], [DOCS], [MAINTENANCE]
     * You can see the past Changelog here: :ref:`changelog`
+
 
 If you’ve checked off all these items, you’re now ready to submit a pull request!
 

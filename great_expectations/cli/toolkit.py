@@ -3,31 +3,50 @@ import os
 import subprocess
 import sys
 import warnings
-from typing import Union
+from pathlib import Path
+from typing import Optional, Union
 
 import click
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
 
-from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.cli.batch_kwargs import get_batch_kwargs
+from great_expectations.cli.build_docs import build_docs
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
-from great_expectations.cli.datasource import get_batch_kwargs
-from great_expectations.cli.docs import build_docs
+from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
-from great_expectations.cli.util import cli_colorize_string, cli_message
-from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import Batch
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.core.usage_statistics.usage_statistics import (
+    send_usage_message as send_usage_stats_message,
+)
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.types.base import MINIMUM_SUPPORTED_CONFIG_VERSION
+from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.datasource import Datasource
-from great_expectations.exceptions import CheckpointError, CheckpointNotFoundError
 from great_expectations.profile import BasicSuiteBuilderProfiler
+
+try:
+    from termcolor import colored
+except ImportError:
+    pass
+
+
+EXIT_UPGRADE_CONTINUATION_MESSAGE = (
+    "\nOk, exiting now. To upgrade at a later time, use the following command: "
+    "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
+    "process, visit "
+    "<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
+    "</cyan>.\n"
+)
 
 
 class MyYAML(YAML):
@@ -84,6 +103,7 @@ def create_expectation_suite(
         )
 
     data_source = select_datasource(context, datasource_name=datasource_name)
+
     if data_source is None:
         # select_datasource takes care of displaying an error message, so all is left here is to exit.
         sys.exit(1)
@@ -167,9 +187,9 @@ def _profile_to_create_a_suite(
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data.
 
-Great Expectations will store these expectations in a new Expectation Suite '{0:s}' here:
+Great Expectations will store these expectations in a new Expectation Suite '{:s}' here:
 
-  {1:s}
+  {:s}
 """.format(
             expectation_suite_name,
             context.stores[
@@ -211,7 +231,7 @@ def _raise_profiling_errors(profiling_results):
         == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
     ):
         raise ge_exceptions.DataContextError(
-            """Some of the data assets you specified were not found: {0:s}
+            """Some of the data assets you specified were not found: {:s}
             """.format(
                 ",".join(profiling_results["error"]["not_found_data_assets"])
             )
@@ -265,9 +285,9 @@ def create_empty_suite(
 ) -> None:
     cli_message(
         """
-Great Expectations will create a new Expectation Suite '{0:s}' and store it here:
+Great Expectations will create a new Expectation Suite '{:s}' and store it here:
 
-  {1:s}
+  {:s}
 """.format(
             expectation_suite_name,
             context.stores[
@@ -296,10 +316,10 @@ def load_batch(
     context: DataContext,
     suite: Union[str, ExpectationSuite],
     batch_kwargs: Union[dict, BatchKwargs],
-) -> DataAsset:
-    batch: DataAsset = context.get_batch(batch_kwargs, suite)
-    assert isinstance(
-        batch, DataAsset
+) -> Union[Batch, DataAsset]:
+    batch: Union[Batch, DataAsset] = context.get_batch(batch_kwargs, suite)
+    assert isinstance(batch, DataAsset) or isinstance(
+        batch, Batch
     ), "Batch failed to load. Please check your batch_kwargs"
     return batch
 
@@ -338,24 +358,94 @@ def exit_with_failure_message_and_stats(
     sys.exit(1)
 
 
+def delete_checkpoint(
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+    assume_yes: bool,
+):
+    """Delete a checkpoint or raise helpful errors."""
+    validate_checkpoint(
+        context=context,
+        checkpoint_name=checkpoint_name,
+        usage_event=usage_event,
+    )
+    confirm_prompt: str = f"""\nAre you sure you want to delete the Checkpoint "{checkpoint_name}" (this action is irreversible)?"
+"""
+    continuation_message: str = (
+        f'The Checkpoint "{checkpoint_name}" was not deleted.  Exiting now.'
+    )
+    if not assume_yes:
+        confirm_proceed_or_exit(
+            confirm_prompt=confirm_prompt,
+            continuation_message=continuation_message,
+        )
+    context.delete_checkpoint(name=checkpoint_name)
+
+
+def run_checkpoint(
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+) -> CheckpointResult:
+    """Run a checkpoint or raise helpful errors."""
+    failure_message: str = "Exception occurred while running Checkpoint."
+    validate_checkpoint(
+        context=context,
+        checkpoint_name=checkpoint_name,
+        usage_event=usage_event,
+        failure_message=failure_message,
+    )
+    try:
+        result: CheckpointResult = context.run_checkpoint(
+            checkpoint_name=checkpoint_name
+        )
+        return result
+    except ge_exceptions.CheckpointError as e:
+        cli_message(string=failure_message)
+        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}.</red>")
+
+
+def validate_checkpoint(
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+    failure_message: Optional[str] = None,
+):
+    try:
+        # noinspection PyUnusedLocal
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = load_checkpoint(
+            context=context, checkpoint_name=checkpoint_name, usage_event=usage_event
+        )
+    except ge_exceptions.CheckpointError as e:
+        if failure_message:
+            cli_message(string=failure_message)
+        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
+
+
 def load_checkpoint(
-    context: DataContext, checkpoint_name: str, usage_event: str
-) -> dict:
+    context: DataContext,
+    checkpoint_name: str,
+    usage_event: str,
+) -> Union[Checkpoint, LegacyCheckpoint]:
     """Load a checkpoint or raise helpful errors."""
     try:
-        checkpoint_config = context.get_checkpoint(checkpoint_name)
-        return checkpoint_config
-    except CheckpointNotFoundError as e:
+        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+            name=checkpoint_name
+        )
+        return checkpoint
+    except (
+        ge_exceptions.CheckpointNotFoundError,
+        ge_exceptions.InvalidCheckpointConfigError,
+    ):
         exit_with_failure_message_and_stats(
             context,
             usage_event,
             f"""\
-<red>Could not find checkpoint `{checkpoint_name}`.</red> Try running:
+<red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
-    except CheckpointError as e:
-        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
 def select_datasource(context: DataContext, datasource_name: str = None) -> Datasource:
@@ -397,9 +487,25 @@ def load_data_context_with_error_handling(
     directory: str, from_cli_upgrade_command: bool = False
 ) -> DataContext:
     """Return a DataContext with good error handling and exit codes."""
-    # TODO consolidate all the myriad CLI tests into this
     try:
-        context = DataContext(directory)
+        context: DataContext = DataContext(context_root_dir=directory)
+        ge_config_version: int = context.get_config().config_version
+        if (
+            from_cli_upgrade_command
+            and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION
+        ):
+            directory = directory or context.root_directory
+            (
+                increment_version,
+                exception_occurred,
+            ) = upgrade_project_one_version_increment(
+                context_root_dir=directory,
+                ge_config_version=ge_config_version,
+                continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+                from_cli_upgrade_command=from_cli_upgrade_command,
+            )
+            if not exception_occurred and increment_version:
+                context = DataContext(context_root_dir=directory)
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or DataContext.find_context_root_dir()
@@ -411,10 +517,7 @@ def load_data_context_with_error_handling(
             if ge_config_version
             else None
         )
-        if (
-            upgrade_helper_class
-            and ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION
-        ):
+        if upgrade_helper_class and ge_config_version < CURRENT_GE_CONFIG_VERSION:
             upgrade_project(
                 context_root_dir=directory,
                 ge_config_version=ge_config_version,
@@ -443,24 +546,17 @@ def load_data_context_with_error_handling(
 def upgrade_project(
     context_root_dir, ge_config_version, from_cli_upgrade_command=False
 ):
-    continuation_message = (
-        "\nOk, exiting now. To upgrade at a later time, use the following command: "
-        "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
-        "process, visit "
-        "<cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
-        "</cyan>.\n"
-    )
     if from_cli_upgrade_command:
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
             f"the version "
-            f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.</red>"
+            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"
         )
     else:
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
             f"the version "
-            f"number must be at least {MINIMUM_SUPPORTED_CONFIG_VERSION}.\nIn order to proceed, "
+            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.\nIn order to proceed, "
             f"your project must be upgraded.</red>"
         )
 
@@ -469,61 +565,22 @@ def upgrade_project(
         "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
     )
     confirm_proceed_or_exit(
-        confirm_prompt=upgrade_prompt, continuation_message=continuation_message
+        confirm_prompt=upgrade_prompt,
+        continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
     )
     cli_message(SECTION_SEPARATOR)
 
     # use loop in case multiple upgrades need to take place
-    while ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
-        upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
-        if not upgrade_helper_class:
-            break
-        target_ge_config_version = int(ge_config_version) + 1
-        # set version temporarily to MINIMUM_SUPPORTED_CONFIG_VERSION to get functional DataContext
-        DataContext.set_ge_config_version(
-            config_version=MINIMUM_SUPPORTED_CONFIG_VERSION,
+    while ge_config_version < CURRENT_GE_CONFIG_VERSION:
+        increment_version, exception_occurred = upgrade_project_one_version_increment(
             context_root_dir=context_root_dir,
+            ge_config_version=ge_config_version,
+            continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+            from_cli_upgrade_command=from_cli_upgrade_command,
         )
-        upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)
-        upgrade_overview, confirmation_required = upgrade_helper.get_upgrade_overview()
-
-        if confirmation_required:
-            upgrade_confirmed = confirm_proceed_or_exit(
-                confirm_prompt=upgrade_overview,
-                continuation_message=continuation_message,
-                exit_on_no=False,
-            )
-        else:
-            upgrade_confirmed = True
-
-        if upgrade_confirmed:
-            cli_message("\nUpgrading project...")
-            cli_message(SECTION_SEPARATOR)
-            # run upgrade and get report of what was done, if version number should be incremented
-            upgrade_report, increment_version = upgrade_helper.upgrade_project()
-            # display report to user
-            cli_message(upgrade_report)
-            # set config version to target version
-            if increment_version:
-                DataContext.set_ge_config_version(
-                    target_ge_config_version,
-                    context_root_dir,
-                    validate_config_version=False,
-                )
-                ge_config_version += 1
-            else:
-                # restore version number to current number
-                DataContext.set_ge_config_version(
-                    ge_config_version, context_root_dir, validate_config_version=False
-                )
-                break
-        else:
-            # restore version number to current number
-            DataContext.set_ge_config_version(
-                ge_config_version, context_root_dir, validate_config_version=False
-            )
-            cli_message(continuation_message)
-            sys.exit(0)
+        if exception_occurred or not increment_version:
+            break
+        ge_config_version += 1
 
     cli_message(SECTION_SEPARATOR)
     upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
@@ -537,10 +594,77 @@ To learn more about the upgrade process, visit \
 <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>
 """
 
-    if ge_config_version < MINIMUM_SUPPORTED_CONFIG_VERSION:
+    if ge_config_version < CURRENT_GE_CONFIG_VERSION:
         cli_message(upgrade_incomplete_message)
     else:
         cli_message(upgrade_success_message)
+    sys.exit(0)
+
+
+def upgrade_project_one_version_increment(
+    context_root_dir: str,
+    ge_config_version: float,
+    continuation_message: str,
+    from_cli_upgrade_command: bool = False,
+) -> [bool, bool]:  # Returns increment_version, exception_occurred
+    upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
+    if not upgrade_helper_class:
+        return False, False
+    target_ge_config_version = int(ge_config_version) + 1
+    # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
+    DataContext.set_ge_config_version(
+        config_version=CURRENT_GE_CONFIG_VERSION,
+        context_root_dir=context_root_dir,
+    )
+    upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)
+    upgrade_overview, confirmation_required = upgrade_helper.get_upgrade_overview()
+
+    if confirmation_required or from_cli_upgrade_command:
+        upgrade_confirmed = confirm_proceed_or_exit(
+            confirm_prompt=upgrade_overview,
+            continuation_message=continuation_message,
+            exit_on_no=False,
+        )
+    else:
+        upgrade_confirmed = True
+
+    if upgrade_confirmed:
+        cli_message("\nUpgrading project...")
+        cli_message(SECTION_SEPARATOR)
+        # run upgrade and get report of what was done, if version number should be incremented
+        (
+            upgrade_report,
+            increment_version,
+            exception_occurred,
+        ) = upgrade_helper.upgrade_project()
+        # display report to user
+        cli_message(upgrade_report)
+        if exception_occurred:
+            # restore version number to current number
+            DataContext.set_ge_config_version(
+                ge_config_version, context_root_dir, validate_config_version=False
+            )
+            # display report to user
+            return False, True
+        # set config version to target version
+        if increment_version:
+            DataContext.set_ge_config_version(
+                target_ge_config_version,
+                context_root_dir,
+                validate_config_version=False,
+            )
+            return True, False
+        # restore version number to current number
+        DataContext.set_ge_config_version(
+            ge_config_version, context_root_dir, validate_config_version=False
+        )
+        return False, False
+
+    # restore version number to current number
+    DataContext.set_ge_config_version(
+        ge_config_version, context_root_dir, validate_config_version=False
+    )
+    cli_message(continuation_message)
     sys.exit(0)
 
 
@@ -549,7 +673,7 @@ def confirm_proceed_or_exit(
     continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
     exit_on_no: bool = True,
     exit_code: int = 0,
-) -> Union[None, bool]:
+) -> Optional[bool]:
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
     or modifies some resources (e.g., edits the config file, adds objects
@@ -572,3 +696,90 @@ def confirm_proceed_or_exit(
         else:
             return False
     return True
+
+
+def parse_cli_config_file_location(config_file_location: str) -> dict:
+    """
+    Parse CLI yaml config file or directory location into directory and filename.
+    Uses pathlib to handle windows paths.
+    Args:
+        config_file_location: string of config_file_location
+
+    Returns:
+        {
+            "directory": "directory/where/config/file/is/located",
+            "filename": "great_expectations.yml"
+        }
+    """
+
+    if config_file_location is not None and config_file_location != "":
+
+        config_file_location_path = Path(config_file_location)
+
+        # If the file or directory exists, treat it appropriately
+        # This handles files without extensions
+        if config_file_location_path.is_file():
+            filename: Optional[str] = fr"{str(config_file_location_path.name)}"
+            directory: Optional[str] = fr"{str(config_file_location_path.parent)}"
+        elif config_file_location_path.is_dir():
+            filename: Optional[str] = None
+            directory: Optional[str] = config_file_location
+
+        else:
+            raise ge_exceptions.ConfigNotFoundError()
+
+    else:
+        # Return None if config_file_location is empty rather than default output of ""
+        directory = None
+        filename = None
+
+    return {"directory": directory, "filename": filename}
+
+
+def send_usage_message(
+    data_context: DataContext,
+    event: str,
+    event_payload: Optional[dict] = None,
+    success: bool = False,
+):
+    if event_payload is None:
+        event_payload = {}
+    event_payload.update({"api_version": "v3"})
+    send_usage_stats_message(
+        data_context=data_context,
+        event=event,
+        event_payload=event_payload,
+        success=success,
+    )
+
+
+def is_cloud_file_url(file_path: str) -> bool:
+    """Check for commonly used cloud urls."""
+    sanitized = file_path.strip()
+    if sanitized[0:7] == "file://":
+        return False
+    if (
+        sanitized[0:5] in ["s3://", "gs://"]
+        or sanitized[0:6] == "ftp://"
+        or sanitized[0:7] in ["http://", "wasb://"]
+        or sanitized[0:8] == "https://"
+    ):
+        return True
+    return False
+
+
+def get_relative_path_from_config_file_to_base_path(
+    context_root_directory: str, data_path: str
+) -> str:
+    """
+    This function determines the relative path from a given data path relative
+    to the great_expectations.yml file independent of the current working
+    directory.
+
+    This allows a user to use the CLI from any directory, type a relative path
+    from their current working directory and have the correct relative path be
+    put in the great_expectations.yml file.
+    """
+    data_from_working_dir = os.path.relpath(data_path)
+    context_dir_from_working_dir = os.path.relpath(context_root_directory)
+    return os.path.relpath(data_from_working_dir, context_dir_from_working_dir)

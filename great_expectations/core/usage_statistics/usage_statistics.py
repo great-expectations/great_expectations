@@ -8,12 +8,12 @@ import sys
 import threading
 from functools import wraps
 from queue import Queue
+from typing import Optional
 
 import jsonschema
 import requests
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import nested_update
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
     BatchAnonymizer,
@@ -23,6 +23,9 @@ from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymi
 )
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.execution_engine_anonymizer import (
+    ExecutionEngineAnonymizer,
 )
 from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
     ExpectationSuiteAnonymizer,
@@ -36,6 +39,7 @@ from great_expectations.core.usage_statistics.anonymizers.validation_operator_an
 from great_expectations.core.usage_statistics.schemas import (
     usage_statistics_record_schema,
 )
+from great_expectations.core.util import nested_update
 
 STOP_SIGNAL = object()
 
@@ -44,7 +48,7 @@ logger = logging.getLogger(__name__)
 _anonymizers = dict()
 
 
-class UsageStatisticsHandler(object):
+class UsageStatisticsHandler:
     def __init__(self, data_context, data_context_id, usage_statistics_url):
         self._url = usage_statistics_url
 
@@ -57,6 +61,7 @@ class UsageStatisticsHandler(object):
         self._worker = threading.Thread(target=self._requests_worker, daemon=True)
         self._worker.start()
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+        self._execution_engine_anonymizer = ExecutionEngineAnonymizer(data_context_id)
         self._store_anonymizer = StoreAnonymizer(data_context_id)
         self._validation_operator_anonymizer = ValidationOperatorAnonymizer(
             data_context_id
@@ -139,7 +144,7 @@ class UsageStatisticsHandler(object):
                 self._datasource_anonymizer.anonymize_datasource_info(
                     datasource_name, datasource_config
                 )
-                for datasource_name, datasource_config in self._data_context._project_config_with_variables_substituted.datasources.items()
+                for datasource_name, datasource_config in self._data_context.project_config_with_variables_substituted.datasources.items()
             ],
             "anonymized_stores": [
                 self._store_anonymizer.anonymize_store_info(store_name, store_obj)
@@ -156,7 +161,7 @@ class UsageStatisticsHandler(object):
                 self._data_docs_sites_anonymizer.anonymize_data_docs_site_info(
                     site_name=site_name, site_config=site_config
                 )
-                for site_name, site_config in self._data_context._project_config_with_variables_substituted.data_docs_sites.items()
+                for site_name, site_config in self._data_context.project_config_with_variables_substituted.data_docs_sites.items()
             ],
             "anonymized_expectation_suites": [
                 self._expectation_suite_anonymizer.anonymize_expectation_suite_info(
@@ -199,7 +204,6 @@ class UsageStatisticsHandler(object):
                 message, schema=usage_statistics_record_schema
             ):
                 return
-
             self._message_queue.put(message)
         # noinspection PyBroadException
         except Exception as e:
@@ -265,7 +269,7 @@ def usage_statistics_enabled_method(
                 if handler is not None:
                     handler.emit(message)
             # except Exception:
-            except Exception as e:
+            except Exception:
                 message["success"] = False
                 handler = get_usage_statistics_handler(args)
                 if handler:
@@ -311,15 +315,17 @@ def run_validation_operator_usage_statistics(
         logger.debug(
             "run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
         )
-    try:
-        batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
-        payload["anonymized_batches"] = [
-            batch_anonymizer.anonymize_batch_info(batch) for batch in assets_to_validate
-        ]
-    except Exception:
-        logger.debug(
-            "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
-        )
+    if data_context._usage_statistics_handler:
+        try:
+            batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
+            payload["anonymized_batches"] = [
+                batch_anonymizer.anonymize_batch_info(batch)
+                for batch in assets_to_validate
+            ]
+        except Exception:
+            logger.debug(
+                "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
+            )
     return payload
 
 
@@ -373,6 +379,8 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
 
 
 def add_datasource_usage_statistics(data_context, name, **kwargs):
+    if not data_context._usage_statistics_handler:
+        return dict()
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -395,13 +403,20 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
     return payload
 
 
-def send_usage_message(data_context, event, event_payload=None, success=None):
+def send_usage_message(
+    data_context,
+    event: str,
+    event_payload: Optional[dict] = None,
+    success: Optional[bool] = None,
+):
     """send a usage statistics message."""
     try:
-        handler = getattr(data_context, "_usage_statistics_handler", None)
-        message = {
+        handler: UsageStatisticsHandler = getattr(
+            data_context, "_usage_statistics_handler", None
+        )
+        message: dict = {
             "event": event,
-            "event_payload": event_payload or {},
+            "event_payload": event_payload,
             "success": success,
         }
         if handler is not None:

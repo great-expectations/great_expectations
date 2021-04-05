@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 import json
 from collections import OrderedDict
 
 import pytest
 
 import great_expectations as ge
-from great_expectations.core import expectationSuiteSchema
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer import (
@@ -21,13 +18,16 @@ from great_expectations.render.renderer.content_block import (
     ValidationResultsTableContentBlockRenderer,
 )
 from great_expectations.render.view import DefaultJinjaPageView
-from tests.test_utils import expectationSuiteValidationResultSchema
+from great_expectations.self_check.util import (
+    expectationSuiteSchema,
+    expectationSuiteValidationResultSchema,
+)
 
 
 @pytest.fixture(scope="module")
 def titanic_profiler_evrs():
     with open(
-        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json"), "r"
+        file_relative_path(__file__, "./fixtures/BasicDatasetProfiler_evrs.json")
     ) as infile:
         return expectationSuiteValidationResultSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
@@ -40,7 +40,6 @@ def titanic_profiler_evrs_with_exception():
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_evrs_with_exception.json"
         ),
-        "r",
     ) as infile:
         return expectationSuiteValidationResultSchema.load(json.load(infile))
 
@@ -51,10 +50,9 @@ def titanic_dataset_profiler_expectations():
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
         ),
-        "r",
     ) as infile:
         return expectationSuiteSchema.load(
-            json.load(infile, object_pairs_hook=OrderedDict)
+            json.load(fp=infile, object_pairs_hook=OrderedDict)
         )
 
 
@@ -65,10 +63,9 @@ def titanic_dataset_profiler_expectations_with_distribution():
             __file__,
             "./fixtures/BasicDatasetProfiler_expectations_with_distribution.json",
         ),
-        "r",
     ) as infile:
         return expectationSuiteSchema.load(
-            json.load(infile, encoding="utf-8", object_pairs_hook=OrderedDict)
+            json.load(fp=infile, encoding="utf-8", object_pairs_hook=OrderedDict)
         )
 
 
@@ -217,7 +214,7 @@ def test_content_block_list_available_expectations():
         "expect_column_median_to_be_between",
         "expect_column_min_to_be_between",
         "expect_column_most_common_value_to_be_in_set",
-        "expect_column_pair_values_A_to_be_greater_than_B",
+        "expect_column_pair_values_a_to_be_greater_than_b",
         "expect_column_pair_values_to_be_equal",
         "expect_column_proportion_of_unique_values_to_be_between",
         "expect_column_stdev_to_be_between",
@@ -244,10 +241,13 @@ def test_content_block_list_available_expectations():
         "expect_column_values_to_not_be_null",
         "expect_column_values_to_not_match_regex",
         "expect_column_values_to_not_match_regex_list",
-        "expect_multicolumn_values_to_be_unique",
+        "expect_select_column_values_to_be_unique_within_record",
+        "expect_compound_columns_to_be_unique",
         "expect_table_columns_to_match_ordered_list",
+        "expect_table_columns_to_match_set",
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
+        "expect_column_pair_cramers_phi_value_to_be_less_than",
     }
     assert known_validation_results_implemented_expectations <= set(
         available_expectations
@@ -335,7 +335,7 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     assert rendered_page[-7:] == "</html>"
     assert "Table-Level Expectations" in rendered_page
     assert (
-        'Must have more than <span class="badge badge-secondary" >0</span> rows.'
+        'Must have greater than or equal to <span class="badge badge-secondary" >0</span> rows.'
         in rendered_page
     )
     # assert 'This table should have a list of columns in a specific order, but that order is not specified.' \
@@ -396,7 +396,7 @@ def test_render_string_template():
                 "values": ["A", "B", "C"],
             },
             "threshold": 0.1,
-            "sparklines_histogram": u"\u2588\u2584\u2581",
+            "sparklines_histogram": "\u2588\u2584\u2581",
         },
         "styling": {
             "default": {"classes": ["badge", "badge-secondary"]},
@@ -412,7 +412,7 @@ def test_render_string_template():
         .replace("\n", "")
     )
     expected = (
-        u"""<span>
+        """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >█▄▁</span>
             </span>""".replace(
             " ", ""
@@ -431,7 +431,7 @@ def test_render_string_template():
                 "values": ["A", "B", "C"],
             },
             "threshold": 0.1,
-            "sparklines_histogram": u"▃▆▁█",
+            "sparklines_histogram": "▃▆▁█",
         },
         "styling": {
             "default": {"classes": ["badge", "badge-secondary"]},
@@ -447,7 +447,7 @@ def test_render_string_template():
         .replace("\n", "")
     )
     expected = (
-        u"""<span>
+        """<span>
                 <span class="badge badge-secondary" >categorical_fixed</span> Kullback-Leibler (KL) divergence with respect to the following distribution must be lower than <span class="badge badge-secondary" >0.1</span>: <span style="font-family:serif;" >▃▆▁█</span>
             </span>""".replace(
             " ", ""

@@ -6,32 +6,19 @@ import pytest
 from ruamel.yaml import YAML
 
 import great_expectations.dataset.sqlalchemy_dataset
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator, Validator
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
 
 yaml = YAML()
-
-
-@pytest.fixture
-def test_db_connection_string(tmp_path_factory, test_backends):
-    if "sqlite" not in test_backends:
-        pytest.skip("skipping fixture because sqlite not selected")
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    df2 = pd.DataFrame({"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]})
-
-    import sqlalchemy as sa
-
-    basepath = str(tmp_path_factory.mktemp("db_context"))
-    path = os.path.join(basepath, "test.db")
-    engine = sa.create_engine("sqlite:///" + str(path))
-    df1.to_sql("table_1", con=engine, index=True)
-    df2.to_sql("table_2", con=engine, index=True, schema="main")
-
-    # Return a connection string to this newly-created db
-    return "sqlite:///" + str(path)
 
 
 def test_sqlalchemy_datasource_custom_data_asset(
@@ -60,7 +47,6 @@ def test_sqlalchemy_datasource_custom_data_asset(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -161,7 +147,6 @@ def test_create_sqlalchemy_datasource(data_context_parameterized_expectation_sui
             data_context_parameterized_expectation_suite.root_directory,
             "uncommitted/config_variables.yml",
         ),
-        "r",
     ) as credentials_file:
         substitution_variables = yaml.load(credentials_file)
 
@@ -182,7 +167,7 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
             "test", query_parameters={"col_name": "animal_name"}
         )
     )
-    dataset = Validator(
+    dataset = BridgeValidator(
         batch,
         expectation_suite=ExpectationSuite("test"),
         expectation_engine=SqlAlchemyDataset,
@@ -196,12 +181,12 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
 def test_sqlalchemy_source_limit(sqlitedb_engine):
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     df2 = pd.DataFrame({"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]})
-    df1.to_sql("table_1", con=sqlitedb_engine, index=True)
-    df2.to_sql("table_2", con=sqlitedb_engine, index=True, schema="main")
+    df1.to_sql(name="table_1", con=sqlitedb_engine, index=True)
+    df2.to_sql(name="table_2", con=sqlitedb_engine, index=True, schema="main")
     datasource = SqlAlchemyDatasource("SqlAlchemy", engine=sqlitedb_engine)
     limited_batch = datasource.get_batch({"table": "table_1", "limit": 1, "offset": 2})
     assert isinstance(limited_batch, Batch)
-    limited_dataset = Validator(
+    limited_dataset = BridgeValidator(
         limited_batch,
         expectation_suite=ExpectationSuite("test"),
         expectation_engine=SqlAlchemyDataset,
@@ -261,7 +246,7 @@ def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_stri
     )
     batch_kwargs["query"] = "select * from table_1;"
     batch = datasource.get_batch(batch_kwargs)
-    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False
 
@@ -270,7 +255,7 @@ def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_stri
     )
     batch_kwargs["query"] = "select * from table_1;"
     batch = datasource.get_batch(batch_kwargs)
-    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is True
 
@@ -279,6 +264,6 @@ def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_stri
         "dataset_options": {"caching": False},
     }
     batch = datasource.get_batch(batch_kwargs)
-    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False

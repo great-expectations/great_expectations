@@ -18,7 +18,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 @pytest.fixture
@@ -29,28 +29,45 @@ def titanic_sqlite_db_file(sa, tmp_path_factory):
     db_path = os.path.join(temp_dir, "titanic.db")
     shutil.copy(fixture_db_path, db_path)
 
-    engine = sa.create_engine("sqlite:///{}".format(db_path))
+    engine = sa.create_engine("sqlite:///{}".format(db_path), pool_recycle=3600)
     assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
     return db_path
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project(
-    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file, sa
+    mock_webbrowser, caplog, monkeypatch, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     ge_dir = os.path.join(project_dir, "great_expectations")
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
-    engine = sa.create_engine("sqlite:///{}".format(database_path))
+    engine = sa.create_engine("sqlite:///{}".format(database_path), pool_recycle=3600)
+
+    inspector = sa.inspect(engine)
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
-        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(engine.url),
+        ["--v3-api", "init"],
+        input=f"\n\n2\n6\ntitanic\n{engine.url}\n\n\n1\n{default_schema}\n{default_table}\nwarning\n\n\n\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -63,7 +80,10 @@ def test_cli_init_on_new_project(
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
+        in stdout
+    )
     assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
@@ -87,7 +107,7 @@ def test_cli_init_on_new_project(
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path, "r"))
+    config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["titanic"]["data_asset_type"][
         "class_name"
     ]
@@ -108,6 +128,7 @@ great_expectations/
     great_expectations.yml
     checkpoints/
     expectations/
+        .ge_store_backend_id
         warning.json
     notebooks/
         pandas/
@@ -160,6 +181,7 @@ great_expectations/
                             20190926T134241.000000Z/
                                 foobarbazguid.html
         validations/
+            .ge_store_backend_id
             warning/
                 20190926T134241.000000Z/
                     20190926T134241.000000Z/
@@ -179,25 +201,40 @@ great_expectations/
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_new_project_extra_whitespace_in_url(
-    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file, sa
+    mock_webbrowser, caplog, monkeypatch, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     project_dir = str(tmp_path_factory.mktemp("test_cli_init_diff"))
     ge_dir = os.path.join(project_dir, "great_expectations")
 
     database_path = os.path.join(project_dir, "titanic.db")
     shutil.copy(titanic_sqlite_db_file, database_path)
-    engine = sa.create_engine("sqlite:///{}".format(database_path))
+    engine = sa.create_engine("sqlite:///{}".format(database_path), pool_recycle=3600)
     engine_url_with_added_whitespace = "    " + str(engine.url) + "  "
 
+    inspector = sa.inspect(engine)
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
+
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
-        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(
-            engine_url_with_added_whitespace
-        ),
+        ["--v3-api", "init"],
+        input=f"\n\n2\n6\ntitanic\n{engine_url_with_added_whitespace}\n\n\n1\n{default_schema}\n{default_table}\nwarning\n\n\n\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -210,7 +247,10 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     assert "What is the url/connection string for the sqlalchemy connection" in stdout
     assert "Attempting to connect to your database." in stdout
     assert "Great Expectations connected to your database" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
+        in stdout
+    )
     assert "Name the new Expectation Suite [main.titanic.warning]" in stdout
     assert (
         "Great Expectations will choose a couple of columns and generate expectations about them"
@@ -244,7 +284,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path, "r"))
+    config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["titanic"]["data_asset_type"][
         "class_name"
     ]
@@ -262,9 +302,19 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     )
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
-    mock_webbrowser, caplog, initialized_sqlite_project, titanic_sqlite_db_file, sa
+    mock_webbrowser,
+    caplog,
+    monkeypatch,
+    initialized_sqlite_project,
+    titanic_sqlite_db_file,
+    sa,
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -275,14 +325,27 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert not context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
-    url = "sqlite:///{}".format(titanic_sqlite_db_file)
+    monkeypatch.chdir(project_dir)
+    url = f"sqlite:///{titanic_sqlite_db_file}"
+
+    inspector = sa.inspect(sa.create_engine(url))
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
+
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
-            input="\n\n2\n6\nsqlite\n{}\n\n\n1\nmy_suite\n\n\n\n".format(url),
+            ["--v3-api", "init"],
+            input=f"\n\n2\n6\nsqlite\n{url}\n\n\n1\n{default_schema}\n{default_table}\nmy_suite\n\n\n\n",
             catch_exceptions=False,
         )
     stdout = result.stdout
@@ -304,7 +367,10 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
         in stdout
     )
     assert "What is the url/connection string for the sqlalchemy connection?" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
+        in stdout
+    )
     assert "Great Expectations connected to your database" in stdout
     assert "This looks like an existing project that" not in stdout
 
@@ -346,7 +412,7 @@ def _remove_all_datasources(ge_dir):
 def _load_config_file(config_path):
     assert os.path.isfile(config_path), "Config file is missing. Check path"
 
-    with open(config_path, "r") as f:
+    with open(config_path) as f:
         read = f.read()
         config = yaml.load(read)
 
@@ -357,26 +423,38 @@ def _load_config_file(config_path):
 @pytest.fixture
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def initialized_sqlite_project(
-    mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file, sa
+    mock_webbrowser, caplog, monkeypatch, tmp_path_factory, titanic_sqlite_db_file, sa
 ):
     """This is an initialized project through the CLI."""
     project_dir = str(tmp_path_factory.mktemp("my_rad_project"))
 
-    engine = sa.create_engine("sqlite:///{}".format(titanic_sqlite_db_file))
+    engine = sa.create_engine(
+        "sqlite:///{}".format(titanic_sqlite_db_file), pool_recycle=3600
+    )
+
+    inspector = sa.inspect(engine)
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["init", "-d", project_dir],
-        input="\n\n2\n6\ntitanic\n{}\n\n\n1\nwarning\n\n\n\n".format(engine.url),
+        ["--v3-api", "init"],
+        input=f"\n\n2\n6\ntitanic\n{engine.url}\n\n\n1\n{default_schema}\n{default_table}\nwarning\n\n\n\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
     assert mock_webbrowser.call_count == 1
     assert (
-        "{}/great_expectations/uncommitted/data_docs/local_site/validations/warning/".format(
-            project_dir
-        )
+        f"{project_dir}/great_expectations/uncommitted/data_docs/local_site/validations/warning/"
         in mock_webbrowser.call_args[0][0]
     )
 
@@ -400,10 +478,16 @@ def initialized_sqlite_project(
     return project_dir
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser,
     caplog,
+    monkeypatch,
     initialized_sqlite_project,
     titanic_sqlite_db,
     empty_sqlite_db,
@@ -419,11 +503,15 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+            cli,
+            ["--v3-api", "init"],
+            input="n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -440,18 +528,30 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
-    mock_webbrowser, caplog, initialized_sqlite_project,
+    mock_webbrowser,
+    caplog,
+    monkeypatch,
+    initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="n\n", catch_exceptions=False,
+            cli,
+            ["--v3-api", "init"],
+            input="n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -468,18 +568,30 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
-    mock_webbrowser, caplog, initialized_sqlite_project,
+    mock_webbrowser,
+    caplog,
+    monkeypatch,
+    initialized_sqlite_project,
 ):
     project_dir = initialized_sqlite_project
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
-            cli, ["init", "-d", project_dir], input="\n\n", catch_exceptions=False,
+            cli,
+            ["--v3-api", "init"],
+            input="\n\n",
+            catch_exceptions=False,
         )
     stdout = result.stdout
 
@@ -502,9 +614,14 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.xfail(
+    reason="This command is not yet implemented for the modern API",
+    run=True,
+    strict=True,
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
-    mock_webbrowser, caplog, initialized_sqlite_project,
+    mock_webbrowser, caplog, monkeypatch, initialized_sqlite_project, sa
 ):
     project_dir = initialized_sqlite_project
     ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
@@ -520,17 +637,38 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     _delete_and_recreate_dir(validations_dir)
 
     context = DataContext(ge_dir)
+
+    # get the datasource from data context
+    all_datasources = context.list_datasources()
+    datasource = all_datasources[0] if all_datasources else None
+
+    # create a sqlalchemy engine using the URL of existing datasource
+    engine = sa.create_engine(datasource.get("credentials", dict()).get("url"))
+    inspector = sa.inspect(engine)
+
+    # get the default schema and table for testing
+    schemas = inspector.get_schema_names()
+    default_schema = schemas[0]
+
+    tables = [
+        table_name for table_name in inspector.get_table_names(schema=default_schema)
+    ]
+    default_table = tables[0]
+
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(project_dir)
     with pytest.warns(
         UserWarning, match="Warning. An existing `great_expectations.yml` was found"
     ):
         result = runner.invoke(
             cli,
-            ["init", "-d", project_dir],
-            input="\n1\nsink_me\n\n\n\n".format(
-                os.path.join(project_dir, "data/Titanic.csv")
+            ["--v3-api", "init"],
+            input="\n1\n{schema}\n{table}\nsink_me\n\n\n\n".format(
+                os.path.join(project_dir, "data/Titanic.csv"),
+                schema=default_schema,
+                table=default_table,
             ),
             catch_exceptions=False,
         )
@@ -546,7 +684,10 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     )
 
     assert "Always know what to expect from your data" in stdout
-    assert "Which table would you like to use?" in stdout
+    assert (
+        "You have selected a datasource that is a SQL database. How would you like to specify the data?"
+        in stdout
+    )
     assert "Generating example Expectation Suite..." in stdout
     assert "The following Data Docs sites will be built" in stdout
     assert "Great Expectations is now set up" in stdout

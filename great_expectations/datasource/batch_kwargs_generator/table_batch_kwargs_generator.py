@@ -2,10 +2,14 @@ import logging
 import warnings
 from string import Template
 
-from marshmallow import Schema, ValidationError, fields, post_load
-
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
+from great_expectations.marshmallow__shade import (
+    Schema,
+    ValidationError,
+    fields,
+    post_load,
+)
 
 from .batch_kwargs_generator import BatchKwargsGenerator
 
@@ -31,7 +35,7 @@ class AssetConfigurationSchema(Schema):
         return AssetConfiguration(**data)
 
 
-class AssetConfiguration(object):
+class AssetConfiguration:
     def __init__(self, table, schema=None):
         self.__table = table
         self.__schema = schema
@@ -170,7 +174,13 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 batch_kwargs = SqlAlchemyDatasourceTableBatchKwargs(
                     table=table_name, schema=schema_name
                 )
-
+            else:
+                raise BatchKwargsError(
+                    "TableBatchKwargsGenerator cannot access the following data:"
+                    f"SCHEMA : {schema_name}"
+                    f"TABLE : {table_name}",
+                    {},
+                )
         if batch_kwargs is not None:
             if partition_id is not None:
                 logger.warning(
@@ -183,7 +193,6 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             if offset is not None:
                 batch_kwargs["offset"] = offset
             return iter([batch_kwargs])
-
         # Otherwise, we return None
         return
 

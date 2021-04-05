@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import re
 
@@ -7,25 +5,16 @@ import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import SparkDFDataset
 from great_expectations.datasource import SparkDFDatasource
 from great_expectations.datasource.types import InMemoryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import BridgeValidator, Validator
 
 yaml = YAML()
-
-
-@pytest.fixture(scope="module")
-def test_folder_connection_path(tmp_path_factory):
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    path = str(tmp_path_factory.mktemp("test_folder_connection_path"))
-    df1.to_csv(os.path.join(path, "test.csv"))
-
-    return str(path)
 
 
 @pytest.fixture(scope="module")
@@ -47,7 +36,7 @@ def test_parquet_folder_connection_path(tmp_path_factory):
 
 def test_sparkdf_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite,
-    test_folder_connection_path,
+    test_folder_connection_path_csv,
     spark_session,
 ):
     assert spark_session  # Ensure a spark session exists
@@ -66,7 +55,7 @@ def test_sparkdf_datasource_custom_data_asset(
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": test_folder_connection_path,
+                "base_directory": test_folder_connection_path_csv,
             }
         },
     )
@@ -77,7 +66,6 @@ def test_sparkdf_datasource_custom_data_asset(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as data_context_config_file:
         data_context_file_config = yaml.load(data_context_config_file)
 
@@ -168,7 +156,6 @@ def test_create_sparkdf_datasource(
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
-        "r",
     ) as configfile:
         lines = configfile.readlines()
         assert "          sep: '|'\n" in lines
@@ -215,7 +202,9 @@ def test_standalone_spark_parquet_datasource(
     assert batch.data.count() == 2
 
 
-def test_standalone_spark_csv_datasource(test_folder_connection_path, test_backends):
+def test_standalone_spark_csv_datasource(
+    test_folder_connection_path_csv, test_backends
+):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     datasource = SparkDFDatasource(
@@ -223,7 +212,7 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path, test_backe
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": test_folder_connection_path,
+                "base_directory": test_folder_connection_path_csv,
             }
         },
     )
@@ -233,7 +222,7 @@ def test_standalone_spark_csv_datasource(test_folder_connection_path, test_backe
     ]
     batch = datasource.get_batch(
         batch_kwargs={
-            "path": os.path.join(test_folder_connection_path, "test.csv"),
+            "path": os.path.join(test_folder_connection_path_csv, "test.csv"),
             "reader_options": {"header": True},
         }
     )
@@ -344,35 +333,8 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
     assert batch.data.head()["a"] == "1"
 
 
-@pytest.mark.skipif(
-    is_library_loadable(library_name="pyspark"),
-    reason="Spark 3.0.0 creates one JVM per session, makikng configuration immutable.  A future PR handles this better.",
-)
-def test_spark_config(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    source = SparkDFDatasource()
-    conf = source.spark.sparkContext.getConf().getAll()
-    # Without specifying any spark_config values we get defaults
-    assert ("spark.app.name", "pyspark-shell") in conf
-
-    source = SparkDFDatasource(
-        spark_config={
-            "spark.app.name": "great_expectations",
-            "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "128m",
-        }
-    )
-
-    # Test that our values were set
-    conf = source.spark.sparkContext.getConf().getAll()
-    assert ("spark.app.name", "great_expectations") in conf
-    assert ("spark.sql.catalogImplementation", "hive") in conf
-    assert ("spark.executor.memory", "128m") in conf
-
-
 def test_spark_datasource_processes_dataset_options(
-    test_folder_connection_path, test_backends
+    test_folder_connection_path_csv, test_backends
 ):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
@@ -381,7 +343,7 @@ def test_spark_datasource_processes_dataset_options(
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": test_folder_connection_path,
+                "base_directory": test_folder_connection_path_csv,
             }
         },
     )
@@ -390,7 +352,7 @@ def test_spark_datasource_processes_dataset_options(
     )
     batch_kwargs["dataset_options"] = {"caching": False, "persist": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = Validator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
     dataset = validator.get_dataset()
     assert dataset.caching is False
     assert dataset._persist is False

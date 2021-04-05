@@ -31,6 +31,16 @@
         "unique": "INTEGER",
         "null": "NVARCHAR",
         "mult_dup": "VARCHAR"
+      },
+      "mysql": {
+        "a": "CHAR",
+        "b": "CHAR",
+        "c": "INTEGER",
+        "d": "CHAR",
+        "n": "INTEGER",
+        "unique": "INTEGER",
+        "null": "CHAR",
+        "mult_dup": "CHAR"
       }
     },
     "tests" : [
@@ -46,7 +56,7 @@
           "unexpected_index_list": []
         }
       },{
-        "title": "Basic Negative Case, all non-unique character values",
+        "title": "basic_negative_case_all_non_unique_character_values",
         "exact_match_out": false,
         "in": {
           "column": "a"
@@ -57,7 +67,7 @@
           "unexpected_index_list": [0, 1, 2]
         }
       },{
-        "title": "Multi-type column, contains 2 and '2'. Suppressed for SQAlchemy",
+        "title": "multi_type_column_contains_2_and_quoted_2_suppressed_for_sqalchemy",
         "suppress_test_for": ["sqlalchemy"],
         "exact_match_out": false,
         "in": {
@@ -70,7 +80,7 @@
           "unexpected_index_list": [0, 1]
         }
       },{
-        "title": "Positive Case, using Mostly",
+        "title": "positive_case_using_mostly",
         "exact_match_out": false,
         "in": {
           "column": "c",
@@ -82,7 +92,7 @@
           "unexpected_index_list": [0, 1]
         }
       },{
-        "title": "Negative Case, using Mostly",
+        "title": "negative_case_using_mostly",
         "exact_match_out": false,
         "in": {
           "column": "c",
@@ -94,7 +104,7 @@
           "unexpected_index_list": [0, 1]
         }
       },{
-        "title": "Positive case, multiple null values",
+        "title": "positive_case_multiple_null_values",
         "exact_match_out": false,
         "in": {
           "column": "n"
@@ -105,7 +115,7 @@
           "unexpected_index_list": []
         }
       },{
-        "title": "Negative case, non-unique numeric values",
+        "title": "negative_case_non_unique_numeric_values",
         "exact_match_out": false,
         "in": {
           "column": "c"
@@ -116,7 +126,7 @@
           "unexpected_index_list": [0, 1]
         }
       },{
-        "title": "Positive case, all null values",
+        "title": "positive_case_all_null_values",
         "exact_match_out": false,
         "in": {
           "column": "null"
@@ -127,7 +137,7 @@
           "unexpected_index_list": []
         }
       },{
-        "title": "Negative, Multiple duplicate values",
+        "title": "negative_multiple_duplicate_values",
         "exact_match_out": false,
         "in": {
           "column": "mult_dup"

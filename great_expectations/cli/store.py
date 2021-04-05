@@ -1,48 +1,36 @@
 import click
 
+from great_expectations import DataContext
 from great_expectations.cli import toolkit
-from great_expectations.cli.util import cli_message, cli_message_dict
-from great_expectations.core.usage_statistics.usage_statistics import send_usage_message
+from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 
 
 @click.group()
-def store():
+@click.pass_context
+def store(ctx):
     """Store operations"""
-    pass
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+    # TODO consider moving this all the way up in to the CLIState constructor
+    ctx.obj.data_context = context
 
 
 @store.command(name="list")
-@click.option(
-    "--directory",
-    "-d",
-    default=None,
-    help="The project's great_expectations directory.",
-)
-def store_list(directory):
-    """List known Stores."""
-    context = toolkit.load_data_context_with_error_handling(directory)
+@click.pass_context
+def store_list(ctx):
+    """List active Stores."""
+    context = ctx.obj.data_context
+    stores = context.list_active_stores()
+    cli_message(f"{len(stores)} active Stores found:")
+    for store in stores:
+        cli_message("")
+        cli_message_dict(store)
 
-    try:
-        stores = context.list_stores()
-
-        if len(stores) == 0:
-            cli_message("No Stores found")
-            send_usage_message(
-                data_context=context, event="cli.store.list", success=True
-            )
-            return
-        elif len(stores) == 1:
-            list_intro_string = "1 Store found:"
-        else:
-            list_intro_string = "{} Stores found:".format(len(stores))
-
-        cli_message(list_intro_string)
-
-        for store in stores:
-            cli_message("")
-            cli_message_dict(store)
-
-        send_usage_message(data_context=context, event="cli.store.list", success=True)
-    except Exception as e:
-        send_usage_message(data_context=context, event="cli.store.list", success=False)
-        raise e
+    toolkit.send_usage_message(
+        data_context=context, event="cli.store.list", success=True
+    )

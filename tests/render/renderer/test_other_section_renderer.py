@@ -5,15 +5,14 @@ import pytest
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer import ProfilingResultsOverviewSectionRenderer
-from great_expectations.render.types import RenderedTableContent
-from tests.test_utils import expectationSuiteValidationResultSchema
+from great_expectations.self_check.util import expectationSuiteValidationResultSchema
 
 
 @pytest.fixture(scope="module")
 def datetime_column_evrs():
     """hand-crafted EVRS for datetime columns"""
     with open(
-        file_relative_path(__file__, "../fixtures/datetime_column_evrs.json"), "r"
+        file_relative_path(__file__, "../fixtures/datetime_column_evrs.json")
     ) as infile:
         return expectationSuiteValidationResultSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)

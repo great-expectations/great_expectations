@@ -1,15 +1,17 @@
 import datetime
+import os
 
 import pytest
 from freezegun import freeze_time
 
-from great_expectations.core import (
-    ExpectationConfiguration,
+import tests.test_utils as test_utils
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
-    RunIdentifier,
 )
 from great_expectations.core.metric import ValidationMetricIdentifier
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 
 
@@ -23,7 +25,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
                     "drivername": "postgresql",
                     "username": "postgres",
                     "password": "",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "5432",
                     "database": "test_ci",
                 },
@@ -41,7 +43,36 @@ def param_store(request, test_backends):
 
     return instantiate_class_from_config(
         config=request.param,
-        config_defaults={"module_name": "great_expectations.data_context.store",},
+        config_defaults={
+            "module_name": "great_expectations.data_context.store",
+        },
+        runtime_environment={},
+    )
+
+
+@pytest.fixture(
+    params=[
+        {
+            "class_name": "EvaluationParameterStore",
+            "store_backend": {
+                "class_name": "InMemoryStoreBackend",
+            },
+        },
+        {
+            "class_name": "EvaluationParameterStore",
+            "module_name": "great_expectations.data_context.store",
+        },
+    ]
+)
+def in_memory_param_store(request, test_backends):
+    if "postgresql" not in test_backends:
+        pytest.skip("skipping fixture because postgresql not selected")
+
+    return instantiate_class_from_config(
+        config=request.param,
+        config_defaults={
+            "module_name": "great_expectations.data_context.store",
+        },
         runtime_environment={},
     )
 
@@ -59,7 +90,9 @@ def test_evaluation_parameter_store_methods(
             ExpectationValidationResult(
                 expectation_config=ExpectationConfiguration(
                     expectation_type="expect_table_row_count_to_equal",
-                    kwargs={"value": 1024,},
+                    kwargs={
+                        "value": 1024,
+                    },
                 ),
                 success=True,
                 exception_info={
@@ -149,6 +182,18 @@ def test_database_evaluation_parameter_store_basics(param_store):
     param_store.set(metric_identifier, metric_value)
     value = param_store.get(metric_identifier)
     assert value == metric_value
+
+
+def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_store):
+    """
+    What does this test and why?
+    A Store should be able to report it's store_backend_id
+    which is set when the StoreBackend is instantiated.
+    """
+    # Check that store_backend_id exists can be read
+    assert in_memory_param_store.store_backend_id is not None
+    # Check that store_backend_id is a valid UUID
+    assert test_utils.validate_uuid4(in_memory_param_store.store_backend_id)
 
 
 @freeze_time("09/26/2019 13:42:41")

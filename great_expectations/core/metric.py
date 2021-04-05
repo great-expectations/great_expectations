@@ -1,17 +1,17 @@
 import warnings
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 
-from great_expectations.core import RunIdentifier
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
 from great_expectations.exceptions import GreatExpectationsError
 
 
-class Metric(object):
+class Metric:
     """A Metric associates a value with some name and configuration. The specific configuration parameters that are
     relevant for a given metric's identity depend on the metric. For example, the metric `column_mean` depends on a
     column name.
@@ -120,7 +120,7 @@ class ValidationMetric(Metric):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = None
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):
@@ -170,7 +170,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
             )
             try:
                 run_time = parse(run_id)
-            except (ParserError, TypeError):
+            except (ValueError, TypeError):
                 run_time = None
             run_id = RunIdentifier(run_name=run_id, run_time=run_time)
         elif isinstance(run_id, dict):

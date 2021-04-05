@@ -4,7 +4,11 @@ import shutil
 import pytest
 
 import great_expectations as ge
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.util import file_relative_path
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
+)
 
 
 @pytest.fixture()
@@ -25,7 +29,9 @@ def data_context_without_config_variables_filepath_configured(tmp_path_factory):
 
 
 @pytest.fixture()
-def data_context_with_variables_in_config(tmp_path_factory):
+def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
+    monkeypatch.setenv("FOO", "BAR")
+    monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     project_path = str(tmp_path_factory.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -113,3 +119,44 @@ def create_common_data_context_files(context_path, asset_config_path):
 
 def copy_relative_path(relative_src, dest):
     shutil.copy(file_relative_path(__file__, relative_src), dest)
+
+
+@pytest.fixture
+def basic_data_context_config():
+    return DataContextConfig(
+        **{
+            "commented_map": {},
+            "config_version": 2,
+            "plugins_directory": "plugins/",
+            "evaluation_parameter_store_name": "evaluation_parameter_store",
+            "validations_store_name": "does_not_have_to_be_real",
+            "expectations_store_name": "expectations_store",
+            "config_variables_file_path": "uncommitted/config_variables.yml",
+            "datasources": {},
+            "stores": {
+                "expectations_store": {
+                    "class_name": "ExpectationsStore",
+                    "store_backend": {
+                        "class_name": "TupleFilesystemStoreBackend",
+                        "base_directory": "expectations/",
+                    },
+                },
+                "evaluation_parameter_store": {
+                    "module_name": "great_expectations.data_context.store",
+                    "class_name": "EvaluationParameterStore",
+                },
+            },
+            "data_docs_sites": {},
+            "validation_operators": {
+                "default": {
+                    "class_name": "ActionListValidationOperator",
+                    "action_list": [],
+                }
+            },
+            "anonymous_usage_statistics": {
+                "enabled": True,
+                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
+                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
+            },
+        }
+    )

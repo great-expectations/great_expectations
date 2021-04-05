@@ -13,7 +13,7 @@ from great_expectations.exceptions import BatchKwargsError
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 @pytest.fixture(scope="module")

@@ -1,11 +1,9 @@
+import pandas as pd
 import pytest
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationKwargs,
-    ExpectationSuite,
-)
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_asset import DataAsset, FileDataAsset
 from great_expectations.dataset import Dataset, PandasDataset
 
@@ -15,7 +13,7 @@ def test_data_asset_expectation_suite():
     default_suite = ExpectationSuite(
         expectation_suite_name="default",
         data_asset_type="DataAsset",
-        meta={"great_expectations.__version__": ge_version},
+        meta={"great_expectations_version": ge_version},
         expectations=[],
     )
 
@@ -71,7 +69,7 @@ def test_data_asset_name_inheritance(dataset):
 def test_catch_exceptions_with_bad_expectation_type():
     # We want to catch degenerate cases where an expectation suite is incompatible with
     my_df = PandasDataset({"x": range(10)})
-    my_df._append_expectation(
+    my_df._expectation_suite.append_expectation(
         ExpectationConfiguration(expectation_type="foobar", kwargs={})
     )
     result = my_df.validate(catch_exceptions=True)
@@ -84,7 +82,7 @@ def test_catch_exceptions_with_bad_expectation_type():
 
     assert result.results[idx].success is False
     assert result.results[idx].expectation_config.expectation_type == "foobar"
-    assert result.results[idx].expectation_config.kwargs == ExpectationKwargs()
+    assert result.results[idx].expectation_config.kwargs == {}
     assert result.results[idx].exception_info["raised_exception"] is True
     assert (
         "AttributeError: 'PandasDataset' object has no attribute 'foobar'"
@@ -108,6 +106,7 @@ def test_valid_expectation_types(dataset, pandas_dataset):
         "expect_column_median_to_be_between",
         "expect_column_min_to_be_between",
         "expect_column_most_common_value_to_be_in_set",
+        "expect_column_pair_cramers_phi_value_to_be_less_than",
         "expect_column_pair_values_A_to_be_greater_than_B",
         "expect_column_pair_values_to_be_equal",
         "expect_column_pair_values_to_be_in_set",
@@ -138,10 +137,35 @@ def test_valid_expectation_types(dataset, pandas_dataset):
         "expect_column_values_to_not_be_null",
         "expect_column_values_to_not_match_regex",
         "expect_column_values_to_not_match_regex_list",
+        "expect_compound_columns_to_be_unique",
+        "expect_multicolumn_sum_to_equal",
         "expect_multicolumn_values_to_be_unique",
+        "expect_select_column_values_to_be_unique_within_record",
         "expect_table_column_count_to_be_between",
         "expect_table_column_count_to_equal",
         "expect_table_columns_to_match_ordered_list",
+        "expect_table_columns_to_match_set",
         "expect_table_row_count_to_be_between",
         "expect_table_row_count_to_equal",
     ]
+
+
+def test_custom_expectation_default_arg_values_set(
+    data_context_simple_expectation_suite_with_custom_pandas_dataset,
+):
+    # this test ensures that default arg values in custom expectations are being set properly
+    context = data_context_simple_expectation_suite_with_custom_pandas_dataset
+
+    df = pd.DataFrame({"a": [1, None, 1, 1], "b": [None, 1, 1, 1], "c": [1, 1, 1, 1]})
+
+    batch_kwargs = {
+        "data_asset_name": "multicolumn_ignore_row_if",
+        "datasource": "mycustomdatasource",
+        "dataset": df,
+    }
+    batch = context.get_batch(batch_kwargs, expectation_suite_name="default")
+    # this expectation has a declared default arg value `ignore_row_if="any_value_is_missing"`
+    # which overrides an internal default of "all_values_are_missing"
+    # can only pass if the declared default is set properly
+    result = batch.expect_column_sum_equals_3(column_list=["a", "b", "c"])
+    assert result.success

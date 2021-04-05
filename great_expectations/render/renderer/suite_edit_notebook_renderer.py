@@ -1,12 +1,14 @@
 import os
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 import jinja2
 import nbformat
 
-from great_expectations.core import ExpectationSuite
+from great_expectations import DataContext
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
+    NotebookConfig,
     NotebookTemplateConfig,
     notebookConfigSchema,
 )
@@ -14,11 +16,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.util import lint_code
+from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 
 
-class SuiteEditNotebookRenderer(Renderer):
+class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     """
     Render a notebook that can re-create or edit a suite.
 
@@ -42,6 +43,7 @@ class SuiteEditNotebookRenderer(Renderer):
         footer_code: Optional[NotebookTemplateConfig] = None,
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
+        context: Optional[DataContext] = None,
     ):
         super().__init__()
         custom_loader = []
@@ -82,6 +84,7 @@ class SuiteEditNotebookRenderer(Renderer):
         self.footer_code = footer_code
         self.column_expectation_code = column_expectation_code
         self.table_expectation_code = table_expectation_code
+        self.context = context
 
     @staticmethod
     def from_data_context(data_context):
@@ -98,7 +101,7 @@ class SuiteEditNotebookRenderer(Renderer):
                 "module_name": "great_expectations.render.renderer.suite_edit_notebook_renderer",
                 "class_name": "SuiteEditNotebookRenderer",
             },
-            runtime_environment={},
+            runtime_environment={"context": data_context},
             config_defaults={},
         )
 
@@ -143,7 +146,7 @@ class SuiteEditNotebookRenderer(Renderer):
     ):
         if notebook_config:
             rendered = self.template_env.get_template(notebook_config.file_name).render(
-                **default_kwargs, **notebook_config.template_kwargs
+                **{**default_kwargs, **notebook_config.template_kwargs}
             )
         else:
             rendered = self.template_env.get_template(default_file_name).render(
@@ -165,6 +168,7 @@ class SuiteEditNotebookRenderer(Renderer):
             "header.py.j2",
             suite_name=suite_name,
             batch_kwargs=batch_kwargs,
+            env=os.environ,
         )
         self.add_code_cell(code, lint=True)
 
@@ -173,25 +177,18 @@ class SuiteEditNotebookRenderer(Renderer):
         self.add_markdown_cell(markdown)
         # TODO this may become confusing for users depending on what they are trying
         #  to accomplish in their dev loop
-        code = self.render_with_overwrite(self.footer_code, "footer.py.j2")
+        validation_operator_name = None
+        if self.context and self.context.validation_operators.get(
+            "action_list_operator"
+        ):
+            validation_operator_name = "action_list_operator"
+
+        code = self.render_with_overwrite(
+            self.footer_code,
+            "footer.py.j2",
+            validation_operator_name=validation_operator_name,
+        )
         self.add_code_cell(code)
-
-    def add_code_cell(self, code: str, lint: bool = False, **template_params) -> None:
-        """
-        Add the given code as a new code cell.
-        """
-        if lint:
-            code = lint_code(code).rstrip("\n")
-
-        cell = nbformat.v4.new_code_cell(code)
-        self._notebook["cells"].append(cell)
-
-    def add_markdown_cell(self, markdown: str) -> None:
-        """
-        Add the given markdown as a new markdown cell.
-        """
-        cell = nbformat.v4.new_markdown_cell(markdown)
-        self._notebook["cells"].append(cell)
 
     def add_expectation_cells_from_suite(self, expectations):
         expectations_by_column = self._get_expectations_by_column(expectations)
@@ -234,7 +231,8 @@ class SuiteEditNotebookRenderer(Renderer):
                     meta_args=self._build_meta_arguments(exp.meta),
                 )
                 self.add_code_cell(
-                    code, lint=True,
+                    code,
+                    lint=True,
                 )
 
     def _add_table_level_expectations(self, expectations_by_column):
@@ -269,11 +267,6 @@ class SuiteEditNotebookRenderer(Renderer):
             return ", meta={}".format(meta)
 
         return ""
-
-    @classmethod
-    def write_notebook_to_disk(cls, notebook, notebook_file_path):
-        with open(notebook_file_path, "w") as f:
-            nbformat.write(notebook, f)
 
     def render(
         self, suite: ExpectationSuite, batch_kwargs=None
@@ -338,6 +331,8 @@ class SuiteEditNotebookRenderer(Renderer):
             batch_kwargs = dict(batch_kwargs)
         if batch_kwargs and "path" in batch_kwargs.keys():
             base_dir = batch_kwargs["path"]
+            if base_dir[0:5] in ["s3://", "gs://"]:
+                return batch_kwargs
             if not os.path.isabs(base_dir):
                 batch_kwargs["path"] = os.path.join("..", "..", base_dir)
 

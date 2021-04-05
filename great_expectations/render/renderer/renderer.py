@@ -1,10 +1,25 @@
-from great_expectations.core import (
-    ExpectationConfiguration,
+from functools import wraps
+
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 
 
-class Renderer(object):
+def renderer(renderer_type, **kwargs):
+    def wrapper(renderer_fn):
+        @wraps(renderer_fn)
+        def inner_func(*args, **kwargs):
+            return renderer_fn(*args, **kwargs)
+
+        inner_func._renderer_type = renderer_type
+        inner_func._renderer_definition_kwargs = kwargs
+        return inner_func
+
+    return wrapper
+
+
+class Renderer:
     def __init__(self):
         # This is purely a convenience to provide an explicit mechanism to instantiate any Renderer, even ones that
         # used to be composed exclusively of classmethods
@@ -63,13 +78,11 @@ class Renderer(object):
         # Group EVRs by column
         sorted_columns = sorted(
             list(
-                set(
-                    [
-                        evr.expectation_config.kwargs["column"]
-                        for evr in evrs_
-                        if "column" in evr.expectation_config.kwargs
-                    ]
-                )
+                {
+                    evr.expectation_config.kwargs["column"]
+                    for evr in evrs_
+                    if "column" in evr.expectation_config.kwargs
+                }
             )
         )
 

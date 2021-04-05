@@ -3,11 +3,10 @@ import json
 import os
 import traceback
 
-from dateutil.parser import ParserError, parse
+from dateutil.parser import parse
 
 from great_expectations import DataContext
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
-from great_expectations.cli.util import cli_message
 from great_expectations.data_context.store import (
     DatabaseStoreBackend,
     HtmlSiteStore,
@@ -102,7 +101,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 self._process_metrics_store_for_checklist(store_name, store)
 
         sites = (
-            self.data_context._project_config_with_variables_substituted.data_docs_sites
+            self.data_context.project_config_with_variables_substituted.data_docs_sites
         )
 
         if sites:
@@ -185,7 +184,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 }
             )
 
-    def upgrade_store_backend(self, store_backend, store_name=None, site_name=None):
+    def _upgrade_store_backend(self, store_backend, store_name=None, site_name=None):
         assert store_name or site_name, "Must pass either store_name or site_name."
         assert not (
             store_name and site_name
@@ -336,7 +335,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             self.validation_run_times[run_name] = parse(run_name).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-        except (ParserError, TypeError):
+        except (ValueError, TypeError):
             source_path = os.path.join(
                 store_backend.full_base_directory,
                 store_backend._convert_key_to_filepath(source_key),
@@ -357,7 +356,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             self.validation_run_times[run_name] = parse(run_name).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-        except (ParserError, TypeError):
+        except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
                 source_path = os.path.join(store_backend.prefix, source_path)
@@ -379,7 +378,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
             self.validation_run_times[run_name] = parse(run_name).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-        except (ParserError, TypeError):
+        except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
                 source_path = os.path.join(store_backend.prefix, source_path)
@@ -587,6 +586,7 @@ Would you like to proceed with the project upgrade?\
     def _generate_upgrade_report(self):
         upgrade_log_path = self._save_upgrade_log()
         skipped_stores_or_sites = any(self._get_skipped_store_and_site_names())
+        exception_occurred = False
         exceptions = self.upgrade_log.get("exceptions")
         if skipped_stores_or_sites or exceptions:
             increment_version = False
@@ -612,6 +612,7 @@ A log detailing the upgrade can be found here:
 """
         else:
             if exceptions:
+                exception_occurred = True
                 upgrade_report += f"""
 <red>\
 The Upgrade Helper encountered some exceptions during the upgrade process.
@@ -632,7 +633,7 @@ A log detailing the upgrade can be found here:
     - {upgrade_log_path}\
 </yellow>\
 """
-        return upgrade_report, increment_version
+        return upgrade_report, increment_version, exception_occurred
 
     def upgrade_project(self):
         try:
@@ -643,7 +644,7 @@ A log detailing the upgrade can be found here:
                     "validations_updated": [],
                     "exceptions": False,
                 }
-                self.upgrade_store_backend(store_backend, store_name=store_name)
+                self._upgrade_store_backend(store_backend, store_name=store_name)
         except Exception:
             pass
 
@@ -655,12 +656,16 @@ A log detailing the upgrade can be found here:
                     "validation_result_pages_updated": [],
                     "exceptions": False,
                 }
-                self.upgrade_store_backend(store_backend, site_name=site_name)
+                self._upgrade_store_backend(store_backend, site_name=site_name)
         except Exception:
             pass
 
         # return a report of what happened, boolean indicating whether version should be incremented
         # if the version should not be incremented, the report should include instructions for steps to
         # be performed manually
-        upgrade_report, increment_version = self._generate_upgrade_report()
-        return upgrade_report, increment_version
+        (
+            upgrade_report,
+            increment_version,
+            exception_occurred,
+        ) = self._generate_upgrade_report()
+        return upgrade_report, increment_version, exception_occurred

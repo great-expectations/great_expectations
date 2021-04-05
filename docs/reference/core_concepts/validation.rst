@@ -7,7 +7,7 @@ Validation
 Once you've constructed and stored Expectations, you can use them to validate new data. Validation generates a report
 that details any specific deviations from expected values.
 
-We recommend using :ref:`data_context` to manage expectation suites and coordinate validation across runs.
+We recommend using a :ref:`data_context` to manage expectation suites and coordinate validation across runs.
 
 ******************
 Validation Results
@@ -114,11 +114,10 @@ and Validation Results.
 If you would like to review the raw validation results in JSON format, the default Validation Results directory is ``uncommitted/validations/``.
 Note that by default, Data Docs will only compile Validation Results located in this directory.
 
-To learn more about setting up Great Expectations for your team read :ref:`using_ge_on_teams`.
 
-********************
-Validation Operators
-********************
+****************************************************
+Checkpoints (formerly known as Validation Operators)
+****************************************************
 
 The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method returns a dictionary of validation results. This is sufficient when exploring your data and getting to know Great Expectations.
 When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
@@ -127,9 +126,9 @@ When deploying Great Expectations in a real data pipeline, you will typically di
 * validating a batch against several expectation suites
 * doing something with the validation results (e.g., saving them for a later review, sending notifications in case of failures, etc.).
 
-Validation Operators are mini-applications that can be configured to implement these scenarios.
+Checkpoints are mini-applications that can be configured to implement these scenarios.
 
-Read :ref:`validation_operators_and_actions` to learn more.
+Read :ref:`checkpoints_and_actions` to learn more.
 
 
 *******************
@@ -150,5 +149,3 @@ Useful deployment patterns include:
 
 For certain deployment patterns, it may be useful to parameterize expectations, and supply evaluation parameters at \
 validation time. See :ref:`evaluation_parameters` for more information.
-
-

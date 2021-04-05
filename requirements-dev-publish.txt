@@ -1,0 +1,3 @@
+# Requirements to publish Great Expectation artifacts
+
+docker>=4.2

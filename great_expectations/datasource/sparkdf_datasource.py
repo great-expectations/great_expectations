@@ -1,21 +1,24 @@
 import datetime
 import logging
 import uuid
+import warnings
+from typing import Optional
 
-from great_expectations.datasource.types import BatchMarkers
 from great_expectations.types import ClassConfig
 
-from ..core.batch import Batch
+from ..core.batch import Batch, BatchMarkers
+from ..core.util import get_or_create_spark_application
 from ..dataset import SparkDFDataset
 from ..exceptions import BatchKwargsError
 from ..types.configurations import classConfigSchema
-from .datasource import Datasource
+from .datasource import LegacyDatasource
 
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql import SparkSession, DataFrame
+    from pyspark.sql import DataFrame, SparkSession
 except ImportError:
+    DataFrame = None
     SparkSession = None
     # TODO: review logging more detail here
     logger.debug(
@@ -23,33 +26,33 @@ except ImportError:
     )
 
 
-class SparkDFDatasource(Datasource):
+class SparkDFDatasource(LegacyDatasource):
     """The SparkDFDatasource produces SparkDFDatasets and supports generators capable of interacting with local
-    filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.
+        filesystem (the default subdir_reader batch kwargs  generator) and databricks notebooks.
 
-    Accepted Batch Kwargs:
-        - PathBatchKwargs ("path" or "s3" keys)
-        - InMemoryBatchKwargs ("dataset" key)
-        - QueryBatchKwargs ("query" key)
+        Accepted Batch Kwargs:
+            - PathBatchKwargs ("path" or "s3" keys)
+            - InMemoryBatchKwargs ("dataset" key)
+            - QueryBatchKwargs ("query" key)
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: datasource_hdfs_spark
-        title: Datasource - HDFS
-        icon:
-        short_description: HDFS
-        description: Use HDFS as an external datasource in conjunction with Spark.
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Stable
-            implementation_completeness: Unknown
-            unit_test_coverage: Minimal (none)
-            integration_infrastructure_test_coverage: Minimal (none)
-            documentation_completeness:  Minimal (none)
-            bug_risk: Unknown
+        id: datasource_hdfs_spark
+            title: Datasource - HDFS
+            icon:
+            short_description: HDFS
+            description: Use HDFS as an external datasource in conjunction with Spark.
+            how_to_guide_url:
+            maturity: Experimental
+            maturity_details:
+                api_stability: Stable
+                implementation_completeness: Unknown
+                unit_test_coverage: Minimal (none)
+                integration_infrastructure_test_coverage: Minimal (none)
+                documentation_completeness:  Minimal (none)
+                bug_risk: Unknown
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     recognized_batch_parameters = {
@@ -135,16 +138,10 @@ class SparkDFDatasource(Datasource):
             **configuration_with_defaults
         )
 
-        try:
-            builder = SparkSession.builder
-            for k, v in configuration_with_defaults["spark_config"].items():
-                builder.config(k, v)
-            self.spark = builder.getOrCreate()
-        except AttributeError:
-            logger.error(
-                "Unable to load spark context; install optional spark dependency for support."
-            )
-            self.spark = None
+        if spark_config is None:
+            spark_config = {}
+        spark = get_or_create_spark_application(spark_config=spark_config)
+        self.spark = spark
 
         self._build_generators()
 
@@ -152,7 +149,8 @@ class SparkDFDatasource(Datasource):
         self, reader_method=None, reader_options=None, limit=None, dataset_options=None
     ):
         batch_kwargs = super().process_batch_parameters(
-            limit=limit, dataset_options=dataset_options,
+            limit=limit,
+            dataset_options=dataset_options,
         )
 
         # Apply globally-configured reader options first
@@ -185,6 +183,13 @@ class SparkDFDatasource(Datasource):
         )
 
         if "path" in batch_kwargs or "s3" in batch_kwargs:
+            if "s3" in batch_kwargs:
+                warnings.warn(
+                    "Direct GE Support for the s3 BatchKwarg will be removed in a future release. Please use a path "
+                    "including the s3a:// protocol instead.",
+                    DeprecationWarning,
+                )
+
             # If both are present, let s3 override
             path = batch_kwargs.get("path")
             path = batch_kwargs.get("s3", path)
@@ -264,8 +269,8 @@ class SparkDFDatasource(Datasource):
             ]
 
         try:
-            if reader_method.lower() == "delta":
-                return reader.format("delta").load
+            if reader_method.lower() in ["delta", "avro"]:
+                return reader.format(reader_method.lower()).load
 
             return getattr(reader, reader_method)
         except AttributeError:

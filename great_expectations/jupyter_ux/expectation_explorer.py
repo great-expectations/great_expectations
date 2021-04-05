@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 import logging
 from itertools import chain
@@ -10,7 +8,7 @@ from IPython.display import display
 logger = logging.getLogger(__name__)
 
 
-class ExpectationExplorer(object):
+class ExpectationExplorer:
     def __init__(self):
         self.state = {"data_assets": {}}
         self.expectation_kwarg_field_names = {
@@ -113,6 +111,7 @@ class ExpectationExplorer(object):
                 "max_value",
             ],
             "expect_table_columns_to_match_ordered_list": ["column_list"],
+            "expect_table_columns_to_match_set": ["column_set", "exact_match"],
             ####
             "expect_column_pair_values_to_be_equal": ["ignore_row_if"],
             "expect_column_pair_values_A_to_be_greater_than_B": [
@@ -124,7 +123,8 @@ class ExpectationExplorer(object):
                 "value_pairs_set",
                 "ignore_row_if",
             ],
-            "expect_multicolumn_values_to_be_unique": ["ignore_row_if"],
+            "expect_compound_columns_to_be_unique": ["ignore_row_if"],
+            "expect_select_column_values_to_be_unique_within_record": ["ignore_row_if"],
             "expect_column_values_to_be_of_type": ["type_", "mostly"],
             "expect_column_values_to_be_in_type_list": ["type_list", "mostly"],
             "expect_column_kl_divergence_to_be_less_than": [
@@ -997,7 +997,7 @@ class ExpectationExplorer(object):
         expectation_feedback_widget = expectation_state["expectation_feedback_widget"]
         expectation_type = expectation_state["expectation_type"]
         regex_widget = self.generate_text_area_widget(
-            value=regex, description="regex", placeholder="e.g. ([A-Z])\w+"
+            value=regex, description="regex", placeholder=r"e.g. ([A-Z])\w+"
         )
 
         @expectation_feedback_widget.capture(clear_output=True)
@@ -1164,8 +1164,8 @@ class ExpectationExplorer(object):
             parse_strings_as_datetimes_widget_dict = expectation_state["kwargs"].get(
                 "parse_strings_as_datetimes", {}
             )
-            parse_strings_as_datetimes_widget = parse_strings_as_datetimes_widget_dict.get(
-                "kwarg_widget"
+            parse_strings_as_datetimes_widget = (
+                parse_strings_as_datetimes_widget_dict.get("kwarg_widget")
             )
 
             if new_type_selection == "string":
@@ -1345,8 +1345,10 @@ class ExpectationExplorer(object):
         if min_value_widget:
             min_value_widget_dict["kwarg_widget"] = min_value_widget
         else:
-            min_value_widget_dict = self.generate_expectation_kwarg_fallback_widget_dict(
-                expectation_kwarg_name="min_value", **{"min_value": min_value}
+            min_value_widget_dict = (
+                self.generate_expectation_kwarg_fallback_widget_dict(
+                    expectation_kwarg_name="min_value", **{"min_value": min_value}
+                )
             )
 
         expectation_state["kwargs"]["min_value"] = min_value_widget_dict
@@ -1727,7 +1729,7 @@ class ExpectationExplorer(object):
         for result_title, result_value in result.items():
             result_detail_widgets.append(
                 widgets.HTML(
-                    value="<span><strong>{0}: </strong>{1:.2f}</span>".format(
+                    value="<span><strong>{}: </strong>{:.2f}</span>".format(
                         result_title, result_value
                     )
                     if type(result_value) is float
@@ -1893,8 +1895,10 @@ class ExpectationExplorer(object):
             expectation_suite = data_asset.get_expectation_suite(
                 discard_failed_expectations=False
             )
-            expectation_suite_editor.children = self.generate_expectation_suite_editor_widgets(
-                data_asset, expectation_suite
+            expectation_suite_editor.children = (
+                self.generate_expectation_suite_editor_widgets(
+                    data_asset, expectation_suite
+                )
             )
 
         return expectation_editor_widget
@@ -1939,7 +1943,10 @@ class ExpectationExplorer(object):
         data_asset_state = self.state["data_assets"].get(data_asset_name, {})
         data_asset_expectations = data_asset_state.get("expectations", {})
 
-        ge_version = expectation_suite.get("meta")["great_expectations.__version__"]
+        # TODO: Deprecate "great_expectations.__version__"
+        ge_version = expectation_suite.get("meta").get(
+            "great_expectations_version"
+        ) or expectation_suite.get("meta").get("great_expectations.__version__")
         column_count = len(column_names)
         expectation_count = len(expectation_suite["expectations"])
 
@@ -1963,7 +1970,10 @@ class ExpectationExplorer(object):
             expectation_count=expectation_count,
         )
         summary_widget = widgets.HTML(
-            value=summary_widget_content, layout=widgets.Layout(margin="10px",)
+            value=summary_widget_content,
+            layout=widgets.Layout(
+                margin="10px",
+            ),
         )
 
         for column_name in column_names:
@@ -1998,13 +2008,17 @@ class ExpectationExplorer(object):
                 include_config=True, **expectation_kwargs
             )
 
-        expectation_suite_editor_widgets = self.generate_expectation_suite_editor_widgets(
-            data_asset, expectation_suite
+        expectation_suite_editor_widgets = (
+            self.generate_expectation_suite_editor_widgets(
+                data_asset, expectation_suite
+            )
         )
         ###################
         expectation_suite_editor = widgets.VBox(
             children=expectation_suite_editor_widgets,
-            layout=widgets.Layout(border="2px solid black",),
+            layout=widgets.Layout(
+                border="2px solid black",
+            ),
         )
 
         self.state["data_assets"][data_asset_name][
