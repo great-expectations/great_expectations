@@ -10,7 +10,23 @@ del get_versions  # isort:skip
 
 from packaging.version import parse as parse_version
 
+from great_expectations.data_context import DataContext
 from great_expectations.exceptions.exceptions import GreatExpectationsError
+
+from .util import (
+    from_pandas,
+    get_context,
+    measure_execution_time,
+    read_csv,
+    read_excel,
+    read_feather,
+    read_json,
+    read_parquet,
+    read_pickle,
+    read_table,
+    validate,
+)
+
 #
 # try:
 #     import sqlalchemy as sa
@@ -26,21 +42,7 @@ from great_expectations.exceptions.exceptions import GreatExpectationsError
 # except (ImportError, ModuleNotFoundError):
 #     pass
 
-from great_expectations.data_context import DataContext
 
-from .util import (
-    from_pandas,
-    get_context,
-    measure_execution_time,
-    read_csv,
-    read_excel,
-    read_feather,
-    read_json,
-    read_parquet,
-    read_pickle,
-    read_table,
-    validate,
-)
 
 # from great_expectations.expectations.core import *
 # from great_expectations.expectations.metrics import *
