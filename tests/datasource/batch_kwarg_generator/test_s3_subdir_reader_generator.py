@@ -61,7 +61,7 @@ def mock_s3_bucket(s3_base):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    not is_library_loadable(library_name="s3fs"),
     reason="s3fs must not be installed",
 )
 @pytest.fixture
@@ -82,7 +82,7 @@ def s3_subdir_generator(mock_s3_bucket, basic_sparkdf_datasource):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    not is_library_loadable(library_name="s3fs"),
     reason="s3fs must not be installed",
 )
 @pytest.fixture
