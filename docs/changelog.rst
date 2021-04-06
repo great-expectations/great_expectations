@@ -9,6 +9,7 @@ Develop
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [ENHANCEMENT] V3 API CLI docs commands have better error messages and more consistent short flags
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
+* [DOCS] Update Configuring Datasources documentation for V3 API CLI
 
 0.13.17
 -----------------
