@@ -209,14 +209,54 @@ Steps
                 pip install snowflake-connector-python
                 pip install snowflake-sqlalchemy
 
-        #. **Instantiate a Data Context.**
+        #. **Run datasource new**
 
-            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
+
+        #. **Choose "Relational database (SQL)"**
+
+            .. code-block:: bash
+
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 2
+
+        #. **Choose Snowflake**
+
+            .. code-block:: bash
+
+                Which database backend are you using?
+                    1. MySQL
+                    2. Postgres
+                    3. Redshift
+                    4. Snowflake
+                    5. BigQuery
+                    6. other - Do you have a working SQLAlchemy connection string?
+                : 4
+
+        #. **Choose an authentication mechanism**
+
+            .. code-block:: bash
+
+                What authentication method would you like to use?
+
+                1. User and Password
+                2. Single sign-on (SSO)
+                3. Key pair authentication
+
+
+Additional notes
+----------------
+
+        #.  **Snowflake SimpleSqlalchemyDatasource Example.**
+
+            Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
+
 
         #.  **Create or copy a yaml config.**
 
