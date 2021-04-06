@@ -1,19 +1,15 @@
 import json
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
-import numpy as np
-import pandas as pd
 import edtf
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    Expectation,
     ExpectationConfiguration,
 )
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
@@ -30,46 +26,51 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 
+
 def complies_to_level(edtf_object, level=None):
     parsed_level = None
     # Level 0
-    if isinstance(edtf_object, (
-        edtf.Date, 
-        edtf.DateAndTime, 
-        edtf.Interval)):
+    if isinstance(edtf_object, (edtf.Date, edtf.DateAndTime, edtf.Interval)):
         parsed_level = 0
 
     # Level 1
-    elif isinstance(edtf_object, (
-        edtf.UncertainOrApproximate, 
-        edtf.Unspecified, 
-        edtf.Level1Interval, 
-        edtf.LongYear, 
-        edtf.Season)):
+    elif isinstance(
+        edtf_object,
+        (
+            edtf.UncertainOrApproximate,
+            edtf.Unspecified,
+            edtf.Level1Interval,
+            edtf.LongYear,
+            edtf.Season,
+        ),
+    ):
         parsed_level = 1
 
     # Level 2
-    elif isinstance(edtf_object, (
-    edtf.PartialUncertainOrApproximate,
-    edtf.PartialUnspecified,
-    edtf.OneOfASet,
-    edtf.MultipleDates,
-    edtf.MaskedPrecision,
-    edtf.Level2Interval,
-    edtf.ExponentialYear)):
+    elif isinstance(
+        edtf_object,
+        (
+            edtf.PartialUncertainOrApproximate,
+            edtf.PartialUnspecified,
+            edtf.OneOfASet,
+            edtf.MultipleDates,
+            edtf.MaskedPrecision,
+            edtf.Level2Interval,
+            edtf.ExponentialYear,
+        ),
+    ):
         parsed_level = 2
 
     if parsed_level is not None and level is not None and level <= 2:
         return parsed_level <= level
-        
+
     return True
 
-def is_parseable(val, level = None):
+
+def is_parseable(val, level=None):
 
     if level is not None and type(level) != int:
-        raise TypeError(
-            "level must be of type int."
-        )
+        raise TypeError("level must be of type int.")
 
     try:
         if type(val) != str:
@@ -83,11 +84,12 @@ def is_parseable(val, level = None):
     except (ValueError, OverflowError):
         return False
 
+
 class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
     condition_metric_name = "column_values.edtf_parseable"
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, level = None, **kwargs):
+    def _pandas(cls, column, level=None, **kwargs):
         return column.map(is_parseable)
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
@@ -141,140 +143,140 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "all_edtf_l0":[
-                    '1964/2008',
-                    '2004-06/2006-08',
-                    '2004-02-01/2005-02-08',
-                    '2004-02-01/2005-02',
-                    '2004-02-01/2005',
-                    '2005/2006-02',
-                    '0000/0000',
-                    '0000-02/1111',
-                    '0000-01/0000-01-03',
-                    '0000-01-13/0000-01-23',
-                    '1111-01-01/1111',
-                    '0000-01/0000',
+                "all_edtf_l0": [
+                    "1964/2008",
+                    "2004-06/2006-08",
+                    "2004-02-01/2005-02-08",
+                    "2004-02-01/2005-02",
+                    "2004-02-01/2005",
+                    "2005/2006-02",
+                    "0000/0000",
+                    "0000-02/1111",
+                    "0000-01/0000-01-03",
+                    "0000-01-13/0000-01-23",
+                    "1111-01-01/1111",
+                    "0000-01/0000",
                 ],
                 "all_edtf_l1": [
-                    '-1000/-0999',
-                    '-2004-02-01/2005',
-                    '-1980-11-01/1989-11-30',
-                    '1923-21/1924',
-                    '2019-12/2020%',
-                    '1984~/2004-06',
-                    '1984/2004-06~',
-                    '1984~/2004~',
-                    '-1984?/2004%',
-                    '1984?/2004-06~',
-                    '1984-06?/2004-08?',
-                    '1984-06-02?/2004-08-08~',
-                    '2004-06~/2004-06-11%',
-                    '1984-06-02?/',
-                    '2003/2004-06-11%',
-                    '1952-23~/1953',
-                    '-2004-06-01/',
-                    '1985-04-12/',
-                    '1985-04/',
-                    '1985/',
-                    '/1985-04-12',
-                    '/1985-04',
-                    '/1985',
-                    '2003-22/2004-22',
-                    '2003-22/2003-22',
-                    '2003-22/2003-23',
-                    '1985-04-12/..',
-                    '1985-04/..',
-                    '1985/..',
-                    '../1985-04-12',
-                    '../1985-04',
-                    '../1985',
-                    '/..',
-                    '../',
-                    '../..',
-                    '-1985-04-12/..',
-                    '-1985-04/..',
-                    '-1985/',
+                    "-1000/-0999",
+                    "-2004-02-01/2005",
+                    "-1980-11-01/1989-11-30",
+                    "1923-21/1924",
+                    "2019-12/2020%",
+                    "1984~/2004-06",
+                    "1984/2004-06~",
+                    "1984~/2004~",
+                    "-1984?/2004%",
+                    "1984?/2004-06~",
+                    "1984-06?/2004-08?",
+                    "1984-06-02?/2004-08-08~",
+                    "2004-06~/2004-06-11%",
+                    "1984-06-02?/",
+                    "2003/2004-06-11%",
+                    "1952-23~/1953",
+                    "-2004-06-01/",
+                    "1985-04-12/",
+                    "1985-04/",
+                    "1985/",
+                    "/1985-04-12",
+                    "/1985-04",
+                    "/1985",
+                    "2003-22/2004-22",
+                    "2003-22/2003-22",
+                    "2003-22/2003-23",
+                    "1985-04-12/..",
+                    "1985-04/..",
+                    "1985/..",
+                    "../1985-04-12",
+                    "../1985-04",
+                    "../1985",
+                    "/..",
+                    "../",
+                    "../..",
+                    "-1985-04-12/..",
+                    "-1985-04/..",
+                    "-1985/",
                 ],
                 "all_edtf_l2": [
-                    '2004-06-~01/2004-06-~20',
-                    '-2004-06-?01/2006-06-~20',
-                    '-2005-06-%01/2006-06-~20',
-                    '2019-12/%2020',
-                    '1984?-06/2004-08?',
-                    '-1984-?06-02/2004-08-08~',
-                    '1984-?06-02/2004-06-11%',
-                    '2019-~12/2020',
-                    '2003-06-11%/2004-%06',
-                    '2004-06~/2004-06-%11',
-                    '1984?/2004~-06',
-                    '?2004-06~-10/2004-06-%11',
-                    '2004-06-XX/2004-07-03',
-                    '2003-06-25/2004-X1-03',
-                    '20X3-06-25/2004-X1-03',
-                    'XXXX-12-21/1890-09-2X',
-                    '1984-11-2X/1999-01-01',
-                    '1984-11-12/1984-11-XX',
-                    '198X-11-XX/198X-11-30',
-                    '2000-12-XX/2012',
-                    '-2000-12-XX/2012',
-                    '2000-XX/2012',
-                    '2000-XX-XX/2012',
-                    '2000-XX-XX/2012',
-                    '-2000-XX-10/2012',
-                    '2000/2000-XX-XX',
-                    '198X/199X',
-                    '198X/1999',
-                    '1987/199X',
-                    '1919-XX-02/1919-XX-01',
-                    '1919-0X-02/1919-01-03',
-                    '1865-X2-02/1865-03-01',
-                    '1930-X0-10/1930-10-30',
-                    '1981-1X-10/1981-11-09',
-                    '1919-12-02/1919-XX-04',
-                    '1919-11-02/1919-1X-01',
-                    '1919-09-02/1919-X0-01',
-                    '1919-08-02/1919-0X-01',
-                    '1919-10-02/1919-X1-01',
-                    '1919-04-01/1919-X4-02',
-                    '1602-10-0X/1602-10-02',
-                    '2018-05-X0/2018-05-11',
-                    '-2018-05-X0/2018-05-11',
-                    '1200-01-X4/1200-01-08',
-                    '1919-07-30/1919-07-3X',
-                    '1908-05-02/1908-05-0X',
-                    '0501-11-18/0501-11-1X',
-                    '1112-08-22/1112-08-2X',
-                    '2015-02-27/2015-02-X8',
-                    '2016-02-28/2016-02-X9',
-                    '1984-06-?02/2004-06-11%',
+                    "2004-06-~01/2004-06-~20",
+                    "-2004-06-?01/2006-06-~20",
+                    "-2005-06-%01/2006-06-~20",
+                    "2019-12/%2020",
+                    "1984?-06/2004-08?",
+                    "-1984-?06-02/2004-08-08~",
+                    "1984-?06-02/2004-06-11%",
+                    "2019-~12/2020",
+                    "2003-06-11%/2004-%06",
+                    "2004-06~/2004-06-%11",
+                    "1984?/2004~-06",
+                    "?2004-06~-10/2004-06-%11",
+                    "2004-06-XX/2004-07-03",
+                    "2003-06-25/2004-X1-03",
+                    "20X3-06-25/2004-X1-03",
+                    "XXXX-12-21/1890-09-2X",
+                    "1984-11-2X/1999-01-01",
+                    "1984-11-12/1984-11-XX",
+                    "198X-11-XX/198X-11-30",
+                    "2000-12-XX/2012",
+                    "-2000-12-XX/2012",
+                    "2000-XX/2012",
+                    "2000-XX-XX/2012",
+                    "2000-XX-XX/2012",
+                    "-2000-XX-10/2012",
+                    "2000/2000-XX-XX",
+                    "198X/199X",
+                    "198X/1999",
+                    "1987/199X",
+                    "1919-XX-02/1919-XX-01",
+                    "1919-0X-02/1919-01-03",
+                    "1865-X2-02/1865-03-01",
+                    "1930-X0-10/1930-10-30",
+                    "1981-1X-10/1981-11-09",
+                    "1919-12-02/1919-XX-04",
+                    "1919-11-02/1919-1X-01",
+                    "1919-09-02/1919-X0-01",
+                    "1919-08-02/1919-0X-01",
+                    "1919-10-02/1919-X1-01",
+                    "1919-04-01/1919-X4-02",
+                    "1602-10-0X/1602-10-02",
+                    "2018-05-X0/2018-05-11",
+                    "-2018-05-X0/2018-05-11",
+                    "1200-01-X4/1200-01-08",
+                    "1919-07-30/1919-07-3X",
+                    "1908-05-02/1908-05-0X",
+                    "0501-11-18/0501-11-1X",
+                    "1112-08-22/1112-08-2X",
+                    "2015-02-27/2015-02-X8",
+                    "2016-02-28/2016-02-X9",
+                    "1984-06-?02/2004-06-11%",
                 ],
                 "invalid_edtf_dates": [
-                    '1863- 03-29',
-                    ' 1863-03-29',
-                    '1863-03 -29',
-                    '1863-03- 29',
-                    '1863-03-29 ',
-                    '18 63-03-29',
-                    '1863-0 3-29',
-                    '1960-06-31',
-                    '20067890%',
-                    'Y2006',
-                    '-0000',
-                    'Y20067890-14-10%',
-                    '20067890%',
-                    '+2006%',
-                    'NONE/',
-                    '2000/12-12',
-                    '2012-10-10T1:10:10',
-                    '2012-10-10T10:1:10',
-                    '2005-07-25T10:10:10Z/2006-01-01T10:10:10Z',
-                    '[1 760-01, 1760-02, 1760-12..]',
-                    '[1667,1668, 1670..1672]',
-                    '[..176 0-12-03]',
-                    '{-1667,1668, 1670..1672}',
-                    '{-1667,1 668-10,1670..1672}',
-                    '2001-21^southernHemisphere',
-                    '',
+                    "1863- 03-29",
+                    " 1863-03-29",
+                    "1863-03 -29",
+                    "1863-03- 29",
+                    "1863-03-29 ",
+                    "18 63-03-29",
+                    "1863-0 3-29",
+                    "1960-06-31",
+                    "20067890%",
+                    "Y2006",
+                    "-0000",
+                    "Y20067890-14-10%",
+                    "20067890%",
+                    "+2006%",
+                    "NONE/",
+                    "2000/12-12",
+                    "2012-10-10T1:10:10",
+                    "2012-10-10T10:1:10",
+                    "2005-07-25T10:10:10Z/2006-01-01T10:10:10Z",
+                    "[1 760-01, 1760-02, 1760-12..]",
+                    "[1667,1668, 1670..1672]",
+                    "[..176 0-12-03]",
+                    "{-1667,1668, 1670..1672}",
+                    "{-1667,1 668-10,1670..1672}",
+                    "2001-21^southernHemisphere",
+                    "",
                 ],
                 "mostly_edtf": [
                     "1979-08",  # ISO8601 Date
@@ -342,7 +344,7 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                         "success": False,
                         "unexpected_count": 25,
                     },
-                }
+                },
             ],
         }
     ]
