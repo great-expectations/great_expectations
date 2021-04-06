@@ -173,7 +173,7 @@ Steps
 
             .. code-block:: bash
 
-                great_expectations datasource new
+                great_expectations --v3-api datasource new
 
         #. **Choose "Relational database (SQL)"**
 
