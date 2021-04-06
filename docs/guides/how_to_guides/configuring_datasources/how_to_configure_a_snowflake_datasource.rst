@@ -249,6 +249,8 @@ Steps
                 2. Single sign-on (SSO)
                 3. Key pair authentication
 
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
 
 Additional notes
 ----------------
