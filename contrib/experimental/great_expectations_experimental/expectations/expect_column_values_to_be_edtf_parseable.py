@@ -144,6 +144,22 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                     "1111-01-01/1111",
                     "0000-01/0000",
                 ],
+            },
+            "tests": [
+                {
+                    "title": "positive_level0_test_exact",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "all_edtf_l0", "level": 0},
+                    "out": {
+                        "success": True,
+                        "unexpected_count": 0,
+                    },
+                },
+            ],
+        },
+        {
+            "data": {
                 "all_edtf_l1": [
                     "-1000/-0999",
                     "-2004-02-01/2005",
@@ -183,7 +199,23 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                     "-1985-04-12/..",
                     "-1985-04/..",
                     "-1985/",
-                ],
+                ]
+            },
+            "tests": [
+                {
+                    "title": "positive_level1_test_exact",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "all_edtf_l1", "level": 1},
+                    "out": {
+                        "success": True,
+                        "unexpected_count": 0,
+                    },
+                },
+            ],
+        },
+        {
+            "data": {
                 "all_edtf_l2": [
                     "2004-06-~01/2004-06-~20",
                     "-2004-06-?01/2006-06-~20",
@@ -236,7 +268,23 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                     "2015-02-27/2015-02-X8",
                     "2016-02-28/2016-02-X9",
                     "1984-06-?02/2004-06-11%",
-                ],
+                ]
+            },
+            "tests": [
+                {
+                    "title": "positive_level2_test_exact",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "all_edtf_l2", "level": 2},
+                    "out": {
+                        "success": True,
+                        "unexpected_count": 0,
+                    },
+                },
+            ],
+        },
+        {
+            "data": {
                 "invalid_edtf_dates": [
                     "1863- 03-29",
                     " 1863-03-29",
@@ -264,7 +312,23 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                     "{-1667,1 668-10,1670..1672}",
                     "2001-21^southernHemisphere",
                     "",
-                ],
+                ]
+            },
+            "tests": [
+                {
+                    "title": "negative_test_exact",
+                    "include_in_gallery": True,
+                    "exact_match_out": False,
+                    "in": {"column": "invalid_edtf_dates"},
+                    "out": {
+                        "success": False,
+                        "unexpected_count": 25,
+                    },
+                },
+            ],
+        },
+        {
+            "data": {
                 "mostly_edtf": [
                     "1979-08",  # ISO8601 Date
                     "2004-01-01T10:10:10+05:00",  # ISO8601 Datetime
@@ -291,49 +355,9 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
                         "unexpected_list": [2, -1],
                         "unexpected_count": 2,
                     },
-                },
-                {
-                    "title": "positive_level0_test_exact",
-                    "include_in_gallery": True,
-                    "exact_match_out": False,
-                    "in": {"column": "all_edtf_l0", "level": 0},
-                    "out": {
-                        "success": True,
-                        "unexpected_count": 0,
-                    },
-                },
-                {
-                    "title": "positive_level1_test_exact",
-                    "include_in_gallery": True,
-                    "exact_match_out": False,
-                    "in": {"column": "all_edtf_l1", "level": 1},
-                    "out": {
-                        "success": True,
-                        "unexpected_count": 0,
-                    },
-                },
-                {
-                    "title": "positive_level2_test_exact",
-                    "include_in_gallery": True,
-                    "exact_match_out": False,
-                    "in": {"column": "all_edtf_l2", "level": 2},
-                    "out": {
-                        "success": True,
-                        "unexpected_count": 0,
-                    },
-                },
-                {
-                    "title": "negative_test_exact",
-                    "include_in_gallery": True,
-                    "exact_match_out": False,
-                    "in": {"column": "invalid_edtf_dates"},
-                    "out": {
-                        "success": False,
-                        "unexpected_count": 25,
-                    },
-                },
+                }
             ],
-        }
+        },
     ]
 
     # This dictionary contains metadata for display in the public gallery
