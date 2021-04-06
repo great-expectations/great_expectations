@@ -25,7 +25,7 @@ The simplest ``RuntimeDataConnector`` may simply store lookup information about 
 
 The Data Connector uses ``Partitions`` to identify the available batches available in a Data Asset.
 
-A **Partition** is what differentiates a specific ``Batch`` of data that is part of a Data Asset. The partition uniquely identifies a subset of data based on the purpose for which you validate, such as the most recent delivery. The ``ConfiguredAssetFilesystemDataConnector`` can use a regex strring to match files and prouce named match groups that define unique partitions. Data Connectors use **Sorters** to help define a unique order for partitions, such as sorting files by date or alphabetically.
+A **Partition** is what differentiates a specific ``Batch`` of data that is part of a Data Asset. The partition uniquely identifies a subset of data based on the purpose for which you validate, such as the most recent delivery. The ``ConfiguredAssetFilesystemDataConnector`` can use a regex string to match files and prouce named match groups that define unique partitions. Data Connectors use **Sorters** to help define a unique order for partitions, such as sorting files by date or alphabetically.
 
 Batches
 =========
