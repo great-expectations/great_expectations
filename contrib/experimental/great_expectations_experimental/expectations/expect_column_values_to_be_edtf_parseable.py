@@ -2,10 +2,10 @@ import json
 from typing import Optional
 
 from edtf_validate.valid_edtf import (
-    is_valid,
     conformsLevel0,
     conformsLevel1,
     conformsLevel2,
+    is_valid,
 )
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -30,6 +30,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+
 
 def complies_to_level(value, level=None):
     if level == 0:
