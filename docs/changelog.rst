@@ -6,7 +6,9 @@ Changelog
 
 Develop
 -----------------
-
+* [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
+* [ENHANCEMENT] V3 API CLI docs commands have better error messages and more consistent short flags
+* [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
 
 0.13.17
 -----------------
@@ -19,10 +21,12 @@ Develop
 * [BREAKING-EXPERIMENTAL] The ``batch_identifiers`` key on ``DataConnectorQuery`` (formerly ``PartitionRequest``) has been changed to ``batch_filter_parameters``
 * [ENHANCEMENT] Added a new ``RuntimeBatchRequest`` class, which can be used alongside ``RuntimeDataConnector`` to specify batches at runtime with either an in-memory dataframe, path (filesystem or s3), or sql query
 * [ENHANCEMENT] Added a new ``RuntimeQueryBatchSpec`` class
+* [ENHANCEMENT] CLI store list now lists active stores
 * [BUGFIX] Fixed issue where Sorters were not being applied correctly when ``data_connector_query`` contained limit or index  #2617
 * [DOCS] Updated docs to reflect above class name changes
 * [DOCS] Added the following docs: "How to configure sorting in Data Connectors", "How to configure a Runtime Data Connector", "How to create a Batch Request using an Active Data Connector", "How to load a database table, view, or query result as a Batch"
 * [DOCS] Updated the V3 API section of the following docs: "How to load a Pandas DataFrame as a Batch", "How to load a Spark DataFrame as a Batch",
+
 
 0.13.16
 -----------------

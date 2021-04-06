@@ -23,10 +23,10 @@ def store(ctx):
 @store.command(name="list")
 @click.pass_context
 def store_list(ctx):
-    """List known Stores."""
+    """List active Stores."""
     context = ctx.obj.data_context
-    stores = context.list_stores()
-    cli_message(f"{len(stores)} Stores found:")
+    stores = context.list_active_stores()
+    cli_message(f"{len(stores)} active Stores found:")
     for store in stores:
         cli_message("")
         cli_message_dict(store)
