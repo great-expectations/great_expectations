@@ -1,6 +1,6 @@
 import json
 import os
-from typing import List
+from typing import Dict, List
 from unittest import mock
 
 import pytest
@@ -8,18 +8,24 @@ from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
-from tests.render.test_util import run_notebook
+from tests.render.test_util import (
+    find_code_in_notebook,
+    load_notebook_from_path,
+    run_notebook,
+)
 
 
 def test_suite_help_output(caplog):
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["--v3-api", "suite"], catch_exceptions=False)
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(cli, ["--v3-api", "suite"], catch_exceptions=False)
     assert result.exit_code == 0
+    stdout: str = result.stdout
     assert (
         """Commands:
   delete    Delete an expectation suite from the expectation store.
@@ -28,7 +34,7 @@ def test_suite_help_output(caplog):
   list      Lists available Expectation Suites.
   new       Create a new empty Expectation Suite.
   scaffold  Scaffold a new Expectation Suite."""
-        in result.stdout
+        in stdout
     )
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -96,7 +102,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook_path: str = os.path.join(
-        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
@@ -167,7 +173,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook_path: str = os.path.join(
-        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
@@ -220,7 +226,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --suite {expectation_suite_name}",
+        f"--v3-api suite new --expectation-suite {expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -236,7 +242,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook_path: str = os.path.join(
-        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
@@ -289,7 +295,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --suite {expectation_suite_name} --no-jupyter",
+        f"--v3-api suite new --expectation-suite {expectation_suite_name} --no-jupyter",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -309,7 +315,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     assert os.path.isfile(expected_suite_path)
 
     expected_notebook_path: str = os.path.join(
-        project_dir, "uncommitted", f"edit_{expectation_suite_name}.ipynb"
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
@@ -338,65 +344,41 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=False,
-    strict=True,
-)
-def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_context):
-    """This is really only testing click missing arguments"""
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
-    result = runner.invoke(cli, "--v3-api suite edit", catch_exceptions=False)
-    assert result.exit_code == 2
-    assert (
-        'Error: Missing argument "SUITE".' in result.stderr
-        or "Error: Missing argument 'SUITE'." in result.stderr
-    )
-
-
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
-    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
+def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    """
-    The command should:
-    - exit with a clear error message
-    - NOT open Data Docs
-    - NOT open jupyter
-    """
-    project_dir: str = empty_data_context.root_directory
-    context: DataContext = DataContext(context_root_dir=project_dir)
-    context.create_expectation_suite(expectation_suite_name="foo")
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+
+    expectation_suite_name: str = "test_suite_name"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        [
-            "--v3-api",
-            "suite",
-            "edit",
-            "foo",
-            "--batch-kwargs",
-            "'{foobar}'",
-        ],
+        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+nonexistent_file.json --no-jupyter
+""",
         catch_exceptions=False,
     )
-    stdout = result.output
     assert result.exit_code == 1
-    assert "Please check that your batch_kwargs are valid JSON." in stdout
 
-    assert mock_webbrowser.call_count == 0
+    stdout: str = result.stdout
+    assert 'The JSON file with the path "nonexistent_file.json' in stdout
+
+    context = DataContext(context_root_dir=project_dir)
+    assert expectation_suite_name not in context.list_expectation_suite_names()
+
     assert mock_subprocess.call_count == 0
+
+    assert mock_webbroser.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -404,51 +386,47 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error(
-    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
+def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    """
-    The command should:
-    - exit with a clear error message
-    - NOT open Data Docs
-    - NOT open jupyter
-    """
-    project_dir = empty_data_context.root_directory
-
-    context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
-    context.add_datasource("source", class_name="PandasDatasource")
-
-    runner = CliRunner(mix_stderr=False)
-    batch_kwargs = '{"table": "fake", "datasource": "source"}'
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    with open(batch_request_file_path, "w") as json_file:
+        json_file.write("not_proper_json")
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        [
-            "--v3-api",
-            "suite",
-            "edit",
-            "foo",
-            "--batch-kwargs",
-            batch_kwargs,
-        ],
+        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+{batch_request_file_path} --no-jupyter
+""",
         catch_exceptions=False,
     )
-    stdout = result.output
     assert result.exit_code == 1
-    assert "To continue editing this suite" not in stdout
-    assert "Please check that your batch_kwargs are able to load a batch." in stdout
 
-    assert mock_webbrowser.call_count == 0
+    stdout: str = result.stdout
+    assert "Error" in stdout
+    assert "occurred while attempting to load the JSON file with the path" in stdout
+
+    context = DataContext(context_root_dir=project_dir)
+    assert expectation_suite_name not in context.list_expectation_suite_names()
+
     assert mock_subprocess.call_count == 0
+
+    assert mock_webbroser.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -456,12 +434,153 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=False,
-    strict=True,
-)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    with open(batch_request_file_path, "w") as json_file:
+        json.dump(batch_request, json_file)
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+{batch_request_file_path} --no-jupyter
+""",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "Error" not in stdout
+
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook_path: str = os.path.join(
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    batch_request_string: str = (
+        str(BatchRequest(**batch_request))
+        .replace("{\n", "{\n  ")
+        .replace(",\n", ",\n  ")
+        .replace("\n}", ",\n}")
+    )
+    batch_request_string = fr"batch_request = {batch_request_string}"
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        replacement_string="",
+    )
+
+    context = DataContext(context_root_dir=project_dir)
+    assert expectation_suite_name in context.list_expectation_suite_names()
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert suite.expectations == []
+
+    assert mock_subprocess.call_count == 0
+
+    assert mock_webbroser.call_count == 0
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_context):
+    """This is really only testing click missing arguments"""
+    context: DataContext = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(cli, "--v3-api suite edit", catch_exceptions=False)
+    assert result.exit_code == 2
+
+    assert (
+        'Error: Missing argument "EXPECTATION_SUITE".' in result.stderr
+        or "Error: Missing argument 'EXPECTATION_SUITE'." in result.stderr
+    )
+
+
+def test_suite_edit_datasource_and_batch_request_error(monkeypatch, empty_data_context):
+    """This is really only testing click missing arguments"""
+    context: DataContext = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    expectation_suite_name: str = "test_suite_name"
+
+    # noinspection PyUnusedLocal
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert (
+        context.list_expectation_suites()[0].expectation_suite_name
+        == expectation_suite_name
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api suite edit {expectation_suite_name} --datasource_name some_datasource_name --batch-request some_file.json --interactive",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
+    assert (
+        "Only one of --datasource_name DATASOURCE_NAME and --batch-request <path to JSON file> options can be used."
+        in stdout
+    )
+
+
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_suite_name_raises_error(
@@ -473,19 +592,23 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     - NOT open Data Docs
     - NOT open jupyter
     """
-    context = empty_data_context
+    context: DataContext = empty_data_context
+
     assert not context.list_expectation_suites()
 
-    runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         f"--v3-api suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
-    assert "Could not find a suite named `not_a_real_suite`." in result.output
-    assert "by running `great_expectations suite list`" in result.output
+
+    stdout: str = result.stdout
+    assert "Could not find a suite named `not_a_real_suite`." in stdout
+    assert "by running `great_expectations suite list`" in stdout
 
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
@@ -496,12 +619,6 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=False,
-    strict=True,
-)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
@@ -513,22 +630,32 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     - NOT open Data Docs
     - NOT open jupyter
     """
-    project_dir = empty_data_context.root_directory
-    context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
-    assert context.list_expectation_suites()[0].expectation_suite_name == "foo"
-
-    runner = CliRunner(mix_stderr=False)
+    context: DataContext = empty_data_context
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+
+    expectation_suite_name: str = "test_suite_name"
+
+    # noinspection PyUnusedLocal
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert (
+        context.list_expectation_suites()[0].expectation_suite_name
+        == expectation_suite_name
+    )
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit foo --datasource not_real",
+        f"--v3-api suite edit {expectation_suite_name} --interactive --datasource_name not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
+
+    stdout: str = result.stdout
     assert (
         "Unable to load datasource `not_real` -- no configuration found or invalid configuration."
-        in result.output
+        in stdout
     )
 
     assert mock_webbrowser.call_count == 0
@@ -540,67 +667,90 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations(
+def test_suite_edit_multiple_datasources_with_no_additional_args_without_citations(
     mock_webbrowser,
     mock_subprocess,
     caplog,
     monkeypatch,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
-    Here we verify that the "suite edit" command helps the user to specify the batch
-    kwargs when it is called without the optional arguments that specify the batch.
+    Here we verify that the "suite edit" command helps the user to specify batch_request
+    when it is called without the optional command-line arguments that specify the batch.
 
     First, we call the "suite new" command to create the expectation suite our test
-    will edit - this step is a just a setup.
+    will edit -- this step is a just a setup.
 
-    We call the "suite edit" command without any optional arguments. This means that
-    the command will help us specify the batch kwargs interactively.
+    We then call the "suite edit" command without any optional command-line arguments.  This means
+    that the command will help us specify batch_request interactively.
 
-    The data context has two datasources - we choose one of them. It has a generator
-    configured. We choose to use the generator and select a generator asset from the list.
+    The data context has two datasources -- we choose one of them.
+    After that, we select a data connector and, finally, select a data asset from the list.
 
     The command should:
     - NOT open Data Docs
     - open jupyter
     """
-    context = site_builder_data_context_v013_with_html_store_titanic_random
-    root_dir = context.root_directory
-    runner = CliRunner(mix_stderr=False)
+    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    batch_request_string: str = (
+        str(BatchRequest(**batch_request))
+        .replace("{\n", "{\n  ")
+        .replace(",\n", ",\n  ")
+        .replace("\n}", ",\n}")
+    )
+    batch_request_string = fr"batch_request = {batch_request_string}"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         [
             "--v3-api",
             "suite",
             "new",
-            "--suite",
-            "foo_suite",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
+            "--interactive",
             "--no-jupyter",
         ],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "A batch of data is required to edit the suite" in stdout
+    assert "Select a datasource" in stdout
+
     assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 0
     mock_webbrowser.reset_mock()
+
+    assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
 
     # remove the citations from the suite
-    context = DataContext(root_dir)
-    suite = context.get_expectation_suite("foo_suite")
+    context = DataContext(context_root_dir=project_dir)
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
     assert isinstance(suite, ExpectationSuite)
-    suite.meta.pop("citations")
-    context.save_expectation_suite(suite)
+
+    suite.meta.pop("citations", None)
+    context.save_expectation_suite(expectation_suite=suite)
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
@@ -611,25 +761,53 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
             "--v3-api",
             "suite",
             "edit",
-            "foo_suite",
+            f"{expectation_suite_name}",
+            "--interactive",
         ],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
 
     assert result.exit_code == 0
+
     stdout = result.stdout
     assert "A batch of data is required to edit the suite" in stdout
     assert "Select a datasource" in stdout
-    assert "Which data would you like to use" in stdout
 
-    expected_notebook_path = os.path.join(
-        root_dir, "uncommitted", "edit_foo_suite.ipynb"
+    expected_notebook_path: str = os.path.join(
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
-    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
     assert os.path.isfile(expected_suite_path)
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        replacement_string="",
+    )
 
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
@@ -637,86 +815,143 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=False,
-    strict=True,
-)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations(
+def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations(
     mock_webbrowser,
     mock_subprocess,
     caplog,
     monkeypatch,
-    site_builder_data_context_v013_with_html_store_titanic_random,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
-    Here we verify that the "suite edit" command uses the batch kwargs found in
+    Here we verify that the "suite edit" command uses the batch_request found in
     citations in the existing suite when it is called without the optional
-    arguments that specify the batch.
+    command-line arguments that specify the batch.
 
     First, we call the "suite new" command to create the expectation suite our
-    test will edit - this step is a just a setup.
+    test will edit -- this step is a just a setup.
 
-    We call the "suite edit" command without any optional arguments.
+    We then call the "suite edit" command without any optional command-line-arguments.
 
     The command should:
     - NOT open Data Docs
     - NOT open jupyter
     """
-    context = site_builder_data_context_v013_with_html_store_titanic_random
-    root_dir = context.root_directory
-    runner = CliRunner(mix_stderr=False)
+    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+        "limit": 1000,
+    }
+    batch_request_string: str = (
+        str(BatchRequest(**batch_request))
+        .replace("{\n", "{\n  ")
+        .replace(",\n", ",\n  ")
+        .replace("\n}", ",\n}")
+    )
+    batch_request_string = fr"batch_request = {batch_request_string}"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         [
             "--v3-api",
             "suite",
             "new",
-            "--suite",
-            "foo_suite",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
+            "--interactive",
             "--no-jupyter",
         ],
         input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "A batch of data is required to edit the suite" in stdout
+    assert "Select a datasource" in stdout
+
     assert mock_webbrowser.call_count == 0
+    mock_webbrowser.reset_mock()
+
     assert mock_subprocess.call_count == 0
     mock_subprocess.reset_mock()
-    mock_webbrowser.reset_mock()
-    assert result.exit_code == 0
-    context = DataContext(root_dir)
-    suite = context.get_expectation_suite("foo_suite")
+
+    context = DataContext(context_root_dir=project_dir)
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
     assert isinstance(suite, ExpectationSuite)
 
+    # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "suite", "edit", "foo_suite"],
-        input="2\n1\n1\n\n",
+        [
+            "--v3-api",
+            "suite",
+            "edit",
+            f"{expectation_suite_name}",
+            "--interactive",
+        ],
         catch_exceptions=False,
     )
 
     assert result.exit_code == 0
+
     stdout = result.stdout
+    assert "A batch of data is required to edit the suite" not in stdout
     assert "Select a datasource" not in stdout
-    assert "Which data would you like to use" not in stdout
 
-    expected_notebook_path = os.path.join(
-        root_dir, "uncommitted", "edit_foo_suite.ipynb"
+    expected_notebook_path: str = os.path.join(
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
 
-    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
     assert os.path.isfile(expected_suite_path)
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        replacement_string="",
+    )
 
     assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
@@ -724,346 +959,68 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
-    mock_webbrowser,
-    mock_subprocess,
-    caplog,
-    monkeypatch,
-    site_builder_data_context_v013_with_html_store_titanic_random,
-):
-    """
-    Here we verify that when the "suite edit" command is called with batch_kwargs arg
-    that specifies the batch that will be used as a sample for editing the suite,
-    the command processes the batch_kwargs correctly and skips all the prompts
-    that help users to specify the batch (when called without batch_kwargs).
-
-    First, we call the "suite new" command to create the expectation suite our test
-    will edit - this step is a just a setup.
-
-    We call the "suite edit" command without any optional arguments. This means that
-    the command will help us specify the batch kwargs interactively.
-
-    The data context has two datasources - we choose one of them. It has a generator
-    configured. We choose to use the generator and select a generator asset from the list.
-
-    The command should:
-    - NOT open Data Docs
-    - open jupyter
-    """
-    context = site_builder_data_context_v013_with_html_store_titanic_random
-    root_dir = context.root_directory
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        [
-            "--v3-api",
-            "suite",
-            "new",
-            "--suite",
-            "foo_suite",
-            "--no-jupyter",
-        ],
-        input="2\n1\n1\n\n",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 0
-    mock_subprocess.reset_mock()
-    mock_webbrowser.reset_mock()
-    assert (
-        "Great Expectations will create a new Expectation Suite 'foo_suite' and store it here:"
-        in stdout
-    )
-
-    batch_kwargs = {
-        "datasource": "random",
-        "path": str(
-            os.path.join(
-                os.path.abspath(os.path.join(root_dir, os.pardir)),
-                "data",
-                "random",
-                "f1.csv",
-            )
-        ),
-    }
-    batch_kwargs_arg_str = json.dumps(batch_kwargs)
-
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        [
-            "--v3-api",
-            "suite",
-            "edit",
-            "foo_suite",
-            "--batch-kwargs",
-            batch_kwargs_arg_str,
-        ],
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-
-    assert result.exit_code == 0
-    assert "Select a datasource" not in stdout
-    assert "Which data would you like to use" not in stdout
-
-    expected_notebook_path = os.path.join(
-        root_dir, "uncommitted", "edit_foo_suite.ipynb"
-    )
-    assert os.path.isfile(expected_notebook_path)
-
-    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
-    assert os.path.isfile(expected_suite_path)
-
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 1
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
-
-
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch("subprocess.call", return_value=True, side_effect=None)
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error(
-    mock_webbrowser,
-    mock_subprocess,
-    caplog,
-    monkeypatch,
-    titanic_data_context,
-):
-    """
-    Given:
-    - the suite foo exists
-    - the a datasource exists
-    - and the users runs this
-    great_expectations suite edit foo --batch-kwargs '{"path": "data/10k.csv"}'
-
-    Then:
-    - The user should see a nice error and the program halts before notebook
-    compilation.
-    - NOT open Data Docs
-    - NOT open jupyter
-    '"""
-    project_dir = titanic_data_context.root_directory
-    context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
-
-    runner = CliRunner(mix_stderr=False)
-    batch_kwargs = {"path": "../data/Titanic.csv"}
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        [
-            "--v3-api",
-            "suite",
-            "edit",
-            "foo",
-            "--batch-kwargs",
-            json.dumps(batch_kwargs),
-        ],
-        catch_exceptions=False,
-    )
-    stdout = result.output
-    assert result.exit_code == 1
-    assert "Please check that your batch_kwargs are able to load a batch." in stdout
-    assert "Unable to load datasource `None`" in stdout
-
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 0
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
-
-
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch("subprocess.call", return_value=True, side_effect=None)
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs(
-    mock_webbrowser,
-    mock_subprocess,
-    caplog,
-    monkeypatch,
-    titanic_data_context,
-):
-    """
-    Given:
-    - the suite foo exists
-    - the a datasource bar exists
-    - and the users runs this
-    great_expectations suite edit foo --datasource bar --batch-kwargs '{"path": "data/10k.csv"}'
-
-    Then:
-    - The user gets a working notebook
-    - NOT open Data Docs
-    - open jupyter
-    """
-    project_dir = titanic_data_context.root_directory
-    context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
-
-    runner = CliRunner(mix_stderr=False)
-    batch_kwargs = {"path": os.path.join(project_dir, "../", "data", "Titanic.csv")}
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        [
-            "--v3-api",
-            "suite",
-            "edit",
-            "foo",
-            "--batch-kwargs",
-            json.dumps(batch_kwargs),
-            "--datasource",
-            "mydatasource",
-        ],
-        catch_exceptions=False,
-    )
-    stdout = result.output
-    assert stdout == ""
-    assert result.exit_code == 0
-
-    expected_notebook_path = os.path.join(project_dir, "uncommitted", "edit_foo.ipynb")
-    assert os.path.isfile(expected_notebook_path)
-    expected_suite_path = os.path.join(project_dir, "expectations", "foo.json")
-    assert os.path.isfile(expected_suite_path)
-
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 1
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
-
-
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch("subprocess.call", return_value=True, side_effect=None)
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations(
-    mock_webbrowser,
+def test_suite_edit_interactive_batch_request_without_datasource_json_file_raises_helpful_error(
+    mock_webbroser,
     mock_subprocess,
     caplog,
     monkeypatch,
     empty_data_context,
-    filesystem_csv_2,
 ):
-    """
-    Here we verify that the "suite edit" command helps the user to specify the batch
-    kwargs when it is called without the optional arguments that specify the batch.
+    context: DataContext = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
 
-    First, we call the "suite new" command to create the expectation suite our test
-    will edit - this step is a just a setup.
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
 
-    We call the "suite edit" command without any optional arguments. This means that
-    the command will help us specify the batch kwargs interactively.
+    expectation_suite_name: str = "test_suite_name"
 
-    The data context has one datasource. The datasource has no generators
-    configured. The command prompts us to enter the file path.
-    """
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
+    # noinspection PyUnusedLocal
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert (
+        context.list_expectation_suites()[0].expectation_suite_name
+        == expectation_suite_name
     )
 
-    context = empty_data_context
-    project_root_dir = context.root_directory
+    batch_request: dict = {
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
 
-    root_dir = project_root_dir
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    batch_request_file_path: str = os.path.join(
+        uncommitted_dir, f"batch_request_missing_datasource.json"
+    )
+    with open(batch_request_file_path, "w") as json_file:
+        json.dump(batch_request, json_file)
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
-        ["--v3-api", "suite", "new", "--no-jupyter"],
-        input="{:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
+        f"""--v3-api suite edit {expectation_suite_name} --interactive --batch-request
+{batch_request_file_path} --no-jupyter
+""",
         catch_exceptions=False,
     )
-    stdout = result.stdout
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 0
-    mock_subprocess.reset_mock()
-    mock_webbrowser.reset_mock()
-    assert result.exit_code == 0
+    assert result.exit_code == 1
+
+    stdout: str = result.stdout
+    assert "A batch of data is required to edit the suite" not in stdout
+    assert "Select a datasource" not in stdout
     assert (
-        "Great Expectations will create a new Expectation Suite 'my_new_suite' and store it here:"
+        "Please check that your batch_request is valid and is able to load a batch."
         in stdout
     )
+    assert 'The type of an datasource name must be a string (Python "str").' in stdout
 
-    # remove the citations from the suite
-    context = DataContext(project_root_dir)
-    suite = context.get_expectation_suite("my_new_suite")
-    suite.meta.pop("citations")
-    context.save_expectation_suite(suite)
+    assert mock_subprocess.call_count == 0
 
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        [
-            "--v3-api",
-            "suite",
-            "edit",
-            "my_new_suite",
-        ],
-        input="{:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
-        catch_exceptions=False,
-    )
-
-    assert result.exit_code == 0
-    stdout = result.stdout
-    assert "Select a datasource" not in stdout
-    assert "Which data would you like to use" not in stdout
-    assert "Enter the path" in stdout
-
-    expected_notebook_path = os.path.join(
-        root_dir, "uncommitted", "edit_my_new_suite.ipynb"
-    )
-    assert os.path.isfile(expected_notebook_path)
-
-    expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
-    assert os.path.isfile(expected_suite_path)
-
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 1
+    assert mock_webbroser.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1096,43 +1053,22 @@ def test_suite_list_with_zero_suites(caplog, monkeypatch, empty_data_context):
 
 
 def test_suite_list_with_one_suite(caplog, monkeypatch, empty_data_context):
-    project_dir: str = empty_data_context.root_directory
-    context: DataContext = DataContext(context_root_dir=project_dir)
-    config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
-    assert os.path.exists(config_file_path)
-
-    context.create_expectation_suite(expectation_suite_name="a.warning")
-
+    context: DataContext = empty_data_context
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        f"--v3-api suite list",
-        catch_exceptions=False,
-    )
 
-    assert result.exit_code == 0
-    assert "1 Expectation Suite found" in result.output
-    assert "a.warning" in result.output
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
-def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context):
-    project_dir: str = empty_data_context.root_directory
-    context: DataContext = DataContext(context_root_dir=project_dir)
-
-    context.create_expectation_suite(expectation_suite_name="a.warning")
-    context.create_expectation_suite(expectation_suite_name="b.warning")
-    context.create_expectation_suite(expectation_suite_name="c.warning")
+    project_dir: str = context.root_directory
 
     config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
     assert os.path.exists(config_file_path)
 
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    expectation_suite_dir_name: str = "a_dir"
+    expectation_suite_name: str = "test_suite_name"
+
+    # noinspection PyUnusedLocal
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
+    )
+
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
@@ -1142,7 +1078,46 @@ def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context
     assert result.exit_code == 0
 
     stdout: str = result.stdout
+    assert "1 Expectation Suite found" in stdout
+    assert f"{expectation_suite_dir_name}.{expectation_suite_name}" in stdout
 
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context):
+    context: DataContext = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+
+    # noinspection PyUnusedLocal
+    suite_0: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="a.warning"
+    )
+    # noinspection PyUnusedLocal
+    suite_1: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="b.warning"
+    )
+    # noinspection PyUnusedLocal
+    suite_2: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="c.warning"
+    )
+
+    config_file_path: str = os.path.join(project_dir, "great_expectations.yml")
+    assert os.path.exists(config_file_path)
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api suite list",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
     assert "3 Expectation Suites found:" in stdout
     assert "a.warning" in stdout
     assert "b.warning" in stdout
@@ -1161,16 +1136,18 @@ def test_suite_delete_with_zero_suites(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context: DataContext = empty_data_context_stats_enabled
-    runner: CliRunner = CliRunner(mix_stderr=False)
-
     monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
-    assert "No expectation suites found in the project" in result.output
+
+    stdout: str = result.stdout
+    assert "No expectation suites found in the project" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1199,21 +1176,31 @@ def test_suite_delete_with_non_existent_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context: DataContext = empty_data_context_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    expectation_suite_name: str = "test_suite_name"
+
     suite: ExpectationSuite = context.create_expectation_suite(
-        expectation_suite_name="foo"
+        expectation_suite_name=expectation_suite_name
     )
     context.save_expectation_suite(expectation_suite=suite)
+    assert (
+        context.list_expectation_suites()[0].expectation_suite_name
+        == expectation_suite_name
+    )
+
     mock_emit.reset_mock()
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
-    assert "No expectation suite named not_a_suite found" in result.output
+
+    stdout: str = result.stdout
+    assert "No expectation suite named not_a_suite found" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -1228,6 +1215,7 @@ def test_suite_delete_with_non_existent_suite(
             }
         ),
     ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
@@ -1241,26 +1229,44 @@ def test_suite_delete_with_one_suite(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     context: DataContext = empty_data_context_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
     project_dir: str = empty_data_context_stats_enabled.root_directory
+
+    expectation_suite_dir_name: str = "a_dir"
+    expectation_suite_name: str = "test_suite_name"
+
+    # noinspection PyUnusedLocal
     suite: ExpectationSuite = context.create_expectation_suite(
-        expectation_suite_name="a.warning"
+        expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
     context.save_expectation_suite(expectation_suite=suite)
+    assert (
+        context.list_expectation_suites()[0].expectation_suite_name
+        == f"{expectation_suite_dir_name}.{expectation_suite_name}"
+    )
+
     mock_emit.reset_mock()
 
-    suite_dir: str = os.path.join(project_dir, "expectations", "a")
-    suite_path: str = os.path.join(suite_dir, "warning.json")
+    suite_dir: str = os.path.join(
+        project_dir, "expectations", expectation_suite_dir_name
+    )
+    suite_path: str = os.path.join(suite_dir, f"{expectation_suite_name}.json")
     assert os.path.isfile(suite_path)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite delete a.warning",
+        f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    assert "Deleted the expectation suite named: a.warning" in result.output
+
+    stdout: str = result.stdout
+    assert (
+        f"Deleted the expectation suite named: {expectation_suite_dir_name}.{expectation_suite_name}"
+        in stdout
+    )
 
     assert not os.path.isfile(suite_path)
 
@@ -1290,35 +1296,50 @@ def test_suite_delete_with_one_suite(
 def test_suite_delete_with_one_suite_assume_yes_flag(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    project_dir: str = empty_data_context_stats_enabled.root_directory
-    context: DataContext = DataContext(project_dir)
+    context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+
+    expectation_suite_dir_name: str = "a_dir"
+    expectation_suite_name: str = "test_suite_name"
+
+    # noinspection PyUnusedLocal
     suite: ExpectationSuite = context.create_expectation_suite(
-        expectation_suite_name="a.warning"
+        expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
-    context.save_expectation_suite(suite)
+    context.save_expectation_suite(expectation_suite=suite)
+    assert (
+        context.list_expectation_suites()[0].expectation_suite_name
+        == f"{expectation_suite_dir_name}.{expectation_suite_name}"
+    )
+
     mock_emit.reset_mock()
 
-    suite_dir: str = os.path.join(project_dir, "expectations", "a")
-    suite_path: str = os.path.join(suite_dir, "warning.json")
+    suite_dir: str = os.path.join(
+        project_dir, "expectations", expectation_suite_dir_name
+    )
+    suite_path: str = os.path.join(suite_dir, f"{expectation_suite_name}.json")
     assert os.path.isfile(suite_path)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --assume-yes suite delete a.warning",
+        f"--v3-api --assume-yes suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
 
     stdout: str = result.stdout
-    assert "Deleted the expectation suite named: a.warning" in stdout
+    assert (
+        f"Deleted the expectation suite named: {expectation_suite_dir_name}.{expectation_suite_name}"
+        in stdout
+    )
 
     assert "Would you like to proceed? [Y/n]:" not in stdout
     # This assertion is extra assurance since this test is too permissive if we change the confirmation message
     assert "[Y/n]" not in stdout
 
-    # assert not os.path.isdir(suite_dir)
     assert not os.path.isfile(suite_path)
 
     assert mock_emit.call_count == 2
@@ -1382,7 +1403,7 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
             "--v3-api",
             "suite",
             "scaffold",
-            "foop",
+            "foo",
         ],
         catch_exceptions=False,
     )
@@ -1431,9 +1452,9 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     - send a scaffold fail message
     """
     context = empty_data_context_stats_enabled
-    suite = context.create_expectation_suite("foop")
-    context.save_expectation_suite(suite)
-    assert context.list_expectation_suite_names() == ["foop"]
+    suite = context.create_expectation_suite("foo")
+    context.save_expectation_suite(expectation_suite=suite)
+    assert context.list_expectation_suite_names() == ["foo"]
     mock_emit.reset_mock()
 
     runner = CliRunner(mix_stderr=False)
@@ -1444,15 +1465,15 @@ def test_suite_scaffold_on_existing_suite_raises_error(
             "--v3-api",
             "suite",
             "scaffold",
-            "foop",
+            "foo",
         ],
         catch_exceptions=False,
     )
     stdout = result.output
     assert result.exit_code == 1
-    assert "An expectation suite named `foop` already exists." in stdout
+    assert "An expectation suite named `foo` already exists." in stdout
     assert (
-        "If you intend to edit the suite please use `great_expectations suite edit foop`."
+        "If you intend to edit the suite please use `great_expectations suite edit foo`."
         in stdout
     )
 
@@ -1495,7 +1516,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
     - send a scaffold success message
     """
     context = titanic_data_context_stats_enabled
-    suite_name = "foop"
+    suite_name = "foo"
     expected_notebook_path = os.path.join(
         context.root_directory,
         context.GE_EDIT_NOTEBOOK_DIR,
@@ -1563,7 +1584,7 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
     - send a scaffold success message
     """
     context = titanic_data_context_stats_enabled
-    suite_name = "foop"
+    suite_name = "foo"
     expected_notebook_path = os.path.join(
         context.root_directory,
         context.GE_EDIT_NOTEBOOK_DIR,

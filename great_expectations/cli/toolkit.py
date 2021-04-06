@@ -1,7 +1,9 @@
 import datetime
+import json
 import os
 import subprocess
 import sys
+from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
@@ -64,81 +66,6 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-def create_expectation_suite(
-    context: DataContext,
-    datasource_name: Optional[str] = None,
-    batch_request: Optional[Dict[str, Union[str, Dict[str, Any]]]] = None,
-    expectation_suite_name: Optional[str] = None,
-    interactive: Optional[bool] = False,
-    scaffold: Optional[bool] = False,
-    additional_batch_request_args: Optional[dict] = None,
-    # TODO: <Alex>ALEX -- Is this needed?</Alex>
-    profiler_configuration: Optional[str] = "demo",
-) -> Tuple[str, Dict[str, Union[str, Dict[str, Any]]], Optional[dict]]:
-    """
-    Create a new expectation suite.
-
-    :return: a tuple: (suite name, profiling_results)
-    """
-    if interactive and not batch_request:
-        data_source: Optional[BaseDatasource] = select_datasource(
-            context=context, datasource_name=datasource_name
-        )
-
-        if data_source is None:
-            # select_datasource takes care of displaying an error message, so all is left here is to exit.
-            sys.exit(1)
-
-        datasource_name = data_source.name
-
-        batch_request = get_batch_request(
-            context=context,
-            datasource_name=datasource_name,
-            additional_batch_request_args=additional_batch_request_args,
-        )
-        # In this case, we have "consumed" the additional_batch_request_args
-        additional_batch_request_args = {}
-
-    data_asset_name: Optional[str] = None
-
-    if batch_request:
-        data_asset_name = batch_request.get("data_asset_name")
-
-    if expectation_suite_name is None:
-        default_expectation_suite_name: str = _get_default_expectation_suite_name(
-            data_asset_name=data_asset_name,
-            batch_request=batch_request,
-        )
-        while True:
-            expectation_suite_name = click.prompt(
-                "\nName the new Expectation Suite",
-                default=default_expectation_suite_name,
-            )
-            if expectation_suite_name not in context.list_expectation_suite_names():
-                break
-            tell_user_suite_exists(expectation_suite_name)
-    elif expectation_suite_name in context.list_expectation_suite_names():
-        tell_user_suite_exists(expectation_suite_name)
-        sys.exit(1)
-
-    return expectation_suite_name, batch_request, None
-
-    # TODO: <Alex>ALEX -- This scaffold.</Alex>
-    # TODO: <Alex>ALEX -- How will this be in V3?</Alex>
-    # profiling_results: dict = _profile_to_create_a_suite(
-    #     additional_batch_request_args,
-    #     batch_request,
-    #     data_connector_name,
-    #     context,
-    #     datasource_name,
-    #     expectation_suite_name,
-    #     data_asset_name,
-    #     profiler_configuration,
-    # )
-    #
-    # return expectation_suite_name, batch_request, profiling_results
-
-
 # TODO: <Alex>ALEX - Update for V3</Alex>
 def _profile_to_create_a_suite(
     additional_batch_kwargs,
@@ -152,7 +79,7 @@ def _profile_to_create_a_suite(
 ):
 
     cli_message(
-        """
+        string="""
 Great Expectations will choose a couple of columns and generate expectations about them
 to demonstrate some examples of assertions you can make about your data.
 
@@ -174,7 +101,7 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
     confirm_proceed_or_exit()
 
     # TODO this may not apply
-    cli_message("\nGenerating example Expectation Suite...")
+    cli_message(string="\nGenerating example Expectation Suite...")
     run_id = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     profiling_results = context.profile_data_asset(
         datasource_name,
@@ -190,7 +117,7 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
     if not profiling_results["success"]:
         _raise_profiling_errors(profiling_results)
 
-    cli_message("\nDone generating example Expectation Suite")
+    cli_message(string="\nDone generating example Expectation Suite")
     return profiling_results
 
 
@@ -223,9 +150,11 @@ def attempt_to_open_validation_results_in_data_docs(context, profiling_results):
         context.open_data_docs()
 
 
-def _get_default_expectation_suite_name(
+def get_default_expectation_suite_name(
     data_asset_name: str,
-    batch_request: Optional[Union[str, Dict[str, Union[str, Dict[str, Any]]]]] = None,
+    batch_request: Optional[
+        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+    ] = None,
 ) -> str:
     suite_name: str
     if data_asset_name:
@@ -237,14 +166,14 @@ def _get_default_expectation_suite_name(
     return suite_name
 
 
-def tell_user_suite_exists(suite_name: str) -> None:
+def tell_user_suite_exists(suite_name: str):
     cli_message(
-        f"""<red>An expectation suite named `{suite_name}` already exists.</red>
+        string=f"""<red>An expectation suite named `{suite_name}` already exists.</red>
   - If you intend to edit the suite please use `great_expectations suite edit {suite_name}`."""
     )
 
 
-def launch_jupyter_notebook(notebook_path: str) -> None:
+def launch_jupyter_notebook(notebook_path: str):
     jupyter_command_override = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
         subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
@@ -279,7 +208,7 @@ def get_validator(
 def load_expectation_suite(
     # TODO consolidate all the myriad CLI tests into this
     context: DataContext,
-    suite_name: str,
+    expectation_suite_name: str,
     usage_event: str,
     create_if_not_exist: Optional[bool] = True,
 ) -> Optional[ExpectationSuite]:
@@ -288,27 +217,31 @@ def load_expectation_suite(
 
     Handles a suite name with or without `.json`
     :param context:
-    :param suite_name:
+    :param expectation_suite_name:
     :param usage_event:
     :param create_if_not_exist:
     """
-    if suite_name.endswith(".json"):
-        suite_name = suite_name[:-5]
+    if expectation_suite_name.endswith(".json"):
+        expectation_suite_name = expectation_suite_name[:-5]
 
     suite: Optional[ExpectationSuite]
     try:
-        suite = context.get_expectation_suite(expectation_suite_name=suite_name)
+        suite = context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
         return suite
     except ge_exceptions.DataContextError:
         if create_if_not_exist:
-            suite = context.create_expectation_suite(expectation_suite_name=suite_name)
+            suite = context.create_expectation_suite(
+                expectation_suite_name=expectation_suite_name
+            )
             return suite
         else:
             suite = None
             exit_with_failure_message_and_stats(
                 context=context,
                 usage_event=usage_event,
-                message=f"<red>Could not find a suite named `{suite_name}`.</red> Please check "
+                message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check "
                 "the name by running `great_expectations suite list` and try again.",
             )
     return suite
@@ -316,9 +249,9 @@ def load_expectation_suite(
 
 def exit_with_failure_message_and_stats(
     context: DataContext, usage_event: str, message: str
-) -> None:
-    cli_message(message)
-    send_usage_message(context, event=usage_event, success=False)
+):
+    cli_message(string=message)
+    send_usage_message(data_context=context, event=usage_event, success=False)
     sys.exit(1)
 
 
@@ -414,7 +347,7 @@ def load_checkpoint(
 
 def select_datasource(
     context: DataContext, datasource_name: str = None
-) -> Optional[BaseDatasource]:
+) -> BaseDatasource:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
     data_source: Optional[BaseDatasource] = None
@@ -428,7 +361,7 @@ def select_datasource(
         )
         if len(data_sources) == 0:
             cli_message(
-                "<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
+                string="<red>No datasources found in the context. To add a datasource, run `great_expectations datasource new`</red>"
             )
         elif len(data_sources) == 1:
             datasource_name = data_sources[0].name
@@ -495,22 +428,22 @@ def load_data_context_with_error_handling(
                 from_cli_upgrade_command=from_cli_upgrade_command,
             )
         else:
-            cli_message("<red>{}</red>".format(err.message))
+            cli_message(string="<red>{}</red>".format(err.message))
             sys.exit(1)
     except (
         ge_exceptions.ConfigNotFoundError,
         ge_exceptions.InvalidConfigError,
     ) as err:
-        cli_message("<red>{}</red>".format(err.message))
+        cli_message(string="<red>{}</red>".format(err.message))
         sys.exit(1)
     except ge_exceptions.PluginModuleNotFoundError as err:
-        cli_message(err.cli_colored_message)
+        cli_message(string=err.cli_colored_message)
         sys.exit(1)
     except ge_exceptions.PluginClassNotFoundError as err:
-        cli_message(err.cli_colored_message)
+        cli_message(string=err.cli_colored_message)
         sys.exit(1)
     except ge_exceptions.InvalidConfigurationYamlError as err:
-        cli_message(f"<red>{str(err)}</red>")
+        cli_message(string=f"<red>{str(err)}</red>")
         sys.exit(1)
 
 
@@ -531,7 +464,7 @@ def upgrade_project(
             f"your project must be upgraded.</red>"
         )
 
-    cli_message(message)
+    cli_message(string=message)
     upgrade_prompt = (
         "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
     )
@@ -539,7 +472,7 @@ def upgrade_project(
         confirm_prompt=upgrade_prompt,
         continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
     )
-    cli_message(SECTION_SEPARATOR)
+    cli_message(string=SECTION_SEPARATOR)
 
     # use loop in case multiple upgrades need to take place
     while ge_config_version < CURRENT_GE_CONFIG_VERSION:
@@ -553,7 +486,7 @@ def upgrade_project(
             break
         ge_config_version += 1
 
-    cli_message(SECTION_SEPARATOR)
+    cli_message(string=SECTION_SEPARATOR)
     upgrade_success_message = "<green>Upgrade complete. Exiting...</green>\n"
     upgrade_incomplete_message = f"""\
 <red>The Upgrade Helper was unable to perform a complete project upgrade. Next steps:</red>
@@ -566,9 +499,9 @@ To learn more about the upgrade process, visit \
 """
 
     if ge_config_version < CURRENT_GE_CONFIG_VERSION:
-        cli_message(upgrade_incomplete_message)
+        cli_message(string=upgrade_incomplete_message)
     else:
-        cli_message(upgrade_success_message)
+        cli_message(string=upgrade_success_message)
     sys.exit(0)
 
 
@@ -600,8 +533,8 @@ def upgrade_project_one_version_increment(
         upgrade_confirmed = True
 
     if upgrade_confirmed:
-        cli_message("\nUpgrading project...")
-        cli_message(SECTION_SEPARATOR)
+        cli_message(string="\nUpgrading project...")
+        cli_message(string=SECTION_SEPARATOR)
         # run upgrade and get report of what was done, if version number should be incremented
         (
             upgrade_report,
@@ -609,7 +542,7 @@ def upgrade_project_one_version_increment(
             exception_occurred,
         ) = upgrade_helper.upgrade_project()
         # display report to user
-        cli_message(upgrade_report)
+        cli_message(string=upgrade_report)
         if exception_occurred:
             # restore version number to current number
             DataContext.set_ge_config_version(
@@ -635,7 +568,7 @@ def upgrade_project_one_version_increment(
     DataContext.set_ge_config_version(
         ge_config_version, context_root_dir, validate_config_version=False
     )
-    cli_message(continuation_message)
+    cli_message(string=continuation_message)
     sys.exit(0)
 
 
@@ -662,7 +595,7 @@ def confirm_proceed_or_exit(
     continuation_message_colorized = cli_colorize_string(continuation_message)
     if not click.confirm(confirm_prompt_colorized, default=True):
         if exit_on_no:
-            cli_message(continuation_message_colorized)
+            cli_message(string=continuation_message_colorized)
             sys.exit(exit_code)
         else:
             return False
@@ -713,15 +646,16 @@ def send_usage_message(
     event_payload: Optional[dict] = None,
     success: bool = False,
 ):
-    if event_payload is None:
-        event_payload = {}
-    event_payload.update({"api_version": "v3"})
-    send_usage_stats_message(
-        data_context=data_context,
-        event=event,
-        event_payload=event_payload,
-        success=success,
-    )
+    if not ((event is None) or (data_context is None)):
+        if event_payload is None:
+            event_payload = {}
+        event_payload.update({"api_version": "v3"})
+        send_usage_stats_message(
+            data_context=data_context,
+            event=event,
+            event_payload=event_payload,
+            success=success,
+        )
 
 
 def is_cloud_file_url(file_path: str) -> bool:
@@ -754,3 +688,79 @@ def get_relative_path_from_config_file_to_base_path(
     data_from_working_dir = os.path.relpath(data_path)
     context_dir_from_working_dir = os.path.relpath(context_root_directory)
     return os.path.relpath(data_from_working_dir, context_dir_from_working_dir)
+
+
+def load_json_file_into_dict(
+    filepath: str,
+    usage_event: Optional[str] = None,
+    data_context: Optional[DataContext] = None,
+) -> Optional[Dict[str, Union[str, Dict[str, Any]]]]:
+    trackable: bool = not ((usage_event is None) or (data_context is None))
+
+    error_message: str
+
+    if not filepath:
+        error_message = f"The path to a JSON file was not specified."
+        if trackable:
+            exit_with_failure_message_and_stats(
+                context=data_context,
+                usage_event=usage_event,
+                message=f"<red>{error_message}</red>",
+            )
+        else:
+            raise ValueError(error_message)
+
+    if not filepath.endswith(".json"):
+        error_message = f'The JSON file path "{filepath}" does not have the ".json" extension in the file name.'
+        if trackable:
+            exit_with_failure_message_and_stats(
+                context=data_context,
+                usage_event=usage_event,
+                message=f"<red>{error_message}</red>",
+            )
+        else:
+            raise ValueError(error_message)
+
+    contents: Optional[str] = None
+    try:
+        with open(filepath) as json_file:
+            contents = json_file.read()
+    except FileNotFoundError:
+        error_message = f'The JSON file with the path "{filepath}" could not be found.'
+        if trackable:
+            exit_with_failure_message_and_stats(
+                context=data_context,
+                usage_event=usage_event,
+                message=f"<red>{error_message}</red>",
+            )
+        else:
+            raise ValueError(error_message)
+
+    batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None
+    if contents:
+        try:
+            batch_request = json.loads(contents)
+        except JSONDecodeError as jde:
+            error_message = f"""Error "{jde}" occurred while attempting to load the JSON file with the path
+"{filepath}" into dictionary.
+"""
+            if trackable:
+                exit_with_failure_message_and_stats(
+                    context=data_context,
+                    usage_event=usage_event,
+                    message=f"<red>{error_message}</red>",
+                )
+            else:
+                raise ValueError(error_message)
+    else:
+        error_message = f'The JSON file path "{filepath}" is empty.'
+        if trackable:
+            exit_with_failure_message_and_stats(
+                context=data_context,
+                usage_event=usage_event,
+                message=f"<red>{error_message}</red>",
+            )
+        else:
+            raise ValueError(error_message)
+
+    return batch_request

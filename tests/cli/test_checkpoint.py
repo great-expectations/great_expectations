@@ -56,19 +56,17 @@ def titanic_data_context_with_sql_datasource(
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
 
-    config = yaml.load(
-        f"""
+    datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file_path}
 introspection:
   whole_table: {{}}
-""",
-    )
+"""
 
     try:
         # noinspection PyUnusedLocal
         my_sql_datasource = context.add_datasource(
-            "test_sqlite_db_datasource", **config
+            "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
