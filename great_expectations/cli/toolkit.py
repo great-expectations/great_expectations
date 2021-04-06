@@ -243,14 +243,14 @@ def get_default_expectation_suite_name(
     return suite_name
 
 
-def tell_user_suite_exists(suite_name: str) -> None:
+def tell_user_suite_exists(suite_name: str):
     cli_message(
         string=f"""<red>An expectation suite named `{suite_name}` already exists.</red>
   - If you intend to edit the suite please use `great_expectations suite edit {suite_name}`."""
     )
 
 
-def launch_jupyter_notebook(notebook_path: str) -> None:
+def launch_jupyter_notebook(notebook_path: str):
     jupyter_command_override = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
         subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
@@ -326,7 +326,7 @@ def load_expectation_suite(
 
 def exit_with_failure_message_and_stats(
     context: DataContext, usage_event: str, message: str
-) -> None:
+):
     cli_message(string=message)
     send_usage_message(data_context=context, event=usage_event, success=False)
     sys.exit(1)

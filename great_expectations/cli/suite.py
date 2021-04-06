@@ -119,10 +119,8 @@ def _suite_new_workflow(
     scaffold: bool,
     no_jupyter: bool,
     usage_event: str,
-    batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-    ] = None,
-) -> None:
+    batch_request: Optional[str] = None,
+):
     error_message: Optional[str] = None
 
     if not (interactive or (batch_request is None)):
@@ -157,7 +155,6 @@ def _suite_new_workflow(
                 )
                 sys.exit(1)
 
-        # TODO: <Alex>ALEX</Alex>
         datasource_name: Optional[str] = None
         data_asset_name: Optional[str] = None
         additional_batch_request_args: Optional[
@@ -207,22 +204,6 @@ def _suite_new_workflow(
             toolkit.tell_user_suite_exists(suite_name=expectation_suite_name)
             sys.exit(1)
 
-        # TODO: <Alex>ALEX</Alex>
-        # # TODO: <Alex>ALEX -- Can we be more precise about the type of profiling results in V3?</Alex>
-        # profiling_results: dict
-        # # TODO: <Alex>ALEX -- change method name; it does not create expectation suite any more.</Alex>
-        # (
-        #     expectation_suite_name,
-        #     batch_request,
-        #     profiling_results,
-        # ) = toolkit.create_expectation_suite(
-        #     context=context,
-        #     batch_request=batch_request,
-        #     expectation_suite_name=expectation_suite_name,
-        #     interactive=interactive,
-        #     scaffold=scaffold,
-        #     additional_batch_request_args={"limit": 1000},
-        # )
         suite: ExpectationSuite = toolkit.load_expectation_suite(
             context=context,
             expectation_suite_name=expectation_suite_name,
@@ -380,7 +361,7 @@ def _suite_edit_workflow(
     if not interactive and datasource_name:
         error_message = "The --datasource_name DATASOURCE_NAME option requires the --interactive flag."
 
-    if not (interactive or (batch_request is None)):
+    if not interactive and batch_request is not None and isinstance(batch_request, str):
         error_message = "The --batch-request <path to JSON file> option requires the --interactive flag."
 
     if error_message is not None:
@@ -612,7 +593,7 @@ def suite_scaffold(ctx, suite, no_jupyter):
     _suite_scaffold(suite, directory, no_jupyter)
 
 
-def _suite_scaffold(suite: str, directory: str, no_jupyter: bool) -> None:
+def _suite_scaffold(suite: str, directory: str, no_jupyter: bool):
     usage_event = "cli.suite.scaffold"
     suite_name = suite
     context = toolkit.load_data_context_with_error_handling(directory)

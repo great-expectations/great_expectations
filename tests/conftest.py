@@ -2402,9 +2402,21 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         and (sa is not None)
         and is_library_loadable(library_name="sqlalchemy")
     ):
-        db_file = file_relative_path(
-            __file__,
-            "test_sets/test_cases_for_sql_data_connector.db",
+        db_file: str = str(
+            os.path.join(
+                context_path,
+                "..",
+                "data",
+                "titanic",
+                "test_cases_for_sql_data_connector.db",
+            )
+        )
+        shutil.copy(
+            file_relative_path(
+                __file__,
+                os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+            ),
+            db_file,
         )
         datasource_config = f"""
             class_name: Datasource

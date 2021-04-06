@@ -13,6 +13,7 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
@@ -917,7 +918,24 @@ def test_notebook_execution_with_pandas_backend(
             },
             "module_name": "great_expectations.datasource",
             "name": "my_datasource",
-        }
+        },
+        {
+            "class_name": "Datasource",
+            "execution_engine": {
+                "class_name": "SqlAlchemyExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+                "connection_string": f"sqlite:///{root_dir}/../data/titanic/test_cases_for_sql_data_connector.db",
+            },
+            "data_connectors": {
+                "my_runtime_data_connector": {
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "batch_identifiers": ["pipeline_stage_name", "airflow_run_id"],
+                    "class_name": "RuntimeDataConnector",
+                },
+            },
+            "module_name": "great_expectations.datasource",
+            "name": "my_runtime_sql_datasource",
+        },
     ]
 
     assert context.get_validation_result(expectation_suite_name="warning") == {}
