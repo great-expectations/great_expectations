@@ -67,33 +67,44 @@ def complies_to_level(edtf_object, level=None):
     return True
 
 
-def is_parseable(val, level=None):
-
-    if level is not None and type(level) != int:
-        raise TypeError("level must be of type int.")
-
-    try:
-        if type(val) != str:
-            raise TypeError(
-                "Values passed to expect_column_values_to_be_edtf_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
-            )
-
-        parsed = edtf.parse_edtf(val)
-        return complies_to_level(parsed, level)
-
-    except (ValueError, OverflowError):
-        return False
-
-
 class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
     condition_metric_name = "column_values.edtf_parseable"
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, level=None, **kwargs):
+        def is_parseable(val):
+            try:
+                if type(val) != str:
+                    raise TypeError(
+                        "Values passed to expect_column_values_to_be_edtf_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
+                    )
+
+                return complies_to_level(val, level)
+
+            except (ValueError, OverflowError):
+                return False
+
+        if level is not None and type(level) != int:
+            raise TypeError("level must be of type int.")
+
         return column.map(is_parseable)
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, **kwargs):
+    def _spark(cls, column, level=None, **kwargs):
+        def is_parseable(val):
+            try:
+                if type(val) != str:
+                    raise TypeError(
+                        "Values passed to expect_column_values_to_be_edtf_parseable must be of type string.\nIf you want to validate a column of dates or timestamps, please call the expectation before converting from string format."
+                    )
+
+                return complies_to_level(val, level)
+
+            except (ValueError, OverflowError):
+                return False
+
+        if level is not None and type(level) != int:
+            raise TypeError("level must be of type int.")
 
         is_parseable_udf = F.udf(is_parseable, sparktypes.BooleanType())
         return is_parseable_udf(column)
