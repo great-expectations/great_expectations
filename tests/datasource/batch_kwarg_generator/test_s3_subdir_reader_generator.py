@@ -78,7 +78,7 @@ def s3_subdir_generator(mock_s3_bucket, basic_sparkdf_datasource):
         )
         yield generator
     except ValueError as e:
-        pytest.skip(e)
+        pytest.skip(str(e))
 
 
 @pytest.mark.skipif(
