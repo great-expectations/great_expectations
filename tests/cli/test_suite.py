@@ -674,7 +674,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     mock_subprocess,
     caplog,
     monkeypatch,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
     Here we verify that the "suite edit" command helps the user to specify batch_request
@@ -693,7 +693,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     - NOT open Data Docs
     - open jupyter
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -726,7 +726,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
             "--interactive",
             "--no-jupyter",
         ],
-        input="1\n1\n1\n\n",
+        input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -764,7 +764,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
             f"{expectation_suite_name}",
             "--interactive",
         ],
-        input="1\n1\n1\n\n",
+        input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
 
@@ -825,7 +825,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations(
     mock_subprocess,
     caplog,
     monkeypatch,
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
     Here we verify that the "suite edit" command uses the batch_request found in
@@ -841,7 +841,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations(
     - NOT open Data Docs
     - NOT open jupyter
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -875,7 +875,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations(
             "--interactive",
             "--no-jupyter",
         ],
-        input="1\n1\n1\n\n",
+        input="2\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

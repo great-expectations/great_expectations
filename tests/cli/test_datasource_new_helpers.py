@@ -577,9 +577,8 @@ def test_check_if_datasource_name_exists(
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert [d["name"] for d in context.list_datasources()] == [
         "my_datasource",
-        "my_runtime_sql_datasource",
     ]
-    assert len(context.list_datasources()) == 2
+    assert len(context.list_datasources()) == 1
 
     # Exists
     assert check_if_datasource_name_exists(
