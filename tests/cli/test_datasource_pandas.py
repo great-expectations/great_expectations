@@ -48,9 +48,12 @@ def test_cli_datasource_list_on_project_with_one_datasource(
     )
 
     expected_output = f"""Using v3 (Batch Request) API\x1b[0m
-1 Datasource found:[0m
+2 Datasources found:[0m
 [0m
  - [36mname:[0m my_datasource[0m
+   [36mclass_name:[0m Datasource[0m
+[0m
+ - [36mname:[0m my_runtime_sql_datasource[0m
    [36mclass_name:[0m Datasource[0m
 """.strip()
     stdout = result.stdout.strip()
@@ -298,7 +301,7 @@ def test_cli_datasource_delete_on_project_with_one_datasource(
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert "my_datasource" in [ds["name"] for ds in context.list_datasources()]
-    assert len(context.list_datasources()) == 1
+    assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -318,7 +321,7 @@ def test_cli_datasource_delete_on_project_with_one_datasource(
     root_directory = context.root_directory
     del context
     context = DataContext(root_directory)
-    assert len(context.list_datasources()) == 0
+    assert len(context.list_datasources()) == 1
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -329,7 +332,7 @@ def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert "my_datasource" in [ds["name"] for ds in context.list_datasources()]
-    assert len(context.list_datasources()) == 1
+    assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -353,7 +356,7 @@ def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
     root_directory = context.root_directory
     del context
     context = DataContext(root_directory)
-    assert len(context.list_datasources()) == 0
+    assert len(context.list_datasources()) == 1
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -364,7 +367,7 @@ def test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_d
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert "my_datasource" in [ds["name"] for ds in context.list_datasources()]
-    assert len(context.list_datasources()) == 1
+    assert len(context.list_datasources()) == 2
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -384,7 +387,7 @@ def test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_d
     root_directory = context.root_directory
     del context
     context = DataContext(root_directory)
-    assert len(context.list_datasources()) == 1
+    assert len(context.list_datasources()) == 2
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 

@@ -24,7 +24,7 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_datacon
 ):
     context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     context.delete_datasource("my_datasource")
-    assert len(context.list_datasources()) == 0
+    assert len(context.list_datasources()) == 1
     context.add_datasource(
         "aaa_datasource",
         class_name="Datasource",
@@ -34,7 +34,7 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_datacon
             "module_name": "great_expectations.execution_engine",
         },
     )
-    assert len(context.list_datasources()) == 1
+    assert len(context.list_datasources()) == 2
 
     renderer = CheckpointNewNotebookRenderer(context, "foo")
     obs = renderer._find_datasource_with_asset()
