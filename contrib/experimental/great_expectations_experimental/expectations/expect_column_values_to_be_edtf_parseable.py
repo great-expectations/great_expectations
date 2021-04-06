@@ -1,7 +1,12 @@
 import json
 from typing import Optional
 
-import edtf
+from edtf_validate.valid_edtf import (
+    is_valid,
+    conformsLevel0,
+    conformsLevel1,
+    conformsLevel2,
+)
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -26,45 +31,15 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 
+def complies_to_level(value, level=None):
+    if level == 0:
+        return conformsLevel0(value)
+    elif level == 1:
+        return conformsLevel1(value)
+    elif level == 2:
+        return conformsLevel2(value)
 
-def complies_to_level(edtf_object, level=None):
-    parsed_level = None
-    # Level 0
-    if isinstance(edtf_object, (edtf.Date, edtf.DateAndTime, edtf.Interval)):
-        parsed_level = 0
-
-    # Level 1
-    elif isinstance(
-        edtf_object,
-        (
-            edtf.UncertainOrApproximate,
-            edtf.Unspecified,
-            edtf.Level1Interval,
-            edtf.LongYear,
-            edtf.Season,
-        ),
-    ):
-        parsed_level = 1
-
-    # Level 2
-    elif isinstance(
-        edtf_object,
-        (
-            edtf.PartialUncertainOrApproximate,
-            edtf.PartialUnspecified,
-            edtf.OneOfASet,
-            edtf.MultipleDates,
-            edtf.MaskedPrecision,
-            edtf.Level2Interval,
-            edtf.ExponentialYear,
-        ),
-    ):
-        parsed_level = 2
-
-    if parsed_level is not None and level is not None and level <= 2:
-        return parsed_level <= level
-
-    return True
+    return is_valid(value)
 
 
 class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
@@ -366,7 +341,7 @@ class ExpectColumnValuesToBeEdtfParseable(ColumnMapExpectation):
         "tags": ["edtf", "datetime", "glam"],
         "contributors": ["@mielvds"],
         "package": "experimental_expectations",
-        "requirements": ["edtf"],
+        "requirements": ["edtf_validate"],
     }
 
     map_metric = "column_values.edtf_parsable"
