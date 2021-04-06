@@ -28,7 +28,7 @@ def test_sparkdfdataset_persist(spark_session):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 @pytest.fixture
@@ -117,7 +117,7 @@ def test_dataframe(spark_session):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
@@ -140,7 +140,7 @@ def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
@@ -163,7 +163,7 @@ def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_column_values_to_be_in_type_list(spark_session, test_dataframe):
@@ -186,7 +186,7 @@ def test_expect_column_values_to_be_in_type_list(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_column_pair_values_to_be_equal(spark_session, test_dataframe):
@@ -211,7 +211,7 @@ def test_expect_column_pair_values_to_be_equal(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_column_pair_values_A_to_be_greater_than_B(
@@ -229,7 +229,7 @@ def test_expect_column_pair_values_A_to_be_greater_than_B(
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_select_column_values_to_be_unique_within_record(
@@ -258,7 +258,7 @@ def test_expect_select_column_values_to_be_unique_within_record(
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_compound_columns_to_be_unique(spark_session, test_dataframe):
@@ -320,7 +320,7 @@ def test_expect_compound_columns_to_be_unique(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_column_values_to_be_unique(spark_session, test_dataframe):
@@ -339,7 +339,7 @@ def test_expect_column_values_to_be_unique(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_column_value_lengths_to_be_between(spark_session, test_dataframe):
@@ -355,7 +355,7 @@ def test_expect_column_value_lengths_to_be_between(spark_session, test_dataframe
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_column_value_lengths_to_equal(spark_session, test_dataframe):
@@ -369,7 +369,7 @@ def test_expect_column_value_lengths_to_equal(spark_session, test_dataframe):
 
 
 @pytest.mark.skipif(
-    is_library_loadable(library_name="s3fs"),
+    is_library_loadable(library_name="pyspark"),
     reason="pyspark must not be installed",
 )
 def test_expect_column_values_to_be_json_parseable(spark_session):
