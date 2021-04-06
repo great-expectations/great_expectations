@@ -817,7 +817,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
 
 
 def test_notebook_execution_with_pandas_backend(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
     To set this test up we:
@@ -837,7 +837,7 @@ def test_notebook_execution_with_pandas_backend(
     # Since we'll run the notebook, we use a context with no data docs to avoid
     # the renderer's default behavior of building and opening docs, which is not
     # part of this test.
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
     expectation_suite_name: str = "warning"
@@ -866,7 +866,9 @@ def test_notebook_execution_with_pandas_backend(
     assert context.list_expectation_suite_names() == [expectation_suite_name]
     assert context.list_datasources() == [
         {
+            "name": "my_datasource",
             "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
             "execution_engine": {
                 "class_name": "PandasExecutionEngine",
                 "module_name": "great_expectations.execution_engine",
@@ -916,25 +918,26 @@ def test_notebook_execution_with_pandas_backend(
                     "class_name": "RuntimeDataConnector",
                 },
             },
-            "module_name": "great_expectations.datasource",
-            "name": "my_datasource",
         },
         {
+            "name": "my_additional_datasource",
             "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
             "execution_engine": {
-                "class_name": "SqlAlchemyExecutionEngine",
                 "module_name": "great_expectations.execution_engine",
-                "connection_string": f"sqlite:///{root_dir}/../data/titanic/test_cases_for_sql_data_connector.db",
+                "class_name": "PandasExecutionEngine",
             },
             "data_connectors": {
-                "my_runtime_data_connector": {
+                "my_additional_data_connector": {
                     "module_name": "great_expectations.datasource.data_connector",
-                    "batch_identifiers": ["pipeline_stage_name", "airflow_run_id"],
-                    "class_name": "RuntimeDataConnector",
-                },
+                    "default_regex": {
+                        "pattern": "(.*)\\.csv",
+                        "group_names": ["data_asset_name"],
+                    },
+                    "base_directory": f"{root_dir}/../data/titanic",
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                }
             },
-            "module_name": "great_expectations.datasource",
-            "name": "my_runtime_sql_datasource",
         },
     ]
 
