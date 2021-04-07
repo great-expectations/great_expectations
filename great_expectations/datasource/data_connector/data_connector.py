@@ -1,5 +1,6 @@
 import logging
 import random
+from copy import deepcopy
 from typing import Any, List, Optional, Tuple
 
 from great_expectations.core.batch import (
@@ -123,7 +124,7 @@ class DataConnector:
             )
         )
         # batch_spec_passthrough via Data Connector config
-        batch_spec_passthrough: dict = self.batch_spec_passthrough
+        batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
 
         # batch_spec_passthrough from batch_definition supercedes batch_spec_passthrough from Data Connector config
         if isinstance(batch_definition.batch_spec_passthrough, dict):
