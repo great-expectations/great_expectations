@@ -5,11 +5,6 @@ How to configure a BigQuery Datasource
 
 This guide will help you add a BigQuery project (or a dataset) as a Datasource. This will allow you to validate tables and queries within this project. When you use a BigQuery Datasource, the validation is done in BigQuery itself. Your data is not downloaded.
 
-.. admonition:: Prerequisites: This how-to guide assumes you have already:
-
-  - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
-  - Followed the `Google Cloud library guide <https://googleapis.dev/python/google-api-core/latest/auth.html>`_ for authentication
-  - Installed the ``pybigquery`` package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
 
 Steps
 -----
@@ -18,6 +13,12 @@ Steps
 
     .. tab-container:: tab0
         :title: Show Docs for V2 (Batch Kwargs) API
+
+        .. admonition:: Prerequisites: This how-to guide assumes you have already:
+
+          - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
+          - Followed the `Google Cloud library guide <https://googleapis.dev/python/google-api-core/latest/auth.html>`_ for authentication
+          - Installed the ``pybigquery`` package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
 
 
         1. Run the following CLI command to begin the interactive Datasource creation process:
@@ -69,18 +70,24 @@ Steps
             - Installed the ``pybigquery`` package for the BigQuery sqlalchemy dialect (``pip install pybigquery``)
 
 
-        #. **Instantiate a Data Context.**
+        1. Run the following CLI command to begin the interactive Datasource creation process:
 
-            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
+            .. code-block:: bash
 
-            .. code-block:: python
+                great_expectations --v3-api datasource new
 
-                import great_expectations as ge
-                context = ge.get_context()
+        2. Choose "Big Query" from the list of database engines, when prompted.
 
-        #.  **Create or copy a yaml config.**
+        3. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.  Great Expectations uses a ``connection_string`` to connect to BigQuery through SQLAlchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
+Additional Notes
+----------------
+
+        Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
+
+        **BigQuery SimpleSqlalchemyDatasource Example**
+
+        3a.  Here is a simple example configuration. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.  Great Expectations uses a ``connection_string`` to connect to BigQuery through SQLAlchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
 
 
                 .. code-block:: python
@@ -98,13 +105,11 @@ Steps
             **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 
-        #. **Run context.test_yaml_config.**
+        3b. Test your config using ``context.test_yaml_config``.
 
             .. code-block:: python
 
-                context.test_yaml_config(
-                    yaml_config=config
-                )
+                context.test_yaml_config(yaml_config=config)
 
             When executed, ``test_yaml_config`` will instantiate the component and run through a ``self_check`` procedure to verify that the component works as expected.
 
@@ -126,10 +131,10 @@ Steps
                     Unmatched data_references (0 of 0): []
 
 
-            This means all has gone well and you can proceed with configuring your new Datasource.             If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
 
-        #. **Save the config.**
+        3c. **Save the config.**
             Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
             .. code-block:: python
@@ -140,9 +145,6 @@ Steps
 
             **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
 
-
-Additional notes
-----------------
 
 Environment variables can be used to store the SQLAlchemy URL instead of the file, if preferred - search documentation for "Managing Environment and Secrets".
 
