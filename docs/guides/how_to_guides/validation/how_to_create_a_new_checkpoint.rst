@@ -40,7 +40,7 @@ Steps
 
 
     .. tab-container:: tab1
-        :title: Checkpoints (>=0.13.8)
+        :title: Checkpoints (>=0.13.12)
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
