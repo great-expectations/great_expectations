@@ -8,7 +8,7 @@ This guide will help you create Expectations that span multiple :ref:`Batches <r
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -141,7 +141,7 @@ This guide will help you create Expectations that span multiple :ref:`Batches <r
                 In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the `Great Expectations discussion forum <https://discuss.great_expectations.io>`_ and `Slack channel <https://great_expectations.io/slack>`_.
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 

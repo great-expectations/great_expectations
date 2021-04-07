@@ -59,12 +59,15 @@ data_connectors:
     )
 
     report = my_data_connector.self_check()
-    print(json.dumps(report, indent=4))
+    # print(json.dumps(report, indent=4))
 
     report["execution_engine"].pop("connection_string")
 
     assert report == {
-        "execution_engine": {"class_name": "SqlAlchemyExecutionEngine"},
+        "execution_engine": {
+            "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
+            "class_name": "SqlAlchemyExecutionEngine",
+        },
         "data_connectors": {
             "count": 1,
             "my_sqlite_db": {
@@ -83,18 +86,20 @@ data_connectors:
                 },
                 "unmatched_data_reference_count": 0,
                 "example_unmatched_data_references": [],
-                "example_data_reference": {
-                    "batch_spec": {
-                        "table_name": "table_partitioned_by_date_column__A",
-                        "partition_definition": {"date": "2020-01"},
-                        "splitter_method": "_split_on_converted_datetime",
-                        "splitter_kwargs": {
-                            "column_name": "date",
-                            "date_format_string": "%Y-%W",
-                        },
-                    },
-                    "n_rows": 24,
-                },
+                # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+                # "example_data_reference": {
+                #     "batch_spec": {
+                #         "table_name": "table_partitioned_by_date_column__A",
+                #         "data_asset_name": "table_partitioned_by_date_column__A",
+                #         "batch_identifiers": {"date": "2020-01"},
+                #         "splitter_method": "_split_on_converted_datetime",
+                #         "splitter_kwargs": {
+                #             "column_name": "date",
+                #             "date_format_string": "%Y-%W",
+                #         },
+                #     },
+                #     "n_rows": 24,
+                # },
             },
         },
     }
@@ -697,13 +702,16 @@ def test_basic_instantiation_of_InferredAssetSqlDataConnector(
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {
-            "batch_spec": {
-                "table_name": "main.table_containing_id_spacers_for_D",
-                "partition_definition": {},
-            },
-            "n_rows": 30,
-        },
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {
+        #     "batch_spec": {
+        #         "schema_name": "main",
+        #         "table_name": "table_containing_id_spacers_for_D",
+        #         "data_asset_name": "prexif__table_containing_id_spacers_for_D__xiffus",
+        #         "batch_identifiers": {},
+        #     },
+        #     "n_rows": 30,
+        # },
     }
 
     assert my_data_connector.get_available_data_asset_names() == [
@@ -782,13 +790,16 @@ def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
             "main.table_full__I__whole",
             "main.table_partitioned_by_date_column__A__whole",
         ],
-        "example_data_reference": {
-            "batch_spec": {
-                "partition_definition": {},
-                "table_name": "main.table_containing_id_spacers_for_D",
-            },
-            "n_rows": 30,
-        },
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {
+        #     "batch_spec": {
+        #         "batch_identifiers": {},
+        #         "schema_name": "main",
+        #         "table_name": "table_containing_id_spacers_for_D",
+        #         "data_asset_name": "main.table_containing_id_spacers_for_D__whole",
+        #     },
+        #     "n_rows": 30,
+        # },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
     }

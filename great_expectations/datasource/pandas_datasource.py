@@ -9,10 +9,11 @@ from io import BytesIO
 import pandas as pd
 
 from great_expectations.core.batch import Batch, BatchMarkers
-from great_expectations.datasource.util import S3Url, hash_pandas_dataframe
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.types import ClassConfig
 
+from ..core.util import S3Url
+from ..execution_engine.pandas_execution_engine import hash_pandas_dataframe
 from ..types.configurations import classConfigSchema
 from .datasource import LegacyDatasource
 
@@ -248,7 +249,7 @@ class PandasDatasource(LegacyDatasource):
 
         else:
             raise BatchKwargsError(
-                "Invalid batch_kwargs: path, s3, or df is required for a PandasDatasource",
+                "Invalid batch_kwargs: path, s3, or dataset is required for a PandasDatasource",
                 batch_kwargs,
             )
 
@@ -299,9 +300,13 @@ class PandasDatasource(LegacyDatasource):
         Returns:
             dict: A copy of the reader options post-inference
         """
-        if reader_fn.__name__ == "read_parquet":
+        while isinstance(reader_fn, partial):
+            # reader_fn might be partial so need to unwrap to get underlying method
+            reader_fn = reader_fn.func
+        name = reader_fn.__name__
+        if name == "read_parquet":
             return {}
-        if reader_fn.__name__ == "read_excel":
+        if name == "read_excel":
             return {}
         else:
             return {"encoding": "utf-8"}

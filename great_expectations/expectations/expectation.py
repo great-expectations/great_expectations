@@ -5,7 +5,9 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Dict, List, Optional, Tuple
+
+import pandas as pd
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -28,15 +30,14 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.self_check_util import (
+from great_expectations.expectations.util import legacy_method_parameters
+from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
-from great_expectations.expectations.util import legacy_method_parameters
 from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update
-from ..data_asset.util import recursively_convert_to_json_serializable
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..render.renderer.renderer import renderer
 from ..render.types import (
@@ -45,6 +46,7 @@ from ..render.types import (
     RenderedTableContent,
 )
 from ..render.util import num_to_str
+from ..util import is_parseable_date
 from ..validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -68,7 +70,7 @@ class MetaExpectation(ABCMeta):
 
     def __new__(cls, clsname, bases, attrs):
         newclass = super().__new__(cls, clsname, bases, attrs)
-        if not isabstract(newclass):
+        if not newclass.is_abstract():
             newclass.expectation_type = camel_to_snake(clsname)
             register_expectation(newclass)
         newclass._register_renderer_functions()
@@ -83,7 +85,7 @@ class MetaExpectation(ABCMeta):
         return newclass
 
 
-class Expectation(ABC, metaclass=MetaExpectation):
+class Expectation(metaclass=MetaExpectation):
     """Base class for all Expectations.
 
     Expectation classes *must* have the following attributes set:
@@ -138,6 +140,10 @@ class Expectation(ABC, metaclass=MetaExpectation):
         self._configuration = configuration
 
     @classmethod
+    def is_abstract(cls):
+        return isabstract(cls)
+
+    @classmethod
     def _register_renderer_functions(cls):
         expectation_type = camel_to_snake(cls.__name__)
 
@@ -148,15 +154,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
             register_renderer(
                 object_name=expectation_type, parent_class=cls, renderer_fn=attr_obj
             )
-
-    @abstractmethod
-    def get_validation_dependencies(
-        self,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
-    ):
-        raise NotImplementedError
 
     @abstractmethod
     def _validate(
@@ -497,15 +494,6 @@ class Expectation(ABC, metaclass=MetaExpectation):
     def get_allowed_config_keys(cls):
         return cls.domain_keys + cls.success_keys + cls.runtime_keys
 
-    def _validate(
-        self,
-        configuration: ExpectationConfiguration,
-        metrics: Dict[str, Any],
-        runtime_configuration: Dict,
-        execution_engine: ExecutionEngine,
-    ):
-        raise NotImplementedError
-
     def metrics_validate(
         self,
         metrics: Dict,
@@ -762,7 +750,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
         if gallery_examples != []:
             example_data, example_test = self._choose_example(gallery_examples)
 
-            test_batch = Batch(data=example_data)
+            # TODO: this should be creating a Batch using an engine
+            test_batch = Batch(data=pd.DataFrame(example_data))
 
             expectation_config = ExpectationConfiguration(
                 **{"expectation_type": snake_name, "kwargs": example_test}
@@ -804,15 +793,20 @@ class Expectation(ABC, metaclass=MetaExpectation):
                 )
                 report_obj.update({"execution_engines": execution_engines})
 
-            tests = self._get_examples(return_only_gallery_examples=False)
-            if len(tests) > 0:
-                if execution_engines is not None:
-                    test_results = self._get_test_results(
-                        snake_name,
-                        tests,
-                        execution_engines,
-                    )
-                    report_obj.update({"test_report": test_results})
+            try:
+                tests = self._get_examples(return_only_gallery_examples=False)
+                if len(tests) > 0:
+                    if execution_engines is not None:
+                        test_results = self._get_test_results(
+                            snake_name,
+                            tests,
+                            execution_engines,
+                        )
+                        report_obj.update({"test_report": test_results})
+            except Exception as e:
+                report_obj = self._add_error_to_diagnostics_report(
+                    report_obj, e, traceback.format_exc()
+                )
 
         return report_obj
 
@@ -924,7 +918,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
                     {
                         "test title": exp_test["test"]["title"],
                         "backend": exp_test["backend"],
-                        "success": "true",
+                        "test_passed": "true",
                     }
                 )
             except Exception as e:
@@ -932,7 +926,7 @@ class Expectation(ABC, metaclass=MetaExpectation):
                     {
                         "test title": exp_test["test"]["title"],
                         "backend": exp_test["backend"],
-                        "success": "false",
+                        "test_passed": "false",
                         "error_message": str(e),
                         "stack_trace": traceback.format_exc(),
                     }
@@ -959,7 +953,8 @@ class Expectation(ABC, metaclass=MetaExpectation):
             return rendered_result.__str__()
 
         else:
-            print(type(rendered_result))
+            pass
+            # print(type(rendered_result))
 
     def _get_renderer_dict(
         self,
@@ -1081,6 +1076,7 @@ class TableExpectation(Expectation, ABC):
         # Validating that Minimum and Maximum values are of the proper format and type
         min_val = None
         max_val = None
+        parse_strings_as_datetimes = None
 
         if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
@@ -1088,25 +1084,38 @@ class TableExpectation(Expectation, ABC):
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
 
+        if "parse_strings_as_datetimes" in configuration.kwargs:
+            parse_strings_as_datetimes = configuration.kwargs[
+                "parse_strings_as_datetimes"
+            ]
+
         try:
             # Ensuring Proper interval has been provided
-            assert min_val is None or isinstance(
-                min_val, (float, int, dict)
-            ), "Provided min threshold must be a number"
-            if isinstance(min_val, dict):
+            if parse_strings_as_datetimes:
+                assert min_val is None or is_parseable_date(
+                    min_val
+                ), "Provided min threshold must be a dateutil-parseable date"
                 assert (
-                    "$PARAMETER" in min_val
-                ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
+                    max_val is None or is_parseable_date(max_val),
+                ), "Provided max threshold must be a dateutil-parseable date"
+            else:
+                assert min_val is None or isinstance(
+                    min_val, (float, int, dict)
+                ), "Provided min threshold must be a number"
+                if isinstance(min_val, dict):
+                    assert (
+                        "$PARAMETER" in min_val
+                    ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
 
-            assert max_val is None or isinstance(
-                max_val, (float, int, dict)
-            ), "Provided max threshold must be a number"
-            if isinstance(max_val, dict):
-                assert "$PARAMETER" in max_val, (
-                    "Evaluation Parameter dict for max_value "
-                    "kwarg "
-                    'must have "$PARAMETER" key'
-                )
+                assert max_val is None or isinstance(
+                    max_val, (float, int, dict)
+                ), "Provided max threshold must be a number"
+                if isinstance(max_val, dict):
+                    assert "$PARAMETER" in max_val, (
+                        "Evaluation Parameter dict for max_value "
+                        "kwarg "
+                        'must have "$PARAMETER" key'
+                    )
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -1185,6 +1194,10 @@ class ColumnMapExpectation(TableExpectation, ABC):
         "include_config": True,
         "catch_exceptions": True,
     }
+
+    @classmethod
+    def is_abstract(cls):
+        return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if not super().validate_configuration(configuration):
@@ -1378,6 +1391,10 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "include_config": True,
         "catch_exceptions": True,
     }
+
+    @classmethod
+    def is_abstract(cls):
+        return cls.map_metric is None or super().is_abstract()
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if not super().validate_configuration(configuration):
@@ -1590,7 +1607,7 @@ def _format_map_output(
         missing_count = element_count - nonnull_count
 
     if element_count > 0:
-        unexpected_percent = unexpected_count / element_count * 100
+        unexpected_percent_total = unexpected_count / element_count * 100
 
         if not skip_missing:
             missing_percent = missing_count / element_count * 100
@@ -1598,16 +1615,18 @@ def _format_map_output(
                 unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
             else:
                 unexpected_percent_nonmissing = None
+        else:
+            unexpected_percent_nonmissing = unexpected_percent_total
 
     else:
         missing_percent = None
-        unexpected_percent = None
+        unexpected_percent_total = None
         unexpected_percent_nonmissing = None
 
     return_obj["result"] = {
         "element_count": element_count,
         "unexpected_count": unexpected_count,
-        "unexpected_percent": unexpected_percent,
+        "unexpected_percent": unexpected_percent_nonmissing,
         "partial_unexpected_list": unexpected_list[
             : result_format["partial_unexpected_count"]
         ],
@@ -1616,6 +1635,7 @@ def _format_map_output(
     if not skip_missing:
         return_obj["result"]["missing_count"] = missing_count
         return_obj["result"]["missing_percent"] = missing_percent
+        return_obj["result"]["unexpected_percent_total"] = unexpected_percent_total
         return_obj["result"][
             "unexpected_percent_nonmissing"
         ] = unexpected_percent_nonmissing

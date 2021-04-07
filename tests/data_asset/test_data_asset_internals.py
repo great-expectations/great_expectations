@@ -30,6 +30,8 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         "y", [1, 2, 4], catch_exceptions=True, include_config=True
     )
     df.expect_column_values_to_match_regex("z", "ello")
+    df.expect_compound_columns_to_be_unique(column_list=["x", "y"])
+    df.expect_compound_columns_to_be_unique(column_list=["y", "z"])
 
     ### First test set ###
 
@@ -42,6 +44,14 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_match_regex",
                 kwargs={"column": "z", "regex": "ello"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["x", "y"]},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["y", "z"]},
             ),
         ],
         expectation_suite_name="default",
@@ -71,6 +81,14 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
             ExpectationConfiguration(
                 expectation_type="expect_column_values_to_match_regex",
                 kwargs={"column": "z", "regex": "ello"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["x", "y"]},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["y", "z"]},
             ),
         ],
         expectation_suite_name="default",
@@ -102,6 +120,14 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
                 expectation_type="expect_column_values_to_match_regex",
                 kwargs={"column": "z", "regex": "ello", "result_format": "BASIC"},
             ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["x", "y"], "result_format": "BASIC"},
+            ),
+            ExpectationConfiguration(
+                expectation_type="expect_compound_columns_to_be_unique",
+                kwargs={"column_list": ["y", "z"], "result_format": "BASIC"},
+            ),
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
@@ -112,7 +138,6 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         discard_include_config_kwargs=False,
         discard_catch_exceptions_kwargs=False,
     )
-
     df.save_expectation_suite(
         directory_name + "/temp3.json",
         discard_result_format_kwargs=False,
@@ -301,35 +326,6 @@ def test_test_column_aggregate_expectation_function():
     )
 
 
-def test_meta_version_warning():
-    asset = ge.data_asset.DataAsset()
-
-    with pytest.warns(UserWarning) as w:
-        suite = ExpectationSuite(expectations=[], expectation_suite_name="test")
-        # mangle the metadata
-        suite.meta = {"foo": "bar"}
-        out = asset.validate(expectation_suite=suite)
-    assert (
-        w[0].message.args[0]
-        == "WARNING: No great_expectations version found in configuration object."
-    )
-
-    with pytest.warns(UserWarning) as w:
-        suite = ExpectationSuite(
-            expectations=[],
-            expectation_suite_name="test",
-            meta={"great_expectations_version": "0.0.0"},
-        )
-        # mangle the metadata
-        suite.meta = {"great_expectations_version": "0.0.0"}
-        out = asset.validate(expectation_suite=suite)
-    assert (
-        w[0].message.args[0]
-        == "WARNING: This configuration object was built using version 0.0.0 of great_expectations, but is currently "
-        "being validated by version %s." % ge.__version__
-    )
-
-
 def test_format_map_output():
     df = ge.dataset.PandasDataset(
         {
@@ -378,6 +374,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
+            "unexpected_percent_total": 0.0,
             "unexpected_percent_nonmissing": 0.0,
         },
     }
@@ -399,6 +396,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
+            "unexpected_percent_total": 0.0,
             "unexpected_percent_nonmissing": 0.0,
             "partial_unexpected_index_list": [],
             "partial_unexpected_counts": [],
@@ -422,6 +420,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": 0.0,
+            "unexpected_percent_total": 0.0,
             "unexpected_percent_nonmissing": 0.0,
             "partial_unexpected_index_list": [],
             "partial_unexpected_counts": [],
@@ -470,7 +469,8 @@ def test_format_map_output():
             "missing_percent": 100,
             "partial_unexpected_list": [],
             "unexpected_count": 0,
-            "unexpected_percent": 0.0,
+            "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
         },
     }
@@ -491,7 +491,8 @@ def test_format_map_output():
             "missing_percent": 100,
             "partial_unexpected_list": [],
             "unexpected_count": 0,
-            "unexpected_percent": 0.0,
+            "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
             "partial_unexpected_index_list": [],
             "partial_unexpected_counts": [],
@@ -514,7 +515,8 @@ def test_format_map_output():
             "missing_percent": 100,
             "partial_unexpected_list": [],
             "unexpected_count": 0,
-            "unexpected_percent": 0.0,
+            "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
             "partial_unexpected_index_list": [],
             "partial_unexpected_counts": [],
@@ -564,6 +566,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
         },
     }
@@ -585,6 +588,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
             "partial_unexpected_counts": [],
             "partial_unexpected_index_list": [],
@@ -608,6 +612,7 @@ def test_format_map_output():
             "partial_unexpected_list": [],
             "unexpected_count": 0,
             "unexpected_percent": None,
+            "unexpected_percent_total": None,
             "unexpected_percent_nonmissing": None,
             "partial_unexpected_counts": [],
             "partial_unexpected_index_list": [],

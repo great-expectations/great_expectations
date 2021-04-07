@@ -4,9 +4,147 @@
 Changelog
 #########
 
-
 Develop
 -----------------
+* [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
+* [ENHANCEMENT] V3 API CLI docs commands have better error messages and more consistent short flags
+* [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
+* [DOCS] Update Configuring Datasources documentation for V3 API CLI
+
+0.13.17
+-----------------
+* [BREAKING-EXPERIMENTAL] The ``batch_data`` attribute of ``BatchRequest`` has been removed. To pass in in-memory dataframes at runtime, the new ``RuntimeDataConnector`` should be used
+* [BREAKING-EXPERIMENTAL] ``RuntimeDataConnector`` must now be passed Batch Requests of type ``RuntimeBatchRequest``
+* [BREAKING-EXPERIMENTAL] The ``PartitionDefinitionSubset`` class has been removed - the parent class ``IDDict`` is used in its place
+* [BREAKING-EXPERIMENTAL] ``partition_request`` was renamed ``data_connector_query``. The related ``PartitionRequest`` class has been removed - the parent class ``IDDict`` is used in its place
+* [BREAKING-EXPERIMENTAL] ``partition_definition`` was renamed ``batch_identifiers`. The related ``PartitionDefinition`` class has been removed - the parent class ``IDDict`` is used in its place
+* [BREAKING-EXPERIMENTAL] The ``PartitionQuery`` class has been renamed to ``BatchFilter``
+* [BREAKING-EXPERIMENTAL] The ``batch_identifiers`` key on ``DataConnectorQuery`` (formerly ``PartitionRequest``) has been changed to ``batch_filter_parameters``
+* [ENHANCEMENT] Added a new ``RuntimeBatchRequest`` class, which can be used alongside ``RuntimeDataConnector`` to specify batches at runtime with either an in-memory dataframe, path (filesystem or s3), or sql query
+* [ENHANCEMENT] Added a new ``RuntimeQueryBatchSpec`` class
+* [ENHANCEMENT] CLI store list now lists active stores
+* [BUGFIX] Fixed issue where Sorters were not being applied correctly when ``data_connector_query`` contained limit or index  #2617
+* [DOCS] Updated docs to reflect above class name changes
+* [DOCS] Added the following docs: "How to configure sorting in Data Connectors", "How to configure a Runtime Data Connector", "How to create a Batch Request using an Active Data Connector", "How to load a database table, view, or query result as a Batch"
+* [DOCS] Updated the V3 API section of the following docs: "How to load a Pandas DataFrame as a Batch", "How to load a Spark DataFrame as a Batch",
+
+
+0.13.16
+-----------------
+* [ENHANCEMENT] CLI `docs list` command implemented for v3 api #2612
+* [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource #2613
+* [ENHANCEMENT] CLI `docs build` command implemented for v3 api #2614
+* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api #2615
+* [ENHANCEMENT] DataContext.clean_data_docs now raises helpful errors #2621
+* [ENHANCEMENT] CLI `init` command implemented for v3 api #2626
+* [ENHANCEMENT] CLI `store list` command implemented for v3 api #2627
+
+0.13.15
+-----------------
+* [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
+* [ENHANCEMENT] Datasource CLI functionality for v3 api and global --assume-yes flag #2590
+* [ENHANCEMENT] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
+* [ENHANCEMENT] Adding tqdm to Profiler (Thanks @peterdhansen). New library in requirements.txt
+* [ENHANCEMENT][MAINTENANCE] Use Metrics to Protect Against Wrong Column Names
+* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
+* [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
+* [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
+* [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource (Thanks @xaniasd)
+* [BUGFIX] pandas partial read_ functions not being unwrapped (Thanks @luke321321)
+* [BUGFIX] Don't stop SparkContext when running in Databricks (#2587) (Thanks @jarandaf)
+
+0.13.14
+-----------------
+* [BUGFIX] Use temporary paths in tests #2545
+* [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
+* [ENHANCEMENT] Restore cli functionality for legacy checkpoints #2511
+* [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend #2513 (thanks @benoitLebreton-perso)
+* [BUGFIX] force azure to set content_type='text/html' if the file is HTML #2539 (thanks @benoitLebreton-perso)
+* [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 in requirements-dev-sqlalchemy.txt #2547
+* [DOCS] Fix documentation links generated within template #2542 (thanks @thejasraju)
+* [MAINTENANCE] Remove deprecated automerge config #2492
+
+0.13.13
+-----------------
+* [ENHANCEMENT] Improve support for median calculation in Athena (Thanks @kuhnen!) #2521
+* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfiler #2519
+* [MAINTENANCE] Add support for spark 3 based spark_config #2481
+
+0.13.12
+-----------------
+
+* [FEATURE] Added EmailAction as a new Validation Action (Thanks @Cedric-Magnan!) #2479
+* [ENHANCEMENT] CLI global options and checkpoint functionality for v3 api #2497
+* [DOCS] Renamed the "old" and the "new" APIs to "V2 (Batch Kwargs) API" and "V3 (Batch Request) API" and added an article with recommendations for choosing between them
+
+0.13.11
+-----------------
+* [FEATURE] Add "table.head" metric
+* [FEATURE] Add support for BatchData as a core GE concept for all Execution Engines. #2395
+ * NOTE: As part of our improvements to the underlying Batch API, we have refactored BatchSpec to be part of the "core" package in Great Expectations, consistent with its role coordinating communication about Batches between the Datasource and Execution Engine abstractions.
+* [ENHANCEMENT] Explicit support for schema_name in the SqlAlchemyBatchData #2465. Issue #2340
+* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API #2224
+* [ENHANCEMENT] Evaluation parameter runtime values rendering in data docs if arithmetic is present #2447. Issue #2215
+* [ENHANCEMENT] When connecting to new Datasource, CLI prompt is consistent with rest of GE #2434
+* [ENHANCEMENT] Adds basic test for bad s3 paths generated from regex #2427 (Thanks @lukedyer-peak!)
+* [ENHANCEMENT] Updated UserConfigurableProfiler date parsing error handling #2459
+* [ENHANCEMENT] Clarification of self_check error messages #2304
+* [ENHANCEMENT] Allows gzipped files and other encodings to be read from S3 #2440 (Thanks @luke321321!)
+* [BUGFIX] `expect_column_unique_value_count_to_be_between` renderer bug (duplicate "Distinct (%)") #2455. Issue #2423
+* [BUGFIX] Fix S3 Test issue by pinning `moto` version < 2.0.0 #2470
+* [BUGFIX] Check for datetime-parseable strings in validate_metric_value_between_configuration #2419. Issue #2340 (Thanks @victorwyee!)
+* [BUGFIX] `expect_compound_columns_to_be_unique` ExpectationConfig added #2471 Issue #2464
+* [BUGFIX] In basic profiler, handle date parsing and overflow exceptions separately #2431 (Thanks @peterdhansen!)
+* [BUGFIX] Fix sqlalchemy column comparisons when comparison was done between different datatypes #2443 (Thanks @peterdhansen!)
+* [BUGFIX] Fix divide by zero error in expect_compound_columns_to_be_unique #2454 (Thanks @jdimatteo!)
+* [DOCS] added how-to guide for user configurable profiler #2452
+* [DOCS] Linked videos and minor documentation addition #2388
+* [DOCS] Modifying getting started tutorial content to work with 0.13.8+ #2418
+* [DOCS] add case studies to header in docs #2430
+* [MAINTENANCE] Updates to Azure pipeline configurations #2462
+* [MAINTENANCE] Allowing the tests to run with Docker-in-Windows #2402 (Thanks @Patechoc!)
+* [MAINTENANCE] Add support for automatically building expectations gallery metadata #2386
+
+
+0.13.10
+-----------------
+* [ENHANCEMENT] Optimize tests #2421
+* [ENHANCEMENT] Add docstring for _invert_regex_to_data_reference_template #2428
+* [ENHANCEMENT] Added expectation to check if data is in alphabetical ordering #2407 (Thanks @sethdmay!)
+* [BUGFIX] Fixed a broken docs link #2433
+* [BUGFIX] Missing `markown_text.j2` jinja template #2422
+* [BUGFIX] parse_strings_as_datetimes error with user_configurable_profiler #2429
+* [BUGFIX] Update `suite edit` and `suite scaffold` notebook renderers to output functional validation cells #2432
+* [DOCS] Update how_to_create_custom_expectations_for_pandas.rst #2426 (Thanks @henriquejsfj!)
+* [DOCS] Correct regex escape for data connectors #2425 (Thanks @lukedyer-peak!)
+* [CONTRIB] Expectation: Matches benfords law with 80 percent confidence interval test #2406 (Thanks @vinodkri1!)
+
+
+0.13.9
+-----------------
+* [FEATURE] Add TupleAzureBlobStoreBackend (thanks @syahdeini) #1975
+* [FEATURE] Add get_metrics interface to Modular Expectations Validator API
+* [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for #1691 to @mgorsk1!) #2371
+* [ENHANCEMENT] Removed the logic that prints the "This configuration object was built using version..." warning when current version of Great Expectations is not the same as the one used to build the suite, since it was not actionable #2366
+* [ENHANCEMENT] Update Validator with more informative error message
+* [BUGFIX] Ensure that batch_spec_passthrough is handled correctly by properly refactoring build_batch_spec and _generate_batch_spec_parameters_from_batch_definition for all DataConnector classes
+* [BUGFIX] Display correct unexpected_percent in DataDocs - corrects the result object from map expectations to return the same "unexpected_percent" as is used to evaluate success (excluding null values from the denominator). The old value is now returned in a key called "unexpected_percent_total" (thanks @mlondschien) #1875
+* [BUGFIX] Add python=3.7 argument to conda env creation (thanks @scouvreur!) #2391
+* [BUGFIX] Fix issue with temporary table creation in MySQL #2389
+* [BUGFIX] Remove duplicate code in data_context.store.tuple_store_backend (Thanks @vanderGoes)
+* [BUGFIX] Fix issue where WarningAndFailureExpectationSuitesValidationOperator failing when warning suite fails
+* [DOCS] Update How to instantiate a Data Context on Databricks Spark cluster for 0.13+ #2379
+* [DOCS] How to load a Pandas DataFrame as a Batch #2327
+* [DOCS] Added annotations for Expectations not yet ported to the new Modular Expectations API.
+* [DOCS] How to load a Spark DataFrame as a Batch #2385
+* [MAINTENANCE] Add checkpoint store to store backend defaults #2378
+
+
+0.13.8
+-----------------
+* [FEATURE] New implementation of Checkpoints that uses dedicated CheckpointStore (based on the new ConfigurationStore mechanism) #2311, #2338
+* [BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract #2334
+* [BUGFIX] DataContext with multiple DataSources no longer scans all configurations #2250
 
 
 0.13.7
@@ -123,7 +261,6 @@ varundunga!)
 * BREAKING: **Renamed** Datasource to LegacyDatasource and introduced the new Datasource class. Because most installations rely on one PandasDatasource, SqlAlchemyDatasource, or SparkDFDatasource, most users will not be affected. However, if you have implemented highly customized Datasource class inheriting from the base class, you may need to update your inheritance.
 * BREAKING: The new Modular Expectations API will begin removing the ``parse_strings_as_datetimes`` and ``allow_cross_type_comparisons`` flags in expectations. Expectation Suites that use the flags will need to be updated to use the new Modular Expectations. In general, simply removing the flag will produce correct behavior; if you still want the exact same semantics, you should ensure your raw data already has typed datetime objects.
 * **NOTE:** Both the new Datasource API and the new Modular Expectations API are *experimental* and will change somewhat during the next several point releases. We are extremely excited for your feedback while we iterate rapidly, and continue to welcome new community contributions.
-
 
 0.12.10
 -----------------

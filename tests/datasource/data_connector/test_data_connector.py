@@ -1,15 +1,12 @@
 # TODO: <Alex>This module should be broken up -- please see suggestions below.</Alex>
-import json
-import os
-
-import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
-    PartitionDefinition,
+    BatchRequestBase,
+    IDDict,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
@@ -115,11 +112,8 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
         assets={"stuff": {}},
     )
 
-    with pytest.raises(ValueError):
-        my_data_connector.get_data_reference_list_count()
-
-    with pytest.raises(ValueError):
-        my_data_connector.get_unmatched_data_references()
+    assert my_data_connector.get_data_reference_list_count() == 0
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
@@ -167,7 +161,7 @@ def test__batch_definition_matches_batch_request():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {
                 "id": "A",
             }
@@ -175,56 +169,49 @@ def test__batch_definition_matches_batch_request():
     )
 
     assert batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequest(datasource_name="A")
+        batch_definition=A, batch_request=BatchRequestBase(datasource_name="A")
     )
 
     assert not batch_definition_matches_batch_request(
-        batch_definition=A, batch_request=BatchRequest(datasource_name="B")
+        batch_definition=A, batch_request=BatchRequestBase(datasource_name="B")
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
-            datasource_name="A",
-            data_connector_name="a",
-        ),
+        batch_request=BatchRequestBase(datasource_name="A", data_connector_name="a"),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
-            datasource_name="A",
-            data_connector_name="a",
-            data_asset_name="aaa",
+        batch_request=BatchRequestBase(
+            datasource_name="A", data_connector_name="a", data_asset_name="aaa"
         ),
     )
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
-            datasource_name="A",
-            data_connector_name="a",
-            data_asset_name="bbb",
+        batch_request=BatchRequestBase(
+            datasource_name="A", data_connector_name="a", data_asset_name="bbb"
         ),
     )
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
+        batch_request=BatchRequestBase(
             datasource_name="A",
             data_connector_name="a",
             data_asset_name="aaa",
-            partition_request={
-                "partition_identifiers": {"id": "B"},
+            data_connector_query={
+                "batch_filter_parameters": {"id": "B"},
             },
         ),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
-        batch_request=BatchRequest(
-            partition_request={
-                "partition_identifiers": {"id": "A"},
+        batch_request=BatchRequestBase(
+            data_connector_query={
+                "batch_filter_parameters": {"id": "A"},
             }
         ),
     )
@@ -235,7 +222,7 @@ def test__batch_definition_matches_batch_request():
                 "datasource_name": "FAKE_DATASOURCE",
                 "data_connector_name": "TEST_DATA_CONNECTOR",
                 "data_asset_name": "DEFAULT_ASSET_NAME",
-                "partition_definition": PartitionDefinition({"index": "3"}),
+                "batch_identifiers": IDDict({"index": "3"}),
             }
         ),
         batch_request=BatchRequest(
@@ -243,7 +230,7 @@ def test__batch_definition_matches_batch_request():
                 "datasource_name": "FAKE_DATASOURCE",
                 "data_connector_name": "TEST_DATA_CONNECTOR",
                 "data_asset_name": "DEFAULT_ASSET_NAME",
-                "partition_request": None,
+                "data_connector_query": None,
             }
         ),
     )
@@ -277,11 +264,12 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_PandasExecuti
     )
     self_check_results = my_data_connector.self_check()
     assert self_check_results["data_asset_count"] == 3
-    assert self_check_results["example_data_reference"]["n_rows"] == 2
+    # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+    # assert self_check_results["example_data_reference"]["n_rows"] == 2
 
 
 def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecutionEngine(
-    spark_session, tmp_path_factory
+    spark_session, basic_spark_df_execution_engine, tmp_path_factory
 ):
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -301,7 +289,7 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
         base_directory=base_directory,
         glob_directive="*.csv",
         datasource_name="FAKE_DATASOURCE",
-        execution_engine=SparkDFExecutionEngine(),
+        execution_engine=basic_spark_df_execution_engine,
         default_regex={
             "pattern": "(.+)_(\\d+)_(\\d+)\\.csv",
             "group_names": ["data_asset_name", "timestamp", "size"],
@@ -309,4 +297,5 @@ def test_for_self_check_using_InferredAssetFilesystemDataConnector_SparkDFExecut
     )
     self_check_results = my_data_connector.self_check()
     assert self_check_results["data_asset_count"] == 3
-    assert self_check_results["example_data_reference"]["n_rows"] == 3
+    # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+    # assert self_check_results["example_data_reference"]["n_rows"] == 3

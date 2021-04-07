@@ -133,6 +133,15 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 
     """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     map_metric = "column_values.of_type"
     success_keys = (
         "type_",
@@ -311,13 +320,17 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        # this calls TableExpectation.get_validation_dependencies to set baseline dependencies
-        # for the aggregate version of the expectation
+        # This calls TableExpectation.get_validation_dependencies to set baseline dependencies for the aggregate version
+        # of the expectation.
+        # We need to keep this as super(ColumnMapExpectation, self), which calls
+        # TableExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
+        # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
+        # version for the other backends.
         dependencies = super(ColumnMapExpectation, self).get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
 
-        # only PandasExecutionEngine supports the column map version of the expectation
+        # Only PandasExecutionEngine supports the column map version of the expectation.
         if isinstance(execution_engine, PandasExecutionEngine):
             column_name = configuration.kwargs.get("column")
             expected_type = configuration.kwargs.get("type_")
@@ -415,7 +428,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
 def _get_dialect_type_module(
     execution_engine,
 ):
-    if execution_engine.dialect is None:
+    if execution_engine.dialect_module is None:
         logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
@@ -423,10 +436,10 @@ def _get_dialect_type_module(
     try:
         # Redshift does not (yet) export types to top level; only recognize base SA types
         if isinstance(
-            execution_engine.sql_engine_dialect,
+            execution_engine.dialect_module,
             sqlalchemy_redshift.dialect.RedshiftDialect,
         ):
-            return execution_engine.dialect.sa
+            return execution_engine.dialect_module.sa
     except (TypeError, AttributeError):
         pass
 
@@ -434,7 +447,7 @@ def _get_dialect_type_module(
     try:
         if (
             isinstance(
-                execution_engine.sql_engine_dialect,
+                execution_engine.dialect_module,
                 pybigquery.sqlalchemy_bigquery.BigQueryDialect,
             )
             and bigquery_types_tuple is not None
@@ -443,7 +456,7 @@ def _get_dialect_type_module(
     except (TypeError, AttributeError):
         pass
 
-    return execution_engine.dialect
+    return execution_engine.dialect_module
 
 
 def _native_type_type_map(type_):

@@ -2,12 +2,13 @@ try:
     from unittest import mock
 except ImportError:
     from unittest import mock
+
 import pandas as pd
 import pytest
 
 from great_expectations.dataset import MetaSqlAlchemyDataset, SqlAlchemyDataset
+from great_expectations.self_check.util import get_dataset
 from great_expectations.util import is_library_loadable
-from tests.test_utils import get_dataset
 
 
 @pytest.fixture
@@ -347,3 +348,21 @@ def test_expect_compound_columns_to_be_unique(sa):
     assert dataset.expect_compound_columns_to_be_unique(
         ["col1", "col2", "col4"]
     ).success
+
+
+def test_expect_compound_columns_to_be_unique_with_no_rows(sa):
+    engine = sa.create_engine("sqlite://")
+
+    data = pd.DataFrame(
+        {
+            "col1": [],
+            "col2": [],
+            "col3": [],
+            "col4": [],
+        }
+    )
+
+    data.to_sql(name="test_sql_data", con=engine, index=False)
+    dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
+
+    assert dataset.expect_compound_columns_to_be_unique(["col1", "col2"]).success

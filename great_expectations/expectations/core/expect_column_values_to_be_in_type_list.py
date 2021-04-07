@@ -43,8 +43,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """
     Expect a column to contain values from a specified type list.
 
-    expect_column_values_to_be_in_type_list is a :func:`column_aggregate_expectation \
-    <great_expectations.dataset.dataset.MetaDataset.column_aggregate_expectation>` for typed-column backends,
+    expect_column_values_to_be_in_type_list is a \
+    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
+    .column_map_expectation>` for typed-column backends,
     and also for PandasDataset where the column dtype provides an unambiguous constraints (any dtype except
     'object'). For PandasDataset columns with dtype of 'object' expect_column_values_to_be_of_type is a
     :func:`column_map_expectation <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>` and will
@@ -90,6 +91,15 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         :func:`expect_column_values_to_be_of_type \
         <great_expectations.dataset.dataset.Dataset.expect_column_values_to_be_of_type>`
     """
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column map expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
 
     map_metric = "column_values.in_type_list"
 
@@ -219,6 +229,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             for type_ in expected_types_list:
                 try:
                     comp_types.append(np.dtype(type_).type)
+                    comp_types.append(np.dtype(type_))
                 except TypeError:
                     try:
                         pd_type = getattr(pd, type_)
@@ -310,13 +321,17 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        # this calls TableExpectation.get_validation_dependencies to set baseline dependencies
-        # for the aggregate version of the expectation
+        # This calls TableExpectation.get_validation_dependencies to set baseline dependencies for the aggregate version
+        # of the expectation.
+        # We need to keep this as super(ColumnMapExpectation, self), which calls
+        # TableExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
+        # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
+        # version for the other backends.
         dependencies = super(ColumnMapExpectation, self).get_validation_dependencies(
             configuration, execution_engine, runtime_configuration
         )
 
-        # only PandasExecutionEngine supports the column map version of the expectation
+        # Only PandasExecutionEngine supports the column map version of the expectation.
         if isinstance(execution_engine, PandasExecutionEngine):
             column_name = configuration.kwargs.get("column")
             expected_types_list = configuration.kwargs.get("type_list")

@@ -6,15 +6,16 @@ import string
 
 import pandas as pd
 import pytest
-from pandas import DataFrame as pandas_DataFrame
 
-try:
-    from pyspark.sql import DataFrame as spark_DataFrame
-except ImportError:
-    spark_DataFrame = type(None)
-
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.self_check.util import (
+    candidate_test_is_on_temporary_notimplemented_list_cfe,
+    evaluate_json_test_cfe,
+    get_test_validator_with_data,
 )
 from tests.conftest import build_test_backends_list_cfe
 from tests.test_definitions.test_expectations import mssqlDialect as mssqlDialect
@@ -24,10 +25,6 @@ from tests.test_definitions.test_expectations import (
 )
 from tests.test_definitions.test_expectations import sqliteDialect as sqliteDialect
 from tests.test_definitions.test_expectations import tmp_dir
-from tests.test_utils import evaluate_json_test_cfe, get_test_validator_with_data
-from tests.test_utils_modular import (
-    candidate_test_is_on_temporary_notimplemented_list_cfe,
-)
 
 
 def pytest_generate_tests(metafunc):
@@ -149,7 +146,7 @@ def pytest_generate_tests(metafunc):
                                     generate_test = True
                             elif validator_with_data and isinstance(
                                 validator_with_data.execution_engine.active_batch_data,
-                                pandas_DataFrame,
+                                PandasBatchData,
                             ):
                                 if "pandas" in test["only_for"]:
                                     generate_test = True
@@ -164,7 +161,7 @@ def pytest_generate_tests(metafunc):
                                     generate_test = True
                             elif validator_with_data and isinstance(
                                 validator_with_data.execution_engine.active_batch_data,
-                                spark_DataFrame,
+                                SparkDFBatchData,
                             ):
                                 if "spark" in test["only_for"]:
                                     generate_test = True
@@ -238,7 +235,7 @@ def pytest_generate_tests(metafunc):
                                 and validator_with_data
                                 and isinstance(
                                     validator_with_data.execution_engine.active_batch_data,
-                                    pandas_DataFrame,
+                                    PandasBatchData,
                                 )
                             )
                             or (
@@ -246,7 +243,7 @@ def pytest_generate_tests(metafunc):
                                 and validator_with_data
                                 and isinstance(
                                     validator_with_data.execution_engine.active_batch_data,
-                                    spark_DataFrame,
+                                    SparkDFBatchData,
                                 )
                             )
                         ):
@@ -282,10 +279,10 @@ def pytest_generate_tests(metafunc):
                             + ":"
                             + test["title"]
                         )
-
     metafunc.parametrize("test_case", parametrized_tests, ids=ids)
 
 
+@pytest.mark.order(index=0)
 def test_case_runner_cfe(test_case):
     if test_case["skip"]:
         pytest.skip()

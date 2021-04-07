@@ -176,6 +176,7 @@ class DefaultJinjaView:
         content_block_type = content_block.get("content_block_type")
         if content_block_type is None:
             return content_block
+
         if render_to_markdown:
             template_filename = f"markdown_{content_block_type}.j2"
         else:
@@ -480,6 +481,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         Handle list as well as single document
         """
         if isinstance(document, list):
+            # We need to keep this as super(DefaultMarkdownPageView, self); otherwise a wrong render will be called.
             return [
                 super(DefaultMarkdownPageView, self).render(
                     document=d, template=template, **kwargs
@@ -504,6 +506,11 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         if not isinstance(template, (dict, OrderedDict)):
             return template
 
+        # replace and render any horizontal lines using ***
+        tag = template.get("tag", None)
+        if tag and tag == "hr":
+            template["template"] = "***"
+
         # if there are any groupings of two or more $, we need to double the groupings to account
         # for template string substitution escaping
         template["template"] = re.sub(
@@ -523,6 +530,11 @@ class DefaultMarkdownPageView(DefaultJinjaView):
         for parameter in template["params"].keys():
             if parameter == "html_success_icon":
                 template["params"][parameter] = ""
+                continue
+            # to escape any values that are '*' which, when combined with bold ('**') in markdown,
+            # does not give the output we want.
+            elif template["params"][parameter] == "*":
+                template["params"][parameter] = "\\*"
                 continue
 
             template["params"][parameter] = pTemplate(

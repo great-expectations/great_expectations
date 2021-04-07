@@ -11,12 +11,11 @@ import great_expectations.exceptions.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
-    PartitionDefinition,
-    PartitionRequest,
+    BatchRequestBase,
+    IDDict,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
 
@@ -71,7 +70,8 @@ def test_basic_instantiation():
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
     # noinspection PyProtectedMember
@@ -149,7 +149,8 @@ def test_instantiation_from_a_config(empty_data_context):
         },
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -212,7 +213,8 @@ assets:
             "alpha-3.csv",
         ],
         "unmatched_data_reference_count": 3,
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
 
 
@@ -275,9 +277,19 @@ def test_return_all_batch_definitions_unsorted():
         my_data_connector.get_batch_definition_list_from_batch_request()
 
     # with unnamed data_asset_name
-    unsorted_batch_definition_list = (
+    with pytest.raises(TypeError):
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_s3_data_connector",
+                data_asset_name=None,
+            )
+        )
+
+    # with unnamed data_asset_name
+    unsorted_batch_definition_list = (
+        my_data_connector._get_batch_definition_list_from_batch_request(
+            BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_s3_data_connector",
                 data_asset_name=None,
@@ -289,7 +301,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
@@ -297,7 +309,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
@@ -305,7 +317,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
@@ -313,7 +325,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
@@ -321,7 +333,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
@@ -329,7 +341,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
@@ -337,7 +349,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
@@ -345,7 +357,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
@@ -353,7 +365,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
@@ -361,7 +373,7 @@ def test_return_all_batch_definitions_unsorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
@@ -470,7 +482,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
         ),
@@ -478,7 +490,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
         ),
@@ -486,7 +498,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
         ),
@@ -494,7 +506,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
         ),
@@ -502,7 +514,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
         ),
@@ -510,7 +522,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
         ),
@@ -518,7 +530,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
         ),
@@ -526,7 +538,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
         ),
@@ -534,7 +546,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
         ),
@@ -542,7 +554,7 @@ def test_return_all_batch_definitions_sorted():
             datasource_name="test_environment",
             data_connector_name="general_s3_data_connector",
             data_asset_name="TestFiles",
-            partition_definition=PartitionDefinition(
+            batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
         ),
@@ -555,9 +567,9 @@ def test_return_all_batch_definitions_sorted():
         datasource_name="test_environment",
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
-        partition_request=PartitionRequest(
+        data_connector_query=IDDict(
             **{
-                "partition_identifiers": {
+                "batch_filter_parameters": {
                     "name": "james",
                     "timestamp": "20200713",
                     "price": "1567",
@@ -582,7 +594,7 @@ def test_return_all_batch_definitions_sorted():
         datasource_name="test_environment",
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             **{
                 "name": "james",
                 "timestamp": "20200713",
@@ -592,12 +604,12 @@ def test_return_all_batch_definitions_sorted():
     )
     assert my_batch_definition == expected_batch_definition
 
-    # TEST 3: Without partition request, should return all 10
+    # TEST 3: Without data_connector_query, should return all 10
     my_batch_request: BatchRequest = BatchRequest(
         datasource_name="test_environment",
         data_connector_name="general_s3_data_connector",
         data_asset_name="TestFiles",
-        partition_request=None,
+        data_connector_query=None,
     )
     # should return 10
     my_batch_definition_list = (
@@ -668,7 +680,7 @@ def test_alpha():
         datasource_name="BASE",
         data_connector_name="general_s3_data_connector",
         data_asset_name="B",
-        partition_request=None,
+        data_connector_query=None,
     )
 
     my_batch_definition_list = (
@@ -682,9 +694,7 @@ def test_alpha():
         datasource_name="BASE",
         data_connector_name="general_s3_data_connector",
         data_asset_name="A",
-        partition_request=PartitionRequest(
-            **{"partition_identifiers": {"part_1": "B"}}
-        ),
+        data_connector_query=IDDict(**{"batch_filter_parameters": {"part_1": "B"}}),
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -793,7 +803,8 @@ def test_foxtrot():
         },
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
-        "example_data_reference": {},
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {},
     }
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -801,7 +812,7 @@ def test_foxtrot():
         datasource_name="BASE",
         data_connector_name="general_s3_data_connector",
         data_asset_name="A",
-        partition_request=None,
+        data_connector_query=None,
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -1022,6 +1033,7 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="alpha",
                 )
@@ -1034,6 +1046,7 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="beta",
                 )
@@ -1046,6 +1059,7 @@ assets:
         len(
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
+                    datasource_name="FAKE_DATASOURCE_NAME",
                     data_connector_name="my_data_connector",
                     data_asset_name="gamma",
                 )

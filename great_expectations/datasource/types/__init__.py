@@ -1,15 +1,13 @@
 import enum
 
 from .batch_kwargs import *
-from .batch_spec import *
 
 
 # noinspection SpellCheckingInspection
 class DatasourceTypes(enum.Enum):
     PANDAS = "pandas"
     SPARK = "spark"
-    SQL = "sql"
-    # TODO DBT = "dbt"
+    SQL = "sqlalchemy"
 
 
 # noinspection SpellCheckingInspection

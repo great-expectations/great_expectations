@@ -10,7 +10,7 @@ can use for configuration.
 
     - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - :ref:`Understand the basics of Datasources in 0.13 or later <reference__core_concepts__datasources>`
-    - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+    - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Great Expectations provides two types of ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
 but also S3 object stores, etc:
@@ -43,7 +43,7 @@ All of the examples below assume you’re testing configurations using something
     """)
 
 
-If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure Data Context components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Choose a DataConnector
 ----------------------
@@ -65,19 +65,18 @@ The simplest approach would be to consider each file to be its own DataAsset.  I
 
 .. code-block:: yaml
 
-    my_data_source:
-      class_name: Datasource
-      execution_engine:
-        class_name: PandasExecutionEngine
-      data_connectors:
-        my_filesystem_data_connector:
-          class_name: InferredAssetFilesystemDataConnector
-          datasource_name: my_data_source
-          base_directory: my_directory/
-          default_regex:
-            group_names:
-              - data_asset_name
-            pattern: (.*)\.csv
+  class_name: Datasource
+  execution_engine:
+    class_name: PandasExecutionEngine
+  data_connectors:
+    my_filesystem_data_connector:
+      class_name: InferredAssetFilesystemDataConnector
+      datasource_name: my_data_source
+      base_directory: my_directory/
+      default_regex:
+        group_names:
+          - data_asset_name
+        pattern: (.*)\.csv
 
 Notice that the ``default_regex`` is configured to have one capture group (``(.*)``) which captures the entire filename. That capture group is assigned to ``data_asset_name`` under ``group_names``.
 Running ``test_yaml_config()`` would result in 3 DataAssets : ``alpha-2020-01-01``, ``alpha-2020-01-02`` and ``alpha-2020-01-03``.
@@ -90,22 +89,21 @@ We could treat ``alpha-*.csv`` files as batches within the ``alpha`` DataAsset w
 
 .. code-block:: yaml
 
-    my_data_source:
-      class_name: Datasource
-      execution_engine:
-        class_name: PandasExecutionEngine
-      data_connectors:
-        my_filesystem_data_connector:
-          class_name: InferredAssetFilesystemDataConnector
-          datasource_name: my_data_source
-          base_directory: my_directory/
-          default_regex:
-            group_names:
-              - data_asset_name
-              - year
-              - month
-              - day
-            pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
+  class_name: Datasource
+  execution_engine:
+    class_name: PandasExecutionEngine
+  data_connectors:
+    my_filesystem_data_connector:
+      class_name: InferredAssetFilesystemDataConnector
+      datasource_name: my_data_source
+      base_directory: my_directory/
+      default_regex:
+        group_names:
+          - data_asset_name
+          - year
+          - month
+          - day
+        pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
 
 Running ``test_yaml_config()`` would result in 1 DataAsset ``alpha`` with 3 associated data_references: ``alpha-2020-01-01.csv``, ``alpha-2020-01-02.csv`` and ``alpha-2020-01-03.csv``, seen also in Example 1 below.
 
@@ -113,23 +111,22 @@ A corresponding configuration for ``InferredAssetS3DataConnector`` would look si
 
 .. code-block:: yaml
 
-    my_data_source:
-      class_name: Datasource
-      execution_engine:
-        class_name: PandasExecutionEngine
-      data_connectors:
-        my_filesystem_data_connector:
-          class_name: InferredAssetS3DataConnector
-          datasource_name: my_data_source
-          bucket: MY_S3_BUCKET
-          prefix: MY_S3_BUCKET_PREFIX
-          default_regex:
-            group_names:
-              - data_asset_name
-              - year
-              - month
-              - day
-            pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
+  class_name: Datasource
+  execution_engine:
+    class_name: PandasExecutionEngine
+  data_connectors:
+    my_filesystem_data_connector:
+      class_name: InferredAssetS3DataConnector
+      datasource_name: my_data_source
+      bucket: MY_S3_BUCKET
+      prefix: MY_S3_BUCKET_PREFIX
+      default_regex:
+        group_names:
+          - data_asset_name
+          - year
+          - month
+          - day
+        pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
 
 The following examples will show scenarios that InferredAssetDataConnectors can help you analyze, using ``InferredAssetFilesystemDataConnector`` as an example and only show the configuration under ``data_connectors`` for simplicity.
 
@@ -150,16 +147,15 @@ Then this configuration...
 
 .. code-block:: yaml
 
-    my_filesystem_data_connector
-      class_name: InferredAssetFilesystemDataConnector
-      base_directory: my_directory/
-      default_regex:
-        group_names:
-          - data_asset_name
-          - year
-          - month
-          - day
-        pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
+  class_name: InferredAssetFilesystemDataConnector
+  base_directory: my_directory/
+  default_regex:
+    group_names:
+      - data_asset_name
+      - year
+      - month
+      - day
+    pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
 
 ...will make available the following data_references:
 
@@ -174,7 +170,7 @@ Then this configuration...
 
     Unmatched data_references (0 of 0): []
 
-Once configured, you can get ``Validators`` from the ``DataContext`` as follows:
+Once configured, you can get ``Validators`` from the ``Data Context`` as follows:
 
 .. code-block:: python
 
@@ -206,16 +202,15 @@ The same configuration as Example 1...
 
 .. code-block:: yaml
 
-    my_filesystem_data_connector
-      class_name: InferredAssetFilesystemDataConnector
-      base_directory: test_data/
-      default_regex:
-        group_names:
-          - data_asset_name
-          - year
-          - month
-          - day
-      pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
+  class_name: InferredAssetFilesystemDataConnector
+  base_directory: test_data/
+  default_regex:
+    group_names:
+      - data_asset_name
+      - year
+      - month
+      - day
+  pattern: (.*)-(\d{4})-(\d{2})-(\d{2})\.csv
 
 ...will now make ``alpha`` and ``beta`` both available a DataAssets, with the following data_references:
 
@@ -256,16 +251,15 @@ Then this configuration...
 
 .. code-block:: yaml
 
-    my_filesystem_data_connector
-      class_name: InferredAssetFilesystemDataConnector
-      base_directory: my_directory/
-      default_regex:
-        group_names:
-          - year
-          - month
-          - day
-          - data_asset_name
-        pattern: (\d{4})/(\d{2})/(\d{2})/(.*)\.csv
+  class_name: InferredAssetFilesystemDataConnector
+  base_directory: my_directory/
+  default_regex:
+    group_names:
+      - year
+      - month
+      - day
+      - data_asset_name
+    pattern: (\d{4})/(\d{2})/(\d{2})/(.*)\.csv
 
 ...will now make ``alpha`` and ``beta`` both available a DataAssets, with the following data_references:
 
@@ -310,16 +304,15 @@ Then this configuration...
 
 .. code-block:: yaml
 
-    my_filesystem_data_connector
-      class_name: InferredAssetFilesystemDataConnector
-      base_directory: /
+  class_name: InferredAssetFilesystemDataConnector
+  base_directory: /
 
-      default_regex:
-        group_names:
-          - data_asset_name
-          - letter
-          - number
-        pattern: (\w{1})/(\w{1})-(\d{1})\.csv
+  default_regex:
+    group_names:
+      - data_asset_name
+      - letter
+      - number
+    pattern: (\w{1})/(\w{1})-(\d{1})\.csv
 
 
 ...will now make ``A`` and ``B`` and ``C`` into data_assets, with each containing 3 data_references
@@ -360,17 +353,16 @@ Here’s a configuration that will allow all the log files in the bucket to be a
 
 .. code-block:: yaml
 
-    my_filesystem_data_connector
-      class_name: InferredAssetFilesystemDataConnector
-      base_directory: /
+  class_name: InferredAssetFilesystemDataConnector
+  base_directory: /
 
-      default_regex:
-        group_names:
-          - year
-          - month
-          - day
-          - data_asset_name
-        pattern: (\w{11})/(\d{4})/(\d{2})/(\d{2})/log_file-.*\.csv
+  default_regex:
+    group_names:
+      - year
+      - month
+      - day
+      - data_asset_name
+    pattern: (\w{11})/(\d{4})/(\d{2})/(\d{2})/log_file-.*\.csv
 
 
 All the log files will be mapped to a single data_asset named ``my_bucket``.
@@ -408,17 +400,16 @@ Here’s a configuration that will allow all the log files to be associated with
 
 .. code-block:: yaml
 
-    my_filesystem_data_connector
-      class_name: InferredAssetFilesystemDataConnector
-      base_directory: /
+  class_name: InferredAssetFilesystemDataConnector
+  base_directory: /
 
-      default_regex:
-        group_names:
-          - year
-          - month
-          - day
-          - data_asset_name
-        pattern: (\d{4})/(\d{2})/(\d{2})/(log_file)-.*\.txt\.gz
+  default_regex:
+    group_names:
+      - year
+      - month
+      - day
+      - data_asset_name
+    pattern: (\d{4})/(\d{2})/(\d{2})/(log_file)-.*\.txt\.gz
 
 ... will give you the following output
 
@@ -454,18 +445,16 @@ Here’s a configuration that will allow all the log files to be associated with
 
 .. code-block:: yaml
 
-    my_filesystem_data_connector
+  class_name: InferredAssetFilesystemDataConnector
+  base_directory: /
 
-      class_name: InferredAssetFilesystemDataConnector
-      base_directory: /
-
-      default_regex:
-        group_names:
-          - data_asset_name
-          - year
-          - month
-          - day
-        pattern: (log_file)-(\d{4})-(\d{2})-(\d{2})-.*\.*\.txt\.gz
+  default_regex:
+    group_names:
+      - data_asset_name
+      - year
+      - month
+      - day
+    pattern: (log_file)-(\d{4})-(\d{2})-(\d{2})-.*\.*\.txt\.gz
 
 All the log files will be mapped to the data_asset ``log_file``.
 

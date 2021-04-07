@@ -10,7 +10,7 @@ attrs==19.3.0
 autoapi==2.0.1
 Babel==2.8.0
 backcall==0.2.0
-bleach==3.1.5
+bleach==3.3.0
 certifi==2020.6.20
 cffi==1.14.1
 chardet==3.0.4
@@ -29,7 +29,7 @@ ipython==7.17.0
 ipython-genutils==0.2.0
 ipywidgets==7.5.1
 jedi==0.17.2
-Jinja2==2.11.2
+Jinja2==2.11.3
 jsonpatch==1.26
 jsonpointer==2.0
 jsonschema==3.2.0

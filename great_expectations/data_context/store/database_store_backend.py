@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.util import filter_properties_dict
 
 try:
     import sqlalchemy as sa
@@ -122,6 +123,25 @@ class DatabaseStoreBackend(StoreBackend):
         # Initialize with store_backend_id
         self._store_backend_id = None
         self._store_backend_id = self.store_backend_id
+
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = {
+            "table_name": table_name,
+            "key_columns": key_columns,
+            "fixed_length_key": fixed_length_key,
+            "credentials": credentials,
+            "url": url,
+            "connection_string": connection_string,
+            "engine": engine,
+            "store_name": store_name,
+            "suppress_store_backend_id": suppress_store_backend_id,
+            "manually_initialize_store_backend_id": manually_initialize_store_backend_id,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
+        self._config.update(kwargs)
+        filter_properties_dict(properties=self._config, inplace=True)
 
     @property
     def store_backend_id(self) -> str:
@@ -331,5 +351,9 @@ class DatabaseStoreBackend(StoreBackend):
             raise ge_exceptions.StoreBackendError(
                 f"Unable to delete key: got sqlalchemy error {str(e)}"
             )
+
+    @property
+    def config(self) -> dict:
+        return self._config
 
     _move = None

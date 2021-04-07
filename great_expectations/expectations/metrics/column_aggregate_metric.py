@@ -1,7 +1,9 @@
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, Tuple, Type
+from typing import Any, Callable, Dict, Optional, Type
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
@@ -19,6 +21,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     metric_value,
 )
 from great_expectations.expectations.metrics.table_metric import TableMetricProvider
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +30,7 @@ def column_aggregate_value(
     engine: Type[ExecutionEngine],
     metric_fn_type="value",
     domain_type="column",
-    **kwargs
+    **kwargs,
 ):
     """Return the column aggregate metric decorator for the specified engine.
 
@@ -49,10 +52,10 @@ def column_aggregate_value(
             @wraps(metric_fn)
             def inner_func(
                 cls,
-                execution_engine: "PandasExecutionEngine",
+                execution_engine: PandasExecutionEngine,
                 metric_domain_kwargs: Dict,
                 metric_value_kwargs: Dict,
-                metrics: Dict[Tuple, Any],
+                metrics: Dict[str, Any],
                 runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
@@ -62,11 +65,20 @@ def column_aggregate_value(
                 df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
+
+                column_name = accessor_domain_kwargs["column"]
+
+                if column_name not in metrics["table.columns"]:
+                    raise ge_exceptions.ExecutionEngineError(
+                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                    )
+
                 if filter_column_isnull:
-                    df = df[df[accessor_domain_kwargs["column"]].notnull()]
+                    df = df[df[column_name].notnull()]
+
                 return metric_fn(
                     cls,
-                    column=df[accessor_domain_kwargs["column"]],
+                    column=df[column_name],
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
@@ -103,10 +115,10 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
             @wraps(metric_fn)
             def inner_func(
                 cls,
-                execution_engine: "SqlAlchemyExecutionEngine",
+                execution_engine: SqlAlchemyExecutionEngine,
                 metric_domain_kwargs: Dict,
                 metric_value_kwargs: Dict,
-                metrics: Dict[Tuple, Any],
+                metrics: Dict[str, Any],
                 runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
@@ -126,8 +138,16 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 ) = execution_engine.get_compute_domain(
                     compute_domain_kwargs, domain_type=domain_type
                 )
-                column_name = accessor_domain_kwargs["column"]
-                sqlalchemy_engine = execution_engine.engine
+
+                column_name: str = accessor_domain_kwargs["column"]
+
+                sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
+
+                if column_name not in metrics["table.columns"]:
+                    raise ge_exceptions.ExecutionEngineError(
+                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                    )
+
                 dialect = sqlalchemy_engine.dialect
                 metric_aggregate = metric_fn(
                     cls,
@@ -156,10 +176,10 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
             @wraps(metric_fn)
             def inner_func(
                 cls,
-                execution_engine: "SparkDFExecutionEngine",
+                execution_engine: SparkDFExecutionEngine,
                 metric_domain_kwargs: Dict,
                 metric_value_kwargs: Dict,
-                metrics: Dict[Tuple, Any],
+                metrics: Dict[str, Any],
                 runtime_configuration: Dict,
             ):
                 filter_column_isnull = kwargs.get(
@@ -181,10 +201,18 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 ) = execution_engine.get_compute_domain(
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
+
                 column_name = accessor_domain_kwargs["column"]
+
+                if column_name not in metrics["table.columns"]:
+                    raise ge_exceptions.ExecutionEngineError(
+                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
+                    )
+
+                column = data[column_name]
                 metric_aggregate = metric_fn(
                     cls,
-                    column=data[column_name],
+                    column=column,
                     **metric_value_kwargs,
                     _table=data,
                     _column_name=column_name,
@@ -209,3 +237,30 @@ class ColumnMetricProvider(TableMetricProvider):
         "condition_parser",
     )
     filter_column_isnull = False
+
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+        table_domain_kwargs: dict = {
+            k: v
+            for k, v in metric.metric_domain_kwargs.items()
+            if k != MetricDomainTypes.COLUMN.value
+        }
+        dependencies["table.columns"] = MetricConfiguration(
+            metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        return dependencies

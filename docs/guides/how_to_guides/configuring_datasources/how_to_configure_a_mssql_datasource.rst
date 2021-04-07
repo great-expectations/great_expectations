@@ -13,7 +13,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Show Docs for Stable API (up to 0.12.x)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
@@ -71,7 +71,7 @@ Steps
 
         #. **Give your Datasource a name**
 
-            When prompted, provide a custom name for your Snowflake data source, or hit Enter to accept the default.
+            When prompted, provide a custom name for your MSSQL data source, or hit Enter to accept the default.
 
             .. code-block:: bash
 
@@ -108,13 +108,13 @@ Steps
                 The credentials will be saved in uncommitted/config_variables.yml under the key 'mssql_db'
 
     .. tab-container:: tab1
-        :title: Show Docs for Experimental API (0.13)
+        :title: Show Docs for V3 (Batch Request) API
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
             - Obtained database credentials for MSSQL, including username, password, hostname, and database.
 
         To add a MSSQL datasource, do the following:
@@ -134,29 +134,54 @@ Steps
 
                 pip install sqlalchemy
                 pip install pyodbc
-        #. **Instantiate a DataContext.**
+        #. **Run datasource new**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
 
-        #.  **Create or copy a yaml config.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.  GE uses a ``connection_string`` to connect to MSSQL databases through sqlalchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
+        #. **Choose "Relational database (SQL)"**
 
-                ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use when connecting to data in an sql database. (More information on ``Datasources``
-                in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`)
+            .. code-block:: bash
 
-                This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 2
 
-                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+        #. **Choose 'other'**
+
+            .. code-block:: bash
+
+                Which database backend are you using?
+                    1. MySQL
+                    2. Postgres
+                    3. Redshift
+                    4. Snowflake
+                    5. BigQuery
+                    6. other - Do you have a working SQLAlchemy connection string?
+                : 6
+
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
+Additional Notes
+----------------
+
+        Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
+
+        #.  **MSSQL SimpleSqlalchemyDatasource Example.**
+
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.  Great Expectations uses a ``connection_string`` to connect to MSSQL databases through SQLAlchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
+
 
                 .. code-block:: python
 
+                    datasource_name = "my_mssql_datasource"
                     config = f"""
+                    name: {datasource_name}
                     class_name: SimpleSqlalchemyDatasource
                     connection_string: mssql+pyodbc://YOUR_MSSQL_USERNAME:YOUR_MSSQL_PASSWORD@YOUR_MSSQL_HOST:YOUR_MSSQL_PORT/YOUR_MSSQL_DATABASE?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true
                     introspection:
@@ -164,12 +189,14 @@ Steps
                         data_asset_name_suffix: __whole_table
                     """
 
-        #. **Run context.test_yaml_config.**
+            **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+
+
+        #. **Test your config using ``context.test_yaml_config``.**
 
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_mssql_datasource",
                     yaml_config=config
                 )
 
@@ -192,33 +219,21 @@ Steps
 
                     Unmatched data_references (0 of 0): []
 
-                    Choosing an example data reference...
-                        Reference chosen: {}
 
-                    Fetching batch data...
-                    [(58098,)]
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
-                            Showing 5 rows
-                       movieId                               title                                         genres
-                    0        1                    Toy Story (1995)  Adventure|Animation|Children|Comedy|Fantasy\r
-                    1        2                      Jumanji (1995)                   Adventure|Children|Fantasy\r
-                    2        3             Grumpier Old Men (1995)                               Comedy|Romance\r
-                    3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance\r
-                    4        5  Father of the Bride Part II (1995)                                       Comedy\r
-
-            This means all has went well and you can proceed with exploring datasets in your new MSSQL datasource.
 
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_mssql_datasource`` in our example).
-            Next, copy the yml snippet from Step 4 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
 
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
 
-Additional notes
-----------------
+            **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
+
 
 The following blog post provides a useful overview of using SqlAlchemy to connect to MSSQL.
 

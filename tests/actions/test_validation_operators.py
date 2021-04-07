@@ -1,20 +1,51 @@
 # TODO: ADD TESTS ONCE GET_BATCH IS INTEGRATED!
 
 import pandas as pd
+import pytest
 from freezegun import freeze_time
 
 import great_expectations as ge
 from great_expectations.data_context import BaseDataContext
+from great_expectations.self_check.util import modify_locale
 from great_expectations.validation_operators.validation_operators import (
     WarningAndFailureExpectationSuitesValidationOperator,
 )
 
-from ..test_utils import modify_locale
+
+@pytest.fixture
+def assets_to_validate():
+    # succeeded "failure-level" suite
+    # failed "warning-level" suite
+    my_df_1 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, None]})
+    my_ge_df_1 = ge.dataset.PandasDataset(
+        my_df_1, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8226-acde48001122"}
+    )
+
+    # failed "failure-level" suite
+    # failed "warning-level" suite
+    my_df_2 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, None]})
+    my_ge_df_2 = ge.dataset.PandasDataset(
+        my_df_2, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8133-acde48001122"}
+    )
+
+    # succeeded "failure-level" suite
+    # succeeded "warning-level" suite
+    my_df_3 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, 5]})
+    my_ge_df_3 = ge.dataset.PandasDataset(
+        my_df_3, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-a53d-acde48001122"}
+    )
+
+    # failed "failure-level" suite
+    # succeeded "warning-level" suite
+    my_df_4 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, 5]})
+    my_ge_df_4 = ge.dataset.PandasDataset(
+        my_df_4, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8133-acde48001122"}
+    )
+    return [my_ge_df_1, my_ge_df_2, my_ge_df_3, my_ge_df_4]
 
 
-@modify_locale
-@freeze_time("09/26/2019 13:42:41")
-def test_errors_warnings_validation_operator_run_slack_query(
+@pytest.fixture
+def warning_failure_validation_operator_data_context(
     basic_data_context_config_for_validation_operator,
     tmp_path_factory,
     filesystem_csv_4,
@@ -60,7 +91,9 @@ def test_errors_warnings_validation_operator_run_slack_query(
             "my_datasource", "subdir_reader", "f1"
         ),
     )
-    df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
+    df.expect_column_values_to_be_between(
+        column="x", min_value=1, max_value=9, mostly=0.8
+    )
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
     data_context.save_expectation_suite(
@@ -79,6 +112,15 @@ def test_errors_warnings_validation_operator_run_slack_query(
     data_context.save_expectation_suite(
         warning_expectations, expectation_suite_name="f3.warning"
     )
+    return data_context
+
+
+@modify_locale
+@freeze_time("09/26/2019 13:42:41")
+def test_errors_warnings_validation_operator_run_slack_query(
+    warning_failure_validation_operator_data_context, assets_to_validate
+):
+    data_context = warning_failure_validation_operator_data_context
 
     vo = WarningAndFailureExpectationSuitesValidationOperator(
         data_context=data_context,
@@ -87,23 +129,8 @@ def test_errors_warnings_validation_operator_run_slack_query(
         slack_webhook="https://hooks.slack.com/services/test/slack/webhook",
     )
 
-    my_df_1 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, None]})
-    my_ge_df_1 = ge.dataset.PandasDataset(
-        my_df_1, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8226-acde48001122"}
-    )
-
-    my_df_2 = pd.DataFrame({"x": [1, 2, 3, 4, 99], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_2 = ge.dataset.PandasDataset(
-        my_df_2, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-8133-acde48001122"}
-    )
-
-    my_df_3 = pd.DataFrame({"x": [1, 2, 3, 4, 5], "y": [1, 2, 3, 4, 5]})
-    my_ge_df_3 = ge.dataset.PandasDataset(
-        my_df_3, batch_kwargs={"ge_batch_id": "82a8de83-e063-11e9-a53d-acde48001122"}
-    )
-
     return_obj = vo.run(
-        assets_to_validate=[my_ge_df_1, my_ge_df_2, my_ge_df_3],
+        assets_to_validate=assets_to_validate,
         run_id="test_100",
         base_expectation_suite_name="f1",
     )
@@ -181,3 +208,145 @@ def test_errors_warnings_validation_operator_run_slack_query(
     print(json.dumps(slack_query, indent=2))
     print(json.dumps(expected_slack_query, indent=2))
     assert slack_query == expected_slack_query
+
+
+def test_errors_warnings_validation_operator_failed_vo_result(
+    warning_failure_validation_operator_data_context, assets_to_validate
+):
+    # this tests whether the WarningAndFailureExpectationSuitesValidationOperator properly returns
+    # a failed ValidationOperatorResult if there is a failed validation with a suite severity level of "failure"
+
+    data_context = warning_failure_validation_operator_data_context
+
+    vo = WarningAndFailureExpectationSuitesValidationOperator(
+        data_context=data_context,
+        action_list=[],
+        name="test",
+    )
+
+    # only pass asset that yields failed "failure-level" suite and succeeded "warning-level" suite
+    return_obj = vo.run(
+        assets_to_validate=[assets_to_validate[3]],
+        run_id="test_100",
+        base_expectation_suite_name="f1",
+    )
+    run_results = list(return_obj.run_results.values())
+
+    # make sure there is at least one failed validation with a "failure-level" suite
+    assert any(
+        [
+            run_result
+            for run_result in run_results
+            if run_result["expectation_suite_severity_level"] == "failure"
+            and not run_result["validation_result"].success
+        ]
+    )
+    # no failed warning suites
+    assert not any(
+        [
+            run_result
+            for run_result in run_results
+            if run_result["expectation_suite_severity_level"] == "warning"
+            and not run_result["validation_result"].success
+        ]
+    )
+    assert not return_obj.success
+
+    # only pass asset that yields failed "failure-level" suite and failed "warning-level" suite
+    return_obj_2 = vo.run(
+        assets_to_validate=[assets_to_validate[1]],
+        run_id="test_100",
+        base_expectation_suite_name="f1",
+    )
+    run_results_2 = list(return_obj_2.run_results.values())
+
+    # make sure there is at least one failed validation with a "failure-level" suite
+    assert any(
+        [
+            run_result
+            for run_result in run_results_2
+            if run_result["expectation_suite_severity_level"] == "failure"
+            and not run_result["validation_result"].success
+        ]
+    )
+    # with at least one failed warning suite
+    assert any(
+        [
+            run_result
+            for run_result in run_results_2
+            if run_result["expectation_suite_severity_level"] == "warning"
+            and not run_result["validation_result"].success
+        ]
+    )
+    assert not return_obj_2.success
+
+
+def test_errors_warnings_validation_operator_succeeded_vo_result_with_only_failed_warning_suite(
+    warning_failure_validation_operator_data_context, assets_to_validate
+):
+    # this tests whether the WarningAndFailureExpectationSuitesValidationOperator properly returns
+    # a failed ValidationOperatorResult if there is a failed validation with a suite severity level of "failure"
+
+    data_context = warning_failure_validation_operator_data_context
+
+    vo = WarningAndFailureExpectationSuitesValidationOperator(
+        data_context=data_context,
+        action_list=[],
+        name="test",
+    )
+
+    # only pass asset that yields succeeded "failure-level" suite and failed "warning-level" suite
+    return_obj = vo.run(
+        assets_to_validate=[assets_to_validate[0]],
+        run_id="test_100",
+        base_expectation_suite_name="f1",
+    )
+    run_results = list(return_obj.run_results.values())
+
+    # make sure there are no failed validations with suite severity of failure
+    assert not any(
+        [
+            run_result
+            for run_result in run_results
+            if run_result["expectation_suite_severity_level"] == "failure"
+            and not run_result["validation_result"].success
+        ]
+    )
+    # make sure there is at least one failed validation with suite severity of warning
+    assert any(
+        [
+            run_result
+            for run_result in run_results
+            if run_result["expectation_suite_severity_level"] == "warning"
+            and not run_result["validation_result"].success
+        ]
+    )
+    assert return_obj.success
+
+    # only pass asset that yields succeeded "failure-level" suite and succeeded "warning-level" suite
+    return_obj_2 = vo.run(
+        assets_to_validate=[assets_to_validate[2]],
+        run_id="test_100",
+        base_expectation_suite_name="f1",
+    )
+    run_results_2 = list(return_obj_2.run_results.values())
+
+    # make sure there are no failed validations with suite severity of failure
+    assert not any(
+        [
+            run_result
+            for run_result in run_results_2
+            if run_result["expectation_suite_severity_level"] == "failure"
+            and not run_result["validation_result"].success
+        ]
+    )
+    # make sure there are no failed validation with suite severity of warning
+    assert not any(
+        [
+            run_result
+            for run_result in run_results_2
+            if run_result["expectation_suite_severity_level"] == "warning"
+            and not run_result["validation_result"].success
+        ]
+    )
+    assert return_obj_2.success

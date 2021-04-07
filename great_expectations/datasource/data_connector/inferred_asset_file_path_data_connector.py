@@ -2,7 +2,8 @@ import copy
 import logging
 from typing import List, Optional
 
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector import FilePathDataConnector
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -30,6 +31,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
@@ -52,6 +54,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             sorters=sorters,
         )
 
+        self._batch_spec_passthrough = batch_spec_passthrough or {}
+
     def _refresh_data_references_cache(self):
         """ refreshes data_reference cache """
         # Map data_references to batch_definitions
@@ -73,11 +77,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             number of data_references known by this DataConnector
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated."
-            )
-
         return len(self._data_references_cache)
 
     def get_unmatched_data_references(self) -> List[str]:
@@ -88,11 +87,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
-            )
-
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     def get_available_data_asset_names(self) -> List[str]:
@@ -102,16 +96,15 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             A list of available names
         """
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
         batch_definition_list: List[
             BatchDefinition
-        ] = self.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name=self.datasource_name,
-                data_connector_name=self.name,
+        ] = self._get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequestBase(
+                datasource_name=self.datasource_name, data_connector_name=self.name
             )
         )
 
@@ -121,6 +114,24 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         ]
 
         return list(set(data_asset_names))
+
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+
+        batch_spec.update(self._batch_spec_passthrough)
+
+        return PathBatchSpec(batch_spec)
 
     def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
         batch_definition_list: List[BatchDefinition] = [

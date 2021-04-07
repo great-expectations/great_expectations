@@ -20,11 +20,11 @@ If you only have time to remember a few key ideas about Great Expectations, make
 
 It all starts with ``Expectations``. An Expectation is how we communicate the way data *should* appear. It's also how Profilers communicate what they *learn* about data, and what Data Docs uses to *describe* data or *diagnose* problems. When lots of Expectations are grouped together to define a kind of data asset, like "monthly taxi rides", we call it an ``Expectation Suite``.
 
-``Datasources`` are the first thing you'll need to configure to use Great Expectations. A Datasource brings together a way of interacting with data (like a database or spark cluster) and some specific data (a description of that taxi ride data for last month). With a Datasource, you can get a Batch of data or a Validator that can evaluate expecations on data.
+``Datasources`` are the first thing you'll need to configure to use Great Expectations. A Datasource brings together a way of interacting with data (like a database or spark cluster) and some specific data (a description of that taxi ride data for last month). With a Datasource, you can get a Batch of data or a Validator that can evaluate expectations on data.
 
-When you're deploying Great Expectations, you'll use a ``Checkpoint`` to run a validation, testing wheher data meets expecations, and potentially performing other actions like building and saving a Data Docs site, sending a notification, or signaling a pipeline runner.
+When you're deploying Great Expectations, you'll use a ``Checkpoint`` to run a validation, testing whether data meets expecations, and potentially performing other actions like building and saving a Data Docs site, sending a notification, or signaling a pipeline runner.
 
-Great Expectations makes it possible to maintain state about data pipelines using ``Stores``. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, or even Data Docs sites. Stores, and other configuration, is managed using a ``Data Context``. The Data Context configuration is usually stored as a yaml file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
+Great Expectations makes it possible to maintain state about data pipelines using ``Stores``. A Store is a generalized way of keeping Great Expectations objects, like Expectation Suites, Validation Results, Metrics, Checkpoints, or even Data Docs sites. Stores, and other configuration, is managed using a ``Data Context``. The Data Context configuration is usually stored as a yaml file or declared in your pipeline directly, and you should commit the configuration to version control to share it with your team.
 
 
 ************************************************
@@ -69,7 +69,7 @@ A **Datasource** is the primary way that you configure data access in Great Expe
 
 An **Execution Engine** is configured as part of a datasource. The Execution Engine provides the computing resources that will be used to actually perform validation. Great Expectations can take advantage of many different Execution Engines, such as Pandas, Spark, or SqlAlchemy, and can translate the same Expectations to validate data using different engines.
 
-A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external data store to *identify available partitions*, *build batch definitions using parameters such as partition names*, and *translate batch definitions to Execution Engine-specific Batch Specs*. See the :ref:`Data Connectors reference <reference__core_concepts__datasources__data_connector>` for more information including descriptions of Batch Definition and Batch Spec.
+A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external data store to *identify available Batches*, *build Batch Definitions using Batch Identifiers*, and *translate Batch Definitions to Execution Engine-specific Batch Specs*. See the :ref:`Data Connectors reference <reference__core_concepts__datasources__data_connector>` for more information including descriptions of Batch Definition and Batch Spec.
 
 A **Batch** is reference to a set of data, with metadata about it. *The Batch is the fundamental building block for accessing data using Great Expectations*, but is not the data itself. Instantiating a Batch does not necessarily "fetch" the data by immediately running a query or pulling data into memory. Instead, think of a Batch as a wrapper that includes the information that you will need to fetch the right data when it’s time to validate.
 
@@ -77,7 +77,7 @@ A **Batch** is reference to a set of data, with metadata about it. *The Batch is
    :maxdepth: 2
 
    /reference/core_concepts/datasource.rst
-   /reference/core_concepts/partitioning.rst
+   /reference/core_concepts/dividing_data_assets_into_batches.rst
 
 
 .. _reference__core_concepts__validation:
@@ -86,23 +86,24 @@ A **Batch** is reference to a set of data, with metadata about it. *The Batch is
 Validation
 ===================
 
-A **Validator** uses an Execution Engine and Expectation Suite to validate whether data meets expectations. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis to build or edit an Expectations.
+A **Validator** uses an Execution Engine and Expectation Suite to validate whether data meets expectations. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis to build or edit Expectations.
 
 An **Expectation Validation Result** captures the output of checking an expectation against data. It describes whether the data met the expectation, and will usually include Metrics from the data that were used to evaluate the Expectation, such as the percentage of unique values or observed mean.
 
 An **Expectation Suite Validation Result** combines multiple Expectation Validation Results and metadata about the validation into a single report.
 
-A **Checkpoint** faciliates running a validation as well as configurable **Actions** such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket. The Checkpoint makes it easy to add Great Expectations to your project by tracking configuration about what data, Expectation Suite, and Actions should be run when.
+A **Checkpoint** facilitates running a validation as well as configurable **Actions** such as updating Data Docs, sending a notification to your team about validation results, or storing a result in a shared S3 bucket. The Checkpoint makes it easy to add Great Expectations to your project by tracking configuration about what data, Expectation Suite, and Actions should be run when.
 
 .. attention::
 
-  The Checkpoint feature is continuing to evolve as we standardize on that name instead of "Validation Operator" but the behavior is very similar.
+  Checkpoints are an evolution of the soon-to-be-deprecated Validation Operators.
+
 
 .. toctree::
    :maxdepth: 2
 
    /reference/core_concepts/validation.rst
-   /reference/core_concepts/validation_operators_and_actions.rst
+   /reference/core_concepts/checkpoints_and_actions.rst
 
 .. _reference__core_concepts__data_contexts:
 
@@ -119,7 +120,7 @@ A **Store** provides a consistent API to manage access to Expectations, Expectat
 
 .. _reference__core_concepts__data_context__stores:
 
-A **Plugin** customizes Great Expectations by making a new python package or module available at runtime. 
+A **Plugin** customizes Great Expectations by making a new python package or module available at runtime.
 
 .. toctree::
    :maxdepth: 2

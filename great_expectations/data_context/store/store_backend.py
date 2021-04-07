@@ -4,6 +4,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Optional
 
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
+from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +55,9 @@ class StoreBackend(metaclass=ABCMeta):
     def store_name(self):
         return self._store_name
 
-    def _construct_store_backend_id(self, suppress_warning: bool = False) -> str:
+    def _construct_store_backend_id(
+        self, suppress_warning: bool = False
+    ) -> Optional[str]:
         """
         Create a store_backend_id if one does not exist, and return it if it exists
         If a valid UUID store_backend_id is passed in param manually_initialize_store_backend_id
@@ -71,7 +74,7 @@ class StoreBackend(metaclass=ABCMeta):
                 logger.warning(
                     f"You are attempting to access the store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
                 )
-            return
+            return None
         try:
             try:
                 return self.get(key=self.STORE_BACKEND_ID_KEY).replace(
@@ -188,6 +191,10 @@ class StoreBackend(metaclass=ABCMeta):
 
         return False
 
+    @property
+    def config(self) -> dict:
+        raise NotImplementedError
+
 
 class InMemoryStoreBackend(StoreBackend):
     """Uses an in-memory dictionary as a store backend."""
@@ -212,6 +219,19 @@ class InMemoryStoreBackend(StoreBackend):
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
 
+        # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
+        # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.
+        self._config = {
+            "runtime_environment": runtime_environment,
+            "fixed_length_key": fixed_length_key,
+            "suppress_store_backend_id": suppress_store_backend_id,
+            "manually_initialize_store_backend_id": manually_initialize_store_backend_id,
+            "store_name": store_name,
+            "module_name": self.__class__.__module__,
+            "class_name": self.__class__.__name__,
+        }
+        filter_properties_dict(properties=self._config, inplace=True)
+
     def _get(self, key):
         try:
             return self._store[key]
@@ -233,3 +253,7 @@ class InMemoryStoreBackend(StoreBackend):
 
     def remove_key(self, key):
         del self._store[key]
+
+    @property
+    def config(self) -> dict:
+        return self._config

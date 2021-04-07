@@ -1,549 +1,410 @@
 import os
+from unittest import mock
 
+import nbformat
 from click.testing import CliRunner
+from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.test_cli import yaml
-from tests.cli.utils import (
-    assert_dict_key_and_val_in_stdout,
-    assert_no_logging_messages_or_tracebacks,
-    assert_no_tracebacks,
-)
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
-    """Test an empty project and after adding a single datasource."""
+def test_cli_datasource_list_on_project_with_no_datasources(
+    caplog, monkeypatch, empty_data_context, filesystem_csv_2
+):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
-        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
+        cli,
+        "--v3-api datasource list",
+        catch_exceptions=False,
     )
 
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
-    base_directory = str(filesystem_csv_2)
 
-    context.add_datasource(
-        "wow_a_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": base_directory,
-            }
-        },
-    )
-
-    datasources = context.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "wow_a_datasource",
-            "class_name": "PandasDatasource",
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-            "batch_kwargs_generators": {
-                "subdir_reader": {
-                    "base_directory": base_directory,
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                }
-            },
-            "module_name": "great_expectations.datasource",
-        }
-    ]
+def test_cli_datasource_list_on_project_with_one_datasource(
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    filesystem_csv_2,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    project_root_dir = context.root_directory
+    context = DataContext(project_root_dir)
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
-        cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
+        cli,
+        "--v3-api datasource list",
+        catch_exceptions=False,
     )
-    expected_output = """
+
+    expected_output = f"""Using v3 (Batch Request) API\x1b[0m
 1 Datasource found:[0m
 [0m
- - [36mname:[0m wow_a_datasource[0m
-   [36mmodule_name:[0m great_expectations.datasource[0m
-   [36mclass_name:[0m PandasDatasource[0m
-   [36mbatch_kwargs_generators:[0m[0m
-     [36msubdir_reader:[0m[0m
-       [36mclass_name:[0m SubdirReaderBatchKwargsGenerator[0m
-       [36mbase_directory:[0m {}[0m
-   [36mdata_asset_type:[0m[0m
-     [36mmodule_name:[0m great_expectations.dataset[0m
-     [36mclass_name:[0m PandasDataset[0m""".format(
-        base_directory
-    ).strip()
-    stdout = result.output.strip()
+ - [36mname:[0m my_datasource[0m
+   [36mclass_name:[0m Datasource[0m
+""".strip()
+    stdout = result.stdout.strip()
     assert stdout == expected_output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
-    project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_cli_datasource_new(
+    mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
+):
+    context = empty_data_context
+    root_dir = context.root_directory
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(root_dir))
     result = runner.invoke(
         cli,
-        ["datasource", "new", "-d", project_root_dir],
-        input="1\n1\n%s\nmynewsource\n" % str(filesystem_csv_2),
+        "--v3-api datasource new",
+        input=f"1\n1\n{filesystem_csv_2}\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert context.list_datasources() == []
+
+    assert "What data would you like Great Expectations to connect to?" in stdout
+    assert "What are you processing your files with?" in stdout
+
+    assert result.exit_code == 0
+
+    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    assert os.path.isfile(expected_notebook)
+    mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
+
+    # Run notebook
+    with open(expected_notebook) as f:
+        nb = nbformat.read(f, as_version=4)
+    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
+
+    del context
+    context = DataContext(root_dir)
+
+    assert len(context.list_datasources()) == 1
+
+    assert context.list_datasources() == [
+        {
+            "name": "my_datasource",
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+            },
+            "data_connectors": {
+                "my_datasource_example_data_connector": {
+                    "default_regex": {
+                        "group_names": "data_asset_name",
+                        "pattern": "(.*)",
+                    },
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "base_directory": "../../filesystem_csv_2",
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                }
+            },
+        }
+    ]
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_cli_datasource_new_no_jupyter_writes_notebook(
+    mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
+):
+    context = empty_data_context
+    root_dir = context.root_directory
+    assert context.list_datasources() == []
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(root_dir))
+    result = runner.invoke(
+        cli,
+        "--v3-api datasource new --no-jupyter",
+        input=f"1\n1\n{filesystem_csv_2}\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert context.list_datasources() == []
+
+    assert "What data would you like Great Expectations to connect to?" in stdout
+    assert "What are you processing your files with?" in stdout
+    assert "To continue editing this Datasource" in stdout
+
+    assert result.exit_code == 0
+
+    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    assert os.path.isfile(expected_notebook)
+    assert mock_subprocess.call_count == 0
+    assert len(context.list_datasources()) == 0
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_cli_datasource_new_with_name_param(
+    mock_subprocess, caplog, monkeypatch, empty_data_context, filesystem_csv_2
+):
+    context = empty_data_context
+    root_dir = context.root_directory
+    assert context.list_datasources() == []
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(root_dir))
+    result = runner.invoke(
+        cli,
+        "--v3-api datasource new --name foo",
+        input=f"1\n1\n{filesystem_csv_2}\n",
+        catch_exceptions=False,
+    )
+    stdout = result.stdout
+
+    assert context.list_datasources() == []
+
+    assert "What data would you like Great Expectations to connect to?" in stdout
+    assert "What are you processing your files with?" in stdout
+
+    assert result.exit_code == 0
+
+    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    assert os.path.isfile(expected_notebook)
+    mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
+
+    # Run notebook
+    with open(expected_notebook) as f:
+        nb = nbformat.read(f, as_version=4)
+    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
+
+    del context
+    context = DataContext(root_dir)
+
+    assert len(context.list_datasources()) == 1
+
+    assert context.list_datasources() == [
+        {
+            "name": "foo",
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+            },
+            "data_connectors": {
+                "foo_example_data_connector": {
+                    "default_regex": {
+                        "group_names": "data_asset_name",
+                        "pattern": "(.*)",
+                    },
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "base_directory": "../../filesystem_csv_2",
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                }
+            },
+        }
+    ]
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+def test_cli_datasource_new_from_misc_directory(
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    tmp_path_factory,
+    empty_data_context,
+    filesystem_csv_2,
+):
+    context = empty_data_context
+    root_dir = context.root_directory
+    assert context.list_datasources() == []
+
+    runner = CliRunner(mix_stderr=False)
+    misc_dir = tmp_path_factory.mktemp("misc", numbered=False)
+    monkeypatch.chdir(misc_dir)
+    result = runner.invoke(
+        cli,
+        f"--config {root_dir} --v3-api datasource new",
+        input=f"1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
 
     assert "What data would you like Great Expectations to connect to?" in stdout
     assert "What are you processing your files with?" in stdout
-    assert "Give your new Datasource a short name." in stdout
-    assert "A new datasource 'mynewsource' was added to your project." in stdout
 
     assert result.exit_code == 0
 
-    config_path = os.path.join(project_root_dir, DataContext.GE_YML)
-    config = yaml.load(open(config_path))
-    datasources = config["datasources"]
-    assert "mynewsource" in datasources.keys()
-    data_source_class = datasources["mynewsource"]["data_asset_type"]["class_name"]
-    assert data_source_class == "PandasDataset"
+    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+    assert os.path.isfile(expected_notebook)
+    mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
+
+    # Run notebook
+    with open(expected_notebook) as f:
+        nb = nbformat.read(f, as_version=4)
+    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
+
+    del context
+    context = DataContext(root_dir)
+    assert context.list_datasources() == [
+        {
+            "name": "my_datasource",
+            "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+            },
+            "data_connectors": {
+                "my_datasource_example_data_connector": {
+                    "default_regex": {
+                        "group_names": "data_asset_name",
+                        "pattern": "(.*)",
+                    },
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "base_directory": "../../filesystem_csv_2",
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                }
+            },
+        }
+    ]
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_datasource_profile_answering_no(
-    caplog, empty_data_context, filesystem_csv_2
+def test_cli_datasource_delete_on_project_with_one_datasource(
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
-            }
-        },
-    )
-
-    not_so_empty_data_context = empty_data_context
-    project_root_dir = not_so_empty_data_context.root_directory
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert "my_datasource" in [ds["name"] for ds in context.list_datasources()]
+    assert len(context.list_datasources()) == 1
 
     runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        [
-            "datasource",
-            "profile",
-            "my_datasource",
-            "-d",
-            project_root_dir,
-            "--no-view",
-        ],
+        "--v3-api datasource delete my_datasource",
+        input="Y\n",
+        catch_exceptions=False,
+    )
+
+    stdout = result.output
+    assert result.exit_code == 0
+    assert "Using v3 (Batch Request) API" in stdout
+    assert "Datasource deleted successfully." in stdout
+
+    # reload context from disk to see if the datasource was in fact deleted
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+    assert len(context.list_datasources()) == 0
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert "my_datasource" in [ds["name"] for ds in context.list_datasources()]
+    assert len(context.list_datasources()) == 1
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        "--v3-api --assume-yes datasource delete my_datasource",
+        catch_exceptions=False,
+    )
+
+    stdout = result.output
+    assert result.exit_code == 0
+
+    assert "Would you like to proceed? [Y/n]:" not in stdout
+    # This assertion is extra assurance since this test is too permissive if we change the confirmation message
+    assert "[Y/n]" not in stdout
+
+    assert "Using v3 (Batch Request) API" in stdout
+    assert "Datasource deleted successfully." in stdout
+
+    # reload context from disk to see if the datasource was in fact deleted
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+    assert len(context.list_datasources()) == 0
+    assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_does_not_delete(
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert "my_datasource" in [ds["name"] for ds in context.list_datasources()]
+    assert len(context.list_datasources()) == 1
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        "--v3-api datasource delete my_datasource",
         input="n\n",
         catch_exceptions=False,
     )
 
-    stdout = result.stdout
-    print(stdout)
-    assert result.exit_code == 0
-    assert "Profiling 'my_datasource'" in stdout
-    assert "Skipping profiling for now." in stdout
-    assert_no_logging_messages_or_tracebacks(caplog, result)
-
-
-def test_cli_datasource_profile_with_datasource_arg(
-    caplog, empty_data_context, filesystem_csv_2
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
-            }
-        },
-    )
-
-    not_so_empty_data_context = empty_data_context
-    project_root_dir = not_so_empty_data_context.root_directory
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        [
-            "datasource",
-            "profile",
-            "my_datasource",
-            "-d",
-            project_root_dir,
-            "--no-view",
-        ],
-        input="Y\n",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0
-    stdout = result.stdout
-    assert "Profiling 'my_datasource'" in stdout
-    assert result.exit_code == 0
-
-    context = DataContext(project_root_dir)
-    assert len(context.list_datasources()) == 1
-
-    expectations_store = context.stores["expectations_store"]
-    suites = expectations_store.list_keys()
-    assert len(suites) == 1
-    assert (
-        suites[0].expectation_suite_name
-        == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    )
-
-    validations_store = context.stores["validations_store"]
-    validation_keys = validations_store.list_keys()
-    assert len(validation_keys) == 1
-
-    validation = validations_store.get(validation_keys[0])
-    assert (
-        validation.meta["expectation_suite_name"]
-        == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    )
-    assert validation.success is False
-    assert len(validation.results) == 8
-
-    assert "Preparing column 1 of 1" in caplog.messages[0]
-    assert_no_tracebacks(result)
-
-
-def test_cli_datasource_profile_with_no_datasource_args(
-    caplog, empty_data_context, filesystem_csv_2
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
-            }
-        },
-    )
-
-    not_so_empty_data_context = empty_data_context
-
-    project_root_dir = not_so_empty_data_context.root_directory
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["datasource", "profile", "-d", project_root_dir, "--no-view"],
-        input="Y\n",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0
-    stdout = result.stdout
-
-    assert (
-        "Profiling 'my_datasource' will create expectations and documentation."
-        in stdout
-    )
-    assert "Would you like to profile 'my_datasource'" in stdout
-    assert (
-        "Great Expectations is building Data Docs from the data you just profiled!"
-        in stdout
-    )
-
-    context = DataContext(project_root_dir)
-    assert len(context.list_datasources()) == 1
-
-    expectations_store = context.stores["expectations_store"]
-    suites = expectations_store.list_keys()
-    assert len(suites) == 1
-    assert (
-        suites[0].expectation_suite_name
-        == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    )
-
-    validations_store = context.stores["validations_store"]
-    validation_keys = validations_store.list_keys()
-    assert len(validation_keys) == 1
-
-    validation = validations_store.get(validation_keys[0])
-    assert (
-        validation.meta["expectation_suite_name"]
-        == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    )
-    assert validation.success is False
-    assert len(validation.results) == 8
-
-    assert "Preparing column 1 of 1" in caplog.messages[0]
-    assert len(caplog.messages) == 1
-    assert_no_tracebacks(result)
-
-
-def test_cli_datasource_profile_with_skip_prompt_flag(
-    caplog, empty_data_context, filesystem_csv_2
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
-            }
-        },
-    )
-
-    not_so_empty_data_context = empty_data_context
-
-    project_root_dir = not_so_empty_data_context.root_directory
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["datasource", "profile", "-d", project_root_dir, "--no-view", "-y"],
-        input="Y\n",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0
-    stdout = result.stdout
-
-    assert (
-        "Profiling 'my_datasource' will create expectations and documentation."
-        in stdout
-    )
-    assert "Would you like to profile 'my_datasource'" not in stdout
-    assert (
-        "Great Expectations is building Data Docs from the data you just profiled!"
-        in stdout
-    )
-
-    context = DataContext(project_root_dir)
-    assert len(context.list_datasources()) == 1
-
-    expectations_store = context.stores["expectations_store"]
-    suites = expectations_store.list_keys()
-    assert len(suites) == 1
-    assert (
-        suites[0].expectation_suite_name
-        == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    )
-
-    validations_store = context.stores["validations_store"]
-    validation_keys = validations_store.list_keys()
-    assert len(validation_keys) == 1
-
-    validation = validations_store.get(validation_keys[0])
-    assert (
-        validation.meta["expectation_suite_name"]
-        == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    )
-    assert validation.success is False
-    assert len(validation.results) == 8
-
-    assert "Preparing column 1 of 1" in caplog.messages[0]
-    assert len(caplog.messages) == 1
-    assert_no_tracebacks(result)
-
-
-def test_cli_datasource_profile_with_additional_batch_kwargs(
-    caplog, empty_data_context, filesystem_csv_2
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
-            }
-        },
-    )
-
-    not_so_empty_data_context = empty_data_context
-
-    project_root_dir = not_so_empty_data_context.root_directory
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        [
-            "datasource",
-            "profile",
-            "-d",
-            project_root_dir,
-            "--additional-batch-kwargs",
-            '{"reader_options": {"sep": ",", "parse_dates": [0]}}',
-            "--no-view",
-        ],
-        input="Y\n",
-        catch_exceptions=False,
-    )
     stdout = result.output
     assert result.exit_code == 0
+    assert "Using v3 (Batch Request) API" in stdout
+    assert "Datasource `my_datasource` was not deleted." in stdout
 
-    assert (
-        "Profiling 'my_datasource' will create expectations and documentation."
-        in stdout
-    )
-    assert "Would you like to profile 'my_datasource'" in stdout
-    assert (
-        "Great Expectations is building Data Docs from the data you just profiled!"
-        in stdout
-    )
-
-    context = DataContext(project_root_dir)
+    # reload context from disk to see if the datasource was in fact deleted
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
     assert len(context.list_datasources()) == 1
-
-    expectations_store = context.stores["expectations_store"]
-    suites = expectations_store.list_keys()
-    assert len(suites) == 1
-    expected_suite_name = "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    assert suites[0].expectation_suite_name == expected_suite_name
-
-    validations_store = context.stores["validations_store"]
-    validation_keys = validations_store.list_keys()
-    assert len(validation_keys) == 1
-
-    validation = validations_store.get(validation_keys[0])
-    assert validation.meta["expectation_suite_name"] == expected_suite_name
-    assert validation.success is False
-    assert len(validation.results) == 9
-
-    batch_id = validation_keys[0].batch_identifier
-    evr = context.get_validation_result(
-        expectation_suite_name=expected_suite_name, batch_identifier=batch_id
-    )
-    reader_options = evr.meta["batch_kwargs"]["reader_options"]
-    assert reader_options["parse_dates"] == [0]
-    assert reader_options["sep"] == ","
-
-    assert "Preparing column 1 of 1" in caplog.messages[0]
-    assert len(caplog.messages) == 1
-    assert_no_tracebacks(result)
-
-
-def test_cli_datasource_profile_with_valid_data_asset_arg(
-    caplog, empty_data_context, filesystem_csv_2
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
-            }
-        },
-    )
-    context = empty_data_context
-
-    project_root_dir = context.root_directory
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        [
-            "datasource",
-            "profile",
-            "my_datasource",
-            "--data-assets",
-            "f1",
-            "-d",
-            project_root_dir,
-            "--no-view",
-        ],
-        input="\n",
-        catch_exceptions=False,
-    )
-
-    assert result.exit_code == 0
-    stdout = result.stdout
-    assert "Profiling 'my_datasource'" in stdout
-    assert "The following Data Docs sites will be built:\n" in stdout
-    assert "local_site:" in stdout
-
-    context = DataContext(project_root_dir)
-    assert len(context.list_datasources()) == 1
-
-    expectations_store = context.stores["expectations_store"]
-    suites = expectations_store.list_keys()
-    assert len(suites) == 1
-    assert (
-        suites[0].expectation_suite_name
-        == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    )
-
-    validations_store = context.stores["validations_store"]
-    validation_keys = validations_store.list_keys()
-    assert len(validation_keys) == 1
-
-    validation = validations_store.get(validation_keys[0])
-    suite_name = validation.meta["expectation_suite_name"]
-    assert suite_name == "my_datasource.subdir_reader.f1.BasicDatasetProfiler"
-    assert validation.success is False
-    assert len(validation.results) == 8
-
-    assert "Preparing column 1 of 1" in caplog.messages[0]
-    assert len(caplog.messages) == 1
-    assert_no_tracebacks(result)
-
-
-def test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no(
-    caplog, empty_data_context, filesystem_csv_2
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv_2),
-            }
-        },
-    )
-
-    not_so_empty_data_context = empty_data_context
-
-    project_root_dir = not_so_empty_data_context.root_directory
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        [
-            "datasource",
-            "profile",
-            "my_datasource",
-            "--data-assets",
-            "bad-bad-asset",
-            "-d",
-            project_root_dir,
-            "--no-view",
-        ],
-        input="2\n",
-        catch_exceptions=False,
-    )
-
-    stdout = result.stdout
-    assert (
-        "Some of the data assets you specified were not found: bad-bad-asset" in stdout
-    )
-    assert "Choose how to proceed" in stdout
-    assert "Skipping profiling for now." in stdout
-
-    context = DataContext(project_root_dir)
-    assert len(context.list_datasources()) == 1
-
-    expectations_store = context.stores["expectations_store"]
-    suites = expectations_store.list_keys()
-    assert len(suites) == 0
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+
+def test_cli_datasource_delete_with_non_existent_datasource_raises_error(
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    assert "foo" not in [ds["name"] for ds in context.list_datasources()]
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        "--v3-api datasource delete foo",
+        catch_exceptions=False,
+    )
+
+    stdout = result.output
+    assert result.exit_code == 1
+    assert "Using v3 (Batch Request) API" in stdout
+    assert "Datasource foo could not be found." in stdout

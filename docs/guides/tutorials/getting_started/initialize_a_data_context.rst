@@ -7,8 +7,6 @@ Set up the tutorial data and initialize a Data Context
 
 .. admonition:: Prerequisites for the tutorial:
 
-  - Make sure you have `Docker <https://www.docker.com/>`_ installed on your machine.
-  - Have git installed on your machine to clone the tutorial repo.
   - You need a Python environment where you can install Great Expectations and other dependencies, e.g. a virtual environment.
 
 About the example data
@@ -16,10 +14,10 @@ About the example data
 
 The `NYC taxi data <https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page>`_ we're going to use in this tutorial is an open data set which is updated every month. Each record in the data corresponds to one taxi ride and contains information such as the pick up and drop-off location, the payment amount, and the number of passengers, among others.
 
-In this tutorial, we provide two tables, each with a 10,000 row sample of the Yellow Taxi Trip Records set:
+In this tutorial, we provide two CSV files, each with a 10,000 row sample of the Yellow Taxi Trip Records set:
 
-* **yellow_tripdata_sample_2019_01**: a sample of the January 2019 taxi data
-* **yellow_tripdata_staging**: a sample of the February 2019 taxi data, loaded to a "staging" table so we can validate it before promoting it to a permanent table
+* **yellow_tripdata_sample_2019-01.csv**: a sample of the January 2019 taxi data
+* **yellow_tripdata_sample_2019-02.csv**: a sample of the February 2019 taxi data
 
 If we compare the ``passenger_count`` column in the January and February data, we find a significant difference: The February data contains a large proportion of rides with 0 passengers, which seems unexpected:
 
@@ -27,23 +25,27 @@ If we compare the ``passenger_count`` column in the January and February data, w
 
 .. admonition:: The data problem we're solving in this tutorial:
 
-    In this tutorial, we will be creating an Expectation Suite for this example data set that allows us to assert that we expect **at least 1 passenger per taxi ride** based on what we see in the January 2019 data. We will then use that Expectation Suite to catch data quality issues in the staging table, which contains a new batch of data every month.
+    In this tutorial, we will be creating an Expectation Suite for this example data set that allows us to assert that we expect **at least 1 passenger per taxi ride** based on what we see in the January 2019 data (and based on what we expect about taxi rides!). We will then use that Expectation Suite to catch data quality issues in the February data set.
 
 
 Set up your machine for the tutorial
 ------------------------------------------
 
-For this tutorial, we will use a simplified version of the NYC taxi ride data. We prepared a Docker image that contains a local Postgres database with the data pre-loaded, so you can easily get up and running without any local dependencies.
+For this tutorial, we will use a simplified version of the NYC taxi ride data.
 
-Clone the `ge_tutorials <https://github.com/superconductive/ge_tutorials>`_ repository and start up the container with the Postgres database containing the data:
+Clone the `ge_tutorials <https://github.com/superconductive/ge_tutorials>`_ repository to download the data and directories with the final versions of the tutorial, which you can use for reference:
 
 .. code-block:: bash
 
    git clone https://github.com/superconductive/ge_tutorials
-   cd ge_tutorials/ge_getting_started_tutorial
-   docker-compose up --detach
+   cd ge_tutorials
+   
 
-You will now have a Postgres database running in the background with the pre-loaded taxi data! In case you want to connect to the database, to check out the data, you'll find instructions in the `README <https://github.com/superconductive/ge_tutorials/tree/main/ge_getting_started_tutorial>`_ in the repository. **But for now, let's move on!**
+What you find in the ge_tutorials repository
+---------------------------------------------
+
+The repository you cloned contains several directories with final versions for our tutorials. The **final version** for this tutorial is located in the ``getting_started_tutorial_final_stable_api/`` folder. You can use the final version as a reference or to explore a complete deploy of Great Expectations, but **you do not need it for this tutorial**.
+
 
 
 Install Great Expectations and dependencies
@@ -56,29 +58,15 @@ If you haven't already, install Great Expectations. The command to install is es
 
     pip install great_expectations
 
-You'll also need to install a few other dependencies to connect to your Postgres database. In general, Great Expectations doesn't clutter up your deployments by installing dependencies before you need them.
-
-.. code-block:: bash
-
-   pip install SQLAlchemy psycopg2-binary
-
 
 Create a Data Context
 -----------------------------------------------
 
 In Great Expectations, your :ref:`Data Context` manages your project configuration, so let's go and create a Data Context for our tutorial project!
 
-First, we want to create a separate project directory ``ge_example/`` for our tutorial project. The ``ge_tutorials`` repo contains the final version of this tutorial, but we want to start from scratch here, so let's move out of ``ge_tutorials``:
-
-.. code-block:: bash
-
-    cd ../..
-    mkdir ge_example
-    cd ge_example
-
 When you installed Great Expectations, you also installed the Great Expectations :ref:`command line interface (CLI) <command_line>`. It provides helpful utilities for deploying and configuring Data Contexts, plus a few other convenience methods.
 
-To initialize your Great Expectations deployment for the project, run this command in the terminal from the ``ge_example/`` directory:
+To initialize your Great Expectations deployment for the project, run this command in the terminal from the ``ge_tutorials/`` directory:
 
 .. code-block:: bash
 

@@ -1,13 +1,19 @@
+import copy
 import datetime
 import decimal
 import logging
+import os
 import sys
+from collections import OrderedDict
 from collections.abc import Mapping
+from typing import Any, Dict, Iterable, List, Optional, Union
+from urllib.parse import urlparse
 
 import numpy as np
 import pandas as pd
 from IPython import get_ipython
 
+from great_expectations import exceptions as ge_exceptions
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -18,6 +24,34 @@ from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 
+
+try:
+    import sqlalchemy
+except ImportError:
+    sqlalchemy = None
+    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+
+
+SCHEMAS = {
+    "api_np": {
+        "NegativeInfinity": -np.inf,
+        "PositiveInfinity": np.inf,
+    },
+    "api_cast": {
+        "NegativeInfinity": -float("inf"),
+        "PositiveInfinity": float("inf"),
+    },
+    "mysql": {
+        "NegativeInfinity": -1.79e308,
+        "PositiveInfinity": 1.79e308,
+    },
+    "mssql": {
+        "NegativeInfinity": -1.79e308,
+        "PositiveInfinity": 1.79e308,
+    },
+}
+
+
 try:
     import pyspark
 except ImportError:
@@ -27,11 +61,16 @@ except ImportError:
     )
 
 
-def nested_update(d, u):
+_SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
+
+
+def nested_update(
+    d: Union[Iterable, dict], u: Union[Iterable, dict], dedup: bool = False
+):
     """update d with items from u, recursively and joining elements"""
     for k, v in u.items():
         if isinstance(v, Mapping):
-            d[k] = nested_update(d.get(k, {}), v)
+            d[k] = nested_update(d.get(k, {}), v, dedup=dedup)
         elif isinstance(v, set) or (k in d and isinstance(d[k], set)):
             s1 = d.get(k, set())
             s2 = v or set()
@@ -39,7 +78,10 @@ def nested_update(d, u):
         elif isinstance(v, list) or (k in d and isinstance(d[k], list)):
             l1 = d.get(k, [])
             l2 = v or []
-            d[k] = l1 + l2
+            if dedup:
+                d[k] = list(set(l1 + l2))
+            else:
+                d[k] = l1 + l2
         else:
             d[k] = v
     return d
@@ -56,6 +98,16 @@ def in_jupyter_notebook():
             return False  # Other type (?)
     except NameError:
         return False  # Probably standard Python interpreter
+
+
+def in_databricks() -> bool:
+    """
+    Tests whether we are in a Databricks environment.
+
+    Returns:
+        bool
+    """
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
 def convert_to_json_serializable(data):
@@ -277,3 +329,266 @@ def ensure_json_serializable(data):
 
 def requires_lossy_conversion(d):
     return d - decimal.Context(prec=sys.float_info.dig).create_decimal(d) != 0
+
+
+def substitute_all_strftime_format_strings(
+    data: Union[dict, list, str, Any], datetime_obj: Optional[datetime.datetime] = None
+) -> Union[str, Any]:
+    """
+    This utility function will iterate over input data and for all strings, replace any strftime format
+    elements using either the provided datetime_obj or the current datetime
+    """
+
+    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
+    if isinstance(data, dict) or isinstance(data, OrderedDict):
+        return {
+            k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
+            for k, v in data.items()
+        }
+    elif isinstance(data, list):
+        return [
+            substitute_all_strftime_format_strings(el, datetime_obj=datetime_obj)
+            for el in data
+        ]
+    elif isinstance(data, str):
+        return get_datetime_string_from_strftime_format(data, datetime_obj=datetime_obj)
+    else:
+        return data
+
+
+def get_datetime_string_from_strftime_format(
+    format_str: str, datetime_obj: Optional[datetime.datetime] = None
+) -> str:
+    """
+    This utility function takes a string with strftime format elements and substitutes those elements using
+    either the provided datetime_obj or current datetime
+    """
+    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
+    return datetime_obj.strftime(format_str)
+
+
+def parse_string_to_datetime(
+    datetime_string: str, datetime_format_string: str
+) -> datetime.date:
+    if not isinstance(datetime_string, str):
+        raise ge_exceptions.SorterError(
+            f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
+            """
+        )
+    if datetime_format_string and not isinstance(datetime_format_string, str):
+        raise ge_exceptions.SorterError(
+            f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
+"{str(type(datetime_format_string))}").
+            """
+        )
+    return datetime.datetime.strptime(datetime_string, datetime_format_string).date()
+
+
+def datetime_to_int(dt: datetime.date) -> int:
+    return int(dt.strftime("%Y%m%d%H%M%S"))
+
+
+# S3Url class courtesy: https://stackoverflow.com/questions/42641315/s3-urls-get-bucket-name-and-path
+class S3Url:
+    """
+    >>> s = S3Url("s3://bucket/hello/world")
+    >>> s.bucket
+    'bucket'
+    >>> s.key
+    'hello/world'
+    >>> s.url
+    's3://bucket/hello/world'
+
+    >>> s = S3Url("s3://bucket/hello/world?qwe1=3#ddd")
+    >>> s.bucket
+    'bucket'
+    >>> s.key
+    'hello/world?qwe1=3#ddd'
+    >>> s.url
+    's3://bucket/hello/world?qwe1=3#ddd'
+
+    >>> s = S3Url("s3://bucket/hello/world#foo?bar=2")
+    >>> s.key
+    'hello/world#foo?bar=2'
+    >>> s.url
+    's3://bucket/hello/world#foo?bar=2'
+    """
+
+    def __init__(self, url):
+        self._parsed = urlparse(url, allow_fragments=False)
+
+    @property
+    def bucket(self):
+        return self._parsed.netloc
+
+    @property
+    def key(self):
+        if self._parsed.query:
+            return self._parsed.path.lstrip("/") + "?" + self._parsed.query
+        else:
+            return self._parsed.path.lstrip("/")
+
+    @property
+    def suffix(self) -> Optional[str]:
+        """
+        Attempts to get a file suffix from the S3 key.
+        If can't find one returns `None`.
+        """
+        splits = self._parsed.path.rsplit(".", 1)
+        _suffix = splits[-1]
+        if len(_suffix) > 0 and len(splits) > 1:
+            return str(_suffix)
+        return None
+
+    @property
+    def url(self):
+        return self._parsed.geturl()
+
+
+def sniff_s3_compression(s3_url: S3Url) -> str:
+    """Attempts to get read_csv compression from s3_url"""
+    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix, "infer")
+
+
+# noinspection PyPep8Naming
+def get_or_create_spark_application(
+    spark_config: Optional[Dict[str, str]] = None,
+):
+    # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
+    # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
+    # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
+    # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+    try:
+        from pyspark.sql import SparkSession
+    except ImportError:
+        SparkSession = None
+        # TODO: review logging more detail here
+        logger.debug(
+            "Unable to load pyspark; install optional spark dependency for support."
+        )
+
+    if spark_config is None:
+        spark_config = {}
+    else:
+        spark_config = copy.deepcopy(spark_config)
+    name: Optional[str] = spark_config.get("spark.app.name")
+    if not name:
+        name = "default_great_expectations_spark_application"
+    spark_config.update({"spark.app.name": name})
+
+    spark_session: Optional[SparkSession] = get_or_create_spark_session(
+        spark_config=spark_config
+    )
+    if spark_session is None:
+        raise ValueError("SparkContext could not be started.")
+
+    # noinspection PyProtectedMember
+    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
+    if spark_restart_required(
+        current_spark_config=spark_session.sparkContext.getConf().getAll(),
+        desired_spark_config=spark_config,
+    ):
+        if not sc_stopped:
+            try:
+                # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
+                logger.info("Stopping existing spark context to reconfigure.")
+                spark_session.sparkContext.stop()
+            except AttributeError:
+                logger.error(
+                    "Unable to load spark context; install optional spark dependency for support."
+                )
+        spark_session = get_or_create_spark_session(spark_config=spark_config)
+        if spark_session is None:
+            raise ValueError("SparkContext could not be started.")
+        # noinspection PyProtectedMember
+        sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
+
+    if sc_stopped:
+        raise ValueError("SparkContext stopped unexpectedly.")
+
+    return spark_session
+
+
+# noinspection PyPep8Naming
+def get_or_create_spark_session(
+    spark_config: Optional[Dict[str, str]] = None,
+):
+    # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
+    # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
+    # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
+    # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+    try:
+        from pyspark.sql import SparkSession
+    except ImportError:
+        SparkSession = None
+        # TODO: review logging more detail here
+        logger.debug(
+            "Unable to load pyspark; install optional spark dependency for support."
+        )
+
+    spark_session: Optional[SparkSession]
+    try:
+        if spark_config is None:
+            spark_config = {}
+        else:
+            spark_config = copy.deepcopy(spark_config)
+
+        builder = SparkSession.builder
+
+        app_name: Optional[str] = spark_config.get("spark.app.name")
+        if app_name:
+            builder.appName(app_name)
+        for k, v in spark_config.items():
+            if k != "spark.app.name":
+                builder.config(k, v)
+        spark_session = builder.getOrCreate()
+        # noinspection PyProtectedMember
+        if spark_session.sparkContext._jsc.sc().isStopped():
+            raise ValueError("SparkContext stopped unexpectedly.")
+    except AttributeError:
+        logger.error(
+            "Unable to load spark context; install optional spark dependency for support."
+        )
+        spark_session = None
+
+    return spark_session
+
+
+def spark_restart_required(
+    current_spark_config: List[tuple], desired_spark_config: dict
+) -> bool:
+
+    # we can't change spark context config values within databricks runtimes
+    if in_databricks():
+        return False
+
+    current_spark_config_dict: dict = {k: v for (k, v) in current_spark_config}
+    if desired_spark_config.get("spark.app.name") != current_spark_config_dict.get(
+        "spark.app.name"
+    ):
+        return True
+
+    if not set([(k, v) for k, v in desired_spark_config.items()]).issubset(
+        current_spark_config
+    ):
+        return True
+
+    return False
+
+
+def get_sql_dialect_floating_point_infinity_value(
+    schema: str, negative: bool = False
+) -> float:
+    res: Optional[dict] = SCHEMAS.get(schema)
+    if res is None:
+        if negative:
+            return -np.inf
+        else:
+            return np.inf
+    else:
+        if negative:
+            return res["NegativeInfinity"]
+        else:
+            return res["PositiveInfinity"]

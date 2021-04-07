@@ -8,10 +8,11 @@ from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
+    RuntimeBatchRequest,
 )
+from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import DataConnector
-from great_expectations.datasource.types import PathBatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,7 @@ class BaseDatasource:
         return batch_list[0]
 
     def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
+        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> List[Batch]:
         """
         Processes batch_request and returns the (possibly empty) list of batch objects.
@@ -112,13 +113,44 @@ class BaseDatasource:
         data_connector: DataConnector = self.data_connectors[
             batch_request.data_connector_name
         ]
+
         batch_definition_list: List[
             BatchDefinition
         ] = data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
 
-        if batch_request["batch_data"] is None:
+        if isinstance(batch_request, RuntimeBatchRequest):
+            # This is a runtime batch_request
+
+            if len(batch_definition_list) != 1:
+                raise ValueError(
+                    "RuntimeBatchRequests must specify exactly one corresponding BatchDefinition"
+                )
+
+            batch_definition = batch_definition_list[0]
+            runtime_parameters = batch_request.runtime_parameters
+
+            # noinspection PyArgumentList
+            (
+                batch_data,
+                batch_spec,
+                batch_markers,
+            ) = data_connector.get_batch_data_and_metadata(
+                batch_definition=batch_definition,
+                runtime_parameters=runtime_parameters,
+            )
+
+            new_batch: Batch = Batch(
+                data=batch_data,
+                batch_request=batch_request,
+                batch_definition=batch_definition,
+                batch_spec=batch_spec,
+                batch_markers=batch_markers,
+            )
+
+            return [new_batch]
+        else:
             batches: List[Batch] = []
             for batch_definition in batch_definition_list:
                 batch_definition.batch_spec_passthrough = (
@@ -143,37 +175,6 @@ class BaseDatasource:
                 )
                 batches.append(new_batch)
             return batches
-
-        else:
-            # This is a runtime batchrequest
-
-            if len(batch_definition_list) != 1:
-                raise ValueError(
-                    "When batch_request includes batch_data, it must specify exactly one corresponding BatchDefinition"
-                )
-
-            batch_definition = batch_definition_list[0]
-            batch_data = batch_request["batch_data"]
-
-            # noinspection PyArgumentList
-            (
-                typed_batch_data,
-                batch_spec,
-                batch_markers,
-            ) = data_connector.get_batch_data_and_metadata(
-                batch_definition=batch_definition,
-                batch_data=batch_data,
-            )
-
-            new_batch: Batch = Batch(
-                data=typed_batch_data,
-                batch_request=batch_request,
-                batch_definition=batch_definition,
-                batch_spec=batch_spec,
-                batch_markers=batch_markers,
-            )
-
-            return [new_batch]
 
     def _build_data_connector_from_config(
         self,
@@ -255,13 +256,15 @@ class BaseDatasource:
 
     def self_check(self, pretty_print=True, max_examples=3):
         # Provide visibility into parameters that ExecutionEngine was instantiated with.
-        report_object = {"execution_engine": self.execution_engine.config}
+        report_object: dict = {"execution_engine": self.execution_engine.config}
 
         if pretty_print:
-            print(f"Execution engine: {self.execution_engine.__class__.__name__}")
+            print(
+                f"\nExecutionEngine class name: {self.execution_engine.__class__.__name__}"
+            )
 
         if pretty_print:
-            print(f"Data connectors:")
+            print(f"Data Connectors:")
 
         data_connector_list = list(self.data_connectors.keys())
         data_connector_list.sort()
@@ -289,6 +292,12 @@ class BaseDatasource:
                 f"""datasource_name in BatchRequest: "{batch_request.datasource_name}" does not
                 match Datasource name: "{self.name}".
                 """
+            )
+
+        if batch_request.data_connector_name not in self.data_connectors.keys():
+            raise ValueError(
+                f"""data_connector_name in BatchRequest: "{batch_request.data_connector_name}" is not configured for DataSource: "{self.name}".
+                    """
             )
 
     @property

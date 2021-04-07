@@ -116,6 +116,15 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
            """
 
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "production",
+        "package": "great_expectations",
+        "tags": ["core expectation", "column aggregate expectation"],
+        "contributors": ["@great_expectations"],
+        "requirements": [],
+    }
+
     metric_dependencies = ("column.quantile_values",)
     success_keys = (
         "quantile_ranges",
@@ -154,11 +163,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             allow_relative_error = configuration.kwargs["allow_relative_error"]
         else:
             allow_relative_error = False
-
-        if allow_relative_error is not False:
-            raise ValueError(
-                "PandasExecutionEngine does not support relative error in column quantiles."
-            )
 
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(

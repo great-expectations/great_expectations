@@ -2,11 +2,10 @@ import json
 
 import pytest
 
-from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError
-from tests.test_utils import expectationSuiteSchema
+from great_expectations.self_check.util import expectationSuiteSchema
 
 
 @pytest.fixture()
@@ -82,7 +81,9 @@ def test_run_validation_operator_raises_error_if_non_batches_are_passed_in_list(
             validation_operator_name="store_val_res_and_extract_eval_params",
             assets_to_validate=["foo"],
         )
-    assert e.value.message == "Batches are required to be of type DataAsset"
+    assert (
+        e.value.message == "Batches are required to be of type DataAsset or Validator"
+    )
 
 
 def test_run_validation_operator_raises_error_if_no_matching_validation_operator_is_found(

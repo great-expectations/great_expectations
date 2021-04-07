@@ -9,7 +9,7 @@ Datasources
 Data Connectors
 ===================
 
-A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external data store to *identify available partitions*, *build batch definitions using parameters such as partition names*, and *translate batch definitions to Execution Engine-specific Batch Specs*.
+A **Data Connector** facilitates access to an external data store, such as a database, filesystem, or cloud storage. The Data Connector can inspect an external data store to *identify available Batches*, *build Batch Definitions using Batch Identifiers*, and *translate Batch Definitions to Execution Engine-specific Batch Specs*.
 
 .. admonition:: API Note
 
@@ -23,10 +23,11 @@ Each Data Connector holds configuration for connecting to a different type of ex
 
 The simplest ``RuntimeDataConnector`` may simply store lookup information about Data Assets to facilitate running in a pipeline where you already have a DataFrame in memory or available in a cluster. However, Great Expectations makes it possible to configure Data Connectors that offer stronger guarantees about reproducibility, sampling, and compatibility with other tools.
 
-The Data Connector uses ``Partitions`` to identify the available batches available in a Data Asset.
+The Data Connector uses ``Batch Definitions`` to identify the Batches available in a Data Asset.
 
-A **Partition** is what differentiates a specific ``Batch`` of data that is part of a Data Asset. The partition uniquely identifies a subset of data based on the purpose for which you validate, such as the most recent delivery. The ``ConfiguredAssetFilesystemDataConnector`` can use a regex string to match files and prouce named match groups that define unique partitions. Data Connectors use **Sorters** to help define a unique order for partitions, such as sorting files by date or alphabetically.
+A **Batch** is what differentiates a specific set of data that is part of a Data Asset. The Batch uniquely identifies a subset of data based on the purpose for which you validate, such as the most recent delivery. The ``ConfiguredAssetFilesystemDataConnector`` can use a regex string to match files and produce named match groups that define unique Batches. Data Connectors use **Sorters** to help define a unique order for Batches, such as sorting files by date or alphabetically.
 
+.. _specifying_batches:
 Batches
 =========
 
@@ -51,9 +52,9 @@ Typically, a user need specify only the **BatchRequest**. The BatchRequest is a 
 
 A **Batch Definition** includes all the information required to precisely identify a set of data from the external data source that should be translated into a Batch. One or more BatchDefinitions are always *returned* from the Datasource, as a result of processing the BatchRequest. A BatchDefinition includes several key components:
 
-- **Partition Definition**: contains information that uniquely identifies a specific partition from the Data Asset, such as the delivery date or query time.
+- **Batch Identifiers**: contains information that uniquely identifies a specific batch from the Data Asset, such as the delivery date or query time.
 - **Engine Passthrough**: contains information that will be passed directly to the Execution Engine as part of the Batch Spec.
-- **Sample Definition**: contains information about sampling or limiting done on the partition to create a Batch.
+- **Sample Definition**: contains information about sampling or limiting done on the Data Asset to create a Batch.
 
 .. admonition:: Best Practice
 
@@ -76,7 +77,7 @@ Given the following BatchDefinition:
       "datasource_name": "cloud_spark",
       "data_connector_name": "s3",
       "data_asset_name": "nightly_logs",
-      "partition_definition": {
+      "batch_identifiers": {
         "year": 2020,
         "month": 9,
         "day": 15
@@ -100,7 +101,7 @@ The ``ConfiguredAssetFilesystemDataConnector`` might work with a configured Spar
 
 
 
-[[Diagram: External Datasource -> Partition Definition -> Batch Definition -> Batch Spec -> Execution  Engine -> External Datasource ]]
+[[Diagram: External Datasource -> Batch Identifiers -> Batch Definition -> Batch Spec -> Execution  Engine -> External Datasource ]]
 
 The Datasource can then query the ExecutionEngine to fetch data and BatchMarkers, producing a ``new_batch`` that may look something like this:
 
@@ -112,8 +113,8 @@ The Datasource can then query the ExecutionEngine to fetch data and BatchMarkers
             "datasource": "myds"
             "data_connector": "pipeline",
             "data_asset_name": "my_asset",
-            "partition_request" : {
-                "partition_identifiers" : {
+            "data_connector_query" : {
+                "batch_filter_parameters" : {
                     "airflow_run_id": "string_airflow_run_id_that_was_provided",
                     "other_key": "string_other_key_that_was_provided",
                 }
@@ -126,7 +127,7 @@ The Datasource can then query the ExecutionEngine to fetch data and BatchMarkers
             "datasource": "myds",
             "data_connector": "pipeline",
             "data_asset_name": "my_asset",
-            "partition_definition": {
+            "batch_identifiers": {
               "airflow_run_id": "string_airflow_run_id_that_was_provided",
               "other_key": "string_other_key_that_was_provided",
           }
@@ -150,7 +151,7 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
 1. ``BatchRequest``
 
 - The ``BatchRequest`` is the object a user passes to the ``DataSource`` to request a ``Batch`` (or ``Batches``).
-    - It can include ``partition_request`` params with values relative to the latest batch (e.g. the "latest" slice). Conceptually, this enables "fetch the latest `Batch`" behavior. It is the key thing that differentiates a `BatchRequest`, which does NOT necessarily uniquely identify the `Batch(es)` to be fetched, from a BatchDefinition.
+    - It can include ``data_connector_query`` params with values relative to the latest batch (e.g. the "latest" slice). Conceptually, this enables "fetch the latest `Batch`" behavior. It is the key thing that differentiates a `BatchRequest`, which does NOT necessarily uniquely identify the `Batch(es)` to be fetched, from a BatchDefinition.
     - The BatchRequest can also include a section called ``batch_spec_passthrough`` to make it easy to directly communicate parameters to a specific ExecutionEngine.
     - When resolved, the `BatchRequest` may point to many `BatchDefinitions` and Batches.
 
@@ -162,14 +163,14 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
         "datasource": "myds",
         "data_connector": "pipeline",
         "in_memory_dataset": df,
-        "partition_request" : {
-        "partition_identifiers" : {
-            "airflow_run_id": my_run_id,
-            "other_key": my_other_key
-        }
-        "custom_filter_function": my_filter_fn,
-        "limit": 10,
-        "index": Optional[Union[int, list, tuple, slice, str]],  # examples: 0; "-1"; [3:7]; "[2:4]"
+        "data_connector_query" : {
+          "batch_filter_parameters" : {
+              "airflow_run_id": my_run_id,
+              "other_key": my_other_key
+          }
+          "custom_filter_function": my_filter_fn,
+          "limit": 10,
+          "index": Optional[Union[int, list, tuple, slice, str]],  # examples: 0; "-1"; [3:7]; "[2:4]"
         },
         "sampling": {
             "limit": 1000,
@@ -188,9 +189,9 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
         datasource: str
         data_connector: str
         data_asset_name: str
-        partition_definition:
+        batch_identifiers:
             ** contents depend on the configuration of the DataConnector **
-            ** provides a persistent, unique identifier for the partition within the context of the data asset **
+            ** provides a persistent, unique identifier for the Batch within the context of the Data Asset **
 
 3. ``BatchSpec``
 
@@ -198,12 +199,11 @@ Let's follow the outline in this diagram to follow the journey from ``BatchReque
 
 4. During initilization of the Batch, ``BatchMarkers``, calculated by the ``ExecutionEngine``, are also added. They are metadata that can be used to calculate performance characteristics, ensure reproducibility of validation results, and provide indicators of the state of the underlying data system.
 
-
+.. _runtime_data_connector_and_runtime_batch_request:
 ************************************************************
-RuntimeDataConnector 
+RuntimeDataConnector and RuntimeBatchRequest
 ************************************************************
 
-A ``RuntimeDataConnector`` is a special kind of DataConnector that supports easy integration with Pipeline Runners where the data is already available as a reference that needs only a lightweight wrapper to track validations.
+A Runtime Data Connector is a special kind of Data Connector that supports easy integration with Pipeline Runners where the data is already available as a reference that needs only a lightweight wrapper to track validations. Runtime Data Connectors are used alongside a special kind of Batch Request class called a ``RuntimeBatchRequest``. Instead of serving as a description of what data Great Expectations should fetch, a Runtime Batch Request serves as a wrapper for data that is passed in at runtime (as an in-memory dataframe, file/S3 path, or SQL query), with user-provided identifiers for uniquely identifying the data.
 
-In a BatchDefinition produced by a RuntimeDataConnector, the ``partition_definition`` section is replaced with ``runtime_keys``. ``runtime_keys`` perform the same function as ``partition_definition``: a persistent, unique identifier for the partition of data included in the ``Batch``. By relying on user-provided keys, we allow the definition of the specific partition's identifiers to happen at runtime, for example using a run_id from an Airflow DAG run.
--  The specific runtime **keys** to be expected are controlled in the in the DataConnector configuration. Using that configuration creates a control plane for governance-minded engineers who want to enforce some level of consistency between validations.
+In a Batch Definition produced by a Runtime Data Connector, the ``batch_identifiers`` come directly from the Runtime Batch Request and serve as a persistent, unique identifier for the data included in the Batch. By relying on user-provided ``batch_identifiers``, we allow the definition of the specific batch's identifiers to happen at runtime, for example using a run_id from an Airflow DAG run. The specific runtime batch_identifiers to be expected are controlled in the in the Runtime Data Connector configuration. Using that configuration creates a control plane for governance-minded engineers who want to enforce some level of consistency between validations.

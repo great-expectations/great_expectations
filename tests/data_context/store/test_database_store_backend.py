@@ -1,4 +1,5 @@
 import logging
+import os
 
 import pyparsing as pp
 import pytest
@@ -7,6 +8,11 @@ import tests.test_utils as test_utils
 from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import StoreBackendError
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
 
 
 def test_database_store_backend_schema_spec(caplog, sa, test_backends):
@@ -18,7 +24,7 @@ def test_database_store_backend_schema_spec(caplog, sa, test_backends):
             "drivername": "postgresql",
             "username": "postgres",
             "password": "",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "5432",
             "schema": "special",
             "database": "test_ci",
@@ -46,7 +52,7 @@ def test_database_store_backend_get_url_for_key(caplog, sa, test_backends):
             "drivername": "postgresql",
             "username": "postgres",
             "password": "",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "5432",
             "database": "test_ci",
         },
@@ -74,7 +80,7 @@ def test_database_store_backend_duplicate_key_violation(caplog, sa, test_backend
             "drivername": "postgresql",
             "username": "postgres",
             "password": "",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "5432",
             "database": "test_ci",
         },
@@ -109,8 +115,9 @@ def test_database_store_backend_url_instantiation(caplog, sa, test_backends):
     if "postgresql" not in test_backends:
         pytest.skip("test_database_store_backend_get_url_for_key requires postgresql")
 
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     store_backend = DatabaseStoreBackend(
-        url="postgresql://postgres@localhost/test_ci",
+        url=f"postgresql://postgres@{db_hostname}/test_ci",
         table_name="test_database_store_backend_url_key",
         key_columns=["k1"],
     )
@@ -123,10 +130,11 @@ def test_database_store_backend_url_instantiation(caplog, sa, test_backends):
     key = ("not_here",)
     assert "postgresql://test_ci/not_here" == store_backend.get_url_for_key(key)
 
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     store_backend = DatabaseStoreBackend(
         table_name="test_database_store_backend_url_key",
         key_columns=["k1"],
-        connection_string="postgresql://postgres@localhost/test_ci",
+        connection_string=f"postgresql://postgres@{db_hostname}/test_ci",
     )
 
     # existing key
@@ -165,7 +173,7 @@ def test_database_store_backend_id_initialization(caplog, sa, test_backends):
             "drivername": "postgresql",
             "username": "postgres",
             "password": "",
-            "host": "localhost",
+            "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
             "port": "5432",
             "database": "test_ci",
         },
@@ -189,7 +197,7 @@ def test_database_store_backend_id_initialization(caplog, sa, test_backends):
                     "drivername": "postgresql",
                     "username": "postgres",
                     "password": "",
-                    "host": "localhost",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
                     "port": "5432",
                     "database": "test_ci",
                 },

@@ -2,41 +2,36 @@ import copy
 import datetime
 import hashlib
 import logging
+import pickle
 import random
 from functools import partial
+from io import BytesIO
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
 import pandas as pd
-from ruamel.yaml.compat import StringIO
 
-import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.datasource.types import (
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchMarkers
+from great_expectations.core.batch_spec import (
+    BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.datasource.util import S3Url
+from great_expectations.core.util import S3Url, sniff_s3_compression
+from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
+
+from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 try:
     import boto3
 except ImportError:
     boto3 = None
 
-from ..core.batch import BatchMarkers
-from ..core.id_dict import BatchSpec
-from ..datasource.util import hash_pandas_dataframe
-from ..exceptions import BatchSpecError, GreatExpectationsError, ValidationError
-from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
-
-
-class PandasBatchData(pd.DataFrame):
-    # @property
-    def row_count(self):
-        return self.shape[0]
 
 
 class PandasExecutionEngine(ExecutionEngine):
@@ -103,6 +98,17 @@ Notes:
         super().configure_validator(validator)
         validator.expose_dataframe_methods = True
 
+    def load_batch_data(self, batch_id: str, batch_data: Any) -> None:
+        if isinstance(batch_data, pd.DataFrame):
+            batch_data = PandasBatchData(self, batch_data)
+        elif isinstance(batch_data, PandasBatchData):
+            pass
+        else:
+            raise ge_exceptions.GreatExpectationsError(
+                "PandasExecutionEngine requires batch data that is either a DataFrame or a PandasBatchData object"
+            )
+        super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
+
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
@@ -115,20 +121,24 @@ Notes:
             }
         )
 
+        batch_data: Any
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
+            if isinstance(batch_data, str):
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
+Please check your config."""
+                )
+            if isinstance(batch_spec.batch_data, pd.DataFrame):
+                df = batch_spec.batch_data
+            elif isinstance(batch_spec.batch_data, PandasBatchData):
+                df = batch_spec.batch_data.dataframe
+            else:
+                raise ValueError(
+                    "RuntimeDataBatchSpec must provide a Pandas DataFrame or PandasBatchData object."
+                )
             batch_spec.batch_data = "PandasDataFrame"
-
-        elif isinstance(batch_spec, PathBatchSpec):
-            reader_method: str = batch_spec.get("reader_method")
-            reader_options: dict = batch_spec.get("reader_options") or {}
-
-            path: str = batch_spec["path"]
-            reader_fn: Callable = self._get_reader_fn(reader_method, path)
-
-            batch_data = reader_fn(path, **reader_options)
-
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
@@ -136,54 +146,51 @@ Notes:
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
             s3_engine = self._s3
-            s3_url = S3Url(batch_spec.get("s3"))
-            reader_method: str = batch_spec.get("reader_method")
-            reader_options: dict = batch_spec.get("reader_options") or {}
-
+            s3_url = S3Url(batch_spec.path)
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options or {}
+            if "compression" not in reader_options.keys():
+                reader_options["compression"] = sniff_s3_compression(s3_url)
             s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
-
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
                     s3_url.bucket, s3_url.key
                 )
             )
             reader_fn = self._get_reader_fn(reader_method, s3_url.key)
-            batch_data = reader_fn(
-                StringIO(
-                    s3_object["Body"]
-                    .read()
-                    .decode(s3_object.get("ContentEncoding", "utf-8"))
-                ),
-                **reader_options,
-            )
+            buf = BytesIO(s3_object["Body"].read())
+            buf.seek(0)
+            df = reader_fn(buf, **reader_options)
+        elif isinstance(batch_spec, PathBatchSpec):
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options
+            path: str = batch_spec.path
+            reader_fn: Callable = self._get_reader_fn(reader_method, path)
+            df = reader_fn(path, **reader_options)
         else:
-            raise BatchSpecError(
+            raise ge_exceptions.BatchSpecError(
                 f"batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, or S3BatchSpec, not {batch_spec.__class__.__name__}"
             )
 
-        batch_data = self._apply_splitting_and_sampling_methods(batch_spec, batch_data)
-        if batch_data.memory_usage().sum() < HASH_THRESHOLD:
-            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(batch_data)
+        df = self._apply_splitting_and_sampling_methods(batch_spec, df)
+        if df.memory_usage().sum() < HASH_THRESHOLD:
+            batch_markers["pandas_data_fingerprint"] = hash_pandas_dataframe(df)
 
-        typed_batch_data = self._get_typed_batch_data(batch_data)
+        typed_batch_data = PandasBatchData(execution_engine=self, dataframe=df)
 
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
             splitter_fn = getattr(self, batch_spec.get("splitter_method"))
-            splitter_kwargs: str = batch_spec.get("splitter_kwargs") or {}
+            splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
         if batch_spec.get("sampling_method"):
             sampling_fn = getattr(self, batch_spec.get("sampling_method"))
-            sampling_kwargs: str = batch_spec.get("sampling_kwargs") or {}
+            sampling_kwargs: dict = batch_spec.get("sampling_kwargs") or {}
             batch_data = sampling_fn(batch_data, **sampling_kwargs)
         return batch_data
-
-    def _get_typed_batch_data(self, batch_data):
-        typed_batch_data = PandasBatchData(batch_data)
-        return typed_batch_data
 
     @property
     def dataframe(self):
@@ -196,7 +203,7 @@ Notes:
                 "Batch has not been loaded - please run load_batch_data() to load a batch."
             )
 
-        return self.active_batch_data
+        return self.active_batch_data.dataframe
 
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
@@ -211,7 +218,7 @@ Notes:
 
         """
         if reader_method is None and path is None:
-            raise BatchSpecError(
+            raise ge_exceptions.BatchSpecError(
                 "Unable to determine pandas reader function without reader_method or path."
             )
 
@@ -229,7 +236,7 @@ Notes:
                 reader_fn = partial(reader_fn, **reader_options)
             return reader_fn
         except AttributeError:
-            raise BatchSpecError(
+            raise ge_exceptions.BatchSpecError(
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
@@ -263,13 +270,15 @@ Notes:
                 "reader_options": {"compression": "gzip"},
             }
 
-        raise BatchSpecError(f'Unable to determine reader method from path: "{path}".')
+        raise ge_exceptions.BatchSpecError(
+            f'Unable to determine reader method from path: "{path}".'
+        )
 
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, "MetricDomainTypes"],
-        accessor_keys: Optional[Iterable[str]] = [],
+        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
@@ -298,16 +307,18 @@ Notes:
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.active_batch_data_id is not None:
-                data = self.active_batch_data
+                data = self.active_batch_data.dataframe
             else:
-                raise ValidationError(
+                raise ge_exceptions.ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
             if batch_id in self.loaded_batch_data_dict:
-                data = self.loaded_batch_data_dict[batch_id]
+                data = self.loaded_batch_data_dict[batch_id].dataframe
             else:
-                raise ValidationError(f"Unable to find batch with batch_id {batch_id}")
+                raise ge_exceptions.ValidationError(
+                    f"Unable to find batch with batch_id {batch_id}"
+                )
 
         compute_domain_kwargs = copy.deepcopy(domain_kwargs)
         accessor_domain_kwargs = dict()
@@ -338,7 +349,7 @@ Notes:
         if (
             domain_type != MetricDomainTypes.TABLE
             and accessor_keys is not None
-            and len(accessor_keys) > 0
+            and len(list(accessor_keys)) > 0
         ):
             logger.warning(
                 "Accessor keys ignored since Metric Domain Type is not 'table"
@@ -347,21 +358,26 @@ Notes:
         # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
         # modify domain access)
         if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(accessor_keys) > 0:
+            if accessor_keys is not None and len(list(accessor_keys)) > 0:
                 for key in accessor_keys:
                     accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
             if len(compute_domain_kwargs.keys()) > 0:
-                for key in compute_domain_kwargs.keys():
-                    # Warning user if kwarg not "normal"
-                    if key not in [
+                # Warn user if kwarg not "normal".
+                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
+                    {
                         "batch_id",
                         "table",
                         "row_condition",
                         "condition_parser",
-                    ]:
-                        logger.warning(
-                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
-                        )
+                    }
+                )
+                if len(unexpected_keys) > 0:
+                    unexpected_keys_str: str = ", ".join(
+                        map(lambda element: f'"{element}"', unexpected_keys)
+                    )
+                    logger.warning(
+                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                    )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and
@@ -370,7 +386,7 @@ Notes:
                 accessor_domain_kwargs["column"] = compute_domain_kwargs.pop("column")
             else:
                 # If column not given
-                raise GreatExpectationsError(
+                raise ge_exceptions.GreatExpectationsError(
                     "Column not provided in compute_domain_kwargs"
                 )
 
@@ -388,7 +404,7 @@ Notes:
                     "column_B"
                 )
             else:
-                raise GreatExpectationsError(
+                raise ge_exceptions.GreatExpectationsError(
                     "column_A or column_B not found within compute_domain_kwargs"
                 )
 
@@ -434,37 +450,32 @@ Notes:
 
     @staticmethod
     def _split_on_column_value(
-        df,
-        column_name: str,
-        partition_definition: dict,
+        df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
 
-        return df[df[column_name] == partition_definition[column_name]]
+        return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
     def _split_on_converted_datetime(
         df,
         column_name: str,
-        partition_definition: dict,
+        batch_identifiers: dict,
         date_format_string: str = "%Y-%m-%d",
     ):
         """Convert the values in the named column to the given date_format, and split on that"""
         stringified_datetime_series = df[column_name].map(
             lambda x: x.strftime(date_format_string)
         )
-        matching_string = partition_definition[column_name]
+        matching_string = batch_identifiers[column_name]
         return df[stringified_datetime_series == matching_string]
 
     @staticmethod
     def _split_on_divided_integer(
-        df,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
+        df, column_name: str, divisor: int, batch_identifiers: dict
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        matching_divisor = partition_definition[column_name]
+        matching_divisor = batch_identifiers[column_name]
         matching_rows = df[column_name].map(
             lambda x: int(x / divisor) == matching_divisor
         )
@@ -472,35 +483,28 @@ Notes:
         return df[matching_rows]
 
     @staticmethod
-    def _split_on_mod_integer(
-        df,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
-    ):
+    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        matching_mod_value = partition_definition[column_name]
+        matching_mod_value = batch_identifiers[column_name]
         matching_rows = df[column_name].map(lambda x: x % mod == matching_mod_value)
 
         return df[matching_rows]
 
     @staticmethod
     def _split_on_multi_column_values(
-        df,
-        column_names: List[str],
-        partition_definition: dict,
+        df, column_names: List[str], batch_identifiers: dict
     ):
         """Split on the joint values in the named columns"""
 
         subset_df = df.copy()
         for column_name in column_names:
-            value = partition_definition.get(column_name)
+            value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
                     f"In order for PandasExecution to `_split_on_multi_column_values`, "
-                    f"all values in column_names must also exist in partition_definition. "
-                    f"{column_name} was not found in partition_definition."
+                    f"all values in column_names must also exist in batch_identifiers. "
+                    f"{column_name} was not found in batch_identifiers."
                 )
             subset_df = subset_df[subset_df[column_name] == value]
         return subset_df
@@ -510,7 +514,7 @@ Notes:
         df,
         column_name: str,
         hash_digits: int,
-        partition_definition: dict,
+        batch_identifiers: dict,
         hash_function_name: str = "md5",
     ):
         """Split on the hashed value of the named column"""
@@ -525,7 +529,7 @@ Notes:
             )
         matching_rows = df[column_name].map(
             lambda x: hash_method(str(x).encode()).hexdigest()[-1 * hash_digits :]
-            == partition_definition["hash_value"]
+            == batch_identifiers["hash_value"]
         )
         return df[matching_rows]
 
@@ -585,3 +589,13 @@ Notes:
             == hash_value
         )
         return df[matches]
+
+
+def hash_pandas_dataframe(df):
+    try:
+        obj = pd.util.hash_pandas_object(df, index=True).values
+    except TypeError:
+        # In case of facing unhashable objects (like dict), use pickle
+        obj = pickle.dumps(df, pickle.HIGHEST_PROTOCOL)
+
+    return hashlib.md5(obj).hexdigest()
