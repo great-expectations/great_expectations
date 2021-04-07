@@ -98,7 +98,7 @@ Additional notes
                 #--------------------------------
                 notify_with:
                   - local_site
-                  - gcs_site
+                  - s3_site
                 renderer:
                   module_name: great_expectations.render.renderer.slack_renderer
                   class_name: SlackRenderer
