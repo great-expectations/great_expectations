@@ -7,12 +7,13 @@ from nbformat.notebooknode import NotebookNode
 from great_expectations import DataContext
 
 # noinspection PyProtectedMember
-from great_expectations.cli.suite import _suite_edit
+from great_expectations.cli.suite import _suite_edit_workflow
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
 )
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
@@ -816,7 +817,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
 
 
 def test_notebook_execution_with_pandas_backend(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
     To set this test up we:
@@ -836,7 +837,7 @@ def test_notebook_execution_with_pandas_backend(
     # Since we'll run the notebook, we use a context with no data docs to avoid
     # the renderer's default behavior of building and opening docs, which is not
     # part of this test.
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
     expectation_suite_name: str = "warning"
@@ -865,7 +866,9 @@ def test_notebook_execution_with_pandas_backend(
     assert context.list_expectation_suite_names() == [expectation_suite_name]
     assert context.list_datasources() == [
         {
+            "name": "my_datasource",
             "class_name": "Datasource",
+            "module_name": "great_expectations.datasource",
             "execution_engine": {
                 "class_name": "PandasExecutionEngine",
                 "module_name": "great_expectations.execution_engine",
@@ -915,22 +918,41 @@ def test_notebook_execution_with_pandas_backend(
                     "class_name": "RuntimeDataConnector",
                 },
             },
+        },
+        {
+            "name": "my_additional_datasource",
+            "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
-            "name": "my_datasource",
-        }
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "class_name": "PandasExecutionEngine",
+            },
+            "data_connectors": {
+                "my_additional_data_connector": {
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "default_regex": {
+                        "pattern": "(.*)\\.csv",
+                        "group_names": ["data_asset_name"],
+                    },
+                    "base_directory": f"{root_dir}/../data/titanic",
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                }
+            },
+        },
     ]
 
     assert context.get_validation_result(expectation_suite_name="warning") == {}
 
     # Create notebook
-    _suite_edit(
+    _suite_edit_workflow(
         context=context,
-        suite_name=expectation_suite_name,
+        expectation_suite_name=expectation_suite_name,
         no_jupyter=True,
         batch_request=batch_request,
         usage_event="test_notebook_execution",
+        create_if_not_exist=False,
         interactive=False,
-        datasource=None,
+        datasource_name=None,
         suppress_usage_message=True,
         # do not want to actually send usage_message, since the function call is not the result of actual usage
     )
@@ -961,7 +983,7 @@ def test_notebook_execution_with_pandas_backend(
 
 
 def test_notebook_execution_with_custom_notebooks_wrong_module(
-    suite_with_multiple_citations, data_context_with_bad_notebooks
+    suite_with_multiple_citations, data_context_v3_custom_bad_notebooks
 ):
     """
     Test the error message in case of "bad" custom module is clear
@@ -970,8 +992,8 @@ def test_notebook_execution_with_custom_notebooks_wrong_module(
         SuiteEditNotebookCustomTemplateModuleNotFoundError, match=r"invalid\.module"
     ):
         SuiteEditNotebookRenderer.from_data_context(
-            data_context_with_bad_notebooks
-        ).render(suite_with_multiple_citations)
+            data_context=data_context_v3_custom_bad_notebooks
+        ).render(suite=suite_with_multiple_citations)
 
 
 def test_notebook_execution_with_custom_notebooks(

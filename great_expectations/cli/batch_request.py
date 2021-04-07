@@ -30,8 +30,7 @@ except ImportError:
 
 
 def get_batch_request(
-    context: DataContext,
-    datasource_name: Optional[str] = None,
+    datasource: BaseDatasource,
     additional_batch_request_args: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Union[str, Dict[str, Any]]]:
     """
@@ -48,19 +47,10 @@ def get_batch_request(
     If the datasource has data connectors, the method lets user choose a name from that list (note: if there are
     multiple data connectors, user has to choose one first).
 
-    :param context:
-    :param datasource_name:
-    :param data_connector_name:
-    :param data_asset_name:
-    :param additional_batch_request_args:
-    :return: a tuple: (datasource_name, data_connector_name, data_asset_name, batch_request). The components
-                of the tuple were passed into the methods as optional arguments, but their values might
-                have changed after this method's execution.
+    # :param datasource:
+    # :param additional_batch_request_args:
+    # :return: batch_request
     """
-    datasource: BaseDatasource = toolkit.select_datasource(
-        context=context, datasource_name=datasource_name
-    )
-
     available_data_asset_names_by_data_connector_dict: Dict[
         str, List[str]
     ] = datasource.get_available_data_asset_names()
@@ -68,8 +58,8 @@ def get_batch_request(
         available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
     )
 
-    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
-        "datasource_name": datasource_name,
+    batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = {
+        "datasource_name": datasource.name,
         "data_connector_name": data_connector_name,
     }
 
@@ -94,7 +84,7 @@ def get_batch_request(
     else:
         raise ge_exceptions.DataContextError(
             "Datasource {:s} of unsupported type {:s} was encountered.".format(
-                datasource_name, str(type(datasource))
+                datasource.name, str(type(datasource))
             )
         )
 
@@ -299,7 +289,7 @@ def _get_batch_spec_passthrough(
 
 
 def standardize_batch_request_display_ordering(
-    batch_request: Dict[str, Union[str, Dict[str, Any]]]
+    batch_request: Dict[str, Union[str, int, Dict[str, Any]]]
 ) -> Dict[str, Union[str, Dict[str, Any]]]:
     datasource_name: str = batch_request["datasource_name"]
     data_connector_name: str = batch_request["data_connector_name"]

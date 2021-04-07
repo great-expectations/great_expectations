@@ -2002,7 +2002,7 @@ class BaseDataContext:
         return validation_operators
 
     def create_expectation_suite(
-        self, expectation_suite_name, overwrite_existing=False
+        self, expectation_suite_name: str, overwrite_existing: Optional[bool] = False
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -2017,10 +2017,12 @@ class BaseDataContext:
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
-        expectation_suite = ExpectationSuite(
+        expectation_suite: ExpectationSuite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name
         )
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite_name
+        )
 
         if self.expectations_store.has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
@@ -2052,7 +2054,7 @@ class BaseDataContext:
             self.expectations_store.remove_key(key)
             return True
 
-    def get_expectation_suite(self, expectation_suite_name):
+    def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """Get a named expectation suite for the provided data_asset_name.
 
         Args:
@@ -2061,7 +2063,9 @@ class BaseDataContext:
         Returns:
             expectation_suite
         """
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite_name
+        )
 
         if self.expectations_store.has_key(key):
             return self.expectations_store.get(key)
