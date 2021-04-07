@@ -9,7 +9,7 @@ Note that we do not guarantee that Expectations in the `experimental` package ar
 
 ## Using Contrib
 
-Using a new Expectation contributed by a user is easy. Simply `pip install --upgrade great-expectations-contrib` and import the Expectation you'd like. Because each Expectation is modular and not imported until you declare you'd like to use it, you're in complete control of dependencies for contrib expectations.
+Using a new Expectation contributed by a user is easy. Simply `pip install --upgrade great-expectations-experimental` and import the Expectation you'd like. Because each Expectation is modular and not imported until you declare you'd like to use it, you're in complete control of dependencies for contrib expectations.
 
 For example:
 
