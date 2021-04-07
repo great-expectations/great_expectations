@@ -7,6 +7,11 @@ from great_expectations.datasource.batch_kwargs_generator import (
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
 
 def test_basic_operation(basic_sqlalchemy_datasource):
     table_generator = TableBatchKwargsGenerator(

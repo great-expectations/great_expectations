@@ -3,7 +3,12 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
-from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    IDDict,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -172,21 +177,19 @@ def test_graph_validate(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
     batch = basic_datasource.get_single_batch_from_batch_request(
-        BatchRequest(
+        RuntimeBatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
                 "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "batch_data": df,
-                "partition_request": PartitionRequest(
-                    **{
-                        "batch_identifiers": {
-                            "pipeline_stage_name": 0,
-                            "airflow_run_id": 0,
-                            "custom_key_0": 0,
-                        }
-                    }
-                ),
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
             }
         )
     )
@@ -227,21 +230,19 @@ def test_graph_validate_with_bad_config(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
     batch = basic_datasource.get_single_batch_from_batch_request(
-        BatchRequest(
+        RuntimeBatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
                 "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "batch_data": df,
-                "partition_request": PartitionRequest(
-                    **{
-                        "batch_identifiers": {
-                            "pipeline_stage_name": 0,
-                            "airflow_run_id": 0,
-                            "custom_key_0": 0,
-                        }
-                    }
-                ),
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
             }
         )
     )
@@ -268,21 +269,19 @@ def test_graph_validate_with_runtime_config(basic_datasource):
     )
 
     batch = basic_datasource.get_single_batch_from_batch_request(
-        BatchRequest(
+        RuntimeBatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
                 "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "batch_data": df,
-                "partition_request": PartitionRequest(
-                    **{
-                        "batch_identifiers": {
-                            "pipeline_stage_name": 0,
-                            "airflow_run_id": 0,
-                            "custom_key_0": 0,
-                        }
-                    }
-                ),
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
             }
         )
     )
@@ -327,21 +326,19 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
     batch = basic_datasource.get_single_batch_from_batch_request(
-        BatchRequest(
+        RuntimeBatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
                 "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "batch_data": df,
-                "partition_request": PartitionRequest(
-                    **{
-                        "batch_identifiers": {
-                            "pipeline_stage_name": 0,
-                            "airflow_run_id": 0,
-                            "custom_key_0": 0,
-                        }
-                    }
-                ),
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
             }
         )
     )
@@ -352,9 +349,9 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
 
 
 def test_validator_default_expectation_args__sql(
-    data_context_with_sql_datasource_for_testing_get_batch,
+    data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context = data_context_with_simple_sql_datasource_for_testing_get_batch
 
     my_validator = context.get_validator(
         datasource_name="my_sqlite_db",

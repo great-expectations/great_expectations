@@ -373,7 +373,7 @@ def test_get_batch_with_split_on_column_value(
             splitter_method="_split_on_column_value",
             splitter_kwargs={
                 "column_name": "batch_id",
-                "partition_definition": {"batch_id": 2},
+                "batch_identifiers": {"batch_id": 2},
             },
         )
     ).dataframe
@@ -389,7 +389,7 @@ def test_get_batch_with_split_on_column_value(
             splitter_method="_split_on_column_value",
             splitter_kwargs={
                 "column_name": "date",
-                "partition_definition": {"date": datetime.date(2020, 1, 30)},
+                "batch_identifiers": {"date": datetime.date(2020, 1, 30)},
             },
         )
     ).dataframe
@@ -406,7 +406,7 @@ def test_get_batch_with_split_on_converted_datetime(
             splitter_method="_split_on_converted_datetime",
             splitter_kwargs={
                 "column_name": "timestamp",
-                "partition_definition": {"timestamp": "2020-01-03"},
+                "batch_identifiers": {"timestamp": "2020-01-03"},
             },
         )
     ).dataframe
@@ -424,7 +424,7 @@ def test_get_batch_with_split_on_divided_integer(
             splitter_kwargs={
                 "column_name": "id",
                 "divisor": 10,
-                "partition_definition": {"id": 5},
+                "batch_identifiers": {"id": 5},
             },
         )
     ).dataframe
@@ -446,7 +446,7 @@ def test_get_batch_with_split_on_mod_integer(
             splitter_kwargs={
                 "column_name": "id",
                 "mod": 10,
-                "partition_definition": {"id": 5},
+                "batch_identifiers": {"id": 5},
             },
         )
     ).dataframe
@@ -468,7 +468,7 @@ def test_get_batch_with_split_on_multi_column_values(
             splitter_method="_split_on_multi_column_values",
             splitter_kwargs={
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {
+                "batch_identifiers": {
                     "y": 2020,
                     "m": 1,
                     "d": 5,
@@ -490,7 +490,7 @@ def test_get_batch_with_split_on_multi_column_values(
                 splitter_method="_split_on_multi_column_values",
                 splitter_kwargs={
                     "column_names": ["I", "dont", "exist"],
-                    "partition_definition": {
+                    "batch_identifiers": {
                         "y": 2020,
                         "m": 1,
                         "d": 5,
@@ -515,7 +515,7 @@ def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
                     "column_name": "favorite_color",
                     "hash_digits": 1,
                     "hash_function_name": "I_wont_work",
-                    "partition_definition": {
+                    "batch_identifiers": {
                         "hash_value": "a",
                     },
                 },
@@ -534,7 +534,7 @@ def test_get_batch_with_split_on_hashed_column(
                 "column_name": "favorite_color",
                 "hash_digits": 1,
                 "hash_function_name": "sha256",
-                "partition_definition": {
+                "batch_identifiers": {
                     "hash_value": "a",
                 },
             },
@@ -649,7 +649,7 @@ def test_split_on_multi_column_values_and_sample_using_random(
             splitter_method="_split_on_multi_column_values",
             splitter_kwargs={
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {
+                "batch_identifiers": {
                     "y": 2020,
                     "m": 1,
                     "d": 5,
@@ -664,7 +664,7 @@ def test_split_on_multi_column_values_and_sample_using_random(
 
     # The test dataframe contains 10 columns and 120 rows.
     assert len(returned_df.columns) == 10
-    # The number of returned rows corresponding to the value of "partition_definition" above is 4.
+    # The number of returned rows corresponding to the value of "batch_identifiers" above is 4.
     assert 0 <= returned_df.count() <= 4
     # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
     # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get 50% of the rows, which is

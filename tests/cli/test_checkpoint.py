@@ -703,7 +703,7 @@ validations:
       datasource_name: my_datasource
       data_connector_name: my_other_data_connector
       data_asset_name: users
-      partition_request:
+      data_connector_query:
         index: -1
     expectation_suite_name: Titanic.warning
 profilers: []
@@ -846,7 +846,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
           batch_spec_passthrough:
             path: /totally/not/a/file.csv
@@ -964,7 +964,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         action_list:
             - name: store_validation_result
@@ -1144,7 +1144,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
@@ -1571,7 +1571,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
@@ -1826,7 +1826,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
           datasource_name: my_datasource
           data_connector_name: my_basic_data_connector
           data_asset_name: Titanic_1911
-          partition_request:
+          data_connector_query:
             index: -1
           batch_spec_passthrough:
             reader_options:
@@ -1967,7 +1967,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
@@ -2218,7 +2218,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
           batch_spec_passthrough:
             reader_options:
@@ -2510,7 +2510,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: users.delivery
         action_list:
@@ -2632,7 +2632,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
@@ -2752,7 +2752,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
           datasource_name: my_datasource
           data_connector_name: my_special_data_connector
           data_asset_name: users
-          partition_request:
+          data_connector_query:
             index: -1
         expectation_suite_name: Titanic.warning
         action_list:
