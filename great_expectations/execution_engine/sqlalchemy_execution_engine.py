@@ -767,6 +767,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(self, batch_spec) -> Select:
         table_name: str = batch_spec["table_name"]
+        # print("\n\n\n\n")
+        # print(batch_spec["sampling_kwargs"]["n"])
+        # print("$$$$ SAMPLING KWARGS $$$")
+        # print("\n\n\n\n")
 
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
@@ -783,7 +787,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if batch_spec["sampling_method"] == "_sample_using_limit":
                 # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
                 # so the business logic for building the query needs to be different.
-
                 return (
                     sa.select("*")
                     .select_from(
@@ -806,6 +809,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
+
         return (
             sa.select("*")
             .select_from(
@@ -834,6 +838,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
+        # print("we have a query\n\n\n")
+        # print(batch_markers)
+        # print(batch_spec)
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
             query: str = batch_spec.query
