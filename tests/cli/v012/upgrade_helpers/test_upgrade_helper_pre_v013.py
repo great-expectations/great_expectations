@@ -219,6 +219,7 @@ great_expectations/
 
     assert obs_upgrade_log_dict == expected_upgrade_log_dict
 
+
 # <WILL> this test fails
 @freeze_time("09/26/2019 13:42:41")
 def test_project_upgrade_with_manual_steps(
