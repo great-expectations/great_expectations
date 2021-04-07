@@ -115,14 +115,48 @@ Steps
 
         To add a Pandas filesystem datasource, do the following:
 
-        #. **Instantiate a Data Context.**
+        #. **Run datasource new**
 
-            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
+
+        #. **Choose "Files on a filesystem (for processing with Pandas or Spark)"**
+
+            .. code-block:: bash
+
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 1
+
+        #. **Choose Pandas**
+
+            .. code-block:: bash
+
+                What are you processing your files with?
+                    1. Pandas
+                    2. PySpark
+                : 1
+
+        #. **Specify the directory path for data files**
+
+            .. code-block:: bash
+
+                Enter the path (relative or absolute) of the root directory where the data files are stored.
+                : /path/to/directory/containing/your/data/files
+
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
+
+Additional notes
+----------------
+
+        #.  **Pandas Datasource Example.**
+
+            Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
 
 
         #. **List files in your directory.**
@@ -177,7 +211,7 @@ Steps
             **Note**: The ``InferredAssetS3DataConnector`` used in this example is closely related to the ``ConfiguredAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
 
-        #. **Run context.test_yaml_config.**
+        #. **Test your config using ``context.test_yaml_config``.**
 
             .. code-block:: python
 

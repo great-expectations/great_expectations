@@ -71,7 +71,7 @@ Steps
 
         #. **Give your Datasource a name**
 
-            When prompted, provide a custom name for your Snowflake data source, or hit Enter to accept the default.
+            When prompted, provide a custom name for your MSSQL data source, or hit Enter to accept the default.
 
             .. code-block:: bash
 
@@ -134,16 +134,45 @@ Steps
 
                 pip install sqlalchemy
                 pip install pyodbc
-        #. **Instantiate a Data Context.**
+        #. **Run datasource new**
 
-            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
 
-        #.  **Create or copy a yaml config.**
+
+        #. **Choose "Relational database (SQL)"**
+
+            .. code-block:: bash
+
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 2
+
+        #. **Choose 'other'**
+
+            .. code-block:: bash
+
+                Which database backend are you using?
+                    1. MySQL
+                    2. Postgres
+                    3. Redshift
+                    4. Snowflake
+                    5. BigQuery
+                    6. other - Do you have a working SQLAlchemy connection string?
+                : 6
+
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
+Additional Notes
+----------------
+
+        Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
+
+        #.  **MSSQL SimpleSqlalchemyDatasource Example.**
 
                 Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.  Great Expectations uses a ``connection_string`` to connect to MSSQL databases through SQLAlchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
 
@@ -163,7 +192,7 @@ Steps
             **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 
-        #. **Run context.test_yaml_config.**
+        #. **Test your config using ``context.test_yaml_config``.**
 
             .. code-block:: python
 
@@ -205,9 +234,6 @@ Steps
 
             **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
 
-
-Additional notes
-----------------
 
 The following blog post provides a useful overview of using SqlAlchemy to connect to MSSQL.
 
