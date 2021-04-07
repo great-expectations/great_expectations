@@ -1,4 +1,3 @@
-import logging
 import os
 import time
 
@@ -10,7 +9,6 @@ from botocore.session import Session
 from great_expectations.datasource.batch_kwargs_generator import (
     S3SubdirReaderBatchKwargsGenerator,
 )
-from great_expectations.exceptions import BatchKwargsError
 
 port = 5555
 url_host = os.getenv("GE_TEST_LOCALHOST_URL", "127.0.0.1")
@@ -65,28 +63,34 @@ def mock_s3_bucket(s3_base):
 def s3_subdir_generator(mock_s3_bucket, basic_sparkdf_datasource):
     # We configure a generator that will fetch from (mocked) my_bucket
     # and will use glob patterns to match returned assets into batches of the same asset
-    generator = S3SubdirReaderBatchKwargsGenerator(
-        "my_generator",
-        datasource=basic_sparkdf_datasource,
-        boto3_options={"endpoint_url": endpoint_uri},
-        base_directory="test_bucket/data/for",
-        reader_options={"sep": ","},
-    )
-    yield generator
+    try:
+        generator = S3SubdirReaderBatchKwargsGenerator(
+            "my_generator",
+            datasource=basic_sparkdf_datasource,
+            boto3_options={"endpoint_url": endpoint_uri},
+            base_directory="test_bucket/data/for",
+            reader_options={"sep": ","},
+        )
+        yield generator
+    except ImportError as e:
+        pytest.skip(str(e))
 
 
 @pytest.fixture
 def s3_subdir_generator_with_partition(mock_s3_bucket, basic_sparkdf_datasource):
     # We configure a generator that will fetch from (mocked) my_bucket
     # and will use glob patterns to match returned assets into batches of the same asset
-    generator = S3SubdirReaderBatchKwargsGenerator(
-        "my_generator",
-        datasource=basic_sparkdf_datasource,
-        boto3_options={"endpoint_url": endpoint_uri},
-        base_directory="test_bucket/data/",
-        reader_options={"sep": ","},
-    )
-    yield generator
+    try:
+        generator = S3SubdirReaderBatchKwargsGenerator(
+            "my_generator",
+            datasource=basic_sparkdf_datasource,
+            boto3_options={"endpoint_url": endpoint_uri},
+            base_directory="test_bucket/data/",
+            reader_options={"sep": ","},
+        )
+        yield generator
+    except ImportError as e:
+        pytest.skip(str(e))
 
 
 def test_s3_subdir_generator_basic_operation(s3_subdir_generator):
