@@ -116,16 +116,51 @@ Steps
             - :ref:`Understand the basics of Datasources. <reference__core_concepts__datasources>`
             - Learned how to configure a :ref:`Data Context using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
-        To add a Pandas filesystem datasource, do the following:
+        To add a Spark filesystem datasource, do the following:
 
-        #. **Instantiate a Data Context.**
+        #. **Run datasource new**
 
-            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
+
+        #. **Choose "Files on a filesystem (for processing with Pandas or Spark)"**
+
+            .. code-block:: bash
+
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 1
+
+
+        #. **Choose PySpark**
+
+            .. code-block:: bash
+
+                What are you processing your files with?
+                    1. Pandas
+                    2. PySpark
+                : 2
+
+        #. **Specify the directory path for data files**
+
+            .. code-block:: bash
+
+                Enter the path (relative or absolute) of the root directory where the data files are stored.
+                : /path/to/directory/containing/your/data/files
+
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
+
+Additional notes
+----------------
+
+        #.  **Spark Datasource Example.**
+
+            Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
 
 
         #. **List files in your directory.**
