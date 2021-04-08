@@ -77,7 +77,14 @@ def checkpoint(ctx):
     )
     # TODO consider moving this all the way up in to the CLIState constructor
     ctx.obj.data_context = context
-    ctx.obj.usage_stats_prefix = "cli.checkpoint"
+
+    usage_stats_prefix = f"cli.checkpoint.{ctx.invoked_subcommand}"
+    toolkit.send_usage_message(
+        data_context=context,
+        event=f"{usage_stats_prefix}.begin",
+        success=True,
+    )
+    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
 
 
 @checkpoint.command(name="new")
@@ -100,12 +107,7 @@ def checkpoint_new(ctx, name, jupyter):
 def _checkpoint_new(ctx, checkpoint_name, jupyter):
 
     context = ctx.obj.data_context
-    toolkit.send_usage_message(
-        data_context=context,
-        event=f"{ctx.obj.usage_stats_prefix}.new.begin",
-        success=True,
-    )
-    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.new.end"
+    usage_event_end: str = ctx.obj.usage_event_end
 
     try:
         _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event_end)
@@ -172,12 +174,7 @@ def _get_notebook_path(context, notebook_name):
 def checkpoint_list(ctx):
     """List configured Checkpoints."""
     context: DataContext = ctx.obj.data_context
-    toolkit.send_usage_message(
-        data_context=context,
-        event=f"{ctx.obj.usage_stats_prefix}.list.begin",
-        success=True,
-    )
-    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.list.end"
+    usage_event_end: str = ctx.obj.usage_event_end
 
     checkpoints: List[str] = context.list_checkpoints()
     if not checkpoints:
@@ -202,12 +199,7 @@ def checkpoint_list(ctx):
 def checkpoint_delete(ctx, checkpoint):
     """Delete a Checkpoint."""
     context: DataContext = ctx.obj.data_context
-    toolkit.send_usage_message(
-        data_context=context,
-        event=f"{ctx.obj.usage_stats_prefix}.delete.begin",
-        success=True,
-    )
-    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.delete.end"
+    usage_event_end: str = ctx.obj.usage_event_end
 
     try:
         toolkit.delete_checkpoint(
@@ -235,12 +227,7 @@ def checkpoint_delete(ctx, checkpoint):
 def checkpoint_run(ctx, checkpoint):
     """Run a Checkpoint."""
     context: DataContext = ctx.obj.data_context
-    toolkit.send_usage_message(
-        data_context=context,
-        event=f"{ctx.obj.usage_stats_prefix}.run.begin",
-        success=True,
-    )
-    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.run.end"
+    usage_event_end: str = ctx.obj.usage_event_end
 
     try:
         result: CheckpointResult = toolkit.run_checkpoint(
@@ -310,12 +297,7 @@ def checkpoint_script(ctx, checkpoint):
     This script is provided for those who wish to run Checkpoints via python.
     """
     context: DataContext = ctx.obj.data_context
-    toolkit.send_usage_message(
-        data_context=context,
-        event=f"{ctx.obj.usage_stats_prefix}.script.begin",
-        success=True,
-    )
-    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.script.end"
+    usage_event_end: str = ctx.obj.usage_event_end
 
     toolkit.validate_checkpoint(
         context=context, checkpoint_name=checkpoint, usage_event=usage_event_end
