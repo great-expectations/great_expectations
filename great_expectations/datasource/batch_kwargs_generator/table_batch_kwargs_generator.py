@@ -198,9 +198,6 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
     def get_available_data_asset_names(self):
         # TODO: limit and is_complete_list logic
-        # print("THIS IS WHAT RUNS WILL!")
-        # print("this is get_schema_names()!")
-        # print(self.inspector.get_schema_names())
         is_complete_list = True
         defined_assets = list(self._assets.keys())
         tables = []
@@ -214,8 +211,6 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                     "mysql",  # mysql
                 ]
                 known_system_tables = ["sqlite_master"]  # sqlite
-                ### Figure this out ####
-
                 if schema_name in known_information_schemas:
                     continue
 
@@ -230,11 +225,9 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                         ]
                     )
                 else:
-                    # set default_schema_nane
-
+                    # set default_schema_name
                     if self.engine.dialect.name.lower() == "sqlite":
-                        # <WILL> 202104 This is for sqlalchemy compatibilty < 1.4.0
-                        # default_schema_name was returning None for sqlite.. issue number?
+                        # Workaround for compatibility with sqlalchemy < 1.4.0 and is described in issue #2641
                         default_schema_name = None
                     else:
                         default_schema_name = self.inspector.default_schema_name

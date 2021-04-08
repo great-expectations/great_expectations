@@ -632,11 +632,11 @@ def test_sampling_method__mod(
     assert len(validator.head(fetch_all=True)) == 12
 
 
-# <WILL THIS FAILS>
 def test_sampling_method__a_list(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    # remove once sql alchemy has addressed issue : [ INSERT ISSUE NUMBER HERE ]
+    # <WILL> to remove in 202105
+    # remove once sqlalchemy has released fix for https://github.com/sqlalchemy/sqlalchemy/issues/6222
     if parse_version(sqlalchemy.__version__) < parse_version("1.4.0"):
         execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 

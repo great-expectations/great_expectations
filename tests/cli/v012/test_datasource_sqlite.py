@@ -424,7 +424,6 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert_no_tracebacks(result)
 
 
-# <WILL> this test will fail
 def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with_limit(
     empty_data_context, titanic_sqlite_db, caplog
 ):
