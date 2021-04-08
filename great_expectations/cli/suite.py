@@ -8,16 +8,13 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
-from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
-from great_expectations.cli.toolkit import load_json_file_into_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
-from great_expectations.datasource import BaseDatasource
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -134,10 +131,12 @@ def _suite_new_workflow(
     ] = None,
 ):
     try:
+        datasource_name: Optional[str] = None
+        data_asset_name: Optional[str] = None
+
         additional_batch_request_args: Optional[
             Dict[str, Union[str, int, Dict[str, Any]]]
         ] = {"limit": 1000}
-        data_asset_name: Optional[str] = None
 
         if interactive:
             if batch_request is not None and isinstance(batch_request, str):
@@ -148,22 +147,12 @@ def _suite_new_workflow(
                     suppress_usage_message=False,
                 )
 
-            datasource_name: Optional[str] = None
-
             if not batch_request:
-                cli_message(
-                    string="""A batch of data is required to edit the suite - let's help you to specify it."""
-                )
-                datasource: BaseDatasource = toolkit.select_datasource(
-                    context=context, datasource_name=datasource_name
-                )
-
-                if datasource is None:
-                    # select_datasource takes care of displaying an error message, so all is left here is to exit.
-                    sys.exit(1)
-
-                batch_request = get_batch_request(
-                    datasource=datasource,
+                batch_request = toolkit.get_batch_request_using_datasource_name(
+                    data_context=context,
+                    datasource_name=datasource_name,
+                    usage_event=usage_event,
+                    suppress_usage_message=False,
                     additional_batch_request_args=additional_batch_request_args,
                 )
                 # In this case, we have "consumed" the additional_batch_request_args
@@ -173,54 +162,27 @@ def _suite_new_workflow(
         else:
             batch_request = None
 
-        if expectation_suite_name is None:
-            default_expectation_suite_name: str = (
-                toolkit.get_default_expectation_suite_name(
-                    data_asset_name=data_asset_name,
-                    batch_request=batch_request,
-                )
-            )
-            while True:
-                expectation_suite_name = click.prompt(
-                    "\nName the new Expectation Suite",
-                    default=default_expectation_suite_name,
-                )
-                if expectation_suite_name not in context.list_expectation_suite_names():
-                    break
-                toolkit.tell_user_suite_exists(suite_name=expectation_suite_name)
-        elif expectation_suite_name in context.list_expectation_suite_names():
-            toolkit.tell_user_suite_exists(suite_name=expectation_suite_name)
-            sys.exit(1)
-
-        suite: ExpectationSuite = toolkit.load_expectation_suite(
-            context=context,
+        suite: ExpectationSuite = toolkit.get_or_create_expectation_suite(
             expectation_suite_name=expectation_suite_name,
+            data_context=context,
+            data_asset_name=data_asset_name,
             usage_event=usage_event,
+            suppress_usage_message=False,
+            batch_request=batch_request,
             create_if_not_exist=True,
         )
+        expectation_suite_name = suite.expectation_suite_name
 
-        if (
-            batch_request
-            and isinstance(batch_request, dict)
-            and BatchRequest(**batch_request)
-        ):
-            suite.add_citation(
-                comment="Created suite added via CLI",
-                batch_request=batch_request,
-            )
-            context.save_expectation_suite(expectation_suite=suite)
-
-        if not no_jupyter:
-            cli_message(
-                string="""<green>Opening a notebook for you now to edit your expectation suite!
-If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
-            )
+        toolkit.add_citation_with_batch_request(
+            data_context=context,
+            expectation_suite=suite,
+            batch_request=batch_request,
+        )
 
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=True
         )
 
-        datasource_name: Optional[str] = None
         if batch_request:
             datasource_name = batch_request.get("datasource_name")
 
@@ -372,7 +334,7 @@ def _suite_edit_workflow(
         usage_event = None
 
     suite: ExpectationSuite = toolkit.load_expectation_suite(
-        context=context,
+        data_context=context,
         expectation_suite_name=expectation_suite_name,
         usage_event=usage_event,
         create_if_not_exist=create_if_not_exist,
@@ -408,44 +370,22 @@ def _suite_edit_workflow(
                 ):
                     batch_request = copy.deepcopy(batch_request_from_citation)
                 else:
-                    cli_message(
-                        string="""
-A batch of data is required to edit the suite - let's help you to specify it."""
-                    )
-
-                    datasource = toolkit.select_datasource(
-                        context=context, datasource_name=datasource_name
-                    )
-
-                    if not datasource:
-                        cli_message(
-                            string="<red>No datasources found in the context.</red>"
-                        )
-                        if not suppress_usage_message:
-                            toolkit.send_usage_message(
-                                data_context=context, event=usage_event, success=False
-                            )
-                        sys.exit(1)
-
-                    batch_request = get_batch_request(
-                        datasource=datasource,
+                    batch_request = toolkit.get_batch_request_using_datasource_name(
+                        data_context=context,
+                        datasource_name=datasource_name,
+                        usage_event=usage_event,
+                        suppress_usage_message=False,
                         additional_batch_request_args=additional_batch_request_args,
                     )
-
                     if batch_request != batch_request_from_citation:
                         batch_request_from_citation_is_up_to_date = False
 
-            if (
-                not batch_request_from_citation_is_up_to_date
-                and batch_request
-                and isinstance(batch_request, dict)
-                and BatchRequest(**batch_request)
-            ):
-                suite.add_citation(
-                    comment="Updated suite added via CLI",
+            if not batch_request_from_citation_is_up_to_date:
+                toolkit.add_citation_with_batch_request(
+                    data_context=context,
+                    expectation_suite=suite,
                     batch_request=batch_request,
                 )
-                context.save_expectation_suite(expectation_suite=suite)
 
         notebook_name: str = "edit_{}.ipynb".format(expectation_suite_name)
         notebook_path: str = _get_notebook_path(context, notebook_name)
@@ -482,6 +422,11 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         if no_jupyter:
             cli_message(
                 string=f"To continue editing this suite, run <green>jupyter notebook {notebook_path}</green>"
+            )
+        else:
+            cli_message(
+                string="""<green>Opening a notebook for you now to edit your expectation suite!
+If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             )
 
         payload: dict = edit_expectation_suite_usage_statistics(
@@ -552,16 +497,18 @@ def suite_delete(ctx, suite):
         raise e
     if not suite_names:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event,
-            message="</red>No expectation suites found in the project.</red>",
+            suppress_usage_message=False,
+            message="<red>No expectation suites found in the project.</red>",
         )
 
     if suite not in suite_names:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event,
-            message=f"No expectation suite named {suite} found.",
+            suppress_usage_message=False,
+            message=f"<red>No expectation suite named {suite} found.</red>",
         )
 
     if not (ctx.obj.assume_yes or toolkit.confirm_proceed_or_exit(exit_on_no=False)):

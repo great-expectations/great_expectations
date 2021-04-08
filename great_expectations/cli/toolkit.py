@@ -14,6 +14,7 @@ from ruamel.yaml.compat import StringIO
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
@@ -149,6 +150,48 @@ def attempt_to_open_validation_results_in_data_docs(context, profiling_results):
         context.open_data_docs()
 
 
+def get_or_create_expectation_suite(
+    expectation_suite_name: str,
+    data_context: DataContext,
+    data_asset_name: Optional[str] = None,
+    usage_event: Optional[str] = None,
+    suppress_usage_message: Optional[bool] = False,
+    batch_request: Optional[
+        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+    ] = None,
+    create_if_not_exist: Optional[bool] = True,
+) -> ExpectationSuite:
+    if expectation_suite_name is None:
+        default_expectation_suite_name: str = get_default_expectation_suite_name(
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+        )
+        while True:
+            expectation_suite_name = click.prompt(
+                "\nName the new Expectation Suite",
+                default=default_expectation_suite_name,
+            )
+            if (
+                expectation_suite_name
+                not in data_context.list_expectation_suite_names()
+            ):
+                break
+            tell_user_suite_exists(suite_name=expectation_suite_name)
+    elif expectation_suite_name in data_context.list_expectation_suite_names():
+        tell_user_suite_exists(suite_name=expectation_suite_name)
+        sys.exit(1)
+
+    suite: ExpectationSuite = load_expectation_suite(
+        data_context=data_context,
+        expectation_suite_name=expectation_suite_name,
+        usage_event=usage_event,
+        suppress_usage_message=suppress_usage_message,
+        create_if_not_exist=create_if_not_exist,
+    )
+
+    return suite
+
+
 def get_default_expectation_suite_name(
     data_asset_name: str,
     batch_request: Optional[
@@ -205,19 +248,20 @@ def get_validator(
 
 
 def load_expectation_suite(
-    # TODO consolidate all the myriad CLI tests into this
-    context: DataContext,
+    data_context: DataContext,
     expectation_suite_name: str,
     usage_event: str,
+    suppress_usage_message: Optional[bool] = False,
     create_if_not_exist: Optional[bool] = True,
 ) -> Optional[ExpectationSuite]:
     """
     Load an expectation suite from a given context.
 
     Handles a suite name with or without `.json`
-    :param context:
+    :param data_context:
     :param expectation_suite_name:
     :param usage_event:
+    :param suppress_usage_message:
     :param create_if_not_exist:
     """
     if expectation_suite_name.endswith(".json"):
@@ -225,21 +269,22 @@ def load_expectation_suite(
 
     suite: Optional[ExpectationSuite]
     try:
-        suite = context.get_expectation_suite(
+        suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )
         return suite
     except ge_exceptions.DataContextError:
         if create_if_not_exist:
-            suite = context.create_expectation_suite(
+            suite = data_context.create_expectation_suite(
                 expectation_suite_name=expectation_suite_name
             )
             return suite
         else:
             suite = None
             exit_with_failure_message_and_stats(
-                context=context,
+                data_context=data_context,
                 usage_event=usage_event,
+                suppress_usage_message=suppress_usage_message,
                 message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check "
                 "the name by running `great_expectations suite list` and try again.",
             )
@@ -247,10 +292,15 @@ def load_expectation_suite(
 
 
 def exit_with_failure_message_and_stats(
-    context: DataContext, usage_event: str, message: str
+    data_context: DataContext,
+    usage_event: str,
+    suppress_usage_message: Optional[bool] = False,
+    message: Optional[str] = None,
 ):
-    cli_message(string=message)
-    send_usage_message(data_context=context, event=usage_event, success=False)
+    if message:
+        cli_message(string=message)
+    if not suppress_usage_message:
+        send_usage_message(data_context=data_context, event=usage_event, success=False)
     sys.exit(1)
 
 
@@ -299,7 +349,11 @@ def run_checkpoint(
         return result
     except ge_exceptions.CheckpointError as e:
         cli_message(string=failure_message)
-        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}.</red>")
+        exit_with_failure_message_and_stats(
+            data_context=context,
+            usage_event=usage_event,
+            message="<red>{e}.</red>",
+        )
 
 
 def validate_checkpoint(
@@ -316,7 +370,11 @@ def validate_checkpoint(
     except ge_exceptions.CheckpointError as e:
         if failure_message:
             cli_message(string=failure_message)
-        exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
+        exit_with_failure_message_and_stats(
+            data_context=context,
+            usage_event=usage_event,
+            message="<red>{e}.</red>",
+        )
 
 
 def load_checkpoint(
@@ -335,9 +393,9 @@ def load_checkpoint(
         ge_exceptions.InvalidCheckpointConfigError,
     ):
         exit_with_failure_message_and_stats(
-            context,
-            usage_event,
-            f"""\
+            data_context=context,
+            usage_event=usage_event,
+            message=f"""\
 <red>Could not find Checkpoint `{checkpoint_name}` (or its configuration is invalid).</red> Try running:
   - `<green>great_expectations checkpoint list</green>` to verify your Checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new Checkpoint""",
@@ -691,34 +749,30 @@ def get_relative_path_from_config_file_to_base_path(
 
 def load_json_file_into_dict(
     filepath: str,
+    data_context: DataContext,
     usage_event: Optional[str] = None,
-    data_context: Optional[DataContext] = None,
 ) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
-    trackable: bool = not ((usage_event is None) or (data_context is None))
+    suppress_usage_message: bool = (usage_event is None) or (data_context is None)
 
     error_message: str
 
     if not filepath:
         error_message = f"The path to a JSON file was not specified."
-        if trackable:
-            exit_with_failure_message_and_stats(
-                context=data_context,
-                usage_event=usage_event,
-                message=f"<red>{error_message}</red>",
-            )
-        else:
-            raise ValueError(error_message)
+        exit_with_failure_message_and_stats(
+            data_context=data_context,
+            usage_event=usage_event,
+            suppress_usage_message=suppress_usage_message,
+            message=f"<red>{error_message}</red>",
+        )
 
     if not filepath.endswith(".json"):
         error_message = f'The JSON file path "{filepath}" does not have the ".json" extension in the file name.'
-        if trackable:
-            exit_with_failure_message_and_stats(
-                context=data_context,
-                usage_event=usage_event,
-                message=f"<red>{error_message}</red>",
-            )
-        else:
-            raise ValueError(error_message)
+        exit_with_failure_message_and_stats(
+            data_context=data_context,
+            usage_event=usage_event,
+            suppress_usage_message=suppress_usage_message,
+            message=f"<red>{error_message}</red>",
+        )
 
     contents: Optional[str] = None
     try:
@@ -726,14 +780,12 @@ def load_json_file_into_dict(
             contents = json_file.read()
     except FileNotFoundError:
         error_message = f'The JSON file with the path "{filepath}" could not be found.'
-        if trackable:
-            exit_with_failure_message_and_stats(
-                context=data_context,
-                usage_event=usage_event,
-                message=f"<red>{error_message}</red>",
-            )
-        else:
-            raise ValueError(error_message)
+        exit_with_failure_message_and_stats(
+            data_context=data_context,
+            usage_event=usage_event,
+            suppress_usage_message=suppress_usage_message,
+            message=f"<red>{error_message}</red>",
+        )
 
     batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None
     if contents:
@@ -743,24 +795,20 @@ def load_json_file_into_dict(
             error_message = f"""Error "{jde}" occurred while attempting to load the JSON file with the path
 "{filepath}" into dictionary.
 """
-            if trackable:
-                exit_with_failure_message_and_stats(
-                    context=data_context,
-                    usage_event=usage_event,
-                    message=f"<red>{error_message}</red>",
-                )
-            else:
-                raise ValueError(error_message)
-    else:
-        error_message = f'The JSON file path "{filepath}" is empty.'
-        if trackable:
             exit_with_failure_message_and_stats(
-                context=data_context,
+                data_context=data_context,
                 usage_event=usage_event,
+                suppress_usage_message=suppress_usage_message,
                 message=f"<red>{error_message}</red>",
             )
-        else:
-            raise ValueError(error_message)
+    else:
+        error_message = f'The JSON file path "{filepath}" is empty.'
+        exit_with_failure_message_and_stats(
+            data_context=data_context,
+            usage_event=usage_event,
+            suppress_usage_message=suppress_usage_message,
+            message=f"<red>{error_message}</red>",
+        )
 
     return batch_request
 
@@ -784,8 +832,8 @@ def get_batch_request_from_citations(
 
 
 def add_citation_with_batch_request(
-    data_context: Optional[DataContext] = None,
-    expectation_suite: Optional[ExpectationSuite] = None,
+    data_context: DataContext,
+    expectation_suite: ExpectationSuite,
     batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None,
 ):
     if (
@@ -798,12 +846,12 @@ def add_citation_with_batch_request(
             comment="Created suite added via CLI",
             batch_request=batch_request,
         )
-        data_context.save_expectation_suite(expectation_suite=suite)
+        data_context.save_expectation_suite(expectation_suite=expectation_suite)
 
 
 def get_batch_request_from_json_file(
     batch_request_json_file_path: str,
-    data_context: Optional[DataContext] = None,
+    data_context: DataContext,
     usage_event: Optional[str] = None,
     suppress_usage_message: Optional[bool] = False,
 ) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
@@ -811,8 +859,8 @@ def get_batch_request_from_json_file(
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = load_json_file_into_dict(
         filepath=batch_request_json_file_path,
-        usage_event=usage_event,
         data_context=data_context,
+        usage_event=usage_event,
     )
     try:
         batch_request = BatchRequest(**batch_request).get_json_dict()
@@ -826,5 +874,40 @@ def get_batch_request_from_json_file(
                 data_context=data_context, event=usage_event, success=False
             )
         sys.exit(1)
+
+    return batch_request
+
+
+def get_batch_request_using_datasource_name(
+    data_context: DataContext,
+    datasource_name: Optional[str] = None,
+    usage_event: Optional[str] = None,
+    suppress_usage_message: Optional[bool] = False,
+    additional_batch_request_args: Optional[
+        Dict[str, Union[str, int, Dict[str, Any]]]
+    ] = None,
+) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+    cli_message(
+        string="A batch of data is required to edit the suite - let's help you to specify it."
+    )
+
+    datasource: BaseDatasource = select_datasource(
+        context=data_context, datasource_name=datasource_name
+    )
+
+    if not datasource:
+        cli_message(string="<red>No datasources found in the context.</red>")
+        if not suppress_usage_message:
+            send_usage_message(
+                data_context=data_context, event=usage_event, success=False
+            )
+        sys.exit(1)
+
+    batch_request: Optional[
+        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+    ] = get_batch_request(
+        datasource=datasource,
+        additional_batch_request_args=additional_batch_request_args,
+    )
 
     return batch_request
