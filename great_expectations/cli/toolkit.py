@@ -491,6 +491,16 @@ def load_data_context_with_error_handling(
     """Return a DataContext with good error handling and exit codes."""
     try:
         context: DataContext = DataContext(context_root_dir=directory)
+        if from_cli_upgrade_command:
+            try:
+                send_usage_message(
+                    data_context=context,
+                    event="cli.project.upgrade.begin",
+                    success=True,
+                )
+            except Exception:
+                # Don't fail for usage stats
+                pass
         ge_config_version: int = context.get_config().config_version
         if (
             from_cli_upgrade_command
@@ -508,6 +518,12 @@ def load_data_context_with_error_handling(
             )
             if not exception_occurred and increment_version:
                 context = DataContext(context_root_dir=directory)
+                if from_cli_upgrade_command:
+                    send_usage_message(
+                        data_context=context,
+                        event="cli.project.upgrade.end",
+                        success=True,
+                    )
         return context
     except ge_exceptions.UnsupportedConfigVersionError as err:
         directory = directory or DataContext.find_context_root_dir()
@@ -566,9 +582,17 @@ def upgrade_project(
     upgrade_prompt = (
         "\nWould you like to run the Upgrade Helper to bring your project up-to-date?"
     )
+    # This loading of DataContext is optional and just to track if someone exits here
+    try:
+        data_context = DataContext(context_root_dir)
+    except Exception:
+        # Do not raise error for usage stats
+        data_context = None
     confirm_proceed_or_exit(
         confirm_prompt=upgrade_prompt,
         continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
+        data_context=data_context,
+        usage_stats_event="cli.project.upgrade.end",
     )
     cli_message(SECTION_SEPARATOR)
 
@@ -598,8 +622,24 @@ To learn more about the upgrade process, visit \
 
     if ge_config_version < CURRENT_GE_CONFIG_VERSION:
         cli_message(upgrade_incomplete_message)
+        try:
+            context: DataContext = DataContext(context_root_dir)
+            send_usage_message(
+                data_context=context, event="cli.project.upgrade.end", success=False
+            )
+        except Exception:
+            # Do not raise error for usage stats
+            pass
     else:
         cli_message(upgrade_success_message)
+        try:
+            context: DataContext = DataContext(context_root_dir)
+            send_usage_message(
+                data_context=context, event="cli.project.upgrade.end", success=True
+            )
+        except Exception:
+            # Do not raise error for usage stats
+            pass
     sys.exit(0)
 
 
@@ -697,12 +737,16 @@ def confirm_proceed_or_exit(
         if exit_on_no:
             cli_message(continuation_message_colorized)
             if (usage_stats_event is not None) and (data_context is not None):
-                send_usage_message(
-                    data_context=data_context,
-                    event=usage_stats_event,
-                    event_payload={"cancelled": True},
-                    success=True,
-                )
+                try:
+                    send_usage_message(
+                        data_context=data_context,
+                        event=usage_stats_event,
+                        event_payload={"cancelled": True},
+                        success=True,
+                    )
+                except Exception:
+                    # Don't fail on usage stats
+                    pass
             sys.exit(exit_code)
         else:
             return False

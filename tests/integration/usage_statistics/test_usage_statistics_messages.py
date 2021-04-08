@@ -1055,6 +1055,33 @@ valid_usage_statistics_messages = {
             "ge_version": "0.13.0.manual_testing",
         },
     ],
+    "cli.project.upgrade": generate_messages_with_defaults(
+        defaults={
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:20:37.828Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+        },
+        message_stubs=[
+            {
+                "event": "cli.project.upgrade.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.project.upgrade.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.project.upgrade.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
     "cli.store.list": generate_messages_with_defaults(
         defaults={
             "success": True,
