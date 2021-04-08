@@ -1,10 +1,132 @@
 """Test usage statistics transmission client-side."""
+import copy
+from typing import Any, Dict, List
+
 import pytest
 import requests
 
 USAGE_STATISTICS_QA_URL = (
     "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
+
+
+def generate_messages_with_defaults(
+    defaults: Dict[str, Any], message_stubs: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
+    """
+    Create a list of messages by overriding defaults with message_stubs
+    Args:
+        defaults: Dict of default message items
+        message_stubs: Unique parts of message
+
+    Returns:
+        List of messsages same len(message_stubs) combining defaults overridden by message stubs
+    """
+    output_list = []
+    for message_stub in message_stubs:
+        defaults_copy = copy.deepcopy(defaults)
+        defaults_copy.update(message_stub)
+        output_list.append(defaults_copy)
+
+    return output_list
+
+
+def test_generate_messages_with_defaults():
+
+    defaults = {
+        "success": True,
+        "version": "1.0.0",
+        "event_time": "2020-08-04T22:50:58.837Z",
+        "data_context_id": "00000000-0000-0000-0000-000000000002",
+        "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+    }
+
+    message_stubs = [
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {},
+            "ge_version": "0.11.9.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {"api_version": "v2"},
+            "ge_version": "0.13.0.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {"api_version": "v3"},
+            "ge_version": "0.13.0.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new.begin",
+            "event_payload": {"api_version": "v3"},
+            "ge_version": "0.13.18.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new.end",
+            "event_payload": {"api_version": "v3"},
+            "ge_version": "0.13.18.manual_testing",
+        },
+    ]
+
+    output = generate_messages_with_defaults(
+        defaults=defaults, message_stubs=message_stubs
+    )
+
+    expected = [
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {"api_version": "v2"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.0.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new",
+            "event_payload": {"api_version": "v3"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.0.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new.begin",
+            "event_payload": {"api_version": "v3"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.18.manual_testing",
+        },
+        {
+            "event": "cli.checkpoint.new.end",
+            "event_payload": {"api_version": "v3"},
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T22:50:58.837Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.18.manual_testing",
+        },
+    ]
+
+    assert output == expected
 
 
 """
@@ -351,166 +473,186 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
-    "cli.checkpoint.new": [
-        {
-            "event": "cli.checkpoint.new",
-            "event_payload": {},
+    "cli.checkpoint.new": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
         },
-        {
-            "event": "cli.checkpoint.new",
-            "event_payload": {"api_version": "v2"},
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.new",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.new",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.new",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.new.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.checkpoint.script": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-        {
-            "event": "cli.checkpoint.new",
-            "event_payload": {"api_version": "v3"},
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.script",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.script",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.script",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.script.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.script.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.checkpoint.run": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-    ],
-    "cli.checkpoint.script": [
-        {
-            "event": "cli.checkpoint.script",
-            "event_payload": {},
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.run",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.run.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.run.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.checkpoint.list": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
         },
-        {
-            "event": "cli.checkpoint.script",
-            "event_payload": {"api_version": "v2"},
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.list",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.list.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.checkpoint.delete": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-        {
-            "event": "cli.checkpoint.script",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.checkpoint.run": [
-        {
-            "event": "cli.checkpoint.run",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.run",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.run",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.checkpoint.list": [
-        {
-            "event": "cli.checkpoint.list",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.list",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.list",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
-    "cli.checkpoint.delete": [
-        {
-            "event": "cli.checkpoint.delete",
-            "event_payload": {},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.delete",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.checkpoint.delete",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T22:50:58.837Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
+        message_stubs=[
+            {
+                "event": "cli.checkpoint.delete",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.checkpoint.delete.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
     "cli.datasource.list": [
         {
             "event": "cli.datasource.list",
