@@ -2287,7 +2287,6 @@ def empty_data_context(tmp_path) -> DataContext:
 @pytest.fixture
 def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
-    test_backends,
     monkeypatch,
 ):
     # Reenable GE_USAGE_STATS
