@@ -757,17 +757,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
-        # <WILL> to remove in 202105
-        # Issue is being tracked by Sqlalchemy https://github.com/sqlalchemy/sqlalchemy/issues/6222
-        if parse_version(sa.__version__) >= parse_version("1.4.0"):
-            raise GreatExpectationsError(
-                f"""
-                                This functionality in Great Expectations version {__version__} is currently incompatible with SqlAlchemy 1.4.0 and higher.
-                                You currently have SqlAlchemy version {sa.__version__}. Please downgrade SqlAlchemy to < 1.4.0 while we work on a proper fix.
-                            """
-            )
-        else:
-            return sa.column(column_name).in_(value_list)
+        return sa.column(column_name).in_(value_list)
 
     def _sample_using_md5(
         self,
@@ -808,17 +798,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(split_clause)
                     .limit(batch_spec["sampling_kwargs"]["n"])
                 )
-
-            else:
-                # <WILL> to remove in 202105
-                # Issue is being tracked by Sqlalchemy https://github.com/sqlalchemy/sqlalchemy/issues/6222
-                # if parse_version(sa.__version__) >= parse_version("1.4.0"):
-                #     raise GreatExpectationsError(
-                #         f"""
-                #         This functionality in Great Expectations version {__version__} is currently incompatible with SqlAlchemy 1.4.0 and higher.
-                #         You currently have SqlAlchemy version {sa.__version__}. Please downgrade SqlAlchemy to < 1.4.0 while we work on a proper fix.
-                #     """
-                #     )
+            elif batch_spec["sampling_method"] == "_sample_using_a_list":
+                # <WILL> This check is necessary because of a bug in sqlalchemy that prevents the compilation
+                # of an IN statement using literal_binds. Issue is being tracked by Sqlalchemy https://github.com/sqlalchemy/sqlalchemy/issues/6222
+                # Check if we can remove this entire elif statement in 202105
+                if parse_version(sa.__version__) >= parse_version("1.4.0"):
+                    raise GreatExpectationsError(
+                        f"""
+                        This functionality in Great Expectations version {__version__} is currently incompatible with SqlAlchemy 1.4.0 and higher.
+                        You currently have SqlAlchemy version {sa.__version__}. Please downgrade SqlAlchemy to < 1.4.0 while we work on a proper fix.
+                        """
+                    )
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
                     sa.select("*")
@@ -832,7 +822,21 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         )
                     )
                 )
+            else:
 
+                sampler_fn = getattr(self, batch_spec["sampling_method"])
+                return (
+                    sa.select("*")
+                    .select_from(
+                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                    )
+                    .where(
+                        sa.and_(
+                            split_clause,
+                            sampler_fn(**batch_spec["sampling_kwargs"]),
+                        )
+                    )
+                )
         return (
             sa.select("*")
             .select_from(
