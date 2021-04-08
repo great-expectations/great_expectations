@@ -2819,56 +2819,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     )
 
 
-@pytest.mark.xfail(
-    reason="TODO: ALEX <Alex>NOT_IMPLEMENTED_YET</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_new_with_ge_config_3_raises_error(
-    mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled_config_version_3
-):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_3
-
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-
-    runner: CliRunner = CliRunner(mix_stderr=False)
-    result: Result = runner.invoke(
-        cli,
-        f"--v3-api checkpoint new foo not_a_suite",
-        catch_exceptions=False,
-    )
-
-    assert result.exit_code == 1
-
-    stdout: str = result.stdout
-    assert (
-        "The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3."
-        in stdout
-    )
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.new",
-                "event_payload": {"api_version": "v3"},
-                "success": False,
-            }
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
-
-
 def _write_checkpoint_dict_to_file(config, checkpoint_file_path):
     yaml_obj: YAML = YAML()
     with open(checkpoint_file_path, "w") as f:
