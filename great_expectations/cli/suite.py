@@ -205,6 +205,7 @@ def _suite_new_workflow(
             usage_event=usage_event,
             create_if_not_exist=True,
         )
+
         if (
             batch_request
             and isinstance(batch_request, dict)
@@ -215,11 +216,13 @@ def _suite_new_workflow(
                 batch_request=batch_request,
             )
             context.save_expectation_suite(expectation_suite=suite)
+
         if not no_jupyter:
             cli_message(
                 string="""<green>Opening a notebook for you now to edit your expectation suite!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             )
+
         toolkit.send_usage_message(
             data_context=context, event=usage_event, success=True
         )
