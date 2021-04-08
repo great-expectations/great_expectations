@@ -42,7 +42,7 @@ batches:
 #      execution_environment: Titanic_Env_0
 #      data_connector: subdir_reader_on_filesystem_data_connector_alex_0
 #      data_asset_name: Titanic_CSV_File_Whose_Contents_Are_Updated_Hourly
-#      partition_definition: latest  # TODO: Richer specifications are TBD.
+#      batch_identifiers: latest  # TODO: Richer specifications are TBD.
 #    expectation_suite_names: # one or more suites may validate against a single batch
 #      - Titanic.warning
 #

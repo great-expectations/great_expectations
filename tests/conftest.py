@@ -40,7 +40,7 @@ from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
-from great_expectations.util import import_library_module
+from great_expectations.util import import_library_module, is_library_loadable
 from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
@@ -270,11 +270,8 @@ def no_usage_stats(monkeypatch):
 
 @pytest.fixture
 def sa(test_backends):
-    if (
-        "postgresql" not in test_backends
-        and "sqlite" not in test_backends
-        and "mysql" not in test_backends
-        and "mssql" not in test_backends
+    if not any(
+        [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
@@ -2320,6 +2317,12 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     shutil.copy(
         file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(
+            os.path.join(context_path, "..", "data", "titanic", "Titanic_19120414_1313")
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
     )
     shutil.copy(
@@ -2378,7 +2381,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
             my_runtime_data_connector:
                 module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
-                runtime_keys:
+                batch_identifiers:
                     - pipeline_stage_name
                     - airflow_run_id
         """
@@ -2387,6 +2390,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     datasource: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
+
     # noinspection PyProtectedMember
     context._save_project_config()
     return context
@@ -2608,7 +2612,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                     "datasource_name": "my_datasource_template_1",
                     "data_connector_name": "my_special_data_connector_template_1",
                     "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
+                    "data_connector_query": {"partition_index": -999},
                 }
             }
         ],
@@ -4106,7 +4110,44 @@ SELECT EXISTS (
 
 
 @pytest.fixture
-def data_context_with_sql_datasource_for_testing_get_batch(sa, empty_data_context):
+def data_context_with_runtime_sql_datasource_for_testing_get_batch(
+    sa, empty_data_context
+):
+    context = empty_data_context
+    db_file = file_relative_path(
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    datasource_config = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: sqlite:///{db_file}
+
+        data_connectors:
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
+        """
+
+    context.test_yaml_config(
+        name="my_runtime_sql_datasource", yaml_config=datasource_config
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+    return context
+
+
+@pytest.fixture
+def data_context_with_simple_sql_datasource_for_testing_get_batch(
+    sa, empty_data_context
+):
     context = empty_data_context
 
     db_file = file_relative_path(
@@ -4222,7 +4263,7 @@ data_connectors:
     test_runtime_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
+        batch_identifiers:
         - pipeline_stage_name
         - airflow_run_id
         - custom_key_0

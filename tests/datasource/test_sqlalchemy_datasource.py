@@ -12,6 +12,12 @@ from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.validator.validator import BridgeValidator, Validator
 
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
+
 yaml = YAML()
 
 
