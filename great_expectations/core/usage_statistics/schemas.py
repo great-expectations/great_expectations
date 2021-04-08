@@ -506,6 +506,8 @@ usage_statistics_record_schema = {
                         "cli.init.create",
                         "cli.project.check_config",
                         "cli.store.list",
+                        "cli.store.list.begin",
+                        "cli.store.list.end",
                         "cli.suite.delete",
                         "cli.suite.demo",
                         "cli.suite.list",

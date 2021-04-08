@@ -1055,38 +1055,48 @@ valid_usage_statistics_messages = {
             "ge_version": "0.13.0.manual_testing",
         },
     ],
-    "cli.store.list": [
-        {
-            "event": "cli.store.list",
-            "event_payload": {},
+    "cli.store.list": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-08-03T23:56:53.908Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
         },
-        {
-            "event": "cli.store.list",
-            "event_payload": {"api_version": "v2"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:56:53.908Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-        {
-            "event": "cli.store.list",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-03T23:56:53.908Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
+        message_stubs=[
+            {
+                "event": "cli.store.list",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.store.list",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.store.list",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.store.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.store.list.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.store.list.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
     "cli.suite.demo": [
         {
             "event": "cli.suite.demo",
