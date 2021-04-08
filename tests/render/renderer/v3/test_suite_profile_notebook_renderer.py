@@ -4,8 +4,8 @@ import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations import DataContext
-from great_expectations.render.renderer.suite_scaffold_notebook_renderer import (
-    SuiteScaffoldNotebookRenderer,
+from great_expectations.render.renderer.v3.suite_profile_notebook_renderer import (
+    SuiteProfileNotebookRenderer,
 )
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
@@ -60,7 +60,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_doc
     assert not os.path.isfile(notebook_path)
 
     # Create notebook
-    renderer = SuiteScaffoldNotebookRenderer(
+    renderer = SuiteProfileNotebookRenderer(
         titanic_data_context_no_data_docs, suite, batch_kwargs
     )
     renderer.render_to_disk(notebook_path)

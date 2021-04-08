@@ -10,11 +10,7 @@ from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.mark import Mark as mark
-from great_expectations.cli.pretty_printing import (
-    cli_message,
-    cli_message_list,
-    display_not_implemented_message_and_exit,
-)
+from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.cli.toolkit import load_json_file_into_dict
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
@@ -25,8 +21,8 @@ from great_expectations.datasource import BaseDatasource
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
-from great_expectations.render.renderer.v3.suite_scaffold_notebook_renderer import (
-    SuiteScaffoldNotebookRenderer,
+from great_expectations.render.renderer.v3.suite_profile_notebook_renderer import (
+    SuiteProfileNotebookRenderer,
 )
 
 try:
@@ -64,24 +60,24 @@ def suite(ctx):
     "-i",
     is_flag=True,
     default=False,
-    help="""Use to specify a batch of data to create expectations against.  Assumed with --scaffold flag.
-Incompatible with --batch-request option.
+    help="""Indicates that a batch of data is used to create expectations against.  Required with --profile flag and
+with --batch-request option.
 """,
 )
 @click.option(
-    "--scaffold",
-    "-s",
+    "--profile",
+    "-p",
     is_flag=True,
     default=False,
-    help="""Generate a starting expectation suite automatically so you can refine it further.
-The interactive mode is assumed.  Incompatible with --batch-request option.
+    help="""Generate a starting expectation suite automatically so you can refine it further. Requires --interactive
+flag.
 """,
 )
 @click.option(
     "--batch-request",
     "-br",
     help="""Arguments to be provided to get_batch when loading the data asset.  Must be a path to a valid JSON file.
-Requires the --interactive flag.
+Requires --interactive flag.
 """,
     default=None,
 )
@@ -90,10 +86,10 @@ Requires the --interactive flag.
     "-nj",
     is_flag=True,
     default=False,
-    help="By default launch jupyter notebooks, unless you specify the --no-jupyter flag.",
+    help="By default launch jupyter notebooks, unless you specify --no-jupyter flag.",
 )
 @click.pass_context
-def suite_new(ctx, expectation_suite, interactive, scaffold, batch_request, no_jupyter):
+def suite_new(ctx, expectation_suite, interactive, profile, batch_request, no_jupyter):
     """
     Create a new empty Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
@@ -101,11 +97,25 @@ def suite_new(ctx, expectation_suite, interactive, scaffold, batch_request, no_j
     context: DataContext = ctx.obj.data_context
     usage_event: str = "cli.suite.new"
 
+    error_message: Optional[str] = None
+
+    if not interactive and (profile or (batch_request is not None)):
+        error_message = """Using --profile flag and/or --batch-request <path to JSON file> option requires \
+--interactive flag.
+"""
+
+    if error_message is not None:
+        cli_message(string=f"<red>{error_message}</red>")
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event, success=False
+        )
+        sys.exit(1)
+
     _suite_new_workflow(
         context=context,
         expectation_suite_name=expectation_suite,
         interactive=interactive,
-        scaffold=scaffold,
+        profile=profile,
         no_jupyter=no_jupyter,
         usage_event=usage_event,
         batch_request=batch_request,
@@ -116,26 +126,11 @@ def _suite_new_workflow(
     context: DataContext,
     expectation_suite_name: str,
     interactive: bool,
-    scaffold: bool,
+    profile: bool,
     no_jupyter: bool,
     usage_event: str,
     batch_request: Optional[str] = None,
 ):
-    error_message: Optional[str] = None
-
-    if not (interactive or (batch_request is None)):
-        error_message = "The --batch-request <path to JSON file> option requires the --interactive flag."
-
-    if not interactive and scaffold:
-        error_message = "The --scaffold flag requires the --interactive flag."
-
-    if error_message is not None:
-        cli_message(string=f"<red>{error_message}</red>")
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
-        )
-        sys.exit(1)
-
     try:
         if batch_request is not None and isinstance(batch_request, str):
             batch_request = load_json_file_into_dict(
@@ -237,12 +232,14 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         _suite_edit_workflow(
             context=context,
             expectation_suite_name=expectation_suite_name,
-            no_jupyter=no_jupyter,
-            batch_request=batch_request,
+            profile=profile,
             usage_event=usage_event,
-            create_if_not_exist=True,
             interactive=interactive,
+            no_jupyter=no_jupyter,
+            create_if_not_exist=True,
             datasource_name=datasource_name,
+            batch_request=batch_request,
+            additional_batch_request_args=additional_batch_request_args,
             suppress_usage_message=True,  # do not want to actually send usage_message, since the function call is not the result of actual usage
         )
     except (
@@ -272,22 +269,22 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     is_flag=True,
     default=False,
     help="""Allows to specify explicitly whether or not a batch of data is available to reason about using the language
-of expectations; otherwise, best effort is made to determine this automatically (falling back to False).
-Incompatible with the --batch-request option.
+of expectations; otherwise, best effort is made to determine this automatically (falling back to False).  Required with
+--datasource-name option and with --batch-request option.
 """,
 )
 @click.option(
-    "--datasource_name",
+    "--datasource-name",
     "-ds",
     default=None,
-    help="""The name of the datasource. Requires the --interactive flag.  Incompatible with the --batch-request option.
+    help="""The name of the datasource. Requires --interactive flag.  Incompatible with --batch-request option.
 """,
 )
 @click.option(
     "--batch-request",
     "-br",
     help="""Arguments to be provided to get_batch when loading the data asset.  Must be a path to a valid JSON file.
-Requires the --interactive flag.  Incompatible with the --datasource option.
+Requires --interactive flag.  Incompatible with --datasource-name option.
 """,
     default=None,
 )
@@ -296,7 +293,7 @@ Requires the --interactive flag.  Incompatible with the --datasource option.
     "-nj",
     is_flag=True,
     default=False,
-    help="By default launch jupyter notebooks, unless you specify the --no-jupyter flag.",
+    help="By default launch jupyter notebooks, unless you specify --no-jupyter flag.",
 )
 @click.pass_context
 def suite_edit(
@@ -318,8 +315,17 @@ def suite_edit(
 
     error_message: Optional[str] = None
 
-    if not ((datasource_name is None) or (batch_request is None)):
-        error_message = "Only one of --datasource_name DATASOURCE_NAME and --batch-request <path to JSON file> options can be used."
+    if not interactive and (
+        (datasource_name is not None) or (batch_request is not None)
+    ):
+        error_message = """Using --datasource-name DATASOURCE_NAME option or --batch-request <path to JSON file> \
+option requires --interactive flag.
+"""
+
+    if interactive and (datasource_name is not None) and (batch_request is not None):
+        error_message = """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
+options can be used.
+"""
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
@@ -328,15 +334,21 @@ def suite_edit(
         )
         sys.exit(1)
 
+    additional_batch_request_args: Optional[
+        Dict[str, Union[str, int, Dict[str, Any]]]
+    ] = {"limit": 1000}
+
     _suite_edit_workflow(
         context=context,
         expectation_suite_name=expectation_suite,
-        no_jupyter=no_jupyter,
-        batch_request=batch_request,
+        profile=False,
         usage_event=usage_event,
-        create_if_not_exist=False,
         interactive=interactive,
+        no_jupyter=no_jupyter,
+        create_if_not_exist=False,
         datasource_name=datasource_name,
+        batch_request=batch_request,
+        additional_batch_request_args=additional_batch_request_args,
         suppress_usage_message=False,
     )
 
@@ -344,33 +356,22 @@ def suite_edit(
 def _suite_edit_workflow(
     context: DataContext,
     expectation_suite_name: str,
-    no_jupyter: bool,
+    profile: bool,
     usage_event: str,
+    interactive: bool,
+    no_jupyter: bool,
     create_if_not_exist: Optional[bool] = False,
-    interactive: Optional[bool] = False,
     datasource_name: Optional[str] = None,
-    suppress_usage_message: Optional[bool] = False,
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None,
+    additional_batch_request_args: Optional[
+        Dict[str, Union[str, int, Dict[str, Any]]]
+    ] = None,
+    suppress_usage_message: Optional[bool] = False,
 ):
     # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
     # when called by _suite_new_workflow(), the flag will be set to True, otherwise it will default to False
-    error_message: Optional[str] = None
-
-    if not interactive and datasource_name:
-        error_message = "The --datasource_name DATASOURCE_NAME option requires the --interactive flag."
-
-    if not interactive and batch_request is not None and isinstance(batch_request, str):
-        error_message = "The --batch-request <path to JSON file> option requires the --interactive flag."
-
-    if error_message is not None:
-        cli_message(string=f"<red>{error_message}</red>")
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
-        )
-        sys.exit(1)
-
     if suppress_usage_message:
         usage_event = None
 
@@ -385,47 +386,36 @@ def _suite_edit_workflow(
         Union[str, Dict[str, Union[str, Dict[str, Any]]]]
     ] = None
     batch_request_from_citation_is_up_to_date: bool = True
-    if interactive:
-        citations: List[Dict[str, Any]] = suite.get_citations(
-            require_batch_request=True
-        )
-        if citations:
-            citation: Dict[str, Any] = citations[-1]
-            batch_request_from_citation = citation.get("batch_request")
-
     try:
-        if batch_request is not None and isinstance(batch_request, str):
-            batch_request = load_json_file_into_dict(
-                filepath=batch_request,
-                usage_event=usage_event,
-                data_context=context,
+        if interactive:
+            citations: List[Dict[str, Any]] = suite.get_citations(
+                require_batch_request=True
             )
-            try:
-                batch_request = BatchRequest(**batch_request).get_json_dict()
-            except TypeError as e:
-                cli_message(
-                    string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
-                )
-                cli_message(string="<red>{}</red>".format(e))
-                toolkit.send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
-                sys.exit(1)
-            if batch_request != batch_request_from_citation:
-                batch_request_from_citation_is_up_to_date = False
-    except ValueError as e:
-        cli_message(string="<red>{}</red>".format(e))
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
-        )
-        sys.exit(1)
-    except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
-        )
-        raise e
+            if citations:
+                citation: Dict[str, Any] = citations[-1]
+                batch_request_from_citation = citation.get("batch_request")
 
-    try:
+            if batch_request is not None and isinstance(batch_request, str):
+                batch_request = load_json_file_into_dict(
+                    filepath=batch_request,
+                    usage_event=usage_event,
+                    data_context=context,
+                )
+                try:
+                    batch_request = BatchRequest(**batch_request).get_json_dict()
+                except TypeError as e:
+                    cli_message(
+                        string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
+                    )
+                    cli_message(string="<red>{}</red>".format(e))
+                    if not suppress_usage_message:
+                        toolkit.send_usage_message(
+                            data_context=context, event=usage_event, success=False
+                        )
+                    sys.exit(1)
+                if batch_request != batch_request_from_citation:
+                    batch_request_from_citation_is_up_to_date = False
+
         if interactive and not (
             batch_request
             and isinstance(batch_request, dict)
@@ -443,16 +433,9 @@ def _suite_edit_workflow(
 A batch of data is required to edit the suite - let's help you to specify it."""
                 )
 
-                try:
-                    datasource = toolkit.select_datasource(
-                        context=context, datasource_name=datasource_name
-                    )
-                except ValueError as ve:
-                    cli_message(string="<red>{}</red>".format(ve))
-                    toolkit.send_usage_message(
-                        data_context=context, event=usage_event, success=False
-                    )
-                    sys.exit(1)
+                datasource = toolkit.select_datasource(
+                    context=context, datasource_name=datasource_name
+                )
 
                 if not datasource:
                     cli_message(
@@ -466,7 +449,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
                 batch_request = get_batch_request(
                     datasource=datasource,
-                    additional_batch_request_args=None,
+                    additional_batch_request_args=additional_batch_request_args,
                 )
 
                 if batch_request != batch_request_from_citation:
@@ -486,13 +469,35 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
         notebook_name: str = "edit_{}.ipynb".format(expectation_suite_name)
         notebook_path: str = _get_notebook_path(context, notebook_name)
-        SuiteEditNotebookRenderer.from_data_context(
-            data_context=context
-        ).render_to_disk(
-            suite=suite,
-            notebook_file_path=notebook_path,
-            batch_request=batch_request,
-        )
+
+        if profile:
+            if not (
+                batch_request
+                and isinstance(batch_request, dict)
+                and BatchRequest(**batch_request)
+            ):
+                cli_message(
+                    string="<red>Creating expectations with --profile flag requires a valid batch of data.</red>"
+                )
+                if not suppress_usage_message:
+                    toolkit.send_usage_message(
+                        data_context=context, event=usage_event, success=False
+                    )
+                sys.exit(1)
+            renderer: SuiteProfileNotebookRenderer = SuiteProfileNotebookRenderer(
+                context=context,
+                expectation_suite_name=expectation_suite_name,
+                batch_request=batch_request,
+            )
+            renderer.render_to_disk(notebook_file_path=notebook_path)
+        else:
+            SuiteEditNotebookRenderer.from_data_context(
+                data_context=context
+            ).render_to_disk(
+                suite=suite,
+                notebook_file_path=notebook_path,
+                batch_request=batch_request,
+            )
 
         if no_jupyter:
             cli_message(
@@ -514,10 +519,25 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         if not no_jupyter:
             toolkit.launch_jupyter_notebook(notebook_path=notebook_path)
 
+    except (
+        ge_exceptions.DataContextError,
+        ge_exceptions.ProfilerError,
+        ValueError,
+        OSError,
+        SQLAlchemyError,
+    ) as e:
+        cli_message(string="<red>{}</red>".format(e))
+        if not suppress_usage_message:
+            toolkit.send_usage_message(
+                data_context=context, event=usage_event, success=False
+            )
+        sys.exit(1)
+
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
-        )
+        if not suppress_usage_message:
+            toolkit.send_usage_message(
+                data_context=context, event=usage_event, success=False
+            )
         raise e
 
 
@@ -536,7 +556,6 @@ def suite_demo(ctx):
 
 @suite.command(name="delete")
 @click.argument("suite")
-@mark.cli_as_experimental
 @click.pass_context
 def suite_delete(ctx, suite):
     """
@@ -572,67 +591,6 @@ def suite_delete(ctx, suite):
     context.delete_expectation_suite(suite)
     cli_message(string=f"Deleted the expectation suite named: {suite}")
     toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
-
-
-@suite.command(name="scaffold")
-@click.argument("suite")
-@click.option(
-    "--jupyter/--no-jupyter",
-    is_flag=True,
-    help="By default launch jupyter notebooks unless you specify the --no-jupyter flag",
-    default=True,
-)
-@mark.cli_as_experimental
-@click.pass_context
-def suite_scaffold(ctx, suite, no_jupyter):
-    """Scaffold a new Expectation Suite."""
-    display_not_implemented_message_and_exit()
-    directory = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    _suite_scaffold(suite, directory, no_jupyter)
-
-
-def _suite_scaffold(suite: str, directory: str, no_jupyter: bool):
-    usage_event = "cli.suite.scaffold"
-    suite_name = suite
-    context = toolkit.load_data_context_with_error_handling(directory)
-    notebook_filename = f"scaffold_{suite_name}.ipynb"
-    notebook_path = _get_notebook_path(context, notebook_filename)
-
-    if suite_name in context.list_expectation_suite_names():
-        toolkit.tell_user_suite_exists(suite_name)
-        if os.path.isfile(notebook_path):
-            cli_message(
-                string=f"  - If you wish to adjust your scaffolding, you can open this notebook with jupyter: `{notebook_path}` <red>(Please note that if you run that notebook, you will overwrite your existing suite.)</red>"
-            )
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
-        )
-        sys.exit(1)
-
-    datasource = toolkit.select_datasource(context)
-    if datasource is None:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
-        )
-        sys.exit(1)
-
-    _suite = context.create_expectation_suite(suite_name)
-    _, _, _, batch_kwargs = get_batch_request(
-        context=context, datasource_name=datasource.name
-    )
-    renderer = SuiteScaffoldNotebookRenderer(context, _suite, batch_kwargs)
-    renderer.render_to_disk(notebook_path)
-
-    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
-
-    if not no_jupyter:
-        toolkit.launch_jupyter_notebook(notebook_path)
-    else:
-        cli_message(
-            string=f"To continue scaffolding this suite, run `jupyter notebook {notebook_path}`"
-        )
 
 
 @suite.command(name="list")

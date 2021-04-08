@@ -27,13 +27,21 @@ def test_suite_help_output(caplog):
     assert result.exit_code == 0
     stdout: str = result.stdout
     assert (
-        """Commands:
-  delete    Delete an expectation suite from the expectation store.
-  demo      This command is not supported in the v3 (Batch Request) API.
-  edit      Generate a Jupyter notebook for editing an existing Expectation...
-  list      Lists available Expectation Suites.
-  new       Create a new empty Expectation Suite.
-  scaffold  Scaffold a new Expectation Suite."""
+        """
+Usage: great_expectations suite [OPTIONS] COMMAND [ARGS]...
+
+  Expectation Suite operations
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  delete   Delete an expectation suite from the expectation store.
+  demo     This command is not supported in the v3 (Batch Request) API.
+  edit     Generate a Jupyter notebook for editing an existing Expectation...
+  list     Lists available Expectation Suites.
+  new      Create a new empty Expectation Suite.
+"""
         in stdout
     )
     assert_no_logging_messages_or_tracebacks(
@@ -569,14 +577,14 @@ def test_suite_edit_datasource_and_batch_request_error(monkeypatch, empty_data_c
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit {expectation_suite_name} --datasource_name some_datasource_name --batch-request some_file.json --interactive",
+        f"--v3-api suite edit {expectation_suite_name} --datasource-name some_datasource_name --batch-request some_file.json --interactive",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
 
     stdout: str = result.stdout
     assert (
-        "Only one of --datasource_name DATASOURCE_NAME and --batch-request <path to JSON file> options can be used."
+        "Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> options can be used."
         in stdout
     )
 
@@ -647,7 +655,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit {expectation_suite_name} --interactive --datasource_name not_real",
+        f"--v3-api suite edit {expectation_suite_name} --interactive --datasource-name not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1

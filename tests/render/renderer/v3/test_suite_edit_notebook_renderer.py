@@ -8,12 +8,12 @@ from great_expectations import DataContext
 
 # noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
 )
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
@@ -858,11 +858,10 @@ def test_notebook_execution_with_pandas_backend(
     validator.save_expectation_suite(discard_failed_expectations=False)
 
     # Sanity check test setup
-    suite: ExpectationSuite = context.get_expectation_suite(
+    original_suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    original_suite: ExpectationSuite = suite
-    assert len(suite.expectations) == 3
+    assert len(original_suite.expectations) == 3
     assert context.list_expectation_suite_names() == [expectation_suite_name]
     assert context.list_datasources() == [
         {
@@ -947,16 +946,18 @@ def test_notebook_execution_with_pandas_backend(
     _suite_edit_workflow(
         context=context,
         expectation_suite_name=expectation_suite_name,
-        no_jupyter=True,
-        batch_request=batch_request,
+        profile=False,
         usage_event="test_notebook_execution",
-        create_if_not_exist=False,
         interactive=False,
+        no_jupyter=True,
+        create_if_not_exist=False,
         datasource_name=None,
+        batch_request=batch_request,
+        additional_batch_request_args=None,
         suppress_usage_message=True,
         # do not want to actually send usage_message, since the function call is not the result of actual usage
     )
-    edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
+    edit_notebook_path: str = os.path.join(uncommitted_dir, "edit_warning.ipynb")
     assert os.path.isfile(edit_notebook_path)
 
     run_notebook(
@@ -968,8 +969,8 @@ def test_notebook_execution_with_pandas_backend(
 
     # Assertions about output
     context = DataContext(context_root_dir=root_dir)
-    obs_validation_result = context.get_validation_result(
-        expectation_suite_name="warning"
+    obs_validation_result: ExpectationSuiteValidationResult = (
+        context.get_validation_result(expectation_suite_name="warning")
     )
     assert obs_validation_result.statistics == {
         "evaluated_expectations": 3,
@@ -977,7 +978,9 @@ def test_notebook_execution_with_pandas_backend(
         "unsuccessful_expectations": 1,
         "success_percent": 66.66666666666666,
     }
-    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
     suite["meta"].pop("citations", None)
     assert suite == original_suite
 

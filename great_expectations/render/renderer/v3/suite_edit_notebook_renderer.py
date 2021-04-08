@@ -166,7 +166,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         suite_name: str,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
     ) -> None:
         markdown: str = self.render_with_overwrite(
@@ -191,7 +191,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def add_footer(
         self,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
     ) -> None:
         markdown: str = self.render_with_overwrite(
@@ -211,7 +211,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         expectations: List[ExpectationConfiguration],
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
     ):
         expectations_by_column: Dict[
@@ -245,7 +245,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         expectations_by_column: Dict[str, List[ExpectationConfiguration]],
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
     ):
         if not expectations_by_column["table_expectations"]:
@@ -276,7 +276,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         expectations_by_column: Dict[str, List[ExpectationConfiguration]],
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
     ):
         if not expectations_by_column:
@@ -351,7 +351,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         suite: ExpectationSuite,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
     ) -> nbformat.NotebookNode:
         """
@@ -390,7 +390,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         suite: ExpectationSuite,
         notebook_file_path: str,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
     ) -> None:
         """
@@ -409,7 +409,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def add_authoring_intro(
         self,
         batch_request: Optional[
-            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
+            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
         ] = None,
     ):
         markdown: str = self.render_with_overwrite(
