@@ -783,17 +783,3 @@ def get_relative_path_from_config_file_to_base_path(
     data_from_working_dir = os.path.relpath(data_path)
     context_dir_from_working_dir = os.path.relpath(context_root_directory)
     return os.path.relpath(data_from_working_dir, context_dir_from_working_dir)
-
-
-def send_cli_begin_usage_event(context: DataContext, usage_event_prefix: str) -> str:
-    """
-    Send a f"{usage_event_prefix}.begin" message and return the end message event name
-    Args:
-        context: DataContext associated with current CLI call
-        usage_event_prefix: message name prefix before the .begin or .end
-
-    Returns:
-        usage_event_end str with ".end" appended to prefix
-    """
-    send_usage_message(context, event=f"{usage_event_prefix}.begin", success=True)
-    return f"{usage_event_prefix}.end"

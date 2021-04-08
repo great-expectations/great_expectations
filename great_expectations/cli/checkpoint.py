@@ -100,9 +100,12 @@ def checkpoint_new(ctx, name, jupyter):
 def _checkpoint_new(ctx, checkpoint_name, jupyter):
 
     context = ctx.obj.data_context
-    usage_event_end: str = toolkit.send_cli_begin_usage_event(
-        context=context, usage_event_prefix=f"{ctx.obj.usage_stats_prefix}.new"
+    toolkit.send_usage_message(
+        data_context=context,
+        event=f"{ctx.obj.usage_stats_prefix}.new.begin",
+        success=True,
     )
+    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.new.end"
 
     try:
         _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event_end)
@@ -169,9 +172,12 @@ def _get_notebook_path(context, notebook_name):
 def checkpoint_list(ctx):
     """List configured Checkpoints."""
     context: DataContext = ctx.obj.data_context
-    usage_event_end: str = toolkit.send_cli_begin_usage_event(
-        context=context, usage_event_prefix=f"{ctx.obj.usage_stats_prefix}.list"
+    toolkit.send_usage_message(
+        data_context=context,
+        event=f"{ctx.obj.usage_stats_prefix}.list.begin",
+        success=True,
     )
+    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.list.end"
 
     checkpoints: List[str] = context.list_checkpoints()
     if not checkpoints:
@@ -196,9 +202,12 @@ def checkpoint_list(ctx):
 def checkpoint_delete(ctx, checkpoint):
     """Delete a Checkpoint."""
     context: DataContext = ctx.obj.data_context
-    usage_event_end: str = toolkit.send_cli_begin_usage_event(
-        context=context, usage_event_prefix=f"{ctx.obj.usage_stats_prefix}.delete"
+    toolkit.send_usage_message(
+        data_context=context,
+        event=f"{ctx.obj.usage_stats_prefix}.delete.begin",
+        success=True,
     )
+    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.delete.end"
 
     try:
         toolkit.delete_checkpoint(
@@ -226,9 +235,12 @@ def checkpoint_delete(ctx, checkpoint):
 def checkpoint_run(ctx, checkpoint):
     """Run a Checkpoint."""
     context: DataContext = ctx.obj.data_context
-    usage_event_end: str = toolkit.send_cli_begin_usage_event(
-        context=context, usage_event_prefix=f"{ctx.obj.usage_stats_prefix}.run"
+    toolkit.send_usage_message(
+        data_context=context,
+        event=f"{ctx.obj.usage_stats_prefix}.run.begin",
+        success=True,
     )
+    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.run.end"
 
     try:
         result: CheckpointResult = toolkit.run_checkpoint(
@@ -298,9 +310,12 @@ def checkpoint_script(ctx, checkpoint):
     This script is provided for those who wish to run Checkpoints via python.
     """
     context: DataContext = ctx.obj.data_context
-    usage_event_end: str = toolkit.send_cli_begin_usage_event(
-        context=context, usage_event_prefix=f"{ctx.obj.usage_stats_prefix}.script"
+    toolkit.send_usage_message(
+        data_context=context,
+        event=f"{ctx.obj.usage_stats_prefix}.script.begin",
+        success=True,
     )
+    usage_event_end: str = f"{ctx.obj.usage_stats_prefix}.script.end"
 
     toolkit.validate_checkpoint(
         context=context, checkpoint_name=checkpoint, usage_event=usage_event_end
