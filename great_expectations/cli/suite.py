@@ -129,34 +129,27 @@ def _suite_new_workflow(
     profile: bool,
     no_jupyter: bool,
     usage_event: str,
-    batch_request: Optional[str] = None,
+    batch_request: Optional[
+        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+    ] = None,
 ):
     try:
-        if batch_request is not None and isinstance(batch_request, str):
-            batch_request = load_json_file_into_dict(
-                filepath=batch_request,
-                usage_event=usage_event,
-                data_context=context,
-            )
-            try:
-                batch_request = BatchRequest(**batch_request).get_json_dict()
-            except TypeError as e:
-                cli_message(
-                    string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
-                )
-                cli_message(string="<red>{}</red>".format(e))
-                toolkit.send_usage_message(
-                    data_context=context, event=usage_event, success=False
-                )
-                sys.exit(1)
-
-        datasource_name: Optional[str] = None
-        data_asset_name: Optional[str] = None
         additional_batch_request_args: Optional[
             Dict[str, Union[str, int, Dict[str, Any]]]
         ] = {"limit": 1000}
+        data_asset_name: Optional[str] = None
 
         if interactive:
+            if batch_request is not None and isinstance(batch_request, str):
+                batch_request = toolkit.get_batch_request_from_json_file(
+                    batch_request_json_file_path=batch_request,
+                    data_context=context,
+                    usage_event=usage_event,
+                    suppress_usage_message=False,
+                )
+
+            datasource_name: Optional[str] = None
+
             if not batch_request:
                 cli_message(
                     string="""A batch of data is required to edit the suite - let's help you to specify it."""

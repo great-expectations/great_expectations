@@ -783,6 +783,24 @@ def get_batch_request_from_citations(
     return batch_request_from_citation
 
 
+def add_citation_with_batch_request(
+    data_context: Optional[DataContext] = None,
+    expectation_suite: Optional[ExpectationSuite] = None,
+    batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None,
+):
+    if (
+        expectation_suite is not None
+        and batch_request
+        and isinstance(batch_request, dict)
+        and BatchRequest(**batch_request)
+    ):
+        expectation_suite.add_citation(
+            comment="Created suite added via CLI",
+            batch_request=batch_request,
+        )
+        data_context.save_expectation_suite(expectation_suite=suite)
+
+
 def get_batch_request_from_json_file(
     batch_request_json_file_path: str,
     data_context: Optional[DataContext] = None,
