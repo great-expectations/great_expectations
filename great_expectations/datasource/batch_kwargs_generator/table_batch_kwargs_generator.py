@@ -216,8 +216,6 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 known_system_tables = ["sqlite_master"]  # sqlite
                 ### Figure this out ####
 
-
-
                 if schema_name in known_information_schemas:
                     continue
 
@@ -233,7 +231,6 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                     )
                 else:
                     # set default_schema_nane
-
 
                     if self.engine.dialect.name.lower() == "sqlite":
                         # <WILL> 202104 This is for sqlalchemy compatibilty < 1.4.0

@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 from packaging.version import parse as parse_version
 
 from great_expectations._version import get_versions  # isort:skip
+
 __version__ = get_versions()["version"]  # isort:skip
 del get_versions  # isort:skip
 
@@ -759,7 +760,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Match the values in the named column against value_list, and only keep the matches"""
         if parse_version(sa.__version__) >= parse_version("1.4.0"):
             raise GreatExpectationsError(
-            f"""
+                f"""
                 This functionality in Great Expectations version {__version__} is currently incompatible with SqlAlchemy 1.4.0 and higher.
                 You currently have SqlAlchemy version {sa.__version__}. Please downgrade SqlAlchemy to < 1.4.0 while we work on a proper fix.
             """
@@ -816,7 +817,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
                     sa.select("*")
-                    .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
+                    .select_from(
+                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                    )
                     .where(
                         sa.and_(
                             split_clause,

@@ -2,12 +2,12 @@ import json
 import random
 
 import pytest
+from packaging.version import parse as parse_version
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-from packaging.version import parse as parse_version
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")

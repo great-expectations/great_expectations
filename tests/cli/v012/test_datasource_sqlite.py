@@ -442,7 +442,6 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     )
     res = context.get_available_data_asset_names("wow_a_datasource")
 
-
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,

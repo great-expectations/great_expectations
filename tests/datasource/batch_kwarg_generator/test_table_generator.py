@@ -100,6 +100,7 @@ def test_db_introspection(postgresql_sqlalchemy_datasource, caplog):
         "use new supplemental kwargs."
     ]
 
+
 def test_query_generator_view(sqlite_view_engine):
     datasource = SqlAlchemyDatasource(
         engine=sqlite_view_engine,
