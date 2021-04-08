@@ -12,6 +12,12 @@ from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.validator.validator import BridgeValidator, Validator
 
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
+
+
 yaml = YAML()
 
 
@@ -175,8 +181,8 @@ def test_sqlalchemy_source_templating(sqlitedb_engine):
 def test_sqlalchemy_source_limit(sqlitedb_engine):
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     df2 = pd.DataFrame({"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]})
-    df1.to_sql("table_1", con=sqlitedb_engine, index=True)
-    df2.to_sql("table_2", con=sqlitedb_engine, index=True, schema="main")
+    df1.to_sql(name="table_1", con=sqlitedb_engine, index=True)
+    df2.to_sql(name="table_2", con=sqlitedb_engine, index=True, schema="main")
     datasource = SqlAlchemyDatasource("SqlAlchemy", engine=sqlitedb_engine)
     limited_batch = datasource.get_batch({"table": "table_1", "limit": 1, "offset": 2})
     assert isinstance(limited_batch, Batch)

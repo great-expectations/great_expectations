@@ -58,7 +58,7 @@ class ColumnDistinctValues(ColumnMetricProvider):
     ):
         """Returns a dictionary of given metric names and their corresponding configuration,
         specifying the metric types and their respective domains"""
-        dependencies = super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
@@ -68,14 +68,13 @@ class ColumnDistinctValues(ColumnMetricProvider):
         if isinstance(
             execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
         ):
-            dependencies.update(
-                {
-                    "column.value_counts": MetricConfiguration(
-                        metric_name="column.value_counts",
-                        metric_domain_kwargs=metric.metric_domain_kwargs,
-                        metric_value_kwargs={"sort": "value", "collate": None},
-                    )
-                }
+            dependencies["column.value_counts"] = MetricConfiguration(
+                metric_name="column.value_counts",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+                metric_value_kwargs={
+                    "sort": "value",
+                    "collate": None,
+                },
             )
 
         return dependencies
@@ -122,7 +121,7 @@ class ColumnDistinctValuesCount(ColumnMetricProvider):
     ):
         """Returns a dictionary of given metric names and their corresponding configuration,
         specifying the metric types and their respective domains"""
-        dependencies = super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
@@ -132,14 +131,13 @@ class ColumnDistinctValuesCount(ColumnMetricProvider):
         if isinstance(
             execution_engine, (SqlAlchemyExecutionEngine, SparkDFExecutionEngine)
         ):
-            dependencies.update(
-                {
-                    "column.value_counts": MetricConfiguration(
-                        metric_name="column.value_counts",
-                        metric_domain_kwargs=metric.metric_domain_kwargs,
-                        metric_value_kwargs={"sort": "value", "collate": None},
-                    )
-                }
+            dependencies["column.value_counts"] = MetricConfiguration(
+                metric_name="column.value_counts",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+                metric_value_kwargs={
+                    "sort": "value",
+                    "collate": None,
+                },
             )
 
         return dependencies

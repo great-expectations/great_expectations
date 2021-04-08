@@ -15,10 +15,10 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
-from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.self_check.util import build_spark_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
-from tests.test_utils import build_spark_engine
+from tests.expectations.test_util import get_table_columns_metric
 
 try:
     pyspark = pytest.importorskip("pyspark")
@@ -373,7 +373,7 @@ def test_get_batch_with_split_on_column_value(
             splitter_method="_split_on_column_value",
             splitter_kwargs={
                 "column_name": "batch_id",
-                "partition_definition": {"batch_id": 2},
+                "batch_identifiers": {"batch_id": 2},
             },
         )
     ).dataframe
@@ -389,7 +389,7 @@ def test_get_batch_with_split_on_column_value(
             splitter_method="_split_on_column_value",
             splitter_kwargs={
                 "column_name": "date",
-                "partition_definition": {"date": datetime.date(2020, 1, 30)},
+                "batch_identifiers": {"date": datetime.date(2020, 1, 30)},
             },
         )
     ).dataframe
@@ -406,7 +406,7 @@ def test_get_batch_with_split_on_converted_datetime(
             splitter_method="_split_on_converted_datetime",
             splitter_kwargs={
                 "column_name": "timestamp",
-                "partition_definition": {"timestamp": "2020-01-03"},
+                "batch_identifiers": {"timestamp": "2020-01-03"},
             },
         )
     ).dataframe
@@ -424,7 +424,7 @@ def test_get_batch_with_split_on_divided_integer(
             splitter_kwargs={
                 "column_name": "id",
                 "divisor": 10,
-                "partition_definition": {"id": 5},
+                "batch_identifiers": {"id": 5},
             },
         )
     ).dataframe
@@ -446,7 +446,7 @@ def test_get_batch_with_split_on_mod_integer(
             splitter_kwargs={
                 "column_name": "id",
                 "mod": 10,
-                "partition_definition": {"id": 5},
+                "batch_identifiers": {"id": 5},
             },
         )
     ).dataframe
@@ -468,7 +468,7 @@ def test_get_batch_with_split_on_multi_column_values(
             splitter_method="_split_on_multi_column_values",
             splitter_kwargs={
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {
+                "batch_identifiers": {
                     "y": 2020,
                     "m": 1,
                     "d": 5,
@@ -490,7 +490,7 @@ def test_get_batch_with_split_on_multi_column_values(
                 splitter_method="_split_on_multi_column_values",
                 splitter_kwargs={
                     "column_names": ["I", "dont", "exist"],
-                    "partition_definition": {
+                    "batch_identifiers": {
                         "y": 2020,
                         "m": 1,
                         "d": 5,
@@ -515,7 +515,7 @@ def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
                     "column_name": "favorite_color",
                     "hash_digits": 1,
                     "hash_function_name": "I_wont_work",
-                    "partition_definition": {
+                    "batch_identifiers": {
                         "hash_value": "a",
                     },
                 },
@@ -534,7 +534,7 @@ def test_get_batch_with_split_on_hashed_column(
                 "column_name": "favorite_color",
                 "hash_digits": 1,
                 "hash_function_name": "sha256",
-                "partition_definition": {
+                "batch_identifiers": {
                     "hash_value": "a",
                 },
             },
@@ -649,7 +649,7 @@ def test_split_on_multi_column_values_and_sample_using_random(
             splitter_method="_split_on_multi_column_values",
             splitter_kwargs={
                 "column_names": ["y", "m", "d"],
-                "partition_definition": {
+                "batch_identifiers": {
                     "y": 2020,
                     "m": 1,
                     "d": 5,
@@ -664,7 +664,7 @@ def test_split_on_multi_column_values_and_sample_using_random(
 
     # The test dataframe contains 10 columns and 120 rows.
     assert len(returned_df.columns) == 10
-    # The number of returned rows corresponding to the value of "partition_definition" above is 4.
+    # The number of returned rows corresponding to the value of "batch_identifiers" above is 4.
     assert 0 <= returned_df.count() <= 4
     # The sampling probability "p" used in "SparkDFExecutionEngine._sample_using_random()" is 0.5 (the equivalent of a
     # fair coin with the 50% chance of coming up as "heads").  Hence, on average we should get 50% of the rows, which is
@@ -756,7 +756,7 @@ def dataframes_equal(first_table, second_table):
 def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     import datetime
 
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]},
@@ -764,62 +764,48 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         batch_id="1234",
     )
 
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+
+    metrics.update(results)
+
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=dict(),
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
     )
-    metrics = engine.resolve_metrics(
-        metrics_to_resolve=(
-            desired_metric_1,
-            desired_metric_2,
-            desired_metric_3,
-            desired_metric_4,
-        )
-    )
-    desired_metric_1 = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_1},
-    )
-    desired_metric_2 = MetricConfiguration(
-        metric_name="column.min",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_2},
-    )
-    desired_metric_3 = MetricConfiguration(
-        metric_name="column.max",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_3},
-    )
-    desired_metric_4 = MetricConfiguration(
-        metric_name="column.min",
-        metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
-        metric_dependencies={"metric_partial_fn": desired_metric_4},
-    )
-    start = datetime.datetime.now()
-    caplog.clear()
-    caplog.set_level(logging.DEBUG, logger="great_expectations")
-    res = engine.resolve_metrics(
+    results = engine.resolve_metrics(
         metrics_to_resolve=(
             desired_metric_1,
             desired_metric_2,
@@ -828,12 +814,63 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         ),
         metrics=metrics,
     )
+    metrics.update(results)
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_1,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_2,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_3,
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs=dict(),
+        metric_dependencies={
+            "metric_partial_fn": desired_metric_4,
+            "table.columns": table_columns_metric,
+        },
+    )
+    start = datetime.datetime.now()
+    caplog.clear()
+    caplog.set_level(logging.DEBUG, logger="great_expectations")
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(
+            desired_metric_1,
+            desired_metric_2,
+            desired_metric_3,
+            desired_metric_4,
+        ),
+        metrics=metrics,
+    )
+    metrics.update(results)
     end = datetime.datetime.now()
     print(end - start)
-    assert res[desired_metric_1.id] == 3
-    assert res[desired_metric_2.id] == 1
-    assert res[desired_metric_3.id] == 4
-    assert res[desired_metric_4.id] == 4
+    assert metrics[desired_metric_1.id] == 3
+    assert metrics[desired_metric_2.id] == 1
+    assert metrics[desired_metric_3.id] == 4
+    assert metrics[desired_metric_4.id] == 4
 
     # Check that all four of these metrics were computed on a single domain
     found_message = False
@@ -850,7 +887,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
 def test_get_compute_domain_with_no_domain_kwargs_alt(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -875,7 +912,7 @@ def test_get_compute_domain_with_no_domain_kwargs_alt(
 def test_get_compute_domain_with_column_pair(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -917,7 +954,7 @@ def test_get_compute_domain_with_column_pair(
 def test_get_compute_domain_with_multicolumn(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None], "c": [1, 2, 3, None]},
@@ -959,7 +996,7 @@ def test_get_compute_domain_with_multicolumn(
 def test_get_compute_domain_with_column_domain_alt(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -984,7 +1021,7 @@ def test_get_compute_domain_with_column_domain_alt(
 def test_get_compute_domain_with_row_condition_alt(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -1018,7 +1055,7 @@ def test_get_compute_domain_with_row_condition_alt(
 def test_get_compute_domain_with_unmeetable_row_condition_alt(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -1071,7 +1108,7 @@ def test_get_compute_domain_with_unmeetable_row_condition_alt(
 def test_get_compute_domain_with_ge_experimental_condition_parser(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -1130,7 +1167,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(
 def test_get_compute_domain_with_nonexistent_condition_parser(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 3, 4], "b": [2, 3, 4, None]},
@@ -1158,7 +1195,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(
 def test_resolve_metric_bundle_with_nonexistent_metric(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]},
@@ -1205,7 +1242,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(
 def test_dataframe_property_given_loaded_batch(
     spark_session, basic_spark_df_execution_engine
 ):
-    engine = build_spark_engine(
+    engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
             {"a": [1, 5, 22, 3, 5, 10]},

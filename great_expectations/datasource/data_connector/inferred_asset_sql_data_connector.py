@@ -168,9 +168,9 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             if not sampling_kwargs is None:
                 data_asset_config["sampling_kwargs"] = sampling_kwargs
 
-            # Attempt to fetch a list of partition_definitions from the table
+            # Attempt to fetch a list of batch_identifiers from the table
             try:
-                self._get_partition_definition_list_from_data_asset_config(
+                self._get_batch_identifiers_list_from_data_asset_config(
                     data_asset_name,
                     data_asset_config,
                 )

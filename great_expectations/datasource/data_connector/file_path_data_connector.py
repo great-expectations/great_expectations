@@ -9,11 +9,11 @@ from great_expectations.core.batch import (
     BatchSpec,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.datasource.data_connector.data_connector import DataConnector
-from great_expectations.datasource.data_connector.partition_query import (
-    PartitionQuery,
-    build_partition_query,
+from great_expectations.datasource.data_connector.batch_filter import (
+    BatchFilter,
+    build_batch_filter,
 )
+from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
@@ -92,6 +92,11 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
+        if len(self.sorters) > 0:
+            batch_definition_list = self._sort_batch_definition_list(
+                batch_definition_list=batch_definition_list
+            )
+
         path_list: List[str] = [
             map_batch_definition_to_data_reference_string_using_regex(
                 batch_definition=batch_definition,
@@ -100,9 +105,6 @@ class FilePathDataConnector(DataConnector):
             )
             for batch_definition in batch_definition_list
         ]
-
-        # TODO: Sort with a real sorter here
-        path_list.sort()
 
         return path_list
 
@@ -114,7 +116,7 @@ class FilePathDataConnector(DataConnector):
         Retrieve batch_definitions and that match batch_request.
 
         First retrieves all batch_definitions that match batch_request
-            - if batch_request also has a partition_query, then select batch_definitions that match partition_query.
+            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.
             - if data_connector has sorters configured, then sort the batch_definition list before returning.
 
         Args:
@@ -137,7 +139,7 @@ class FilePathDataConnector(DataConnector):
         Retrieve batch_definitions that match batch_request.
 
         First retrieves all batch_definitions that match batch_request
-            - if batch_request also has a partition_query, then select batch_definitions that match partition_query.
+            - if batch_request also has a batch_filter, then select batch_definitions that match batch_filter.
             - if data_connector has sorters configured, then sort the batch_definition list before returning.
 
         Args:
@@ -148,8 +150,7 @@ class FilePathDataConnector(DataConnector):
 
         """
         self._validate_batch_request(batch_request=batch_request)
-
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         batch_definition_list: List[BatchDefinition] = list(
@@ -161,21 +162,20 @@ class FilePathDataConnector(DataConnector):
             )
         )
 
-        if batch_request.partition_request is not None:
-            partition_query_obj: PartitionQuery = build_partition_query(
-                partition_request_dict=batch_request.partition_request
-            )
-            batch_definition_list = partition_query_obj.select_from_partition_request(
+        if len(self.sorters) > 0:
+            batch_definition_list = self._sort_batch_definition_list(
                 batch_definition_list=batch_definition_list
             )
 
-        if len(self.sorters) > 0:
-            sorted_batch_definition_list = self._sort_batch_definition_list(
+        if batch_request.data_connector_query is not None:
+            batch_filter_obj: BatchFilter = build_batch_filter(
+                data_connector_query_dict=batch_request.data_connector_query
+            )
+            batch_definition_list = batch_filter_obj.select_from_data_connector_query(
                 batch_definition_list=batch_definition_list
             )
-            return sorted_batch_definition_list
-        else:
-            return batch_definition_list
+
+        return batch_definition_list
 
     def _sort_batch_definition_list(
         self, batch_definition_list: List[BatchDefinition]
@@ -249,7 +249,7 @@ class FilePathDataConnector(DataConnector):
         if not path:
             raise ValueError(
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-partition definition {batch_definition.partition_definition} from batch definition {batch_definition}.
+batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
                 """
             )
         path = self._get_full_file_path(

@@ -115,7 +115,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "import great_expectations as ge\n\ncontext = ge.get_context()",
+            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\n\nyaml = YAML()\ncontext = ge.get_context()",
             "outputs": [],
         },
     ]
@@ -170,7 +170,7 @@ validations:
       datasource_name: my_datasource
       data_connector_name: my_other_data_connector
       data_asset_name: users
-      partition_request:
+      data_connector_query:
         index: -1
     expectation_suite_name: Titanic.warning
 """
@@ -192,15 +192,13 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Test and Store Your Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nNote that if it is valid, it will be automatically saved to your Checkpoint Store.\n\nThis `test_yaml_config()` function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters.""",
+            "source": """# Test Your Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nThis `test_yaml_config()` function is meant to enable fast dev loops. If your configuration is correct, this cell will show a message that you successfully instantiated a Checkpoint. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters.""",
         },
         {
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": """my_checkpoint = context.test_yaml_config(
-    name=my_checkpoint_name, yaml_config=my_checkpoint_name_config
-)""",
+            "source": """my_checkpoint = context.test_yaml_config(yaml_config=my_checkpoint_name_config)""",
             "outputs": [],
         },
     ]
@@ -215,6 +213,20 @@ validations:
             "metadata": {},
             "execution_count": None,
             "source": "print(my_checkpoint.get_substituted_config().to_yaml_str())",
+            "outputs": [],
+        },
+    ]
+    add_checkpoint = [
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": """# Add Your Checkpoint\n\nRun the following cell to save this Checkpoint to your Checkpoint Store.""",
+        },
+        {
+            "cell_type": "code",
+            "metadata": {},
+            "execution_count": None,
+            "source": f"context.add_checkpoint(**yaml.load(my_checkpoint_name_config))",
             "outputs": [],
         },
     ]
@@ -242,6 +254,7 @@ validations:
         "sample_checkpoint_config_markdown_error_message": sample_checkpoint_config_markdown_error_message,
         "test_and_save_your_checkpoint_configuration": test_and_save_your_checkpoint_configuration,
         "review_checkpoint": review_checkpoint,
+        "add_checkpoint": add_checkpoint,
         "optional_run_checkpoint": optional_run_checkpoint,
     }
 
@@ -280,6 +293,7 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
         + checkpoint_new_notebook_assets["optional_customize_your_config"]
         + checkpoint_new_notebook_assets["test_and_save_your_checkpoint_configuration"]
         + checkpoint_new_notebook_assets["review_checkpoint"]
+        + checkpoint_new_notebook_assets["add_checkpoint"]
         + checkpoint_new_notebook_assets["optional_run_checkpoint"]
     )
 
@@ -328,6 +342,7 @@ def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
         + checkpoint_new_notebook_assets["optional_customize_your_config"]
         + checkpoint_new_notebook_assets["test_and_save_your_checkpoint_configuration"]
         + checkpoint_new_notebook_assets["review_checkpoint"]
+        + checkpoint_new_notebook_assets["add_checkpoint"]
         + checkpoint_new_notebook_assets["optional_run_checkpoint"]
     )
 

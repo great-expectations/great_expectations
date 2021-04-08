@@ -7,15 +7,12 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
-)
-from great_expectations.expectations.metrics.util import (
-    get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
@@ -24,15 +21,18 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
+from great_expectations.self_check.util import (
+    connection_manager,
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-from tests.test_utils import connection_manager
 
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sqlalchemy
     import sqlalchemy.dialects.postgresql as postgresqltypes
 
     POSTGRESQL_TYPES = {
@@ -48,6 +48,7 @@ try:
         "NUMERIC": postgresqltypes.NUMERIC,
     }
 except ImportError:
+    sqlalchemy = None
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
@@ -55,16 +56,14 @@ logger = logging.getLogger(__name__)
 
 
 def get_pandas_runtime_validator(context, df):
-    batch_request = BatchRequest(
+    batch_request = RuntimeBatchRequest(
         datasource_name="my_pandas_runtime_datasource",
         data_connector_name="my_data_connector",
-        batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
-        partition_request={
-            "batch_identifiers": {
-                "an_example_key": "a",
-                "another_example_key": "b",
-            }
+        runtime_parameters={"batch_data": df},
+        batch_identifiers={
+            "an_example_key": "a",
+            "another_example_key": "b",
         },
     )
 
@@ -88,16 +87,14 @@ def get_spark_runtime_validator(context, df):
         }
     )
     df = spark.createDataFrame(df)
-    batch_request = BatchRequest(
+    batch_request = RuntimeBatchRequest(
         datasource_name="my_spark_datasource",
         data_connector_name="my_data_connector",
-        batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
-        partition_request={
-            "batch_identifiers": {
-                "an_example_key": "a",
-                "another_example_key": "b",
-            }
+        runtime_parameters={"batch_data": df},
+        batch_identifiers={
+            "an_example_key": "a",
+            "another_example_key": "b",
         },
     )
 
@@ -121,7 +118,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
         )
-    except sa.exc.OperationalError:
+    except sqlalchemy.exc.OperationalError:
         return None
 
     sql_dtypes = {}
@@ -210,7 +207,7 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
 
 
 @pytest.fixture
-def taxi_validator_spark(titanic_data_context_modular_api):
+def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
@@ -223,7 +220,7 @@ def taxi_validator_spark(titanic_data_context_modular_api):
 
 
 @pytest.fixture
-def taxi_validator_sqlalchemy(titanic_data_context_modular_api):
+def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     """
     What does this test do and why?
     Ensures that all available expectation types work as expected
@@ -235,7 +232,21 @@ def taxi_validator_sqlalchemy(titanic_data_context_modular_api):
     return get_sqlalchemy_runtime_validator_postgresql(df)
 
 
-@pytest.fixture
+@pytest.fixture()
+def nulls_validator(titanic_data_context_modular_api):
+    df = pd.DataFrame(
+        {
+            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
+            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
+        }
+    )
+
+    validator = get_pandas_runtime_validator(titanic_data_context_modular_api, df)
+
+    return validator
+
+
+@pytest.fixture()
 def cardinality_validator(titanic_data_context_modular_api):
     """
     What does this test do and why?
@@ -627,7 +638,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
 
 
 def test_config_with_not_null_only(
-    titanic_data_context_modular_api, possible_expectations_set
+    titanic_data_context_modular_api, nulls_validator, possible_expectations_set
 ):
     """
     What does this test do and why?
@@ -636,14 +647,7 @@ def test_config_with_not_null_only(
 
     excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
 
-    df = pd.DataFrame(
-        {
-            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
-            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
-        }
-    )
-
-    validator = get_pandas_runtime_validator(titanic_data_context_modular_api, df)
+    validator = nulls_validator
 
     profiler_without_not_null_only = UserConfigurableProfiler(
         validator, excluded_expectations, not_null_only=False
@@ -670,6 +674,22 @@ def test_config_with_not_null_only(
     no_config_suite = no_config_profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(no_config_suite)
     assert "expect_column_values_to_be_null" in expectations
+
+
+def test_nullity_expectations_mostly_tolerance(
+    nulls_validator, possible_expectations_set
+):
+    excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
+
+    validator = nulls_validator
+
+    profiler = UserConfigurableProfiler(
+        validator, excluded_expectations, not_null_only=False
+    )
+    suite = profiler.build_suite()
+
+    for i in suite.expectations:
+        assert i["kwargs"]["mostly"] == 0.66
 
 
 def test_profiled_dataset_passes_own_validation(

@@ -121,9 +121,15 @@ Notes:
             }
         )
 
-        batch_data: PandasBatchData
+        batch_data: Any
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
+            batch_data = batch_spec.batch_data
+            if isinstance(batch_data, str):
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
+Please check your config."""
+                )
             if isinstance(batch_spec.batch_data, pd.DataFrame):
                 df = batch_spec.batch_data
             elif isinstance(batch_spec.batch_data, PandasBatchData):
@@ -272,7 +278,7 @@ Notes:
         self,
         domain_kwargs: dict,
         domain_type: Union[str, "MetricDomainTypes"],
-        accessor_keys: Optional[Iterable[str]] = [],
+        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas DataFrame. If the domain is a single column,
@@ -343,7 +349,7 @@ Notes:
         if (
             domain_type != MetricDomainTypes.TABLE
             and accessor_keys is not None
-            and len(accessor_keys) > 0
+            and len(list(accessor_keys)) > 0
         ):
             logger.warning(
                 "Accessor keys ignored since Metric Domain Type is not 'table"
@@ -352,21 +358,26 @@ Notes:
         # If given table (this is default), get all unexpected accessor_keys (an optional parameters allowing us to
         # modify domain access)
         if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(accessor_keys) > 0:
+            if accessor_keys is not None and len(list(accessor_keys)) > 0:
                 for key in accessor_keys:
                     accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
             if len(compute_domain_kwargs.keys()) > 0:
-                for key in compute_domain_kwargs.keys():
-                    # Warning user if kwarg not "normal"
-                    if key not in [
+                # Warn user if kwarg not "normal".
+                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
+                    {
                         "batch_id",
                         "table",
                         "row_condition",
                         "condition_parser",
-                    ]:
-                        logger.warning(
-                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
-                        )
+                    }
+                )
+                if len(unexpected_keys) > 0:
+                    unexpected_keys_str: str = ", ".join(
+                        map(lambda element: f'"{element}"', unexpected_keys)
+                    )
+                    logger.warning(
+                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                    )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and
@@ -439,37 +450,32 @@ Notes:
 
     @staticmethod
     def _split_on_column_value(
-        df,
-        column_name: str,
-        partition_definition: dict,
+        df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
 
-        return df[df[column_name] == partition_definition[column_name]]
+        return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
     def _split_on_converted_datetime(
         df,
         column_name: str,
-        partition_definition: dict,
+        batch_identifiers: dict,
         date_format_string: str = "%Y-%m-%d",
     ):
         """Convert the values in the named column to the given date_format, and split on that"""
         stringified_datetime_series = df[column_name].map(
             lambda x: x.strftime(date_format_string)
         )
-        matching_string = partition_definition[column_name]
+        matching_string = batch_identifiers[column_name]
         return df[stringified_datetime_series == matching_string]
 
     @staticmethod
     def _split_on_divided_integer(
-        df,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
+        df, column_name: str, divisor: int, batch_identifiers: dict
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        matching_divisor = partition_definition[column_name]
+        matching_divisor = batch_identifiers[column_name]
         matching_rows = df[column_name].map(
             lambda x: int(x / divisor) == matching_divisor
         )
@@ -477,35 +483,28 @@ Notes:
         return df[matching_rows]
 
     @staticmethod
-    def _split_on_mod_integer(
-        df,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
-    ):
+    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        matching_mod_value = partition_definition[column_name]
+        matching_mod_value = batch_identifiers[column_name]
         matching_rows = df[column_name].map(lambda x: x % mod == matching_mod_value)
 
         return df[matching_rows]
 
     @staticmethod
     def _split_on_multi_column_values(
-        df,
-        column_names: List[str],
-        partition_definition: dict,
+        df, column_names: List[str], batch_identifiers: dict
     ):
         """Split on the joint values in the named columns"""
 
         subset_df = df.copy()
         for column_name in column_names:
-            value = partition_definition.get(column_name)
+            value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
                     f"In order for PandasExecution to `_split_on_multi_column_values`, "
-                    f"all values in column_names must also exist in partition_definition. "
-                    f"{column_name} was not found in partition_definition."
+                    f"all values in column_names must also exist in batch_identifiers. "
+                    f"{column_name} was not found in batch_identifiers."
                 )
             subset_df = subset_df[subset_df[column_name] == value]
         return subset_df
@@ -515,7 +514,7 @@ Notes:
         df,
         column_name: str,
         hash_digits: int,
-        partition_definition: dict,
+        batch_identifiers: dict,
         hash_function_name: str = "md5",
     ):
         """Split on the hashed value of the named column"""
@@ -530,7 +529,7 @@ Notes:
             )
         matching_rows = df[column_name].map(
             lambda x: hash_method(str(x).encode()).hexdigest()[-1 * hash_digits :]
-            == partition_definition["hash_value"]
+            == batch_identifiers["hash_value"]
         )
         return df[matching_rows]
 

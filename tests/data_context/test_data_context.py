@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from collections import OrderedDict
 
 import pandas as pd
 import pytest
@@ -21,8 +22,8 @@ from great_expectations.data_context import (
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    DataContextConfig,
     DataContextConfigDefaults,
+    DatasourceConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -30,12 +31,13 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
-from great_expectations.datasource import LegacyDatasource
+from great_expectations.datasource import (
+    Datasource,
+    LegacyDatasource,
+    SimpleSqlalchemyDatasource,
+)
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 from tests.test_utils import create_files_in_directory, safe_remove
 
 try:
@@ -438,13 +440,12 @@ def test_data_context_profile_datasource_on_non_existent_one_raises_helpful_erro
 
 @freeze_time("09/26/2019 13:42:41")
 @pytest.mark.rendered_output
-def test_render_full_static_site_from_empty_project(tmp_path_factory, filesystem_csv_3):
+def test_render_full_static_site_from_empty_project(tmp_path, filesystem_csv_3):
 
     # TODO : Use a standard test fixture
     # TODO : Have that test fixture copy a directory, rather than building a new one from scratch
 
-    base_dir = str(tmp_path_factory.mktemp("project_dir"))
-    project_dir = os.path.join(base_dir, "project_path")
+    project_dir = os.path.join(tmp_path, "project_path")
     os.mkdir(project_dir)
 
     os.makedirs(os.path.join(project_dir, "data"))
@@ -478,7 +479,6 @@ project_path/
     )
 
     context = DataContext.create(project_dir)
-    ge_directory = os.path.join(project_dir, "great_expectations")
     context.add_datasource(
         "titanic",
         module_name="great_expectations.datasource",
@@ -516,7 +516,6 @@ project_path/
     ).to_id()
 
     tree_str = gen_directory_tree_str(project_dir)
-    # print(tree_str)
     assert (
         tree_str
         == """project_path/
@@ -589,7 +588,6 @@ project_path/
         project_dir, "great_expectations/uncommitted/data_docs"
     )
     observed = gen_directory_tree_str(data_docs_dir)
-    print(observed)
     assert (
         observed
         == """\
@@ -657,16 +655,16 @@ data_docs/
         )
     )
 
-    # save data_docs locally
-    os.makedirs("./tests/data_context/output", exist_ok=True)
-    os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
-
-    if os.path.isdir("./tests/data_context/output/data_docs"):
-        shutil.rmtree("./tests/data_context/output/data_docs")
-    shutil.copytree(
-        os.path.join(ge_directory, "uncommitted/data_docs/"),
-        "./tests/data_context/output/data_docs",
-    )
+    # save data_docs locally if you need to inspect the files manually
+    # os.makedirs("./tests/data_context/output", exist_ok=True)
+    # os.makedirs("./tests/data_context/output/data_docs", exist_ok=True)
+    #
+    # if os.path.isdir("./tests/data_context/output/data_docs"):
+    #     shutil.rmtree("./tests/data_context/output/data_docs")
+    # shutil.copytree(
+    #     os.path.join(ge_directory, "uncommitted/data_docs/"),
+    #     "./tests/data_context/output/data_docs",
+    # )
 
 
 def test_add_store(empty_data_context):
@@ -683,47 +681,6 @@ def test_add_store(empty_data_context):
     assert "my_new_store" in empty_data_context.get_config()["stores"]
 
     assert isinstance(new_store, ExpectationsStore)
-
-
-@pytest.fixture
-def basic_data_context_config():
-    return DataContextConfig(
-        **{
-            "commented_map": {},
-            "config_version": 2,
-            "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
-            "expectations_store_name": "expectations_store",
-            "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {},
-            "stores": {
-                "expectations_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "expectations/",
-                    },
-                },
-                "evaluation_parameter_store": {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
-                },
-            },
-            "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
-        }
-    )
 
 
 def test_ExplorerDataContext(titanic_data_context):
@@ -776,32 +733,27 @@ def test__normalize_absolute_or_relative_path(
     assert "/yikes" == context._normalize_absolute_or_relative_path("/yikes")
 
 
-def test_load_data_context_from_environment_variables(tmp_path_factory, monkeypatch):
-    curdir = os.path.abspath(os.getcwd())
-    try:
-        project_path = str(tmp_path_factory.mktemp("data_context"))
-        context_path = os.path.join(project_path, "great_expectations")
-        os.makedirs(context_path, exist_ok=True)
-        os.chdir(context_path)
-        with pytest.raises(ge_exceptions.DataContextError) as err:
-            DataContext.find_context_root_dir()
-        assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
+def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
+    project_path = tmp_path / "data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(context_path, exist_ok=True)
+    assert os.path.isdir(context_path)
+    monkeypatch.chdir(context_path)
+    with pytest.raises(ge_exceptions.DataContextError) as err:
+        DataContext.find_context_root_dir()
+    assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
 
-        shutil.copy(
-            file_relative_path(
-                __file__, "../test_fixtures/great_expectations_basic.yml"
-            ),
-            str(os.path.join(context_path, "great_expectations.yml")),
-        )
-        monkeypatch.setenv("GE_HOME", context_path)
-        assert DataContext.find_context_root_dir() == context_path
-    except Exception:
-        raise
-    finally:
-        # Make sure we unset the environment variable we're using
-        if os.getenv("GE_HOME"):
-            monkeypatch.delenv("GE_HOME")
-        os.chdir(curdir)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join("..", "test_fixtures", "great_expectations_basic.yml"),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    monkeypatch.setenv("GE_HOME", context_path)
+    assert DataContext.find_context_root_dir() == context_path
 
 
 def test_data_context_updates_expectation_suite_names(
@@ -1277,151 +1229,6 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     paths.append(os.path.basename(batch_kwargs["path"]))
 
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
-
-
-def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(
-    tmp_path_factory,
-):
-    """
-    This test ensures that a url will be returned for a default site even if a
-    datasource is not configured, and docs are not built.
-    """
-    empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
-    DataContext.create(empty_directory)
-    context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
-
-    obs = context.get_docs_sites_urls(only_if_exists=False)
-    assert len(obs) == 1
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
-
-
-def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_site(
-    tmp_path_factory,
-):
-    empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
-    DataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(ge_dir)
-
-    context._project_config["data_docs_sites"] = {
-        "my_rad_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/some/local/path/",
-            },
-        }
-    }
-
-    # TODO Workaround project config programmatic config manipulation
-    #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
-    context = DataContext(ge_dir)
-    context.build_data_docs()
-
-    expected_path = os.path.join(
-        ge_dir, "uncommitted/data_docs/some/local/path/index.html"
-    )
-    assert os.path.isfile(expected_path)
-
-    obs = context.get_docs_sites_urls()
-    assert obs == [
-        {"site_name": "my_rad_site", "site_url": "file://{}".format(expected_path)}
-    ]
-
-
-def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_local_site(
-    tmp_path_factory,
-):
-    empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
-    DataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(ge_dir)
-
-    context._project_config["data_docs_sites"] = {
-        "my_rad_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/some/path/",
-            },
-        },
-        "another_just_amazing_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/another/path/",
-            },
-        },
-    }
-
-    # TODO Workaround project config programmatic config manipulation
-    #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
-    context = DataContext(ge_dir)
-    context.build_data_docs()
-    data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")
-
-    path_1 = os.path.join(data_docs_dir, "some/path/index.html")
-    path_2 = os.path.join(data_docs_dir, "another/path/index.html")
-    for expected_path in [path_1, path_2]:
-        assert os.path.isfile(expected_path)
-
-    obs = context.get_docs_sites_urls()
-
-    assert obs == [
-        {"site_name": "my_rad_site", "site_url": "file://{}".format(path_1)},
-        {
-            "site_name": "another_just_amazing_site",
-            "site_url": "file://{}".format(path_2),
-        },
-    ]
-
-
-def test_build_data_docs_skipping_index_does_not_build_index(
-    tmp_path_factory,
-):
-    # TODO What's the latest and greatest way to use configs rather than my hackery?
-    empty_directory = str(tmp_path_factory.mktemp("empty"))
-    DataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(ge_dir)
-    config = context.get_config()
-    config.data_docs_sites = {
-        "local_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": os.path.join("uncommitted", "data_docs"),
-            },
-        },
-    }
-    context._project_config = config
-
-    # TODO Workaround project config programmatic config manipulation
-    #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
-    del context
-    context = DataContext(ge_dir)
-    data_docs_dir = os.path.join(ge_dir, "uncommitted", "data_docs")
-    index_path = os.path.join(data_docs_dir, "index.html")
-    assert not os.path.isfile(index_path)
-
-    context.build_data_docs(build_index=False)
-    assert os.path.isdir(os.path.join(data_docs_dir, "static"))
-    assert not os.path.isfile(index_path)
-
-
-def test_get_site_names(
-    tmp_path_factory, empty_data_context, basic_data_context_config
-):
-    assert empty_data_context.get_site_names() == ["local_site"]
-    assert basic_data_context_config.data_docs_sites == {}
-    base_path = tmp_path_factory.mktemp("foo")
-    context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
-    assert context.get_site_names() == []
 
 
 def test_load_config_variables_file(
@@ -1935,3 +1742,473 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
         expectation_suite_name=expectation_suite,
     )
     assert len(batch) == 3
+
+
+def test_add_checkpoint_from_yaml(empty_data_context):
+    """
+    What does this test and why?
+    We should be able to add a checkpoint directly from a valid yaml configuration.
+    test_yaml_config() should not automatically save a checkpoint if valid.
+    checkpoint yaml in a store should match the configuration, even if created from SimpleCheckpoints
+    Note: This tests multiple items and could stand to be broken up.
+    """
+
+    context: DataContext = empty_data_context
+    checkpoint_name: str = "my_new_checkpoint"
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_yaml_config = f"""
+name: {checkpoint_name}
+config_version: 1.0
+class_name: SimpleCheckpoint
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+    """
+
+    checkpoint_from_test_yaml_config = context.test_yaml_config(
+        checkpoint_yaml_config, name=checkpoint_name
+    )
+
+    # test_yaml_config() no longer stores checkpoints automatically
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_from_yaml = context.add_checkpoint(
+        **yaml.load(checkpoint_yaml_config),
+    )
+
+    expected_checkpoint_yaml: str = """name: my_new_checkpoint
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: Checkpoint
+run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
+expectation_suite_name:
+batch_request:
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names: []
+evaluation_parameters: {}
+runtime_configuration: {}
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+profilers: []
+"""
+
+    checkpoint_dir = os.path.join(
+        context.root_directory,
+        context.checkpoint_store.config["store_backend"]["base_directory"],
+    )
+    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
+
+    with open(checkpoint_file) as cf:
+        checkpoint_from_disk = cf.read()
+
+    assert checkpoint_from_disk == expected_checkpoint_yaml
+    assert checkpoint_from_yaml.config.to_yaml_str() == expected_checkpoint_yaml
+
+    checkpoint_from_store = context.get_checkpoint(checkpoint_name)
+    assert checkpoint_from_store.config.to_yaml_str() == expected_checkpoint_yaml
+
+    expected_action_list = [
+        {
+            "name": "store_validation_result",
+            "action": {"class_name": "StoreValidationResultAction"},
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+        },
+        {
+            "name": "update_data_docs",
+            "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+        },
+    ]
+
+    assert checkpoint_from_yaml.action_list == expected_action_list
+    assert checkpoint_from_store.action_list == expected_action_list
+    assert checkpoint_from_test_yaml_config.action_list == expected_action_list
+    assert checkpoint_from_store.action_list == expected_action_list
+
+    assert checkpoint_from_test_yaml_config.name == checkpoint_from_yaml.name
+    assert (
+        checkpoint_from_test_yaml_config.action_list == checkpoint_from_yaml.action_list
+    )
+
+    assert checkpoint_from_yaml.name == checkpoint_name
+    assert checkpoint_from_yaml.config.to_json_dict() == {
+        "name": "my_new_checkpoint",
+        "config_version": 1.0,
+        "template_name": None,
+        "module_name": "great_expectations.checkpoint",
+        "class_name": "Checkpoint",
+        "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
+        "expectation_suite_name": None,
+        "batch_request": None,
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {"class_name": "StoreValidationResultAction"},
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {"class_name": "StoreEvaluationParametersAction"},
+            },
+            {
+                "name": "update_data_docs",
+                "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
+            },
+        ],
+        "evaluation_parameters": {},
+        "runtime_configuration": {},
+        "validations": [
+            {
+                "batch_request": {
+                    "datasource_name": "data_dir",
+                    "data_connector_name": "data_dir_example_data_connector",
+                    "data_asset_name": "DEFAULT_ASSET_NAME",
+                    "partition_request": {"index": -1},
+                },
+                "expectation_suite_name": "newsuite",
+            }
+        ],
+        "profilers": [],
+    }
+
+    assert isinstance(checkpoint_from_yaml, Checkpoint)
+
+    assert checkpoint_name in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 1
+
+
+def test_add_checkpoint_from_yaml_fails_for_unrecognized_class_name(empty_data_context):
+    """
+    What does this test and why?
+    Checkpoint yaml should have a valid class_name
+    """
+
+    context: DataContext = empty_data_context
+    checkpoint_name: str = "my_new_checkpoint"
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+    checkpoint_yaml_config = f"""
+name: {checkpoint_name}
+config_version: 1.0
+class_name: NotAValidCheckpointClassName
+run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+validations:
+  - batch_request:
+      datasource_name: data_dir
+      data_connector_name: data_dir_example_data_connector
+      data_asset_name: DEFAULT_ASSET_NAME
+      partition_request:
+        index: -1
+    expectation_suite_name: newsuite
+    """
+
+    with pytest.raises(KeyError):
+        context.test_yaml_config(checkpoint_yaml_config, name=checkpoint_name)
+
+    with pytest.raises(AttributeError):
+        context.add_checkpoint(
+            **yaml.load(checkpoint_yaml_config),
+        )
+
+    assert checkpoint_name not in context.list_checkpoints()
+    assert len(context.list_checkpoints()) == 0
+
+
+def test_add_datasource_from_yaml(empty_data_context):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
+    """
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = f"""
+    class_name: Datasource
+    execution_engine:
+      class_name: PandasExecutionEngine
+    data_connectors:
+      data_dir_example_data_connector:
+        class_name: InferredAssetFilesystemDataConnector
+        datasource_name: {datasource_name}
+        base_directory: ../data
+        default_regex:
+          group_names: data_asset_name
+          pattern: (.*)
+    """
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
+
+    assert datasource_from_yaml.name == datasource_name
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "data_dir_example_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
+                "base_directory": "../data",
+            }
+        },
+    }
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+
+def test_add_datasource_from_yaml_sql_datasource(sa, test_backends, empty_data_context):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string without substitution variables should work as expected.
+    """
+
+    if "postgresql" not in test_backends:
+        pytest.skip("test_add_datasource_from_yaml_sql_datasource requires postgresql")
+
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    example_yaml = f"""
+    class_name: SimpleSqlalchemyDatasource
+    introspection:
+      whole_table:
+        data_asset_name_suffix: __whole_table
+    credentials:
+      drivername: postgresql
+      host: localhost
+      port: '5432'
+      username: postgres
+      password: ''
+      database: postgres
+    """
+
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    # .config not implemented for SimpleSqlalchemyDatasource
+    assert datasource_from_test_yaml_config.config == {}
+    assert datasource_from_yaml.config == {}
+
+    assert datasource_from_yaml.name == datasource_name
+    assert isinstance(datasource_from_yaml, SimpleSqlalchemyDatasource)
+    assert datasource_from_yaml.__class__.__name__ == "SimpleSqlalchemyDatasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        SimpleSqlalchemyDatasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    assert isinstance(
+        context.get_datasource(datasource_name=datasource_name),
+        SimpleSqlalchemyDatasource,
+    )
+    assert isinstance(
+        context.get_config()["datasources"][datasource_name], DatasourceConfig
+    )
+
+    # As of 20210312 SimpleSqlalchemyDatasource returns an empty {} .config
+    # so here we check for each part of the config individually
+    datasource_config = context.get_config()["datasources"][datasource_name]
+    assert datasource_config.class_name == "SimpleSqlalchemyDatasource"
+    assert datasource_config.credentials == {
+        "drivername": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "username": "postgres",
+        "password": "",
+        "database": "postgres",
+    }
+    assert datasource_config.credentials == OrderedDict(
+        [
+            ("drivername", "postgresql"),
+            ("host", "localhost"),
+            ("port", "5432"),
+            ("username", "postgres"),
+            ("password", ""),
+            ("database", "postgres"),
+        ]
+    )
+    assert datasource_config.introspection == OrderedDict(
+        [("whole_table", OrderedDict([("data_asset_name_suffix", "__whole_table")]))]
+    )
+    assert datasource_config.module_name == "great_expectations.datasource"
+
+
+def test_add_datasource_from_yaml_with_substitution_variables(
+    empty_data_context, monkeypatch
+):
+    """
+    What does this test and why?
+    Adding a datasource using context.add_datasource() via a config from a parsed yaml string containing substitution variables should work as expected.
+    """
+
+    context: DataContext = empty_data_context
+
+    assert "my_new_datasource" not in context.datasources.keys()
+    assert "my_new_datasource" not in context.list_datasources()
+    assert "my_new_datasource" not in context.get_config()["datasources"]
+
+    datasource_name: str = "my_datasource"
+
+    monkeypatch.setenv("SUBSTITUTED_BASE_DIRECTORY", "../data")
+
+    example_yaml = f"""
+        class_name: Datasource
+        execution_engine:
+          class_name: PandasExecutionEngine
+        data_connectors:
+          data_dir_example_data_connector:
+            class_name: InferredAssetFilesystemDataConnector
+            datasource_name: {datasource_name}
+            base_directory: ${{SUBSTITUTED_BASE_DIRECTORY}}
+            default_regex:
+              group_names: data_asset_name
+              pattern: (.*)
+        """
+    datasource_from_test_yaml_config = context.test_yaml_config(
+        example_yaml, name=datasource_name
+    )
+
+    datasource_from_yaml = context.add_datasource(
+        name=datasource_name, **yaml.load(example_yaml)
+    )
+
+    assert datasource_from_test_yaml_config.config == datasource_from_yaml.config
+
+    assert datasource_from_yaml.name == datasource_name
+    assert datasource_from_yaml.config == {
+        "execution_engine": {
+            "class_name": "PandasExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+        },
+        "data_connectors": {
+            "data_dir_example_data_connector": {
+                "class_name": "InferredAssetFilesystemDataConnector",
+                "module_name": "great_expectations.datasource.data_connector",
+                "default_regex": {"group_names": "data_asset_name", "pattern": "(.*)"},
+                "base_directory": "../data",
+            }
+        },
+    }
+    assert isinstance(datasource_from_yaml, Datasource)
+    assert datasource_from_yaml.__class__.__name__ == "Datasource"
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]
+
+    # Check that the datasource was written to disk as expected
+    root_directory = context.root_directory
+    del context
+    context = DataContext(root_directory)
+
+    assert datasource_name in [d["name"] for d in context.list_datasources()]
+    assert datasource_name in context.datasources
+    assert datasource_name in context.get_config()["datasources"]

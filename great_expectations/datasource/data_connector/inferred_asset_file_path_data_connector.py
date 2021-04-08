@@ -77,11 +77,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             number of data_references known by this DataConnector
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated."
-            )
-
         return len(self._data_references_cache)
 
     def get_unmatched_data_references(self) -> List[str]:
@@ -92,11 +87,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
-            )
-
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     def get_available_data_asset_names(self) -> List[str]:
@@ -106,7 +96,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             A list of available names
         """
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
@@ -114,8 +104,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             BatchDefinition
         ] = self._get_batch_definition_list_from_batch_request(
             batch_request=BatchRequestBase(
-                datasource_name=self.datasource_name,
-                data_connector_name=self.name,
+                datasource_name=self.datasource_name, data_connector_name=self.name
             )
         )
 

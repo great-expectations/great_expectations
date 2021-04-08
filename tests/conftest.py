@@ -4,7 +4,6 @@ import locale
 import os
 import random
 import shutil
-import threading
 from types import ModuleType
 from typing import Dict, List, Optional
 
@@ -35,12 +34,14 @@ from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.util import import_library_module
-from tests.test_utils import (
-    create_files_in_directory,
+from great_expectations.self_check.util import (
+    LockingConnectionCheck,
+    expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
+from great_expectations.util import import_library_module, is_library_loadable
+from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
 ###
@@ -50,27 +51,6 @@ yaml = YAML()
 ###
 
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
-
-
-class LockingConnectionCheck:
-    def __init__(self, sa, connection_string):
-        self.lock = threading.Lock()
-        self.sa = sa
-        self.connection_string = connection_string
-        self._is_valid = None
-
-    def is_valid(self):
-        with self.lock:
-            if self._is_valid is None:
-                try:
-                    engine = self.sa.create_engine(self.connection_string)
-                    conn = engine.connect()
-                    conn.close()
-                    self._is_valid = True
-                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
-                    print(f"{str(e)}")
-                    self._is_valid = False
-            return self._is_valid
 
 
 def pytest_configure(config):
@@ -290,11 +270,8 @@ def no_usage_stats(monkeypatch):
 
 @pytest.fixture
 def sa(test_backends):
-    if (
-        "postgresql" not in test_backends
-        and "sqlite" not in test_backends
-        and "mysql" not in test_backends
-        and "mssql" not in test_backends
+    if not any(
+        [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
@@ -2294,13 +2271,16 @@ def postgresql_engine(test_backend):
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
 
-@pytest.fixture
-def empty_data_context(tmp_path_factory) -> DataContext:
-    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
+@pytest.fixture(scope="function")
+def empty_data_context(tmp_path) -> DataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
+    assert context.list_datasources() == []
     return context
 
 
@@ -2312,20 +2292,23 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     # Reenable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data", "titanic")
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     shutil.copy(
         file_relative_path(
             __file__,
-            "./test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
+            os.path.join(
+                "test_fixtures",
+                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
         str(
             os.path.join(
                 context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
@@ -2333,17 +2316,24 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         ),
     )
     shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(
+            os.path.join(context_path, "..", "data", "titanic", "Titanic_19120414_1313")
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
     )
     shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    context = ge.data_context.DataContext(context_path)
+
+    context: DataContext = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
-    datasource_config = f"""
+    datasource_config: str = f"""
         class_name: Datasource
 
         execution_engine:
@@ -2391,14 +2381,16 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
             my_runtime_data_connector:
                 module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
-                runtime_keys:
+                batch_identifiers:
                     - pipeline_stage_name
                     - airflow_run_id
         """
 
-    context.test_yaml_config(
+    # noinspection PyUnusedLocal
+    datasource: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
+
     # noinspection PyProtectedMember
     context._save_project_config()
     return context
@@ -2620,7 +2612,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                     "datasource_name": "my_datasource_template_1",
                     "data_connector_name": "my_special_data_connector_template_1",
                     "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
+                    "data_connector_query": {"partition_index": -999},
                 }
             }
         ],
@@ -3024,6 +3016,29 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 
 
 @pytest.fixture
+def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
+    # Reenable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_v013_upgraded_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
 def titanic_data_context_stats_enabled_config_version_2_with_checkpoint(
     tmp_path_factory, monkeypatch, titanic_data_context_stats_enabled_config_version_2
 ):
@@ -3157,12 +3172,14 @@ def site_builder_data_context_with_html_store_titanic_random(
     return context
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 @freeze_time("09/26/2019 13:42:41")
 def site_builder_data_context_v013_with_html_store_titanic_random(
-    tmp_path_factory, filesystem_csv_3
+    tmp_path, filesystem_csv_3
 ):
-    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    base_dir = tmp_path / "project_dir"
+    base_dir.mkdir()
+    base_dir = str(base_dir)
     project_dir = os.path.join(base_dir, "project_path")
     os.mkdir(project_dir)
 
@@ -3226,15 +3243,15 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
     return context
 
 
-@pytest.fixture
-def titanic_multibatch_data_context(tmp_path_factory):
+@pytest.fixture(scope="function")
+def titanic_multibatch_data_context(tmp_path):
     """
     Based on titanic_data_context, but with 2 identical batches of
     data asset "titanic"
-    :param tmp_path_factory:
-    :return:
     """
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    project_path = tmp_path / "titanic_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "..", "data", "titanic")
@@ -3700,21 +3717,25 @@ def filesystem_csv(tmp_path_factory):
     return base_dir
 
 
-@pytest.fixture
-def filesystem_csv_2(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files")
+@pytest.fixture(scope="function")
+def filesystem_csv_2(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_2"
+    base_dir.mkdir()
     base_dir = str(base_dir)
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
     toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    assert os.path.isabs(base_dir)
+    assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
 
     return base_dir
 
 
-@pytest.fixture
-def filesystem_csv_3(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files")
+@pytest.fixture(scope="function")
+def filesystem_csv_3(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_3"
+    base_dir.mkdir()
     base_dir = str(base_dir)
 
     # Put a file in the directory
@@ -3727,9 +3748,10 @@ def filesystem_csv_3(tmp_path_factory):
     return base_dir
 
 
-@pytest.fixture()
-def filesystem_csv_4(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files")
+@pytest.fixture(scope="function")
+def filesystem_csv_4(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_4"
+    base_dir.mkdir()
     base_dir = str(base_dir)
 
     # Put a file in the directory
@@ -3900,7 +3922,7 @@ def sqlite_view_engine(test_backends):
 
             sqlite_engine = sa.create_engine("sqlite://")
             df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-            df.to_sql("test_table", con=sqlite_engine)
+            df.to_sql(name="test_table", con=sqlite_engine, index=True)
             sqlite_engine.execute(
                 "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
             )
@@ -3981,8 +4003,8 @@ def test_db_connection_string(tmp_path_factory, test_backends):
         basepath = str(tmp_path_factory.mktemp("db_context"))
         path = os.path.join(basepath, "test.db")
         engine = sa.create_engine("sqlite:///" + str(path))
-        df1.to_sql("table_1", con=engine, index=True)
-        df2.to_sql("table_2", con=engine, index=True, schema="main")
+        df1.to_sql(name="table_1", con=engine, index=True)
+        df2.to_sql(name="table_2", con=engine, index=True, schema="main")
 
         # Return a connection string to this newly-created db
         return "sqlite:///" + str(path)
@@ -4081,19 +4103,56 @@ SELECT EXISTS (
 """
     ).fetchall()
     if table_check_results != [(True,)]:
-        test_df.to_sql("test_df", con=engine, index=True, schema="connection_test")
+        test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
 
     # Return a connection string to this newly-created db
     return engine
 
 
 @pytest.fixture
-def data_context_with_sql_datasource_for_testing_get_batch(sa, empty_data_context):
+def data_context_with_runtime_sql_datasource_for_testing_get_batch(
+    sa, empty_data_context
+):
+    context = empty_data_context
+    db_file = file_relative_path(
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    datasource_config = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: sqlite:///{db_file}
+
+        data_connectors:
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
+        """
+
+    context.test_yaml_config(
+        name="my_runtime_sql_datasource", yaml_config=datasource_config
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+    return context
+
+
+@pytest.fixture
+def data_context_with_simple_sql_datasource_for_testing_get_batch(
+    sa, empty_data_context
+):
     context = empty_data_context
 
     db_file = file_relative_path(
         __file__,
-        "test_sets/test_cases_for_sql_data_connector.db",
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
     )
 
     config = yaml.load(
@@ -4204,7 +4263,7 @@ data_connectors:
     test_runtime_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
+        batch_identifiers:
         - pipeline_stage_name
         - airflow_run_id
         - custom_key_0
@@ -4223,3 +4282,11 @@ execution_engine:
     )
 
     return basic_datasource
+
+
+@pytest.fixture(scope="function")
+def misc_directory(tmp_path):
+    misc_dir = tmp_path / "random"
+    misc_dir.mkdir()
+    assert os.path.isabs(misc_dir)
+    return misc_dir

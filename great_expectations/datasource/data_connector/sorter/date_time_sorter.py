@@ -23,9 +23,9 @@ class DateTimeSorter(Sorter):
 
         self._datetime_format = datetime_format
 
-    def get_partition_key(self, batch_definition: BatchDefinition) -> Any:
-        partition_definition: dict = batch_definition.partition_definition
-        partition_value: Any = partition_definition[self.name]
+    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+        batch_identifiers: dict = batch_definition.batch_identifiers
+        partition_value: Any = batch_identifiers[self.name]
         dt: datetime.date = parse_string_to_datetime(
             datetime_string=partition_value,
             datetime_format_string=self._datetime_format,

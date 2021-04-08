@@ -30,11 +30,11 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.self_check_util import (
+from great_expectations.expectations.util import legacy_method_parameters
+from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
-from great_expectations.expectations.util import legacy_method_parameters
 from great_expectations.validator.validator import Validator
 
 from ..core.util import convert_to_json_serializable, nested_update

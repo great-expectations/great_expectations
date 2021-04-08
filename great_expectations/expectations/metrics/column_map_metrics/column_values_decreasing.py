@@ -120,21 +120,23 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if (
-            isinstance(execution_engine, SparkDFExecutionEngine)
-            and metric.metric_name == "column_values.decreasing.condition"
-        ):
-            return {
-                "table.column_types": MetricConfiguration(
-                    "table.column_types",
-                    metric.metric_domain_kwargs,
-                    {"include_nested": True},
-                )
-            }
-        else:
-            return super()._get_evaluation_dependencies(
-                metric=metric,
-                configuration=configuration,
-                execution_engine=execution_engine,
-                runtime_configuration=runtime_configuration,
-            )
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+        table_domain_kwargs: dict = {
+            k: v
+            for k, v in metric.metric_domain_kwargs.items()
+            if k != MetricDomainTypes.COLUMN.value
+        }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
+        return dependencies

@@ -67,6 +67,7 @@ class BaseYamlConfig(SerializableDictDot):
                 "Invalid type: A configuration class needs to inherit from the BaseYamlConfig class."
             )
         if hasattr(cls.get_config_class(), "_schema_instance"):
+            # noinspection PyProtectedMember
             schema_instance: Schema = cls.get_config_class()._schema_instance
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
@@ -79,8 +80,11 @@ class BaseYamlConfig(SerializableDictDot):
     @classmethod
     def from_commented_map(cls, commented_map: CommentedMap):
         try:
-            config: dict = cls._get_schema_instance().load(commented_map)
-            return cls.get_config_class()(commented_map=commented_map, **config)
+            config: Union[dict, BaseYamlConfig]
+            config = cls._get_schema_instance().load(commented_map)
+            if isinstance(config, dict):
+                return cls.get_config_class()(commented_map=commented_map, **config)
+            return config
         except ValidationError:
             logger.error(
                 "Encountered errors during loading config.  See ValidationError for more details."
@@ -203,6 +207,8 @@ class SorterConfig(DictDot):
         class_name=None,
         module_name=None,
         orderby="asc",
+        reference_list=None,
+        datetime_format=None,
         **kwargs,
     ):
         self._name = name
@@ -211,6 +217,12 @@ class SorterConfig(DictDot):
         self._orderby = orderby
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+        if reference_list is not None:
+            self._reference_list = reference_list
+
+        if datetime_format is not None:
+            self._datetime_format = datetime_format
 
     @property
     def name(self):
@@ -228,6 +240,14 @@ class SorterConfig(DictDot):
     def orderby(self):
         return self._orderby
 
+    @property
+    def reference_list(self):
+        return self._reference_list
+
+    @property
+    def datetime_format(self):
+        return self._datetime_format
+
 
 class SorterConfigSchema(Schema):
     class Meta:
@@ -239,6 +259,12 @@ class SorterConfigSchema(Schema):
         missing="great_expectations.datasource.data_connector.sorter"
     )
     orderby = fields.String(required=False, missing="asc", allow_none=False)
+
+    # allow_none = True because it is only used by some Sorters
+    reference_list = fields.List(
+        cls_or_instance=fields.Str(), required=False, missing=None, allow_none=True
+    )
+    datetime_format = fields.String(required=False, missing=None, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -259,12 +285,13 @@ class DataConnectorConfig(DictDot):
         base_directory=None,
         glob_directive=None,
         default_regex=None,
-        runtime_keys=None,
+        batch_identifiers=None,
         bucket=None,
         prefix=None,
         delimiter=None,
         max_keys=None,
         boto3_options=None,
+        sorters=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -277,8 +304,8 @@ class DataConnectorConfig(DictDot):
             self.glob_directive = glob_directive
         if default_regex is not None:
             self.default_regex = default_regex
-        if runtime_keys is not None:
-            self.runtime_keys = runtime_keys
+        if batch_identifiers is not None:
+            self.batch_identifiers = batch_identifiers
         if bucket is not None:
             self.bucket = bucket
         if prefix is not None:
@@ -289,6 +316,8 @@ class DataConnectorConfig(DictDot):
             self.max_keys = max_keys
         if boto3_options is not None:
             self.boto3_options = boto3_options
+        if sorters is not None:
+            self.sorters = sorters
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -317,8 +346,13 @@ class DataConnectorConfigSchema(Schema):
 
     base_directory = fields.String(required=False, allow_none=True)
     glob_directive = fields.String(required=False, allow_none=True)
+    sorters = fields.List(
+        fields.Nested(SorterConfigSchema, required=False, allow_none=True),
+        required=False,
+        allow_none=True,
+    )
     default_regex = fields.Dict(required=False, allow_none=True)
-    runtime_keys = fields.List(
+    batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     bucket = fields.String(required=False, allow_none=True)

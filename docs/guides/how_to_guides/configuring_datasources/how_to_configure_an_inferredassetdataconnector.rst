@@ -10,7 +10,7 @@ can use for configuration.
 
     - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - :ref:`Understand the basics of Datasources in 0.13 or later <reference__core_concepts__datasources>`
-    - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+    - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Great Expectations provides two types of ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
 but also S3 object stores, etc:
@@ -43,7 +43,7 @@ All of the examples below assume you’re testing configurations using something
     """)
 
 
-If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure Data Context components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Choose a DataConnector
 ----------------------
@@ -170,7 +170,7 @@ Then this configuration...
 
     Unmatched data_references (0 of 0): []
 
-Once configured, you can get ``Validators`` from the ``DataContext`` as follows:
+Once configured, you can get ``Validators`` from the ``Data Context`` as follows:
 
 .. code-block:: python
 

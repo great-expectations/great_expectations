@@ -11,13 +11,15 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    get_sql_dialect_floating_point_infinity_value,
+)
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
-    get_sql_dialect_floating_point_infinity_value,
 )
 from great_expectations.util import import_library_module
 

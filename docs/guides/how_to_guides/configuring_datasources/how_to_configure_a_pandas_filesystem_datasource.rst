@@ -111,18 +111,52 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Pandas filesystem datasource, do the following:
 
-        #. **Instantiate a DataContext.**
+        #. **Run datasource new**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
+
+        #. **Choose "Files on a filesystem (for processing with Pandas or Spark)"**
+
+            .. code-block:: bash
+
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 1
+
+        #. **Choose Pandas**
+
+            .. code-block:: bash
+
+                What are you processing your files with?
+                    1. Pandas
+                    2. PySpark
+                : 1
+
+        #. **Specify the directory path for data files**
+
+            .. code-block:: bash
+
+                Enter the path (relative or absolute) of the root directory where the data files are stored.
+                : /path/to/directory/containing/your/data/files
+
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
+
+Additional notes
+----------------
+
+        #.  **Pandas Datasource Example.**
+
+            Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
 
 
         #. **List files in your directory.**
@@ -130,6 +164,7 @@ Steps
             Use a utility like ``tree`` on the command line or ``glob`` to list files, so that you can see how paths and filenames are formatted. Our example will use the following 3 files in the ``test_directory/`` folder, which is a sibling of the ``great_expectations/`` folder in our project directory:
 
             .. code-block:: bash
+
                 - my_ge_project
                     |- great_expectations
                     |- test_directory
@@ -140,52 +175,47 @@ Steps
 
         #.  **Create or copy a yaml config.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetFilesystemDataConnector`` and a ``PandasExecutionEngine``.
-                The example yaml config will take the 3 files shown above and create 1 asset named ``TestAsset``, with ``name``, ``timestamp`` and ``size`` as the group names.
-
-                **Note**: The ``ConfiguredAssetFilesystemDataConnector`` used in this example is closely related to the ``InferredAssetFilesystemDataConnector`` with some key differences.  More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with an ``InferredAssetFilesystemDataConnector`` and a ``PandasExecutionEngine``.
 
                 **Note**: The ``base_directory`` path needs to be specified either as an absolute path or relative to the ``great_expectations/`` directory.
 
                 .. code-block:: python
 
+                    datasource_name = "my_file_datasource"
                     config = f"""
+                            name: {datasource_name}
                             class_name: Datasource
                             execution_engine:
                               class_name: PandasExecutionEngine
                             data_connectors:
                               my_data_connector:
-                                class_name: ConfiguredAssetFilesystemDataConnector
+                                datasource_name: {datasource_name}
+                                class_name: InferredAssetFilesystemDataConnector
                                 base_directory: ../test_directory/
-                                glob_directive: "*.csv"
-                                assets:
-                                  MyAsset:
-                                    pattern: (.+)\\.csv
-                                    group_names:
-                                      - filename
+                                default_regex:
+                                  group_names: data_asset_name
+                                  pattern: (.*)
                             """
 
-                A more complex version of the ``MyAsset`` regex definition that takes into account the naming structure of the CSV files in the ``base_directory/`` would look like this:
+               You can modify the group names and regex pattern to take into account the naming structure of the CSV files in the directory, e.g.
 
                 .. code-block:: python
 
-                    config = f"""
-                            ... see the config above ..
-                                  MyAsset:
-                                    pattern: (.+)_(\\d+)_(\\d+)\\.csv
-                                    group_names:
-                                      - name
-                                      - timestamp
-                                      - size
+                        group_names:
+                          - name
+                          - timestamp
+                          - size
+                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
 
-                Additional examples of yaml configurations can be found in the following document: :ref:`how_to_guides_how_to_configure_a_configuredassetdataconnector`
 
-        #. **Run context.test_yaml_config.**
+            **Note**: The ``InferredAssetS3DataConnector`` used in this example is closely related to the ``ConfiguredAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+
+
+        #. **Test your config using ``context.test_yaml_config``.**
 
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_pandas_datasource",
                     yaml_config=config
                 )
 
@@ -203,31 +233,27 @@ Steps
 
                 Execution engine: PandasExecutionEngine
                 Data connectors:
-                    my_data_connector : ConfiguredAssetFilesystemDataConnector
+                    my_data_connector : InferredAssetFilesystemDataConnector
 
                     Available data_asset_names (1 of 1):
                         TestAsset (3 of 3): ['abe_20201119_200.csv', 'alex_20201212_300.csv', 'will_20201008_100.csv']
 
                     Unmatched data_references (0 of 0): []
 
-                    Choosing an example data reference...
-                        Reference chosen: abe_20201119_200.csv
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
-                        Fetching batch data...
+            **Note:** Pay attention to the "Available data_asset_names" and "Unmatched data_references" output to ensure that the regex pattern you specified matches your desired data files.
 
-                        Showing 5 rows
-                        ...
-
-
-            Pay attention to the "Available data_asset_names" and "Unmatched data_references" output to ensure that the regex pattern you specified matches your desired data files.
 
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup:
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_pandas_datasource`` in our example).
-            Next, copy the yml snippet from Step 3 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
+
 
 ----------------
 Additional Notes

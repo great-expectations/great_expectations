@@ -11,7 +11,7 @@ from great_expectations.checkpoint.configurator import SimpleCheckpointConfigura
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -256,9 +256,9 @@ class Checkpoint:
                     substituted_runtime_config=substituted_runtime_config,
                     validation_dict=validation_dict,
                 )
-                batch_request: BatchRequest = substituted_validation_dict.get(
-                    "batch_request"
-                )
+                batch_request: Union[
+                    BatchRequest, RuntimeBatchRequest
+                ] = substituted_validation_dict.get("batch_request")
                 expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )
@@ -292,7 +292,7 @@ class Checkpoint:
                 ge_exceptions.ExecutionEngineError,
             ) as e:
                 raise ge_exceptions.CheckpointError(
-                    f"Exception occurred while running validation[{idx}] of checkpoint '{self.name}': {e.message}."
+                    f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
                 )
         return CheckpointResult(
             run_id=run_id, run_results=run_results, checkpoint_config=self.config
@@ -558,7 +558,12 @@ class LegacyCheckpoint(Checkpoint):
     ):
         batches_to_validate = self._get_batches_to_validate(self.batches)
 
-        if self.validation_operator_name:
+        if (
+            self.validation_operator_name
+            and self.data_context.validation_operators.get(
+                self.validation_operator_name
+            )
+        ):
             results = self.data_context.run_validation_operator(
                 self.validation_operator_name,
                 assets_to_validate=batches_to_validate,
@@ -570,6 +575,11 @@ class LegacyCheckpoint(Checkpoint):
                 **kwargs,
             )
         else:
+            if self.validation_operator_name:
+                logger.warning(
+                    f'Could not find Validation Operator "{self.validation_operator_name}" when '
+                    f'running Checkpoint "{self.name}". Using default action_list_operator.'
+                )
             results = self._run_default_validation_operator(
                 assets_to_validate=batches_to_validate,
                 run_id=run_id,
