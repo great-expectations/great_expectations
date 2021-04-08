@@ -84,8 +84,13 @@ def datasource_new(ctx, name, jupyter):
             datasource_name=name,
             jupyter=jupyter,
         )
-    except Exception:
-        toolkit.send_usage_message(context, event=usage_event_end, success=False)
+    except Exception as e:
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{e}</red>",
+        )
+        return
 
 
 @datasource.command(name="delete")
@@ -140,10 +145,13 @@ def datasource_list(ctx):
         toolkit.send_usage_message(
             data_context=context, event=usage_event_end, success=True
         )
-    except Exception:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=False
+    except Exception as e:
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{e}</red>",
         )
+        return
 
 
 def _build_datasource_intro_string(datasources):
