@@ -170,7 +170,7 @@ validations:
       datasource_name: my_datasource
       data_connector_name: my_other_data_connector
       data_asset_name: users
-      partition_request:
+      data_connector_query:
         index: -1
     expectation_suite_name: Titanic.warning
 """
@@ -198,9 +198,7 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": """my_checkpoint = context.test_yaml_config(
-    name=my_checkpoint_name, yaml_config=my_checkpoint_name_config
-)""",
+            "source": """my_checkpoint = context.test_yaml_config(yaml_config=my_checkpoint_name_config)""",
             "outputs": [],
         },
     ]

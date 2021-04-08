@@ -10,8 +10,8 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.validator import validator
 from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -257,43 +257,47 @@ class DataConnector:
             :max_examples
         ]
 
-        # Choose an example data_reference
-        if pretty_print:
-            print("\n\tChoosing an example data reference...")
-
-        example_data_reference = None
-
-        available_references = report_obj["data_assets"].items()
-        if len(available_references) == 0:
-            if pretty_print:
-                print(f"\t\tNo references available.")
-            return report_obj
-
-        data_asset_name: Optional[str] = None
-        for tmp_data_asset_name, data_asset_return_obj in available_references:
-            if data_asset_return_obj["batch_definition_count"] > 0:
-                example_data_reference = random.choice(
-                    data_asset_return_obj["example_data_references"]
-                )
-                data_asset_name = tmp_data_asset_name
-                break
-
-        if example_data_reference is not None:
-            if pretty_print:
-                print(f"\t\tReference chosen: {example_data_reference}")
-
-            # ...and fetch it.
-            if data_asset_name is None:
-                raise ValueError(
-                    "The data_asset_name for the chosen example data reference cannot be null."
-                )
-            report_obj["example_data_reference"] = self._self_check_fetch_batch(
-                pretty_print=pretty_print,
-                example_data_reference=example_data_reference,
-                data_asset_name=data_asset_name,
-            )
-        else:
-            report_obj["example_data_reference"] = {}
+        # FIXME: (Sam) Removing this temporarily since it's not supported by
+        # some backends (e.g. BigQuery) and returns empty results for some
+        # (e.g. MSSQL) - this needs some more work to be useful for all backends
+        #
+        # # Choose an example data_reference
+        # if pretty_print:
+        #     print("\n\tChoosing an example data reference...")
+        #
+        # example_data_reference = None
+        #
+        # available_references = report_obj["data_assets"].items()
+        # if len(available_references) == 0:
+        #     if pretty_print:
+        #         print(f"\t\tNo references available.")
+        #     return report_obj
+        #
+        # data_asset_name: Optional[str] = None
+        # for tmp_data_asset_name, data_asset_return_obj in available_references:
+        #     if data_asset_return_obj["batch_definition_count"] > 0:
+        #         example_data_reference = random.choice(
+        #             data_asset_return_obj["example_data_references"]
+        #         )
+        #         data_asset_name = tmp_data_asset_name
+        #         break
+        #
+        # if example_data_reference is not None:
+        #     if pretty_print:
+        #         print(f"\t\tReference chosen: {example_data_reference}")
+        #
+        #     # ...and fetch it.
+        #     if data_asset_name is None:
+        #         raise ValueError(
+        #             "The data_asset_name for the chosen example data reference cannot be null."
+        #         )
+        #     report_obj["example_data_reference"] = self._self_check_fetch_batch(
+        #         pretty_print=pretty_print,
+        #         example_data_reference=example_data_reference,
+        #         data_asset_name=data_asset_name,
+        #     )
+        # else:
+        #     report_obj["example_data_reference"] = {}
 
         return report_obj
 
@@ -316,16 +320,21 @@ class DataConnector:
         if pretty_print:
             print(f"\n\t\tFetching batch data...")
 
-        batch_definition_list = self._map_data_reference_to_batch_definition_list(
+        batch_definition_list: List[
+            BatchDefinition
+        ] = self._map_data_reference_to_batch_definition_list(
             data_reference=example_data_reference,
             data_asset_name=data_asset_name,
         )
         assert len(batch_definition_list) == 1
-        batch_definition = batch_definition_list[0]
+        batch_definition: BatchDefinition = batch_definition_list[0]
 
         # _execution_engine might be None for some tests
         if batch_definition is None or self._execution_engine is None:
             return {}
+
+        batch_data: Any
+        batch_spec: BatchSpec
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(
             batch_definition=batch_definition
         )
@@ -333,13 +342,15 @@ class DataConnector:
         # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
-        validator = Validator(execution_engine=batch_data.execution_engine)
-        df = validator.get_metric(
+        validator_obj: validator.Validator = validator.Validator(
+            execution_engine=batch_data.execution_engine
+        )
+        df: Any = validator_obj.get_metric(
             MetricConfiguration(
                 "table.head", {"batch_id": batch_definition.id}, {"n_rows": 5}
             )
         )
-        n_rows = validator.get_metric(
+        n_rows: int = validator_obj.get_metric(
             MetricConfiguration("table.row_count", {"batch_id": batch_definition.id})
         )
 

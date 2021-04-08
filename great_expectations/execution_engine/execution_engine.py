@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any, Dict, Iterable, Tuple, Union
 
+import pandas as pd
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchMarkers, BatchSpec
@@ -15,7 +16,6 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.default_flow_style = False
-import pandas as pd
 
 
 class NoOpDict:
