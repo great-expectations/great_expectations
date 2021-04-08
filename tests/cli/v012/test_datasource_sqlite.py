@@ -294,7 +294,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     assert len(suites) == 1
     assert (
         suites[0].expectation_suite_name
-        == "wow_a_datasource.default.titanic.BasicDatasetProfiler"
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
     )
 
     validations_store = context.stores["validations_store"]
@@ -304,7 +304,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     validation = validations_store.get(validation_keys[0])
     assert (
         validation.meta["expectation_suite_name"]
-        == "wow_a_datasource.default.titanic.BasicDatasetProfiler"
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
     )
     assert validation.success is False
     assert len(validation.results) == 51
@@ -404,7 +404,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert len(suites) == 1
     assert (
         suites[0].expectation_suite_name
-        == "wow_a_datasource.default.titanic.BasicDatasetProfiler"
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
     )
 
     validations_store = context.stores["validations_store"]
@@ -414,7 +414,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     validation = validations_store.get(validation_keys[0])
     assert (
         validation.meta["expectation_suite_name"]
-        == "wow_a_datasource.default.titanic.BasicDatasetProfiler"
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
     )
     assert validation.success is False
     assert len(validation.results) == 51
@@ -424,6 +424,7 @@ def test_cli_datasource_profile_with_no_datasource_args(
     assert_no_tracebacks(result)
 
 
+# <WILL> this test will fail
 def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with_limit(
     empty_data_context, titanic_sqlite_db, caplog
 ):
@@ -439,6 +440,8 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
     )
+    res = context.get_available_data_asset_names("wow_a_datasource")
+
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -449,7 +452,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
             "-d",
             project_root_dir,
             "--data-assets",
-            "titanic",
+            "main.titanic",
             "--additional-batch-kwargs",
             '{"limit": 97}',
             "--no-view",
@@ -458,8 +461,6 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
         catch_exceptions=False,
     )
     stdout = result.stdout
-    print(stdout)
-
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
     assert "The following Data Docs sites will be built:\n" in stdout
@@ -473,7 +474,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     assert len(suites) == 1
     assert (
         suites[0].expectation_suite_name
-        == "wow_a_datasource.default.titanic.BasicDatasetProfiler"
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
     )
 
     validations_store = context.stores["validations_store"]
@@ -483,7 +484,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     validation = validations_store.get(validation_keys[0])
     assert (
         validation.meta["expectation_suite_name"]
-        == "wow_a_datasource.default.titanic.BasicDatasetProfiler"
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
     )
     assert validation.success is False
 
@@ -519,7 +520,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
             "profile",
             datasource_name,
             "--data-assets",
-            "titanic",
+            "main.titanic",
             "-d",
             project_root_dir,
             "--no-view",
@@ -541,7 +542,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     assert len(suites) == 1
     assert (
         suites[0].expectation_suite_name
-        == "wow_a_datasource.default.titanic.BasicDatasetProfiler"
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
     )
 
     validations_store = context.stores["validations_store"]
@@ -551,7 +552,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
     validation = validations_store.get(validation_keys[0])
     assert (
         validation.meta["expectation_suite_name"]
-        == "wow_a_datasource.default.titanic.BasicDatasetProfiler"
+        == "wow_a_datasource.default.main.titanic.BasicDatasetProfiler"
     )
     assert validation.success is False
     assert len(validation.results) == 51

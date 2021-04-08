@@ -6,6 +6,13 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
+from packaging.version import parse as parse_version
+
+from great_expectations._version import get_versions  # isort:skip
+__version__ = get_versions()["version"]  # isort:skip
+del get_versions  # isort:skip
+
+
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
@@ -743,13 +750,22 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Take the mod of named column, and only keep rows that match the given value"""
         return sa.column(column_name) % mod == value
 
+    # <WILL> marker
     def _sample_using_a_list(
         self,
         column_name: str,
         value_list: list,
     ):
         """Match the values in the named column against value_list, and only keep the matches"""
-        return sa.column(column_name).in_(value_list)
+        if parse_version(sa.__version__) >= parse_version("1.4.0"):
+            raise GreatExpectationsError(
+            f"""
+                This functionality in Great Expectations version {__version__} is currently incompatible with SqlAlchemy 1.4.0 and higher.
+                You currently have SqlAlchemy version {sa.__version__}. Please downgrade SqlAlchemy to < 1.4.0 while we work on a proper fix.
+            """
+            )
+        else:
+            return sa.column(column_name).in_(value_list)
 
     def _sample_using_md5(
         self,
@@ -797,11 +813,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
 
             else:
-
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
                     sa.select("*")
-                    .select_from(sa.text(table_name))
+                    .select_from(sa.table(table_name, schema=batch_spec.get("schema_name", None)))
                     .where(
                         sa.and_(
                             split_clause,

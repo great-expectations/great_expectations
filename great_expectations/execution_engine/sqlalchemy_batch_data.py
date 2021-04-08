@@ -146,9 +146,6 @@ class SqlAlchemyBatchData(BatchData):
                     )
             if selectable is not None:
                 # compile selectable to sql statement
-                # print(selectable)
-                # print("\n\n\n")
-                # print("this was selectable")
                 query = selectable.compile(
                     dialect=self.sql_engine_dialect,
                     compile_kwargs={"literal_binds": True},

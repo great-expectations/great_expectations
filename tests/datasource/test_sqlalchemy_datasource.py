@@ -83,10 +83,10 @@ def test_standalone_sqlalchemy_datasource(test_db_connection_string, sa):
     )
 
     assert set(datasource.get_available_data_asset_names()["default"]["names"]) == {
-        ("table_1", "table"),
-        ("table_2", "table"),
+        ("main.table_1", "table"),
+        ("main.table_2", "table"),
     }
-    batch_kwargs = datasource.build_batch_kwargs("default", "table_1")
+    batch_kwargs = datasource.build_batch_kwargs("default", "main.table_1")
     batch = datasource.get_batch(batch_kwargs=batch_kwargs)
     assert isinstance(batch, Batch)
     batch_data = batch.data

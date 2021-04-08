@@ -7,6 +7,7 @@ from ruamel.yaml import YAML
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from packaging.version import parse as parse_version
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -635,26 +636,28 @@ def test_sampling_method__mod(
 def test_sampling_method__a_list(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+    # remove once sql alchemy has addressed issue : [ INSERT ISSUE NUMBER HERE ]
+    if parse_version(sqlalchemy.__version__) < parse_version("1.4.0"):
+        execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
-        batch_spec=SqlAlchemyDatasourceBatchSpec(
-            {
-                "table_name": "table_partitioned_by_date_column__A",
-                "batch_identifiers": {},
-                "splitter_method": "_split_on_whole_table",
-                "splitter_kwargs": {},
-                "sampling_method": "_sample_using_a_list",
-                "sampling_kwargs": {
-                    "column_name": "id",
-                    "value_list": [10, 20, 30, 40],
-                },
-            }
+        batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+            batch_spec=SqlAlchemyDatasourceBatchSpec(
+                {
+                    "table_name": "table_partitioned_by_date_column__A",
+                    "batch_identifiers": {},
+                    "splitter_method": "_split_on_whole_table",
+                    "splitter_kwargs": {},
+                    "sampling_method": "_sample_using_a_list",
+                    "sampling_kwargs": {
+                        "column_name": "id",
+                        "value_list": [10, 20, 30, 40],
+                    },
+                }
+            )
         )
-    )
-    execution_engine.load_batch_data("__", batch_data)
-    validator = Validator(execution_engine)
-    assert len(validator.head(fetch_all=True)) == 4
+        execution_engine.load_batch_data("__", batch_data)
+        validator = Validator(execution_engine)
+        assert len(validator.head(fetch_all=True)) == 4
 
 
 def test_sampling_method__md5(
