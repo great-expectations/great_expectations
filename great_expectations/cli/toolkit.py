@@ -5,7 +5,7 @@ import subprocess
 import sys
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 import click
 from ruamel.yaml import YAML
@@ -14,7 +14,6 @@ from ruamel.yaml.compat import StringIO
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
@@ -694,7 +693,7 @@ def load_json_file_into_dict(
     filepath: str,
     usage_event: Optional[str] = None,
     data_context: Optional[DataContext] = None,
-) -> Optional[Dict[str, Union[str, Dict[str, Any]]]]:
+) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
     trackable: bool = not ((usage_event is None) or (data_context is None))
 
     error_message: str
@@ -762,5 +761,52 @@ def load_json_file_into_dict(
             )
         else:
             raise ValueError(error_message)
+
+    return batch_request
+
+
+def get_batch_request_from_citations(
+    expectation_suite: Optional[ExpectationSuite] = None,
+) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+    batch_request_from_citation: Optional[
+        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+    ] = None
+
+    if expectation_suite is not None:
+        citations: List[Dict[str, Any]] = expectation_suite.get_citations(
+            require_batch_request=True
+        )
+        if citations:
+            citation: Dict[str, Any] = citations[-1]
+            batch_request_from_citation = citation.get("batch_request")
+
+    return batch_request_from_citation
+
+
+def get_batch_request_from_json_file(
+    batch_request_json_file_path: str,
+    data_context: Optional[DataContext] = None,
+    usage_event: Optional[str] = None,
+    suppress_usage_message: Optional[bool] = False,
+) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+    batch_request: Optional[
+        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+    ] = load_json_file_into_dict(
+        filepath=batch_request_json_file_path,
+        usage_event=usage_event,
+        data_context=data_context,
+    )
+    try:
+        batch_request = BatchRequest(**batch_request).get_json_dict()
+    except TypeError as e:
+        cli_message(
+            string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
+        )
+        cli_message(string="<red>{}</red>".format(e))
+        if not suppress_usage_message:
+            send_usage_message(
+                data_context=data_context, event=usage_event, success=False
+            )
+        sys.exit(1)
 
     return batch_request
