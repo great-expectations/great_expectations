@@ -400,7 +400,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     stdout: str = result.stdout
     assert 'The Checkpoint "my_v1_checkpoint" was not deleted.  Exiting now.' in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -409,6 +409,13 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
             {
                 "event": "cli.checkpoint.delete.begin",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.end",
+                "event_payload": {"cancelled": True, "api_version": "v3"},
                 "success": True,
             }
         ),

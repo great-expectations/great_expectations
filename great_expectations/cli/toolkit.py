@@ -379,6 +379,8 @@ def delete_checkpoint(
         confirm_proceed_or_exit(
             confirm_prompt=confirm_prompt,
             continuation_message=continuation_message,
+            data_context=context,
+            usage_stats_event=usage_event,
         )
     context.delete_checkpoint(name=checkpoint_name)
 
@@ -673,6 +675,8 @@ def confirm_proceed_or_exit(
     continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
     exit_on_no: bool = True,
     exit_code: int = 0,
+    data_context: Optional[DataContext] = None,
+    usage_stats_event: Optional[str] = None,
 ) -> Optional[bool]:
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
@@ -692,6 +696,13 @@ def confirm_proceed_or_exit(
     if not click.confirm(confirm_prompt_colorized, default=True):
         if exit_on_no:
             cli_message(continuation_message_colorized)
+            if (usage_stats_event is not None) and (data_context is not None):
+                send_usage_message(
+                    data_context=data_context,
+                    event=usage_stats_event,
+                    event_payload={"cancelled": True},
+                    success=True,
+                )
             sys.exit(exit_code)
         else:
             return False

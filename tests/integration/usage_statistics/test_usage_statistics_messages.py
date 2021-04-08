@@ -653,38 +653,101 @@ valid_usage_statistics_messages = {
             },
         ],
     ),
-    "cli.datasource.list": [
-        {
-            "event": "cli.datasource.list",
-            "event_payload": {},
+    # DATASOURCE CLI COMMANDS
+    "cli.datasource.list": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-04T00:01:06.628Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.9.manual_testing",
         },
-        {
-            "event": "cli.datasource.list",
-            "event_payload": {"api_version": "v2"},
+        message_stubs=[
+            {
+                "event": "cli.datasource.list",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.list.end",
+                "event_payload": {"api_version": "v3", "cancelled": True},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
+    "cli.datasource.new": generate_messages_with_defaults(
+        defaults={
             "success": True,
             "version": "1.0.0",
-            "event_time": "2020-08-04T00:01:06.628Z",
+            "event_time": "2020-08-04T22:50:58.837Z",
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
         },
-        {
-            "event": "cli.datasource.list",
-            "event_payload": {"api_version": "v3"},
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:01:06.628Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.13.0.manual_testing",
-        },
-    ],
+        message_stubs=[
+            {
+                "event": "cli.datasource.new",
+                "event_payload": {},
+                "ge_version": "0.11.9.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new",
+                "event_payload": {"api_version": "v2"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.0.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new.end",
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new.end",
+                "success": False,
+                "event_payload": {"api_version": "v3"},
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.datasource.new.end",
+                "event_payload": {"api_version": "v3", "cancelled": True},
+                "ge_version": "0.13.18.manual_testing",
+            },
+        ],
+    ),
     "cli.datasource.new": [
         {
             "event": "cli.datasource.new",
