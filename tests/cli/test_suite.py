@@ -534,6 +534,9 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     )
 
 
+# <ALEX>PLEASE START HERE ADDING THE USAGE STATS MESSAGES</ALEX>
+
+
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
