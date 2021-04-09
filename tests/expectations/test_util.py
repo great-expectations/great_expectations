@@ -13,11 +13,11 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.metrics.util import column_reflection_fallback
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.self_check.util import build_sa_validator_with_data
 from great_expectations.self_check.util import (
-    build_sa_validator_with_data,
-    build_test_backends_list,
-    generate_test_table_name,
+    build_test_backends_list as build_test_backends_list_v3,
 )
+from great_expectations.self_check.util import generate_test_table_name
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -324,7 +324,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     if not create_engine:
         pytest.skip("Unable to import sqlalchemy.create_engine() -- skipping.")
 
-    execution_engine_names: List[str] = build_test_backends_list(
+    test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=False,
         include_spark=False,
         include_sqlalchemy=include_sqlalchemy,
@@ -343,13 +343,14 @@ def test_table_column_reflection_fallback(test_backends, sa):
 
     validators_config: Dict[str, Validator] = {}
     validator: Validator
+    backend_name: str
     table_name: str
-    for execution_engine_name in execution_engine_names:
-        if execution_engine_name in ["sqlite", "postgresql", "mysql", "mssql"]:
+    for backend_name in test_backend_names:
+        if backend_name in ["sqlite", "postgresql", "mysql", "mssql"]:
             table_name = generate_test_table_name()
             validator = build_sa_validator_with_data(
                 df=df,
-                sa_engine_name=execution_engine_name,
+                sa_engine_name=backend_name,
                 schemas=None,
                 caching=True,
                 table_name=table_name,
