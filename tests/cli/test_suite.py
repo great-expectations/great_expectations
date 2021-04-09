@@ -1432,6 +1432,7 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
             "--expectation-suite",
             f"{expectation_suite_name}",
         ],
+        input="\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1522,6 +1523,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
             "--profile",
             "--no-jupyter",
         ],
+        input="\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1612,6 +1614,7 @@ def test_suite_new_profile_creates_notebook_and_opens_jupyter(
             f"{batch_request_file_path}",
             "--profile",
         ],
+        input="\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
