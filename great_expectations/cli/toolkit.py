@@ -369,7 +369,7 @@ def run_checkpoint(
         exit_with_failure_message_and_stats(
             data_context=context,
             usage_event=usage_event,
-            message="<red>{e}.</red>",
+            message=f"<red>{e}.</red>",
         )
 
 
@@ -390,7 +390,7 @@ def validate_checkpoint(
         exit_with_failure_message_and_stats(
             data_context=context,
             usage_event=usage_event,
-            message="<red>{e}.</red>",
+            message=f"<red>{e}.</red>",
         )
 
 
