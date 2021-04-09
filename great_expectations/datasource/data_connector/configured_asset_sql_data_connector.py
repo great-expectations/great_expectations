@@ -28,7 +28,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         name (str): The name of this DataConnector
         datasource_name (str): The name of the Datasource that contains it
         execution_engine (ExecutionEngine): An ExecutionEngine
-        data_assets (str): data_assets
+        assets (str): assets
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
@@ -37,12 +37,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        data_assets: Optional[Dict[str, dict]] = None,
+        assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
-        if data_assets is None:
-            data_assets = {}
-        self._data_assets = data_assets
+        if assets is None:
+            assets = {}
+        self._assets = assets
 
         super().__init__(
             name=name,
@@ -52,8 +52,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         )
 
     @property
-    def data_assets(self) -> Dict[str, dict]:
-        return self._data_assets
+    def assets(self) -> Dict[str, dict]:
+        return self._assets
 
     def add_data_asset(
         self,
@@ -63,7 +63,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
         """
-        self._data_assets[name] = config
+        self._assets[name] = config
 
     def _get_batch_identifiers_list_from_data_asset_config(
         self,
@@ -97,8 +97,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
     def _refresh_data_references_cache(self):
         self._data_references_cache = {}
 
-        for data_asset_name in self.data_assets:
-            data_asset = self.data_assets[data_asset_name]
+        for data_asset_name in self.assets:
+            data_asset = self.assets[data_asset_name]
             batch_identifiers_list = (
                 self._get_batch_identifiers_list_from_data_asset_config(
                     data_asset_name,
@@ -127,7 +127,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             A list of available names
         """
-        return list(self.data_assets.keys())
+        return list(self.assets.keys())
 
     def get_unmatched_data_references(self) -> List[str]:
         """
@@ -200,15 +200,15 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         data_asset_name: str = batch_definition.data_asset_name
         if (
-            data_asset_name in self.data_assets
-            and self.data_assets[data_asset_name].get("batch_spec_passthrough")
+            data_asset_name in self.assets
+            and self.assets[data_asset_name].get("batch_spec_passthrough")
             and isinstance(
-                self.data_assets[data_asset_name].get("batch_spec_passthrough"), dict
+                self.assets[data_asset_name].get("batch_spec_passthrough"), dict
             )
         ):
             # batch_spec_passthrough from data_asset
             batch_spec_passthrough = deepcopy(
-                self.data_assets[data_asset_name]["batch_spec_passthrough"]
+                self.assets[data_asset_name]["batch_spec_passthrough"]
             )
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
@@ -225,7 +225,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
-    ) -> dict:
+    ) -> Dict:
         """
         Build BatchSpec parameters from batch_definition with the following components:
             1. data_asset_name from batch_definition
@@ -243,7 +243,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             "data_asset_name": data_asset_name,
             "table_name": data_asset_name,
             "batch_identifiers": batch_definition.batch_identifiers,
-            **self.data_assets[data_asset_name],
+            **self.assets[data_asset_name],
         }
 
     # Splitter methods for listing partitions
