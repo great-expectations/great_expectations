@@ -52,8 +52,15 @@ Commands:
     )
 
 
-def test_suite_demo_deprecation_message(caplog, monkeypatch, empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_demo_deprecation_message(
+    mock_emit, caplog, monkeypatch, empty_data_context
+):
     context: DataContext = empty_data_context
+    # Reenable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -68,17 +75,68 @@ def test_suite_demo_deprecation_message(caplog, monkeypatch, empty_data_context)
     stdout: str = result.stdout
     assert "This command is not supported in the v3 (Batch Request) API." in stdout
 
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.demo.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.demo.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert mock_emit.call_args_list == expected_call_args_list
+    assert mock_emit.call_count == len(expected_call_args_list)
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
+def check_suite_new_cli_messages(mock_emit, end_success: bool = True):
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": end_success,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
+    assert mock_emit.call_count == len(expected_call_args_list)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_non_interactive_with_suite_name_prompted_default_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -116,6 +174,8 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_opens_jupyte
     )
     assert os.path.isfile(expected_notebook_path)
 
+    check_suite_new_cli_messages(mock_emit)
+
     run_notebook(
         notebook_path=expected_notebook_path,
         notebook_dir=uncommitted_dir,
@@ -145,11 +205,15 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_opens_jupyte
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_non_interactive_with_suite_name_prompted_custom_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -187,6 +251,8 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_opens_jupyter
     )
     assert os.path.isfile(expected_notebook_path)
 
+    check_suite_new_cli_messages(mock_emit)
+
     run_notebook(
         notebook_path=expected_notebook_path,
         notebook_dir=uncommitted_dir,
@@ -216,11 +282,15 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_opens_jupyter
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_non_interactive_with_suite_name_arg_custom_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -256,6 +326,8 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_opens_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
+    check_suite_new_cli_messages(mock_emit)
+
     run_notebook(
         notebook_path=expected_notebook_path,
         notebook_dir=uncommitted_dir,
@@ -285,11 +357,15 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_opens_jupyter(
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_non_interactive_with_suite_name_arg_custom_no_jupyter(
     mock_webbroser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -329,6 +405,8 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_no_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
+    check_suite_new_cli_messages(mock_emit)
+
     run_notebook(
         notebook_path=expected_notebook_path,
         notebook_dir=uncommitted_dir,
@@ -354,11 +432,15 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_no_jupyter(
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
     mock_webbroser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -383,6 +465,8 @@ nonexistent_file.json --no-jupyter
     stdout: str = result.stdout
     assert 'The JSON file with the path "nonexistent_file.json' in stdout
 
+    check_suite_new_cli_messages(mock_emit, end_success=False)
+
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name not in context.list_expectation_suite_names()
 
@@ -396,11 +480,15 @@ nonexistent_file.json --no-jupyter
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     mock_webbroser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -430,6 +518,8 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     stdout: str = result.stdout
     assert "Error" in stdout
     assert "occurred while attempting to load the JSON file with the path" in stdout
+
+    check_suite_new_cli_messages(mock_emit, end_success=False)
 
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name not in context.list_expectation_suite_names()

@@ -491,8 +491,10 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 def suite_demo(ctx):
     """This command is not supported in the v3 (Batch Request) API."""
     context: DataContext = ctx.obj.data_context
-    usage_event: str = "cli.suite.demo"
-    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
+    usage_event_end: str = ctx.obj.usage_event_end
+    toolkit.send_usage_message(
+        data_context=context, event=usage_event_end, success=True
+    )
     cli_message(
         string="This command is not supported in the v3 (Batch Request) API. Please use `suite new` instead."
     )
