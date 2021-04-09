@@ -517,7 +517,8 @@ data_connectors:
     datasource_name: {datasource_name}
     base_directory: ../path/to/data
     default_regex:
-      group_names: data_asset_name
+      group_names: 
+        - data_asset_name
       pattern: (.*)
 """'''
     )
@@ -564,7 +565,8 @@ data_connectors:
     datasource_name: {datasource_name}
     base_directory: ../path/to/data
     default_regex:
-      group_names: data_asset_name
+      group_names: 
+        - data_asset_name
       pattern: (.*)
 """'''
     )

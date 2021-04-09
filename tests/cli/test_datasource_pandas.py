@@ -205,7 +205,7 @@ def test_cli_datasource_new(
             "data_connectors": {
                 "my_datasource_example_data_connector": {
                     "default_regex": {
-                        "group_names": "data_asset_name",
+                        "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
@@ -346,7 +346,7 @@ def test_cli_datasource_new_with_name_param(
             "data_connectors": {
                 "foo_example_data_connector": {
                     "default_regex": {
-                        "group_names": "data_asset_name",
+                        "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
@@ -413,7 +413,7 @@ def test_cli_datasource_new_from_misc_directory(
             "data_connectors": {
                 "my_datasource_example_data_connector": {
                     "default_regex": {
-                        "group_names": "data_asset_name",
+                        "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
