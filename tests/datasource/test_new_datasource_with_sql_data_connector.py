@@ -112,6 +112,8 @@ def test_basic_instantiation_with_InferredAssetSqlDataConnector(sa):
     )
     # This is a basic integration test demonstrating an Datasource containing a SQL data_connector
     # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
+
+
     config = yaml.load(
         f"""
 class_name: Datasource
@@ -136,9 +138,10 @@ data_connectors:
     )
     report = my_data_connector.self_check()
 
+    connection_string_to_test = f"""sqlite:///{db_file}"""
     assert report == {
         "execution_engine": {
-            "connection_string": "sqlite:////Users/work/Development/great_expectations/tests/datasource/../test_sets/test_cases_for_sql_data_connector.db",
+            "connection_string": connection_string_to_test,
             "module_name": "great_expectations.execution_engine.sqlalchemy_execution_engine",
             "class_name": "SqlAlchemyExecutionEngine",
         },
