@@ -8,13 +8,11 @@ import numpy as np
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 
 try:
-    from sqlalchemy.engine import RowProxy
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
     from sqlalchemy.sql.selectable import CTE
 except ImportError:
-    RowProxy = None
     ProgrammingError = None
     Select = None
     Label = None
@@ -173,9 +171,7 @@ def _get_column_quantiles_mssql(
     quantiles_query: Select = sa.select(selects).select_from(selectable)
 
     try:
-        quantiles_results: RowProxy = sqlalchemy_engine.execute(
-            quantiles_query
-        ).fetchone()
+        quantiles_results = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -197,9 +193,7 @@ def _get_column_quantiles_bigquery(
     quantiles_query: Select = sa.select(selects).select_from(selectable)
 
     try:
-        quantiles_results: RowProxy = sqlalchemy_engine.execute(
-            quantiles_query
-        ).fetchone()
+        quantiles_results = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -258,9 +252,7 @@ def _get_column_quantiles_mysql(
     )
 
     try:
-        quantiles_results: RowProxy = sqlalchemy_engine.execute(
-            quantiles_query
-        ).fetchone()
+        quantiles_results = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -291,9 +283,7 @@ def _get_column_quantiles_generic_sqlalchemy(
     quantiles_query: Select = sa.select(selects).select_from(selectable)
 
     try:
-        quantiles_results: RowProxy = sqlalchemy_engine.execute(
-            quantiles_query
-        ).fetchone()
+        quantiles_results = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
     except ProgrammingError:
         # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
@@ -309,7 +299,7 @@ def _get_column_quantiles_generic_sqlalchemy(
             )
             if allow_relative_error:
                 try:
-                    quantiles_results: RowProxy = sqlalchemy_engine.execute(
+                    quantiles_results = sqlalchemy_engine.execute(
                         quantiles_query_approx
                     ).fetchone()
                     return list(quantiles_results)
