@@ -331,6 +331,29 @@ api_version_payload_schema = {
     "additionalProperties": False,
 }
 
+cancelled_cli_payload_schema = {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "cancelled": {"type": ["boolean", "null"]},
+    },
+    "additionalProperties": False,
+}
+
+cli_payload_schema = {
+    "$schema": "http://json-schema.org/schema#",
+    "title": "cli-payload",
+    "definitions": {
+        "api_version_definition": api_version_payload_schema,
+        "cancelled_cli_definition": cancelled_cli_payload_schema,
+    },
+    "type": "object",
+    "properties": {
+        "api_version": {"$ref": "#/definitions/api_version_definition"},
+        "cancelled": {"$ref": "#/definitions/cancelled_cli_definition"},
+    },
+    "additionalProperties": False,
+}
 
 cli_new_ds_choice_payload_schema = {
     "$schema": "http://json-schema.org/schema#",
@@ -373,7 +396,7 @@ usage_statistics_record_schema = {
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
         "cli_suite_edit_expectation_suite_payload": cli_suite_edit_expectation_suite_payload_schema,
-        "api_version_payload": api_version_payload_schema,
+        "cli_payload": cli_payload_schema,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload_schema,
         "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
     },
@@ -519,7 +542,7 @@ usage_statistics_record_schema = {
                         "cli.validation_operator.run",
                     ],
                 },
-                "event_payload": {"$ref": "#/definitions/api_version_payload"},
+                "event_payload": {"$ref": "#/definitions/cli_payload"},
             },
         },
     ],
