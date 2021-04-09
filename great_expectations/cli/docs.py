@@ -21,6 +21,14 @@ def docs(ctx):
     # TODO consider moving this all the way up in to the CLIState constructor
     ctx.obj.data_context = context
 
+    usage_stats_prefix = f"cli.docs.{ctx.invoked_subcommand}"
+    toolkit.send_usage_message(
+        data_context=context,
+        event=f"{usage_stats_prefix}.begin",
+        success=True,
+    )
+    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
+
 
 @docs.command(name="build")
 @click.option(
@@ -40,10 +48,12 @@ def docs(ctx):
 def docs_build(ctx, site_name=None, no_view=False):
     """Build Data Docs for a project."""
     context: DataContext = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
+
     if site_name is not None and site_name not in context.get_site_names():
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
-            usage_event="cli.docs.build",
+            usage_event=usage_event_end,
             message=f"<red>The specified site name `{site_name}` does not exist in this project.</red>",
         )
     if site_name is None:
@@ -53,12 +63,13 @@ def docs_build(ctx, site_name=None, no_view=False):
 
     build_docs(
         context,
+        usage_stats_event=usage_event_end,
         site_names=sites_to_build,
         view=not no_view,
         assume_yes=ctx.obj.assume_yes,
     )
     toolkit.send_usage_message(
-        data_context=context, event="cli.docs.build", success=True
+        data_context=context, event=usage_event_end, success=True
     )
 
 
@@ -67,26 +78,36 @@ def docs_build(ctx, site_name=None, no_view=False):
 def docs_list(ctx):
     """List known Data Docs sites."""
     context = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
     docs_sites_url_dicts = context.get_docs_sites_urls()
 
-    if len(docs_sites_url_dicts) == 0:
-        cli_message("No Data Docs sites found")
-    else:
-        docs_sites_strings = [
-            " - <cyan>{}</cyan>: {}".format(
-                docs_site_dict["site_name"],
-                docs_site_dict.get("site_url")
-                or f"site configured but does not exist. Run the following command to build site: great_expectations "
-                f'docs build --site-name {docs_site_dict["site_name"]}',
-            )
-            for docs_site_dict in docs_sites_url_dicts
-        ]
-        list_intro_string = _build_intro_string(docs_sites_strings)
-        cli_message_list(docs_sites_strings, list_intro_string)
+    try:
+        if len(docs_sites_url_dicts) == 0:
+            cli_message("No Data Docs sites found")
+        else:
+            docs_sites_strings = [
+                " - <cyan>{}</cyan>: {}".format(
+                    docs_site_dict["site_name"],
+                    docs_site_dict.get("site_url")
+                    or f"site configured but does not exist. Run the following command to build site: great_expectations "
+                    f'docs build --site-name {docs_site_dict["site_name"]}',
+                )
+                for docs_site_dict in docs_sites_url_dicts
+            ]
+            list_intro_string = _build_intro_string(docs_sites_strings)
+            cli_message_list(docs_sites_strings, list_intro_string)
 
-    toolkit.send_usage_message(
-        data_context=context, event="cli.docs.list", success=True
-    )
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event_end, success=True
+        )
+
+    except Exception as e:
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{e}</red>",
+        )
+        return
 
 
 @docs.command(name="clean")
@@ -110,11 +131,12 @@ def docs_clean(ctx, site_name=None, all_sites=False):
     This is a useful first step if you wish to completely re-build a site from scratch.
     """
     context = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
 
     if (site_name is None and all_sites is False) or (site_name and all_sites):
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
-            usage_event="cli.docs.clean",
+            usage_event=usage_event_end,
             message="<red>Please specify either --all to clean all sites or a specific site using --site-name</red>",
         )
     try:
@@ -122,13 +144,13 @@ def docs_clean(ctx, site_name=None, all_sites=False):
         # will clean all sites.
         context.clean_data_docs(site_name=site_name)
         toolkit.send_usage_message(
-            data_context=context, event="cli.docs.clean", success=True
+            data_context=context, event=usage_event_end, success=True
         )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
     except DataContextError as de:
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
-            usage_event="cli.docs.clean",
+            usage_event=usage_event_end,
             message=f"<red>{de}</red>",
         )
 
