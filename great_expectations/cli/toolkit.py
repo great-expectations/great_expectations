@@ -74,9 +74,9 @@ def prompt_profile_to_create_a_suite(
 Great Expectations will create a notebook, containing code cells that select from available columns in your dataset and
 generate expectations about them to demonstrate some examples of assertions you can make about your data.
 
-When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "{0:s}" here:
+When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "{:s}" here:
 
-  {1:s}
+  {:s}
 """.format(
             expectation_suite_name,
             data_context.stores[
@@ -593,6 +593,8 @@ def confirm_proceed_or_exit(
     continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
     exit_on_no: bool = True,
     exit_code: int = 0,
+    data_context: Optional[DataContext] = None,
+    usage_stats_event: Optional[str] = None,
 ) -> Optional[bool]:
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
@@ -612,6 +614,17 @@ def confirm_proceed_or_exit(
     if not click.confirm(confirm_prompt_colorized, default=True):
         if exit_on_no:
             cli_message(string=continuation_message_colorized)
+            if (usage_stats_event is not None) and (data_context is not None):
+                try:
+                    send_usage_message(
+                        data_context=data_context,
+                        event=usage_stats_event,
+                        event_payload={"cancelled": True},
+                        success=True,
+                    )
+                except Exception:
+                    # Don't fail on usage stats
+                    pass
             sys.exit(exit_code)
         else:
             return False
