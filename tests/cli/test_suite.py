@@ -1509,7 +1509,26 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
 
     assert mock_webbroser.call_count == 0
 
-    assert mock_emit.call_count == 0
+    assert mock_emit.call_count == 3
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
+        ),
+    ]
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,

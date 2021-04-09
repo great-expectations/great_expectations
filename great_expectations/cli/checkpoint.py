@@ -310,6 +310,7 @@ def checkpoint_script(ctx, checkpoint):
 
     if os.path.isfile(script_path):
         toolkit.exit_with_failure_message_and_stats(
+            data_context=context,
             usage_event=usage_event_end,
             message=f"""<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
   - Existing file path: {script_path}""",
