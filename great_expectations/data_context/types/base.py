@@ -292,6 +292,7 @@ class DataConnectorConfig(DictDot):
         max_keys=None,
         boto3_options=None,
         sorters=None,
+        batch_spec_passthrough=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -318,6 +319,8 @@ class DataConnectorConfig(DictDot):
             self.boto3_options = boto3_options
         if sorters is not None:
             self.sorters = sorters
+        if batch_spec_passthrough is not None:
+            self.batch_spec_passthrough = batch_spec_passthrough
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -376,6 +379,7 @@ class DataConnectorConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
+    batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):

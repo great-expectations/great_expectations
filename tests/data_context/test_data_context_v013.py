@@ -20,7 +20,7 @@ from great_expectations.validator.validator import Validator
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
-from tests.test_utils import create_files_in_directory
+from tests.test_utils import create_files_in_directory, get_sqlite_temp_table_names
 
 yaml = YAML()
 
@@ -503,6 +503,7 @@ def test_in_memory_data_context_configuration(
 def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector(
     sa,
     data_context_with_runtime_sql_datasource_for_testing_get_batch,
+    sqlite_view_engine,
 ):
     context: DataContext = (
         data_context_with_runtime_sql_datasource_for_testing_get_batch
@@ -535,6 +536,26 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
 
     assert sa_engine.execute(selectable_count_sql_str).scalar() == 120
     assert batch.batch_markers.get("ge_load_time") is not None
+    # since create_temp_table defaults to True, there should be 1 temp table
+    assert len(get_sqlite_temp_table_names(batch.data.execution_engine.engine)) == 1
+
+    # if create_temp_table in batch_spec_passthrough is set to False, no new temp tables should be created
+    batch = context.get_batch(
+        batch_request=RuntimeBatchRequest(
+            datasource_name="my_runtime_sql_datasource",
+            data_connector_name="my_runtime_data_connector",
+            data_asset_name="IN_MEMORY_DATA_ASSET",
+            runtime_parameters={
+                "query": "SELECT * FROM table_partitioned_by_date_column__A"
+            },
+            batch_identifiers={
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
+            batch_spec_passthrough={"create_temp_table": False},
+        ),
+    )
+    assert len(get_sqlite_temp_table_names(batch.data.execution_engine.engine)) == 1
 
 
 def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_connector(
