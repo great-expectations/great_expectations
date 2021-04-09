@@ -113,7 +113,6 @@ def test_basic_instantiation_with_InferredAssetSqlDataConnector(sa):
     # This is a basic integration test demonstrating an Datasource containing a SQL data_connector
     # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
 
-
     config = yaml.load(
         f"""
 class_name: Datasource
