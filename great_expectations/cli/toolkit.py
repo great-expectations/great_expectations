@@ -176,10 +176,19 @@ def get_or_create_expectation_suite(
                 not in data_context.list_expectation_suite_names()
             ):
                 break
-            tell_user_suite_exists(suite_name=expectation_suite_name)
+            tell_user_suite_exists(
+                data_context=data_context,
+                expectation_suite_name=expectation_suite_name,
+                usage_event=usage_event,
+                suppress_usage_message=suppress_usage_message,
+            )
     elif expectation_suite_name in data_context.list_expectation_suite_names():
-        tell_user_suite_exists(suite_name=expectation_suite_name)
-        sys.exit(1)
+        tell_user_suite_exists(
+            data_context=data_context,
+            expectation_suite_name=expectation_suite_name,
+            usage_event=usage_event,
+            suppress_usage_message=suppress_usage_message,
+        )
 
     suite: ExpectationSuite = load_expectation_suite(
         data_context=data_context,
@@ -208,10 +217,18 @@ def get_default_expectation_suite_name(
     return suite_name
 
 
-def tell_user_suite_exists(suite_name: str):
-    cli_message(
-        string=f"""<red>An expectation suite named `{suite_name}` already exists.</red>
-  - If you intend to edit the suite please use `great_expectations suite edit {suite_name}`."""
+def tell_user_suite_exists(
+    data_context: DataContext,
+    expectation_suite_name: str,
+    usage_event: str,
+    suppress_usage_message: Optional[bool] = False,
+):
+    exit_with_failure_message_and_stats(
+        data_context=data_context,
+        usage_event=usage_event,
+        suppress_usage_message=suppress_usage_message,
+        message=f"""<red>An expectation suite named `{expectation_suite_name}` already exists.</red>
+    - If you intend to edit the suite please use `great_expectations suite edit {expectation_suite_name}`.""",
     )
 
 

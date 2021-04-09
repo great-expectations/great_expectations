@@ -8,8 +8,10 @@ from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.util import lint_code
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
@@ -592,7 +594,11 @@ def test_suite_edit_datasource_and_batch_request_error(monkeypatch, empty_data_c
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_suite_name_raises_error(
-    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    empty_data_context,
 ):
     """
     The command should:
@@ -618,8 +624,9 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     assert "Could not find a suite named `not_a_real_suite`." in stdout
     assert "by running `great_expectations suite list`" in stdout
 
-    assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
+
+    assert mock_webbrowser.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -630,7 +637,11 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
-    mock_webbrowser, mock_subprocess, caplog, monkeypatch, empty_data_context
+    mock_webbrowser,
+    mock_subprocess,
+    caplog,
+    monkeypatch,
+    empty_data_context,
 ):
     """
     The command should:
@@ -666,8 +677,9 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
         in stdout
     )
 
-    assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 0
+
+    assert mock_webbrowser.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -818,8 +830,9 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
         replacement_string="",
     )
 
-    assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
+
+    assert mock_webbrowser.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -962,8 +975,9 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations(
         replacement_string="",
     )
 
-    assert mock_webbrowser.call_count == 0
     assert mock_subprocess.call_count == 1
+
+    assert mock_webbrowser.call_count == 0
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1382,55 +1396,65 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     assert "No Expectation Suites found" in stdout
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
-def test_suite_scaffold_on_context_with_no_datasource_raises_error(
-    mock_subprocess, mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
+def test_suite_new_profile_on_context_with_no_datasource_raises_error(
+    mock_subprocess,
+    mock_emit,
+    caplog,
+    monkeypatch,
+    empty_data_context_stats_enabled,
 ):
     """
-    We call the "suite scaffold" command on a context with no datasource
+    We call the "suite new --profile" command on a context with no datasource
 
     The command should:
     - exit with a clear error message
     - send a DataContext init success message
-    - send a scaffold fail message
+    - send a new fail message
     """
-    context = empty_data_context_stats_enabled
-    runner = CliRunner(mix_stderr=False)
+    context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+
+    expectation_suite_name: str = "test_suite_name"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         [
             "--v3-api",
             "suite",
-            "scaffold",
-            "foo",
+            "new",
+            "--interactive",
+            "--profile",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
         ],
         catch_exceptions=False,
     )
-    stdout = result.output
     assert result.exit_code == 1
+
+    stdout: str = result.output
     assert (
         "No datasources found in the context. To add a datasource, run `great_expectations datasource new`"
         in stdout
     )
 
     assert mock_subprocess.call_count == 0
+
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": False}
+            {
+                "event": "cli.suite.new",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
         ),
     ]
 
@@ -1440,49 +1464,75 @@ def test_suite_scaffold_on_context_with_no_datasource_raises_error(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_suite_scaffold_on_existing_suite_raises_error(
+def test_suite_new_profile_on_existing_suite_raises_error(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
     """
-    We call the "suite scaffold" command with an existing suite
+    We call the "suite new --profile" command with an existing suite
 
     The command should:
     - exit with a clear error message
     - send a DataContext init success message
-    - send a scaffold fail message
+    - send a new fail message
     """
-    context = empty_data_context_stats_enabled
-    suite = context.create_expectation_suite("foo")
+    context: DataContext = empty_data_context_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
     context.save_expectation_suite(expectation_suite=suite)
-    assert context.list_expectation_suite_names() == ["foo"]
+    assert (
+        context.list_expectation_suites()[0].expectation_suite_name
+        == expectation_suite_name
+    )
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    with open(batch_request_file_path, "w") as json_file:
+        json.dump(batch_request, json_file)
+
     mock_emit.reset_mock()
 
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         [
             "--v3-api",
             "suite",
-            "scaffold",
-            "foo",
+            "new",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
+            "--interactive",
+            "--batch-request",
+            f"{batch_request_file_path}",
+            "--profile",
+            "--no-jupyter",
         ],
         catch_exceptions=False,
     )
-    stdout = result.output
     assert result.exit_code == 1
-    assert "An expectation suite named `foo` already exists." in stdout
+
+    stdout: str = result.output
     assert (
-        "If you intend to edit the suite please use `great_expectations suite edit foo`."
+        f"An expectation suite named `{expectation_suite_name}` already exists."
+        in stdout
+    )
+    assert (
+        f"If you intend to edit the suite please use `great_expectations suite edit {expectation_suite_name}`."
         in stdout
     )
 
@@ -1492,7 +1542,11 @@ def test_suite_scaffold_on_existing_suite_raises_error(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": False}
+            {
+                "event": "cli.suite.new",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
         ),
     ]
 
@@ -1502,70 +1556,204 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     )
 
 
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
-def test_suite_scaffold_creates_notebook_and_opens_jupyter(
-    mock_subprocess, mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_profile_creates_notebook_and_opens_jupyter(
+    mock_webbroser,
+    mock_subprocess,
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
-    We call the "suite scaffold" command
+    We call the "suite new --profile" command
 
     The command should:
     - create a new notebook
     - open the notebook in jupyter
     - send a DataContext init success message
-    - send a scaffold success message
+    - send a new success message
     """
-    context = titanic_data_context_stats_enabled
-    suite_name = "foo"
-    expected_notebook_path = os.path.join(
-        context.root_directory,
-        context.GE_EDIT_NOTEBOOK_DIR,
-        f"scaffold_{suite_name}.ipynb",
-    )
-    assert not os.path.isfile(expected_notebook_path)
-
-    runner = CliRunner(mix_stderr=False)
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    with open(batch_request_file_path, "w") as json_file:
+        json.dump(batch_request, json_file)
+
+    mock_emit.reset_mock()
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
         cli,
         [
             "--v3-api",
             "suite",
-            "scaffold",
-            suite_name,
+            "new",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
+            "--interactive",
+            "--batch-request",
+            f"{batch_request_file_path}",
+            "--profile",
         ],
-        input="1\n1\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "Select a datasource" not in stdout
+    assert "Opening a notebook for you now to edit your expectation suite!" in stdout
+    assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
+
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook_path: str = os.path.join(
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
+    )
     assert os.path.isfile(expected_notebook_path)
 
-    assert mock_subprocess.call_count == 1
-    assert mock_subprocess.call_args_list == [
-        mock.call(["jupyter", "notebook", expected_notebook_path])
+    batch_request_string: str = (
+        str(BatchRequest(**batch_request))
+        .replace("{\n", "{\n  ")
+        .replace(",\n", ",\n  ")
+        .replace("\n}", ",\n}")
+    )
+    batch_request_string = fr"batch_request = {batch_request_string}"
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    profiler_code_cell: str = f"""\
+profiler = UserConfigurableProfiler(
+    profile_dataset=validator,
+    excluded_expectations=None,
+    ignored_columns=ignored_columns,
+    not_null_only=False,
+    primary_or_compound_key=False,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
+)
+suite = profiler.build_suite()"""
+    profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=profiler_code_cell,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        replacement_string="",
+    )
+
+    context = DataContext(context_root_dir=project_dir)
+    assert expectation_suite_name in context.list_expectation_suite_names()
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert suite.expectations == [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_table_columns_to_match_ordered_list",
+                "kwargs": {
+                    "column_list": [
+                        "Unnamed: 0",
+                        "Name",
+                        "PClass",
+                        "Age",
+                        "Sex",
+                        "Survived",
+                        "SexCode",
+                    ]
+                },
+                "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "kwargs": {"max_value": 1313, "min_value": 1313},
+                "meta": {},
+            }
+        ),
     ]
-    assert mock_emit.call_count == 2
+
+    assert mock_subprocess.call_count == 1
+    call_args: List[str] = mock_subprocess.call_args[0][0]
+    assert call_args[0] == "jupyter"
+    assert call_args[1] == "notebook"
+    assert expected_notebook_path in call_args[2]
+
+    assert mock_webbroser.call_count == 0
+
+    assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": True}
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
     ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
 
 
