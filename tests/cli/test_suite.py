@@ -3,7 +3,6 @@ import os
 from typing import Dict, List
 from unittest import mock
 
-import pytest
 from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
@@ -12,10 +11,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.util import lint_code
-from tests.cli.utils import (
-    VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    assert_no_logging_messages_or_tracebacks,
-)
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.test_util import (
     find_code_in_notebook,
     load_notebook_from_path,
@@ -56,11 +52,9 @@ Commands:
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_suite_demo_deprecation_message(
-    mock_emit, caplog, monkeypatch, empty_data_context
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context
-    # Reenable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    context: DataContext = empty_data_context_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -102,30 +96,6 @@ def test_suite_demo_deprecation_message(
         my_caplog=caplog,
         click_result=result,
     )
-
-
-def check_suite_new_cli_messages(mock_emit, end_success: bool = True):
-    expected_call_args_list = [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.suite.new.begin",
-                "event_payload": {"api_version": "v3"},
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
-                "success": end_success,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
-    assert mock_emit.call_count == len(expected_call_args_list)
 
 
 @mock.patch(
@@ -174,8 +144,6 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_opens_jupyte
     )
     assert os.path.isfile(expected_notebook_path)
 
-    check_suite_new_cli_messages(mock_emit)
-
     run_notebook(
         notebook_path=expected_notebook_path,
         notebook_dir=uncommitted_dir,
@@ -198,6 +166,30 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_opens_jupyte
     assert expected_notebook_path in call_args[2]
 
     assert mock_webbroser.call_count == 0
+
+    assert mock_emit.call_count == 4
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -251,8 +243,6 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_opens_jupyter
     )
     assert os.path.isfile(expected_notebook_path)
 
-    check_suite_new_cli_messages(mock_emit)
-
     run_notebook(
         notebook_path=expected_notebook_path,
         notebook_dir=uncommitted_dir,
@@ -275,6 +265,30 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_opens_jupyter
     assert expected_notebook_path in call_args[2]
 
     assert mock_webbroser.call_count == 0
+
+    assert mock_emit.call_count == 4
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -326,8 +340,6 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_opens_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
-    check_suite_new_cli_messages(mock_emit)
-
     run_notebook(
         notebook_path=expected_notebook_path,
         notebook_dir=uncommitted_dir,
@@ -350,6 +362,30 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_opens_jupyter(
     assert expected_notebook_path in call_args[2]
 
     assert mock_webbroser.call_count == 0
+
+    assert mock_emit.call_count == 4
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -405,8 +441,6 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_no_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
-    check_suite_new_cli_messages(mock_emit)
-
     run_notebook(
         notebook_path=expected_notebook_path,
         notebook_dir=uncommitted_dir,
@@ -425,6 +459,30 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_no_jupyter(
     assert mock_subprocess.call_count == 0
 
     assert mock_webbroser.call_count == 0
+
+    assert mock_emit.call_count == 4
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -465,14 +523,36 @@ nonexistent_file.json --no-jupyter
     stdout: str = result.stdout
     assert 'The JSON file with the path "nonexistent_file.json' in stdout
 
-    check_suite_new_cli_messages(mock_emit, end_success=False)
-
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name not in context.list_expectation_suite_names()
 
     assert mock_subprocess.call_count == 0
 
     assert mock_webbroser.call_count == 0
+
+    assert mock_emit.call_count == 4
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -519,8 +599,6 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     assert "Error" in stdout
     assert "occurred while attempting to load the JSON file with the path" in stdout
 
-    check_suite_new_cli_messages(mock_emit, end_success=False)
-
     context = DataContext(context_root_dir=project_dir)
     assert expectation_suite_name not in context.list_expectation_suite_names()
 
@@ -528,20 +606,45 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
 
     assert mock_webbroser.call_count == 0
 
+    assert mock_emit.call_count == 4
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
-# <ALEX>PLEASE START HERE ADDING THE USAGE STATS MESSAGES</ALEX>
-
-
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
     mock_webbroser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -632,15 +735,55 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
 
     assert mock_webbroser.call_count == 0
 
+    assert mock_emit.call_count == 5
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
-def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_context):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_edit_without_suite_name_raises_error(
+    mock_emit,
+    monkeypatch,
+    empty_data_context_stats_enabled,
+):
     """This is really only testing click missing arguments"""
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     runner: CliRunner = CliRunner(mix_stderr=False)
@@ -652,10 +795,31 @@ def test_suite_edit_without_suite_name_raises_error(monkeypatch, empty_data_cont
         or "Error: Missing argument 'EXPECTATION_SUITE'." in result.stderr
     )
 
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
 
-def test_suite_edit_datasource_and_batch_request_error(monkeypatch, empty_data_context):
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_edit_datasource_and_batch_request_error(
+    mock_emit,
+    monkeypatch,
+    empty_data_context_stats_enabled,
+):
     """This is really only testing click missing arguments"""
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     expectation_suite_name: str = "test_suite_name"
@@ -683,15 +847,40 @@ def test_suite_edit_datasource_and_batch_request_error(monkeypatch, empty_data_c
         in stdout
     )
 
+    assert mock_emit.call_count == 3
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
+        ),
+    ]
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_suite_name_raises_error(
     mock_webbrowser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
 ):
     """
     The command should:
@@ -699,7 +888,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     - NOT open Data Docs
     - NOT open jupyter
     """
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     assert not context.list_expectation_suites()
 
@@ -721,20 +910,45 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
 
     assert mock_webbrowser.call_count == 0
 
+    assert mock_emit.call_count == 3
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
+        ),
+    ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     mock_webbrowser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
 ):
     """
     The command should:
@@ -742,7 +956,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     - NOT open Data Docs
     - NOT open jupyter
     """
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     expectation_suite_name: str = "test_suite_name"
@@ -774,17 +988,42 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
 
     assert mock_webbrowser.call_count == 0
 
+    assert mock_emit.call_count == 3
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {"api_version": "v3"},
+                "success": False,
+            }
+        ),
+    ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_no_additional_args_without_citations(
     mock_webbrowser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -927,17 +1166,92 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
 
     assert mock_webbrowser.call_count == 0
 
+    assert mock_emit.call_count == 10
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
+                    "api_version": "v3",
+                },
+                "success": True,
+            }
+        ),
+    ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations(
     mock_webbrowser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -1072,22 +1386,79 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations(
 
     assert mock_webbrowser.call_count == 0
 
+    assert mock_emit.call_count == 8
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
+                    "api_version": "v3",
+                },
+                "success": True,
+            }
+        ),
+    ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_interactive_batch_request_without_datasource_json_file_raises_helpful_error(
     mock_webbroser,
     mock_subprocess,
+    mock_emit,
     caplog,
     monkeypatch,
-    empty_data_context,
+    empty_data_context_stats_enabled,
 ):
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -1138,14 +1509,21 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
 
     assert mock_webbroser.call_count == 0
 
+    assert mock_emit.call_count == 0
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
-def test_suite_list_with_zero_suites(caplog, monkeypatch, empty_data_context):
-    context: DataContext = empty_data_context
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_list_with_zero_suites(
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
     config_file_path: str = os.path.join(
         context.root_directory, "great_expectations.yml"
     )
@@ -1160,7 +1538,30 @@ def test_suite_list_with_zero_suites(caplog, monkeypatch, empty_data_context):
     )
 
     assert result.exit_code == 0
-    assert "No Expectation Suites found" in result.output
+
+    stdout: str = result.stdout
+    assert "No Expectation Suites found" in stdout
+
+    assert mock_emit.call_count == 3
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.list.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -1168,8 +1569,13 @@ def test_suite_list_with_zero_suites(caplog, monkeypatch, empty_data_context):
     )
 
 
-def test_suite_list_with_one_suite(caplog, monkeypatch, empty_data_context):
-    context: DataContext = empty_data_context
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_list_with_one_suite(
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -1197,14 +1603,40 @@ def test_suite_list_with_one_suite(caplog, monkeypatch, empty_data_context):
     assert "1 Expectation Suite found" in stdout
     assert f"{expectation_suite_dir_name}.{expectation_suite_name}" in stdout
 
+    assert mock_emit.call_count == 3
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.list.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
     )
 
 
-def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context):
-    context: DataContext = empty_data_context
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_list_with_multiple_suites(
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     project_dir: str = context.root_directory
@@ -1239,6 +1671,27 @@ def test_suite_list_with_multiple_suites(caplog, monkeypatch, empty_data_context
     assert "b.warning" in stdout
     assert "c.warning" in stdout
 
+    assert mock_emit.call_count == 3
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.list.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
@@ -1265,14 +1718,21 @@ def test_suite_delete_with_zero_suites(
     stdout: str = result.stdout
     assert "No expectation suites found in the project" in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.suite.delete",
+                "event": "cli.suite.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.delete.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -1318,14 +1778,21 @@ def test_suite_delete_with_non_existent_suite(
     stdout: str = result.stdout
     assert "No expectation suite named not_a_suite found" in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.suite.delete",
+                "event": "cli.suite.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.delete.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -1386,14 +1853,21 @@ def test_suite_delete_with_one_suite(
 
     assert not os.path.isfile(suite_path)
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.suite.delete",
+                "event": "cli.suite.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.delete.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -1458,14 +1932,21 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
 
     assert not os.path.isfile(suite_path)
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.suite.delete",
+                "event": "cli.suite.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.delete.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -1538,14 +2019,21 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
 
     assert mock_subprocess.call_count == 0
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.suite.new",
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -1631,14 +2119,21 @@ def test_suite_new_profile_on_existing_suite_raises_error(
         in stdout
     )
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.suite.new",
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -1821,10 +2316,17 @@ suite = profiler.build_suite()"""
 
     assert mock_webbroser.call_count == 0
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1837,7 +2339,7 @@ suite = profiler.build_suite()"""
         ),
         mock.call(
             {
-                "event": "cli.suite.new",
+                "event": "cli.suite.new.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -2023,10 +2525,17 @@ suite = profiler.build_suite()"""
 
     assert mock_webbroser.call_count == 0
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2039,7 +2548,7 @@ suite = profiler.build_suite()"""
         ),
         mock.call(
             {
-                "event": "cli.suite.new",
+                "event": "cli.suite.new.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
