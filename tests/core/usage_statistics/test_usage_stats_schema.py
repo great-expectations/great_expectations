@@ -3,8 +3,8 @@ import jsonschema
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_batch_schema,
     anonymized_datasource_schema,
-    api_version_payload_schema,
     cli_new_ds_choice_payload_schema,
+    cli_payload_schema,
     cli_suite_edit_expectation_suite_payload_schema,
     datasource_sqlalchemy_connect_payload,
     empty_payload_schema,
@@ -39,6 +39,7 @@ def test_comprehensive_list_of_messages():
         "cli.checkpoint.new",
         "cli.checkpoint.run",
         "cli.checkpoint.script",
+        "cli.datasource.delete",
         "cli.datasource.list",
         "cli.datasource.new",
         "cli.datasource.profile",
@@ -47,6 +48,7 @@ def test_comprehensive_list_of_messages():
         "cli.docs.list",
         "cli.init.create",
         "cli.project.check_config",
+        "cli.project.upgrade",
         "cli.store.list",
         "cli.suite.delete",
         "cli.suite.demo",
@@ -177,6 +179,7 @@ def test_usage_stats_cli_payload_messages():
         "cli.checkpoint.new",
         "cli.checkpoint.run",
         "cli.checkpoint.script",
+        "cli.datasource.delete",
         "cli.datasource.list",
         "cli.datasource.new",
         "cli.datasource.profile",
@@ -185,6 +188,7 @@ def test_usage_stats_cli_payload_messages():
         "cli.docs.list",
         "cli.init.create",
         "cli.project.check_config",
+        # "cli.project.upgrade",
         "cli.store.list",
         "cli.suite.delete",
         "cli.suite.demo",
@@ -201,5 +205,5 @@ def test_usage_stats_cli_payload_messages():
         )
         jsonschema.validate(
             valid_usage_statistics_messages[message][0]["event_payload"],
-            api_version_payload_schema,
+            cli_payload_schema,
         )

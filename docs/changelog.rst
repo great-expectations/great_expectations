@@ -11,6 +11,7 @@ Develop
 * [ENHANCEMENT] Update `DataConnector.build_batch_spec` to use `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `ConfiguredAssetSqlDataConnector.build_batch_spec` and `ConfiguredAssetFilePathDataConnector.build_batch_spec` to properly process `Asset.batch_spec_passthrough`
 * [ENHANCEMENT] Update `SqlAlchemyExecutionEngine.get_batch_data_and_markers` to handle `create_temp_table` in `RuntimeQueryBatchSpec`
+* [ENHANCEMENT] Usage stats messages for the v3 API CLI are now sent before and after the command runs # 2661
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
