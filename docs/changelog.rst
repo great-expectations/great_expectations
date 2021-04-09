@@ -13,6 +13,8 @@ Develop
 * [ENHANCEMENT] Update `SqlAlchemyExecutionEngine.get_batch_data_and_markers` to handle `create_temp_table` in `RuntimeQueryBatchSpec`
 * [ENHANCEMENT] Usage stats messages for the v3 API CLI are now sent before and after the command runs # 2661
 * [ENHANCEMENT} Update the datasource new notebook for improved data asset inference
+* [ENHANCEMENT} Update the datasource new notebook for improved data asset inference
+* [BUGFIX] Rename assets in SqlDataConnectors to be consistent with other DataConnectors #2665
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
