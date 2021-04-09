@@ -186,7 +186,7 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
                   class_name: SqlAlchemyExecutionEngine
                   module_name: great_expectations.execution_engine
                   connection_string: sqlite:///my_db_file # Insert your SqlAlchemy connection string here
-                  # create_temp_table is optional and defaults to True - override this behavior here
+                  # create_temp_table is optional and defaults to True - you may override this behavior here
                   create_temp_table: False
                 data_connectors:
                   insert_your_runtime_data_connector_name_here:
