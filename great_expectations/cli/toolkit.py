@@ -27,10 +27,8 @@ from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
 )
 from great_expectations.datasource import BaseDatasource
-from great_expectations.profile import BasicSuiteBuilderProfiler
 from great_expectations.validator.validator import Validator
 
 try:
@@ -66,30 +64,23 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-# TODO: <Alex>ALEX - Update for V3</Alex>
-def _profile_to_create_a_suite(
-    additional_batch_kwargs,
-    batch_request,
-    batch_kwargs_generator_name,
-    context,
-    datasource_name,
-    expectation_suite_name,
-    data_asset_name,
-    profiler_configuration,
+def prompt_profile_to_create_a_suite(
+    data_context: DataContext,
+    expectation_suite_name: str,
 ):
 
     cli_message(
         string="""
-Great Expectations will choose a couple of columns and generate expectations about them
-to demonstrate some examples of assertions you can make about your data.
+Great Expectations will create a notebook, containing code cells that select from available columns in your dataset and
+generate expectations about them to demonstrate some examples of assertions you can make about your data.
 
-Great Expectations will store these expectations in a new Expectation Suite '{:s}' here:
+When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "{0:s}" here:
 
-  {:s}
+  {1:s}
 """.format(
             expectation_suite_name,
-            context.stores[
-                context.expectations_store_name
+            data_context.stores[
+                data_context.expectations_store_name
             ].store_backend.get_url_for_key(
                 ExpectationSuiteIdentifier(
                     expectation_suite_name=expectation_suite_name
@@ -99,55 +90,6 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
     )
 
     confirm_proceed_or_exit()
-
-    # TODO this may not apply
-    cli_message(string="\nGenerating example Expectation Suite...")
-    run_id = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
-    profiling_results = context.profile_data_asset(
-        datasource_name,
-        batch_kwargs_generator_name=batch_kwargs_generator_name,
-        data_asset_name=data_asset_name,
-        batch_kwargs=batch_request,
-        profiler=BasicSuiteBuilderProfiler,
-        profiler_configuration=profiler_configuration,
-        expectation_suite_name=expectation_suite_name,
-        run_id=run_id,
-        additional_batch_kwargs=additional_batch_kwargs,
-    )
-    if not profiling_results["success"]:
-        _raise_profiling_errors(profiling_results)
-
-    cli_message(string="\nDone generating example Expectation Suite")
-    return profiling_results
-
-
-def _raise_profiling_errors(profiling_results):
-    if (
-        profiling_results["error"]["code"]
-        == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
-    ):
-        raise ge_exceptions.DataContextError(
-            """Some of the data assets you specified were not found: {:s}
-            """.format(
-                ",".join(profiling_results["error"]["not_found_data_assets"])
-            )
-        )
-    raise ge_exceptions.DataContextError(
-        "Unknown profiling error code: " + profiling_results["error"]["code"]
-    )
-
-
-def attempt_to_open_validation_results_in_data_docs(context, profiling_results):
-    try:
-        # TODO this is really brittle and not covered in tests
-        validation_result = profiling_results["results"][0][1]
-        validation_result_identifier = ValidationResultIdentifier.from_object(
-            validation_result
-        )
-
-        context.open_data_docs(resource_identifier=validation_result_identifier)
-    except (KeyError, IndexError):
-        context.open_data_docs()
 
 
 def get_or_create_expectation_suite(
@@ -233,7 +175,7 @@ def tell_user_suite_exists(
 
 
 def launch_jupyter_notebook(notebook_path: str):
-    jupyter_command_override = os.getenv("GE_JUPYTER_CMD", None)
+    jupyter_command_override: str = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
         subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
     else:

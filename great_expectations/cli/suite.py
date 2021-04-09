@@ -404,6 +404,11 @@ def _suite_edit_workflow(
                         data_context=context, event=usage_event, success=False
                     )
                 sys.exit(1)
+
+            toolkit.prompt_profile_to_create_a_suite(
+                data_context=context, expectation_suite_name=expectation_suite_name
+            )
+
             renderer: SuiteProfileNotebookRenderer = SuiteProfileNotebookRenderer(
                 context=context,
                 expectation_suite_name=expectation_suite_name,
