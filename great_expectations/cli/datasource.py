@@ -307,7 +307,8 @@ data_connectors:
     datasource_name: {{datasource_name}}
     base_directory: {self.base_path}
     default_regex:
-      group_names: data_asset_name
+      group_names: 
+        - data_asset_name
       pattern: (.*)
 """'''
 
