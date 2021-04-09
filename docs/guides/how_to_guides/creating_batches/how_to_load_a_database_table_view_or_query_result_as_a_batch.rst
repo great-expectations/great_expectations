@@ -146,7 +146,7 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources in the V3 (Batch Request) API <reference__core_concepts__datasources>`
             - :ref:`Configured a Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
-            - :ref:`Configured a RuntimeDataConnector <how_to_guides__creating_batches__how_to_configure_a_runtime_data_connector>`
+            - :ref:`Configured a Runtime Data Connector <how_to_guides__creating_batches__how_to_configure_a_runtime_data_connector>`
             - Identified a ``query`` that you would like to use as the data to validate.
 
 
@@ -173,7 +173,7 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
 
         1. Configure a Datasource
 
-          Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`RuntimeDataConnector <reference__core_concepts__datasources>` to connect to your SQL database. Since we are using a SQL database, we use the ``SqlAlchemyExecutionEngine``. You can use ``batch_identifiers`` to define what data you are able to attach as additional metadata to your Batch using the ``batch_identifiers`` parameter (shown in step 3).
+          Configure a :ref:`Datasource <reference__core_concepts__datasources>` using the :ref:`Runtime Data Connector <reference__core_concepts__datasources>` to connect to your SQL database. Since we are using a SQL database, we use the ``SqlAlchemyExecutionEngine``. You can use ``batch_identifiers`` to define what data you are able to attach as additional metadata to your Batch using the ``batch_identifiers`` parameter (shown in step 3).
 
           By default, the SqlAlchemy Execution Engine will create a temporary table using a given query (provided in step 3). This has a performance advantage when creating and working with a Batch because the query will only be executed once (when the temporary table is created). If you would like to override this default behavior (for example, if you do not have permissions to create a temporary table), you may do so by setting ``create_temp_table`` to ``False`` in the Execution Engine configuration. You may also override the default behavior at runtime, on a case-by-case basis via the ``batch_spec_passthrough`` argument of a Runtime Batch Request (see step 3 for details).
 
@@ -216,7 +216,7 @@ This guide shows how to get a :ref:`batch <reference__core_concepts__batches>` o
 
         3. Construct a Runtime Batch Request
 
-          We will create a ``RuntimeBatchRequest`` and pass it our query via the ``runtime_parameters`` argument, under the ``query`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
+          We will create a Runtime Batch Request and pass it our query via the ``runtime_parameters`` argument, under the ``query`` key. The ``batch_identifiers`` argument is required and must be a non-empty dictionary containing all of the Batch Identifiers specified in your Runtime Data Connector configuration.
 
           By default, the associated SqlAlchemy Execution Engine will create a temporary table with your given query unless configured otherwise (see step 1). If you would like to control this behavior at runtime, instead of in configuration, you may do so by setting ``create_temp_table`` to ``False`` via the Runtime Batch Request's ``batch_spec_passthrough`` argument.
 
