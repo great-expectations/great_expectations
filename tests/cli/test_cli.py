@@ -311,11 +311,15 @@ def test_cli_config_not_found_raises_error_for_suite_scaffold(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "suite", "scaffold"], catch_exceptions=False
+        cli,
+        ["-c", "./", "--v3-api", "suite", "new", "--profile", "--interactive"],
+        catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
     result = runner.invoke(
-        cli, ["--v3-api", "suite", "scaffold"], catch_exceptions=False
+        cli,
+        ["--v3-api", "suite", "new", "--profile", "--interactive"],
+        catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 

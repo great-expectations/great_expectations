@@ -130,7 +130,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event,
             message=f"<red>{e}</red>",
         )
@@ -143,13 +143,13 @@ def _verify_checkpoint_does_not_exist(
     try:
         if checkpoint_name in context.list_checkpoints():
             toolkit.exit_with_failure_message_and_stats(
-                context,
-                usage_event,
-                f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
+                data_context=context,
+                usage_event=usage_event,
+                message=f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
             )
     except InvalidTopLevelConfigKeyError as e:
         toolkit.exit_with_failure_message_and_stats(
-            context, usage_event, f"<red>{e}</red>"
+            data_context=context, usage_event=usage_event, message=f"<red>{e}</red>"
         )
 
 
@@ -201,7 +201,7 @@ def checkpoint_delete(ctx, checkpoint):
         toolkit.send_usage_message(context, event="cli.checkpoint.delete", success=True)
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event,
             message=f"<red>{e}</red>",
         )
@@ -227,7 +227,7 @@ def checkpoint_run(ctx, checkpoint):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event,
             message=f"<red>{e}</red>",
         )
@@ -300,9 +300,9 @@ def checkpoint_script(ctx, checkpoint):
 
     if os.path.isfile(script_path):
         toolkit.exit_with_failure_message_and_stats(
-            context,
-            usage_event,
-            f"""<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
+            data_context=context,
+            usage_event=usage_event,
+            message=f"""<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
   - Existing file path: {script_path}""",
         )
 

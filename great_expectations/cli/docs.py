@@ -42,7 +42,7 @@ def docs_build(ctx, site_name=None, no_view=False):
     context: DataContext = ctx.obj.data_context
     if site_name is not None and site_name not in context.get_site_names():
         toolkit.exit_with_failure_message_and_stats(
-            context,
+            data_context=context,
             usage_event="cli.docs.build",
             message=f"<red>The specified site name `{site_name}` does not exist in this project.</red>",
         )
@@ -113,7 +113,7 @@ def docs_clean(ctx, site_name=None, all_sites=False):
 
     if (site_name is None and all_sites is False) or (site_name and all_sites):
         toolkit.exit_with_failure_message_and_stats(
-            context,
+            data_context=context,
             usage_event="cli.docs.clean",
             message="<red>Please specify either --all to clean all sites or a specific site using --site-name</red>",
         )
@@ -127,7 +127,7 @@ def docs_clean(ctx, site_name=None, all_sites=False):
         cli_message("<green>{}</green>".format("Cleaned data docs"))
     except DataContextError as de:
         toolkit.exit_with_failure_message_and_stats(
-            context,
+            data_context=context,
             usage_event="cli.docs.clean",
             message=f"<red>{de}</red>",
         )

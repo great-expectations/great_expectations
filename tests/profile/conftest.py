@@ -1,9 +1,11 @@
 import os
 import shutil
+from typing import Set, Tuple
 
 import pytest
 
 import great_expectations as ge
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 
 
@@ -51,7 +53,9 @@ def possible_expectations_set():
     }
 
 
-def get_set_of_columns_and_expectations_from_suite(suite):
+def get_set_of_columns_and_expectations_from_suite(
+    suite: ExpectationSuite,
+) -> Tuple[Set[str], Set[str]]:
     """
     Args:
         suite: An expectation suite
@@ -59,9 +63,9 @@ def get_set_of_columns_and_expectations_from_suite(suite):
     Returns:
         A tuple containing a set of columns and a set of expectations found in a suite
     """
-    columns = {
+    columns: Set[str] = {
         i.kwargs.get("column") for i in suite.expectations if i.kwargs.get("column")
     }
-    expectations = {i.expectation_type for i in suite.expectations}
+    expectations: Set[str] = {i.expectation_type for i in suite.expectations}
 
     return columns, expectations

@@ -8,12 +8,12 @@ from great_expectations import DataContext
 
 # noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
+from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
 )
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
@@ -452,7 +452,7 @@ def test_render_with_no_column_cells_without_batch_request(
             {
                 "id": "bigger-clone",
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n# TODO: <Alex>ALEX -- The instructions and link must be updated.</Alex>\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -793,7 +793,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
             {
                 "id": "provincial-termination",
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n# TODO: <Alex>ALEX -- The instructions and link must be updated.</Alex>\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
@@ -827,16 +827,14 @@ def test_notebook_execution_with_pandas_backend(
     - verify that no validations have happened
     - create the suite edit notebook by hijacking the private cli method
 
-
     We then:
     - execute that notebook (Note this will raise various errors like
     CellExecutionError if any cell in the notebook fails
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    # Since we'll run the notebook, we use a context with no data docs to avoid
-    # the renderer's default behavior of building and opening docs, which is not
-    # part of this test.
+    # Since we'll run the notebook, we use a context with no data docs to avoid the renderer's default
+    # behavior of building and opening docs, which is not part of this test.
     context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
@@ -858,11 +856,10 @@ def test_notebook_execution_with_pandas_backend(
     validator.save_expectation_suite(discard_failed_expectations=False)
 
     # Sanity check test setup
-    suite: ExpectationSuite = context.get_expectation_suite(
+    original_suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    original_suite: ExpectationSuite = suite
-    assert len(suite.expectations) == 3
+    assert len(original_suite.expectations) == 3
     assert context.list_expectation_suite_names() == [expectation_suite_name]
     assert context.list_datasources() == [
         {
@@ -944,19 +941,21 @@ def test_notebook_execution_with_pandas_backend(
     assert context.get_validation_result(expectation_suite_name="warning") == {}
 
     # Create notebook
+    # do not want to actually send usage_message, since the function call is not the result of actual usage
     _suite_edit_workflow(
         context=context,
         expectation_suite_name=expectation_suite_name,
-        no_jupyter=True,
-        batch_request=batch_request,
+        profile=False,
         usage_event="test_notebook_execution",
-        create_if_not_exist=False,
         interactive=False,
+        no_jupyter=True,
+        create_if_not_exist=False,
         datasource_name=None,
+        batch_request=batch_request,
+        additional_batch_request_args=None,
         suppress_usage_message=True,
-        # do not want to actually send usage_message, since the function call is not the result of actual usage
     )
-    edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
+    edit_notebook_path: str = os.path.join(uncommitted_dir, "edit_warning.ipynb")
     assert os.path.isfile(edit_notebook_path)
 
     run_notebook(
@@ -968,8 +967,8 @@ def test_notebook_execution_with_pandas_backend(
 
     # Assertions about output
     context = DataContext(context_root_dir=root_dir)
-    obs_validation_result = context.get_validation_result(
-        expectation_suite_name="warning"
+    obs_validation_result: ExpectationSuiteValidationResult = (
+        context.get_validation_result(expectation_suite_name="warning")
     )
     assert obs_validation_result.statistics == {
         "evaluated_expectations": 3,
@@ -977,7 +976,9 @@ def test_notebook_execution_with_pandas_backend(
         "unsuccessful_expectations": 1,
         "success_percent": 66.66666666666666,
     }
-    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
     suite["meta"].pop("citations", None)
     assert suite == original_suite
 
@@ -1084,7 +1085,7 @@ def test_notebook_execution_with_custom_notebooks(
             {
                 "id": "inner-alloy",
                 "cell_type": "markdown",
-                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n# TODO: <Alex>ALEX -- The instructions and link must be updated.</Alex>\nIf you decide not to save some expectations that you created, use [remove_expectation method](https://docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_asset/index.html?highlight=remove_expectation&utm_source=notebook&utm_medium=edit_expectations#great_expectations.data_asset.DataAsset.remove_expectation).\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
+                "source": "## Save & Review Your Expectations\n\nLet's save the expectation suite as a JSON file in the `great_expectations/expectations` directory of your project.\n\nLet's now rebuild your Data Docs, which helps you communicate about your data with both machines and humans.",
                 "metadata": {},
             },
             {
