@@ -32,6 +32,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         included_tables: Optional[list] = None,
         skip_inapplicable_tables: Optional[bool] = True,
         introspection_directives: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         InferredAssetDataConnector for connecting to data on a SQL database
@@ -53,6 +54,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 If True, tables that can't be successfully queried using sampling and splitter methods are excluded from inferred data_asset_names.
                 If False, the class will throw an error during initialization if any such tables are encountered.
             introspection_directives (Dict): Arguments passed to the introspection method to guide introspection
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         self._data_asset_name_prefix = data_asset_name_prefix
         self._data_asset_name_suffix = data_asset_name_suffix
@@ -72,6 +74,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             data_assets=None,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         # This cache will contain a "config" for each data_asset discovered via introspection.
