@@ -76,7 +76,7 @@ def test_suite_demo_deprecation_message(caplog, monkeypatch, empty_data_context)
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter(
+def test_suite_new_non_interactive_with_suite_name_prompted_default_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -147,7 +147,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_with_jupyter
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
+def test_suite_new_non_interactive_with_suite_name_prompted_custom_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -218,7 +218,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_with_jupyter(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
+def test_suite_new_non_interactive_with_suite_name_arg_custom_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -287,7 +287,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_with_jupyter(
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_non_interactive_with_suite_name_arg_custom_with_no_jupyter(
+def test_suite_new_non_interactive_with_suite_name_arg_custom_no_jupyter(
     mock_webbroser,
     mock_subprocess,
     caplog,
@@ -1563,7 +1563,209 @@ def test_suite_new_profile_on_existing_suite_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_profile_creates_notebook_and_opens_jupyter(
+def test_suite_new_profile_creates_notebook_no_jupyter(
+    mock_webbroser,
+    mock_subprocess,
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    """
+    We call the "suite new --profile" command
+
+    The command should:
+    - create a new notebook
+    - send a DataContext init success message
+    - send a new success message
+    """
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    with open(batch_request_file_path, "w") as json_file:
+        json.dump(batch_request, json_file)
+
+    mock_emit.reset_mock()
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        [
+            "--v3-api",
+            "suite",
+            "new",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
+            "--interactive",
+            "--batch-request",
+            f"{batch_request_file_path}",
+            "--profile",
+            "--no-jupyter",
+        ],
+        input="\n",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "Select a datasource" not in stdout
+    assert (
+        "Opening a notebook for you now to edit your expectation suite!" not in stdout
+    )
+    assert (
+        "If you wish to avoid this you can add the `--no-jupyter` flag." not in stdout
+    )
+
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook_path: str = os.path.join(
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    batch_request_string: str = (
+        str(BatchRequest(**batch_request))
+        .replace("{\n", "{\n  ")
+        .replace(",\n", ",\n  ")
+        .replace("\n}", ",\n}")
+    )
+    batch_request_string = fr"batch_request = {batch_request_string}"
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    profiler_code_cell: str = f"""\
+profiler = UserConfigurableProfiler(
+    profile_dataset=validator,
+    excluded_expectations=None,
+    ignored_columns=ignored_columns,
+    not_null_only=False,
+    primary_or_compound_key=False,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
+)
+suite = profiler.build_suite()"""
+    profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=profiler_code_cell,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        replacement_string="",
+    )
+
+    context = DataContext(context_root_dir=project_dir)
+    assert expectation_suite_name in context.list_expectation_suite_names()
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert suite.expectations == [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_table_columns_to_match_ordered_list",
+                "kwargs": {
+                    "column_list": [
+                        "Unnamed: 0",
+                        "Name",
+                        "PClass",
+                        "Age",
+                        "Sex",
+                        "Survived",
+                        "SexCode",
+                    ]
+                },
+                "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "kwargs": {"max_value": 1313, "min_value": 1313},
+                "meta": {},
+            }
+        ),
+    ]
+
+    assert mock_subprocess.call_count == 0
+
+    assert mock_webbroser.call_count == 0
+
+    assert mock_emit.call_count == 4
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_profile_creates_notebook_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
@@ -1757,76 +1959,4 @@ suite = profiler.build_suite()"""
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
-    )
-
-
-# TODO: <Alex>ALEX</Alex>
-@pytest.mark.xfail(
-    reason="TODO: <Alex>ALEX: This command is not yet implemented for the modern API</Alex>",
-    run=True,
-    strict=True,
-)
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-@mock.patch("subprocess.call", return_value=True, side_effect=None)
-def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
-    mock_subprocess, mock_emit, caplog, monkeypatch, titanic_data_context_stats_enabled
-):
-    """
-    We call the "suite scaffold --no-jupyter"
-
-    The command should:
-    - create a new notebook
-    - NOT open the notebook in jupyter
-    - tell the user to open the notebook
-    - send a DataContext init success message
-    - send a scaffold success message
-    """
-    context = titanic_data_context_stats_enabled
-    suite_name = "foo"
-    expected_notebook_path = os.path.join(
-        context.root_directory,
-        context.GE_EDIT_NOTEBOOK_DIR,
-        f"scaffold_{suite_name}.ipynb",
-    )
-    assert not os.path.isfile(expected_notebook_path)
-
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        [
-            "--v3-api",
-            "suite",
-            "scaffold",
-            suite_name,
-            "--no-jupyter",
-        ],
-        input="1\n1\n",
-        catch_exceptions=False,
-    )
-    stdout = result.output
-    assert result.exit_code == 0
-    assert os.path.isfile(expected_notebook_path)
-    assert (
-        f"To continue scaffolding this suite, run `jupyter notebook {expected_notebook_path}`"
-        in stdout
-    )
-
-    assert mock_subprocess.call_count == 0
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {"event": "cli.suite.scaffold", "event_payload": {}, "success": True}
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
