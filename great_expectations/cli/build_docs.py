@@ -8,6 +8,7 @@ from great_expectations.cli.pretty_printing import cli_message
 
 def build_docs(
     context: DataContext,
+    usage_stats_event: str,
     site_names: Optional[List[str]] = None,
     view: bool = True,
     assume_yes: bool = False,
@@ -25,7 +26,9 @@ def build_docs(
 
     cli_message(msg)
     if not assume_yes:
-        toolkit.confirm_proceed_or_exit()
+        toolkit.confirm_proceed_or_exit(
+            data_context=context, usage_stats_event=usage_stats_event
+        )
 
     cli_message("\nBuilding Data Docs...\n")
     context.build_data_docs(site_names=site_names)
