@@ -827,16 +827,14 @@ def test_notebook_execution_with_pandas_backend(
     - verify that no validations have happened
     - create the suite edit notebook by hijacking the private cli method
 
-
     We then:
     - execute that notebook (Note this will raise various errors like
     CellExecutionError if any cell in the notebook fails
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    # Since we'll run the notebook, we use a context with no data docs to avoid
-    # the renderer's default behavior of building and opening docs, which is not
-    # part of this test.
+    # Since we'll run the notebook, we use a context with no data docs to avoid the renderer's default
+    # behavior of building and opening docs, which is not part of this test.
     context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
@@ -943,6 +941,7 @@ def test_notebook_execution_with_pandas_backend(
     assert context.get_validation_result(expectation_suite_name="warning") == {}
 
     # Create notebook
+    # do not want to actually send usage_message, since the function call is not the result of actual usage
     _suite_edit_workflow(
         context=context,
         expectation_suite_name=expectation_suite_name,
@@ -955,7 +954,6 @@ def test_notebook_execution_with_pandas_backend(
         batch_request=batch_request,
         additional_batch_request_args=None,
         suppress_usage_message=True,
-        # do not want to actually send usage_message, since the function call is not the result of actual usage
     )
     edit_notebook_path: str = os.path.join(uncommitted_dir, "edit_warning.ipynb")
     assert os.path.isfile(edit_notebook_path)

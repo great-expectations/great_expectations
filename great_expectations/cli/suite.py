@@ -187,6 +187,7 @@ def _suite_new_workflow(
             datasource_name = batch_request.get("datasource_name")
 
         usage_event = "cli.suite.edit"  # or else we will be sending `cli.suite.new` which is incorrect
+        # do not want to actually send usage_message, since the function call is not the result of actual usage
         _suite_edit_workflow(
             context=context,
             expectation_suite_name=expectation_suite_name,
@@ -198,7 +199,8 @@ def _suite_new_workflow(
             datasource_name=datasource_name,
             batch_request=batch_request,
             additional_batch_request_args=additional_batch_request_args,
-            suppress_usage_message=True,  # do not want to actually send usage_message, since the function call is not the result of actual usage
+            suppress_usage_message=True,
+            assume_yes=False,
         )
     except (
         ge_exceptions.DataContextError,
@@ -308,6 +310,7 @@ options can be used.
         batch_request=batch_request,
         additional_batch_request_args=additional_batch_request_args,
         suppress_usage_message=False,
+        assume_yes=False,
     )
 
 
@@ -327,6 +330,7 @@ def _suite_edit_workflow(
         Dict[str, Union[str, int, Dict[str, Any]]]
     ] = None,
     suppress_usage_message: Optional[bool] = False,
+    assume_yes: Optional[bool] = False,
 ):
     # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
     # when called by _suite_new_workflow(), the flag will be set to True, otherwise it will default to False
@@ -405,9 +409,10 @@ def _suite_edit_workflow(
                     )
                 sys.exit(1)
 
-            toolkit.prompt_profile_to_create_a_suite(
-                data_context=context, expectation_suite_name=expectation_suite_name
-            )
+            if not assume_yes:
+                toolkit.prompt_profile_to_create_a_suite(
+                    data_context=context, expectation_suite_name=expectation_suite_name
+                )
 
             renderer: SuiteProfileNotebookRenderer = SuiteProfileNotebookRenderer(
                 context=context,
