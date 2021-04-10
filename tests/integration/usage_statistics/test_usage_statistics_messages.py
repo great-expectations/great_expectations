@@ -938,7 +938,10 @@ valid_usage_statistics_messages = {
             },
             {
                 "event": "cli.suite.edit.begin",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
                 "ge_version": "0.13.18.manual_testing",
             },
             {
