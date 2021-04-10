@@ -74,9 +74,9 @@ def prompt_profile_to_create_a_suite(
 Great Expectations will create a notebook, containing code cells that select from available columns in your dataset and
 generate expectations about them to demonstrate some examples of assertions you can make about your data.
 
-When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "{0:s}" here:
+When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "{:s}" here:
 
-  {1:s}
+  {:s}
 """.format(
             expectation_suite_name,
             data_context.stores[

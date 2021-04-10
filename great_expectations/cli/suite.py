@@ -44,6 +44,14 @@ def suite(ctx):
     # TODO consider moving this all the way up in to the CLIState constructor
     ctx.obj.data_context = context
 
+    usage_stats_prefix = f"cli.suite.{ctx.invoked_subcommand}"
+    toolkit.send_usage_message(
+        data_context=context,
+        event=f"{usage_stats_prefix}.begin",
+        success=True,
+    )
+    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
+
 
 @suite.command(name="new")
 @click.option(
@@ -92,7 +100,7 @@ def suite_new(ctx, expectation_suite, interactive, profile, batch_request, no_ju
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
     """
     context: DataContext = ctx.obj.data_context
-    usage_event: str = "cli.suite.new"
+    usage_event_end: str = ctx.obj.usage_event_end
 
     error_message: Optional[str] = None
 
@@ -104,7 +112,7 @@ def suite_new(ctx, expectation_suite, interactive, profile, batch_request, no_ju
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+            data_context=context, event=usage_event_end, success=False
         )
         sys.exit(1)
 
@@ -114,7 +122,7 @@ def suite_new(ctx, expectation_suite, interactive, profile, batch_request, no_ju
         interactive=interactive,
         profile=profile,
         no_jupyter=no_jupyter,
-        usage_event=usage_event,
+        usage_event=usage_event_end,
         batch_request=batch_request,
     )
 
@@ -186,7 +194,8 @@ def _suite_new_workflow(
         if batch_request:
             datasource_name = batch_request.get("datasource_name")
 
-        usage_event = "cli.suite.edit"  # or else we will be sending `cli.suite.new` which is incorrect
+        # This usage event is suppressed via suppress_usage_message but here because usage_event is not optional
+        usage_event = "cli.suite.edit.begin"  # or else we will be sending `cli.suite.new` which is incorrect
         # do not want to actually send usage_message, since the function call is not the result of actual usage
         _suite_edit_workflow(
             context=context,
@@ -271,7 +280,7 @@ def suite_edit(
     Read more about specifying batches of data in the documentation: https://docs.greatexpectations.io/
     """
     context: DataContext = ctx.obj.data_context
-    usage_event: str = "cli.suite.edit"
+    usage_event_end: str = ctx.obj.usage_event_end
 
     error_message: Optional[str] = None
 
@@ -290,7 +299,7 @@ options can be used.
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+            data_context=context, event=usage_event_end, success=False
         )
         sys.exit(1)
 
@@ -302,7 +311,7 @@ options can be used.
         context=context,
         expectation_suite_name=expectation_suite,
         profile=False,
-        usage_event=usage_event,
+        usage_event=usage_event_end,
         interactive=interactive,
         no_jupyter=no_jupyter,
         create_if_not_exist=False,
@@ -482,8 +491,10 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 def suite_demo(ctx):
     """This command is not supported in the v3 (Batch Request) API."""
     context: DataContext = ctx.obj.data_context
-    usage_event: str = "cli.suite.demo"
-    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
+    usage_event_end: str = ctx.obj.usage_event_end
+    toolkit.send_usage_message(
+        data_context=context, event=usage_event_end, success=True
+    )
     cli_message(
         string="This command is not supported in the v3 (Batch Request) API. Please use `suite new` instead."
     )
@@ -497,18 +508,18 @@ def suite_delete(ctx, suite):
     Delete an expectation suite from the expectation store.
     """
     context: DataContext = ctx.obj.data_context
-    usage_event: str = "cli.suite.delete"
+    usage_event_end: str = ctx.obj.usage_event_end
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+            data_context=context, event=usage_event_end, success=False
         )
         raise e
     if not suite_names:
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
-            usage_event=usage_event,
+            usage_event=usage_event_end,
             suppress_usage_message=False,
             message="<red>No expectation suites found in the project.</red>",
         )
@@ -516,18 +527,25 @@ def suite_delete(ctx, suite):
     if suite not in suite_names:
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
-            usage_event=usage_event,
+            usage_event=usage_event_end,
             suppress_usage_message=False,
             message=f"<red>No expectation suite named {suite} found.</red>",
         )
 
-    if not (ctx.obj.assume_yes or toolkit.confirm_proceed_or_exit(exit_on_no=False)):
+    if not (
+        ctx.obj.assume_yes
+        or toolkit.confirm_proceed_or_exit(
+            exit_on_no=False, data_context=context, usage_stats_event=usage_event_end
+        )
+    ):
         cli_message(string=f"Suite `{suite}` was not deleted.")
         sys.exit(0)
 
     context.delete_expectation_suite(suite)
     cli_message(string=f"Deleted the expectation suite named: {suite}")
-    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
+    toolkit.send_usage_message(
+        data_context=context, event=usage_event_end, success=True
+    )
 
 
 @suite.command(name="list")
@@ -535,12 +553,12 @@ def suite_delete(ctx, suite):
 def suite_list(ctx):
     """Lists available Expectation Suites."""
     context: DataContext = ctx.obj.data_context
-    usage_event: str = "cli.suite.list"
+    usage_event_end: str = ctx.obj.usage_event_end
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+            data_context=context, event=usage_event_end, success=False
         )
         raise e
 
@@ -550,7 +568,7 @@ def suite_list(ctx):
     if len(suite_names_styled) == 0:
         cli_message(string="No Expectation Suites found")
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=True
+            data_context=context, event=usage_event_end, success=True
         )
         return
 
@@ -562,7 +580,9 @@ def suite_list(ctx):
     cli_message_list(
         string_list=suite_names_styled, list_intro_string=list_intro_string
     )
-    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
+    toolkit.send_usage_message(
+        data_context=context, event=usage_event_end, success=True
+    )
 
 
 def _get_notebook_path(context, notebook_name):
