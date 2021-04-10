@@ -915,17 +915,25 @@ valid_usage_statistics_messages = {
         message_stubs=[
             {
                 "event": "cli.suite.edit",
-                "event_payload": {},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e"
+                },
                 "ge_version": "0.11.9.manual_testing",
             },
             {
                 "event": "cli.suite.edit",
-                "event_payload": {"api_version": "v2"},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v2",
+                },
                 "ge_version": "0.13.0.manual_testing",
             },
             {
                 "event": "cli.suite.edit",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
                 "ge_version": "0.13.0.manual_testing",
             },
             {
