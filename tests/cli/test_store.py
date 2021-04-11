@@ -1,6 +1,6 @@
 import os
+from unittest import mock
 
-import mock
 from click.testing import CliRunner
 
 from great_expectations.cli import cli
@@ -31,18 +31,25 @@ def test_store_list_stores(
     ]:
         assert expected_output in result.output
 
-    assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.store.list",
+                "event": "cli.store.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.store.list.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
     ]
+    assert mock_emit.call_count == 3
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
