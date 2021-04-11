@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Dict, List, Optional
 
 from great_expectations.core.batch import (
@@ -28,6 +29,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         datasource_name (str): The name of the Datasource that contains it
         execution_engine (ExecutionEngine): An ExecutionEngine
         data_assets (str): data_assets
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
     def __init__(
@@ -36,6 +38,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
         data_assets: Optional[Dict[str, dict]] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         if data_assets is None:
             data_assets = {}
@@ -45,6 +48,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
     @property
@@ -193,9 +197,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
 
         data_asset_name: str = batch_definition.data_asset_name
         if (
@@ -205,9 +206,20 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 self.data_assets[data_asset_name].get("batch_spec_passthrough"), dict
             )
         ):
-            batch_spec.update(
+            # batch_spec_passthrough from data_asset
+            batch_spec_passthrough = deepcopy(
                 self.data_assets[data_asset_name]["batch_spec_passthrough"]
             )
+            batch_definition_batch_spec_passthrough = (
+                deepcopy(batch_definition.batch_spec_passthrough) or {}
+            )
+            # batch_spec_passthrough from Batch Definition supercedes batch_spec_passthrough from data_asset
+            batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
+            batch_definition.batch_spec_passthrough = batch_spec_passthrough
+
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
 
         return SqlAlchemyDatasourceBatchSpec(batch_spec)
 
