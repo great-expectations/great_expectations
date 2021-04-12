@@ -9,6 +9,7 @@ from collections.abc import Mapping
 from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
+import dateutil.parser
 import numpy as np
 import pandas as pd
 from IPython import get_ipython
@@ -368,20 +369,25 @@ def get_datetime_string_from_strftime_format(
 
 
 def parse_string_to_datetime(
-    datetime_string: str, datetime_format_string: str
+    datetime_string: str, datetime_format_string: Optional[str] = None
 ) -> datetime.date:
     if not isinstance(datetime_string, str):
         raise ge_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
             """
         )
+
+    if not datetime_format_string:
+        return dateutil.parser.parse(timestr=datetime_string)
+
     if datetime_format_string and not isinstance(datetime_format_string, str):
         raise ge_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").
             """
         )
-    return datetime.datetime.strptime(datetime_string, datetime_format_string).date()
+
+    return datetime.datetime.strptime(datetime_string, datetime_format_string)
 
 
 def datetime_to_int(dt: datetime.date) -> int:

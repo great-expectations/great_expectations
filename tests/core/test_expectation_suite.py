@@ -328,9 +328,9 @@ def test_get_citations_not_sorted(baseline_suite):
         properties_dict.pop("interactive", None)
 
     assert properties_dict_list == [
-        {"citation_date": "20000101T000000.000000Z", "comment": "first"},
-        {"citation_date": "20000103T000000.000000Z", "comment": "third"},
-        {"citation_date": "20000102T000000.000000Z", "comment": "second"},
+        {"citation_date": "2000-01-01T00:00:00.000000Z", "comment": "first"},
+        {"citation_date": "2000-01-03T00:00:00.000000Z", "comment": "third"},
+        {"citation_date": "2000-01-02T00:00:00.000000Z", "comment": "second"},
     ]
 
 
@@ -349,15 +349,15 @@ def test_get_citations_sorted(baseline_suite):
 
     assert properties_dict_list == [
         {
-            "citation_date": "20000101T000000.000000Z",
+            "citation_date": "2000-01-01T00:00:00.000000Z",
             "comment": "first",
         },
         {
-            "citation_date": "20000102T000000.000000Z",
+            "citation_date": "2000-01-02T00:00:00.000000Z",
             "comment": "second",
         },
         {
-            "citation_date": "20000103T000000.000000Z",
+            "citation_date": "2000-01-03T00:00:00.000000Z",
             "comment": "third",
         },
     ]
@@ -383,12 +383,12 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
 
     assert properties_dict_list == [
         {
-            "citation_date": "20000101T000000.000000Z",
+            "citation_date": "2000-01-01T00:00:00.000000Z",
             "batch_kwargs": {"path": "first"},
             "comment": "first",
         },
         {
-            "citation_date": "20010101T000000.000000Z",
+            "citation_date": "2001-01-01T00:00:00.000000Z",
             "batch_kwargs": {"path": "second"},
             "comment": "second",
         },

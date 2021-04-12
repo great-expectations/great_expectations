@@ -15,6 +15,7 @@ from great_expectations.core.expectation_configuration import (
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
+    get_datetime_string_from_strftime_format,
     nested_update,
     parse_string_to_datetime,
 )
@@ -89,21 +90,19 @@ class ExpectationSuite(SerializableDictDot):
         batch_markers: Optional[dict] = None,
         batch_parameters: Optional[dict] = None,
         citation_date: Optional[Union[str, datetime.datetime]] = None,
-        date_format_string: Optional[str] = "%Y-%m-%d",
     ):
         if "citations" not in self.meta:
             self.meta["citations"] = []
 
         if isinstance(citation_date, str):
-            citation_date = parse_string_to_datetime(
-                datetime_string=citation_date,
-                datetime_format_string=date_format_string,
-            )
+            citation_date = parse_string_to_datetime(datetime_string=citation_date)
 
         citation_date = citation_date or datetime.datetime.now(datetime.timezone.utc)
         self.meta["citations"].append(
             {
-                "citation_date": citation_date.strftime("%Y%m%dT%H%M%S.%fZ"),
+                "citation_date": get_datetime_string_from_strftime_format(
+                    format_str="%Y-%m-%dT%H:%M:%S.%fZ", datetime_obj=citation_date
+                ),
                 "batch_request": batch_request,
                 "batch_definition": batch_definition,
                 "batch_spec": batch_spec,
