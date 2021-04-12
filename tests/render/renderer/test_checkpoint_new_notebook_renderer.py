@@ -115,7 +115,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\n\nyaml = YAML()\ncontext = ge.get_context()",
+            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = ge.get_context()",
             "outputs": [],
         },
     ]
