@@ -30,8 +30,6 @@ def test_notebook_execution_with_pandas_backend(
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    # Since we'll run the notebook, we use a context with no data docs to avoid the renderer's default
-    # behavior of building and opening docs, which is not part of this test.
     context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
