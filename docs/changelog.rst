@@ -6,13 +6,17 @@ Changelog
 
 Develop
 -----------------
+
+* [ENHANCEMENT] Improve support for quantiles calculation in Athena
+=======
 * [ENHANCEMENT] V3 API CLI docs commands have better error messages and more consistent short flags
 * [ENHANCEMENT] Update all Data Connectors to allow for `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `DataConnector.build_batch_spec` to use `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `ConfiguredAssetSqlDataConnector.build_batch_spec` and `ConfiguredAssetFilePathDataConnector.build_batch_spec` to properly process `Asset.batch_spec_passthrough`
 * [ENHANCEMENT] Update `SqlAlchemyExecutionEngine.get_batch_data_and_markers` to handle `create_temp_table` in `RuntimeQueryBatchSpec`
 * [ENHANCEMENT] Usage stats messages for the v3 API CLI are now sent before and after the command runs # 2661
-* [ENHANCEMENT} Update the datasource new notebook for improved data asset inference
+* [ENHANCEMENT] Update the `datasource new` notebook for improved data asset inference
+* [ENHANCEMENT] Made stylistic improvements to the `checkpoint new` notebook
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
@@ -70,7 +74,7 @@ Develop
 * [BUGFIX] force azure to set content_type='text/html' if the file is HTML #2539 (thanks @benoitLebreton-perso)
 * [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 in requirements-dev-sqlalchemy.txt #2547
 * [DOCS] Fix documentation links generated within template #2542 (thanks @thejasraju)
-* [MAINTENANCE] Remove deprecated automerge config #2492
+* [MAINTENANCE] Remove deprecated automerge config #249
 
 0.13.13
 -----------------
