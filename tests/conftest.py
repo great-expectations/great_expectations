@@ -4,8 +4,7 @@ import locale
 import os
 import random
 import shutil
-from types import ModuleType
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -35,12 +34,13 @@ from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.self_check.util import (
-    LockingConnectionCheck,
+    build_test_backends_list as build_test_backends_list_v3,
+)
+from great_expectations.self_check.util import (
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
-from great_expectations.util import import_library_module, is_library_loadable
 from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
@@ -103,143 +103,34 @@ def pytest_addoption(parser):
 
 
 def build_test_backends_list(metafunc):
-    test_backends = ["PandasDataset"]
-    no_spark = metafunc.config.getoption("--no-spark")
-    if not no_spark:
-        try:
-            import pyspark
-            from pyspark.sql import SparkSession
-        except ImportError:
-            raise ValueError("spark tests are requested, but pyspark is not installed")
-        test_backends += ["SparkDFDataset"]
-    no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
-    if not no_sqlalchemy:
-        test_backends += ["sqlite"]
-
-        sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
-
-        no_postgresql = metafunc.config.getoption("--no-postgresql")
-        if not (sa is None or no_postgresql):
-            ###
-            # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
-            # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
-            # round trip compared to NUMERIC, which stays as a python DECIMAL
-
-            # Be sure to ensure that tests (and users!) understand that subtlety,
-            # which can be important for distributional expectations, for example.
-            ###
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-            checker = LockingConnectionCheck(sa, connection_string)
-            if checker.is_valid() is True:
-                test_backends += ["postgresql"]
-            else:
-                raise ValueError(
-                    f"backend-specific tests are requested, but unable "
-                    f"to connect to the database at {connection_string}"
-                )
-        mysql = metafunc.config.getoption("--mysql")
-        if sa and mysql:
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            try:
-                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mysql tests are requested, but unable to connect to the mysql database at "
-                    f"'mysql+pymysql://root@{db_hostname}/test_ci'"
-                )
-            test_backends += ["mysql"]
-        mssql = metafunc.config.getoption("--mssql")
-        if sa and mssql:
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            try:
-                engine = sa.create_engine(
-                    f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
-                    # echo=True,
-                )
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mssql tests are requested, but unable to connect to the mssql database at "
-                    f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
-                )
-            test_backends += ["mssql"]
-    return test_backends
+    test_backend_names: List[str] = build_test_backends_list_cfe(metafunc)
+    backend_name_class_name_map: Dict[str, str] = {
+        "pandas": "PandasDataset",
+        "spark": "SparkDFDataset",
+    }
+    backend_name: str
+    return [
+        (backend_name_class_name_map.get(backend_name) or backend_name)
+        for backend_name in test_backend_names
+    ]
 
 
 def build_test_backends_list_cfe(metafunc):
-    test_backends = ["pandas"]
-    no_spark = metafunc.config.getoption("--no-spark")
-    if not no_spark:
-        try:
-            import pyspark
-            from pyspark.sql import SparkSession
-        except ImportError:
-            raise ValueError("spark tests are requested, but pyspark is not installed")
-        test_backends += ["spark"]
-    no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
-    if not no_sqlalchemy:
-        test_backends += ["sqlite"]
-
-        sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
-
-        no_postgresql = metafunc.config.getoption("--no-postgresql")
-        if not (sa is None or no_postgresql):
-            ###
-            # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
-            # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
-            # round trip compared to NUMERIC, which stays as a python DECIMAL
-
-            # Be sure to ensure that tests (and users!) understand that subtlety,
-            # which can be important for distributional expectations, for example.
-            ###
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-            checker = LockingConnectionCheck(sa, connection_string)
-            if checker.is_valid() is True:
-                test_backends += ["postgresql"]
-            else:
-                raise ValueError(
-                    f"backend-specific tests are requested, but unable to connect to the database at "
-                    f"{connection_string}"
-                )
-        mysql = metafunc.config.getoption("--mysql")
-        if sa and mysql:
-            try:
-                db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mysql tests are requested, but unable to connect to the mysql database at "
-                    f"'mysql+pymysql://root@{db_hostname}/test_ci'"
-                )
-            test_backends += ["mysql"]
-        mssql = metafunc.config.getoption("--mssql")
-        if sa and mssql:
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            try:
-                engine = sa.create_engine(
-                    f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
-                    # echo=True,
-                )
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mssql tests are requested, but unable to connect to the mssql database at "
-                    f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
-                )
-            test_backends += ["mssql"]
-    return test_backends
+    include_pandas: bool = True
+    include_spark: bool = not metafunc.config.getoption("--no-spark")
+    include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")
+    include_postgresql = not metafunc.config.getoption("--no-postgresql")
+    include_mysql: bool = metafunc.config.getoption("--mysql")
+    include_mssql: bool = metafunc.config.getoption("--mssql")
+    test_backend_names: List[str] = build_test_backends_list_v3(
+        include_pandas=include_pandas,
+        include_spark=include_spark,
+        include_sqlalchemy=include_sqlalchemy,
+        include_postgresql=include_postgresql,
+        include_mysql=include_mysql,
+        include_mssql=include_mssql,
+    )
+    return test_backend_names
 
 
 def pytest_generate_tests(metafunc):

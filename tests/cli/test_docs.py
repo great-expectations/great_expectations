@@ -1,6 +1,6 @@
 import os
+from unittest import mock
 
-import mock
 import pytest
 from click.testing import CliRunner
 
@@ -42,6 +42,20 @@ def test_docs_help_output(caplog):
             1,
         ),
         ("--v3-api --assume-yes docs build -sn local_site", None, "", 1),
+        # Answer "n" to prompt
+        ("--v3-api docs build", "n\n", "Would you like to proceed? [Y/n]", 0),
+        (
+            "--v3-api docs build --site-name local_site",
+            "n\n",
+            "Would you like to proceed? [Y/n]",
+            0,
+        ),
+        (
+            "--v3-api docs build -sn local_site",
+            "n\n",
+            "Would you like to proceed? [Y/n]",
+            0,
+        ),
         # All the same but with --no-view
         ("--v3-api docs build --no-view", "\n", "Would you like to proceed? [Y/n]", 0),
         ("--v3-api --assume-yes docs build --no-view", None, "", 0),
@@ -118,8 +132,9 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
     assert result.exit_code == 0
     assert "The following Data Docs sites will be built" in stdout
     assert "local_site" in stdout
-    assert "Building Data Docs..." in stdout
-    assert "Done building Data Docs" in stdout
+    if not cli_input == "n\n":
+        assert "Building Data Docs..." in stdout
+        assert "Done building Data Docs" in stdout
     assert expected_stdout in stdout
     assert mock_webbrowser.call_count == expected_browser_call_count
 
@@ -129,12 +144,22 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
         ),
         mock.call(
             {
-                "event_payload": {},
-                "event": "data_context.build_data_docs",
+                "event": "cli.docs.build.begin",
+                "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
     ]
+    if not cli_input == "n\n":
+        expected_usage_stats_messages.append(
+            mock.call(
+                {
+                    "event_payload": {},
+                    "event": "data_context.build_data_docs",
+                    "success": True,
+                }
+            ),
+        )
     if expected_browser_call_count == 1:
         expected_usage_stats_messages.append(
             mock.call(
@@ -145,11 +170,14 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
                 }
             ),
         )
+    build_docs_end_event_payload = {"api_version": "v3"}
+    if cli_input == "n\n":
+        build_docs_end_event_payload.update({"cancelled": True})
     expected_usage_stats_messages.append(
         mock.call(
             {
-                "event": "cli.docs.build",
-                "event_payload": {"api_version": "v3"},
+                "event": "cli.docs.build.end",
+                "event_payload": build_docs_end_event_payload,
                 "success": True,
             }
         ),
@@ -160,21 +188,17 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
     obs_urls = context.get_docs_sites_urls()
 
     assert len(obs_urls) == 1
-    assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-        in obs_urls[0]["site_url"]
-    )
-    site_dir = os.path.join(
-        root_dir, context.GE_UNCOMMITTED_DIR, "data_docs", "local_site"
-    )
-    assert os.path.isdir(site_dir)
-    # Note the fixture has no expectations or validations - only check the index
-    assert os.path.isfile(os.path.join(site_dir, "index.html"))
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
+    if not cli_input == "n\n":
+        assert (
+            "great_expectations/uncommitted/data_docs/local_site/index.html"
+            in obs_urls[0]["site_url"]
+        )
+        site_dir = os.path.join(
+            root_dir, context.GE_UNCOMMITTED_DIR, "data_docs", "local_site"
+        )
+        assert os.path.isdir(site_dir)
+        # Note the fixture has no expectations or validations - only check the index
+        assert os.path.isfile(os.path.join(site_dir, "index.html"))
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -235,6 +259,28 @@ def context_with_two_sites(titanic_data_context_stats_enabled_config_version_3):
             ["team_site"],
         ),
         ("--v3-api --assume-yes docs build -sn team_site", None, "", 1, ["team_site"]),
+        # Answer "n" to prompt
+        (
+            "--v3-api docs build",
+            "n\n",
+            "Would you like to proceed? [Y/n]",
+            0,
+            [],
+        ),
+        (
+            "--v3-api docs build --site-name team_site",
+            "n\n",
+            "Would you like to proceed? [Y/n]",
+            0,
+            [],
+        ),
+        (
+            "--v3-api docs build -sn team_site",
+            "n\n",
+            "Would you like to proceed? [Y/n]",
+            0,
+            [],
+        ),
         # All the same but with --no-view
         (
             "--v3-api docs build --no-view",
@@ -312,8 +358,9 @@ def test_docs_build_happy_paths_build_site_on_multiple_site_context(
 
     assert result.exit_code == 0
     assert "The following Data Docs sites will be built" in stdout
-    assert "Building Data Docs..." in stdout
-    assert "Done building Data Docs" in stdout
+    if not cli_input == "n\n":
+        assert "Building Data Docs..." in stdout
+        assert "Done building Data Docs" in stdout
     assert expected_stdout in stdout
     assert mock_webbrowser.call_count == expected_browser_call_count
 
@@ -323,12 +370,22 @@ def test_docs_build_happy_paths_build_site_on_multiple_site_context(
         ),
         mock.call(
             {
-                "event_payload": {},
-                "event": "data_context.build_data_docs",
+                "event": "cli.docs.build.begin",
+                "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
     ]
+    if not cli_input == "n\n":
+        expected_usage_stats_messages.append(
+            mock.call(
+                {
+                    "event_payload": {},
+                    "event": "data_context.build_data_docs",
+                    "success": True,
+                }
+            ),
+        )
     for _ in range(expected_browser_call_count):
         expected_usage_stats_messages.append(
             mock.call(
@@ -339,11 +396,16 @@ def test_docs_build_happy_paths_build_site_on_multiple_site_context(
                 }
             ),
         )
+
+    build_docs_end_event_payload = {"api_version": "v3"}
+    if cli_input == "n\n":
+        build_docs_end_event_payload.update({"cancelled": True})
+
     expected_usage_stats_messages.append(
         mock.call(
             {
-                "event": "cli.docs.build",
-                "event_payload": {"api_version": "v3"},
+                "event": "cli.docs.build.end",
+                "event_payload": build_docs_end_event_payload,
                 "success": True,
             }
         ),
@@ -359,11 +421,6 @@ def test_docs_build_happy_paths_build_site_on_multiple_site_context(
         assert os.path.isdir(site_dir)
         # Note the fixture has no expectations or validations - only check the index
         assert os.path.isfile(os.path.join(site_dir, "index.html"))
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -413,14 +470,21 @@ def test_docs_list(
     assert "1 Data Docs site configured:" in stdout
     assert "local_site" in stdout
 
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.docs.list",
+                "event": "cli.docs.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.docs.list.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -451,27 +515,31 @@ def context_with_site_built(titanic_data_context_stats_enabled_config_version_3)
 
 
 @pytest.mark.parametrize(
-    "invocation,expected_error,expected_usage_event",
+    "invocation,expected_error,expected_usage_event_begin,expected_usage_event_end",
     [
         (
             "--v3-api docs clean",
             "Please specify either --all to clean all sites or a specific site using --site-name",
-            "cli.docs.clean",
+            "cli.docs.clean.begin",
+            "cli.docs.clean.end",
         ),
         (
             "--v3-api docs clean --site-name local_site --all",
             "Please specify either --all to clean all sites or a specific site using --site-name",
-            "cli.docs.clean",
+            "cli.docs.clean.begin",
+            "cli.docs.clean.end",
         ),
         (
             "--v3-api docs clean --site-name fake_site",
             "The specified site name `fake_site` does not exist in this project.",
-            "cli.docs.clean",
+            "cli.docs.clean.begin",
+            "cli.docs.clean.end",
         ),
         (
             "--v3-api docs build --site-name fake_site",
             "The specified site name `fake_site` does not exist in this project.",
-            "cli.docs.build",
+            "cli.docs.build.begin",
+            "cli.docs.build.end",
         ),
     ],
 )
@@ -484,7 +552,8 @@ def test_docs_clean_and_build_raises_helpful_errors(
     mock_webbrowser,
     invocation,
     expected_error,
-    expected_usage_event,
+    expected_usage_event_begin,
+    expected_usage_event_end,
     caplog,
     monkeypatch,
     context_with_site_built,
@@ -508,14 +577,21 @@ def test_docs_clean_and_build_raises_helpful_errors(
     assert result.exit_code == 1
     assert expected_error in stdout
     assert "Cleaned data docs" not in stdout
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": expected_usage_event,
+                "event": expected_usage_event_begin,
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": expected_usage_event_end,
                 "event_payload": {"api_version": "v3"},
                 "success": False,
             }
@@ -554,14 +630,21 @@ def test_docs_clean_happy_paths_clean_expected_sites(
     stdout = result.stdout
     assert result.exit_code == 0
     assert "Cleaned data docs" in stdout
-    assert mock_emit.call_count == 2
+    assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.docs.clean",
+                "event": "cli.docs.clean.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.docs.clean.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }

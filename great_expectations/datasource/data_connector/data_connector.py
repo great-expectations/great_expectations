@@ -1,5 +1,6 @@
 import logging
 import random
+from copy import deepcopy
 from typing import Any, List, Optional, Tuple
 
 from great_expectations.core.batch import (
@@ -43,6 +44,7 @@ class DataConnector:
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         Base class for DataConnectors
@@ -51,7 +53,7 @@ class DataConnector:
             name (str): required name for DataConnector
             datasource_name (str): required name for datasource
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
-
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         self._name = name
         self._datasource_name = datasource_name
@@ -61,6 +63,11 @@ class DataConnector:
         self._data_references_cache = {}
 
         self._data_context_root_directory = None
+        self._batch_spec_passthrough = batch_spec_passthrough or {}
+
+    @property
+    def batch_spec_passthrough(self) -> dict:
+        return self._batch_spec_passthrough
 
     @property
     def name(self) -> str:
@@ -116,9 +123,14 @@ class DataConnector:
                 batch_definition=batch_definition
             )
         )
-        batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
-        if isinstance(batch_spec_passthrough, dict):
-            batch_spec_params.update(batch_spec_passthrough)
+        # batch_spec_passthrough via Data Connector config
+        batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
+
+        # batch_spec_passthrough from batch_definition supercedes batch_spec_passthrough from Data Connector config
+        if isinstance(batch_definition.batch_spec_passthrough, dict):
+            batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
+
+        batch_spec_params.update(batch_spec_passthrough)
         batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
         return batch_spec
 
