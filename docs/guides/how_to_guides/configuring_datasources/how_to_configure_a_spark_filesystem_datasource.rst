@@ -83,6 +83,16 @@ Steps
 
                     Would you like to proceed? [Y/n]:
 
+            **Note** Additional options are available for more fine-grained customization of Spark datasource. For example, you could add the following ``reader_options`` to the great_expectations.yml file to have Spark read in the first line of the CSV file as column names.
+
+            .. code-block:: bash
+
+                  subdir_reader:
+                    class_name: SubdirReaderBatchKwargsGenerator
+                    base_directory: /path/to/directory/containing/your/data/files
+                    reader_options:
+                      header=True
+
         #. **Wait for confirmation**
 
             If all goes well, it will be followed by the message:
@@ -177,6 +187,7 @@ Additional notes
 
                 Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``Datasource``, with a ``InferredFilesystemDataConnector`` and ``SparkDFExecutionEngine``.
 
+                **Note** Additional options are available through the ``batch_spec_passthrough`` parameter for a more fine-grained customization of the Spark datasource.  Here we configure Spark to read in the first line of the CSV file as column names by setting ``header=True``.
 
                 .. code-block:: python
 
@@ -191,6 +202,10 @@ Additional notes
                         datasource_name: {datasource_name}
                         class_name: InferredAssetFilesystemDataConnector
                         base_directory: test_directory/
+                        # batch_spec_passthrough can be used to configure reader_options.
+                        batch_spec_passthrough:
+                          reader_options:
+                            header: True
                         default_regex:
                           group_names: data_asset_name
                           pattern: (.*)
@@ -257,6 +272,7 @@ Additional Notes
 
 #.
     For the V3 (Batch Request) API, relative path locations should be specified from the perspective of the ``great_expectations/`` directory.
+
 
 --------
 Comments

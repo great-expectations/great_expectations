@@ -15,16 +15,18 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
+from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.self_check.util import build_spark_engine
 from great_expectations.validator.validation_graph import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
+from tests.test_utils import create_files_in_directory
 
 try:
     pyspark = pytest.importorskip("pyspark")
     # noinspection PyPep8Naming
     import pyspark.sql.functions as F
-    from pyspark.sql.types import IntegerType, StringType
+    from pyspark.sql.types import IntegerType, Row, StringType
 except ImportError:
     pyspark = None
     F = None
@@ -105,6 +107,36 @@ def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     # Ensuring that other way around works as well - reader_method should always override path
     fn_new = engine._get_reader_fn(reader=spark_session.read, reader_method="csv")
     assert "<bound method DataFrameReader.csv" in str(fn_new)
+
+
+def test_reader_fn_parameters(
+    spark_session, basic_spark_df_execution_engine, tmp_path_factory
+):
+    base_directory = str(tmp_path_factory.mktemp("test_csv"))
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "test-A.csv",
+        ],
+    )
+    test_df_small_csv_path = base_directory + "/test-A.csv"
+    engine = basic_spark_df_execution_engine
+    fn = engine._get_reader_fn(reader=spark_session.read, path=test_df_small_csv_path)
+    assert "<bound method DataFrameReader.csv" in str(fn)
+
+    test_sparkdf_with_header_param = basic_spark_df_execution_engine.get_batch_data(
+        PathBatchSpec(
+            path=test_df_small_csv_path,
+            data_asset_name="DATA_ASSET",
+            reader_options={"header": True},
+        )
+    ).dataframe
+    assert test_sparkdf_with_header_param.head() == Row(x="1", y="2")
+
+    test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
+        PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
+    ).dataframe
+    assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
 
 
 def test_get_compute_domain_with_no_domain_kwargs(
