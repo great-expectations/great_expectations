@@ -5,7 +5,14 @@ from typing import List
 
 import pandas as pd
 import pytest
-from pyspark import Row
+
+try:
+    pyspark = pytest.importorskip("pyspark")
+    from pyspark.sql.types import Row
+except ImportError:
+    pyspark = None
+    Row = None
+
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
@@ -119,64 +126,6 @@ data_connectors:
         config_defaults={"module_name": "great_expectations.datasource"},
     )
     return basic_datasource
-
-
-def test_spark_with_batch_spec_passthrough(tmp_path_factory):
-    base_directory: str = str(
-        tmp_path_factory.mktemp("basic_spark_datasource_v013_filesystem_data_connector")
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "test-A.csv",
-        ],
-    )
-    basic_datasource: Datasource = instantiate_class_from_config(
-        yaml.load(
-            f"""
-        class_name: Datasource
-    
-        execution_engine:
-            class_name: SparkDFExecutionEngine
-            spark_config:
-                spark.master: local[*]
-                spark.executor.memory: 6g
-                spark.driver.memory: 6g
-                spark.ui.showConsoleProgress: false
-                spark.sql.shuffle.partitions: 2
-                spark.default.parallelism: 4
-        data_connectors:
-            simple_filesystem_data_connector:
-                class_name: InferredAssetFilesystemDataConnector
-                base_directory: {base_directory}
-                batch_spec_passthrough:
-                    reader_options:
-                        header: True 
-                glob_directive: '*'
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                    - data_asset_name
-            """,
-        ),
-        runtime_environment={"name": "my_datasource"},
-        config_defaults={"module_name": "great_expectations.datasource"},
-    )
-
-    data_connector_name: str = "simple_filesystem_data_connector"
-    data_asset_name: str = "test-A"
-
-    batch_request: dict = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
-    }
-
-    batch = basic_datasource.get_batch_list_from_batch_request(
-        BatchRequest(**batch_request)
-    )
-    # check that the batch_spec_passthrough has worked
-    assert batch[0].data.dataframe.head() == Row(x="1", y="2")
 
 
 @pytest.fixture
@@ -927,3 +876,61 @@ data_connectors:
     #     ]["n_rows"]
     #     == 10
     # )
+
+
+def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
+    base_directory: str = str(
+        tmp_path_factory.mktemp("basic_spark_datasource_v013_filesystem_data_connector")
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "test-A.csv",
+        ],
+    )
+    basic_datasource: Datasource = instantiate_class_from_config(
+        yaml.load(
+            f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SparkDFExecutionEngine
+            spark_config:
+                spark.master: local[*]
+                spark.executor.memory: 6g
+                spark.driver.memory: 6g
+                spark.ui.showConsoleProgress: false
+                spark.sql.shuffle.partitions: 2
+                spark.default.parallelism: 4
+        data_connectors:
+            simple_filesystem_data_connector:
+                class_name: InferredAssetFilesystemDataConnector
+                base_directory: {base_directory}
+                batch_spec_passthrough:
+                    reader_options:
+                        header: True 
+                glob_directive: '*'
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                    - data_asset_name
+            """,
+        ),
+        runtime_environment={"name": "my_datasource"},
+        config_defaults={"module_name": "great_expectations.datasource"},
+    )
+
+    data_connector_name: str = "simple_filesystem_data_connector"
+    data_asset_name: str = "test-A"
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+    }
+
+    batch = basic_datasource.get_batch_list_from_batch_request(
+        BatchRequest(**batch_request)
+    )
+    # check that the batch_spec_passthrough has worked
+    assert batch[0].data.dataframe.head() == Row(x="1", y="2")

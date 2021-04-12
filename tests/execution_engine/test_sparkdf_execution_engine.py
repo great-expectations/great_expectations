@@ -32,6 +32,7 @@ except ImportError:
     F = None
     IntegerType = None
     StringType = None
+    Row = None
 
 
 @pytest.fixture
