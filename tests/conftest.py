@@ -1,6 +1,7 @@
 import datetime
 import json
 import locale
+import logging
 import os
 import random
 import shutil
@@ -41,6 +42,7 @@ from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
+from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
@@ -51,6 +53,8 @@ yaml = YAML()
 ###
 
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+
+logger = logging.getLogger(__name__)
 
 
 def pytest_configure(config):
@@ -2332,8 +2336,8 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
 ):
     context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
+    project_dir: str = context.root_directory
+    data_path: str = os.path.join(project_dir, "..", "data", "titanic")
 
     if (
         any(
@@ -2345,20 +2349,16 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
         and (sa is not None)
         and is_library_loadable(library_name="sqlalchemy")
     ):
-        db_file_path: str = str(
-            os.path.join(
-                context_path,
-                "..",
-                "data",
-                "titanic",
-                "test_cases_for_sql_data_connector.db",
-            )
+        db_fixture_file_path: str = file_relative_path(
+            __file__,
+            os.path.join("test_sets", "titanic_sql_test_cases.db"),
+        )
+        db_file_path: str = os.path.join(
+            data_path,
+            "titanic_sql_test_cases.db",
         )
         shutil.copy(
-            file_relative_path(
-                __file__,
-                os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
-            ),
+            db_fixture_file_path,
             db_file_path,
         )
 

@@ -103,7 +103,7 @@ def test_suite_demo_deprecation_message(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_non_interactive_with_suite_name_prompted_default_opens_jupyter(
+def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_notebook_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
@@ -202,7 +202,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_opens_jupyte
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_non_interactive_with_suite_name_prompted_custom_opens_jupyter(
+def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
@@ -301,7 +301,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_opens_jupyter
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_non_interactive_with_suite_name_arg_custom_opens_jupyter(
+def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
@@ -398,7 +398,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_opens_jupyter(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_non_interactive_with_suite_name_arg_custom_no_jupyter(
+def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_jupyter(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
@@ -641,7 +641,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook(
+def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_runs_notebook_no_jupyter(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
@@ -1020,7 +1020,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_multiple_datasources_with_no_additional_args_without_citations(
+def test_suite_edit_multiple_datasources_with_no_additional_args_without_citations_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
     mock_emit,
@@ -1248,7 +1248,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations(
+def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_runs_notebook_opens_jupyter(
     mock_webbrowser,
     mock_subprocess,
     mock_emit,
@@ -1305,6 +1305,436 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations(
             "--no-jupyter",
         ],
         input="2\n1\n1\n\n",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "A batch of data is required to edit the suite" in stdout
+    assert "Select a datasource" in stdout
+
+    assert mock_webbrowser.call_count == 0
+    mock_webbrowser.reset_mock()
+
+    assert mock_subprocess.call_count == 0
+    mock_subprocess.reset_mock()
+
+    context = DataContext(context_root_dir=project_dir)
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert isinstance(suite, ExpectationSuite)
+
+    # Actual testing really starts here
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        [
+            "--v3-api",
+            "suite",
+            "edit",
+            f"{expectation_suite_name}",
+            "--interactive",
+        ],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+
+    stdout = result.stdout
+    assert "A batch of data is required to edit the suite" not in stdout
+    assert "Select a datasource" not in stdout
+
+    expected_notebook_path: str = os.path.join(
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(expected_suite_path)
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        replacement_string="",
+    )
+
+    assert mock_subprocess.call_count == 1
+
+    assert mock_webbrowser.call_count == 0
+
+    assert mock_emit.call_count == 8
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
+                    "api_version": "v3",
+                },
+                "success": True,
+            }
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_without_citations_runs_notebook_opens_jupyter(
+    mock_webbrowser,
+    mock_subprocess,
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    """
+    Here we verify that the "suite edit" command helps the user to specify batch_request
+    when it is called without the optional command-line arguments that specify the batch.
+
+    First, we call the "suite new" command to create the expectation suite our test
+    will edit -- this step is a just a setup (we use an SQL datasource for this test).
+
+    We then call the "suite edit" command without any optional command-line arguments.  This means
+    that the command will help us specify batch_request interactively.
+
+    The data context has two datasources -- we choose one of them.
+    After that, we select a data connector and, finally, select a data asset from the list.
+
+    The command should:
+    - NOT open Data Docs
+    - open jupyter
+    """
+    context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request: dict = {
+        "datasource_name": "my_sqlite_db_datasource",
+        "data_connector_name": "whole_table",
+        "data_asset_name": "titanic",
+        "limit": 1000,
+    }
+    batch_request_string: str = (
+        str(BatchRequest(**batch_request))
+        .replace("{\n", "{\n  ")
+        .replace(",\n", ",\n  ")
+        .replace("\n}", ",\n}")
+    )
+    batch_request_string = fr"batch_request = {batch_request_string}"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        [
+            "--v3-api",
+            "suite",
+            "new",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
+            "--interactive",
+            "--no-jupyter",
+        ],
+        input="3\n2\ny\n2\n",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "A batch of data is required to edit the suite" in stdout
+    assert "Select a datasource" in stdout
+
+    assert mock_webbrowser.call_count == 0
+    mock_webbrowser.reset_mock()
+
+    assert mock_subprocess.call_count == 0
+    mock_subprocess.reset_mock()
+
+    # remove the citations from the suite
+    context = DataContext(context_root_dir=project_dir)
+
+    suite: ExpectationSuite = context.get_expectation_suite(
+        expectation_suite_name=expectation_suite_name
+    )
+    assert isinstance(suite, ExpectationSuite)
+
+    suite.meta.pop("citations", None)
+    context.save_expectation_suite(expectation_suite=suite)
+
+    # Actual testing really starts here
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        [
+            "--v3-api",
+            "suite",
+            "edit",
+            f"{expectation_suite_name}",
+            "--interactive",
+        ],
+        input="3\n2\ny\n2\n",
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+
+    stdout = result.stdout
+    assert "A batch of data is required to edit the suite" in stdout
+    assert "Select a datasource" in stdout
+
+    expected_notebook_path: str = os.path.join(
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(expected_suite_path)
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    run_notebook(
+        notebook_path=expected_notebook_path,
+        notebook_dir=uncommitted_dir,
+        string_to_be_replaced="context.open_data_docs(resource_identifier=validation_result_identifier)",
+        replacement_string="",
+    )
+
+    assert mock_subprocess.call_count == 1
+
+    assert mock_webbrowser.call_count == 0
+
+    assert mock_emit.call_count == 10
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "event": "data_context.save_expectation_suite",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
+                    "api_version": "v3",
+                },
+                "success": True,
+            }
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_citations_runs_notebook_opens_jupyter(
+    mock_webbrowser,
+    mock_subprocess,
+    mock_emit,
+    caplog,
+    monkeypatch,
+    titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    """
+    Here we verify that the "suite edit" command uses the batch_request found in
+    citations in the existing suite when it is called without the optional
+    command-line arguments that specify the batch.
+
+    First, we call the "suite new" command to create the expectation suite our
+    test will edit -- this step is a just a setup (we use an SQL datasource for this test).
+
+    We then call the "suite edit" command without any optional command-line-arguments.
+
+    The command should:
+    - NOT open Data Docs
+    - NOT open jupyter
+    """
+    context: DataContext = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request: dict = {
+        "datasource_name": "my_sqlite_db_datasource",
+        "data_connector_name": "whole_table",
+        "data_asset_name": "titanic",
+        "limit": 1000,
+    }
+    batch_request_string: str = (
+        str(BatchRequest(**batch_request))
+        .replace("{\n", "{\n  ")
+        .replace(",\n", ",\n  ")
+        .replace("\n}", ",\n}")
+    )
+    batch_request_string = fr"batch_request = {batch_request_string}"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        [
+            "--v3-api",
+            "suite",
+            "new",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
+            "--interactive",
+            "--no-jupyter",
+        ],
+        input="3\n2\ny\n2\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1860,6 +2290,7 @@ def test_suite_delete_with_one_suite(
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        input="\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1887,6 +2318,75 @@ def test_suite_delete_with_one_suite(
         mock.call(
             {
                 "event": "cli.suite.delete.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert_no_logging_messages_or_tracebacks(
+        my_caplog=caplog,
+        click_result=result,
+    )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_suite_delete_canceled_with_one_suite(
+    mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = empty_data_context_stats_enabled.root_directory
+
+    expectation_suite_dir_name: str = "a_dir"
+    expectation_suite_name: str = "test_suite_name"
+
+    # noinspection PyUnusedLocal
+    suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
+    )
+    context.save_expectation_suite(expectation_suite=suite)
+    assert (
+        context.list_expectation_suites()[0].expectation_suite_name
+        == f"{expectation_suite_dir_name}.{expectation_suite_name}"
+    )
+
+    mock_emit.reset_mock()
+
+    suite_dir: str = os.path.join(
+        project_dir, "expectations", expectation_suite_dir_name
+    )
+    suite_path: str = os.path.join(suite_dir, f"{expectation_suite_name}.json")
+    assert os.path.isfile(suite_path)
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        input="n\n",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert (
+        f"Suite `{expectation_suite_dir_name}.{expectation_suite_name}` was not deleted"
+        in stdout
+    )
+
+    assert os.path.isfile(suite_path)
+
+    assert mock_emit.call_count == 2
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.suite.delete.begin",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
@@ -2170,7 +2670,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_profile_creates_notebook_no_jupyter(
+def test_suite_new_profile_runs_notebook_no_jupyter(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
@@ -2379,7 +2879,7 @@ suite = profiler.build_suite()"""
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_suite_new_profile_creates_notebook_opens_jupyter(
+def test_suite_new_profile_runs_notebook_opens_jupyter(
     mock_webbroser,
     mock_subprocess,
     mock_emit,
