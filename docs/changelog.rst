@@ -6,6 +6,9 @@ Changelog
 
 Develop
 -----------------
+
+* [ENHANCEMENT] Improve support for quantiles calculation in Athena
+=======
 * [ENHANCEMENT] V3 API CLI docs commands have better error messages and more consistent short flags
 * [ENHANCEMENT] Update all Data Connectors to allow for `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `DataConnector.build_batch_spec` to use `batch_spec_passthrough` in config
@@ -71,7 +74,7 @@ Develop
 * [BUGFIX] force azure to set content_type='text/html' if the file is HTML #2539 (thanks @benoitLebreton-perso)
 * [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 in requirements-dev-sqlalchemy.txt #2547
 * [DOCS] Fix documentation links generated within template #2542 (thanks @thejasraju)
-* [MAINTENANCE] Remove deprecated automerge config #2492
+* [MAINTENANCE] Remove deprecated automerge config #249
 
 0.13.13
 -----------------
