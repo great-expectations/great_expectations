@@ -3,8 +3,8 @@ import jsonschema
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_batch_schema,
     anonymized_datasource_schema,
-    api_version_payload_schema,
     cli_new_ds_choice_payload_schema,
+    cli_payload_schema,
     cli_suite_edit_expectation_suite_payload_schema,
     datasource_sqlalchemy_connect_payload,
     empty_payload_schema,
@@ -26,19 +26,12 @@ def test_comprehensive_list_of_messages():
     # to also update one or more tests below!
 
     assert set(valid_message_list) == {
-        "data_context.__init__",
-        "data_asset.validate",
-        "data_context.add_datasource",
-        "data_context.build_data_docs",
-        "data_context.open_data_docs",
-        "data_context.save_expectation_suite",
-        "datasource.sqlalchemy.connect",
-        "cli.new_ds_choice",
         "cli.checkpoint.delete",
         "cli.checkpoint.list",
         "cli.checkpoint.new",
         "cli.checkpoint.run",
         "cli.checkpoint.script",
+        "cli.datasource.delete",
         "cli.datasource.list",
         "cli.datasource.new",
         "cli.datasource.profile",
@@ -46,16 +39,25 @@ def test_comprehensive_list_of_messages():
         "cli.docs.clean",
         "cli.docs.list",
         "cli.init.create",
+        "cli.new_ds_choice",
         "cli.project.check_config",
+        "cli.project.upgrade",
         "cli.store.list",
         "cli.suite.delete",
         "cli.suite.demo",
+        "cli.suite.edit",
         "cli.suite.list",
         "cli.suite.new",
         "cli.suite.scaffold",
-        "cli.suite.edit",
         "cli.validation_operator.list",
         "cli.validation_operator.run",
+        "data_asset.validate",
+        "data_context.__init__",
+        "data_context.add_datasource",
+        "data_context.build_data_docs",
+        "data_context.open_data_docs",
+        "data_context.save_expectation_suite",
+        "datasource.sqlalchemy.connect",
     }
 
 
@@ -177,6 +179,7 @@ def test_usage_stats_cli_payload_messages():
         "cli.checkpoint.new",
         "cli.checkpoint.run",
         "cli.checkpoint.script",
+        "cli.datasource.delete",
         "cli.datasource.list",
         "cli.datasource.new",
         "cli.datasource.profile",
@@ -185,6 +188,7 @@ def test_usage_stats_cli_payload_messages():
         "cli.docs.list",
         "cli.init.create",
         "cli.project.check_config",
+        # "cli.project.upgrade",
         "cli.store.list",
         "cli.suite.delete",
         "cli.suite.demo",
@@ -201,5 +205,5 @@ def test_usage_stats_cli_payload_messages():
         )
         jsonschema.validate(
             valid_usage_statistics_messages[message][0]["event_payload"],
-            api_version_payload_schema,
+            cli_payload_schema,
         )

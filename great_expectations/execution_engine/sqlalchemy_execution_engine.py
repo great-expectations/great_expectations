@@ -833,17 +833,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             }
         )
-        if isinstance(batch_spec, RuntimeQueryBatchSpec):
-            # query != None is already checked when RuntimeQueryBatchSpec is instantiated
-            query: str = batch_spec.query
-            if query:
-                batch_spec.query = "SQLQuery"
-                batch_data = SqlAlchemyBatchData(execution_engine=self, query=query)
-                return batch_data, batch_markers
 
-        selectable: Select = self._build_selectable_from_batch_spec(
-            batch_spec=batch_spec
-        )
         temp_table_name: Optional[str]
         if "bigquery_temp_table" in batch_spec:
             temp_table_name = batch_spec.get("bigquery_temp_table")
@@ -853,14 +843,35 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_table_name = batch_spec.get("table_name", None)
         source_schema_name = batch_spec.get("schema_name", None)
 
-        batch_data = SqlAlchemyBatchData(
-            execution_engine=self,
-            selectable=selectable,
-            temp_table_name=temp_table_name,
-            create_temp_table=batch_spec.get(
-                "create_temp_table", self._create_temp_table
-            ),
-            source_table_name=source_table_name,
-            source_schema_name=source_schema_name,
-        )
+        if isinstance(batch_spec, RuntimeQueryBatchSpec):
+            # query != None is already checked when RuntimeQueryBatchSpec is instantiated
+            query: str = batch_spec.query
+
+            batch_spec.query = "SQLQuery"
+            batch_data = SqlAlchemyBatchData(
+                execution_engine=self,
+                query=query,
+                temp_table_name=temp_table_name,
+                create_temp_table=batch_spec.get(
+                    "create_temp_table", self._create_temp_table
+                ),
+                source_table_name=source_table_name,
+                source_schema_name=source_schema_name,
+            )
+        elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
+            selectable: Select = self._build_selectable_from_batch_spec(
+                batch_spec=batch_spec
+            )
+
+            batch_data = SqlAlchemyBatchData(
+                execution_engine=self,
+                selectable=selectable,
+                temp_table_name=temp_table_name,
+                create_temp_table=batch_spec.get(
+                    "create_temp_table", self._create_temp_table
+                ),
+                source_table_name=source_table_name,
+                source_schema_name=source_schema_name,
+            )
+
         return batch_data, batch_markers

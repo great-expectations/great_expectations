@@ -230,6 +230,10 @@ class SqlAlchemyBatchData(BatchData):
             stmt = (querymod[0] + "into {temp_table_name} from" + querymod[1]).format(
                 temp_table_name=temp_table_name
             )
+        elif self.sql_engine_dialect.name.lower() == "oracle":
+            stmt = "CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}".format(
+                temp_table_name=temp_table_name, query=query
+            )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'.format(
                 temp_table_name=temp_table_name, query=query
