@@ -910,6 +910,7 @@ def is_float(value: Any) -> bool:
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
+        # noinspection PyUnusedLocal
         parsed_date: datetime = parse(value, fuzzy=fuzzy)
     except (TypeError, ValueError):
         return False

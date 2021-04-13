@@ -10,7 +10,9 @@ from great_expectations.render.renderer.suite_scaffold_notebook_renderer import 
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 
-def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_docs):
+def test_notebook_execution_with_pandas_backend(
+    titanic_data_context_no_data_docs_no_checkpoint_store,
+):
     """
     This tests that the notebook is written to disk and executes without error.
 
@@ -27,7 +29,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_doc
     # Since we'll run the notebook, we use a context with no data docs to avoid
     # the renderer's default behavior of building and opening docs, which is not
     # part of this test.
-    context = titanic_data_context_no_data_docs
+    context = titanic_data_context_no_data_docs_no_checkpoint_store
     root_dir = context.root_directory
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "my_suite"
@@ -61,7 +63,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_doc
 
     # Create notebook
     renderer = SuiteScaffoldNotebookRenderer(
-        titanic_data_context_no_data_docs, suite, batch_kwargs
+        titanic_data_context_no_data_docs_no_checkpoint_store, suite, batch_kwargs
     )
     renderer.render_to_disk(notebook_path)
     assert os.path.isfile(notebook_path)
