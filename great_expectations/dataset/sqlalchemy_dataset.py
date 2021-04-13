@@ -516,7 +516,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "sqlite",
             "oracle",
             "mssql",
-            "oracle",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
@@ -648,6 +647,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if self.engine.dialect.name.lower() == "mssql":
                 head_sql_str = "select top({n}) * from {table}".format(
                     n=n, table=self._table.name
+                )
+
+            # Limit doesn't work in oracle either
+            if self.engine.dialect.name.lower() == "oracle":
+                head_sql_str = "select * from {table} WHERE ROWNUM <= {n}".format(
+                    table=self._table.name, n=n
                 )
 
             df = pd.read_sql(head_sql_str, con=self.engine)
@@ -1305,6 +1310,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ).format(table_name=table_name)
         elif engine_dialect == "awsathena":
             stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif engine_dialect == "oracle":
+            stmt = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         else:
