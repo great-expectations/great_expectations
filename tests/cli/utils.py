@@ -6,7 +6,7 @@ from click.testing import Result
 VALIDATION_OPERATORS_DEPRECATION_MESSAGE: str = "Your data context with this configuration version uses validation_operators, which are being deprecated."
 LEGACY_CONFIG_DEFAULT_CHECKPOINT_STORE_MESSAGE: str = (
     "Detected legacy config version (2.0) so will try to use "
-    "default checkpoint store."
+    "default Checkpoint store."
 )
 
 

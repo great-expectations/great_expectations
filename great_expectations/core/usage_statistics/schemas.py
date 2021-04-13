@@ -331,6 +331,29 @@ api_version_payload_schema = {
     "additionalProperties": False,
 }
 
+cancelled_cli_payload_schema = {
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "cancelled": {"type": ["boolean", "null"]},
+    },
+    "additionalProperties": False,
+}
+
+cli_payload_schema = {
+    "$schema": "http://json-schema.org/schema#",
+    "title": "cli-payload",
+    "definitions": {
+        "api_version_definition": api_version_payload_schema,
+        "cancelled_cli_definition": cancelled_cli_payload_schema,
+    },
+    "type": "object",
+    "properties": {
+        "api_version": {"$ref": "#/definitions/api_version_definition"},
+        "cancelled": {"$ref": "#/definitions/cancelled_cli_definition"},
+    },
+    "additionalProperties": False,
+}
 
 cli_new_ds_choice_payload_schema = {
     "$schema": "http://json-schema.org/schema#",
@@ -372,8 +395,9 @@ usage_statistics_record_schema = {
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
+        "cli_suite_edit_begin_expectation_suite_payload": cli_suite_edit_expectation_suite_payload_schema,
         "cli_suite_edit_expectation_suite_payload": cli_suite_edit_expectation_suite_payload_schema,
-        "api_version_payload": api_version_payload_schema,
+        "cli_payload": cli_payload_schema,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload_schema,
         "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
     },
@@ -401,6 +425,15 @@ usage_statistics_record_schema = {
                 "event": {"enum": ["data_context.save_expectation_suite"]},
                 "event_payload": {
                     "$ref": "#/definitions/save_or_edit_expectation_suite_payload"
+                },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["cli.suite.edit.begin"]},
+                "event_payload": {
+                    "$ref": "#/definitions/cli_suite_edit_begin_expectation_suite_payload"
                 },
             },
         },
@@ -470,29 +503,65 @@ usage_statistics_record_schema = {
                 "event": {
                     "enum": [
                         "cli.checkpoint.delete",
+                        "cli.checkpoint.delete.begin",
+                        "cli.checkpoint.delete.end",
                         "cli.checkpoint.list",
+                        "cli.checkpoint.list.begin",
+                        "cli.checkpoint.list.end",
                         "cli.checkpoint.new",
+                        "cli.checkpoint.new.begin",
+                        "cli.checkpoint.new.end",
                         "cli.checkpoint.run",
+                        "cli.checkpoint.run.begin",
+                        "cli.checkpoint.run.end",
                         "cli.checkpoint.script",
+                        "cli.checkpoint.script.begin",
+                        "cli.checkpoint.script.end",
                         "cli.datasource.list",
+                        "cli.datasource.list.begin",
+                        "cli.datasource.list.end",
                         "cli.datasource.new",
+                        "cli.datasource.new.begin",
+                        "cli.datasource.new.end",
+                        "cli.datasource.delete",
+                        "cli.datasource.delete.begin",
+                        "cli.datasource.delete.end",
                         "cli.datasource.profile",
                         "cli.docs.build",
+                        "cli.docs.build.begin",
+                        "cli.docs.build.end",
                         "cli.docs.clean",
+                        "cli.docs.clean.begin",
+                        "cli.docs.clean.end",
                         "cli.docs.list",
+                        "cli.docs.list.begin",
+                        "cli.docs.list.end",
                         "cli.init.create",
                         "cli.project.check_config",
+                        "cli.project.upgrade.begin",
+                        "cli.project.upgrade.end",
                         "cli.store.list",
+                        "cli.store.list.begin",
+                        "cli.store.list.end",
+                        "cli.suite.edit.end",
                         "cli.suite.delete",
+                        "cli.suite.delete.begin",
+                        "cli.suite.delete.end",
                         "cli.suite.demo",
+                        "cli.suite.demo.begin",
+                        "cli.suite.demo.end",
                         "cli.suite.list",
+                        "cli.suite.list.begin",
+                        "cli.suite.list.end",
                         "cli.suite.new",
+                        "cli.suite.new.begin",
+                        "cli.suite.new.end",
                         "cli.suite.scaffold",
                         "cli.validation_operator.list",
                         "cli.validation_operator.run",
                     ],
                 },
-                "event_payload": {"$ref": "#/definitions/api_version_payload"},
+                "event_payload": {"$ref": "#/definitions/cli_payload"},
             },
         },
     ],

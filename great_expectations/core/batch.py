@@ -2,17 +2,12 @@ import copy
 import datetime
 import hashlib
 import json
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
-from great_expectations.core.id_dict import (
-    BatchKwargs,
-    BatchSpec,
-    IDDict,
-    PartitionDefinition,
-    PartitionRequest,
-)
+from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -22,23 +17,22 @@ class BatchDefinition(SerializableDictDot):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_definition: PartitionDefinition,
+        batch_identifiers: IDDict,
         batch_spec_passthrough: Optional[dict] = None,
     ):
         self._validate_batch_definition(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_definition=partition_definition,
-            # limit=limit,
+            batch_identifiers=batch_identifiers,
         )
 
-        assert type(partition_definition) == PartitionDefinition
+        assert type(batch_identifiers) == IDDict
 
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
-        self._partition_definition = partition_definition
+        self._batch_identifiers = batch_identifiers
         self._batch_spec_passthrough = batch_spec_passthrough
 
     def to_json_dict(self) -> Dict:
@@ -46,7 +40,7 @@ class BatchDefinition(SerializableDictDot):
             "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_definition": self._partition_definition,
+            "batch_identifiers": self._batch_identifiers,
         }
 
     def __repr__(self) -> str:
@@ -54,7 +48,7 @@ class BatchDefinition(SerializableDictDot):
             "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_definition": repr(self._partition_definition),
+            "batch_identifiers": self._batch_identifiers,
         }
         return str(doc_fields_dict)
 
@@ -63,8 +57,7 @@ class BatchDefinition(SerializableDictDot):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_definition: PartitionDefinition,
-        # limit: Optional[int] = None,
+        batch_identifiers: IDDict,
     ):
         if datasource_name is None:
             raise ValueError("A valid datasource must be specified.")
@@ -90,12 +83,10 @@ class BatchDefinition(SerializableDictDot):
 "{str(type(data_asset_name))}", which is illegal.
                 """
             )
-        if partition_definition and not isinstance(
-            partition_definition, PartitionDefinition
-        ):
+        if batch_identifiers and not isinstance(batch_identifiers, IDDict):
             raise TypeError(
-                f"""The type of a partition_request must be a PartitionDefinition object.  The type given is
-"{str(type(partition_definition))}", which is illegal.
+                f"""The type of batch_identifiers must be a IDDict object.  The type given is
+"{str(type(batch_identifiers))}", which is illegal.
                 """
             )
 
@@ -119,8 +110,8 @@ class BatchDefinition(SerializableDictDot):
         return self._data_asset_name
 
     @property
-    def partition_definition(self) -> PartitionDefinition:
-        return self._partition_definition
+    def batch_identifiers(self) -> IDDict:
+        return self._batch_identifiers
 
     @property
     def batch_spec_passthrough(self) -> dict:
@@ -135,7 +126,7 @@ class BatchDefinition(SerializableDictDot):
             "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_definition": self.partition_definition,
+            "batch_identifiers": self.batch_identifiers,
         }
 
     @property
@@ -160,8 +151,8 @@ class BatchDefinition(SerializableDictDot):
             ^ hash(self.data_connector_name)
             ^ hash(self.data_asset_name)
         )
-        if self.partition_definition is not None:
-            for key, value in self.partition_definition.items():
+        if self.batch_identifiers is not None:
+            for key, value in self.batch_identifiers.items():
                 _result_hash = _result_hash ^ hash(key) ^ hash(str(value))
         return _result_hash
 
@@ -191,18 +182,28 @@ class BatchRequestBase(DictDot):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        batch_data: Any = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
     ):
         self._datasource_name = datasource_name
         self._data_connector_name = data_connector_name
         self._data_asset_name = data_asset_name
-        self._partition_request = partition_request
-        self._batch_data = batch_data
+        self._data_connector_query = data_connector_query
         self._limit = limit
         self._batch_spec_passthrough = batch_spec_passthrough
+        self._runtime_parameters = runtime_parameters
+        self._batch_identifiers = batch_identifiers
+
+    @property
+    def runtime_parameters(self) -> dict:
+        return self._runtime_parameters
+
+    @property
+    def batch_identifiers(self) -> dict:
+        return self._batch_identifiers
 
     @property
     def datasource_name(self) -> str:
@@ -221,12 +222,10 @@ class BatchRequestBase(DictDot):
         self._data_asset_name = data_asset_name
 
     @property
-    def partition_request(self) -> Union[PartitionRequest, dict]:  # PartitionRequest:
-        return self._partition_request
-
-    @property
-    def batch_data(self) -> Any:
-        return self._batch_data
+    def data_connector_query(
+        self,
+    ) -> Union[IDDict, dict]:
+        return self._data_connector_query
 
     @property
     def limit(self) -> int:
@@ -237,25 +236,34 @@ class BatchRequestBase(DictDot):
         return self._batch_spec_passthrough
 
     def get_json_dict(self) -> dict:
-        partition_request: Optional[dict] = None
-        if self.partition_request is not None:
-            partition_request = copy.deepcopy(self.partition_request)
-            if partition_request.get("custom_filter_function") is not None:
-                partition_request["custom_filter_function"] = partition_request[
+        data_connector_query: Optional[dict] = None
+        if self.data_connector_query is not None:
+            data_connector_query = copy.deepcopy(self.data_connector_query)
+            if data_connector_query.get("custom_filter_function") is not None:
+                data_connector_query["custom_filter_function"] = data_connector_query[
                     "custom_filter_function"
                 ].__name__
-        json_dict = {
+        json_dict: dict = {
             "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
-            "partition_request": partition_request,
+            "data_connector_query": data_connector_query,
         }
-        if self.batch_data:
-            json_dict["batch_data"] = str(type(self.batch_data))
+
         if self.batch_spec_passthrough is not None:
             json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
         if self.limit is not None:
             json_dict["limit"] = self.limit
+        if self.batch_identifiers is not None:
+            json_dict["batch_identifiers"] = self.batch_identifiers
+        if self.runtime_parameters is not None:
+            json_dict["runtime_parameters"] = self.runtime_parameters
+            if json_dict["runtime_parameters"].get("batch_data"):
+                json_dict["runtime_parameters"]["batch_data"] = str(
+                    type(json_dict["runtime_parameters"]["batch_data"])
+                )
+
+        filter_properties_dict(properties=json_dict, inplace=True)
 
         return json_dict
 
@@ -285,8 +293,7 @@ class BatchRequest(BatchRequestBase):
         datasource_name: str = None,
         data_connector_name: str = None,
         data_asset_name: str = None,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
-        batch_data: Any = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -294,15 +301,14 @@ class BatchRequest(BatchRequestBase):
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_request=partition_request,
+            data_connector_query=data_connector_query,
             limit=limit,
         )
         super().__init__(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_request=partition_request,
-            batch_data=batch_data,
+            data_connector_query=data_connector_query,
             limit=limit,
             batch_spec_passthrough=batch_spec_passthrough,
         )
@@ -312,7 +318,7 @@ class BatchRequest(BatchRequestBase):
         datasource_name: str,
         data_connector_name: str,
         data_asset_name: str,
-        partition_request: Optional[Union[PartitionRequest, dict]] = None,
+        data_connector_query: Optional[Union[IDDict, dict]] = None,
         limit: Optional[int] = None,
     ):
         # TODO test and check all logic in this validator!
@@ -334,11 +340,13 @@ class BatchRequest(BatchRequestBase):
         "{str(type(data_asset_name))}", which is illegal.
                         """
             )
-        # TODO Abe 20201015: Switch this to PartitionRequest.
-        if partition_request and not isinstance(partition_request, dict):
+        # TODO Abe 20201015: Switch this to DataConnectorQuery.
+        if data_connector_query and not isinstance(
+            data_connector_query, (dict, IDDict)
+        ):
             raise TypeError(
-                f"""The type of partition_request must be a dict object.  The type given is
-"{str(type(partition_request))}", which is illegal.
+                f"""The type of data_connector_query must be a dict or IDDict object.  The type given is
+"{str(type(data_connector_query))}", which is illegal.
                 """
             )
         if limit and not isinstance(limit, int):
@@ -347,6 +355,26 @@ class BatchRequest(BatchRequestBase):
 is illegal.
                 """
             )
+
+
+class RuntimeBatchRequest(BatchRequest):
+    def __init__(
+        self,
+        datasource_name: str = None,
+        data_connector_name: str = None,
+        data_asset_name: str = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
+    ):
+        super().__init__(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_spec_passthrough=batch_spec_passthrough,
+        )
+        self._runtime_parameters = runtime_parameters
+        self._batch_identifiers = batch_identifiers
 
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>

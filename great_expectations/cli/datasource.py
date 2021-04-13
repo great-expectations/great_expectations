@@ -7,7 +7,6 @@ from typing import Optional, Union
 import click
 
 from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
@@ -55,6 +54,13 @@ def datasource(ctx):
     )
     # TODO consider moving this all the way up in to the CLIState constructor
     ctx.obj.data_context = context
+    usage_stats_prefix = f"cli.datasource.{ctx.invoked_subcommand}"
+    toolkit.send_usage_message(
+        data_context=context,
+        event=f"{usage_stats_prefix}.begin",
+        success=True,
+    )
+    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
 
 
 @datasource.command(name="new")
@@ -68,11 +74,23 @@ def datasource(ctx):
 )
 def datasource_new(ctx, name, jupyter):
     """Add a new Datasource to the data context."""
-    context = ctx.obj.data_context
-    toolkit.send_usage_message(
-        data_context=context, event="cli.datasource.new", success=True
-    )
-    _interactive_datasource_new_flow(context, datasource_name=name, jupyter=jupyter)
+    context: DataContext = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
+
+    try:
+        _datasource_new_flow(
+            context,
+            usage_event_end=usage_event_end,
+            datasource_name=name,
+            jupyter=jupyter,
+        )
+    except Exception as e:
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{e}</red>",
+        )
+        return
 
 
 @datasource.command(name="delete")
@@ -81,22 +99,28 @@ def datasource_new(ctx, name, jupyter):
 def delete_datasource(ctx, datasource):
     """Delete the datasource specified as an argument"""
     context: DataContext = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
+
     if not ctx.obj.assume_yes:
         toolkit.confirm_proceed_or_exit(
             confirm_prompt=f"""\nAre you sure you want to delete the Datasource "{datasource}" (this action is irreversible)?" """,
             continuation_message=f"Datasource `{datasource}` was not deleted.",
             exit_on_no=True,
+            data_context=context,
+            usage_stats_event=usage_event_end,
         )
 
     try:
         context.delete_datasource(datasource)
     except ValueError:
         cli_message(f"<red>Datasource {datasource} could not be found.</red>")
+        toolkit.send_usage_message(context, event=usage_event_end, success=False)
         sys.exit(1)
     try:
         context.get_datasource(datasource)
     except ValueError:
         cli_message("<green>{}</green>".format("Datasource deleted successfully."))
+        toolkit.send_usage_message(context, event=usage_event_end, success=True)
         sys.exit(0)
 
 
@@ -105,20 +129,29 @@ def delete_datasource(ctx, datasource):
 def datasource_list(ctx):
     """List known Datasources."""
     context = ctx.obj.data_context
-    datasources = context.list_datasources()
-    cli_message(_build_datasource_intro_string(datasources))
-    for datasource in datasources:
-        cli_message("")
-        cli_message_dict(
-            {
-                "name": datasource["name"],
-                "class_name": datasource["class_name"],
-            }
-        )
+    usage_event_end: str = ctx.obj.usage_event_end
+    try:
+        datasources = context.list_datasources()
+        cli_message(_build_datasource_intro_string(datasources))
+        for datasource in datasources:
+            cli_message("")
+            cli_message_dict(
+                {
+                    "name": datasource["name"],
+                    "class_name": datasource["class_name"],
+                }
+            )
 
-    toolkit.send_usage_message(
-        data_context=context, event="cli.datasource.list", success=True
-    )
+        toolkit.send_usage_message(
+            data_context=context, event=usage_event_end, success=True
+        )
+    except Exception as e:
+        toolkit.exit_with_failure_message_and_stats(
+            context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{e}</red>",
+        )
+        return
 
 
 def _build_datasource_intro_string(datasources):
@@ -130,8 +163,11 @@ def _build_datasource_intro_string(datasources):
     return f"{datasource_count} Datasources found:"
 
 
-def _interactive_datasource_new_flow(
-    context: DataContext, datasource_name: Optional[str] = None, jupyter: bool = True
+def _datasource_new_flow(
+    context: DataContext,
+    usage_event_end: str,
+    datasource_name: Optional[str] = None,
+    jupyter: bool = True,
 ) -> None:
     files_or_sql_selection = click.prompt(
         """
@@ -164,12 +200,14 @@ What data would you like Great Expectations to connect to?
         cli_message(
             f"To continue editing this Datasource, run <green>jupyter notebook {notebook_path}</green>"
         )
+        toolkit.send_usage_message(context, event=usage_event_end, success=True)
         return None
 
     if notebook_path:
         cli_message(
             """<green>Because you requested to create a new Datasource, we'll open a notebook for you now to complete it!</green>\n\n"""
         )
+        toolkit.send_usage_message(context, event=usage_event_end, success=True)
         toolkit.launch_jupyter_notebook(notebook_path)
 
 
@@ -269,7 +307,8 @@ data_connectors:
     datasource_name: {{datasource_name}}
     base_directory: {self.base_path}
     default_regex:
-      group_names: data_asset_name
+      group_names: 
+        - data_asset_name
       pattern: (.*)
 """'''
 

@@ -32,14 +32,14 @@ class Sorter:
     def _verify_sorting_directives_and_get_partition_key(
         self, batch_definition: BatchDefinition
     ) -> Any:
-        partition_definition: dict = batch_definition.partition_definition
-        if partition_definition.get(self.name) is None:
+        batch_identifiers: dict = batch_definition.batch_identifiers
+        if batch_identifiers.get(self.name) is None:
             raise ge_exceptions.SorterError(
                 f'Unable to sort batch_definition "{batch_definition}" by attribute "{self.name}".'
             )
-        return self.get_partition_key(batch_definition=batch_definition)
+        return self.get_batch_key(batch_definition=batch_definition)
 
-    def get_partition_key(self, batch_definition: BatchDefinition) -> Any:
+    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
         raise NotImplementedError
 
     @property

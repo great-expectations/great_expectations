@@ -1,9 +1,17 @@
+from typing import Any, Dict, List, Union
+
 import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext
 from great_expectations.core import IDDict
-from great_expectations.core.batch import Batch, BatchRequest, PartitionRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    IDDict,
+    RuntimeBatchRequest,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -172,21 +180,19 @@ def test_graph_validate(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
     batch = basic_datasource.get_single_batch_from_batch_request(
-        BatchRequest(
+        RuntimeBatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
                 "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "batch_data": df,
-                "partition_request": PartitionRequest(
-                    **{
-                        "batch_identifiers": {
-                            "pipeline_stage_name": 0,
-                            "airflow_run_id": 0,
-                            "custom_key_0": 0,
-                        }
-                    }
-                ),
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
             }
         )
     )
@@ -227,21 +233,19 @@ def test_graph_validate_with_bad_config(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
     batch = basic_datasource.get_single_batch_from_batch_request(
-        BatchRequest(
+        RuntimeBatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
                 "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "batch_data": df,
-                "partition_request": PartitionRequest(
-                    **{
-                        "batch_identifiers": {
-                            "pipeline_stage_name": 0,
-                            "airflow_run_id": 0,
-                            "custom_key_0": 0,
-                        }
-                    }
-                ),
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
             }
         )
     )
@@ -268,21 +272,19 @@ def test_graph_validate_with_runtime_config(basic_datasource):
     )
 
     batch = basic_datasource.get_single_batch_from_batch_request(
-        BatchRequest(
+        RuntimeBatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
                 "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "batch_data": df,
-                "partition_request": PartitionRequest(
-                    **{
-                        "batch_identifiers": {
-                            "pipeline_stage_name": 0,
-                            "airflow_run_id": 0,
-                            "custom_key_0": 0,
-                        }
-                    }
-                ),
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
             }
         )
     )
@@ -327,21 +329,19 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
     df = pd.DataFrame({"a": [1, 5, 22, 3, 5, 10], "b": [1, 2, 3, 4, 5, None]})
 
     batch = basic_datasource.get_single_batch_from_batch_request(
-        BatchRequest(
+        RuntimeBatchRequest(
             **{
                 "datasource_name": "my_datasource",
                 "data_connector_name": "test_runtime_data_connector",
                 "data_asset_name": "IN_MEMORY_DATA_ASSET",
-                "batch_data": df,
-                "partition_request": PartitionRequest(
-                    **{
-                        "batch_identifiers": {
-                            "pipeline_stage_name": 0,
-                            "airflow_run_id": 0,
-                            "custom_key_0": 0,
-                        }
-                    }
-                ),
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
             }
         )
     )
@@ -352,9 +352,9 @@ def test_validator_default_expectation_args__pandas(basic_datasource):
 
 
 def test_validator_default_expectation_args__sql(
-    data_context_with_sql_datasource_for_testing_get_batch,
+    data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
-    context = data_context_with_sql_datasource_for_testing_get_batch
+    context = data_context_with_simple_sql_datasource_for_testing_get_batch
 
     my_validator = context.get_validator(
         datasource_name="my_sqlite_db",
@@ -387,3 +387,63 @@ def test_validator_default_expectation_args__sql(
             batch_identifiers={"date": "2020-01-15"},
             expectation_suite="I_am_not_an_expectation_suite",
         )
+
+
+def test_columns(
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+):
+    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    validator: Validator = data_context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        create_expectation_suite_with_name="warning",
+    )
+    columns: List[str] = validator.columns()
+
+    expected: List[str] = [
+        "Unnamed: 0",
+        "Name",
+        "PClass",
+        "Age",
+        "Sex",
+        "Survived",
+        "SexCode",
+    ]
+    assert columns == expected
+
+
+def test_head(
+    titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+):
+    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    validator: Validator = data_context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        create_expectation_suite_with_name="warning",
+    )
+    head: pd.DataFrame = validator.head()
+
+    expected: Dict[str, Dict[int, Union[int, str]]] = {
+        "Unnamed: 0": {0: 1, 1: 2, 2: 3, 3: 4, 4: 5},
+        "Name": {
+            0: "Allen, Miss Elisabeth Walton",
+            1: "Allison, Miss Helen Loraine",
+            2: "Allison, Mr Hudson Joshua Creighton",
+            3: "Allison, Mrs Hudson JC (Bessie Waldo Daniels)",
+            4: "Allison, Master Hudson Trevor",
+        },
+        "PClass": {0: "1st", 1: "1st", 2: "1st", 3: "1st", 4: "1st"},
+        "Age": {0: 29.0, 1: 2.0, 2: 30.0, 3: 25.0, 4: 0.92},
+        "Sex": {0: "female", 1: "female", 2: "male", 3: "female", 4: "male"},
+        "Survived": {0: 1, 1: 0, 2: 0, 3: 0, 4: 1},
+        "SexCode": {0: 1, 1: 1, 2: 0, 3: 1, 4: 0},
+    }
+    assert head.to_dict() == expected

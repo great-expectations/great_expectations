@@ -42,7 +42,7 @@ Steps
                       datasource_name: data__dir
                       data_connector_name: my_data_connector
                       data_asset_name: TestAsset
-                      partition_request:
+                      data_connector_query:
                         index: 0
                     expectation_suite_name: yellow_tripdata_sample_2019-01.warning
                 site_names: my_local_site
@@ -68,13 +68,13 @@ Steps
                       datasource_name: my_datasource
                       data_connector_name: my_special_data_connector
                       data_asset_name: users
-                      partition_request:
+                      data_connector_query:
                         index: -1
                   - batch_request:
                       datasource_name: my_datasource
                       data_connector_name: my_other_data_connector
                       data_asset_name: users
-                      partition_request:
+                      data_connector_query:
                         index: -2
                 expectation_suite_name: users.delivery
                 action_list:
@@ -109,7 +109,7 @@ Steps
                     datasource_name: my_datasource
                     data_connector_name: my_special_data_connector
                     data_asset_name: users
-                    partition_request:
+                    data_connector_query:
                         index: -1
                 validations:
                   - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
@@ -183,7 +183,7 @@ Steps
                                 "datasource_name": "my_datasource",
                                 "data_connector_name": "my_special_data_connector",
                                 "data_asset_name": "users",
-                                "partition_request": {
+                                "data_connector_query": {
                                     "index": -1,
                                 },
                             },
@@ -194,7 +194,7 @@ Steps
                                 "datasource_name": "my_datasource",
                                 "data_connector_name": "my_other_data_connector",
                                 "data_asset_name": "users",
-                                "partition_request": {
+                                "data_connector_query": {
                                     "index": -2,
                                 },
                             },
@@ -217,13 +217,13 @@ Steps
                     datasource_name: my_datasource
                     data_connector_name: my_special_data_connector
                     data_asset_name: users
-                    partition_request:
+                    data_connector_query:
                       index: -1
                 - batch_request:
                     datasource_name: my_datasource
                     data_connector_name: my_other_data_connector
                     data_asset_name: users
-                    partition_request:
+                    data_connector_query:
                       index: -2
                 expectation_suite_name: users.delivery
                 """
@@ -266,16 +266,18 @@ Steps
                 """
 
 
-           To run this Checkpoint, the `batch_request` with the `batch_data` attribute needs to be specified explicitly as part of the `run_checkpoint()` API call, because the the data to be validated is accessible only dynamically during the execution of the pipeline.
+           To run this Checkpoint, the `batch_request` with the `batch_data` nested under the `runtime_parameters` attribute needs to be specified explicitly as part of the `run_checkpoint()` API call, because the the data to be validated is accessible only dynamically during the execution of the pipeline.
 
            .. code-block:: python
 
                 checkpoint_run_result: CheckpointResult = data_context.run_checkpoint(
                     checkpoint_name="airflow_checkpoint",
                     batch_request={
-                        "batch_data": my_data_frame,
-                        "partition_request": {
-                            "batch_identifiers": {
+                        "runtime_parameters": {
+                            "batch_data": my_data_frame,
+                        },
+                        "data_connector_query": {
+                            "batch_filter_parameters": {
                                 "airflow_run_id": airflow_run_id,
                             }
                         },

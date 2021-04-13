@@ -125,16 +125,45 @@ Steps
                 pip install sqlalchemy
                 pip install PyMySQL
 
-        #. **Instantiate a Data Context.**
+        #. **Run datasource new**
 
-            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
 
-        #.  **Create or copy a yaml config.**
+        #. **Choose "Relational database (SQL)"**
+
+            .. code-block:: bash
+
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 2
+
+        #. **Choose MySQL**
+
+            .. code-block:: bash
+
+                Which database backend are you using?
+                    1. MySQL
+                    2. Postgres
+                    3. Redshift
+                    4. Snowflake
+                    5. BigQuery
+                    6. other - Do you have a working SQLAlchemy connection string?
+                : 1
+
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
+
+Additional notes
+----------------
+
+        Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
+
+        #.  **MySql SimpleSqlalchemyDatasource Example.**
 
                 Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.
 
@@ -159,7 +188,7 @@ Steps
             **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 
-        #. **Run context.test_yaml_config.**
+        #. **Test your config using ``context.test_yaml_config``.**
 
             .. code-block:: python
 
@@ -199,8 +228,6 @@ Steps
 
             **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
 
-Additional notes
-----------------
 
 * The default configuration of the most recent MySQL releases does not support some GROUP_BY operations used in Great Expectations. To use the full range of statistical Expectations, you need to disable the ``ONLY_FULL_GROUP_BY`` ``sql_mode`` setting. Please see the following article for more information https://stackoverflow.com/questions/36829911/how-to-resolve-order-by-clause-is-not-in-select-list-caused-mysql-5-7-with-sel).
 

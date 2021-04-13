@@ -207,6 +207,8 @@ class SorterConfig(DictDot):
         class_name=None,
         module_name=None,
         orderby="asc",
+        reference_list=None,
+        datetime_format=None,
         **kwargs,
     ):
         self._name = name
@@ -215,6 +217,12 @@ class SorterConfig(DictDot):
         self._orderby = orderby
         for k, v in kwargs.items():
             setattr(self, k, v)
+
+        if reference_list is not None:
+            self._reference_list = reference_list
+
+        if datetime_format is not None:
+            self._datetime_format = datetime_format
 
     @property
     def name(self):
@@ -232,6 +240,14 @@ class SorterConfig(DictDot):
     def orderby(self):
         return self._orderby
 
+    @property
+    def reference_list(self):
+        return self._reference_list
+
+    @property
+    def datetime_format(self):
+        return self._datetime_format
+
 
 class SorterConfigSchema(Schema):
     class Meta:
@@ -243,6 +259,12 @@ class SorterConfigSchema(Schema):
         missing="great_expectations.datasource.data_connector.sorter"
     )
     orderby = fields.String(required=False, missing="asc", allow_none=False)
+
+    # allow_none = True because it is only used by some Sorters
+    reference_list = fields.List(
+        cls_or_instance=fields.Str(), required=False, missing=None, allow_none=True
+    )
+    datetime_format = fields.String(required=False, missing=None, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -263,13 +285,14 @@ class DataConnectorConfig(DictDot):
         base_directory=None,
         glob_directive=None,
         default_regex=None,
-        runtime_keys=None,
+        batch_identifiers=None,
         bucket=None,
         prefix=None,
         delimiter=None,
         max_keys=None,
         boto3_options=None,
         sorters=None,
+        batch_spec_passthrough=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -282,8 +305,8 @@ class DataConnectorConfig(DictDot):
             self.glob_directive = glob_directive
         if default_regex is not None:
             self.default_regex = default_regex
-        if runtime_keys is not None:
-            self.runtime_keys = runtime_keys
+        if batch_identifiers is not None:
+            self.batch_identifiers = batch_identifiers
         if bucket is not None:
             self.bucket = bucket
         if prefix is not None:
@@ -296,6 +319,8 @@ class DataConnectorConfig(DictDot):
             self.boto3_options = boto3_options
         if sorters is not None:
             self.sorters = sorters
+        if batch_spec_passthrough is not None:
+            self.batch_spec_passthrough = batch_spec_passthrough
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -330,7 +355,7 @@ class DataConnectorConfigSchema(Schema):
         allow_none=True,
     )
     default_regex = fields.Dict(required=False, allow_none=True)
-    runtime_keys = fields.List(
+    batch_identifiers = fields.List(
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     bucket = fields.String(required=False, allow_none=True)
@@ -354,6 +379,7 @@ class DataConnectorConfigSchema(Schema):
         cls_or_instance=fields.Str(), required=False, allow_none=True
     )
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
+    batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -784,8 +810,8 @@ class NotebookConfig(DictDot):
         column_expectations_markdown=None,
         header_code=None,
         footer_code=None,
-        column_expectation_code=None,
         table_expectation_code=None,
+        column_expectation_code=None,
     ):
         self.class_name = class_name
         self.module_name = module_name
@@ -806,8 +832,8 @@ class NotebookConfig(DictDot):
 
         self.header_code = header_code
         self.footer_code = footer_code
-        self.column_expectation_code = column_expectation_code
         self.table_expectation_code = table_expectation_code
+        self.column_expectation_code = column_expectation_code
 
 
 class NotebookConfigSchema(Schema):
@@ -840,10 +866,10 @@ class NotebookConfigSchema(Schema):
 
     header_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     footer_code = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
-    column_expectation_code = fields.Nested(
+    table_expectation_code = fields.Nested(
         NotebookTemplateConfigSchema, allow_none=True
     )
-    table_expectation_code = fields.Nested(
+    column_expectation_code = fields.Nested(
         NotebookTemplateConfigSchema, allow_none=True
     )
 
@@ -967,11 +993,11 @@ class DataContextConfigSchema(Schema):
             )
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
-                "You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
+                "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
                     data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
                 ),
                 validation_error=ValidationError(
-                    message="You appear to be using a checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
+                    message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
                         data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
                     )
                 ),
@@ -1609,7 +1635,7 @@ class CheckpointConfigSchema(Schema):
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current Checkpoint configuration is incomplete.  Please update your checkpoint configuration to
+                f"""Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
                 continue.
                 """
             )
@@ -1617,7 +1643,7 @@ class CheckpointConfigSchema(Schema):
         if data.get("config_version"):
             if "name" not in data:
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current checkpoint
+                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
                     configuration to continue.
                     """
                 )
