@@ -33,6 +33,7 @@ try:
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
+    from sqlalchemy.engine.row import Row
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
     from sqlalchemy.sql.expression import BinaryExpression, literal
@@ -55,6 +56,7 @@ except ImportError:
     TextClause = None
     DefaultDialect = None
     ProgrammingError = None
+    Row = None
 
 try:
     import psycopg2
@@ -885,7 +887,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results = self.engine.execute(quantiles_query).fetchone()
+            quantiles_results: Row = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
             self._treat_quantiles_exception(pe)
@@ -965,7 +967,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         )
 
         try:
-            quantiles_results = self.engine.execute(quantiles_query).fetchone()
+            quantiles_results: Row = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
             self._treat_quantiles_exception(pe)
@@ -984,7 +986,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results = self.engine.execute(quantiles_query).fetchone()
+            quantiles_results: Row = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError:
             # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
@@ -1000,7 +1002,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
                 if allow_relative_error:
                     try:
-                        quantiles_results = self.engine.execute(
+                        quantiles_results: Row = self.engine.execute(
                             quantiles_query_approx
                         ).fetchone()
                         return list(quantiles_results)
