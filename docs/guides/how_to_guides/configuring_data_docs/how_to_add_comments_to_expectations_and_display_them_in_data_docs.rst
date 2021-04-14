@@ -96,8 +96,8 @@ Steps
                         "notes": {
                             "format": "string",
                             "content": [
-                                "Example notes about this expectation. **Markdown** `Supported`.",
-                                "Second example note **with** *Markdown*",
+                                "Example notes about this expectation. **Markdown** `Not Supported`.",
+                                "Second example note **without** *Markdown*",
                             ]
                         }
                     }
@@ -192,8 +192,8 @@ Steps
                         "notes": {
                             "format": "string",
                             "content": [
-                                "Example notes about this expectation. **Markdown** `Supported`.",
-                                "Second example note **with** *Markdown*",
+                                "Example notes about this expectation. **Markdown** `Not Supported`.",
+                                "Second example note **without** *Markdown*",
                             ]
                         }
                     }
