@@ -280,7 +280,7 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement --requirement requirements-dev-util.txt requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
