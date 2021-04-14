@@ -22,7 +22,6 @@ from great_expectations.data_context import (
 from great_expectations.data_context.store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
 )
@@ -39,9 +38,6 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import gen_directory_tree_str
-from tests.integration.usage_statistics.test_integration_usage_statistics import (
-    USAGE_STATISTICS_QA_URL,
-)
 from tests.test_utils import create_files_in_directory, safe_remove
 
 try:
@@ -687,47 +683,6 @@ def test_add_store(empty_data_context):
     assert isinstance(new_store, ExpectationsStore)
 
 
-@pytest.fixture
-def basic_data_context_config():
-    return DataContextConfig(
-        **{
-            "commented_map": {},
-            "config_version": 2,
-            "plugins_directory": "plugins/",
-            "evaluation_parameter_store_name": "evaluation_parameter_store",
-            "validations_store_name": "does_not_have_to_be_real",
-            "expectations_store_name": "expectations_store",
-            "config_variables_file_path": "uncommitted/config_variables.yml",
-            "datasources": {},
-            "stores": {
-                "expectations_store": {
-                    "class_name": "ExpectationsStore",
-                    "store_backend": {
-                        "class_name": "TupleFilesystemStoreBackend",
-                        "base_directory": "expectations/",
-                    },
-                },
-                "evaluation_parameter_store": {
-                    "module_name": "great_expectations.data_context.store",
-                    "class_name": "EvaluationParameterStore",
-                },
-            },
-            "data_docs_sites": {},
-            "validation_operators": {
-                "default": {
-                    "class_name": "ActionListValidationOperator",
-                    "action_list": [],
-                }
-            },
-            "anonymous_usage_statistics": {
-                "enabled": True,
-                "data_context_id": "6a52bdfa-e182-455b-a825-e69f076e67d6",
-                "usage_statistics_url": USAGE_STATISTICS_QA_URL,
-            },
-        }
-    )
-
-
 def test_ExplorerDataContext(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
     explorer_data_context = ExplorerDataContext(context_root_directory)
@@ -1276,151 +1231,6 @@ def test_build_batch_kwargs(titanic_multibatch_data_context):
     assert {"Titanic_1912.csv", "Titanic_1911.csv"} == set(paths)
 
 
-def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasources_and_a_site_configured(
-    tmp_path_factory,
-):
-    """
-    This test ensures that a url will be returned for a default site even if a
-    datasource is not configured, and docs are not built.
-    """
-    empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
-    DataContext.create(empty_directory)
-    context = DataContext(os.path.join(empty_directory, DataContext.GE_DIR))
-
-    obs = context.get_docs_sites_urls(only_if_exists=False)
-    assert len(obs) == 1
-    assert obs[0]["site_url"].endswith(
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-    )
-
-
-def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_site(
-    tmp_path_factory,
-):
-    empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
-    DataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(ge_dir)
-
-    context._project_config["data_docs_sites"] = {
-        "my_rad_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/some/local/path/",
-            },
-        }
-    }
-
-    # TODO Workaround project config programmatic config manipulation
-    #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
-    context = DataContext(ge_dir)
-    context.build_data_docs()
-
-    expected_path = os.path.join(
-        ge_dir, "uncommitted/data_docs/some/local/path/index.html"
-    )
-    assert os.path.isfile(expected_path)
-
-    obs = context.get_docs_sites_urls()
-    assert obs == [
-        {"site_name": "my_rad_site", "site_url": "file://{}".format(expected_path)}
-    ]
-
-
-def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_local_site(
-    tmp_path_factory,
-):
-    empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
-    DataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(ge_dir)
-
-    context._project_config["data_docs_sites"] = {
-        "my_rad_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/some/path/",
-            },
-        },
-        "another_just_amazing_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/another/path/",
-            },
-        },
-    }
-
-    # TODO Workaround project config programmatic config manipulation
-    #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
-    context = DataContext(ge_dir)
-    context.build_data_docs()
-    data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")
-
-    path_1 = os.path.join(data_docs_dir, "some/path/index.html")
-    path_2 = os.path.join(data_docs_dir, "another/path/index.html")
-    for expected_path in [path_1, path_2]:
-        assert os.path.isfile(expected_path)
-
-    obs = context.get_docs_sites_urls()
-
-    assert obs == [
-        {"site_name": "my_rad_site", "site_url": "file://{}".format(path_1)},
-        {
-            "site_name": "another_just_amazing_site",
-            "site_url": "file://{}".format(path_2),
-        },
-    ]
-
-
-def test_build_data_docs_skipping_index_does_not_build_index(
-    tmp_path_factory,
-):
-    # TODO What's the latest and greatest way to use configs rather than my hackery?
-    empty_directory = str(tmp_path_factory.mktemp("empty"))
-    DataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, DataContext.GE_DIR)
-    context = DataContext(ge_dir)
-    config = context.get_config()
-    config.data_docs_sites = {
-        "local_site": {
-            "class_name": "SiteBuilder",
-            "store_backend": {
-                "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": os.path.join("uncommitted", "data_docs"),
-            },
-        },
-    }
-    context._project_config = config
-
-    # TODO Workaround project config programmatic config manipulation
-    #  statefulness issues by writing to disk and re-upping a new context
-    context._save_project_config()
-    del context
-    context = DataContext(ge_dir)
-    data_docs_dir = os.path.join(ge_dir, "uncommitted", "data_docs")
-    index_path = os.path.join(data_docs_dir, "index.html")
-    assert not os.path.isfile(index_path)
-
-    context.build_data_docs(build_index=False)
-    assert os.path.isdir(os.path.join(data_docs_dir, "static"))
-    assert not os.path.isfile(index_path)
-
-
-def test_get_site_names(
-    tmp_path_factory, empty_data_context, basic_data_context_config
-):
-    assert empty_data_context.get_site_names() == ["local_site"]
-    assert basic_data_context_config.data_docs_sites == {}
-    base_path = tmp_path_factory.mktemp("foo")
-    context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
-    assert context.get_site_names() == []
-
-
 def test_load_config_variables_file(
     basic_data_context_config, tmp_path_factory, monkeypatch
 ):
@@ -1597,7 +1407,7 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
         "my_checkpoint.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        f.write("# Not a checkpoint file")
+        f.write("# Not a Checkpoint file")
     assert os.path.isfile(checkpoint_file_path)
     assert context.list_checkpoints() == ["my_checkpoint"]
 
@@ -1731,7 +1541,7 @@ def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    # add checkpoint config
+    # add Checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
         config_version=1,

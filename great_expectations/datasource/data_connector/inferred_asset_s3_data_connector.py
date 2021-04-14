@@ -63,6 +63,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             boto3_options (dict): optional boto3 options
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.debug(f'Constructing InferredAssetS3DataConnector "{name}".')
 

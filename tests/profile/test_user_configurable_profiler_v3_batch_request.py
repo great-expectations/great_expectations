@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -56,16 +56,14 @@ logger = logging.getLogger(__name__)
 
 
 def get_pandas_runtime_validator(context, df):
-    batch_request = BatchRequest(
+    batch_request = RuntimeBatchRequest(
         datasource_name="my_pandas_runtime_datasource",
         data_connector_name="my_data_connector",
-        batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
-        partition_request={
-            "batch_identifiers": {
-                "an_example_key": "a",
-                "another_example_key": "b",
-            }
+        runtime_parameters={"batch_data": df},
+        batch_identifiers={
+            "an_example_key": "a",
+            "another_example_key": "b",
         },
     )
 
@@ -89,16 +87,14 @@ def get_spark_runtime_validator(context, df):
         }
     )
     df = spark.createDataFrame(df)
-    batch_request = BatchRequest(
+    batch_request = RuntimeBatchRequest(
         datasource_name="my_spark_datasource",
         data_connector_name="my_data_connector",
-        batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
-        partition_request={
-            "batch_identifiers": {
-                "an_example_key": "a",
-                "another_example_key": "b",
-            }
+        runtime_parameters={"batch_data": df},
+        batch_identifiers={
+            "an_example_key": "a",
+            "another_example_key": "b",
         },
     )
 
@@ -173,8 +169,6 @@ def get_sqlalchemy_runtime_validator_postgresql(
         dtype=sql_dtypes,
         if_exists="replace",
     )
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name

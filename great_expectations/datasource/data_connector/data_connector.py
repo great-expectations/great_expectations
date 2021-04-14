@@ -1,17 +1,13 @@
 import logging
 import random
+from copy import deepcopy
 from typing import Any, List, Optional, Tuple
 
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchMarkers,
-    BatchRequest,
-    BatchRequestBase,
-)
+from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.validator import validator
 from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +39,7 @@ class DataConnector:
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         Base class for DataConnectors
@@ -51,7 +48,7 @@ class DataConnector:
             name (str): required name for DataConnector
             datasource_name (str): required name for datasource
             execution_engine (ExecutionEngine): optional reference to ExecutionEngine
-
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         self._name = name
         self._datasource_name = datasource_name
@@ -61,6 +58,11 @@ class DataConnector:
         self._data_references_cache = {}
 
         self._data_context_root_directory = None
+        self._batch_spec_passthrough = batch_spec_passthrough or {}
+
+    @property
+    def batch_spec_passthrough(self) -> dict:
+        return self._batch_spec_passthrough
 
     @property
     def name(self) -> str:
@@ -116,9 +118,14 @@ class DataConnector:
                 batch_definition=batch_definition
             )
         )
-        batch_spec_passthrough: dict = batch_definition.batch_spec_passthrough
-        if isinstance(batch_spec_passthrough, dict):
-            batch_spec_params.update(batch_spec_passthrough)
+        # batch_spec_passthrough via Data Connector config
+        batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
+
+        # batch_spec_passthrough from batch_definition supercedes batch_spec_passthrough from Data Connector config
+        if isinstance(batch_definition.batch_spec_passthrough, dict):
+            batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
+
+        batch_spec_params.update(batch_spec_passthrough)
         batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
         return batch_spec
 
@@ -320,16 +327,21 @@ class DataConnector:
         if pretty_print:
             print(f"\n\t\tFetching batch data...")
 
-        batch_definition_list = self._map_data_reference_to_batch_definition_list(
+        batch_definition_list: List[
+            BatchDefinition
+        ] = self._map_data_reference_to_batch_definition_list(
             data_reference=example_data_reference,
             data_asset_name=data_asset_name,
         )
         assert len(batch_definition_list) == 1
-        batch_definition = batch_definition_list[0]
+        batch_definition: BatchDefinition = batch_definition_list[0]
 
         # _execution_engine might be None for some tests
         if batch_definition is None or self._execution_engine is None:
             return {}
+
+        batch_data: Any
+        batch_spec: BatchSpec
         batch_data, batch_spec, _ = self.get_batch_data_and_metadata(
             batch_definition=batch_definition
         )
@@ -337,19 +349,30 @@ class DataConnector:
         # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
-        validator = Validator(execution_engine=batch_data.execution_engine)
-        df = validator.get_metric(
-            MetricConfiguration(
-                "table.head", {"batch_id": batch_definition.id}, {"n_rows": 5}
+        validator: Validator = Validator(execution_engine=batch_data.execution_engine)
+        data: Any = validator.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.head",
+                metric_domain_kwargs={
+                    "batch_id": batch_definition.id,
+                },
+                metric_value_kwargs={
+                    "n_rows": 5,
+                },
             )
         )
-        n_rows = validator.get_metric(
-            MetricConfiguration("table.row_count", {"batch_id": batch_definition.id})
+        n_rows: int = validator.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.row_count",
+                metric_domain_kwargs={
+                    "batch_id": batch_definition.id,
+                },
+            )
         )
 
         if pretty_print and df is not None:
             print(f"\n\t\tShowing 5 rows")
-            print(df)
+            print(data)
 
         return {
             "batch_spec": batch_spec,
