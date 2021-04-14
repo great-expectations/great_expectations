@@ -23,6 +23,7 @@ Develop
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
 * [DOCS] Update Configuring Data Docs documentation for V3 API CLI
+* [DOCS] Update Configuring metadata stores documentation for V3 API CLI
 * [DOCS] Fix typos in "How to load a database table, view, or query result as a batch" guide and update with `create_temp_table` info
 * [DOCS] Update "How to add a Validation Operator" guide to make it clear it is only for V2 API
 
