@@ -133,9 +133,9 @@ stages:
 
           - script: |
               pip install  pytest pytest-cov pytest-azurepipelines
-#              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-#              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/integration/usage_statistics
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              # pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/integration/usage_statistics
+              # pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -198,9 +198,9 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-#              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-#              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/integration/usage_statistics
-              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              # pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/integration/usage_statistics
+              # pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -246,36 +246,36 @@ stages:
               pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
-#  - stage: cli_integration
-#    dependsOn: [scope_check, lint, usage_stats_integration]
-#    pool:
-#      vmImage: 'ubuntu-latest'
-#
-#    jobs:
-#      - job: test_cli
-#        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
-#        variables:
-#          python.version: '3.8'
-#
-#        steps:
-#          - task: UsePythonVersion@0
-#            inputs:
-#              versionSpec: '$(python.version)'
-#            displayName: 'Use Python $(python.version)'
-#
-#          - bash: python -m pip install --upgrade pip==20.2.4
-#            displayName: 'Update pip'
-#
-#          - script: |
-#                pip install --requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
-#                pip install --requirement requirements.txt
-#                pip install .
-#            displayName: 'Install dependencies'
-#
-#          - script: |
-#              pip install pytest pytest-azurepipelines
-#              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/cli
-#            displayName: 'pytest'
+  - stage: cli_integration
+    dependsOn: [scope_check, lint, usage_stats_integration, required, db_integration]
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: test_cli
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+                pip install --requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
+                pip install --requirement requirements.txt
+                pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-azurepipelines
+              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/cli
+            displayName: 'pytest'
 
   - stage: db_integration
     pool:
@@ -323,9 +323,9 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-#              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-#              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/integration/usage_statistics
-              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              # pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/integration/usage_statistics
+              # pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
       - job: mssql
@@ -356,17 +356,17 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-#              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
-#              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/integration/usage_statistics
-              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              # pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/integration/usage_statistics
+              # pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
             displayName: 'pytest'
 
   - stage: deploy_gallery
     condition: and(succeeded(), or(eq(variables.isMain, true), eq(variables.isDevelop, true)))
     pool:
       vmImage: 'ubuntu-latest'
-#    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
-    dependsOn: [required, lint, db_integration, usage_stats_integration]
+    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+    # dependsOn: [required, lint, db_integration, usage_stats_integration]
 
     jobs:
       - job: build_gallery
@@ -420,8 +420,8 @@ stages:
     condition: and(succeeded(), eq(variables.isMain, true))
     pool:
       vmImage: 'ubuntu-latest'
-#    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
-    dependsOn: [required, lint, db_integration, usage_stats_integration]
+    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+    # dependsOn: [required, lint, db_integration, usage_stats_integration]
 
     jobs:
       - job: deploy
