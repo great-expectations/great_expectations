@@ -954,6 +954,9 @@ def test_error_handling_for_expect_compound_columns_to_be_unique(
             "dropoff_location_id",
         ],
     )
+    # TODO: <Alex>ALEX</Alex>
+    caplog.clear()
+    # TODO: <Alex>ALEX</Alex>
     with caplog.at_level(logging.WARNING):
         suite = profiler.build_suite()
 
@@ -962,6 +965,7 @@ def test_error_handling_for_expect_compound_columns_to_be_unique(
     # TODO: <Alex>ALEX</Alex>
     for warning_message in log_warnings:
         print(f"\n[ALEX_TEST] LOG_WARNING: {warning_message}")
+    print(f"\n[ALEX_TEST] CAPLOG.TEXT: {caplog.text}")
     # TODO: <Alex>ALEX</Alex>
     assert len(log_warnings) == 1
 
