@@ -13,88 +13,88 @@ This guide will explain how to host and share Data Docs on AWS S3.
 Steps
 -----
 
-1. **Configure an S3 bucket.**
-
-  You can configure an S3 bucket using the AWS CLI. Make sure you modify the bucket name and region for your situation.
-
-  .. code-block:: bash
-
-    > aws s3api create-bucket --bucket data-docs.my_org --region us-east-1
-    {
-        "Location": "/data-docs.my_org"
-    }
-
-2. **Configure your bucket policy to enable appropriate access.**
-
-  The example policy below **enforces IP-based access** - modify the bucket name and IP addresses for your situation. After you have customized the example policy to suit your situation, save it to a file called ``ip-policy.json`` in your local directory.
-
-  .. admonition:: Important
-
-      Your policy should provide access only to appropriate users. Data Docs sites can include critical information about raw data and should generally **not** be publicly accessible.
-
-  .. code-block:: json
-
-      {
-        "Version": "2012-10-17",
-        "Statement": [{
-          "Sid": "Allow only based on source IP",
-          "Effect": "Allow",
-          "Principal": "*",
-          "Action": "s3:GetObject",
-          "Resource": [
-            "arn:aws:s3:::data-docs.my_org",
-            "arn:aws:s3:::data-docs.my_org/*"
-          ],
-          "Condition": {
-            "IpAddress": {
-              "aws:SourceIp": [
-                "192.168.0.1/32",
-                "2001:db8:1234:1234::/64"
-              ]
-            }
-          }
-        }
-        ]
-      }
-
-3. **Apply the policy.**
-
-  Run the following CLI command to apply the policy:
-
-  .. code-block:: bash
-  
-      > aws s3api put-bucket-policy --bucket data-docs.my_org --policy file://ip-policy.json
-
-4. **Add a new S3 site to the data_docs_sites section of your great_expectations.yml**
-
-  You may also replace the default ``local_site`` if you would only like to maintain a single S3 Data Docs site.
-
-  .. code-block:: yaml
-
-    data_docs_sites:
-      local_site:
-        class_name: SiteBuilder
-        show_how_to_buttons: true
-        store_backend:
-          class_name: TupleFilesystemStoreBackend
-          base_directory: uncommitted/data_docs/local_site/
-        site_index_builder:
-          class_name: DefaultSiteIndexBuilder
-      s3_site:  # this is a user-selected name - you may select your own
-        class_name: SiteBuilder
-        store_backend:
-          class_name: TupleS3StoreBackend
-          bucket: data-docs.my_org  # UPDATE the bucket name here to match the bucket you configured above.
-        site_index_builder:
-          class_name: DefaultSiteIndexBuilder
-          show_cta_footer: true
-
-5. **Test that your configuration is correct by building the site.**
-
 .. content-tabs::
 
     .. tab-container:: tab0
         :title: Show Docs for V2 (Batch Kwargs) API
+
+        1. **Configure an S3 bucket.**
+
+          You can configure an S3 bucket using the AWS CLI. Make sure you modify the bucket name and region for your situation.
+
+          .. code-block:: bash
+
+            > aws s3api create-bucket --bucket data-docs.my_org --region us-east-1
+            {
+                "Location": "/data-docs.my_org"
+            }
+
+        2. **Configure your bucket policy to enable appropriate access.**
+
+          The example policy below **enforces IP-based access** - modify the bucket name and IP addresses for your situation. After you have customized the example policy to suit your situation, save it to a file called ``ip-policy.json`` in your local directory.
+
+          .. admonition:: Important
+
+              Your policy should provide access only to appropriate users. Data Docs sites can include critical information about raw data and should generally **not** be publicly accessible.
+
+          .. code-block:: json
+
+              {
+                "Version": "2012-10-17",
+                "Statement": [{
+                  "Sid": "Allow only based on source IP",
+                  "Effect": "Allow",
+                  "Principal": "*",
+                  "Action": "s3:GetObject",
+                  "Resource": [
+                    "arn:aws:s3:::data-docs.my_org",
+                    "arn:aws:s3:::data-docs.my_org/*"
+                  ],
+                  "Condition": {
+                    "IpAddress": {
+                      "aws:SourceIp": [
+                        "192.168.0.1/32",
+                        "2001:db8:1234:1234::/64"
+                      ]
+                    }
+                  }
+                }
+                ]
+              }
+
+        3. **Apply the policy.**
+
+          Run the following CLI command to apply the policy:
+
+          .. code-block:: bash
+
+              > aws s3api put-bucket-policy --bucket data-docs.my_org --policy file://ip-policy.json
+
+        4. **Add a new S3 site to the data_docs_sites section of your great_expectations.yml**
+
+          You may also replace the default ``local_site`` if you would only like to maintain a single S3 Data Docs site.
+
+          .. code-block:: yaml
+
+            data_docs_sites:
+              local_site:
+                class_name: SiteBuilder
+                show_how_to_buttons: true
+                store_backend:
+                  class_name: TupleFilesystemStoreBackend
+                  base_directory: uncommitted/data_docs/local_site/
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
+              s3_site:  # this is a user-selected name - you may select your own
+                class_name: SiteBuilder
+                store_backend:
+                  class_name: TupleS3StoreBackend
+                  bucket: data-docs.my_org  # UPDATE the bucket name here to match the bucket you configured above.
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
+                  show_cta_footer: true
+
+        5. **Test that your configuration is correct by building the site.**
 
           Use the following CLI command: ``great_expectations docs build --site-name s3_site``. If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy.
 
@@ -114,6 +114,84 @@ Steps
 
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
+
+        1. **Configure an S3 bucket.**
+
+          You can configure an S3 bucket using the AWS CLI. Make sure you modify the bucket name and region for your situation.
+
+          .. code-block:: bash
+
+            > aws s3api create-bucket --bucket data-docs.my_org --region us-east-1
+            {
+                "Location": "/data-docs.my_org"
+            }
+
+        2. **Configure your bucket policy to enable appropriate access.**
+
+          The example policy below **enforces IP-based access** - modify the bucket name and IP addresses for your situation. After you have customized the example policy to suit your situation, save it to a file called ``ip-policy.json`` in your local directory.
+
+          .. admonition:: Important
+
+              Your policy should provide access only to appropriate users. Data Docs sites can include critical information about raw data and should generally **not** be publicly accessible.
+
+          .. code-block:: json
+
+              {
+                "Version": "2012-10-17",
+                "Statement": [{
+                  "Sid": "Allow only based on source IP",
+                  "Effect": "Allow",
+                  "Principal": "*",
+                  "Action": "s3:GetObject",
+                  "Resource": [
+                    "arn:aws:s3:::data-docs.my_org",
+                    "arn:aws:s3:::data-docs.my_org/*"
+                  ],
+                  "Condition": {
+                    "IpAddress": {
+                      "aws:SourceIp": [
+                        "192.168.0.1/32",
+                        "2001:db8:1234:1234::/64"
+                      ]
+                    }
+                  }
+                }
+                ]
+              }
+
+        3. **Apply the policy.**
+
+          Run the following CLI command to apply the policy:
+
+          .. code-block:: bash
+
+              > aws s3api put-bucket-policy --bucket data-docs.my_org --policy file://ip-policy.json
+
+        4. **Add a new S3 site to the data_docs_sites section of your great_expectations.yml**
+
+          You may also replace the default ``local_site`` if you would only like to maintain a single S3 Data Docs site.
+
+          .. code-block:: yaml
+
+            data_docs_sites:
+              local_site:
+                class_name: SiteBuilder
+                show_how_to_buttons: true
+                store_backend:
+                  class_name: TupleFilesystemStoreBackend
+                  base_directory: uncommitted/data_docs/local_site/
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
+              s3_site:  # this is a user-selected name - you may select your own
+                class_name: SiteBuilder
+                store_backend:
+                  class_name: TupleS3StoreBackend
+                  bucket: data-docs.my_org  # UPDATE the bucket name here to match the bucket you configured above.
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
+                  show_cta_footer: true
+
+        5. **Test that your configuration is correct by building the site.**
 
           Use the following CLI command: ``great_expectations --v3-api docs build --site-name s3_site``. If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy.
 
