@@ -116,11 +116,11 @@ stages:
           - bash: python -m pip install --upgrade pip==21.0.1
             displayName: 'Update pip'
 
-          - bash: pip install  pandas
+          - bash: pip install pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
 
-          - bash: pip install  pandas==$(pandas.version)
+          - bash: pip install pandas==$(pandas.version)
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
 
@@ -132,7 +132,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install  pytest pytest-cov pytest-azurepipelines
+              pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -180,11 +180,11 @@ stages:
               pip install pypandoc
             displayName: 'Install pandoc'
 
-          - bash: pip install  pandas
+          - bash: pip install pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
 
-          - bash: pip install  pandas==$(pandas.version)
+          - bash: pip install pandas==$(pandas.version)
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
 
