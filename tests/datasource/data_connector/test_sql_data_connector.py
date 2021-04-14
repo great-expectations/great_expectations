@@ -2,10 +2,12 @@ import json
 import random
 
 import pytest
+from packaging.version import parse as parse_version
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 
 try:
@@ -26,7 +28,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A:
             #table_name: events # If table_name is omitted, then the table_name defaults to the asset name
             splitter_method: _split_on_column_value
@@ -82,7 +84,7 @@ def test_get_batch_definition_list_from_batch_request(
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -178,7 +180,7 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -232,7 +234,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_timestamp_column__B:
             splitter_method: _split_on_converted_datetime
             splitter_kwargs:
@@ -285,7 +287,7 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_regularly_spaced_incrementing_id_column__C:
             splitter_method: _split_on_divided_integer
             splitter_kwargs:
@@ -341,7 +343,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_incrementing_batch_id__E:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -394,7 +396,7 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_foreign_key__F:
             splitter_method: _split_on_column_value
             splitter_kwargs:
@@ -448,7 +450,7 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_multiple_columns__G:
             splitter_method: _split_on_multi_column_values
             splitter_kwargs:
@@ -512,7 +514,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     # name: my_sql_data_connector
     # datasource_name: FAKE_Datasource_NAME
 
-    # data_assets:
+    # assets:
     #     table_that_should_be_partitioned_by_random_hash__H:
     #         splitter_method: _split_on_hashed_column
     #         splitter_kwargs:
@@ -737,7 +739,7 @@ def test_default_behavior_with_no_splitter(
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A: {}
     """,
     )
@@ -796,7 +798,7 @@ def test_behavior_with_whole_table_splitter(
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
 
-    data_assets:
+    assets:
         table_partitioned_by_date_column__A:
             splitter_method : "_split_on_whole_table"
             splitter_kwargs : {}
@@ -845,3 +847,260 @@ def test_behavior_with_whole_table_splitter(
     )
     assert len(batch_definition_list) == 1
     assert batch_definition_list[0]["batch_identifiers"] == {}
+
+
+def test_basic_instantiation_of_InferredAssetSqlDataConnector(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "whole_table",
+            "data_asset_name_prefix": "prexif__",
+            "data_asset_name_suffix": "__xiffus",
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    report_object = my_data_connector.self_check()
+    # print(json.dumps(report_object, indent=4))
+    assert report_object == {
+        "class_name": "InferredAssetSqlDataConnector",
+        "data_asset_count": 21,
+        "example_data_asset_names": [
+            "prexif__table_containing_id_spacers_for_D__xiffus",
+            "prexif__table_full__I__xiffus",
+            "prexif__table_partitioned_by_date_column__A__xiffus",
+        ],
+        "data_assets": {
+            "prexif__table_containing_id_spacers_for_D__xiffus": {
+                "batch_definition_count": 1,
+                "example_data_references": [{}],
+            },
+            "prexif__table_full__I__xiffus": {
+                "batch_definition_count": 1,
+                "example_data_references": [{}],
+            },
+            "prexif__table_partitioned_by_date_column__A__xiffus": {
+                "batch_definition_count": 1,
+                "example_data_references": [{}],
+            },
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {
+        #     "batch_spec": {
+        #         "schema_name": "main",
+        #         "table_name": "table_containing_id_spacers_for_D",
+        #         "data_asset_name": "prexif__table_containing_id_spacers_for_D__xiffus",
+        #         "batch_identifiers": {},
+        #     },
+        #     "n_rows": 30,
+        # },
+    }
+
+    assert my_data_connector.get_available_data_asset_names() == [
+        "prexif__table_containing_id_spacers_for_D__xiffus",
+        "prexif__table_full__I__xiffus",
+        "prexif__table_partitioned_by_date_column__A__xiffus",
+        "prexif__table_partitioned_by_foreign_key__F__xiffus",
+        "prexif__table_partitioned_by_incrementing_batch_id__E__xiffus",
+        "prexif__table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__xiffus",
+        "prexif__table_partitioned_by_multiple_columns__G__xiffus",
+        "prexif__table_partitioned_by_regularly_spaced_incrementing_id_column__C__xiffus",
+        "prexif__table_partitioned_by_timestamp_column__B__xiffus",
+        "prexif__table_that_should_be_partitioned_by_random_hash__H__xiffus",
+        "prexif__table_with_fk_reference_from_F__xiffus",
+        "prexif__view_by_date_column__A__xiffus",
+        "prexif__view_by_incrementing_batch_id__E__xiffus",
+        "prexif__view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__xiffus",
+        "prexif__view_by_multiple_columns__G__xiffus",
+        "prexif__view_by_regularly_spaced_incrementing_id_column__C__xiffus",
+        "prexif__view_by_timestamp_column__B__xiffus",
+        "prexif__view_containing_id_spacers_for_D__xiffus",
+        "prexif__view_partitioned_by_foreign_key__F__xiffus",
+        "prexif__view_that_should_be_partitioned_by_random_hash__H__xiffus",
+        "prexif__view_with_fk_reference_from_F__xiffus",
+    ]
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="whole_table",
+            data_asset_name="prexif__table_that_should_be_partitioned_by_random_hash__H__xiffus",
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+
+def test_more_complex_instantiation_of_InferredAssetSqlDataConnector(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "InferredAssetSqlDataConnector",
+            "name": "whole_table",
+            "data_asset_name_suffix": "__whole",
+            "include_schema_name": True,
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+
+    report_object = my_data_connector.self_check()
+
+    assert report_object == {
+        "class_name": "InferredAssetSqlDataConnector",
+        "data_asset_count": 21,
+        "data_assets": {
+            "main.table_containing_id_spacers_for_D__whole": {
+                "batch_definition_count": 1,
+                "example_data_references": [{}],
+            },
+            "main.table_full__I__whole": {
+                "batch_definition_count": 1,
+                "example_data_references": [{}],
+            },
+            "main.table_partitioned_by_date_column__A__whole": {
+                "batch_definition_count": 1,
+                "example_data_references": [{}],
+            },
+        },
+        "example_data_asset_names": [
+            "main.table_containing_id_spacers_for_D__whole",
+            "main.table_full__I__whole",
+            "main.table_partitioned_by_date_column__A__whole",
+        ],
+        # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
+        # "example_data_reference": {
+        #     "batch_spec": {
+        #         "batch_identifiers": {},
+        #         "schema_name": "main",
+        #         "table_name": "table_containing_id_spacers_for_D",
+        #         "data_asset_name": "main.table_containing_id_spacers_for_D__whole",
+        #     },
+        #     "n_rows": 30,
+        # },
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
+    }
+
+    assert my_data_connector.get_available_data_asset_names() == [
+        "main.table_containing_id_spacers_for_D__whole",
+        "main.table_full__I__whole",
+        "main.table_partitioned_by_date_column__A__whole",
+        "main.table_partitioned_by_foreign_key__F__whole",
+        "main.table_partitioned_by_incrementing_batch_id__E__whole",
+        "main.table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole",
+        "main.table_partitioned_by_multiple_columns__G__whole",
+        "main.table_partitioned_by_regularly_spaced_incrementing_id_column__C__whole",
+        "main.table_partitioned_by_timestamp_column__B__whole",
+        "main.table_that_should_be_partitioned_by_random_hash__H__whole",
+        "main.table_with_fk_reference_from_F__whole",
+        "main.view_by_date_column__A__whole",
+        "main.view_by_incrementing_batch_id__E__whole",
+        "main.view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D__whole",
+        "main.view_by_multiple_columns__G__whole",
+        "main.view_by_regularly_spaced_incrementing_id_column__C__whole",
+        "main.view_by_timestamp_column__B__whole",
+        "main.view_containing_id_spacers_for_D__whole",
+        "main.view_partitioned_by_foreign_key__F__whole",
+        "main.view_that_should_be_partitioned_by_random_hash__H__whole",
+        "main.view_with_fk_reference_from_F__whole",
+    ]
+
+    batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
+        BatchRequest(
+            datasource_name="my_test_datasource",
+            data_connector_name="whole_table",
+            data_asset_name="main.table_that_should_be_partitioned_by_random_hash__H__whole",
+        )
+    )
+    assert len(batch_definition_list) == 1
+
+
+def test_basic_instantiation_of_ConfiguredAssetSqlDataConnector(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "name": "my_sql_data_connector",
+            "assets": {"main.table_full__I__whole": {}},
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+    report_object = my_data_connector.self_check()
+
+    assert report_object == {
+        "class_name": "ConfiguredAssetSqlDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": ["main.table_full__I__whole"],
+        "data_assets": {
+            "main.table_full__I__whole": {
+                "batch_definition_count": 1,
+                "example_data_references": [{}],
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+    }
+
+
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "name": "my_sql_data_connector",
+            "assets": {
+                "main.table_partitioned_by_date_column__A": {
+                    "splitter_method": "_split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                },
+            },
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+    report_object = my_data_connector.self_check()
+    assert report_object == {
+        "class_name": "ConfiguredAssetSqlDataConnector",
+        "data_asset_count": 1,
+        "example_data_asset_names": ["main.table_partitioned_by_date_column__A"],
+        "data_assets": {
+            "main.table_partitioned_by_date_column__A": {
+                "batch_definition_count": 30,
+                "example_data_references": [
+                    {"date": "2020-01-01"},
+                    {"date": "2020-01-02"},
+                    {"date": "2020-01-03"},
+                ],
+            }
+        },
+        "unmatched_data_reference_count": 0,
+        "example_unmatched_data_references": [],
+    }
+
+
+# TODO
+def test_ConfiguredAssetSqlDataConnector_with_sorting(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    pass

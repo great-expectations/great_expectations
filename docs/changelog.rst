@@ -8,18 +8,21 @@ Develop
 -----------------
 
 * [ENHANCEMENT] Improve support for quantiles calculation in Athena
-=======
 * [ENHANCEMENT] V3 API CLI docs commands have better error messages and more consistent short flags
+* [ENHANCEMENT] Great Expectations Compatibility with SqlAlchemy 1.4 #2641
 * [ENHANCEMENT] Update all Data Connectors to allow for `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `DataConnector.build_batch_spec` to use `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `ConfiguredAssetSqlDataConnector.build_batch_spec` and `ConfiguredAssetFilePathDataConnector.build_batch_spec` to properly process `Asset.batch_spec_passthrough`
 * [ENHANCEMENT] Update `SqlAlchemyExecutionEngine.get_batch_data_and_markers` to handle `create_temp_table` in `RuntimeQueryBatchSpec`
 * [ENHANCEMENT] Usage stats messages for the v3 API CLI are now sent before and after the command runs # 2661
+* [ENHANCEMENT} Update the datasource new notebook for improved data asset inference
 * [ENHANCEMENT] Update the `datasource new` notebook for improved data asset inference
 * [ENHANCEMENT] Made stylistic improvements to the `checkpoint new` notebook
+* [BUGFIX] Rename assets in SqlDataConnectors to be consistent with other DataConnectors #2665
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
+* [DOCS] Update Configuring Data Docs documentation for V3 API CLI
 * [DOCS] Fix typos in "How to load a database table, view, or query result as a batch" guide and update with `create_temp_table` info
 * [DOCS] Update "How to add a Validation Operator" guide to make it clear it is only for V2 API
 
@@ -61,9 +64,12 @@ Develop
 * [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
 * [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
 * [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
+* [ENHANCE] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
 * [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource (Thanks @xaniasd)
 * [BUGFIX] pandas partial read_ functions not being unwrapped (Thanks @luke321321)
 * [BUGFIX] Don't stop SparkContext when running in Databricks (#2587) (Thanks @jarandaf)
+* [MAINTENANCE] Oracle listed twice in list of sqlalchemy dialects #2609
+* [FEATURE] Oracle support added to sqlalchemy datasource and dataset #2609
 
 0.13.14
 -----------------

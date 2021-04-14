@@ -40,6 +40,10 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
             parsed_value_set = parse_value_set(value_set)
         else:
             parsed_value_set = value_set
+
+        if parsed_value_set is None or len(parsed_value_set) == 0:
+            return True
+
         return column.notin_(tuple(parsed_value_set))
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
