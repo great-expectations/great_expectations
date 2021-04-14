@@ -1,6 +1,6 @@
-# This checkpoint was created by the command `great_expectations checkpoint new`.
+# This Checkpoint was created by the command `great_expectations checkpoint new`.
 #
-# A checkpoint is a list of one or more batches paired with one or more
+# A Checkpoint is a list of one or more batches paired with one or more
 # Expectation Suites and a configurable Validation Operator.
 #
 # It can be run with the `great_expectations checkpoint run` command.
@@ -10,7 +10,7 @@
 # https://docs.greatexpectations.io/en/latest/how_to_guides/validation/how_to_add_validations_data_or_suites_to_a_checkpoint.html
 validation_operator_name: action_list_operator
 # Batches are a list of batch_kwargs paired with a list of one or more suite
-# names. A checkpoint can have one or more batches. This makes deploying
+# names. A Checkpoint can have one or more batches. This makes deploying
 # Great Expectations in your pipelines easy!
 batches:
   - batch_kwargs:

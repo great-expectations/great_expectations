@@ -11,7 +11,7 @@ from great_expectations.checkpoint.configurator import SimpleCheckpointConfigura
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -68,7 +68,7 @@ class Checkpoint:
         self._name = name
         # Note the gross typechecking to avoid a circular import
         if "DataContext" not in str(type(data_context)):
-            raise TypeError("A checkpoint requires a valid DataContext")
+            raise TypeError("A Checkpoint requires a valid DataContext")
         self._data_context = data_context
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -256,9 +256,9 @@ class Checkpoint:
                     substituted_runtime_config=substituted_runtime_config,
                     validation_dict=validation_dict,
                 )
-                batch_request: BatchRequest = substituted_validation_dict.get(
-                    "batch_request"
-                )
+                batch_request: Union[
+                    BatchRequest, RuntimeBatchRequest
+                ] = substituted_validation_dict.get("batch_request")
                 expectation_suite_name: str = substituted_validation_dict.get(
                     "expectation_suite_name"
                 )
@@ -332,7 +332,7 @@ class Checkpoint:
             if not validations_present:
                 print(
                     f"""Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
-means you must either update your checkpoint configuration or provide an appropriate validations
+means you must either update your Checkpoint configuration or provide an appropriate validations
 list programmatically (i.e., when your Checkpoint is run).
                     """
                 )
@@ -354,8 +354,8 @@ class LegacyCheckpoint(Checkpoint):
         id: checkpoint_notebook
         title: LegacyCheckpoint - Notebook
         icon:
-        short_description: Run a configured checkpoint from a notebook.
-        description: Run a configured checkpoint from a notebook.
+        short_description: Run a configured Checkpoint from a notebook.
+        description: Run a configured Checkpoint from a notebook.
         how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_python.html
         maturity: Experimental (to-be-deprecated in favor of Checkpoint)
         maturity_details:
@@ -369,7 +369,7 @@ class LegacyCheckpoint(Checkpoint):
         id: checkpoint_command_line
         title: LegacyCheckpoint - Command Line
         icon:
-        short_description: Run a configured checkpoint from a command line.
+        short_description: Run a configured Checkpoint from a command line.
         description: Run a configured checkpoint from a command line in a Terminal shell.
         how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
         maturity: Experimental (to-be-deprecated in favor of Checkpoint)
@@ -384,8 +384,8 @@ class LegacyCheckpoint(Checkpoint):
         id: checkpoint_cron_job
         title: LegacyCheckpoint - Cron
         icon:
-        short_description: Deploy a configured checkpoint as a scheduled task with cron.
-        description: Use the Unix crontab command to edit the cron file and add a line that will run checkpoint as a scheduled task.
+        short_description: Deploy a configured Checkpoint as a scheduled task with cron.
+        description: Use the Unix crontab command to edit the cron file and add a line that will run Checkpoint as a scheduled task.
         how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_deploy_a_scheduled_checkpoint_with_cron.html
         maturity: Experimental (to-be-deprecated in favor of Checkpoint)
         maturity_details:
@@ -399,8 +399,8 @@ class LegacyCheckpoint(Checkpoint):
         id: checkpoint_airflow_dag
         title: LegacyCheckpoint - Airflow DAG
         icon:
-        short_description: Run a configured checkpoint in Apache Airflow
-        description: Running a configured checkpoint in Apache Airflow enables the triggering of data validation using an Expectation Suite directly within an Airflow DAG.
+        short_description: Run a configured Checkpoint in Apache Airflow
+        description: Running a configured Checkpoint in Apache Airflow enables the triggering of data validation using an Expectation Suite directly within an Airflow DAG.
         how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_airflow.html
         maturity: Beta (to-be-deprecated in favor of Checkpoint)
         maturity_details:
@@ -612,7 +612,7 @@ class LegacyCheckpoint(Checkpoint):
                 raise Exception(
                     f"""A batch has no suites associated with it. At least one suite is required.
     - Batch: {json.dumps(batch_kwargs)}
-    - Please add at least one suite to checkpoint {self.name}
+    - Please add at least one suite to Checkpoint {self.name}
 """
                 )
 

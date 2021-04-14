@@ -33,7 +33,7 @@ try:
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.engine.result import RowProxy
+    from sqlalchemy.engine.row import Row
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup, quoted_name
     from sqlalchemy.sql.expression import BinaryExpression, literal
@@ -54,9 +54,9 @@ except ImportError:
     Label = None
     WithinGroup = None
     TextClause = None
-    RowProxy = None
     DefaultDialect = None
     ProgrammingError = None
+    Row = None
 
 try:
     import psycopg2
@@ -75,7 +75,7 @@ try:
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
     registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
-except (ImportError, KeyError):
+except (ImportError, KeyError, AttributeError):
     snowflake = None
 
 try:
@@ -98,7 +98,7 @@ try:
             "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
         )
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+except (ImportError, AttributeError):
     bigquery_types_tuple = None
     pybigquery = None
 
@@ -516,7 +516,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "sqlite",
             "oracle",
             "mssql",
-            "oracle",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
@@ -648,6 +647,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             if self.engine.dialect.name.lower() == "mssql":
                 head_sql_str = "select top({n}) * from {table}".format(
                     n=n, table=self._table.name
+                )
+
+            # Limit doesn't work in oracle either
+            if self.engine.dialect.name.lower() == "oracle":
+                head_sql_str = "select * from {table} WHERE ROWNUM <= {n}".format(
+                    table=self._table.name, n=n
                 )
 
             df = pd.read_sql(head_sql_str, con=self.engine)
@@ -828,6 +833,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     ) -> list:
         if self.sql_engine_dialect.name.lower() == "mssql":
             return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
+        elif self.sql_engine_dialect.name.lower() == "awsathena":
+            return self._get_column_quantiles_awsathena(
+                column=column, quantiles=quantiles
+            )
         elif self.sql_engine_dialect.name.lower() == "bigquery":
             return self._get_column_quantiles_bigquery(
                 column=column, quantiles=quantiles
@@ -857,6 +866,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
             )
 
+    @classmethod
+    def _treat_quantiles_exception(cls, pe):
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
+
     def _get_column_quantiles_mssql(self, column: str, quantiles: Iterable) -> list:
         # mssql requires over(), so we add an empty over() clause
         selects: List[WithinGroup] = [
@@ -868,16 +887,26 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results: RowProxy = self.engine.execute(
-                quantiles_query
-            ).fetchone()
+            quantiles_results: Row = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
-            exception_message: str = "An SQL syntax Exception occurred."
-            exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-            logger.error(exception_message)
-            raise pe
+            self._treat_quantiles_exception(pe)
+
+    def _get_column_quantiles_awsathena(self, column: str, quantiles: Iterable) -> list:
+        import ast
+
+        quantiles_list = list(quantiles)
+        quantiles_query = (
+            f"SELECT approx_percentile({column}, ARRAY{str(quantiles_list)}) as quantiles "
+            f"from (SELECT {column} from {self._table})"
+        )
+        try:
+            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            quantiles_results_list = ast.literal_eval(quantiles_results)
+            return quantiles_results_list
+
+        except ProgrammingError as pe:
+            self._treat_quantiles_exception(pe)
 
     def _get_column_quantiles_bigquery(self, column: str, quantiles: Iterable) -> list:
         # BigQuery does not support "WITHIN", so we need a special case for it
@@ -888,16 +917,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results: RowProxy = self.engine.execute(
-                quantiles_query
-            ).fetchone()
+            quantiles_results = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
-            exception_message: str = "An SQL syntax Exception occurred."
-            exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-            logger.error(exception_message)
-            raise pe
+            self._treat_quantiles_exception(pe)
 
     def _get_column_quantiles_mysql(self, column: str, quantiles: Iterable) -> list:
         # MySQL does not support "percentile_disc", so we implement it as a compound query.
@@ -944,16 +967,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         )
 
         try:
-            quantiles_results: RowProxy = self.engine.execute(
-                quantiles_query
-            ).fetchone()
+            quantiles_results: Row = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError as pe:
-            exception_message: str = "An SQL syntax Exception occurred."
-            exception_traceback: str = traceback.format_exc()
-            exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-            logger.error(exception_message)
-            raise pe
+            self._treat_quantiles_exception(pe)
 
     # Support for computing the quantiles column for PostGreSQL and Redshift is included in the same method as that for
     # the generic sqlalchemy compatible DBMS engine, because users often use the postgresql driver to connect to Redshift
@@ -969,9 +986,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         quantiles_query: Select = sa.select(selects).select_from(self._table)
 
         try:
-            quantiles_results: RowProxy = self.engine.execute(
-                quantiles_query
-            ).fetchone()
+            quantiles_results: Row = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
         except ProgrammingError:
             # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
@@ -987,16 +1002,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
                 if allow_relative_error:
                     try:
-                        quantiles_results: RowProxy = self.engine.execute(
+                        quantiles_results: Row = self.engine.execute(
                             quantiles_query_approx
                         ).fetchone()
                         return list(quantiles_results)
                     except ProgrammingError as pe:
-                        exception_message: str = "An SQL syntax Exception occurred."
-                        exception_traceback: str = traceback.format_exc()
-                        exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-                        logger.error(exception_message)
-                        raise pe
+                        self._treat_quantiles_exception(pe)
                 else:
                     raise ValueError(
                         f'The SQL engine dialect "{str(self.sql_engine_dialect)}" does not support computing quantiles '
@@ -1291,6 +1302,10 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             ).format(table_name=table_name)
         elif engine_dialect == "awsathena":
             stmt = "CREATE TABLE {table_name} AS {custom_sql}".format(
+                table_name=table_name, custom_sql=custom_sql
+            )
+        elif engine_dialect == "oracle":
+            stmt = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
         else:

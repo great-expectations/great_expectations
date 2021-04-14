@@ -195,7 +195,7 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add a Snowflake datasource, do the following:
 
@@ -209,28 +209,67 @@ Steps
                 pip install snowflake-connector-python
                 pip install snowflake-sqlalchemy
 
-        #. **Instantiate a DataContext.**
+        #. **Run datasource new**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
+
+        #. **Choose "Relational database (SQL)"**
+
+            .. code-block:: bash
+
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 2
+
+        #. **Choose Snowflake**
+
+            .. code-block:: bash
+
+                Which database backend are you using?
+                    1. MySQL
+                    2. Postgres
+                    3. Redshift
+                    4. Snowflake
+                    5. BigQuery
+                    6. other - Do you have a working SQLAlchemy connection string?
+                : 4
+
+        #. **Choose an authentication mechanism**
+
+            .. code-block:: bash
+
+                What authentication method would you like to use?
+
+                1. User and Password
+                2. Single sign-on (SSO)
+                3. Key pair authentication
+
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
+
+Additional notes
+----------------
+
+        #.  **Snowflake SimpleSqlalchemyDatasource Example.**
+
+            Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
+
 
         #.  **Create or copy a yaml config.**
 
                 Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials using username and password authentication.  Username, password, host, database and query are set as strings.
-                ``SimpleSqlalchemyDatasource`` is a sub-class of ``Datasource`` that automatically configures a ``SqlDataConnector``, and is one you will probably want to use in connecting data living in a sql database. More information on ``Datasources``
-                in GE 0.13 can found in :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
 
-                This example also uses ``introspection`` to configure the datasource, where each table in the database is associated with its own ``data_asset``.  A deeper explanation on the different modes of building ``data_asset`` from data (``introspective`` / ``inferred`` vs ``configured``) can be found in the :ref:`Core Great Expectations Concepts document. <reference__core_concepts>`
-
-                Also, additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`. Examples of yaml configurations for Key pair and SSO authentication can be found in the **Additional Notes** section below.
 
                 .. code-block:: python
 
+                    datasource_name = "my_snowflake_datasource"
                     config = f"""
+                        name: {datasource_name}
                         class_name: SimpleSqlalchemyDatasource
                         credentials:
                           drivername: snowflake
@@ -245,12 +284,14 @@ Steps
                             data_asset_name_suffix: __whole_table
                         """
 
+            **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+
+
         #. **Run context.test_yaml_config.**
 
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_snowflake_datasource",
                     yaml_config=config
                 )
 
@@ -273,29 +314,20 @@ Steps
 
                     Unmatched data_references (0 of 0): []
 
-                    Choosing an example data reference...
-                        Reference chosen: {}
 
-                        Fetching batch data...
-                        [(50832,)]
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
-                Showing 5 rows
-               movieid                               title                                       genres
-                0        1                    Toy Story (1995)  Adventure|Animation|Children|Comedy|Fantasy
-                1        2                      Jumanji (1995)                   Adventure|Children|Fantasy
-                2        3             Grumpier Old Men (1995)                               Comedy|Romance
-                3        4            Waiting to Exhale (1995)                         Comedy|Drama|Romance
-                4        5  Father of the Bride Part II (1995)                                       Comedy
-
-            This means all has went well and you can proceed with exploring data with your new Snowflake datasource.
 
         #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
 
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_snowflake_datasource`` in our example).
-            Next, copy the yml snippet from Step 3 into the new entry.
+            .. code-block:: python
 
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
+
+            **Note**: The credentials will be stored in ``uncommitted/config_variables.yml`` to prevent checking them into version control.
 
 ----------------
 Additional Notes

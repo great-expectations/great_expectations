@@ -2,12 +2,14 @@ import copy
 import datetime
 import decimal
 import logging
+import os
 import sys
 from collections import OrderedDict
 from collections.abc import Mapping
 from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
+import dateutil.parser
 import numpy as np
 import pandas as pd
 from IPython import get_ipython
@@ -97,6 +99,16 @@ def in_jupyter_notebook():
             return False  # Other type (?)
     except NameError:
         return False  # Probably standard Python interpreter
+
+
+def in_databricks() -> bool:
+    """
+    Tests whether we are in a Databricks environment.
+
+    Returns:
+        bool
+    """
+    return "DATABRICKS_RUNTIME_VERSION" in os.environ
 
 
 def convert_to_json_serializable(data):
@@ -357,20 +369,25 @@ def get_datetime_string_from_strftime_format(
 
 
 def parse_string_to_datetime(
-    datetime_string: str, datetime_format_string: str
+    datetime_string: str, datetime_format_string: Optional[str] = None
 ) -> datetime.date:
     if not isinstance(datetime_string, str):
         raise ge_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
             """
         )
+
+    if not datetime_format_string:
+        return dateutil.parser.parse(timestr=datetime_string)
+
     if datetime_format_string and not isinstance(datetime_format_string, str):
         raise ge_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").
             """
         )
-    return datetime.datetime.strptime(datetime_string, datetime_format_string).date()
+
+    return datetime.datetime.strptime(datetime_string, datetime_format_string)
 
 
 def datetime_to_int(dt: datetime.date) -> int:
@@ -548,6 +565,11 @@ def get_or_create_spark_session(
 def spark_restart_required(
     current_spark_config: List[tuple], desired_spark_config: dict
 ) -> bool:
+
+    # we can't change spark context config values within databricks runtimes
+    if in_databricks():
+        return False
+
     current_spark_config_dict: dict = {k: v for (k, v) in current_spark_config}
     if desired_spark_config.get("spark.app.name") != current_spark_config_dict.get(
         "spark.app.name"
