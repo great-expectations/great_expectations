@@ -64,7 +64,7 @@ Steps
                 :alt: Expectation with a single line of markdown comment is rendered in red with markdown formatting.
 
 
-            Multiple lines can be rendered by using a list for ``content``, these lines are rendered in black text with any Markdown formatting applied.
+            Multiple lines can be rendered by using a list for ``content``; these lines are rendered in black text with any Markdown formatting applied.
 
             .. code-block:: python
 
@@ -160,7 +160,7 @@ Steps
                 :alt: Expectation with a single line of markdown comment is rendered in red with markdown formatting.
 
 
-            Multiple lines can be rendered by using a list for ``content``, these lines are rendered in black text with any Markdown formatting applied.
+            Multiple lines can be rendered by using a list for ``content``; these lines are rendered in black text with any Markdown formatting applied.
 
             .. code-block:: python
 
