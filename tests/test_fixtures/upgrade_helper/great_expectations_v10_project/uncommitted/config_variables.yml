@@ -15,7 +15,7 @@
 
 instance_id: 2c7556c4-2436-482f-84c7-8420547604a7
 my_postgres_db:
-  drivername: postgres
+  drivername: postgresql
   host: localhost
   port: '5432'
   username: postgres

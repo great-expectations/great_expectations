@@ -8,8 +8,8 @@ Develop
 -----------------
 
 * [ENHANCEMENT] Improve support for quantiles calculation in Athena
-=======
 * [ENHANCEMENT] V3 API CLI docs commands have better error messages and more consistent short flags
+* [ENHANCEMENT] Great Expectations Compatibility with SqlAlchemy 1.4 #2641
 * [ENHANCEMENT] Update all Data Connectors to allow for `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `DataConnector.build_batch_spec` to use `batch_spec_passthrough` in config
 * [ENHANCEMENT] Update `ConfiguredAssetSqlDataConnector.build_batch_spec` and `ConfiguredAssetFilePathDataConnector.build_batch_spec` to properly process `Asset.batch_spec_passthrough`
