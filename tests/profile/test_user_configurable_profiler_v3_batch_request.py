@@ -29,8 +29,6 @@ from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
-logger = logging.getLogger(__name__)
-
 try:
     import sqlalchemy as sqlalchemy
     import sqlalchemy.dialects.postgresql as postgresqltypes
@@ -51,8 +49,6 @@ except ImportError:
     sqlalchemy = None
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
-
-logger = logging.getLogger(__name__)
 
 
 def get_pandas_runtime_validator(context, df):
