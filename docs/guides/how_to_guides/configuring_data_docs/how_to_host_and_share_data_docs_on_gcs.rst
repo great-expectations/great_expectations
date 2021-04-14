@@ -122,19 +122,43 @@ This guide will explain how to host and share Data Docs on Google Cloud Storage.
 
   Use the following CLI command: ``great_expectations docs build --site-name gs_site``. If successful, the CLI will provide the object URL of the index page. Since the bucket is not public, this URL will be inaccessible. Rather, you will access the Data Docs site using the App Engine app configured above.
 
-  .. code-block:: bash
+.. content-tabs::
 
-    > great_expectations docs build --site-name gs_site
+    .. tab-container:: tab0
+        :title: Show Docs for V2 (Batch Kwargs) API
 
-    The following Data Docs sites will be built:
+          .. code-block:: bash
 
-     - gs_site: https://storage.googleapis.com/my_org_data_docs/index.html
+            > great_expectations docs build --site-name gs_site
 
-    Would you like to proceed? [Y/n]: Y
+            The following Data Docs sites will be built:
 
-    Building Data Docs...
+             - gs_site: https://storage.googleapis.com/my_org_data_docs/index.html
 
-    Done building Data Docs
+            Would you like to proceed? [Y/n]: Y
+
+            Building Data Docs...
+
+            Done building Data Docs
+
+    .. tab-container:: tab1
+        :title: Show Docs for V3 (Batch Request) API
+
+          .. code-block:: bash
+
+            > great_expectations --v3-api docs build --site-name gs_site
+
+            The following Data Docs sites will be built:
+
+             - gs_site: https://storage.googleapis.com/my_org_data_docs/index.html
+
+            Would you like to proceed? [Y/n]: Y
+
+            Building Data Docs...
+
+            Done building Data Docs
+
+
 
 8. **Test that everything was configured properly by launching your App Engine app.**
 
