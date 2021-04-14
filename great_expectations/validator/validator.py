@@ -11,6 +11,7 @@ from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
 from dateutil.parser import parse
+from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -488,8 +489,16 @@ class Validator:
 
     def resolve_validation_graph(self, graph, metrics, runtime_configuration=None):
         done: bool = False
+        pbar = None
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
+            if pbar is None:
+                pbar = tqdm(
+                    total=len(ready_metrics) + len(needed_metrics),
+                    desc="Calculating Metrics",
+                    disable=len(graph._edges) < 3,
+                )
+                pbar.update(0)
             metrics.update(
                 self._resolve_metrics(
                     execution_engine=self._execution_engine,
@@ -498,8 +507,10 @@ class Validator:
                     runtime_configuration=runtime_configuration,
                 )
             )
+            pbar.update(len(ready_metrics))
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
+        pbar.close()
 
         return metrics
 
