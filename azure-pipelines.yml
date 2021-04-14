@@ -156,7 +156,7 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
+          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt'
           GE_pytest_opts: ''
 
         strategy:
@@ -236,9 +236,9 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-                pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
-                pip install --requirement requirements.txt
-                pip install .
+              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
+              pip install --requirement requirements.txt
+              pip install .
             displayName: 'Install dependencies'
 
           - script: |
@@ -284,8 +284,8 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
+              pip install --requirement --requirement requirements-dev-util.txt requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               pip install --requirement requirements.txt
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
@@ -318,8 +318,8 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
+              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               pip install --requirement requirements.txt
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-util.txt
               pip install .
             displayName: 'Install dependencies'
 
@@ -351,9 +351,9 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-                pip install --requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt
-                pip install --requirement requirements.txt
-                pip install .
+              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements.txt
+              pip install .
             displayName: 'Install dependencies'
 
           - script: |
@@ -372,7 +372,7 @@ stages:
       - job: build_gallery
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --requirement requirements-dev-test.txt'
+          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt'
           GE_pytest_opts: ''
 
         steps:
