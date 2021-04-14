@@ -1,4 +1,4 @@
-.. _how_to_guides__creating_and_editing_expectations__how_to_create_a_new_expectation_suite_using_suite_scaffold:
+.. _how_to_guides__creating_and_editing_expectations__how_to_automatically_create_a_new_expectation_suite:
 
 How to automatically create a new Expectation Suite
 ==============================================================
