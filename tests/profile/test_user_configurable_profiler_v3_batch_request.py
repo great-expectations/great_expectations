@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -950,23 +950,16 @@ def test_error_handling_for_expect_compound_columns_to_be_unique(
             "dropoff_location_id",
         ],
     )
-    # TODO: <Alex>ALEX</Alex>
-    caplog.clear()
-    # TODO: <Alex>ALEX</Alex>
     with caplog.at_level(logging.WARNING):
         suite = profiler.build_suite()
 
-    log_warnings = caplog.messages
-    print(f"\n[ALEX_TEST] LOG_WARNINGS: {log_warnings}")
-    # TODO: <Alex>ALEX</Alex>
-    for warning_message in log_warnings:
-        print(f"\n[ALEX_TEST] LOG_WARNING: {warning_message}")
-    print(f"\n[ALEX_TEST] CAPLOG.TEXT: {caplog.text}")
-    # TODO: <Alex>ALEX</Alex>
-    assert len(log_warnings) == 1
+    log_warning_records = list(
+        filter(lambda record: record.levelname == "WARNING", caplog.records)
+    )
+    assert len(log_warning_records) == 1
 
     assert (
-        log_warnings[0]
+        log_warning_records[0].message
         == "expect_compound_columns_to_be_unique is not currently available in the V3 (Batch Request) API. Specifying a compound key will not add any expectations. This will be updated when that expectation becomes available."
     )
 
