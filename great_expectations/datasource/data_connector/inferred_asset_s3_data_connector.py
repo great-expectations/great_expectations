@@ -28,7 +28,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
     The InferredAssetS3DataConnector is one of two classes (ConfiguredAssetS3DataConnector being the
     other one) designed for connecting to filesystem-like data, more specifically files on S3. It connects to assets
-    inferred from directory and file name by default_regex and glob_directive.
+    inferred from bucket, prefix, and file name by default_regex.
 
     InferredAssetS3DataConnector that operates on S3 buckets and determines
     the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
