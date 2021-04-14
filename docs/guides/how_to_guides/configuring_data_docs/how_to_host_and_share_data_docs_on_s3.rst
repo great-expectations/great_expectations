@@ -91,21 +91,45 @@ Steps
 
 5. **Test that your configuration is correct by building the site.**
 
-  Use the following CLI command: ``great_expectations docs build --site-name s3_site``. If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy.
+.. content-tabs::
 
-  .. code-block:: bash
+    .. tab-container:: tab0
+        :title: Show Docs for V2 (Batch Kwargs) API
 
-    > great_expectations docs build --site-name s3_site
+          Use the following CLI command: ``great_expectations docs build --site-name s3_site``. If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy.
 
-    The following Data Docs sites will be built:
+          .. code-block:: bash
 
-     - s3_site: https://s3.amazonaws.com/data-docs.my_org/index.html
+            > great_expectations docs build --site-name s3_site
 
-    Would you like to proceed? [Y/n]: Y
+            The following Data Docs sites will be built:
 
-    Building Data Docs...
+             - s3_site: https://s3.amazonaws.com/data-docs.my_org/index.html
 
-    Done building Data Docs
+            Would you like to proceed? [Y/n]: Y
+
+            Building Data Docs...
+
+            Done building Data Docs
+
+    .. tab-container:: tab1
+        :title: Show Docs for V3 (Batch Request) API
+
+          Use the following CLI command: ``great_expectations --v3-api docs build --site-name s3_site``. If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy.
+
+          .. code-block:: bash
+
+            > great_expectations --v3-api docs build --site-name s3_site
+
+            The following Data Docs sites will be built:
+
+             - s3_site: https://s3.amazonaws.com/data-docs.my_org/index.html
+
+            Would you like to proceed? [Y/n]: Y
+
+            Building Data Docs...
+
+            Done building Data Docs
 
 Note you may want to use the `-y/--yes/--assume-yes` flag which skips the confirmation dialog.
 This can be useful for non-interactive environments.
