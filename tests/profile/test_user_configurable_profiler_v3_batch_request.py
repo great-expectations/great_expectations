@@ -958,6 +958,11 @@ def test_error_handling_for_expect_compound_columns_to_be_unique(
         suite = profiler.build_suite()
 
     log_warnings = caplog.messages
+    print(f"\n[ALEX_TEST] LOG_WARNINGS: {log_warnings}")
+    # TODO: <Alex>ALEX</Alex>
+    for warning_message in log_warnings:
+        print(f"\n[ALEX_TEST] LOG_WARNING: {warning_message}")
+    # TODO: <Alex>ALEX</Alex>
     assert len(log_warnings) == 1
 
     assert (
