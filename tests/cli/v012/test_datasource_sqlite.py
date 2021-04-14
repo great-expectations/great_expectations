@@ -439,6 +439,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
     )
+    res = context.get_available_data_asset_names("wow_a_datasource")
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -457,7 +458,6 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
         input="Y\n",
         catch_exceptions=False,
     )
-
     stdout = result.stdout
     assert result.exit_code == 0
     assert "Profiling '{}'".format(datasource_name) in stdout
