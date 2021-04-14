@@ -2,6 +2,7 @@ import json
 import random
 
 import pytest
+from packaging.version import parse as parse_version
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchRequest
