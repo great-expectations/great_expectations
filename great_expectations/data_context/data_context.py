@@ -372,10 +372,10 @@ class BaseDataContext:
     def _init_datasources(self, config):
         if not config.datasources:
             return
-        for datasource in config.datasources:
+        for datasource_name, data_source_config in config.datasources.items():
             try:
-                self._cached_datasources[datasource] = self.get_datasource(
-                    datasource_name=datasource
+                self._cached_datasources[datasource_name] = self.get_datasource(
+                    datasource_name=datasource_name
                 )
             except ge_exceptions.DatasourceInitializationError:
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
@@ -686,7 +686,7 @@ class BaseDataContext:
         self,
         resource_identifier: Optional[str] = None,
         site_name: Optional[str] = None,
-        only_if_exists=True,
+        only_if_exists: Optional[bool] = True,
     ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -698,13 +698,14 @@ class BaseDataContext:
                 URL of the index page.
             site_name: Optionally specify which site to open. If not specified,
                 open all docs found in the project.
+            only_if_exists: Optionally specify flag to pass to "self.get_docs_sites_urls()".
         """
-        data_docs_urls = self.get_docs_sites_urls(
+        data_docs_urls: List[Dict[str, str]] = self.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
             only_if_exists=only_if_exists,
         )
-        urls_to_open = [site["site_url"] for site in data_docs_urls]
+        urls_to_open: List[str] = [site["site_url"] for site in data_docs_urls]
 
         for url in urls_to_open:
             if url is not None:
@@ -777,7 +778,7 @@ class BaseDataContext:
                 directory_path=self.root_directory
             ):
                 logger.warning(
-                    f'Detected legacy config version ({config_version}) so will try to use default checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
+                    f'Detected legacy config version ({config_version}) so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
                 )
                 return self._build_store_from_config(
                     checkpoint_store_name,
@@ -786,7 +787,7 @@ class BaseDataContext:
                     ],
                 )
             raise ge_exceptions.StoreConfigurationError(
-                f'Attempted to access the checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
+                f'Attempted to access the Checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
             )
 
     @property
@@ -2001,7 +2002,7 @@ class BaseDataContext:
         return validation_operators
 
     def create_expectation_suite(
-        self, expectation_suite_name, overwrite_existing=False
+        self, expectation_suite_name: str, overwrite_existing: Optional[bool] = False
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -2016,10 +2017,12 @@ class BaseDataContext:
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
-        expectation_suite = ExpectationSuite(
+        expectation_suite: ExpectationSuite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name
         )
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite_name
+        )
 
         if self.expectations_store.has_key(key) and not overwrite_existing:
             raise ge_exceptions.DataContextError(
@@ -2051,7 +2054,7 @@ class BaseDataContext:
             self.expectations_store.remove_key(key)
             return True
 
-    def get_expectation_suite(self, expectation_suite_name):
+    def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """Get a named expectation suite for the provided data_asset_name.
 
         Args:
@@ -2060,7 +2063,9 @@ class BaseDataContext:
         Returns:
             expectation_suite
         """
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        key: ExpectationSuiteIdentifier = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite_name
+        )
 
         if self.expectations_store.has_key(key):
             return self.expectations_store.get(key)
@@ -2235,7 +2240,6 @@ class BaseDataContext:
         """Get validation results from a configured store.
 
         Args:
-            data_asset_name: name of data asset for which to get validation result
             expectation_suite_name: expectation_suite name for which to get validation result (default: "default")
             run_id: run_id for which to get validation result (if None, fetch the latest result by alphanumeric sort)
             validations_store_name: the name of the store from which to get validation results
@@ -2948,11 +2952,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
             raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
             )
         except ValidationError as exc_ve:
             raise ge_exceptions.InvalidCheckpointConfigError(
-                message="Invalid checkpoint configuration", validation_error=exc_ve
+                message="Invalid Checkpoint configuration", validation_error=exc_ve
             )
 
         if checkpoint_config.config_version is None:
@@ -3003,7 +3007,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             self.checkpoint_store.remove_key(key=key)
         except ge_exceptions.InvalidKeyError as exc_ik:
             raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
             )
 
     def list_checkpoints(self) -> List[str]:
@@ -3028,9 +3032,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         **kwargs,
     ) -> CheckpointResult:
         """
-        Validate against a pre-defined checkpoint. (Experimental)
+        Validate against a pre-defined Checkpoint. (Experimental)
         Args:
-            checkpoint_name: The name of a checkpoint defined via the CLI or by manually creating a yml file
+            checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
             run_name: The run_name for the validation; if None, a default value will be used
             **kwargs: Additional kwargs to pass to the validation operator
 

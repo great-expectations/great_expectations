@@ -25,7 +25,7 @@ The simplest ``RuntimeDataConnector`` may simply store lookup information about 
 
 The Data Connector uses ``Batch Definitions`` to identify the Batches available in a Data Asset.
 
-A **Batch** is what differentiates a specific set of data that is part of a Data Asset. The Batch uniquely identifies a subset of data based on the purpose for which you validate, such as the most recent delivery. The ``ConfiguredAssetFilesystemDataConnector`` can use a regex strring to match files and produce named match groups that define unique Batches. Data Connectors use **Sorters** to help define a unique order for Batches, such as sorting files by date or alphabetically.
+A **Batch** is what differentiates a specific set of data that is part of a Data Asset. The Batch uniquely identifies a subset of data based on the purpose for which you validate, such as the most recent delivery. The ``ConfiguredAssetFilesystemDataConnector`` can use a regex string to match files and produce named match groups that define unique Batches. Data Connectors use **Sorters** to help define a unique order for Batches, such as sorting files by date or alphabetically.
 
 .. _specifying_batches:
 Batches

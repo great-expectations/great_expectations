@@ -115,7 +115,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\n\nyaml = YAML()\ncontext = ge.get_context()",
+            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = ge.get_context()",
             "outputs": [],
         },
     ]
@@ -129,12 +129,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": """# Run this cell to print out the names of your Datasources, Data Connectors and Data Assets\n\nfor datasource_name, datasource in context.datasources.items():
-    print(f"datasource_name: {datasource_name}")
-    for data_connector_name, data_connector in datasource.data_connectors.items():
-        print(f"\tdata_connector_name: {data_connector_name}")
-        for data_asset_name in data_connector.get_available_data_asset_names():
-            print(f"\t\tdata_asset_name: {data_asset_name}")""",
+            "source": """# Run this cell to print out the names of your Datasources, Data Connectors and Data Assets\npprint(context.get_available_data_asset_names())""",
             "outputs": [],
         },
         {
