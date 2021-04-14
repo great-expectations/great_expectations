@@ -9,7 +9,7 @@ h: SqlAlchemyDataset
 i: great_expectations.dataset
 j: great_expectations.datasource
 k:
-  drivername: postgres
+  drivername: postgresql
   host: localhost
   port: '5432'
   username: postgres
