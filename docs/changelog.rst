@@ -61,9 +61,12 @@ Develop
 * [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
 * [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
 * [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
+* [ENHANCE] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
 * [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource (Thanks @xaniasd)
 * [BUGFIX] pandas partial read_ functions not being unwrapped (Thanks @luke321321)
 * [BUGFIX] Don't stop SparkContext when running in Databricks (#2587) (Thanks @jarandaf)
+* [MAINTENANCE] Oracle listed twice in list of sqlalchemy dialects #2609
+* [FEATURE] Oracle support added to sqlalchemy datasource and dataset #2609
 
 0.13.14
 -----------------
