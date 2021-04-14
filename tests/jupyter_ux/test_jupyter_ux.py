@@ -190,7 +190,6 @@ def test_display_column_evrs_as_section(titanic_profiled_evrs_1):
     )
 
 
-# <WILL> fails
 def test_configure_logging(caplog):
     # First, ensure we set the root logger to close-to-jupyter settings (only show warnings)
     caplog.set_level(logging.WARNING)
