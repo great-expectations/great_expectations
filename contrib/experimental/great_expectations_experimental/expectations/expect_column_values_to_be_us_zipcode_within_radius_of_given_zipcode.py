@@ -352,10 +352,10 @@ if __name__ == "__main__":
     # Issue can be tracked here : https://github.com/MacHu-GWU/uszipcode-project/issues/48
     try:
         import sqlalchemy as sa
+
         if parse_version(sa.__version__) < parse_version("1.4.0"):
             diagnostics_report = (
-            ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode().run_diagnostics()
-        )
+                ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode().run_diagnostics()
+            )
     except (ImportError, ModuleNotFoundError):
         pass
-
