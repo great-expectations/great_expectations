@@ -26,14 +26,6 @@ def test_comprehensive_list_of_messages():
     # to also update one or more tests below!
 
     assert set(valid_message_list) == {
-        "data_context.__init__",
-        "data_asset.validate",
-        "data_context.add_datasource",
-        "data_context.build_data_docs",
-        "data_context.open_data_docs",
-        "data_context.save_expectation_suite",
-        "datasource.sqlalchemy.connect",
-        "cli.new_ds_choice",
         "cli.checkpoint.delete",
         "cli.checkpoint.list",
         "cli.checkpoint.new",
@@ -47,17 +39,25 @@ def test_comprehensive_list_of_messages():
         "cli.docs.clean",
         "cli.docs.list",
         "cli.init.create",
+        "cli.new_ds_choice",
         "cli.project.check_config",
         "cli.project.upgrade",
         "cli.store.list",
         "cli.suite.delete",
         "cli.suite.demo",
+        "cli.suite.edit",
         "cli.suite.list",
         "cli.suite.new",
         "cli.suite.scaffold",
-        "cli.suite.edit",
         "cli.validation_operator.list",
         "cli.validation_operator.run",
+        "data_asset.validate",
+        "data_context.__init__",
+        "data_context.add_datasource",
+        "data_context.build_data_docs",
+        "data_context.open_data_docs",
+        "data_context.save_expectation_suite",
+        "datasource.sqlalchemy.connect",
     }
 
 

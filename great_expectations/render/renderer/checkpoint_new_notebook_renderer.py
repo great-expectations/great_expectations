@@ -47,6 +47,7 @@ Use this notebook to configure a new Checkpoint and add it to your project:
         self.add_code_cell(
             """from ruamel.yaml import YAML
 import great_expectations as ge
+from pprint import pprint
 
 yaml = YAML()
 context = ge.get_context()
@@ -61,13 +62,7 @@ The following cells show examples for listing your current configuration. You ca
         )
         self.add_code_cell(
             """# Run this cell to print out the names of your Datasources, Data Connectors and Data Assets
-
-for datasource_name, datasource in context.datasources.items():
-    print(f"datasource_name: {datasource_name}")
-    for data_connector_name, data_connector in datasource.data_connectors.items():
-        print(f"\tdata_connector_name: {data_connector_name}")
-        for data_asset_name in data_connector.get_available_data_asset_names():
-            print(f"\t\tdata_asset_name: {data_asset_name}")""",
+pprint(context.get_available_data_asset_names())""",
             lint=True,
         )
         self.add_code_cell("context.list_expectation_suite_names()")
