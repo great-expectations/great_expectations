@@ -24,6 +24,7 @@ Develop
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
 * [DOCS] Update Configuring Data Docs documentation for V3 API CLI
 * [DOCS] Update Configuring metadata stores documentation for V3 API CLI
+* [DOCS] Update How to configure a Pandas/S3 Datasource for V3 API CLI
 * [DOCS] Fix typos in "How to load a database table, view, or query result as a batch" guide and update with `create_temp_table` info
 * [DOCS] Update "How to add a Validation Operator" guide to make it clear it is only for V2 API
 
