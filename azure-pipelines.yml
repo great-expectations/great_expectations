@@ -331,7 +331,7 @@ stages:
       - job: test_cli
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         variables:
-          python.version: '3.7'
+          python.version: '3.8'
 
         steps:
           - task: UsePythonVersion@0
