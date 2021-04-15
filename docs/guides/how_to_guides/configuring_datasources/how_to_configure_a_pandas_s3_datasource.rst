@@ -122,9 +122,7 @@ Steps
                 Repeat this check for all data sets you configured.  An inconsistency is likely due to an incorrect regular expression pattern in the respective data set configuration.
 
 
-        ----------------
-        Additional Notes
-        ----------------
+        **Additional Notes**
 
         #.
             Additional options are available for a more fine-grained customization of the S3-backed Pandas data sources.
@@ -316,9 +314,7 @@ Steps
             **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
 
 
-        ----------------
-        Additional Notes
-        ----------------
+        **Additional Notes**
 
         #.
             Additional options are available for a more fine-grained customization of the S3-backed Pandas data sources.
