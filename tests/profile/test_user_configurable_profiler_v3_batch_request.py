@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -28,8 +28,6 @@ from great_expectations.self_check.util import (
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-
-logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sqlalchemy
@@ -52,20 +50,16 @@ except ImportError:
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
-logger = logging.getLogger(__name__)
-
 
 def get_pandas_runtime_validator(context, df):
-    batch_request = BatchRequest(
+    batch_request = RuntimeBatchRequest(
         datasource_name="my_pandas_runtime_datasource",
         data_connector_name="my_data_connector",
-        batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
-        partition_request={
-            "batch_identifiers": {
-                "an_example_key": "a",
-                "another_example_key": "b",
-            }
+        runtime_parameters={"batch_data": df},
+        batch_identifiers={
+            "an_example_key": "a",
+            "another_example_key": "b",
         },
     )
 
@@ -89,16 +83,14 @@ def get_spark_runtime_validator(context, df):
         }
     )
     df = spark.createDataFrame(df)
-    batch_request = BatchRequest(
+    batch_request = RuntimeBatchRequest(
         datasource_name="my_spark_datasource",
         data_connector_name="my_data_connector",
-        batch_data=df,
         data_asset_name="IN_MEMORY_DATA_ASSET",
-        partition_request={
-            "batch_identifiers": {
-                "an_example_key": "a",
-                "another_example_key": "b",
-            }
+        runtime_parameters={"batch_data": df},
+        batch_identifiers={
+            "an_example_key": "a",
+            "another_example_key": "b",
         },
     )
 
@@ -173,8 +165,6 @@ def get_sqlalchemy_runtime_validator_postgresql(
         dtype=sql_dtypes,
         if_exists="replace",
     )
-    batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
-    batch = Batch(data=batch_data)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
     batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine, table_name=table_name
@@ -963,11 +953,13 @@ def test_error_handling_for_expect_compound_columns_to_be_unique(
     with caplog.at_level(logging.WARNING):
         suite = profiler.build_suite()
 
-    log_warnings = caplog.messages
-    assert len(log_warnings) == 1
+    log_warning_records = list(
+        filter(lambda record: record.levelname == "WARNING", caplog.records)
+    )
+    assert len(log_warning_records) == 1
 
     assert (
-        log_warnings[0]
+        log_warning_records[0].message
         == "expect_compound_columns_to_be_unique is not currently available in the V3 (Batch Request) API. Specifying a compound key will not add any expectations. This will be updated when that expectation becomes available."
     )
 

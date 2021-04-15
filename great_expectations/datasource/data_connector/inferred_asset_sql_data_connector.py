@@ -32,6 +32,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         included_tables: Optional[list] = None,
         skip_inapplicable_tables: Optional[bool] = True,
         introspection_directives: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         InferredAssetDataConnector for connecting to data on a SQL database
@@ -53,6 +54,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                 If True, tables that can't be successfully queried using sampling and splitter methods are excluded from inferred data_asset_names.
                 If False, the class will throw an error during initialization if any such tables are encountered.
             introspection_directives (Dict): Arguments passed to the introspection method to guide introspection
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         self._data_asset_name_prefix = data_asset_name_prefix
         self._data_asset_name_suffix = data_asset_name_suffix
@@ -71,14 +73,15 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
-            data_assets=None,
+            assets=None,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         # This cache will contain a "config" for each data_asset discovered via introspection.
-        # This approach ensures that ConfiguredAssetSqlDataConnector._data_assets and _introspected_data_assets_cache store objects of the same "type"
+        # This approach ensures that ConfiguredAssetSqlDataConnector._assets and _introspected_assets_cache store objects of the same "type"
         # Note: We should probably turn them into AssetConfig objects
-        self._introspected_data_assets_cache = {}
-        self._refresh_introspected_data_assets_cache(
+        self._introspected_assets_cache = {}
+        self._refresh_introspected_assets_cache(
             self._data_asset_name_prefix,
             self._data_asset_name_suffix,
             self._include_schema_name,
@@ -92,11 +95,11 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         )
 
     @property
-    def data_assets(self) -> Dict[str, Asset]:
-        return self._introspected_data_assets_cache
+    def assets(self) -> Dict[str, Asset]:
+        return self._introspected_assets_cache
 
     def _refresh_data_references_cache(self):
-        self._refresh_introspected_data_assets_cache(
+        self._refresh_introspected_assets_cache(
             self._data_asset_name_prefix,
             self._data_asset_name_suffix,
             self._include_schema_name,
@@ -111,7 +114,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
         super()._refresh_data_references_cache()
 
-    def _refresh_introspected_data_assets_cache(
+    def _refresh_introspected_assets_cache(
         self,
         data_asset_name_prefix: str = None,
         data_asset_name_suffix: str = None,
@@ -168,16 +171,16 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             if not sampling_kwargs is None:
                 data_asset_config["sampling_kwargs"] = sampling_kwargs
 
-            # Attempt to fetch a list of partition_definitions from the table
+            # Attempt to fetch a list of batch_identifiers from the table
             try:
-                self._get_partition_definition_list_from_data_asset_config(
+                self._get_batch_identifiers_list_from_data_asset_config(
                     data_asset_name,
                     data_asset_config,
                 )
             except OperationalError as e:
                 # If it doesn't work, then...
                 if skip_inapplicable_tables:
-                    # No harm done. Just don't include this table in the list of data_assets.
+                    # No harm done. Just don't include this table in the list of assets.
                     continue
 
                 else:
@@ -187,7 +190,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     ) from e
 
             # Store an asset config for each introspected data asset.
-            self._introspected_data_assets_cache[data_asset_name] = data_asset_config
+            self._introspected_assets_cache[data_asset_name] = data_asset_config
 
     def _introspect_db(
         self,

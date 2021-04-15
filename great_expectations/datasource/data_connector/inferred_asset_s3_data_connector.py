@@ -28,7 +28,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
     The InferredAssetS3DataConnector is one of two classes (ConfiguredAssetS3DataConnector being the
     other one) designed for connecting to filesystem-like data, more specifically files on S3. It connects to assets
-    inferred from directory and file name by default_regex and glob_directive.
+    inferred from bucket, prefix, and file name by default_regex.
 
     InferredAssetS3DataConnector that operates on S3 buckets and determines
     the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
@@ -63,6 +63,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             boto3_options (dict): optional boto3 options
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.debug(f'Constructing InferredAssetS3DataConnector "{name}".')
 
