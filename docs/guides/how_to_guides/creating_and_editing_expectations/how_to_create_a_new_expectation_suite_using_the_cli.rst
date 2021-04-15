@@ -38,7 +38,7 @@ How to create a new Expectation Suite using the CLI
         We will walk through several available options for how to do this.
 
         1. The `--interactive` mode (`False` by default) denotes the fact that you are interacting with your data.  In
-        other words, you have access to a data source and can specify  a Batch of data to be used to create expectations
+        other words, you have access to a data source and can specify a Batch of data to be used to create expectations
         against.  Not specifying this flag still allows you to create expectations (e.g., if you already know enough
         about your data, such as the various columns in a database table), but you will not be able to run validations,
         until you specify a Batch of data, which can be done at a later point; in fact, you can switch back and forth
