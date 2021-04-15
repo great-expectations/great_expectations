@@ -137,7 +137,7 @@ How to create a new Expectation Suite using the CLI
 
             You will definitely want to edit the Suite to fine-tune it after auto-generating it with the ``--profile`` flag.
 
-        When in the interactive mode, the initialization cell of your jupyter notebook will contain the `batch_request`
+        When in the interactive mode, the initialization cell of your jupyter notebook will contain the ``batch_request``
         dictionary.  You can convert it to JSON and save in a file for future use.  The contents of this file would look like this:
 
         .. code-block:: bash
