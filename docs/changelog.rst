@@ -26,6 +26,7 @@ Develop
 * [DOCS] Update Configuring metadata stores documentation for V3 API CLI
 * [DOCS] Fix typos in "How to load a database table, view, or query result as a batch" guide and update with `create_temp_table` info
 * [DOCS] Update "How to add a Validation Operator" guide to make it clear it is only for V2 API
+* [DOCS] Update Version Migration Guide to recommend using V3 without caveats
 
 0.13.17
 -----------------
@@ -43,7 +44,6 @@ Develop
 * [DOCS] Updated docs to reflect above class name changes
 * [DOCS] Added the following docs: "How to configure sorting in Data Connectors", "How to configure a Runtime Data Connector", "How to create a Batch Request using an Active Data Connector", "How to load a database table, view, or query result as a Batch"
 * [DOCS] Updated the V3 API section of the following docs: "How to load a Pandas DataFrame as a Batch", "How to load a Spark DataFrame as a Batch",
-
 
 0.13.16
 -----------------
