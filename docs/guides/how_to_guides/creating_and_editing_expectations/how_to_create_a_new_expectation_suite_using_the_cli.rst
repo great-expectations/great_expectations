@@ -33,7 +33,7 @@ How to create a new Expectation Suite using the CLI
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
 
-        While you could hand-author an Expectation Suite by writing a JSON file, just like with other features it is easier to let :ref:`CLI <command_line>` save you time and typos.
+        While you could hand-author an Expectation Suite by writing a JSON file, just like with other features it is easier to let the :ref:`CLI <command_line>` save you time and typos.
 
         We will walk through several available options for how to do this.
 
