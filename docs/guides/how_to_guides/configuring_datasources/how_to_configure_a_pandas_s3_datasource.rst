@@ -122,6 +122,41 @@ Steps
                 Repeat this check for all data sets you configured.  An inconsistency is likely due to an incorrect regular expression pattern in the respective data set configuration.
 
 
+        ----------------
+        Additional Notes
+        ----------------
+
+        #.
+            Additional options are available for a more fine-grained customization of the S3-backed Pandas data sources.
+
+            .. code-block:: yaml
+
+                delimiter: "/"  # This is the delimiter for the bucket keys (paths inside the buckets).  By default, it is "/".
+
+                boto3_options:
+                  endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
+
+                reader_options:  # Note that reader options can be specified globally or per-asset.
+                    sep: ","
+
+                max_keys: 100  # The maximum number of keys to fetch in a single request to S3 (default is 100).
+
+        #.  Errors in generated BatchKwargs during configuration of the S3GlobReaderBatchKwargsGenerator are likely due to an incorrect regular expression pattern in the respective data set configuration.
+
+        #.
+            The default values of the various options satisfy the vast majority of scenarios.  However, in certain cases, the developers may need to override them.
+            For instance, ``reader_options``, which can be specified globally and/or at the per-asset level, provide a mechanism for customizing the separator character inside *CSV* files.
+
+        #.
+            Note that specifying the ``--no-jupyter`` flag on the command line will initialize the specified expectation suite in the ``great_expectations/expectations`` directory, but suppress the launching of the Jupyter notebook.
+
+            .. code-block:: bash
+
+                great_expectations suite scaffold name_of_new_expectation_suite --no-jupyter
+
+            If you resume editing the given expectation suite at a later time, please first verify that the ``batch_kwargs`` contain the correct S3 path for the intended data source.
+
+
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
 
@@ -281,39 +316,36 @@ Steps
             **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
 
 
-----------------
-Additional Notes
-----------------
+        ----------------
+        Additional Notes
+        ----------------
 
-#.
-    Additional options are available for a more fine-grained customization of the S3-backed Pandas data sources.
+        #.
+            Additional options are available for a more fine-grained customization of the S3-backed Pandas data sources.
 
-    .. code-block:: yaml
+            .. code-block:: yaml
 
-        delimiter: "/"  # This is the delimiter for the bucket keys (paths inside the buckets).  By default, it is "/".
+                delimiter: "/"  # This is the delimiter for the bucket keys (paths inside the buckets).  By default, it is "/".
 
-        boto3_options:
-          endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
+                boto3_options:
+                  endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
 
-        reader_options:  # Note that reader options can be specified globally or per-asset.
-            sep: ","
+                reader_options:  # Note that reader options can be specified globally or per-asset.
+                    sep: ","
 
-        max_keys: 100  # The maximum number of keys to fetch in a single request to S3 (default is 100).
+                max_keys: 100  # The maximum number of keys to fetch in a single request to S3 (default is 100).
 
-#.  Errors in generated BatchKwargs during configuration of the S3GlobReaderBatchKwargsGenerator are likely due to an incorrect regular expression pattern in the respective data set configuration.
+        #.
+            The default values of the various options satisfy the vast majority of scenarios.  However, in certain cases, the developers may need to override them.
+            For instance, ``reader_options``, which can be specified globally and/or at the per-asset level, provide a mechanism for customizing the separator character inside *CSV* files.
 
-#.
-    The default values of the various options satisfy the vast majority of scenarios.  However, in certain cases, the developers may need to override them.
-    For instance, ``reader_options``, which can be specified globally and/or at the per-asset level, provide a mechanism for customizing the separator character inside *CSV* files.
+        #.
+            Note that specifying the ``--no-jupyter`` flag on the command line will initialize the specified expectation suite in the ``great_expectations/expectations`` directory, but suppress the launching of the Jupyter notebook.
 
-#.
-    Note that specifying the ``--no-jupyter`` flag on the command line will initialize the specified expectation suite in the ``great_expectations/expectations`` directory, but suppress the launching of the Jupyter notebook.
+            .. code-block:: bash
 
-    .. code-block:: bash
+                great_expectations --v3-api suite new --no-jupyter
 
-        great_expectations suite scaffold name_of_new_expectation_suite --no-jupyter
-
-    If you resume editing the given expectation suite at a later time, please first verify that the ``batch_kwargs`` contain the correct S3 path for the intended data source.
 
 --------
 Comments
