@@ -188,7 +188,7 @@ def test_usage_stats_cli_payload_messages():
         "cli.docs.list",
         "cli.init.create",
         "cli.project.check_config",
-        # "cli.project.upgrade",
+        "cli.project.upgrade",
         "cli.store.list",
         "cli.suite.delete",
         "cli.suite.demo",
@@ -198,12 +198,9 @@ def test_usage_stats_cli_payload_messages():
         "cli.validation_operator.list",
         "cli.validation_operator.run",
     ]
-    for message in usage_stats_records_messages:
-        jsonschema.validate(
-            valid_usage_statistics_messages[message][0],
-            usage_statistics_record_schema,
-        )
-        jsonschema.validate(
-            valid_usage_statistics_messages[message][0]["event_payload"],
-            cli_payload_schema,
-        )
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
