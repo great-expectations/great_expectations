@@ -143,42 +143,103 @@ Steps
                 pip install fsspec
                 pip install s3fs
 
-        #. **Instantiate a Data Context.**
+        #. **Run datasource new.**
 
-            Create a new Jupyter Notebook and instantiate a Data Context by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
 
-        #. **Create or copy a yaml config.**
+        #. **Choose "Files on a filesystem (for processing with Pandas or Spark)"**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``InferredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as strings.
+            .. code-block:: bash
+
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 1
+
+        #. **Choose Pandas**
+
+            .. code-block:: bash
+
+                What are you processing your files with?
+                    1. Pandas
+                    2. PySpark
+                : 1
+
+        #. **Specify the directory path for data files**
+
+            For an s3 datasource, we will change this in the notebook so feel free to enter anything at this prompt.
+
+            .. code-block:: bash
+
+                Enter the path (relative or absolute) of the root directory where the data files are stored.
+                : /path/to/directory/containing/your/data/files
+
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
 
 
-            .. code-block:: python
+Additional notes
+----------------
 
-                datasource_name = "my_pandas_s3_datasource"
-                config = f"""
-                        class_name: Datasource
-                        execution_engine:
-                          class_name: PandasExecutionEngine
-                        data_connectors:
-                          my_data_connector:
-                            datasource_name: {datasource_name}
-                            class_name: InferredAssetS3DataConnector
-                            bucket: my_s3_bucket
-                            prefix: my_s3_directory/
-                            default_regex:
-                              group_names: data_asset_name
-                              pattern: (.*)
-                        """
+        #.  **S3-backed Pandas Datasource Example.**
+
+            Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
+
+
+        #. **List files in your directory.**
+
+            Use a utility to list files, so that you can see how paths and filenames are formatted. Our example will use the following 3 files in the ``my_s3_folder/`` folder in our bucket ``my_s3_bucket``:
+
+            .. code-block:: bash
+
+                - my_s3_bucket
+                    |- my_s3_folder
+                        |- abe_20201119_200.csv
+                        |- alex_20201212_300.csv
+                        |- will_20201008_100.csv
+
+
+        #.  **Create or copy a yaml config.**
+
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``InferredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as strings.
+
+                .. code-block:: python
+
+                    datasource_name = "my_file_datasource"
+                    config = f"""
+                            name: {datasource_name}
+                            class_name: Datasource
+                            execution_engine:
+                              class_name: PandasExecutionEngine
+                            data_connectors:
+                              my_data_connector:
+                                datasource_name: {datasource_name}
+                                class_name: InferredAssetS3DataConnector
+                                bucket: my_s3_bucket
+                                prefix: my_s3_folder/
+                                default_regex:
+                                  group_names: data_asset_name
+                                  pattern: (.*)
+                            """
+
+               You can modify the group names and regex pattern to take into account the naming structure of the CSV files in the directory, e.g.
+
+                .. code-block:: python
+
+                        group_names:
+                          - name
+                          - timestamp
+                          - size
+                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
+
 
             **Note**: The ``InferredAssetS3DataConnector`` used in this example is closely related to the ``ConfiguredAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
 
 
-        #. **Run context.test_yaml_config.**
+        #. **Test your config using ``context.test_yaml_config``.**
 
             .. code-block:: python
 
@@ -193,19 +254,19 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                    Instantiating as a Datasource, since class_name is Datasource
-                Instantiating class from config without an explicit class_name is dangerous. Consider adding an explicit class_name for None
+                Instantiating as a Datasource, since class_name is Datasource
+                Instantiating class from config without an explicit class_name is dangerous.
+                Consider adding an explicit class_name for None
                     Successfully instantiated Datasource
 
                 Execution engine: PandasExecutionEngine
                 Data connectors:
-                    my_data_connector : ConfiguredAssetS3DataConnector
+                    my_data_connector : InferredAssetS3DataConnector
 
                     Available data_asset_names (1 of 1):
-                        test_asset (1 of 1): ['abe_20201119_200.csv']
+                        TestAsset (3 of 3): ['abe_20201119_200.csv', 'alex_20201212_300.csv', 'will_20201008_100.csv']
 
                     Unmatched data_references (0 of 0): []
-
 
             This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
