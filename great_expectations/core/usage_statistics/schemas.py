@@ -521,7 +521,6 @@ usage_statistics_record_schema = {
                         "cli.docs.list.end",
                         "cli.init.create",
                         "cli.project.check_config",
-                        "cli.project.upgrade",
                         "cli.project.upgrade.begin",
                         "cli.project.upgrade.end",
                         "cli.store.list",
