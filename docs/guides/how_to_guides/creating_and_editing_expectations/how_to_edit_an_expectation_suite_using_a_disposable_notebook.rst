@@ -122,6 +122,8 @@ Steps
     .. tab-container:: tab2
         :title: Show Docs for V3 (Batch Request) API With a Batch of data
 
+        This mode of Great Expectations allows you to edit your Expectation Suite even when access to data is available.
+
         1. Generate a notebook.
 
             To edit a suite called movieratings.ratings you could run the CLI command:
