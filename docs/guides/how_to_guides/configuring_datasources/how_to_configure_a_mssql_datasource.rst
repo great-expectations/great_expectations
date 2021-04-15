@@ -167,27 +167,26 @@ Steps
 
         #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
 
-Additional Notes
-----------------
+
+        **MSSQL SimpleSqlalchemyDatasource Example.**
 
         Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
 
-        #.  **MSSQL SimpleSqlalchemyDatasource Example.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.  Great Expectations uses a ``connection_string`` to connect to MSSQL databases through SQLAlchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
+        Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.  Great Expectations uses a ``connection_string`` to connect to MSSQL databases through SQLAlchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
 
 
-                .. code-block:: python
+            .. code-block:: python
 
-                    datasource_name = "my_mssql_datasource"
-                    config = f"""
-                    name: {datasource_name}
-                    class_name: SimpleSqlalchemyDatasource
-                    connection_string: mssql+pyodbc://YOUR_MSSQL_USERNAME:YOUR_MSSQL_PASSWORD@YOUR_MSSQL_HOST:YOUR_MSSQL_PORT/YOUR_MSSQL_DATABASE?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true
-                    introspection:
-                      whole_table:
-                        data_asset_name_suffix: __whole_table
-                    """
+                datasource_name = "my_mssql_datasource"
+                config = f"""
+                name: {datasource_name}
+                class_name: SimpleSqlalchemyDatasource
+                connection_string: mssql+pyodbc://YOUR_MSSQL_USERNAME:YOUR_MSSQL_PASSWORD@YOUR_MSSQL_HOST:YOUR_MSSQL_PORT/YOUR_MSSQL_DATABASE?driver=ODBC Driver 17 for SQL Server&charset=utf&autocommit=true
+                introspection:
+                  whole_table:
+                    data_asset_name_suffix: __whole_table
+                """
 
             **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 

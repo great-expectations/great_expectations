@@ -80,12 +80,11 @@ Steps
 
         3. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
 
-Additional Notes
-----------------
+
+        **BigQuery SimpleSqlalchemyDatasource Example**
 
         Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
 
-        **BigQuery SimpleSqlalchemyDatasource Example**
 
         3a.  Here is a simple example configuration. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.  Great Expectations uses a ``connection_string`` to connect to BigQuery through SQLAlchemy (reference: https://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls).
 
