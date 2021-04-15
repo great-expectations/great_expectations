@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -29,8 +29,6 @@ from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
-logger = logging.getLogger(__name__)
-
 try:
     import sqlalchemy as sqlalchemy
     import sqlalchemy.dialects.postgresql as postgresqltypes
@@ -51,8 +49,6 @@ except ImportError:
     sqlalchemy = None
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
-
-logger = logging.getLogger(__name__)
 
 
 def get_pandas_runtime_validator(context, df):
@@ -957,11 +953,13 @@ def test_error_handling_for_expect_compound_columns_to_be_unique(
     with caplog.at_level(logging.WARNING):
         suite = profiler.build_suite()
 
-    log_warnings = caplog.messages
-    assert len(log_warnings) == 1
+    log_warning_records = list(
+        filter(lambda record: record.levelname == "WARNING", caplog.records)
+    )
+    assert len(log_warning_records) == 1
 
     assert (
-        log_warnings[0]
+        log_warning_records[0].message
         == "expect_compound_columns_to_be_unique is not currently available in the V3 (Batch Request) API. Specifying a compound key will not add any expectations. This will be updated when that expectation becomes available."
     )
 
