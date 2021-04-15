@@ -322,35 +322,18 @@ cli_suite_edit_expectation_suite_payload_schema = {
     "additionalProperties": False,
 }
 
-api_version_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
-    "type": "object",
-    "properties": {
-        "api_version": {"type": "string", "maxLength": 256},
-    },
-    "additionalProperties": False,
-}
-
-cancelled_cli_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
-    "type": "object",
-    "properties": {
-        "cancelled": {"type": ["boolean", "null"]},
-    },
-    "additionalProperties": False,
-}
-
 cli_payload_schema = {
     "$schema": "http://json-schema.org/schema#",
     "title": "cli-payload",
-    "definitions": {
-        "api_version_definition": api_version_payload_schema,
-        "cancelled_cli_definition": cancelled_cli_payload_schema,
-    },
     "type": "object",
     "properties": {
-        "api_version": {"$ref": "#/definitions/api_version_definition"},
-        "cancelled": {"$ref": "#/definitions/cancelled_cli_definition"},
+        "api_version": {
+            "type": "string",
+            "maxLength": 256,
+        },
+        "cancelled": {
+            "type": ["boolean", "null"],
+        },
     },
     "additionalProperties": False,
 }
