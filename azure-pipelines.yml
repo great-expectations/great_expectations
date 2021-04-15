@@ -343,6 +343,11 @@ stages:
             displayName: 'Update pip'
 
           - script: |
+              sudo apt-get install -y pandoc
+              pip install pypandoc
+            displayName: 'Install pandoc'
+
+          - script: |
               pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt
               pip install --requirement requirements.txt
               pip install .
