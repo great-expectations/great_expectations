@@ -92,7 +92,7 @@ stages:
       - job: compatibility_matrix
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         variables:
-          GE_pytest_pip_opts: '--constraint constraints-dev.txt --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
+          GE_pytest_pip_opts: '--constraint constraints-dev.txt --requirement requirements-dev-test.txt --requirement requirements-dev-util.txt'
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
@@ -232,7 +232,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --constraint constraints-dev.txt --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
+              pip install --constraint constraints-dev.txt --requirement requirements-dev-test.txt --requirement requirements-dev-util.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
