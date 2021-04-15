@@ -54,8 +54,9 @@ How to create a new Expectation Suite using the CLI
         Batch of data the suite will eventually describe.  If there are unique choices (e.g., only one data connector in
         your datasource configuration), then Great Expectations will automatically select it for you (to speed up the process).
 
-        Finally, unless you specify the name of the Expectation Suite on the command line (using the `--expectation-suite TEXT` syntax),
-        the command will ask you to name your new Expectation Suite and offer you a default name for you to simply accept, or provide your own.
+        Finally, unless you specify the name of the Expectation Suite on the command line (using the
+        `--expectation-suite` option), the command will ask you to name your new Expectation Suite and offer you a
+        default name to simply accept, or provide your own.
 
         Then an empty suite is created and added to your project.
 
@@ -91,7 +92,7 @@ How to create a new Expectation Suite using the CLI
 
         .. code-block:: bash
 
-            great_expectations --v3-api suite new --interactive --batch-request my_saved_batch_request.json
+            great_expectations --v3-api suite new --interactive --batch-request my_saved_batch_request_file.json
 
         Unless you specify the name of the Expectation Suite on the command line (using the `--expectation-suite TEXT` syntax),
         the command will ask you to name your new Expectation Suite and offer you a default name for you to simply accept, or provide your own.
@@ -102,7 +103,7 @@ How to create a new Expectation Suite using the CLI
 
             great_expectations --v3-api suite new --expectation-suite my_suite --interactive --batch-request my_saved_batch_request.json
 
-        You can always run the following command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory to check the syntax:
+        To check the syntax, you can always run the following command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
         .. code-block:: bash
 
