@@ -8,7 +8,7 @@ How to create a new Expectation Suite using the CLI
     .. tab-container:: tab0
         :title: Show Docs for V2 (Batch Kwargs) API
 
-        While you could hand-author an Expectation Suite by writing a JSON file, just like with other features it is easier to let :ref:`CLI <command_line>` save you time and typos.
+        While you could hand-author an Expectation Suite by writing a JSON file, just like with other features it is easier to let the :ref:`CLI <command_line>` save you time and typos.
         Run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
 
