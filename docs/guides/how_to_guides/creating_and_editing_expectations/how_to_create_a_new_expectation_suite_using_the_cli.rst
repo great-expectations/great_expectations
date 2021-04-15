@@ -18,7 +18,7 @@ How to create a new Expectation Suite using the CLI
 
 
         This command prompts you to name your new Expectation Suite and to select a sample Batch of data that the suite will eventually describe.
-        Then an empty suite is created and added to your project.
+        An empty suite is created and added to your project.
         Then it creates a jupyter notebook for you to start creating your new suite.
         The command concludes by opening the newly generated jupyter notebook.
 
