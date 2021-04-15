@@ -6,6 +6,14 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
+from packaging.version import parse as parse_version
+
+from great_expectations._version import get_versions  # isort:skip
+
+__version__ = get_versions()["version"]  # isort:skip
+del get_versions  # isort:skip
+
+
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
 from great_expectations.core.batch_spec import (
@@ -67,10 +75,11 @@ except ImportError:
 try:
     import snowflake.sqlalchemy.snowdialect
 
-    # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
-except (ImportError, KeyError):
+    if sa:
+        # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
+except (ImportError, KeyError, AttributeError):
     snowflake = None
 
 try:
@@ -95,7 +104,7 @@ try:
             "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
         )
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+except (ImportError, AttributeError):
     bigquery_types_tuple = None
     pybigquery = None
 
@@ -766,7 +775,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(self, batch_spec) -> Select:
         table_name: str = batch_spec["table_name"]
-
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
             split_clause = splitter_fn(
@@ -782,7 +790,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if batch_spec["sampling_method"] == "_sample_using_limit":
                 # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
                 # so the business logic for building the query needs to be different.
-
                 return (
                     sa.select("*")
                     .select_from(
@@ -791,13 +798,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(split_clause)
                     .limit(batch_spec["sampling_kwargs"]["n"])
                 )
-
             else:
 
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
                     sa.select("*")
-                    .select_from(sa.text(table_name))
+                    .select_from(
+                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                    )
                     .where(
                         sa.and_(
                             split_clause,

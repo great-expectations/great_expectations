@@ -17,7 +17,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Docs for Legacy Checkpoints (<=0.13.7)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         1. First, generate the python with the command:
 
@@ -100,26 +100,69 @@ Steps
         or the python code can be embedded in your pipeline.
 
     .. tab-container:: tab1
-        :title: Docs for Class-Based Checkpoints (>=0.13.8)
+        :title: Show Docs for V3 (Batch Request) API
 
-        #. **Instantiate a DataContext**
+        1. First, generate the python with the command:
 
-            Instantiate a DataContext using the following lines:
+        .. code-block:: bash
 
-            .. code-block:: python
+            great_expectations --v3-api checkpoint script my_checkpoint
 
-                import great_expectations as ge
-                context = ge.get_context()
+        2. Next, you will see a message about where the python script was created like:
 
-        #. **Run context.test_yaml_config.**
+        .. code-block:: bash
 
-            Use the name of your configured checkpoint as the argument to the following call:
+            A python script was created that runs the checkpoint named: `my_checkpoint`
+              - The script is located in `great_expectations/uncommitted/run_my_checkpoint.py`
+              - The script can be run with `python great_expectations/uncommitted/run_my_checkpoint.py`
 
-            .. code-block:: python
+        3. Next, open the script which should look like this:
 
-                checkpoint_run_result: CheckpointResult = context.run_checkpoint(
-                    checkpoint_name="my_checkpoint",
-                )
+        .. code-block:: python
+
+            """
+            This is a basic generated Great Expectations script that runs a Checkpoint.
+
+            Checkpoints are the primary method for validating batches of data in production and triggering any followup actions.
+
+            A Checkpoint facilitates running a validation as well as configurable Actions such as updating Data Docs, sending a
+            notification to team members about validation results, or storing a result in a shared cloud storage.
+
+            See also <cyan>https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html</cyan> for more information about the Checkpoints and how to configure them in your Great Expectations environment.
+
+            Checkpoints can be run directly without this script using the `great_expectations checkpoint run` command.  This script
+            is provided for those who wish to run Checkpoints in python.
+
+            Usage:
+            - Run this file: `python great_expectations/uncommitted/run_chk.py`.
+            - This can be run manually or via a scheduler such, as cron.
+            - If your pipeline runner supports python snippets, then you can paste this into your pipeline.
+            """
+            import sys
+
+            from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+            from great_expectations.data_context import DataContext
+
+            data_context: DataContext = DataContext(
+                context_root_dir="/Users/talgluck/Documents/ge_main/quagga/UAT/DataContexts/cli_testing/ge_suite/v3_many_suites_pandas_filesystem_v3_config/great_expectations"
+            )
+
+            result: CheckpointResult = data_context.run_checkpoint(
+                checkpoint_name="chk",
+                batch_request=None,
+                run_name=None,
+            )
+
+            if not result["success"]:
+                print("Validation failed!")
+                sys.exit(1)
+
+            print("Validation succeeded!")
+            sys.exit(0)
+
+
+        4. This python can then be invoked directly using python `python great_expectations/uncommitted/run_my_checkpoint.py`
+        or the python code can be embedded in your pipeline.
 
             Other arguments to the `DataContext.run_checkpoint()` method may be required, depending on the amount and specifics of the Checkpoint configuration previously saved in the configuration file of the Checkpoint with the corresponding `name`.  The dynamically specified Checkpoint configuration, provided to the runtime as arguments to `DataContext.run_checkpoint()` must complement the settings in the Checkpoint configuration file so as to comprise a properly and sufficiently configured Checkpoint with the given `name`.
 
