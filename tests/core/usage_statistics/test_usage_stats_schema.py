@@ -4,8 +4,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_batch_schema,
     anonymized_datasource_schema,
     cli_new_ds_choice_payload_schema,
-    cli_payload_schema,
-    cli_suite_edit_expectation_suite_payload_schema,
+    cli_suite_expectation_suite_payload_schema,
     datasource_sqlalchemy_connect_payload,
     empty_payload_schema,
     init_payload_schema,
@@ -103,57 +102,82 @@ def test_data_context_add_datasource_message():
 
 
 def test_data_context_save_expectation_suite_message():
-    # record itself
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_context.save_expectation_suite"][0],
-        usage_statistics_record_schema,
-    )
-    # non-empty payload
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_context.save_expectation_suite"][0][
-            "event_payload"
-        ],
-        save_or_edit_expectation_suite_payload_schema,
-    )
+    usage_stats_records_messages = [
+        "data_context.save_expectation_suite",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                save_or_edit_expectation_suite_payload_schema,
+            )
 
 
 def test_datasource_sqlalchemy_connect_message():
-    # record itself
-    jsonschema.validate(
-        valid_usage_statistics_messages["datasource.sqlalchemy.connect"][0],
-        usage_statistics_record_schema,
-    )
-    jsonschema.validate(
-        valid_usage_statistics_messages["datasource.sqlalchemy.connect"][0][
-            "event_payload"
-        ],
-        datasource_sqlalchemy_connect_payload,
-    )
+    usage_stats_records_messages = [
+        "datasource.sqlalchemy.connect",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                datasource_sqlalchemy_connect_payload,
+            )
+
+
+def test_cli_data_asset_validate():
+
+    usage_stats_records_messages = [
+        "data_asset.validate",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
 
 
 def test_cli_new_ds_choice_message():
-    # record itself
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_asset.validate"][0],
-        usage_statistics_record_schema,
-    )
-    # non-empty payload
-    jsonschema.validate(
-        valid_usage_statistics_messages["cli.new_ds_choice"][0]["event_payload"],
-        cli_new_ds_choice_payload_schema,
-    )
+    usage_stats_records_messages = [
+        "cli.new_ds_choice",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # non-empty payload
+            jsonschema.validate(
+                message["event_payload"],
+                cli_new_ds_choice_payload_schema,
+            )
 
 
 def test_cli_suite_edit_message():
-    # record itself
-    jsonschema.validate(
-        valid_usage_statistics_messages["cli.suite.edit"][0],
-        usage_statistics_record_schema,
-    )
-    jsonschema.validate(
-        valid_usage_statistics_messages["cli.suite.edit"][0]["event_payload"],
-        cli_suite_edit_expectation_suite_payload_schema,
-    )
+    usage_stats_records_messages = [
+        "cli.suite.edit",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                cli_suite_expectation_suite_payload_schema,
+            )
 
 
 def test_usage_stats_empty_payload_messages():

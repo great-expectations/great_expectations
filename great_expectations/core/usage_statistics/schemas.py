@@ -308,7 +308,7 @@ save_or_edit_expectation_suite_payload_schema = {
     "additionalProperties": False,
 }
 
-cli_suite_edit_expectation_suite_payload_schema = {
+cli_suite_expectation_suite_payload_schema = {
     "$schema": "http://json-schema.org/schema#",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
@@ -317,6 +317,9 @@ cli_suite_edit_expectation_suite_payload_schema = {
             "$ref": "#/definitions/anonymized_string"
         },
         "api_version": {"type": "string", "maxLength": 256},
+        "cancelled": {
+            "type": ["boolean", "null"],
+        },
     },
     "required": ["anonymized_expectation_suite_name"],
     "additionalProperties": False,
@@ -378,8 +381,7 @@ usage_statistics_record_schema = {
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
-        "cli_suite_edit_begin_expectation_suite_payload": cli_suite_edit_expectation_suite_payload_schema,
-        "cli_suite_edit_expectation_suite_payload": cli_suite_edit_expectation_suite_payload_schema,
+        "cli_suite_expectation_suite_payload": cli_suite_expectation_suite_payload_schema,
         "cli_payload": cli_payload_schema,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload_schema,
         "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
@@ -408,24 +410,6 @@ usage_statistics_record_schema = {
                 "event": {"enum": ["data_context.save_expectation_suite"]},
                 "event_payload": {
                     "$ref": "#/definitions/save_or_edit_expectation_suite_payload"
-                },
-            },
-        },
-        {
-            "type": "object",
-            "properties": {
-                "event": {"enum": ["cli.suite.edit.begin"]},
-                "event_payload": {
-                    "$ref": "#/definitions/cli_suite_edit_begin_expectation_suite_payload"
-                },
-            },
-        },
-        {
-            "type": "object",
-            "properties": {
-                "event": {"enum": ["cli.suite.edit"]},
-                "event_payload": {
-                    "$ref": "#/definitions/cli_suite_edit_expectation_suite_payload"
                 },
             },
         },
@@ -478,6 +462,21 @@ usage_statistics_record_schema = {
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": [
+                        "cli.suite.edit",
+                        "cli.suite.edit.begin",
+                        "cli.suite.edit.end",
+                    ]
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/cli_suite_expectation_suite_payload"
+                },
             },
         },
         {
