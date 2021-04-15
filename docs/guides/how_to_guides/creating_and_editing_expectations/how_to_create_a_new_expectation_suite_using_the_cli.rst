@@ -148,7 +148,7 @@ How to create a new Expectation Suite using the CLI
                 "data_asset_name": "my_asset"
             }
 
-        You can then utilize this saved `batch_request` (containing any refinements you may have made to it in your notebook)
+        You can then utilize this saved ``batch_request`` (containing any refinements you may have made to it in your notebook)
         and skip the steps of selecting its components:
 
         .. code-block:: bash
