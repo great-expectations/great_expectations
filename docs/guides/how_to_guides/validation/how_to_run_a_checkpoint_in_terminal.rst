@@ -16,7 +16,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Docs for Legacy Checkpoints (<=0.13.7)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         1. Checkpoints can be run like applications from the command line by running:
 
@@ -41,7 +41,7 @@ Steps
         +-------------------------------+-----------------+-----------------------+
 
     .. tab-container:: tab1
-        :title: Docs for Class-Based Checkpoints (>=0.13.8)
+        :title: Show Docs for V3 (Batch Request) API
 
         1. Checkpoints can be run like applications from the command line by running:
 
