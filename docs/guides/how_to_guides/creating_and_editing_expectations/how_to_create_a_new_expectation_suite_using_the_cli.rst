@@ -37,12 +37,6 @@ How to create a new Expectation Suite using the CLI
 
         We will walk through several available options for how to do this.
 
-        You can always run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory to check the syntax:
-
-        .. code-block:: bash
-
-            great_expectations --v3-api suite new --help
-
         The `--interactive` mode (`False` by default) denotes the fact that you are interacting with your data.  In
         other words, you have access to a data source and can specify  a Batch of data to be used to create expectations
         against.  Not specifying this flag still allows you to create expectations (e.g., if you already know enough
@@ -70,6 +64,17 @@ How to create a new Expectation Suite using the CLI
 
         If you wish to skip the automated opening of jupyter notebook, add the `--no-jupyter` flag:
 
+        .. code-block:: bash
+
+            great_expectations --v3-api suite new --interactive --no-jupyter
+
+        or in the non-interactive mode:
+
+        .. code-block:: bash
+
+            great_expectations --v3-api suite new --no-jupyter
+
+
         When in the interactive mode, the initialization cell of your jupyter notebook will contain the `batch_request`
         dictionary.  You can convert it to JSON and save in a file for future use.  The contents of this file would look like this:
 
@@ -81,10 +86,28 @@ How to create a new Expectation Suite using the CLI
                 "data_asset_name": "my_asset"
             }
 
+        You can then utilize this saved `batch_request` (containing any refinements you may have made to it in your notebook)
+        and skip the steps of selecting its components:
 
         .. code-block:: bash
 
-            great_expectations --v3-api suite new --no-jupyter
+            great_expectations --v3-api suite new --interactive --batch-request my_saved_batch_request.json
+
+        Unless you specify the name of the Expectation Suite on the command line (using the `--expectation-suite TEXT` syntax),
+        the command will ask you to name your new Expectation Suite and offer you a default name for you to simply accept, or provide your own.
+
+        You can extend the previous example to specify the name of the Expectation Suite on the command line as follows:
+
+        .. code-block:: bash
+
+            great_expectations --v3-api suite new --expectation-suite my_suite --interactive --batch-request my_saved_batch_request.json
+
+        You can always run the following command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory to check the syntax:
+
+        .. code-block:: bash
+
+            great_expectations --v3-api suite new --help
+
 
 .. discourse::
     :topic_identifier: 240
