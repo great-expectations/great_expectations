@@ -82,7 +82,7 @@ Steps
 
                 great_expectations --v3-api suite edit movieratings.ratings
 
-            For convenience, the :ref:`Data Docs <reference__core_concepts__datasources>` page for each Expectation Suite has the CLI command syntax for you. Simply press the “How to Edit This Suite” button, and copy/paste the CLI command into your terminal.
+            For convenience, the :ref:`Data Docs <reference__core_concepts__datasources>` page for each Expectation Suite has the CLI command syntax for you.
 
         2. Run the boilerplate code at the top of the notebook.
 
