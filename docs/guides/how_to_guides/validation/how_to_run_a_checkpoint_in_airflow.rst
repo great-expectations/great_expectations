@@ -83,7 +83,7 @@ Steps
 
                 validation_task = BashOperator(
                     task_id='validation_task',
-                    bash_command='great_expectations checkpoint run my_checkpoint',
+                    bash_command='great_expectations --v3-api checkpoint run my_checkpoint',
                     dag=dag
                 )
 
@@ -96,7 +96,7 @@ Steps
 
             .. code-block:: bash
 
-                great_expectations checkpoint script my_checkpoint
+                great_expectations --v3-api checkpoint script my_checkpoint
 
                 ...
 
