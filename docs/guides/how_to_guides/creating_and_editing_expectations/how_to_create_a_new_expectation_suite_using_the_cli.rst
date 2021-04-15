@@ -164,7 +164,7 @@ How to create a new Expectation Suite using the CLI
 
             great_expectations --v3-api suite new --expectation-suite my_suite --interactive --batch-request my_saved_batch_request.json
 
-        To check the syntax, you can always run the following command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
+        To check the syntax, you can always run the following command in the root directory of your project (where the ``init`` command created the ``great_expectations`` subdirectory:
 
         .. code-block:: bash
 
