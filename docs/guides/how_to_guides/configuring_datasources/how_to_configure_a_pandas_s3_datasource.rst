@@ -181,10 +181,8 @@ Steps
         #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
 
 
-Additional notes
-----------------
 
-        #.  **S3-backed Pandas Datasource Example.**
+        **S3-backed Pandas Datasource Example.**
 
             Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
 
