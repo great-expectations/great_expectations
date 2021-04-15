@@ -5,27 +5,11 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-
-try:
-    from sqlalchemy.engine.row import Row
-    from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql import Select
-    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
-    from sqlalchemy.sql.selectable import CTE
-except ImportError:
-    Row = None
-    ProgrammingError = None
-    Select = None
-    Label = None
-    TextClaus = None
-    WithinGroup = None
-    CTE = None
-
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -39,6 +23,36 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
 logger = logging.getLogger(__name__)
+
+try:
+    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql import Select
+    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
+    from sqlalchemy.sql.selectable import CTE
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    ProgrammingError = None
+    Select = None
+    Label = None
+    TextClaus = None
+    WithinGroup = None
+    CTE = None
+
+try:
+    from sqlalchemy.engine.row import Row
+except ImportError:
+    try:
+        from sqlalchemy.engine.row import RowProxy
+
+        Row = RowProxy
+    except ImportError:
+        logger.debug(
+            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
+        )
+        RowProxy = None
+        Row = None
 
 
 class ColumnQuantileValues(ColumnMetricProvider):
