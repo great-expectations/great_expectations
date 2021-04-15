@@ -161,15 +161,16 @@ def test_usage_stats_empty_payload_messages():
         "data_context.build_data_docs",
         "data_context.open_data_docs",
     ]
-    for message in usage_stats_records_messages:
-        jsonschema.validate(
-            valid_usage_statistics_messages[message][0],
-            usage_statistics_record_schema,
-        )
-        jsonschema.validate(
-            valid_usage_statistics_messages[message][0]["event_payload"],
-            empty_payload_schema,
-        )
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                empty_payload_schema,
+            )
 
 
 def test_usage_stats_cli_payload_messages():
