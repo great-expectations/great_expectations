@@ -61,44 +61,57 @@ def test_comprehensive_list_of_messages():
 
 
 def test_init_message():
-    # record itself
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_context.__init__"][0],
-        usage_statistics_record_schema,
-    )
-    # non-empty payload
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_context.__init__"][0]["event_payload"],
-        init_payload_schema,
-    )
+    usage_stats_records_messages = [
+        "data_context.__init__",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            # non-empty payload
+            jsonschema.validate(
+                message["event_payload"],
+                init_payload_schema,
+            )
 
 
 def test_data_asset_validate_message():
-    # record itself
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_asset.validate"][0],
-        usage_statistics_record_schema,
-    )
-    # non-empty payload
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_asset.validate"][0]["event_payload"],
-        anonymized_batch_schema,
-    )
+    usage_stats_records_messages = [
+        "data_asset.validate",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            # non-empty payload
+            jsonschema.validate(
+                message["event_payload"],
+                anonymized_batch_schema,
+            )
 
 
 def test_data_context_add_datasource_message():
-    # record itself
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_context.add_datasource"][0],
-        usage_statistics_record_schema,
-    )
-    # non-empty payload
-    jsonschema.validate(
-        valid_usage_statistics_messages["data_context.add_datasource"][0][
-            "event_payload"
-        ],
-        anonymized_datasource_schema,
-    )
+    usage_stats_records_messages = [
+        "data_context.add_datasource",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            # non-empty payload
+            jsonschema.validate(
+                message["event_payload"],
+                anonymized_datasource_schema,
+            )
 
 
 def test_data_context_save_expectation_suite_message():

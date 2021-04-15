@@ -525,7 +525,6 @@ usage_statistics_record_schema = {
                         "cli.store.list",
                         "cli.store.list.begin",
                         "cli.store.list.end",
-                        "cli.suite.edit.end",
                         "cli.suite.delete",
                         "cli.suite.delete.begin",
                         "cli.suite.delete.end",
