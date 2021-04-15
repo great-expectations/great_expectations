@@ -1,9 +1,7 @@
 from typing import Dict, List, Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...render.types import RenderedStringTemplateContent
