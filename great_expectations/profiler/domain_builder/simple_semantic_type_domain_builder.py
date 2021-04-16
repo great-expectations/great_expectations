@@ -25,21 +25,22 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         ]
         """
         config = kwargs
-        type_filter = config.get("type")
-        if type_filter is None:
+        # TODO: AJB 20210416 If the type keyword for the DomainBuilder can contain multiple semantic types, should it be renamed types and take a list instead? Not that we can’t guess from what a user adds but something to make it clear that multiple semantic types can be used to construct a domain?
+        type_filters = config.get("type")
+        if type_filters is None:
             # None indicates no selection; all types should be returned
-            pass
-        elif isinstance(type_filter, str):
-            type_filter = [self.SemanticDomainTypes[type_filter]]
-        elif isinstance(type_filter, Iterable):
-            type_filter = [self.SemanticDomainTypes[x] for x in type_filter]
+            type_filters = []
+        elif isinstance(type_filters, str):
+            type_filters = [self.SemanticDomainTypes[type_filters]]
+        elif isinstance(type_filters, Iterable):
+            type_filters = [self.SemanticDomainTypes[x] for x in type_filters]
         else:
             raise ValueError("unrecognized ")
         columns = validator.get_metric(MetricConfiguration("table.columns", dict()))
         domains = []
         for column in columns:
             column_type = self._get_column_semantic_type(validator, column)
-            if column_type in type_filter:
+            if column_type in type_filters:
                 domains.append(
                     {
                         "domain_kwargs": {"column": column.name},
