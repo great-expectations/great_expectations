@@ -23,6 +23,6 @@ class ColumnDomainBuilder(DomainBuilder):
 
     def get_column_domains(self, *, validator=None, batch_ids=None, **kwargs):
         domain_type = kwargs.pop("domain_type", MetricDomainTypes.COLUMN)
-        return super().get_domains(
+        return self.get_domains(
             validator=validator, batch_ids=batch_ids, domain_type=domain_type, **kwargs
         )
