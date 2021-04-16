@@ -206,7 +206,7 @@ profiler_semantic_types = {
 
 class Profiler(metaclass=abc.ABCMeta):
     """
-    Profilers creates suites from various sources of truth.
+    Profiler creates suites from various sources of truth.
 
     These sources of truth can be data or non-data sources such as DDLs.
 
