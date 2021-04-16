@@ -847,23 +847,21 @@ class UserConfigurableProfiler:
                         profile_dataset.execution_engine.engine.dialect
                     )
 
-            quantile_result = (
-                profile_dataset.expect_column_quantile_values_to_be_between(
-                    column,
-                    quantile_ranges={
-                        "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                        "value_ranges": [
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                            [None, None],
-                        ],
-                    },
-                    # TODO: <Alex>ALEX -- Tal, could you please fix the issue in the next line?</Alex>
-                    allow_relative_error=allow_relative_error,
-                    result_format="SUMMARY",
-                )
+            quantile_result = profile_dataset.expect_column_quantile_values_to_be_between(
+                column,
+                quantile_ranges={
+                    "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+                    "value_ranges": [
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                        [None, None],
+                    ],
+                },
+                # TODO: <Alex>ALEX -- Tal, could you please fix the issue in the next line?</Alex>
+                allow_relative_error=allow_relative_error,
+                result_format="SUMMARY",
             )
             if quantile_result.exception_info and (
                 quantile_result.exception_info["exception_traceback"]
