@@ -91,7 +91,7 @@ Steps
                     class_name: SubdirReaderBatchKwargsGenerator
                     base_directory: /path/to/directory/containing/your/data/files
                     reader_options:
-                      header=True
+                      header: True
 
         #. **Wait for confirmation**
 
