@@ -26,6 +26,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         """
         config = kwargs
         # TODO: AJB 20210416 If the type keyword for the DomainBuilder can contain multiple semantic types, should it be renamed types and take a list instead? Not that we can’t guess from what a user adds but something to make it clear that multiple semantic types can be used to construct a domain?
+        # TODO: <Alex>ALEX -- In general, to avoid confusion, we should avoid the use of "type" because it is a function in Python.</Alex>
         type_filters = config.get("type")
         if type_filters is None:
             # None indicates no selection; all types should be returned
