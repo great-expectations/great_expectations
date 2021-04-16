@@ -7,14 +7,13 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
-
-# from great_expectations.profiler.profiler import Profiler
+from great_expectations.profiler.profiler import Profiler
 
 yaml = YAML()
 
 
 # TODO: AJB 20210416 Move this fixture, generalize, add to quagga, add more column types
-@pytest.fixture(scope="function")
+@pytest.fixture
 def multibatch_generic_csv_generator():
     """
     Construct a series of csv files with many data types for use in multibatch testing
@@ -60,22 +59,13 @@ def multibatch_generic_csv_generator():
     return _multibatch_generic_csv_generator
 
 
-def test_batches_are_accessible(
-    monkeypatch, multibatch_generic_csv_generator, empty_data_context
-):
-    """
-    What does this test and why?
-    Batches created in the multibatch_generic_csv_generator fixture should be available using the
-    multibatch_generic_csv_generator_context
-    This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
-    """
-
+@pytest.fixture
+def multibatch_generic_csv_generator_context(monkeypatch, empty_data_context):
     context: DataContext = empty_data_context
     monkeypatch.chdir(context.root_directory)
     data_relative_path = "../data"
     data_path = os.path.join(context.root_directory, data_relative_path)
     os.makedirs(data_path, exist_ok=True)
-    file_list = multibatch_generic_csv_generator(data_path=data_path)
 
     data_connector_base_directory = "./"
     monkeypatch.setenv("base_directory", data_connector_base_directory)
@@ -107,7 +97,7 @@ data_connectors:
         glob_directive: "*.csv"
     base_directory: $base_directory
     module_name: great_expectations.datasource.data_connector
-    """
+        """
 
     context.add_datasource(name=datasource_name, **yaml.load(datasource_config))
 
@@ -139,10 +129,34 @@ data_connectors:
             "name": "generic_csv_generator",
         }
     ]
+    return context
+
+
+def test_batches_are_accessible(
+    monkeypatch,
+    multibatch_generic_csv_generator,
+    multibatch_generic_csv_generator_context,
+):
+    """
+    What does this test and why?
+    Batches created in the multibatch_generic_csv_generator fixture should be available using the
+    multibatch_generic_csv_generator_context
+    This test most likely duplicates tests elsewhere, but it is more of a test of the configurable fixture.
+    """
+
+    context: DataContext = multibatch_generic_csv_generator_context
+    data_relative_path = "../data"
+    data_path = os.path.join(context.root_directory, data_relative_path)
+    datasource_name = "generic_csv_generator"
+    data_connector_name = "daily_data_connector"
+    asset_name = "daily_data_asset"
 
     datasource = context.datasources[datasource_name]
 
     data_connector = datasource.data_connectors[data_connector_name]
+
+    file_list = multibatch_generic_csv_generator(data_path=data_path)
+
     assert (
         data_connector._get_data_reference_list_from_cache_by_data_asset_name(
             data_asset_name=asset_name
