@@ -355,14 +355,14 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
-              # pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt
+              # not including "--requirement requirements-dev-spark.txt", because it specifies "pyspark>=2.3.2,<3.0.0" versions, which do not support Python 3.8 (see script step below)
               pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pyspark>=3.0.0
+              pip install pyspark>=3.0.0  # "pyspark<3.0.0" versions do not support Python 3.8 (see comment above)
               pip install findspark
             displayName: 'Install pyspark'
 
