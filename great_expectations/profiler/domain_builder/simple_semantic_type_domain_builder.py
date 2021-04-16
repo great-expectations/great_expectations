@@ -36,7 +36,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         elif isinstance(type_filters, Iterable):
             type_filters = [self.SemanticDomainTypes[x] for x in type_filters]
         else:
-            raise ValueError("unrecognized ")
+            raise ValueError("unrecognized")
         columns = validator.get_metric(MetricConfiguration("table.columns", dict()))
         domains = []
         for column in columns:
