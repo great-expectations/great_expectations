@@ -1,6 +1,46 @@
+import datetime
+import os
+
+import pandas as pd
 import pytest
 
 from great_expectations.profiler.profiler import Profiler
+
+
+# TODO: AJB 20210416 Move this fixture, generalize, add to quagga
+@pytest.fixture()
+def multibatch_csv_generator(tmp_path):
+
+    data_path = tmp_path / "data"
+    data_path.mkdir()
+
+    start_date = datetime.datetime(2000, 1, 1)
+
+    num_event_batches = 20
+    num_events_per_batch = 5
+
+    for batch_num in range(num_event_batches):
+        # generate a dataframe with multiple column types
+        batch_start_date = start_date + datetime.timedelta(
+            days=(batch_num * num_events_per_batch)
+        )
+        df = pd.DataFrame(
+            {
+                "event_date": [
+                    (batch_start_date + datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+                    for i in range(num_events_per_batch)
+                ],
+                "batch_num": [batch_num + 1 for _ in range(num_events_per_batch)],
+            }
+        )
+        df.to_csv(
+            os.path.join(
+                data_path, f"csv_batch_{batch_num + 1}_of_{num_event_batches}.csv"
+            ),
+            index_label="intra_batch_index",
+        )
+
+    return data_path
 
 
 @pytest.fixture(scope="module")
@@ -52,7 +92,9 @@ rules:
 
 
 def test_profiler_init_manual(
-    taxicab_context, simple_multibatch_profiler_configuration_yaml
+    taxicab_context,
+    simple_multibatch_profiler_configuration_yaml,
+    multibatch_csv_generator,
 ):
     profiler = Profiler(
         rule_configs=simple_multibatch_profiler_configuration_yaml,
