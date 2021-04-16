@@ -15,7 +15,7 @@ class ColumnDomainBuilder(DomainBuilder):
     ):
         if domain_type is not None and domain_type != MetricDomainTypes.COLUMN:
             raise ProfilerConfigurationError(
-                f"{self.__class__.name} requires a COLUMN domain."
+                f"{self.__class__.__name__} requires a COLUMN domain."
             )
         return super().get_domains(
             validator=validator, batch_ids=batch_ids, domain_type=domain_type, **kwargs
