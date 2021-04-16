@@ -68,9 +68,10 @@ class UserConfigurableProfiler:
         value_set_threshold: str = "MANY",
     ):
         """
-                The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
-                instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
-                instantiated, if config items change, a new profiler will be needed.
+        The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
+        instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
+        instantiated, if config items change, a new profiler will be needed.
+
         Write an entry on how to use the profiler for the GE docs site
                 Args:
                     profile_dataset: A Great Expectations Dataset or Validator object
