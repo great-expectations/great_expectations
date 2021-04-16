@@ -266,7 +266,8 @@ class MetaSqlAlchemyDataset(Dataset):
                     .select_from(self._table)
                     .where(
                         sa.and_(
-                            sa.not_(expected_condition), sa.not_(ignore_values_condition)
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
                         )
                     )
                 )
@@ -276,15 +277,14 @@ class MetaSqlAlchemyDataset(Dataset):
                     .select_from(self._table)
                     .where(
                         sa.and_(
-                            sa.not_(expected_condition), sa.not_(ignore_values_condition)
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
                         )
                     )
                     .limit(unexpected_count_limit)
                 )
             query = str(
-                raw_query.compile(
-                    self.engine, compile_kwargs={"literal_binds": True}
-                )
+                raw_query.compile(self.engine, compile_kwargs={"literal_binds": True})
             )
             # use rownum instead of limit in oracle
             if self.engine.dialect.name.lower() == "oracle":
