@@ -213,7 +213,7 @@ class Profiler(metaclass=abc.ABCMeta):
     When implementing a Profiler ensure that you:
     - Implement a . _profile() method
     - Optionally implement .validate() method that verifies you are running on the right
-     kind of object. You should raise an appropriate Exception if the object is not valid.
+      kind of object. You should raise an appropriate Exception if the object is not valid.
     """
 
     def __init__(self, configuration: dict = None):
