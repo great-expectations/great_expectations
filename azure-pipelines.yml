@@ -338,7 +338,7 @@ stages:
           postgres: postgres
 
         variables:
-          python.version: '3.7'
+          python.version: '3.6'
 
         steps:
           - task: UsePythonVersion@0
