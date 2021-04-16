@@ -41,7 +41,7 @@ class RuleState:
 
         variables_key = "$variables."
         if value.startswith(variables_key):
-            lookup = value[len(variables_key) :].split(".")
+            lookup = value[len(variables_key):].split(".")
             curr = self.variables
         else:
             lookup = value[1:].split(".")
@@ -51,6 +51,7 @@ class RuleState:
             for level in lookup:
                 curr = curr[level]
         except KeyError:
+            # TODO: <Alex>ALEX -- The next line needs to be fixed.</Alex>
             raise ProfilerExecutionError(
                 f"Unable to find value '{value}': key '{level}' was missing."
             )
