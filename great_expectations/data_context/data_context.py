@@ -165,7 +165,7 @@ class BaseDataContext:
         icon:
         short_description: Creating a new Expectation Suite using suite scaffold
         description: Creating Expectation Suites through an interactive development loop using suite scaffold
-        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_using_suite_scaffold.html
+        how_to_guide_url: https://docs.greatexpectations.io/en/latest/how_to_guides/creating_and_editing_expectations/how_to_automatically_create_a_new_expectation_suite.html
         maturity: Experimental (expect exciting changes to Profiler capability)
         maturity_details:
             api_stability: N/A
