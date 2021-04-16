@@ -50,6 +50,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                 )
         return domains
 
+    # TODe: <Alex>ALEX -- This method seems to always return the same value ("integer")...</Alex>
     def _get_column_semantic_type(self, validator, column):
         # FIXME: DO CHECKS
         return self.SemanticDomainTypes["INTEGER"]
