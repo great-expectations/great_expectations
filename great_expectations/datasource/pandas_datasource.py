@@ -300,9 +300,13 @@ class PandasDatasource(LegacyDatasource):
         Returns:
             dict: A copy of the reader options post-inference
         """
-        if reader_fn.__name__ == "read_parquet":
+        while isinstance(reader_fn, partial):
+            # reader_fn might be partial so need to unwrap to get underlying method
+            reader_fn = reader_fn.func
+        name = reader_fn.__name__
+        if name == "read_parquet":
             return {}
-        if reader_fn.__name__ == "read_excel":
+        if name == "read_excel":
             return {}
         else:
             return {"encoding": "utf-8"}

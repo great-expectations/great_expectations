@@ -66,17 +66,17 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
                 data_connector_config,
             )
 
-        # Second, build DataConnectors for tables. They will map to configured data_assets
+        # Second, build DataConnectors for tables. They will map to configured assets
         for table_name, table_config in table_configs.items():
             for partitioner_name, partitioner_config in table_config[
                 "partitioners"
             ].items():
 
                 data_connector_name = partitioner_name
-                if not data_connector_name in self.data_connectors:
+                if data_connector_name not in self.data_connectors:
                     data_connector_config = {
                         "class_name": "ConfiguredAssetSqlDataConnector",
-                        "data_assets": {},
+                        "assets": {},
                     }
                     self._build_data_connector_from_config(
                         data_connector_name, data_connector_config

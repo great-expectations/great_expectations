@@ -11,6 +11,7 @@ from great_expectations.profile.base import (
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
+from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 
 @pytest.fixture()
@@ -25,6 +26,19 @@ def cardinality_dataset():
             "col_many": [i % 100 for i in range(0, 1000)],
             "col_very_many": [i % 500 for i in range(0, 1000)],
             "col_unique": [i for i in range(0, 1000)],
+        }
+    )
+    batch_df = PandasDataset(df)
+
+    return batch_df
+
+
+@pytest.fixture()
+def nulls_dataset():
+    df = pd.DataFrame(
+        {
+            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
+            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
         }
     )
     batch_df = PandasDataset(df)
@@ -59,22 +73,6 @@ def possible_expectations_set():
         "expect_column_values_to_be_unique",
         "expect_compound_columns_to_be_unique",
     }
-
-
-def get_set_of_columns_and_expectations_from_suite(suite):
-    """
-    Args:
-        suite: An expectation suite
-
-    Returns:
-        A tuple containing a set of columns and a set of expectations found in a suite
-    """
-    columns = {
-        i.kwargs.get("column") for i in suite.expectations if i.kwargs.get("column")
-    }
-    expectations = {i.expectation_type for i in suite.expectations}
-
-    return columns, expectations
 
 
 def test_profiler_init_no_config(
@@ -189,6 +187,34 @@ def test__validate_config(cardinality_dataset):
     with pytest.raises(AssertionError) as e:
         UserConfigurableProfiler(cardinality_dataset, table_expectations_only="True")
     assert e.typename == "AssertionError"
+
+
+def test_value_set_threshold(cardinality_dataset):
+    """
+    What does this test do and why?
+    Tests the value_set_threshold logic on the profiler works as expected.
+    """
+    # Test that when value_set_threshold is unset, it will default to "MANY"
+    profiler = UserConfigurableProfiler(cardinality_dataset)
+    assert profiler.value_set_threshold == "MANY"
+
+    # Test that when value_set_threshold is set to an appropriate enum value, the value_set_threshold will be correct
+    profiler = UserConfigurableProfiler(cardinality_dataset, value_set_threshold="FEW")
+    assert profiler.value_set_threshold == "FEW"
+
+    # Test that when value_set_threshold is set to a non-string, it will error
+    with pytest.raises(AssertionError) as e:
+        UserConfigurableProfiler(cardinality_dataset, value_set_threshold=None)
+    assert e.typename == "AssertionError"
+
+    # Test that when value_set_threshold is set to a string that is not in the cardinality enum, it will error
+    with pytest.raises(AssertionError) as e:
+        UserConfigurableProfiler(cardinality_dataset, value_set_threshold="wrong_value")
+    assert e.typename == "AssertionError"
+    assert (
+        e.value.args[0]
+        == "value_set_threshold must be one of ['NONE', 'ONE', 'TWO', 'VERY_FEW', 'FEW', 'MANY', 'VERY_MANY', 'UNIQUE']"
+    )
 
 
 def test__validate_semantic_types_dict(cardinality_dataset):
@@ -371,7 +397,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
 
 
-def test_config_with_not_null_only(possible_expectations_set):
+def test_config_with_not_null_only(nulls_dataset, possible_expectations_set):
     """
     What does this test do and why?
     Confirms that the not_null_only key in config works as expected.
@@ -379,13 +405,7 @@ def test_config_with_not_null_only(possible_expectations_set):
 
     excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
 
-    df = pd.DataFrame(
-        {
-            "mostly_null": [i if i % 3 == 0 else None for i in range(0, 1000)],
-            "mostly_not_null": [None if i % 3 == 0 else i for i in range(0, 1000)],
-        }
-    )
-    batch_df = PandasDataset(df)
+    batch_df = nulls_dataset
 
     profiler_without_not_null_only = UserConfigurableProfiler(
         batch_df, excluded_expectations, not_null_only=False
@@ -412,6 +432,22 @@ def test_config_with_not_null_only(possible_expectations_set):
     no_config_suite = no_config_profiler.build_suite()
     _, expectations = get_set_of_columns_and_expectations_from_suite(no_config_suite)
     assert "expect_column_values_to_be_null" in expectations
+
+
+def test_nullity_expectations_mostly_tolerance(
+    nulls_dataset, possible_expectations_set
+):
+    excluded_expectations = [i for i in possible_expectations_set if "null" not in i]
+
+    batch_df = nulls_dataset
+
+    profiler = UserConfigurableProfiler(
+        batch_df, excluded_expectations, not_null_only=False
+    )
+    suite = profiler.build_suite()
+
+    for i in suite.expectations:
+        assert i["kwargs"]["mostly"] == 0.66
 
 
 def test_profiled_dataset_passes_own_validation(

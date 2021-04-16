@@ -11,31 +11,17 @@ import pandas as pd
 import pytest
 
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
-
-from ..conftest import build_test_backends_list
-from ..test_utils import (
+from great_expectations.self_check.util import (
     candidate_test_is_on_temporary_notimplemented_list,
     evaluate_json_test,
     get_dataset,
+    mssqlDialect,
+    mysqlDialect,
+    postgresqlDialect,
+    sqliteDialect,
 )
 
-try:
-    from sqlalchemy.dialects.mssql import dialect as mssqlDialect
-except (ImportError, KeyError):
-    mssqlDialect = None
-try:
-    from sqlalchemy.dialects.mysql import dialect as mysqlDialect
-except (ImportError, KeyError):
-    mysqlDialect = None
-try:
-    from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
-except (ImportError, KeyError):
-    postgresqlDialect = None
-try:
-    from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
-except (ImportError, KeyError):
-    sqliteDialect = None
-
+from ..conftest import build_test_backends_list
 
 logger = logging.getLogger(__name__)
 tmp_dir = str(tempfile.mkdtemp())
@@ -58,7 +44,8 @@ def pytest_generate_tests(metafunc):
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        for c in build_test_backends_list(metafunc):
+        backends = build_test_backends_list(metafunc)
+        for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
                 # Use OrderedDict so that python2 will use the correct order of columns in all cases
@@ -239,6 +226,7 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize("test_case", parametrized_tests, ids=ids)
 
 
+@pytest.mark.order(index=1)
 def test_case_runner(test_case):
     if test_case["skip"]:
         pytest.skip()

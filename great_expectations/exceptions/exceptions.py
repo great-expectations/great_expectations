@@ -98,6 +98,10 @@ class InvalidBatchSpecError(GreatExpectationsError):
     pass
 
 
+class InvalidBatchRequestError(GreatExpectationsError):
+    pass
+
+
 class InvalidBatchIdError(GreatExpectationsError):
     pass
 
@@ -228,6 +232,10 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "S3Generator": "S3GlobReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
+            "PartitionDefinitionSubset": "IDDict",
+            "PartitionRequest": "IDDict",
+            "PartitionDefinition": "IDDict",
+            "PartitionQuery": "BatchFilter",
         }
 
         if class_name_changes.get(class_name):
@@ -343,7 +351,7 @@ class ExecutionEngineError(DataContextError):
         super().__init__(self.message)
 
 
-class PartitionQueryError(DataContextError):
+class BatchFilterError(DataContextError):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)

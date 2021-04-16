@@ -1,10 +1,5 @@
-# from freezegun import freeze_time
-import pytest
-
 from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.exceptions import InvalidKeyError
 from great_expectations.render.renderer import OpsgenieRenderer
-from tests.test_utils import modify_locale
 
 
 def test_OpsgenieRenderer_validation_results_success():

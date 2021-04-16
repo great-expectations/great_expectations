@@ -12,6 +12,7 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.exceptions import exceptions as ge_exceptions
 
 from ..exceptions import (
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark
     import pyspark.sql.functions as F
+    from pyspark import SparkContext
     from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.types import (
         BooleanType,
@@ -41,10 +43,9 @@ try:
         StructField,
         StructType,
     )
-
-
 except ImportError:
     pyspark = None
+    SparkContext = None
     SparkSession = None
     DataFrame = None
     F = None
@@ -141,30 +142,27 @@ class SparkDFExecutionEngine(ExecutionEngine):
         "reader_options",
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, persist=True, spark_config=None, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
-        self._persist = kwargs.pop("persist", True)
-        self._spark_config = kwargs.pop("spark_config", {})
-        try:
-            builder = SparkSession.builder
-            app_name: Optional[str] = self._spark_config.pop("spark.app.name", None)
-            if app_name:
-                builder.appName(app_name)
-            for k, v in self._spark_config.items():
-                builder.config(k, v)
-            self.spark = builder.getOrCreate()
-        except AttributeError:
-            logger.error(
-                "Unable to load spark context; install optional spark dependency for support."
-            )
-            self.spark = None
+        self._persist = persist
+
+        if spark_config is None:
+            spark_config = {}
+
+        spark: SparkSession = get_or_create_spark_application(spark_config=spark_config)
+
+        spark_config = dict(spark_config)
+        spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
+
+        self._spark_config = spark_config
+        self.spark = spark
 
         super().__init__(*args, **kwargs)
 
         self._config.update(
             {
                 "persist": self._persist,
-                "spark_config": self._spark_config,
+                "spark_config": spark_config,
             }
         )
 
@@ -192,8 +190,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:  # batch_data
-        batch_data: DataFrame
-
         # We need to build a batch_markers to be used in the dataframe
         batch_markers: BatchMarkers = BatchMarkers(
             {
@@ -203,9 +199,15 @@ class SparkDFExecutionEngine(ExecutionEngine):
             }
         )
 
+        batch_data: Any
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
+            if isinstance(batch_data, str):
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""SparkDFExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
+Please check your config."""
+                )
             batch_spec.batch_data = "SparkDataFrame"
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
@@ -306,7 +308,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self,
         domain_kwargs: dict,
         domain_type: Union[str, "MetricDomainTypes"],
-        accessor_keys: Optional[Iterable[str]] = [],
+        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple["pyspark.sql.DataFrame", dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
         to obtain and/or query a batch. Returns in the format of a Pandas Series if only a single column is desired,
@@ -351,7 +353,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
-                "SparkExecutionEngine does not currently support multiple named tables."
+                "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
         row_condition = domain_kwargs.get("row_condition", None)
@@ -371,28 +373,33 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if (
             domain_type != MetricDomainTypes.TABLE
             and accessor_keys is not None
-            and len(accessor_keys) > 0
+            and len(list(accessor_keys)) > 0
         ):
             logger.warning(
                 "Accessor keys ignored since Metric Domain Type is not 'table"
             )
 
         if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(accessor_keys) > 0:
+            if accessor_keys is not None and len(list(accessor_keys)) > 0:
                 for key in accessor_keys:
                     accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
             if len(compute_domain_kwargs.keys()) > 0:
-                for key in compute_domain_kwargs.keys():
-                    # Warning user if kwarg not "normal"
-                    if key not in [
+                # Warn user if kwarg not "normal".
+                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
+                    {
                         "batch_id",
                         "table",
                         "row_condition",
                         "condition_parser",
-                    ]:
-                        logger.warning(
-                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
-                        )
+                    }
+                )
+                if len(unexpected_keys) > 0:
+                    unexpected_keys_str: str = ", ".join(
+                        map(lambda element: f'"{element}"', unexpected_keys)
+                    )
+                    logger.warning(
+                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                    )
             return data, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and
@@ -504,7 +511,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 Returns:
                     A dictionary of the collected metrics over their respective domains
         """
-
         resolved_metrics = dict()
         aggregates: Dict[Tuple, dict] = dict()
         for (
@@ -564,21 +570,17 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return df
 
     @staticmethod
-    def _split_on_column_value(
-        df,
-        column_name: str,
-        partition_definition: dict,
-    ):
-        return df.filter(F.col(column_name) == partition_definition[column_name])
+    def _split_on_column_value(df, column_name: str, batch_identifiers: dict):
+        return df.filter(F.col(column_name) == batch_identifiers[column_name])
 
     @staticmethod
     def _split_on_converted_datetime(
         df,
         column_name: str,
-        partition_definition: dict,
+        batch_identifiers: dict,
         date_format_string: str = "yyyy-MM-dd",
     ):
-        matching_string = partition_definition[column_name]
+        matching_string = batch_identifiers[column_name]
         res = (
             df.withColumn(
                 "date_time_tmp", F.from_unixtime(F.col(column_name), date_format_string)
@@ -590,13 +592,10 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
     @staticmethod
     def _split_on_divided_integer(
-        df,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
+        df, column_name: str, divisor: int, batch_identifiers: dict
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
-        matching_divisor = partition_definition[column_name]
+        matching_divisor = batch_identifiers[column_name]
         res = (
             df.withColumn(
                 "div_temp", (F.col(column_name) / divisor).cast(IntegerType())
@@ -607,14 +606,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return res
 
     @staticmethod
-    def _split_on_mod_integer(
-        df,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
-    ):
+    def _split_on_mod_integer(df, column_name: str, mod: int, batch_identifiers: dict):
         """Divide the values in the named column by `divisor`, and split on that"""
-        matching_mod_value = partition_definition[column_name]
+        matching_mod_value = batch_identifiers[column_name]
         res = (
             df.withColumn("mod_temp", (F.col(column_name) % mod).cast(IntegerType()))
             .filter(F.col("mod_temp") == matching_mod_value)
@@ -623,19 +617,15 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return res
 
     @staticmethod
-    def _split_on_multi_column_values(
-        df,
-        column_names: list,
-        partition_definition: dict,
-    ):
+    def _split_on_multi_column_values(df, column_names: list, batch_identifiers: dict):
         """Split on the joint values in the named columns"""
         for column_name in column_names:
-            value = partition_definition.get(column_name)
+            value = batch_identifiers.get(column_name)
             if not value:
                 raise ValueError(
-                    f"In order for SparkExecutionEngine to `_split_on_multi_column_values`, "
-                    f"all values in  column_names must also exist in partition_definition. "
-                    f"{column_name} was not found in partition_definition."
+                    f"In order for SparkDFExecutionEngine to `_split_on_multi_column_values`, "
+                    f"all values in  column_names must also exist in batch_identifiers. "
+                    f"{column_name} was not found in batch_identifiers."
                 )
             df = df.filter(F.col(column_name) == value)
         return df
@@ -645,7 +635,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         df,
         column_name: str,
         hash_digits: int,
-        partition_definition: dict,
+        batch_identifiers: dict,
         hash_function_name: str = "sha256",
     ):
         """Split on the hashed value of the named column"""
@@ -667,7 +657,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         encrypt_udf = F.udf(_encrypt_value, StringType())
         res = (
             df.withColumn("encrypted_value", encrypt_udf(column_name))
-            .filter(F.col("encrypted_value") == partition_definition["hash_value"])
+            .filter(F.col("encrypted_value") == batch_identifiers["hash_value"])
             .drop("encrypted_value")
         )
         return res

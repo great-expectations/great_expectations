@@ -22,7 +22,7 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
         cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
     )
 
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
@@ -79,12 +79,12 @@ def test_cli_datasource_list(caplog, empty_data_context, filesystem_csv_2):
      [36mclass_name:[0m PandasDataset[0m""".format(
         base_directory
     ).strip()
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert stdout == expected_output
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def test_cli_datasorce_new(caplog, empty_data_context, filesystem_csv_2):
+def test_cli_datasource_new(caplog, empty_data_context, filesystem_csv_2):
     project_root_dir = empty_data_context.root_directory
     context = DataContext(project_root_dir)
     assert context.list_datasources() == []

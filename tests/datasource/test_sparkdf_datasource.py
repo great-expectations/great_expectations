@@ -333,33 +333,6 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
     assert batch.data.head()["a"] == "1"
 
 
-@pytest.mark.skipif(
-    is_library_loadable(library_name="pyspark"),
-    reason="Spark 3.0.0 creates one JVM per session, makikng configuration immutable.  A future PR handles this better.",
-)
-def test_spark_config(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    source = SparkDFDatasource()
-    conf = source.spark.sparkContext.getConf().getAll()
-    # Without specifying any spark_config values we get defaults
-    assert ("spark.app.name", "pyspark-shell") in conf
-
-    source = SparkDFDatasource(
-        spark_config={
-            "spark.app.name": "great_expectations",
-            "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "128m",
-        }
-    )
-
-    # Test that our values were set
-    conf = source.spark.sparkContext.getConf().getAll()
-    assert ("spark.app.name", "great_expectations") in conf
-    assert ("spark.sql.catalogImplementation", "hive") in conf
-    assert ("spark.executor.memory", "128m") in conf
-
-
 def test_spark_datasource_processes_dataset_options(
     test_folder_connection_path_csv, test_backends
 ):

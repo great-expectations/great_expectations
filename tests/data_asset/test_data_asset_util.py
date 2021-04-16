@@ -9,11 +9,10 @@ import numpy as np
 import pytest
 
 import great_expectations as ge
-from great_expectations.core.expectation_suite import ExpectationSuiteSchema
-from tests.test_utils import expectationSuiteSchema
+from great_expectations.self_check.util import expectationSuiteSchema
 
 
-def test_recursively_convert_to_json_serializable():
+def test_recursively_convert_to_json_serializable(tmp_path):
     asset = ge.dataset.PandasDataset(
         {
             "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -91,15 +90,8 @@ def test_recursively_convert_to_json_serializable():
 
     # TypeError when non-serializable numpy object is in dataset.
     with pytest.raises(TypeError):
-        y = {"p": np.DataSource()}
+        y = {"p": np.DataSource(tmp_path)}
         ge.data_asset.util.recursively_convert_to_json_serializable(y)
-
-    try:
-        x = unicode("abcdefg")
-        x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
-        assert isinstance(x, unicode)
-    except NameError:
-        pass
 
 
 """

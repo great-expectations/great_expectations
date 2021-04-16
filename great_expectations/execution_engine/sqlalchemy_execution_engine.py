@@ -1,16 +1,32 @@
 import copy
 import datetime
 import logging
+import traceback
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
+from packaging.version import parse as parse_version
+
+from great_expectations._version import get_versions  # isort:skip
+
+__version__ = get_versions()["version"]  # isort:skip
+del get_versions  # isort:skip
+
+
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.batch_spec import (
+    RuntimeDataBatchSpec,
+    RuntimeQueryBatchSpec,
+    SqlAlchemyDatasourceBatchSpec,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
+    ExecutionEngineError,
     GreatExpectationsError,
+    InvalidBatchSpecError,
     InvalidConfigError,
 )
 from great_expectations.execution_engine import ExecutionEngine
@@ -33,6 +49,7 @@ try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.engine.url import URL
+    from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import TextClause, quoted_name
 except ImportError:
@@ -41,6 +58,7 @@ except ImportError:
     Select = None
     TextClause = None
     quoted_name = None
+    OperationalError = None
 
 
 try:
@@ -57,10 +75,11 @@ except ImportError:
 try:
     import snowflake.sqlalchemy.snowdialect
 
-    # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
-except (ImportError, KeyError):
+    if sa:
+        # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
+except (ImportError, KeyError, AttributeError):
     snowflake = None
 
 try:
@@ -85,7 +104,7 @@ try:
             "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
         )
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-except ImportError:
+except (ImportError, AttributeError):
     bigquery_types_tuple = None
     pybigquery = None
 
@@ -351,9 +370,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_compute_domain(
         self,
         domain_kwargs: Dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple["sa.sql.Selectable", dict, dict]:
+    ) -> Tuple[Select, dict, dict]:
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -429,28 +448,33 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if (
             domain_type != MetricDomainTypes.TABLE
             and accessor_keys is not None
-            and len(accessor_keys) > 0
+            and len(list(accessor_keys)) > 0
         ):
             logger.warning(
                 "Accessor keys ignored since Metric Domain Type is not 'table'"
             )
 
         if domain_type == MetricDomainTypes.TABLE:
-            if accessor_keys is not None and len(accessor_keys) > 0:
+            if accessor_keys is not None and len(list(accessor_keys)) > 0:
                 for key in accessor_keys:
                     accessor_domain_kwargs[key] = compute_domain_kwargs.pop(key)
             if len(domain_kwargs.keys()) > 0:
-                for key in compute_domain_kwargs.keys():
-                    # Warning user if kwarg not "normal"
-                    if key not in [
+                # Warn user if kwarg not "normal".
+                unexpected_keys: set = set(compute_domain_kwargs.keys()).difference(
+                    {
                         "batch_id",
                         "table",
                         "row_condition",
                         "condition_parser",
-                    ]:
-                        logger.warning(
-                            f"Unexpected key {key} found in domain_kwargs for domain type {domain_type.value}"
-                        )
+                    }
+                )
+                if len(unexpected_keys) > 0:
+                    unexpected_keys_str: str = ", ".join(
+                        map(lambda element: f'"{element}"', unexpected_keys)
+                    )
+                    logger.warning(
+                        f'Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}".'
+                    )
             return selectable, compute_domain_kwargs, accessor_domain_kwargs
 
         # If user has stated they want a column, checking if one is provided, and
@@ -558,9 +582,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self,
         metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
     ) -> dict:
-        """For every metrics in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds a
-        bundles the metrics into one large query dictionary so that they are all executed simultaneously. Will fail if
-        bundling the metrics together is not possible.
+        """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
+        bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
+        if bundling the metrics together is not possible.
 
             Args:
                 metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
@@ -601,12 +625,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 query["domain_kwargs"], domain_type="identity"
             )
             assert len(query["select"]) == len(query["ids"])
-            res = self.engine.execute(
-                sa.select(query["select"]).select_from(selectable)
-            ).fetchall()
-            logger.debug(
-                f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
-            )
+            try:
+                res = self.engine.execute(
+                    sa.select(query["select"]).select_from(selectable)
+                ).fetchall()
+                logger.debug(
+                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(compute_domain_kwargs).to_id()}"
+                )
+            except OperationalError as oe:
+                exception_message: str = "An SQL execution Exception occurred.  "
+                exception_traceback: str = traceback.format_exc()
+                exception_message += f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
+                logger.error(exception_message)
+                raise ExecutionEngineError(message=exception_message)
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
@@ -620,32 +651,24 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     ### Splitter methods for partitioning tables ###
 
-    def _split_on_whole_table(
-        self,
-        table_name: str,
-        # column_name: str,
-        partition_definition: dict,
-    ):
+    def _split_on_whole_table(self, table_name: str, batch_identifiers: dict):
         """'Split' by returning the whole table"""
 
-        # return sa.column(column_name) == partition_definition[column_name]
+        # return sa.column(column_name) == batch_identifiers[column_name]
         return 1 == 1
 
     def _split_on_column_value(
-        self,
-        table_name: str,
-        column_name: str,
-        partition_definition: dict,
+        self, table_name: str, column_name: str, batch_identifiers: dict
     ):
         """Split using the values in the named column"""
 
-        return sa.column(column_name) == partition_definition[column_name]
+        return sa.column(column_name) == batch_identifiers[column_name]
 
     def _split_on_converted_datetime(
         self,
         table_name: str,
         column_name: str,
-        partition_definition: dict,
+        batch_identifiers: dict,
         date_format_string: str = "%Y-%m-%d",
     ):
         """Convert the values in the named column to the given date_format, and split on that"""
@@ -655,46 +678,35 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 date_format_string,
                 sa.column(column_name),
             )
-            == partition_definition[column_name]
+            == batch_identifiers[column_name]
         )
 
     def _split_on_divided_integer(
-        self,
-        table_name: str,
-        column_name: str,
-        divisor: int,
-        partition_definition: dict,
+        self, table_name: str, column_name: str, divisor: int, batch_identifiers: dict
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
         return (
             sa.cast(sa.column(column_name) / divisor, sa.Integer)
-            == partition_definition[column_name]
+            == batch_identifiers[column_name]
         )
 
     def _split_on_mod_integer(
-        self,
-        table_name: str,
-        column_name: str,
-        mod: int,
-        partition_definition: dict,
+        self, table_name: str, column_name: str, mod: int, batch_identifiers: dict
     ):
         """Divide the values in the named column by `divisor`, and split on that"""
 
-        return sa.column(column_name) % mod == partition_definition[column_name]
+        return sa.column(column_name) % mod == batch_identifiers[column_name]
 
     def _split_on_multi_column_values(
-        self,
-        table_name: str,
-        column_names: List[str],
-        partition_definition: dict,
+        self, table_name: str, column_names: List[str], batch_identifiers: dict
     ):
         """Split on the joint values in the named columns"""
 
         return sa.and_(
             *[
                 sa.column(column_name) == column_value
-                for column_name, column_value in partition_definition.items()
+                for column_name, column_value in batch_identifiers.items()
             ]
         )
 
@@ -703,13 +715,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         table_name: str,
         column_name: str,
         hash_digits: int,
-        partition_definition: dict,
+        batch_identifiers: dict,
     ):
         """Split on the hashed value of the named column"""
 
         return (
             sa.func.right(sa.func.md5(sa.column(column_name)), hash_digits)
-            == partition_definition[column_name]
+            == batch_identifiers[column_name]
         )
 
     ### Sampling methods ###
@@ -761,14 +773,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selectable_from_batch_spec(self, batch_spec):
+    def _build_selectable_from_batch_spec(self, batch_spec) -> Select:
         table_name: str = batch_spec["table_name"]
-
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
             split_clause = splitter_fn(
                 table_name=table_name,
-                partition_definition=batch_spec["partition_definition"],
+                batch_identifiers=batch_spec["batch_identifiers"],
                 **batch_spec["splitter_kwargs"],
             )
 
@@ -779,7 +790,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if batch_spec["sampling_method"] == "_sample_using_limit":
                 # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
                 # so the business logic for building the query needs to be different.
-
                 return (
                     sa.select("*")
                     .select_from(
@@ -788,13 +798,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(split_clause)
                     .limit(batch_spec["sampling_kwargs"]["n"])
                 )
-
             else:
 
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
                     sa.select("*")
-                    .select_from(sa.text(table_name))
+                    .select_from(
+                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                    )
                     .where(
                         sa.and_(
                             split_clause,
@@ -813,8 +824,25 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
     ) -> Tuple[Any, BatchMarkers]:
-        selectable = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
+        if not isinstance(
+            batch_spec, (SqlAlchemyDatasourceBatchSpec, RuntimeQueryBatchSpec)
+        ):
+            raise InvalidBatchSpecError(
+                f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
+        RuntimeQueryBatchSpec (illegal type "{str(type(batch_spec))}" was received).
+                        """
+            )
 
+        batch_data: SqlAlchemyBatchData
+        batch_markers: BatchMarkers = BatchMarkers(
+            {
+                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
+                    "%Y%m%dT%H%M%S.%fZ"
+                )
+            }
+        )
+
+        temp_table_name: Optional[str]
         if "bigquery_temp_table" in batch_spec:
             temp_table_name = batch_spec.get("bigquery_temp_table")
         else:
@@ -823,22 +851,35 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_table_name = batch_spec.get("table_name", None)
         source_schema_name = batch_spec.get("schema_name", None)
 
-        batch_data = SqlAlchemyBatchData(
-            execution_engine=self,
-            selectable=selectable,
-            temp_table_name=temp_table_name,
-            create_temp_table=batch_spec.get(
-                "create_temp_table", self._create_temp_table
-            ),
-            source_table_name=source_table_name,
-            source_schema_name=source_schema_name,
-        )
-        batch_markers = BatchMarkers(
-            {
-                "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
-                    "%Y%m%dT%H%M%S.%fZ"
-                )
-            }
-        )
+        if isinstance(batch_spec, RuntimeQueryBatchSpec):
+            # query != None is already checked when RuntimeQueryBatchSpec is instantiated
+            query: str = batch_spec.query
+
+            batch_spec.query = "SQLQuery"
+            batch_data = SqlAlchemyBatchData(
+                execution_engine=self,
+                query=query,
+                temp_table_name=temp_table_name,
+                create_temp_table=batch_spec.get(
+                    "create_temp_table", self._create_temp_table
+                ),
+                source_table_name=source_table_name,
+                source_schema_name=source_schema_name,
+            )
+        elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
+            selectable: Select = self._build_selectable_from_batch_spec(
+                batch_spec=batch_spec
+            )
+
+            batch_data = SqlAlchemyBatchData(
+                execution_engine=self,
+                selectable=selectable,
+                temp_table_name=temp_table_name,
+                create_temp_table=batch_spec.get(
+                    "create_temp_table", self._create_temp_table
+                ),
+                source_table_name=source_table_name,
+                source_schema_name=source_schema_name,
+            )
 
         return batch_data, batch_markers

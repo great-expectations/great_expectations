@@ -972,6 +972,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         forbidden_substrings=None,
         platform_specific_separator=False,
         fixed_length_key=False,
+        suppress_store_backend_id=False,
+        manually_initialize_store_backend_id: str = "",
+        store_name=None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -980,6 +983,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             forbidden_substrings=forbidden_substrings,
             platform_specific_separator=platform_specific_separator,
             fixed_length_key=fixed_length_key,
+            suppress_store_backend_id=suppress_store_backend_id,
+            manually_initialize_store_backend_id=manually_initialize_store_backend_id,
+            store_name=store_name,
         )
         self.connection_string = connection_string
         self.prefix = prefix
@@ -1008,15 +1014,28 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         )
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
+
+        from azure.storage.blob import ContentSettings
+
         az_blob_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))
 
         if isinstance(value, str):
-            self._get_container_client().upload_blob(
-                name=az_blob_key,
-                data=value,
-                encoding=content_encoding,
-                overwrite=True,
-            )
+            if az_blob_key.endswith(".html"):
+                my_content_settings = ContentSettings(content_type="text/html")
+                self._get_container_client().upload_blob(
+                    name=az_blob_key,
+                    data=value,
+                    encoding=content_encoding,
+                    overwrite=True,
+                    content_settings=my_content_settings,
+                )
+            else:
+                self._get_container_client().upload_blob(
+                    name=az_blob_key,
+                    data=value,
+                    encoding=content_encoding,
+                    overwrite=True,
+                )
         else:
             self._get_container_client().upload_blob(
                 name=az_blob_key, data=value, overwrite=True

@@ -45,18 +45,20 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if metric.metric_name == "column_values.value_length.equals.condition":
-            return {
-                "column_values.value_length.map": MetricConfiguration(
-                    "column_values.value_length.map", metric.metric_domain_kwargs
-                )
-            }
-        return super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
+
+        if metric.metric_name == "column_values.value_length.equals.condition":
+            dependencies["column_values.value_length.map"] = MetricConfiguration(
+                metric_name="column_values.value_length.map",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
+
+        return dependencies
 
 
 class ColumnValuesValueLength(ColumnMapMetricProvider):
@@ -212,15 +214,17 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if metric.metric_name == "column_values.value_length.between.condition":
-            return {
-                "column_values.value_length.map": MetricConfiguration(
-                    "column_values.value_length.map", metric.metric_domain_kwargs
-                )
-            }
-        return super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
+
+        if metric.metric_name == "column_values.value_length.between.condition":
+            dependencies["column_values.value_length.map"] = MetricConfiguration(
+                metric_name="column_values.value_length.map",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
+
+        return dependencies

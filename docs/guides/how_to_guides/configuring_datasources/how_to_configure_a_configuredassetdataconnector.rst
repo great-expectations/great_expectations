@@ -9,7 +9,7 @@ This guide demonstrates how to configure a ConfiguredAssetDataConnector, and pro
 
     - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
     - :ref:`Understand the basics of Datasources in 0.13 or later <reference__core_concepts__datasources>`
-    - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+    - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Great Expectations provides two ``DataConnector`` classes for connecting to file-system-like data. This includes files on disk,
 but also S3 object stores, etc:
@@ -41,7 +41,7 @@ All of the examples below assume you’re testing configuration using something 
         yaml_config=config
     )
 
-If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure DataContext components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+If you’re not familiar with the ``test_yaml_config`` method, please check out: :ref:`How to configure Data Context components using test_yaml_config. <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
 Choose a DataConnector
 ----------------------
@@ -81,9 +81,9 @@ In that case, the configuration would look like the following:
 
 Notice that we have specified a pattern that captures the number after ``alpha-`` in the filename and assigns it to the ``group_name`` ``index``.
 
-The configuration would also work with a regex capturing entire filename (ie ``pattern: (.*)\\.csv``).  However, capturing the index on its own allows for ``partition_identifiers`` to be used to retrieve a specific partition of the DataAsset.
+The configuration would also work with a regex capturing the entire filename (ie ``pattern: (.*)\\.csv``).  However, capturing the index on its own allows for ``batch_identifiers`` to be used to retrieve a specific Batch of the Data Asset.
 
-Later on we could retrieve the data in ``alpha-2.csv`` of ``alpha`` as its own batch using ``context.get_batch()`` by specifying ``{"index": "2"}`` as the ``partition_identifier``.
+Later on we could retrieve the data in ``alpha-2.csv`` of ``alpha`` as its own batch using ``context.get_batch()`` by specifying ``{"index": "2"}`` as the ``batch_identifier``.
 
 .. code-block:: python
 
@@ -91,12 +91,12 @@ Later on we could retrieve the data in ``alpha-2.csv`` of ``alpha`` as its own b
         datasource_name="my_data_source",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="alpha",
-        partition_identifiers={"index": "2"}
+        batch_identifiers={"index": "2"}
         )
 
 
-This ability to access specific partitions using ``partition_identifiers`` is very useful when validating DataAssets that span multiple files.
-For more information on ``batches`` and ``partition_identifiers``, please refer to the :ref:`Core Concepts document. <reference__core_concepts>`
+This ability to access specific Batches using ``batch_identifiers`` is very useful when validating DataAssets that span multiple files.
+For more information on ``batches`` and ``batch_identifiers``, please refer to the :ref:`Core Concepts document. <reference__core_concepts>`
 
 A corresponding configuration for ``ConfiguredAssetS3DataConnector`` would look similar but would require ``bucket`` and ``prefix`` values instead of ``base_directory``.
 
@@ -151,7 +151,7 @@ Then this configuration...
             'alpha-3.csv'
         ]
 
-Once configured, you can get a ``Validator`` from the ``DataContext`` as follows:
+Once configured, you can get a ``Validator`` from the ``Data Context`` as follows:
 
 .. code-block:: python
 
@@ -159,7 +159,7 @@ Once configured, you can get a ``Validator`` from the ``DataContext`` as follows
         datasource_name="my_data_source",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="alpha",
-        partition_identifiers={
+        batch_identifiers={
             "index": "2"
         },
         expectation_suite_name="my_expectation_suite" # the suite with this name must exist by the time of this call

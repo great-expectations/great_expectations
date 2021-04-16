@@ -3,10 +3,13 @@
 # To run tests for smaller subsets of infrastructure, please look at other requirements-dev-*.txt files.
 # Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
 
+azure-identity>=1.0.0  # all_tests
+azure-keyvault-secrets>=4.0.0  # all_tests
 azure-storage-blob>=12.5.0 # all_test
 boto3>=1.9  # all_tests
 feather-format>=0.4.1  # all_tests
 flask>=1.0.0 # for s3 test only
+google-cloud-secret-manager>=1.0.0  # all_tests
 google-cloud-storage>=1.28.0  # all_tests
 moto[ec2]>=1.3.7,<2.0.0  # all_tests
 pyarrow>=0.12.0  # all_tests

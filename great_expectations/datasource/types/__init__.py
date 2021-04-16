@@ -7,8 +7,7 @@ from .batch_kwargs import *
 class DatasourceTypes(enum.Enum):
     PANDAS = "pandas"
     SPARK = "spark"
-    SQL = "sql"
-    # TODO DBT = "dbt"
+    SQL = "sqlalchemy"
 
 
 # noinspection SpellCheckingInspection

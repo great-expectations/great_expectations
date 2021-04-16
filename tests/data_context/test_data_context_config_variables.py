@@ -2,7 +2,7 @@ import os
 from collections import OrderedDict
 
 import pytest
-from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml import YAML
 
 import great_expectations as ge
 from great_expectations.data_context.types.base import (

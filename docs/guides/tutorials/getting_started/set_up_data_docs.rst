@@ -38,7 +38,7 @@ This Profiler connected to your data (using the Datasource you configured in the
 * the number of times values occur
 * the number of NULL values
 
-If you would like to learn more about how the Profiler works, you can dig deeper here: :py:class:`great_expectations.profile.BasicSuiteBuilderProfiler`
+If you would like to learn more about how the Profiler works, you can dig deeper here: :py:class:`great_expectations.profile.UserConfigurableProfiler`
 
 These Expectations are not intended to be very smart. Instead, the goal is to quickly provide some good examples, so that you're not starting from a blank slate.
 
@@ -73,7 +73,7 @@ For example, a snippet of the JSON file for the Expectation Suite we just genera
             ]
           },
           "meta": {
-            "BasicSuiteBuilderProfiler": {
+            "UserConfigurableProfiler": {
               "confidence": "very low"
             }
           }

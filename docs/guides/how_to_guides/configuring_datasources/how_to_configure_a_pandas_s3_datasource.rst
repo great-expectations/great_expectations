@@ -44,7 +44,7 @@ Steps
                 }
                 batch = context.get_batch(batch_kwargs, "existing_expectation_suite_name")
 
-        #. **Optionally, configure a BatchKwargsGenerator that will allow you to generate Data Assets and Partitions from your S3 bucket.**
+        #. **Optionally, configure a BatchKwargsGenerator that will allow you to generate Data Assets and Batches from your S3 bucket.**
 
             Update your datasource configuration to include the new Batch Kwargs Generator:
 
@@ -122,6 +122,39 @@ Steps
                 Repeat this check for all data sets you configured.  An inconsistency is likely due to an incorrect regular expression pattern in the respective data set configuration.
 
 
+        **Additional Notes**
+
+        #.
+            Additional options are available for a more fine-grained customization of the S3-backed Pandas data sources.
+
+            .. code-block:: yaml
+
+                delimiter: "/"  # This is the delimiter for the bucket keys (paths inside the buckets).  By default, it is "/".
+
+                boto3_options:
+                  endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
+
+                reader_options:  # Note that reader options can be specified globally or per-asset.
+                    sep: ","
+
+                max_keys: 100  # The maximum number of keys to fetch in a single request to S3 (default is 100).
+
+        #.  Errors in generated BatchKwargs during configuration of the S3GlobReaderBatchKwargsGenerator are likely due to an incorrect regular expression pattern in the respective data set configuration.
+
+        #.
+            The default values of the various options satisfy the vast majority of scenarios.  However, in certain cases, the developers may need to override them.
+            For instance, ``reader_options``, which can be specified globally and/or at the per-asset level, provide a mechanism for customizing the separator character inside *CSV* files.
+
+        #.
+            Note that specifying the ``--no-jupyter`` flag on the command line will initialize the specified expectation suite in the ``great_expectations/expectations`` directory, but suppress the launching of the Jupyter notebook.
+
+            .. code-block:: bash
+
+                great_expectations suite scaffold name_of_new_expectation_suite --no-jupyter
+
+            If you resume editing the given expectation suite at a later time, please first verify that the ``batch_kwargs`` contain the correct S3 path for the intended data source.
+
+
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
 
@@ -129,7 +162,7 @@ Steps
 
             - :ref:`Set up a working deployment of Great Expectations <tutorials__getting_started>`
             - :ref:`Understand the basics of Datasources <reference__core_concepts__datasources>`
-            - Learned how to configure a :ref:`DataContext using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+            - Learned how to configure a :ref:`Data Context using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
         To add an S3-backed Pandas datasource do the following:
 
@@ -143,47 +176,105 @@ Steps
                 pip install fsspec
                 pip install s3fs
 
-        #. **Instantiate a DataContext.**
+        #. **Run datasource new.**
 
-            Create a new Jupyter Notebook and instantiate a DataContext by running the following lines:
+            From the command line, run:
 
-            .. code-block:: python
+            .. code-block:: bash
 
-                import great_expectations as ge
-                context = ge.get_context()
+                great_expectations --v3-api datasource new
 
-        #. **Create or copy a yaml config.**
+        #. **Choose "Files on a filesystem (for processing with Pandas or Spark)"**
 
-            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``ConfiguredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as strings.
+            .. code-block:: bash
 
-            **Note**: The ``ConfiguredAssetS3DataConnector`` used in this example is closely related to the ``InferreddAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+                What data would you like Great Expectations to connect to?
+                    1. Files on a filesystem (for processing with Pandas or Spark)
+                    2. Relational database (SQL)
+                : 1
 
-            .. code-block:: python
+        #. **Choose Pandas**
 
-                config = f"""
-                        class_name: Datasource
-                        execution_engine:
-                          class_name: PandasExecutionEngine
-                        data_connectors:
-                          my_data_connector:
-                            class_name: ConfiguredAssetS3DataConnector
-                            bucket: YOUR_S3_BUCKET_NAME
-                            prefix: YOUR_S3_PREFIX_NAME
-                            assets:
-                              test_asset:
-                                pattern: (.+)\\.csv
-                                group_names:
-                                  - full_name
-                        """
+            .. code-block:: bash
 
-            Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure DataContext components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
+                What are you processing your files with?
+                    1. Pandas
+                    2. PySpark
+                : 1
 
-        #. **Run context.test_yaml_config.**
+        #. **Specify the directory path for data files**
+
+            For an s3 datasource, we will change this in the notebook so feel free to enter anything at this prompt.
+
+            .. code-block:: bash
+
+                Enter the path (relative or absolute) of the root directory where the data files are stored.
+                : /path/to/directory/containing/your/data/files
+
+        #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
+
+
+        **S3-backed Pandas Datasource Example.**
+
+            Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
+
+
+        #. **List files in your directory.**
+
+            Use a utility to list files, so that you can see how paths and filenames are formatted. Our example will use the following 3 files in the ``my_s3_folder/`` folder in our bucket ``my_s3_bucket``:
+
+            .. code-block:: bash
+
+                - my_s3_bucket
+                    |- my_s3_folder
+                        |- abe_20201119_200.csv
+                        |- alex_20201212_300.csv
+                        |- will_20201008_100.csv
+
+
+        #.  **Create or copy a yaml config.**
+
+                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``DataSource``, with a ``InferredAssetS3DataConnector`` and a ``PandasExecutionEngine``. The S3-``bucket`` name and ``prefix`` are passed in as strings.
+
+                .. code-block:: python
+
+                    datasource_name = "my_file_datasource"
+                    config = f"""
+                            name: {datasource_name}
+                            class_name: Datasource
+                            execution_engine:
+                              class_name: PandasExecutionEngine
+                            data_connectors:
+                              my_data_connector:
+                                datasource_name: {datasource_name}
+                                class_name: InferredAssetS3DataConnector
+                                bucket: my_s3_bucket
+                                prefix: my_s3_folder/
+                                default_regex:
+                                  group_names: data_asset_name
+                                  pattern: (.*)
+                            """
+
+               You can modify the group names and regex pattern to take into account the naming structure of the CSV files in the directory, e.g.
+
+                .. code-block:: python
+
+                        group_names:
+                          - name
+                          - timestamp
+                          - size
+                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
+
+
+            **Note**: The ``InferredAssetS3DataConnector`` used in this example is closely related to the ``ConfiguredAssetS3DataConnector`` with some key differences. More information can be found in :ref:`How to choose which DataConnector to use. <which_data_connector_to_use>`
+
+
+        #. **Test your config using ``context.test_yaml_config``.**
 
             .. code-block:: python
 
                 context.test_yaml_config(
-                    name="my_pandas_s3_datasource",
                     yaml_config=config
                 )
 
@@ -194,82 +285,63 @@ Steps
             .. code-block:: bash
 
                 Attempting to instantiate class from config...
-                    Instantiating as a Datasource, since class_name is Datasource
-                Instantiating class from config without an explicit class_name is dangerous. Consider adding an explicit class_name for None
+                Instantiating as a Datasource, since class_name is Datasource
+                Instantiating class from config without an explicit class_name is dangerous.
+                Consider adding an explicit class_name for None
                     Successfully instantiated Datasource
 
                 Execution engine: PandasExecutionEngine
                 Data connectors:
-                    my_data_connector : ConfiguredAssetS3DataConnector
+                    my_data_connector : InferredAssetS3DataConnector
 
                     Available data_asset_names (1 of 1):
-                        test_asset (1 of 1): ['abe_20201119_200.csv']
+                        TestAsset (3 of 3): ['abe_20201119_200.csv', 'alex_20201212_300.csv', 'will_20201008_100.csv']
 
                     Unmatched data_references (0 of 0): []
 
-                    Choosing an example data reference...
-                        Reference chosen: abe_20201119_200.csv
+            This means all has gone well and you can proceed with configuring your new Datasource. If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.
 
-                        Fetching batch data...
+            **Note:** Pay attention to the "Available data_asset_names" and "Unmatched data_references" output to ensure that the regex pattern you specified matches your desired data files.
 
-                        Showing 5 rows
-                   Unnamed: 0                                           Name PClass    Age     Sex  Survived  SexCode
-                0           1                   Allen, Miss Elisabeth Walton    1st  29.00  female         1        1
-                1           2                    Allison, Miss Helen Loraine    1st   2.00  female         0        1
-                2           3            Allison, Mr Hudson Joshua Creighton    1st  30.00    male         0        0
-                3           4  Allison, Mrs Hudson JC (Bessie Waldo Daniels)    1st  25.00  female         0        1
-                4           5                  Allison, Master Hudson Trevor    1st   0.92    male         1        0
 
-            If something about your configuration wasn't set up correctly, ``test_yaml_config`` will raise an error.  Whenever possible, test_yaml_config provides helpful warnings and error messages. It can't solve every problem, but it can solve many.
+        #. **Save the config.**
+            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations configuration. The following method will save the new Datasource to your ``great_expectations.yml``:
+
+            .. code-block:: python
+
+                sanitize_yaml_and_save_datasource(context, config, overwrite_existing=False)
+
+            **Note**: This will output a warning if a Datasource with the same name already exists. Use ``overwrite_existing=True`` to force overwriting.
+
+
+        **Additional Notes**
+
+        #.
+            Additional options are available for a more fine-grained customization of the S3-backed Pandas data sources.
+
+            .. code-block:: yaml
+
+                delimiter: "/"  # This is the delimiter for the bucket keys (paths inside the buckets).  By default, it is "/".
+
+                boto3_options:
+                  endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
+
+                reader_options:  # Note that reader options can be specified globally or per-asset.
+                    sep: ","
+
+                max_keys: 100  # The maximum number of keys to fetch in a single request to S3 (default is 100).
+
+        #.
+            The default values of the various options satisfy the vast majority of scenarios.  However, in certain cases, the developers may need to override them.
+            For instance, ``reader_options``, which can be specified globally and/or at the per-asset level, provide a mechanism for customizing the separator character inside *CSV* files.
+
+        #.
+            Note that specifying the ``--no-jupyter`` flag on the command line will initialize the specified expectation suite in the ``great_expectations/expectations`` directory, but suppress the launching of the Jupyter notebook.
 
             .. code-block:: bash
 
-                ...
+                great_expectations --v3-api suite new --no-jupyter
 
-                raise error_class(parsed_response, operation_name)
-                botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the ListObjectsV2 operation: Access Denied
-
-        #. **Save the config.**
-
-            Once you are satisfied with the config of your new Datasource, you can make it a permanent part of your Great Expectations setup.
-            First, create a new entry in the ``datasources`` section of your ``great_expectations/great_expectations.yml`` with the name of your Datasource (which is ``my_pandas_s3_datasource`` in our example).
-            Next, copy the yml snippet from Step 3 into the new entry.
-
-            **Note:** Please make sure the yml is indented correctly. This will save you from much frustration.
-
-----------------
-Additional Notes
-----------------
-
-#.
-    Additional options are available for a more fine-grained customization of the S3-backed Pandas data sources.
-
-    .. code-block:: yaml
-
-        delimiter: "/"  # This is the delimiter for the bucket keys (paths inside the buckets).  By default, it is "/".
-
-        boto3_options:
-          endpoint_url: ${S3_ENDPOINT} # Uses the S3_ENDPOINT environment variable to determine which endpoint to use.
-
-        reader_options:  # Note that reader options can be specified globally or per-asset.
-            sep: ","
-
-        max_keys: 100  # The maximum number of keys to fetch in a single request to S3 (default is 100).
-
-#.  Errors in generated BatchKwargs during configuration of the S3GlobReaderBatchKwargsGenerator are likely due to an incorrect regular expression pattern in the respective data set configuration.
-
-#.
-    The default values of the various options satisfy the vast majority of scenarios.  However, in certain cases, the developers may need to override them.
-    For instance, ``reader_options``, which can be specified globally and/or at the per-asset level, provide a mechanism for customizing the separator character inside *CSV* files.
-
-#.
-    Note that specifying the ``--no-jupyter`` flag on the command line will initialize the specified expectation suite in the ``great_expectations/expectations`` directory, but suppress the launching of the Jupyter notebook.
-
-    .. code-block:: bash
-
-        great_expectations suite scaffold name_of_new_expectation_suite --no-jupyter
-
-    If you resume editing the given expectation suite at a later time, please first verify that the ``batch_kwargs`` contain the correct S3 path for the intended data source.
 
 --------
 Comments

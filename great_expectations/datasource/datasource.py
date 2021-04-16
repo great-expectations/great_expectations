@@ -25,8 +25,8 @@ class LegacyDatasource:
     Each Datasource provides Batches connected to a specific compute environment, such as a
     SQL database, a Spark cluster, or a local in-memory Pandas DataFrame.
 
-    Datasources use Batch Kwargs to specify instructions for how to access data from
-    relevant sources such as an existing object from a DAG runner, a SQL database, S3 bucket, or local filesystem.
+    Datasources use Batch Kwargs to specify instructions for how to access data from relevant sources such as an
+    existing object from a DAG runner, a SQL database, S3 bucket, or local filesystem.
 
     To bridge the gap between those worlds, Datasources interact closely with *generators* which
     are aware of a source of data and can produce produce identifying information, called
@@ -379,7 +379,7 @@ class LegacyDatasource:
             ] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
-    # TODO: move to connector
+    # TODO: move to dataconnector
     def build_batch_kwargs(
         self, batch_kwargs_generator, data_asset_name=None, partition_id=None, **kwargs
     ):

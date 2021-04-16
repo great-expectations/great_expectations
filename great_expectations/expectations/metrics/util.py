@@ -1,8 +1,10 @@
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from dateutil.parser import parse
+
+from great_expectations.execution_engine.util import check_sql_engine_dialect
 
 try:
     import psycopg2
@@ -18,6 +20,9 @@ except ImportError:
 try:
     import sqlalchemy as sa
     from sqlalchemy.dialects import registry
+    from sqlalchemy.engine import Engine, reflection
+    from sqlalchemy.engine.interfaces import Dialect
+    from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Select
     from sqlalchemy.sql.elements import BinaryExpression, TextClause, literal
     from sqlalchemy.sql.operators import custom_op
@@ -29,6 +34,10 @@ except ImportError:
     TextClause = None
     literal = None
     custom_op = None
+    Engine = None
+    reflection = None
+    Dialect = None
+    OperationalError = None
 
 try:
     import sqlalchemy_redshift
@@ -60,42 +69,6 @@ try:
 except ImportError:
     bigquery_types_tuple = None
     pybigquery = None
-from great_expectations.execution_engine.util import check_sql_engine_dialect
-
-SCHEMAS = {
-    "api_np": {
-        "NegativeInfinity": -np.inf,
-        "PositiveInfinity": np.inf,
-    },
-    "api_cast": {
-        "NegativeInfinity": -float("inf"),
-        "PositiveInfinity": float("inf"),
-    },
-    "mysql": {
-        "NegativeInfinity": -1.79e308,
-        "PositiveInfinity": 1.79e308,
-    },
-    "mssql": {
-        "NegativeInfinity": -1.79e308,
-        "PositiveInfinity": 1.79e308,
-    },
-}
-
-
-def get_sql_dialect_floating_point_infinity_value(
-    schema: str, negative: bool = False
-) -> float:
-    res: Optional[Dict] = SCHEMAS.get(schema)
-    if res is None:
-        if negative:
-            return -np.inf
-        else:
-            return np.inf
-    else:
-        if negative:
-            return res["NegativeInfinity"]
-        else:
-            return res["PositiveInfinity"]
 
 
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
@@ -212,36 +185,106 @@ def attempt_allowing_relative_error(dialect):
     return detected_redshift or detected_psycopg2
 
 
-def column_reflection_fallback(selectable, dialect, sqlalchemy_engine):
+def is_column_present_in_table(
+    engine: Engine,
+    table_selectable: Select,
+    column_name: str,
+    schema_name: Optional[str] = None,
+) -> bool:
+    all_columns_metadata: Optional[
+        List[Dict[str, Any]]
+    ] = get_sqlalchemy_column_metadata(
+        engine=engine, table_selectable=table_selectable, schema_name=schema_name
+    )
+    # Purposefully do not check for a NULL "all_columns_metadata" to insure that it must never happen.
+    column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
+    return column_name in column_names
+
+
+def get_sqlalchemy_column_metadata(
+    engine: Engine, table_selectable: Select, schema_name: Optional[str] = None
+) -> Optional[List[Dict[str, Any]]]:
+    try:
+        columns: List[Dict[str, Any]]
+
+        inspector: reflection.Inspector = reflection.Inspector.from_engine(engine)
+        try:
+            columns = inspector.get_columns(
+                table_selectable,
+                schema=schema_name,
+            )
+        except (
+            KeyError,
+            AttributeError,
+            sa.exc.NoSuchTableError,
+            sa.exc.ProgrammingError,
+        ):
+            # we will get a KeyError for temporary tables, since
+            # reflection will not find the temporary schema
+            columns = column_reflection_fallback(
+                selectable=table_selectable,
+                dialect=engine.dialect,
+                sqlalchemy_engine=engine,
+            )
+
+        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
+        if len(columns) == 0:
+            columns = column_reflection_fallback(
+                selectable=table_selectable,
+                dialect=engine.dialect,
+                sqlalchemy_engine=engine,
+            )
+
+        return columns
+    except AttributeError:
+        return None
+
+
+def column_reflection_fallback(
+    selectable: Select, dialect: Dialect, sqlalchemy_engine: Engine
+) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
-    col_info_dict_list: List[Dict]
+    col_info_dict_list: List[Dict[str, str]]
     if dialect.name.lower() == "mssql":
-        type_module = _get_dialect_type_module(dialect)
         # Get column names and types from the database
-        # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
-        col_info_query: TextClause = sa.text(
-            f"""
+        # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
+        columns_query: str = f"""
 SELECT
-cols.NAME, ty.NAME
-FROM
-tempdb.sys.columns AS cols
-JOIN
-sys.types AS ty
-ON
-cols.user_type_id = ty.user_type_id
-WHERE
-object_id = OBJECT_ID('tempdb..{selectable}')
-            """
-        )
-        col_info_tuples_list = sqlalchemy_engine.execute(col_info_query).fetchall()
-        col_info_dict_list = [
-            {"name": col_name, "type": getattr(type_module, col_type.upper())()}
-            for col_name, col_type in col_info_tuples_list
+    SCHEMA_NAME(tab.schema_id) AS schema_name,
+    tab.name AS table_name, 
+    col.column_id AS column_id,
+    col.name AS column_name, 
+    t.name AS column_data_type,    
+    col.max_length AS column_max_length,
+    col.precision AS column_precision
+FROM sys.tables AS tab
+    INNER JOIN sys.columns AS col
+    ON tab.object_id = col.object_id
+    LEFT JOIN sys.types AS t
+    ON col.user_type_id = t.user_type_id
+WHERE tab.name = '{selectable}'
+ORDER BY schema_name,
+    table_name, 
+    column_id
+"""
+        col_info_query: TextClause = sa.text(columns_query)
+        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
+            col_info_query
+        ).fetchall()
+        # type_module = _get_dialect_type_module(dialect=dialect)
+        col_info_dict_list: List[Dict[str, str]] = [
+            {
+                "name": column_name,
+                # "type": getattr(type_module, column_data_type.upper())(),
+                "type": column_data_type.upper(),
+            }
+            for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
         ]
     else:
         query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
         result_object = sqlalchemy_engine.execute(query)
-        col_names = result_object._metadata.keys
+        # noinspection PyProtectedMember
+        col_names: List[str] = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list
 

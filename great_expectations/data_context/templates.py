@@ -36,7 +36,7 @@ PROJECT_HELP_COMMENT = f"""
 # Here you can define datasources, batch kwargs generators, integrations and
 # more. This file is intended to be committed to your repo. For help with
 # configuration please:
-#   - Read our docs: https://docs.greatexpectations.io/en/latest/how_to_guides/spare_parts/data_context_reference.html#configuration
+#   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/spare_parts/data_context_reference.html#configuration
 #   - Join our slack channel: http://greatexpectations.io/slack
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
@@ -45,7 +45,7 @@ config_version: {DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value}
 
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
-# add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource_reference.html
+# add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 datasources: {{}}
 """
 

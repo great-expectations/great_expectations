@@ -4,12 +4,12 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Optional
+from typing import Optional, Union
 
 import requests
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import CheckpointConfig
 
@@ -196,28 +196,38 @@ def send_email(
 def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
     validation_batch_request: Optional[dict] = None,
-) -> BatchRequest:
-    if substituted_runtime_config.batch_request is None:
+) -> Union[BatchRequest, RuntimeBatchRequest]:
+    runtime_config_batch_request = substituted_runtime_config.batch_request
+
+    if (
+        runtime_config_batch_request is not None
+        and "runtime_parameters" in runtime_config_batch_request
+    ) or (
+        validation_batch_request is not None
+        and "runtime_parameters" in validation_batch_request
+    ):
+        batch_request_class = RuntimeBatchRequest
+    else:
+        batch_request_class = BatchRequest
+
+    if runtime_config_batch_request is None:
         return (
             validation_batch_request
             if validation_batch_request is None
-            else BatchRequest(**validation_batch_request)
+            else batch_request_class(**validation_batch_request)
         )
 
     if validation_batch_request is None:
-        return BatchRequest(**substituted_runtime_config.batch_request)
+        return batch_request_class(**runtime_config_batch_request)
 
     runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
     for key, val in runtime_batch_request_dict.items():
-        if (
-            val is not None
-            and substituted_runtime_config.batch_request.get(key) is not None
-        ):
+        if val is not None and runtime_config_batch_request.get(key) is not None:
             raise ge_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
-    runtime_batch_request_dict.update(substituted_runtime_config.batch_request)
-    return BatchRequest(**runtime_batch_request_dict)
+    runtime_batch_request_dict.update(runtime_config_batch_request)
+    return batch_request_class(**runtime_batch_request_dict)
 
 
 def get_substituted_validation_dict(

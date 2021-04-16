@@ -6,11 +6,10 @@ from freezegun import freeze_time
 
 import great_expectations as ge
 from great_expectations.data_context import BaseDataContext
+from great_expectations.self_check.util import modify_locale
 from great_expectations.validation_operators.validation_operators import (
     WarningAndFailureExpectationSuitesValidationOperator,
 )
-
-from ..test_utils import modify_locale
 
 
 @pytest.fixture

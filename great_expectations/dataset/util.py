@@ -20,42 +20,6 @@ except ImportError:
     WithinGroup = None
 
 
-SCHEMAS = {
-    "api_np": {
-        "NegativeInfinity": -np.inf,
-        "PositiveInfinity": np.inf,
-    },
-    "api_cast": {
-        "NegativeInfinity": -float("inf"),
-        "PositiveInfinity": float("inf"),
-    },
-    "mysql": {
-        "NegativeInfinity": -1.79e308,
-        "PositiveInfinity": 1.79e308,
-    },
-    "mssql": {
-        "NegativeInfinity": -1.79e308,
-        "PositiveInfinity": 1.79e308,
-    },
-}
-
-
-def get_sql_dialect_floating_point_infinity_value(
-    schema: str, negative: bool = False
-) -> float:
-    res: Optional[dict] = SCHEMAS.get(schema)
-    if res is None:
-        if negative:
-            return -np.inf
-        else:
-            return np.inf
-    else:
-        if negative:
-            return res["NegativeInfinity"]
-        else:
-            return res["PositiveInfinity"]
-
-
 def is_valid_partition_object(partition_object):
     """Tests whether a given object is a valid continuous or categorical partition object.
     :param partition_object: The partition_object to evaluate

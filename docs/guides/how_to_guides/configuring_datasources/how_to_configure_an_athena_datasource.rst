@@ -16,9 +16,21 @@ Steps
 
 1. Run the following CLI command to begin the interactive Datasource creation process:
 
-.. code-block:: bash
+.. content-tabs::
 
-    great_expectations datasource new
+    .. tab-container:: tab0
+        :title: Show Docs for V2 (Batch Kwargs) API
+
+        .. code-block:: bash
+
+            great_expectations datasource new
+
+    .. tab-container:: tab1
+        :title: Show Docs for V3 (Batch Request) API
+
+        .. code-block:: bash
+
+            great_expectations --v3-api datasource new
 
 
 2. Choose "other" from the list of database engines, when prompted.
@@ -41,10 +53,25 @@ Steps
         awsathena+rest://@athena.{region}.amazonaws.com/{database}?s3_staging_dir={s3_path}
 
 
-5. Enter the connection string when prompted (and press Enter when asked "Would you like to proceed? [Y/n]:").
+.. content-tabs::
 
-6. Should you need to modify your connection string, you can manually edit the
-   ``great_expectations/uncommitted/config_variables.yml`` file.
+    .. tab-container:: tab0
+        :title: Show Docs for V2 (Batch Kwargs) API
+
+        5. Enter the connection string when prompted (and press Enter when asked "Would you like to proceed? [Y/n]:").
+
+        6. Should you need to modify your connection string, you can manually edit the
+           ``great_expectations/uncommitted/config_variables.yml`` file.
+
+
+    .. tab-container:: tab1
+        :title: Show Docs for V3 (Batch Request) API
+
+        5. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
+
+        6. Follow the steps in this Jupyter Notebook including entering the connection string in the yaml configuration.
+
+
 
 
 Additional notes

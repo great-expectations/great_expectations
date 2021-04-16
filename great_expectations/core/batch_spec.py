@@ -83,3 +83,19 @@ class RuntimeDataBatchSpec(BatchSpec):
     @batch_data.setter
     def batch_data(self, batch_data):
         self["batch_data"] = batch_data
+
+
+class RuntimeQueryBatchSpec(BatchSpec):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.query is None:
+            raise InvalidBatchSpecError("RuntimeQueryBatchSpec query cannot be None")
+
+    @property
+    def query(self):
+        return self.get("query")
+
+    @query.setter
+    def query(self, query):
+        self["query"] = query

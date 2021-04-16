@@ -57,27 +57,23 @@ Notebooks are a simple way of interacting with the Great Expectations Python API
 
 Since notebooks are often less permanent, creating Expectations in a notebook also helps reinforce that the source of truth about Expectations is the Expectation Suite, **not** the code that generates the Expectations.
 
-
-.. figure:: /images/jupyter_scaffold.gif
-
-
-**Let's scroll through the notebook and see what's happening in each cell:**
+**Let's take a look through the notebook and see what's happening in each cell:**
 
 #. The first cell does several things: It imports all the relevant libraries, loads a Data Context, and creates what we call a Batch of your data and Expectation Suite.
 
-#. The second cell allows you to specify which columns you want to run the automated Profiler on. Remember how we want to add some tests on the ``passenger_count`` column to ensure that its values range between 1 and 6? **Let's uncomment just this one line:**
+#. The second cell allows you to specify which columns you want to ignore and which you want to run the automated Profiler on. Remember how we want to add some tests on the ``passenger_count`` column to ensure that its values range between 1 and 6? **Let's comment just this one line to include it:**
 
     .. code-block:: python
 
-        included_columns = [
-            # 'vendor_id',
-            # 'pickup_datetime',
-            # 'dropoff_datetime',
-            'passenger_count',
+        ignored_columns = [
+            'vendor_id',
+            'pickup_datetime',
+            'dropoff_datetime',
+            # 'passenger_count',
             ...
         ]
 
-#. The next cell passes the Profiler config to the ``BasicSuiteBuilderProfiler``, which will then profile the data and create the relevant Expectations to add to your ``taxi.demo`` suite.
+#. The next cell is where you configure a ``UserConfigurableProfiler`` and instantiate it, which will then profile the data and create the relevant Expectations to add to your ``taxi.demo`` suite. You can leave these defaults as-is for now  - :ref:`learn more about the available parameters here. <how_to_guides__creating_and_editing_expectations__how_to_create_an_expectation_suite_with_the_user_configurable_profiler>`
 
 #. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the validation results. *We will explain the validation step later in the "Validate your data" section.*
 

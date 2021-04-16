@@ -1,5 +1,6 @@
 import logging
 
+from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
@@ -21,7 +22,7 @@ class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
         super().__init__(name, datasource=datasource)
         self.database = database
         try:
-            self.spark = SparkSession.builder.getOrCreate()
+            self.spark = get_or_create_spark_application()
         except Exception:
             logger.error(
                 "Unable to load spark context; install optional spark dependency for support."

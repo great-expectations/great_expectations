@@ -24,7 +24,7 @@ def test_snowflake_user_password_credentials_exit(empty_data_context):
         input="2\n4\nmy_snowflake_db\n1\nuser\nABCD.us-east-1\ndefault_db\ndefault_schema\nxsmall\npublic\npassword\nn\n",
     )
 
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert "ok, exiting now" in stdout.lower()
 
 

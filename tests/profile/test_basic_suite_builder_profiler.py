@@ -14,7 +14,7 @@ from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.basic_suite_builder_profiler import (
     BasicSuiteBuilderProfiler,
 )
-from tests.test_utils import expectationSuiteValidationResultSchema
+from great_expectations.self_check.util import expectationSuiteValidationResultSchema
 
 FALSEY_VALUES = [None, [], False]
 

@@ -129,35 +129,34 @@ class ColumnMedian(ColumnMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         """This should return a dictionary:
-
         {
           "dependency_name": MetricConfiguration,
           ...
         }
         """
-
-        dependencies = super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
 
-        table_domain_kwargs = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
-
-        dependencies.update(
-            {
-                "table.row_count": MetricConfiguration(
-                    "table.row_count", table_domain_kwargs
-                )
-            }
-        )
-
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             dependencies["column_values.nonnull.count"] = MetricConfiguration(
-                "column_values.nonnull.count", metric.metric_domain_kwargs
+                metric_name="column_values.nonnull.count",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
             )
+
+        table_domain_kwargs: dict = {
+            k: v
+            for k, v in metric.metric_domain_kwargs.items()
+            if k != MetricDomainTypes.COLUMN.value
+        }
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
 
         return dependencies
