@@ -355,7 +355,8 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt
+              # pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
@@ -363,7 +364,7 @@ stages:
           - script: |
               pip install pyspark>=3.0.0
               pip install findspark
-            displayName: 'Upgrade PySpark'
+            displayName: 'Install pyspark'
 
           - script: |
               pip install pytest pytest-azurepipelines
