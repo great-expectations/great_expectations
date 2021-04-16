@@ -271,8 +271,14 @@ class MetaSqlAlchemyDataset(Dataset):
                         )
                     )
                 )
+                query = str(
+                    raw_query.compile(
+                        self.engine, compile_kwargs={"literal_binds": True}
+                    )
+                )
+                query += "\nAND ROWNUM <= %d" % unexpected_count_limit
             else:
-                raw_query = (
+                query = (
                     sa.select([sa.column(column)])
                     .select_from(self._table)
                     .where(
@@ -283,12 +289,6 @@ class MetaSqlAlchemyDataset(Dataset):
                     )
                     .limit(unexpected_count_limit)
                 )
-            query = str(
-                raw_query.compile(self.engine, compile_kwargs={"literal_binds": True})
-            )
-            # use rownum instead of limit in oracle
-            if self.engine.dialect.name.lower() == "oracle":
-                query += "\nAND ROWNUM <= %d" % unexpected_count_limit
             unexpected_query_results = self.engine.execute(query)
 
             nonnull_count: int = (
