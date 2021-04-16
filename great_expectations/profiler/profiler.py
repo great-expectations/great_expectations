@@ -92,6 +92,7 @@ class Profiler:
         batch_request=None,
         batch_ids=None,
         data_context=None,
+        expectation_suite_name=None,
     ):
         if sum([bool(x) for x in (validator, batch, batches, batch_request)]) != 1:
             raise ProfilerError(
@@ -137,7 +138,11 @@ class Profiler:
                 f"batch_ids {unloaded_batch_ids} were requested but are not available."
             )
 
-        suite = ExpectationSuite(expectation_suite_name=f"self.__class__.__name__")
+        if expectation_suite_name is None:
+            expectation_suite_name = (
+                f"{self.__class__.__name__}_generated_expectation_suite"
+            )
+        suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
         for rule in self._rules:
             result = rule.evaluate(validator, batch_ids)
             for config in result:
