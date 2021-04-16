@@ -338,7 +338,7 @@ stages:
           postgres: postgres
 
         variables:
-          python.version: '3.6'
+          python.version: '3.8'
 
         steps:
           - task: UsePythonVersion@0
@@ -357,6 +357,7 @@ stages:
           - script: |
               pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt
               pip install --requirement requirements.txt
+              pip install pyspark>=3.0.0
               pip install .
             displayName: 'Install dependencies'
 
