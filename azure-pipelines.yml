@@ -150,6 +150,7 @@ stages:
 
       - job: comprehensive
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+
         services:
           postgres: postgres
 
@@ -251,6 +252,7 @@ stages:
     jobs:
       - job: mysql
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+
         services:
           mysql: mysql
 
@@ -293,6 +295,7 @@ stages:
 
       - job: mssql
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+
         services:
           mssql: mssql
 
@@ -330,6 +333,10 @@ stages:
     jobs:
       - job: test_cli
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+
+        services:
+          postgres: postgres
+
         variables:
           python.version: '3.7'
 
