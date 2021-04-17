@@ -1,11 +1,12 @@
-from ..rule_state import RuleState
 from ...validator.validation_graph import MetricConfiguration
+from ..rule_state import RuleState
 from .parameter_builder import ParameterBuilder
 
 
 class MetricParameterBuilder(ParameterBuilder):
     """Class utilized for obtaining a resolved metric (which is labeled a 'parameter') using domain kwargs, value
     kwargs, and a metric name"""
+
     def __init__(
         self,
         *,

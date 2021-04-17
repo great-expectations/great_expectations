@@ -1,12 +1,13 @@
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
-from .configuration_builder import ConfigurationBuilder
 from ..rule_state import RuleState
+from .configuration_builder import ConfigurationBuilder
 
 
 class ParameterIdConfigurationBuilder(ConfigurationBuilder):
     """Class which creates Expectation configuration out of a given
     Expectation type and a parameter-name config"""
+
     def __init__(self, expectation: str = None, **kwargs):
         self._expectation_type = expectation
         self._config = kwargs
