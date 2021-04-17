@@ -41,7 +41,7 @@ class RuleState:
 
         variables_key = "$variables."
         if value.startswith(variables_key):
-            lookup = value[len(variables_key):].split(".")
+            lookup = value[len(variables_key) :].split(".")
             curr = self.variables
         else:
             lookup = value[1:].split(".")

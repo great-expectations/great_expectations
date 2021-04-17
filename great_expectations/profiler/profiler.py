@@ -17,7 +17,7 @@ class Profiler:
     def __init__(
         self,
         *,
-        rules: Optional[Dict[str:ProfilerRule]] = None,
+        rules: Optional[Dict[str, ProfilerRule]] = None,
         rule_configs: Optional[Dict[str, Dict]] = None,
         data_context: Optional[DataContext] = None,
     ):
