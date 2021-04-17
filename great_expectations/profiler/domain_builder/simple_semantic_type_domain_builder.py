@@ -1,17 +1,28 @@
 from enum import Enum
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 from ...validator.validation_graph import MetricConfiguration
 from .column_domain_builder import ColumnDomainBuilder
 
 
 class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
+    def __init__(self, type_filters: Optional[List[str]] = None):
+        if type_filters is None:
+            type_filters = []
+        self._type_filters = type_filters
+
     class SemanticDomainTypes(Enum):
         INTEGER = "integer"
         DATETIME = "datetime"
 
     def _get_domains(
-        self, *, validator, batch_ids, include_batch_id, domain_type, **kwargs
+        self,
+        *,
+        validator,
+        batch_ids,
+        include_batch_id,
+        type_filters: Optional[List[str]] = None,
+        **kwargs
     ):
         """Find the semantic column type for each column and return all domains matching the specified type or types.
 
@@ -26,10 +37,11 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         """
         config = kwargs
         # TODO: AJB 20210416 If the type keyword for the DomainBuilder can contain multiple semantic types, should it be renamed types and take a list instead? Not that we can’t guess from what a user adds but something to make it clear that multiple semantic types can be used to construct a domain?
-        type_filters = config.get("type")
+        type_filters = config.get("_type_filters")
         if type_filters is None:
+            # TODO: AJB 20210416 Add a test for the below comment - None = return all types
             # None indicates no selection; all types should be returned
-            type_filters = []
+            type_filters = self._type_filters
         elif isinstance(type_filters, str):
             type_filters = [self.SemanticDomainTypes[type_filters]]
         elif isinstance(type_filters, Iterable):

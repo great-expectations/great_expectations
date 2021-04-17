@@ -21,6 +21,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         threshold: float = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
+        domain_kwargs=None,
     ):
         """
         Configure this SimpleDateFormatStringParameterBuilder
@@ -39,6 +40,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         if additional_candidate_strings is not None:
             self._candidate_strings += additional_candidate_strings
+
+        self._domain_kwargs = domain_kwargs
 
     def _build_parameters(self, *, rule_state, validator, batch_ids, **kwargs):
         """Check the percentage of values matching each string, and return the best fit, or None if no

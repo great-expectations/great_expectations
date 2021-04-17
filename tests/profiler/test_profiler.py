@@ -7,6 +7,7 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.profiler.profiler import Profiler
 
 yaml = YAML()
@@ -175,10 +176,12 @@ rules:
   datetime:
     domain_builder:
       class_name: SimpleSemanticTypeColumnDomainBuilder
-      type: datetime
+      module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
+      type_filters: datetime
     parameter_builders:
-      - id: my_dateformat
+      - parameter_id: my_dateformat
         class_name: SimpleDateFormatStringParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.simple_dateformat_string_parameter_builder
         domain_kwargs: $domain.domain_kwargs
     configuration_builders:
         - expectation: expect_column_values_to_match_strftime_format
@@ -213,15 +216,80 @@ rules:
     return config
 
 
-def test_profiler_init_manual(
+@pytest.fixture(scope="module")
+def very_simple_multibatch_profiler_configuration_yaml():
+    config = """
+name: BasicSuiteBuilderProfiler
+rules:
+  numeric:
+    domain_builder:
+      class_name: SimpleSemanticTypeColumnDomainBuilder
+      module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
+      type_filters: datetime
+    parameter_builders:
+      - parameter_id: min
+        class_name: MetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        metric_name: column.min
+        metric_domain_kwargs: $domain.domain_kwargs
+      - parameter_id: max
+        class_name: MetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        metric_name: column.max
+        metric_domain_kwargs: $domain.domain_kwargs
+    configuration_builders:
+      - expectation: expect_column_values_to_be_between
+        module_name: great_expectations.profiler.configuration_builder.parameter_id_configuration_builder
+        min_value: $min
+        max_value: $max
+"""
+    return config
+
+
+# TODO: 20210416 AJB - Parametrize these tests, pull fixtures from ?? (public repo e.g. here or quagga?)
+
+
+def test_profiler_init_manual_very_simple_multibatch_profiler_configuration_yaml(
+    multibatch_generic_csv_generator_context,
+    very_simple_multibatch_profiler_configuration_yaml,
+    multibatch_generic_csv_generator,
+):
+
+    # TODO: 20210416 AJB - THIS IS A HACK - use/create a ProfilerConfig & ProfilerConfigSchema with validation etc
+    full_profiler_config_dict = yaml.load(
+        very_simple_multibatch_profiler_configuration_yaml
+    )
+    rule_configs = full_profiler_config_dict["rules"]
+
+    profiler = Profiler(
+        rule_configs=rule_configs,
+        data_context=multibatch_generic_csv_generator_context,
+    )
+    suite = profiler.profile()
+
+    # TODO: 20210416 AJB Make these assertions against the expected ExpectationSuite for the config / data
+    assert suite == ExpectationSuite()
+    assert False
+
+
+def test_profiler_init_manual_simple_multibatch_profiler_configuration_yaml(
     multibatch_generic_csv_generator_context,
     simple_multibatch_profiler_configuration_yaml,
     multibatch_generic_csv_generator,
 ):
+
+    # TODO: 20210416 AJB - THIS IS A HACK - use/create a ProfilerConfig & ProfilerConfigSchema with validation etc
+    full_profiler_config_dict = yaml.load(simple_multibatch_profiler_configuration_yaml)
+    rule_configs = full_profiler_config_dict["rules"]
+
     profiler = Profiler(
-        rule_configs=simple_multibatch_profiler_configuration_yaml,
+        rule_configs=rule_configs,
         data_context=multibatch_generic_csv_generator_context,
     )
+    suite = profiler.profile()
+
+    # TODO: 20210416 AJB Make these assertions against the expected ExpectationSuite for the config / data
+    assert suite == ExpectationSuite()
     assert False
 
 

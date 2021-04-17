@@ -7,7 +7,7 @@ class MetricParameterBuilder(ParameterBuilder):
         self,
         *,
         parameter_id,
-        data_context,
+        data_context=None,
         metric_name,
         metric_domain_kwargs="$domain.domain_kwargs",
         metric_value_kwargs=None
