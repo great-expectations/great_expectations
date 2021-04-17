@@ -3,7 +3,8 @@ from great_expectations.profiler.exceptions import ProfilerExecutionError
 
 
 class RuleState:
-    """Manages state for ProfilerRule objects."""
+    """Manages state for ProfilerRule objects. Keeps track of rule domain, rule parameters,
+    and any other necessary variables for validating the rule"""
 
     def __init__(
         self, active_domain=None, domains=None, parameters=None, variables=None
@@ -21,15 +22,26 @@ class RuleState:
 
     @property
     def variables(self):
+        """
+        Getter for rule_state variables
+        :return: variables necessary for validating rule
+        """
         return self._variables
 
     def get_active_domain_id(self):
+        """
+        Getter for the id of the rule domain
+        :return: the id of the rule domain
+        """
         return IDDict(self.active_domain).to_id()
 
-    def get_value(self, value):
+    def get_value(self, value: str):
         """
         Get a value from the current rule state. Values must be dot-delimited, and may start either with
         the key 'domain' or the id of a parameter.
+        Args
+            :param value: str - A string key starting with $ and corresponding to internal state arguments, eg: domain kwargs
+        :return: requested value
         """
         if not value.startswith("$"):
             raise ProfilerExecutionError(

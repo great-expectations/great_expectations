@@ -101,6 +101,14 @@ class BaseDatasource:
     def get_batch_definition_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[BatchDefinition]:
+        """
+        Validates batch request and utilizes the classes'
+        Data Connectors' property to get a list of batch definition given
+         a batch request
+        Args:
+            :param batch_request: A BatchRequest object used to request a batch
+            :return: A list of batch definitions
+        """
         self._validate_batch_request(batch_request=batch_request)
 
         data_connector: DataConnector = self.data_connectors[
