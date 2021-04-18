@@ -94,7 +94,7 @@ class EvaluationParameterParser:
             #                    Optional(e + Word("+-"+nums, nums)))
             # or use provided pyparsing_common.number, but convert back to str:
             # fnumber = ppc.number().addParseAction(lambda t: str(t[0]))
-            fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?")
+            fnumber = Regex(r"[+-]?(?:\d+|\.\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?")
             ge_urn = Combine(
                 Literal("urn:great_expectations:")
                 + Word(alphas, alphanums + "_$:?=%.&")
