@@ -306,6 +306,11 @@ rules:
 # TODO: 20210416 AJB - Parametrize these tests, pull fixtures from ?? (public repo e.g. here or quagga?)
 
 
+@pytest.mark.xfail(
+    reason="The Profiler is not yet implemented.",
+    run=True,
+    strict=True,
+)
 def test_profiler_init_manual_very_simple_multibatch_profiler_configuration_yaml(
     multibatch_generic_csv_generator_context,
     very_simple_multibatch_profiler_configuration_yaml,
@@ -346,6 +351,11 @@ def test_profiler_init_manual_very_simple_multibatch_profiler_configuration_yaml
     # TODO: 20210419 AJB test with multiple batches
 
 
+@pytest.mark.xfail(
+    reason="The Profiler is not yet implemented.",
+    run=True,
+    strict=True,
+)
 def test_profiler_init_manual_simple_multibatch_profiler_configuration_yaml(
     multibatch_generic_csv_generator_context,
     simple_multibatch_profiler_configuration_yaml,
@@ -367,6 +377,11 @@ def test_profiler_init_manual_simple_multibatch_profiler_configuration_yaml(
     assert False
 
 
+@pytest.mark.xfail(
+    reason="The Profiler is not yet implemented.",
+    run=True,
+    strict=True,
+)
 def test_profiler_rule_init_helper(
     taxicab_context, simple_multibatch_profiler_configuration_yaml
 ):
