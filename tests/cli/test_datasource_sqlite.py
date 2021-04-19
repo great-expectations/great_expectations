@@ -11,10 +11,17 @@ from great_expectations.cli import cli
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 
-def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog, monkeypatch):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_cli_datasource_list(
+    mock_emit, empty_data_context, empty_sqlite_db, caplog, monkeypatch
+):
     """Test an empty project and after adding a single datasource."""
-    project_root_dir = empty_data_context.root_directory
-    context = DataContext(project_root_dir)
+    monkeypatch.delenv(
+        "GE_USAGE_STATS", raising=False
+    )  # Undo the project-wide test default
+    context: DataContext = empty_data_context
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -52,6 +59,29 @@ Using v3 (Batch Request) API\x1b[0m
     assert stdout == expected_output
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
+
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.list.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert mock_emit.call_count == len(expected_call_args_list)
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
 def _add_datasource_and_credentials_to_context(context, datasource_name, sqlite_engine):
@@ -147,12 +177,18 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     return context
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 def test_cli_datasource_new_connection_string(
-    mock_subprocess, empty_data_context, empty_sqlite_db, caplog, monkeypatch
+    mock_subprocess, mock_emit, empty_data_context, empty_sqlite_db, caplog, monkeypatch
 ):
+    monkeypatch.delenv(
+        "GE_USAGE_STATS", raising=False
+    )  # Undo the project-wide test default
     root_dir = empty_data_context.root_directory
-    context = DataContext(root_dir)
+    context: DataContext = empty_data_context
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
@@ -173,6 +209,40 @@ def test_cli_datasource_new_connection_string(
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
+
+    expected_call_args_list = [
+        mock.call(
+            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.new.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.new_ds_choice",
+                "event_payload": {
+                    "type": "sqlalchemy",
+                    "db": "other",
+                    "api_version": "v3",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.datasource.new.end",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+    ]
+
+    assert mock_emit.call_args_list == expected_call_args_list
+    assert mock_emit.call_count == len(expected_call_args_list)
 
     # Run notebook
     with open(expected_notebook) as f:

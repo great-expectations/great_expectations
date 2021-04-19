@@ -313,9 +313,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col])
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -376,9 +374,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col])
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -435,9 +431,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col])
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -507,9 +501,7 @@ def get_dataset(
                     df[col] = pd.to_datetime(df[col])
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
         df.to_sql(
             name=table_name,
             con=engine,
@@ -670,9 +662,8 @@ def get_test_validator_with_data(
             df = df.astype(pandas_schema)
 
         if table_name is None:
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            # noinspection PyUnusedLocal
+            table_name = generate_test_table_name()
 
         return build_pandas_validator_with_data(df=df)
 
@@ -796,9 +787,7 @@ def get_test_validator_with_data(
 
         if table_name is None:
             # noinspection PyUnusedLocal
-            table_name = "test_data_" + "".join(
-                [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-            )
+            table_name = generate_test_table_name()
 
         return build_spark_validator_with_data(df=spark_df, spark=spark)
 
@@ -892,9 +881,8 @@ def build_sa_validator_with_data(
                 df[col] = pd.to_datetime(df[col])
 
     if table_name is None:
-        table_name = "test_data_" + "".join(
-            [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
-        )
+        table_name = generate_test_table_name()
+
     df.to_sql(
         name=table_name,
         con=engine,
@@ -1952,3 +1940,12 @@ def check_json_test_result(test, result, data_asset=None):
                 raise ValueError(
                     "Invalid test specification: unknown key " + key + " in 'out'"
                 )
+
+
+def generate_test_table_name(
+    default_table_name_prefix: Optional[str] = "test_data_",
+) -> str:
+    table_name: str = default_table_name_prefix + "".join(
+        [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
+    )
+    return table_name

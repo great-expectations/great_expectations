@@ -64,7 +64,7 @@ def _run_cli_datasource_new_path_test(
             "data_connectors": {
                 "my_datasource_example_data_connector": {
                     "default_regex": {
-                        "group_names": "data_asset_name",
+                        "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",

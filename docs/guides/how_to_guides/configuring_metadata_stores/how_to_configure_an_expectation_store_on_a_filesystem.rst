@@ -15,82 +15,165 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 Steps
 -----
 
-1. **Configure a new folder on your filesystem where Expectations will be stored.**
+.. content-tabs::
 
-    Create a new folder where you would like to store your Expectations, and move your existing Expectation files over to the new location. In our case, the name of the Expectations file is ``npi_expectations`` and the path to our new storage location is ``/shared_expectations``.
+    .. tab-container:: tab0
+        :title: Show Docs for V2 (Batch Kwargs) API
 
-    .. code-block:: bash
+        1. **Configure a new folder on your filesystem where Expectations will be stored.**
 
-        # in the great_expectations/ folder
-        mkdir shared_expectations
-        mv expectations/npi_expectations.json shared_expectations/
+            Create a new folder where you would like to store your Expectations, and move your existing Expectation files over to the new location. In our case, the name of the Expectations file is ``npi_expectations`` and the path to our new storage location is ``/shared_expectations``.
+
+            .. code-block:: bash
+
+                # in the great_expectations/ folder
+                mkdir shared_expectations
+                mv expectations/npi_expectations.json shared_expectations/
 
 
-2. **Identify your Data Context Expectations Store**
+        2. **Identify your Data Context Expectations Store**
 
-    In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
+            In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
-    .. code-block:: yaml
+            .. code-block:: yaml
 
-        expectations_store_name: expectations_store
+                expectations_store_name: expectations_store
 
-        stores:
-            expectations_store:
+                stores:
+                    expectations_store:
+                        class_name: ExpectationsStore
+                        store_backend:
+                            class_name: TupleFilesystemStoreBackend
+                            base_directory: expectations/
+
+
+        3. **Update your configuration file to include a new store for Expectations results on your filesystem**
+
+            In the example below, Expectations Store is being set to ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
+
+            .. code-block:: yaml
+
+                expectations_store_name: shared_expectations_filesystem_store
+
+                stores:
+                    shared_expectations_filesystem_store:
+                        class_name: ExpectationsStore
+                        store_backend:
+                            class_name: TupleFilesystemStoreBackend
+                            base_directory: shared_expectations/
+
+
+
+        4. **Confirm that the location has been updated by running** ``great_expectations store list``.
+
+            Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``shared_expectations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the ``shared_expectations/`` folder as long as we set the ``expectations_store_name`` variable to ``shared_expectations_filesystem_store``.  The config for ``expectations_store`` can be removed if you would like.
+
+            .. code-block:: bash
+
+                great_expectations store list
+
+                2 Stores found:
+
+                - name: expectations_store
                 class_name: ExpectationsStore
                 store_backend:
                     class_name: TupleFilesystemStoreBackend
                     base_directory: expectations/
 
-
-3. **Update your configuration file to include a new store for Expectations results on your filesystem**
-
-    In the example below, Expectations Store is being set to ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
-
-    .. code-block:: yaml
-
-        expectations_store_name: shared_expectations_filesystem_store
-
-        stores:
-            shared_expectations_filesystem_store:
+                - name: shared_expectations_filesystem_store
                 class_name: ExpectationsStore
                 store_backend:
                     class_name: TupleFilesystemStoreBackend
                     base_directory: shared_expectations/
 
 
+        5. **Confirm that Expectations can be read from the new storage location by running** ``great_expectations suite list``.
 
-4. **Confirm that the location has been updated by running** ``great_expectations store list``.
+            .. code-block:: bash
 
-    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``shared_expectations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the ``shared_expectations/`` folder as long as we set the ``expectations_store_name`` variable to ``shared_expectations_filesystem_store``.  The config for ``expectations_store`` can be removed if you would like.
+                great_expectations suite list
 
-    .. code-block:: bash
+                1 Expectation Suite found:
+                    - npi_expectations
 
-        great_expectations store list
+    .. tab-container:: tab1
+        :title: Show Docs for V3 (Batch Request) API
 
-        2 Stores found:
+        1. **Configure a new folder on your filesystem where Expectations will be stored.**
 
-        - name: expectations_store
-        class_name: ExpectationsStore
-        store_backend:
-            class_name: TupleFilesystemStoreBackend
-            base_directory: expectations/
+            Create a new folder where you would like to store your Expectations, and move your existing Expectation files over to the new location. In our case, the name of the Expectations file is ``npi_expectations`` and the path to our new storage location is ``/shared_expectations``.
 
-        - name: shared_expectations_filesystem_store
-        class_name: ExpectationsStore
-        store_backend:
-            class_name: TupleFilesystemStoreBackend
-            base_directory: shared_expectations/
+            .. code-block:: bash
+
+                # in the great_expectations/ folder
+                mkdir shared_expectations
+                mv expectations/npi_expectations.json shared_expectations/
 
 
-5. **Confirm that Expectations can be read from the new storage location by running** ``great_expectations suite list``.
+        2. **Identify your Data Context Expectations Store**
 
-    .. code-block:: bash
+            In your ``great_expectations.yml`` , look for the following lines.  The configuration tells Great Expectations to look for Expectations in a store called ``expectations_store``. The ``base_directory`` for ``expectations_store`` is set to ``expectations/`` by default.
 
-        great_expectations suite list
+            .. code-block:: yaml
 
-        1 Expectation Suite found:
-            - npi_expectations
+                expectations_store_name: expectations_store
 
+                stores:
+                    expectations_store:
+                        class_name: ExpectationsStore
+                        store_backend:
+                            class_name: TupleFilesystemStoreBackend
+                            base_directory: expectations/
+
+
+        3. **Update your configuration file to include a new store for Expectations results on your filesystem**
+
+            In the example below, Expectations Store is being set to ``shared_expectations_filesystem_store`` with the ``base_directory`` set to ``shared_expectations/``.
+
+            .. code-block:: yaml
+
+                expectations_store_name: shared_expectations_filesystem_store
+
+                stores:
+                    shared_expectations_filesystem_store:
+                        class_name: ExpectationsStore
+                        store_backend:
+                            class_name: TupleFilesystemStoreBackend
+                            base_directory: shared_expectations/
+
+
+
+        4. **Confirm that the location has been updated by running** ``great_expectations --v3-api store list``.
+
+            Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``shared_expectations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the ``shared_expectations/`` folder as long as we set the ``expectations_store_name`` variable to ``shared_expectations_filesystem_store``.  The config for ``expectations_store`` can be removed if you would like.
+
+            .. code-block:: bash
+
+                great_expectations --v3-api store list
+
+                2 Stores found:
+
+                - name: expectations_store
+                class_name: ExpectationsStore
+                store_backend:
+                    class_name: TupleFilesystemStoreBackend
+                    base_directory: expectations/
+
+                - name: shared_expectations_filesystem_store
+                class_name: ExpectationsStore
+                store_backend:
+                    class_name: TupleFilesystemStoreBackend
+                    base_directory: shared_expectations/
+
+
+        5. **Confirm that Expectations can be read from the new storage location by running** ``great_expectations --v3-api suite list``.
+
+            .. code-block:: bash
+
+                great_expectations --v3-api suite list
+
+                1 Expectation Suite found:
+                    - npi_expectations
 
 Additional Notes
 ----------------

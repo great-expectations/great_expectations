@@ -24,6 +24,7 @@ Basics
 ======
 
 There are a few commands that are critical to your everyday usage of Great Expectations.
+Please note that the V3 (Batch Request) API can be accessed with many of these commands by adding the ``--v3-api`` flag after ``great_expectations``. Please see our how-to guides and use the ``--help`` flag for more complete descriptions of the new functionality.
 This is a list of the most common commands you'll use in order of how much you'll probably use them:
 
 * ``great_expectations suite edit``

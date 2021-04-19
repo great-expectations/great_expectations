@@ -1407,7 +1407,7 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
         "my_checkpoint.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        f.write("# Not a checkpoint file")
+        f.write("# Not a Checkpoint file")
     assert os.path.isfile(checkpoint_file_path)
     assert context.list_checkpoints() == ["my_checkpoint"]
 
@@ -1541,7 +1541,7 @@ def test_run_checkpoint_new_style(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    # add checkpoint config
+    # add Checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
         config_version=1,

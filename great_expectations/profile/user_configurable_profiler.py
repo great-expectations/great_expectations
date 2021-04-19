@@ -1,4 +1,3 @@
-import datetime
 import logging
 import math
 
@@ -202,6 +201,7 @@ class UserConfigurableProfiler:
 
         """
         if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
+            # noinspection PyProtectedMember
             suite_name = self.profile_dataset._expectation_suite.expectation_suite_name
             self.profile_dataset._expectation_suite = ExpectationSuite(suite_name)
 
@@ -1084,6 +1084,7 @@ class UserConfigurableProfiler:
                     column, min_value=pct_unique, max_value=pct_unique
                 )
             else:
+                # noinspection PyProtectedMember
                 profile_dataset._expectation_suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_proportion_of_unique_values_to_be_between",

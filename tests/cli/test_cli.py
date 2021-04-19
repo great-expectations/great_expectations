@@ -311,11 +311,15 @@ def test_cli_config_not_found_raises_error_for_suite_scaffold(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "suite", "scaffold"], catch_exceptions=False
+        cli,
+        ["-c", "./", "--v3-api", "suite", "new", "--profile", "--interactive"],
+        catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
     result = runner.invoke(
-        cli, ["--v3-api", "suite", "scaffold"], catch_exceptions=False
+        cli,
+        ["--v3-api", "suite", "new", "--profile", "--interactive"],
+        catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
@@ -503,19 +507,28 @@ def test_assume_yes_using_full_flag_using_checkpoint_delete(
 
     assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
 
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
+    expected_call_args_list = [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.delete",
+                "event": "cli.checkpoint.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
     ]
+
+    assert mock_emit.call_count == len(expected_call_args_list)
+    assert mock_emit.call_args_list == expected_call_args_list
 
     assert_no_logging_messages_or_tracebacks(
         caplog,
@@ -566,19 +579,28 @@ def test_assume_yes_using_yes_flag_using_checkpoint_delete(
 
     assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
 
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
+    expected_call_args_list = [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.delete",
+                "event": "cli.checkpoint.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
     ]
+
+    assert mock_emit.call_count == len(expected_call_args_list)
+    assert mock_emit.call_args_list == expected_call_args_list
 
     assert_no_logging_messages_or_tracebacks(
         caplog,
@@ -629,19 +651,28 @@ def test_assume_yes_using_y_flag_using_checkpoint_delete(
 
     assert 'Checkpoint "my_v1_checkpoint" deleted.' in stdout
 
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
+    expected_call_args_list = [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.delete",
+                "event": "cli.checkpoint.delete.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.delete.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
     ]
+
+    assert mock_emit.call_count == len(expected_call_args_list)
+    assert mock_emit.call_args_list == expected_call_args_list
 
     assert_no_logging_messages_or_tracebacks(
         caplog,
@@ -694,19 +725,28 @@ def test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation(
     ]
     assert all([checkpoint_name in stdout for checkpoint_name in checkpoint_names_list])
 
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
+    expected_call_args_list = [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event": "cli.checkpoint.list",
+                "event": "cli.checkpoint.list.begin",
+                "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "cli.checkpoint.list.end",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
             }
         ),
     ]
+
+    assert mock_emit.call_count == len(expected_call_args_list)
+    assert mock_emit.call_args_list == expected_call_args_list
 
     assert_no_logging_messages_or_tracebacks(
         caplog,

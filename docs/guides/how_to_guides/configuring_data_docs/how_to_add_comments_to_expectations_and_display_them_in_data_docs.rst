@@ -13,99 +13,200 @@ This guide will help you add descriptive comments (or notes, here used interchan
 
 Steps
 -----
+.. content-tabs::
 
-#. First, edit your Expectation Suite.
+    .. tab-container:: tab0
+        :title: Show Docs for V2 (Batch Kwargs) API
 
-    .. code-block:: bash
+        #. First, edit your Expectation Suite.
 
-        great_expectations suite edit <your_suite_name>
+            .. code-block:: bash
 
-#. Next, add comments to specific Expectations.
+                great_expectations suite edit <your_suite_name>
 
-    For each Expectation you wish to add notes to, add a dictionary to the ``meta`` field with the key ``notes`` and your comment as the value. Here is an example.
+        #. Next, add comments to specific Expectations.
 
-    .. code-block:: python
+            For each Expectation you wish to add notes to, add a dictionary to the ``meta`` field with the key ``notes`` and your comment as the value. Here is an example.
 
-        batch.expect_table_row_count_to_be_between(
-            max_value=1000000, min_value=1,
-            meta={"notes": "Example notes about this expectation."}
-        )
+            .. code-block:: python
 
-    Leads to the following representation in the Data Docs (click on the speech bubble to view the comment).
+                batch.expect_table_row_count_to_be_between(
+                    max_value=1000000, min_value=1,
+                    meta={"notes": "Example notes about this expectation."}
+                )
 
-    .. image:: table_level_no_format.png
-        :width: 800
-        :alt: Expectation with simple comment, no formatting.
+            Leads to the following representation in the Data Docs (click on the speech bubble to view the comment).
 
-#. Add styling to your comments (optional).
+            .. image:: table_level_no_format.png
+                :width: 800
+                :alt: Expectation with simple comment, no formatting.
 
-    To add styling to your comments, you can add a format tag. Here are a few examples.
+        #. Add styling to your comments (optional).
 
-    A single line of markdown is rendered in red, with any Markdown formatting applied.
+            To add styling to your comments, you can add a format tag. Here are a few examples.
 
-    .. code-block:: python
+            A single line of markdown is rendered in red, with any Markdown formatting applied.
 
-        batch.expect_column_values_to_not_be_null(
-            column="column_name",
-            meta={
-                "notes": {
-                    "format": "markdown",
-                    "content": "Example notes about this expectation. **Markdown** `Supported`."
-                }
-            }
-        )
+            .. code-block:: python
 
-    .. image:: single_line_markdown_red.png
-        :width: 800
-        :alt: Expectation with a single line of markdown comment is rendered in red with markdown formatting.
+                batch.expect_column_values_to_not_be_null(
+                    column="column_name",
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": "Example notes about this expectation. **Markdown** `Supported`."
+                        }
+                    }
+                )
 
-
-    Multiple lines can be rendered by using a list for ``content``, these lines are rendered in black text with any Markdown formatting applied.
-
-    .. code-block:: python
-
-        batch.expect_column_values_to_not_be_null(
-            column="column_name",
-            meta={
-                "notes": {
-                    "format": "markdown",
-                    "content": [
-                        "Example notes about this expectation. **Markdown** `Supported`.",
-                        "Second example note **with** *Markdown*",
-                    ]
-                }
-            }
-        )
-
-    .. image:: multiple_line_markdown.png
-        :width: 800
-        :alt: Multiple lines of markdown rendered with formatting.
+            .. image:: single_line_markdown_red.png
+                :width: 800
+                :alt: Expectation with a single line of markdown comment is rendered in red with markdown formatting.
 
 
-    You can also change the ``format`` to ``string`` and single or multiple lines will be formatted similar to the above, but the Markdown formatting will not be applied.
+            Multiple lines can be rendered by using a list for ``content``; these lines are rendered in black text with any Markdown formatting applied.
 
-    .. code-block:: python
+            .. code-block:: python
 
-        batch.expect_column_values_to_not_be_null(
-            column="column_name",
-            meta={
-                "notes": {
-                    "format": "string",
-                    "content": [
-                        "Example notes about this expectation. **Markdown** `Supported`.",
-                        "Second example note **with** *Markdown*",
-                    ]
-                }
-            }
-        )
+                batch.expect_column_values_to_not_be_null(
+                    column="column_name",
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "Example notes about this expectation. **Markdown** `Supported`.",
+                                "Second example note **with** *Markdown*",
+                            ]
+                        }
+                    }
+                )
 
-    .. image:: multiple_line_string.png
-        :width: 800
-        :alt: Multiple lines of string rendered without formatting.
-    
+            .. image:: multiple_line_markdown.png
+                :width: 800
+                :alt: Multiple lines of markdown rendered with formatting.
 
 
-#. Review your comments in the Expectation Suite overview of your Data Docs.
+            You can also change the ``format`` to ``string`` and single or multiple lines will be formatted similar to the above, but the Markdown formatting will not be applied.
+
+            .. code-block:: python
+
+                batch.expect_column_values_to_not_be_null(
+                    column="column_name",
+                    meta={
+                        "notes": {
+                            "format": "string",
+                            "content": [
+                                "Example notes about this expectation. **Markdown** `Not Supported`.",
+                                "Second example note **without** *Markdown*",
+                            ]
+                        }
+                    }
+                )
+
+            .. image:: multiple_line_string.png
+                :width: 800
+                :alt: Multiple lines of string rendered without formatting.
+
+
+
+        #. Review your comments in the Expectation Suite overview of your Data Docs.
+
+    .. tab-container:: tab1
+        :title: Show Docs for V3 (Batch Request) API
+
+        #. First, edit your Expectation Suite.
+
+            .. code-block:: bash
+
+                great_expectations --v3-api suite edit <your_suite_name>
+
+        #. Next, add comments to specific Expectations.
+
+            For each Expectation you wish to add notes to, add a dictionary to the ``meta`` field with the key ``notes`` and your comment as the value. Here is an example.
+
+            .. code-block:: python
+
+                validator.expect_table_row_count_to_be_between(
+                    max_value=1000000, min_value=1,
+                    meta={"notes": "Example notes about this expectation."}
+                )
+
+            Leads to the following representation in the Data Docs (click on the speech bubble to view the comment).
+
+            .. image:: table_level_no_format.png
+                :width: 800
+                :alt: Expectation with simple comment, no formatting.
+
+        #. Add styling to your comments (optional).
+
+            To add styling to your comments, you can add a format tag. Here are a few examples.
+
+            A single line of markdown is rendered in red, with any Markdown formatting applied.
+
+            .. code-block:: python
+
+                validator.expect_column_values_to_not_be_null(
+                    column="column_name",
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": "Example notes about this expectation. **Markdown** `Supported`."
+                        }
+                    }
+                )
+
+            .. image:: single_line_markdown_red.png
+                :width: 800
+                :alt: Expectation with a single line of markdown comment is rendered in red with markdown formatting.
+
+
+            Multiple lines can be rendered by using a list for ``content``; these lines are rendered in black text with any Markdown formatting applied.
+
+            .. code-block:: python
+
+                validator.expect_column_values_to_not_be_null(
+                    column="column_name",
+                    meta={
+                        "notes": {
+                            "format": "markdown",
+                            "content": [
+                                "Example notes about this expectation. **Markdown** `Supported`.",
+                                "Second example note **with** *Markdown*",
+                            ]
+                        }
+                    }
+                )
+
+            .. image:: multiple_line_markdown.png
+                :width: 800
+                :alt: Multiple lines of markdown rendered with formatting.
+
+
+            You can also change the ``format`` to ``string`` and single or multiple lines will be formatted similar to the above, but the Markdown formatting will not be applied.
+
+            .. code-block:: python
+
+                validator.expect_column_values_to_not_be_null(
+                    column="column_name",
+                    meta={
+                        "notes": {
+                            "format": "string",
+                            "content": [
+                                "Example notes about this expectation. **Markdown** `Not Supported`.",
+                                "Second example note **without** *Markdown*",
+                            ]
+                        }
+                    }
+                )
+
+            .. image:: multiple_line_string.png
+                :width: 800
+                :alt: Multiple lines of string rendered without formatting.
+
+
+
+        #. Review your comments in the Expectation Suite overview of your Data Docs.
+
 
 
 Comments

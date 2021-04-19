@@ -11,6 +11,7 @@ from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
 from dateutil.parser import parse
+from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -31,7 +32,12 @@ from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.registry import (
     get_expectation_impl,
@@ -272,15 +278,6 @@ class Validator:
         """Returns the execution engine being used by the validator at the given time"""
         return self._execution_engine
 
-    def head(self, n_rows=5, domain_kwargs=None, fetch_all=False):
-        if domain_kwargs is None:
-            domain_kwargs = {"batch_id": self.execution_engine.active_batch_data_id}
-        return self.get_metric(
-            MetricConfiguration(
-                "table.head", domain_kwargs, {"n_rows": n_rows, "fetch_all": fetch_all}
-            )
-        )
-
     def list_available_expectation_types(self):
         """ Returns a list of all expectations available to the validator"""
         keys = dir(self)
@@ -333,7 +330,7 @@ class Validator:
         self,
         graph: ValidationGraph,
         child_node: MetricConfiguration,
-        configuration: ExpectationConfiguration,
+        configuration: Optional[ExpectationConfiguration],
         execution_engine: "ExecutionEngine",
         parent_node: Optional[MetricConfiguration] = None,
         runtime_configuration: Optional[dict] = None,
@@ -492,8 +489,16 @@ class Validator:
 
     def resolve_validation_graph(self, graph, metrics, runtime_configuration=None):
         done: bool = False
+        pbar = None
         while not done:
             ready_metrics, needed_metrics = self._parse_validation_graph(graph, metrics)
+            if pbar is None:
+                pbar = tqdm(
+                    total=len(ready_metrics) + len(needed_metrics),
+                    desc="Calculating Metrics",
+                    disable=len(graph._edges) < 3,
+                )
+                pbar.update(0)
             metrics.update(
                 self._resolve_metrics(
                     execution_engine=self._execution_engine,
@@ -502,8 +507,10 @@ class Validator:
                     runtime_configuration=runtime_configuration,
                 )
             )
+            pbar.update(len(ready_metrics))
             if len(ready_metrics) + len(needed_metrics) == 0:
                 done = True
+        pbar.close()
 
         return metrics
 
@@ -1300,6 +1307,58 @@ class Validator:
 
         new_function = self.expectation(argspec)(function)
         return new_function(self, *args, **kwargs)
+
+    def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
+        if domain_kwargs is None:
+            domain_kwargs = {
+                "batch_id": self.execution_engine.active_batch_data_id,
+            }
+
+        columns: List[str] = self.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.columns",
+                metric_domain_kwargs=domain_kwargs,
+            )
+        )
+
+        return columns
+
+    def head(
+        self,
+        n_rows: Optional[int] = 5,
+        domain_kwargs: Optional[Dict[str, Any]] = None,
+        fetch_all: Optional[bool] = False,
+    ) -> pd.DataFrame:
+        if domain_kwargs is None:
+            domain_kwargs = {
+                "batch_id": self.execution_engine.active_batch_data_id,
+            }
+
+        data: Any = self.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.head",
+                metric_domain_kwargs=domain_kwargs,
+                metric_value_kwargs={
+                    "n_rows": n_rows,
+                    "fetch_all": fetch_all,
+                },
+            )
+        )
+
+        df: pd.DataFrame
+        if isinstance(
+            self.execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
+        ):
+            df = pd.DataFrame(data=data)
+        elif isinstance(self.execution_engine, SparkDFExecutionEngine):
+            rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
+            df = pd.DataFrame(data=rows)
+        else:
+            raise GreatExpectationsError(
+                "Unsupported or unknown ExecutionEngine type encountered in Validator class."
+            )
+
+        return df.reset_index(drop=True, inplace=False)
 
 
 ValidationStatistics = namedtuple(

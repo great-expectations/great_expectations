@@ -1,7 +1,9 @@
 .. _how_to_guides__validation__how_to_add_a_validation_operator:
 
-How to add a Validation Operator
-======================================
+How to add a Validation Operator - V2 (Batch Kwargs) API
+=========================================================
+
+.. note:: This guide is only relevant if you are using the V2 (Batch Kwargs) API. For the V3 (Batch Request) API, please refer to the Checkpoints (>=0.13.12) tab in the guide on :ref:`How to create a new Checkpoint<how_to_guides__validation__how_to_create_a_new_checkpoint>`.
 
 This guide will help you add a new instance of a :ref:`Validation Operator <checkpoints_and_actions>`. Validation Operators give you the ability to encode business logic around validation, such as validating multiple batches of data together, differentiating between warnings and errors, and kicking off actions based on the results of validation.
 

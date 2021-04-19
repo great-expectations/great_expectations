@@ -7,6 +7,7 @@ from typing import Dict, Optional, Union
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.util import filter_properties_dict
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -242,12 +243,13 @@ class BatchRequestBase(DictDot):
                 data_connector_query["custom_filter_function"] = data_connector_query[
                     "custom_filter_function"
                 ].__name__
-        json_dict = {
+        json_dict: dict = {
             "datasource_name": self.datasource_name,
             "data_connector_name": self.data_connector_name,
             "data_asset_name": self.data_asset_name,
             "data_connector_query": data_connector_query,
         }
+
         if self.batch_spec_passthrough is not None:
             json_dict["batch_spec_passthrough"] = self.batch_spec_passthrough
         if self.limit is not None:
@@ -260,6 +262,8 @@ class BatchRequestBase(DictDot):
                 json_dict["runtime_parameters"]["batch_data"] = str(
                     type(json_dict["runtime_parameters"]["batch_data"])
                 )
+
+        filter_properties_dict(properties=json_dict, inplace=True)
 
         return json_dict
 
