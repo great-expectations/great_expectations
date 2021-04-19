@@ -345,6 +345,17 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode().run_diagnostics()
-    )
+    from packaging.version import parse as parse_version
+
+    # Note 202104 uszipcode is not compatible with sqlalchemy 1.4 and higher
+    # Please remove this check once issue has been resolved
+    # Issue can be tracked here : https://github.com/MacHu-GWU/uszipcode-project/issues/48
+    try:
+        import sqlalchemy as sa
+
+        if parse_version(sa.__version__) < parse_version("1.4.0"):
+            diagnostics_report = (
+                ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode().run_diagnostics()
+            )
+    except (ImportError, ModuleNotFoundError):
+        pass
