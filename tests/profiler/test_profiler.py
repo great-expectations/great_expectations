@@ -282,7 +282,7 @@ rules:
     domain_builder:
       class_name: SimpleSemanticTypeColumnDomainBuilder
       module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
-      type_filters: datetime
+      type_filters: integer
     parameter_builders:
       - parameter_id: min
         class_name: MetricParameterBuilder
@@ -322,11 +322,28 @@ def test_profiler_init_manual_very_simple_multibatch_profiler_configuration_yaml
         rule_configs=rule_configs,
         data_context=multibatch_generic_csv_generator_context,
     )
-    suite = profiler.profile()
+
+    context: DataContext = multibatch_generic_csv_generator_context
+    data_relative_path = "../data"
+    data_path = os.path.join(context.root_directory, data_relative_path)
+    multibatch_generic_csv_generator(data_path=data_path)
+
+    # Test with a single batch
+    batch_1 = context.get_batch(
+        datasource_name="generic_csv_generator",
+        data_connector_name="daily_data_connector",
+        data_asset_name="daily_data_asset",
+        data_connector_query={
+            "index": -1,
+        },
+    )
+    suite = profiler.profile(batch=batch_1)
 
     # TODO: 20210416 AJB Make these assertions against the expected ExpectationSuite for the config / data
     assert suite == ExpectationSuite()
-    assert False
+    # assert False
+
+    # TODO: 20210419 AJB test with multiple batches
 
 
 def test_profiler_init_manual_simple_multibatch_profiler_configuration_yaml(
