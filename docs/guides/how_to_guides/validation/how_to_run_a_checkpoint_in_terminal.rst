@@ -16,7 +16,7 @@ Steps
 .. content-tabs::
 
     .. tab-container:: tab0
-        :title: Docs for Legacy Checkpoints (<=0.13.7)
+        :title: Show Docs for V2 (Batch Kwargs) API
 
         1. Checkpoints can be run like applications from the command line by running:
 
@@ -41,9 +41,29 @@ Steps
         +-------------------------------+-----------------+-----------------------+
 
     .. tab-container:: tab1
-        :title: Docs for Class-Based Checkpoints (>=0.13.8)
+        :title: Show Docs for V3 (Batch Request) API
 
-        The CLI does not yet support the new-style Checkpoints. Please refer to :ref:`how_to_guides__validation__how_to_run_a_checkpoint_in_python` for a how-to guide on running a Checkpoint.
+        1. Checkpoints can be run like applications from the command line by running:
+
+        .. code-block:: bash
+
+            great_expectations --v3-api checkpoint run my_checkpoint
+            Validation failed!
+
+        2. Next, observe the output which will tell you if all validations passed or failed.
+
+        Additional notes
+        ----------------
+
+        This command will return posix status codes and print messages as follows:
+
+        +-------------------------------+-----------------+-----------------------+
+        | **Situation**                 | **Return code** | **Message**           |
+        +-------------------------------+-----------------+-----------------------+
+        | all validations passed        | 0               | Validation succeeded! |
+        +-------------------------------+-----------------+-----------------------+
+        | one or more validation failed | 1               | Validation failed!    |
+        +-------------------------------+-----------------+-----------------------+
 
 .. discourse::
     :topic_identifier: 226

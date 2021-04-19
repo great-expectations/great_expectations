@@ -232,6 +232,8 @@ class SqlAlchemyBatchData(BatchData):
             )
         elif self.sql_engine_dialect.name.lower() == "awsathena":
             stmt = "CREATE TABLE {temp_table_name} AS {query}".format(
+        elif self.sql_engine_dialect.name.lower() == "oracle":
+            stmt = "CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}".format(
                 temp_table_name=temp_table_name, query=query
             )
         else:

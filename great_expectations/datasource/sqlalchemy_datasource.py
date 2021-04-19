@@ -423,21 +423,32 @@ class SqlAlchemyDatasource(LegacyDatasource):
 
                 else:
                     schema = batch_kwargs.get("schema")
-                raw_query = (
-                    sqlalchemy.select([sqlalchemy.text("*")])
-                    .select_from(
+                # limit doesn't compile properly for oracle so we will append rownum to query string later
+                if self.engine.dialect.name.lower() == "oracle":
+                    raw_query = sqlalchemy.select([sqlalchemy.text("*")]).select_from(
                         sqlalchemy.schema.Table(
                             table, sqlalchemy.MetaData(), schema=schema
                         )
                     )
-                    .offset(offset)
-                    .limit(limit)
-                )
+                else:
+                    raw_query = (
+                        sqlalchemy.select([sqlalchemy.text("*")])
+                        .select_from(
+                            sqlalchemy.schema.Table(
+                                table, sqlalchemy.MetaData(), schema=schema
+                            )
+                        )
+                        .offset(offset)
+                        .limit(limit)
+                    )
                 query = str(
                     raw_query.compile(
                         self.engine, compile_kwargs={"literal_binds": True}
                     )
                 )
+                # use rownum instead of limit in oracle
+                if self.engine.dialect.name.lower() == "oracle":
+                    query += "\nWHERE ROWNUM <= %d" % limit
                 batch_reference = SqlAlchemyBatchReference(
                     engine=self.engine,
                     query=query,

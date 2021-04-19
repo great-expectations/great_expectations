@@ -202,7 +202,7 @@ class BaseDatasource:
 
     def get_available_data_asset_names(
         self, data_connector_names: Optional[Union[list, str]] = None
-    ) -> dict:
+    ) -> Dict[str, List[str]]:
         """
         Returns a dictionary of data_asset_names that the specified data
         connector can provide. Note that some data_connectors may not be

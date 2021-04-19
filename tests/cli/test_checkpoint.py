@@ -56,21 +56,17 @@ def titanic_data_context_with_sql_datasource(
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
 
-    config = yaml.load(
-        f"""
+    datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file_path}
-"""
-        + """
 introspection:
-    whole_table: {}
-""",
-    )
+  whole_table: {{}}
+"""
 
     try:
         # noinspection PyUnusedLocal
         my_sql_datasource = context.add_datasource(
-            "test_sqlite_db_datasource", **config
+            "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
@@ -559,6 +555,7 @@ def test_checkpoint_list_with_eight_checkpoints(
 
     stdout: str = result.stdout
     assert "Found 8 Checkpoints." in stdout
+
     checkpoint_names_list: List[str] = [
         "my_simple_checkpoint_with_slack_and_notify_with_all",
         "my_nested_checkpoint_template_1",
@@ -609,7 +606,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 ):
     """
     What does this test and why?
-    The `checkpoint new` CLI flow should raise an error if the checkpoint name being created already exists in your checkpoint store.
+    The `checkpoint new` CLI flow should raise an error if the Checkpoint name being created already exists in your checkpoint store.
     """
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
@@ -672,9 +669,9 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
 ):
     """
     What does this test and why?
-    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the checkpoint.
-    This test builds that notebook and runs it to generate a checkpoint and then tests the resulting configuration in the checkpoint file.
-    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the checkpoint configuration.
+    The v3 (Batch Request) API `checkpoint new` CLI flow includes creating a notebook to configure the Checkpoint.
+    This test builds that notebook and runs it to generate a Checkpoint and then tests the resulting configuration in the Checkpoint file.
+    The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the Checkpoint configuration.
     """
     context: DataContext = deterministic_asset_dataconnector_context
 
@@ -744,7 +741,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     )
     assert os.path.isfile(expected_checkpoint_path)
 
-    # Ensure the checkpoint configuration in the file is as expected
+    # Ensure the Checkpoint configuration in the file is as expected
     with open(expected_checkpoint_path) as f:
         checkpoint_config: str = f.read()
     expected_checkpoint_config: str = """name: passengers
@@ -978,7 +975,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     #     in stdout
     # )
     # assert (
-    #     "Please verify these batch kwargs in checkpoint bad_batch`"
+    #     "Please verify these batch kwargs in Checkpoint bad_batch`"
     #     in stdout
     # )
     # assert "No such file or directory" in stdout
@@ -1970,7 +1967,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
             index: -1
           batch_spec_passthrough:
             reader_options:
-              header: true
+              header: True
         expectation_suite_name: Titanic.warning
         action_list:
             - name: store_validation_result
@@ -2660,7 +2657,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -2774,7 +2771,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     titanic_expectation_suite,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -2895,7 +2892,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     titanic_expectation_suite,
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)

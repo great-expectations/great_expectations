@@ -73,15 +73,15 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             name=name,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
-            data_assets=None,
+            assets=None,
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
         # This cache will contain a "config" for each data_asset discovered via introspection.
-        # This approach ensures that ConfiguredAssetSqlDataConnector._data_assets and _introspected_data_assets_cache store objects of the same "type"
+        # This approach ensures that ConfiguredAssetSqlDataConnector._assets and _introspected_assets_cache store objects of the same "type"
         # Note: We should probably turn them into AssetConfig objects
-        self._introspected_data_assets_cache = {}
-        self._refresh_introspected_data_assets_cache(
+        self._introspected_assets_cache = {}
+        self._refresh_introspected_assets_cache(
             self._data_asset_name_prefix,
             self._data_asset_name_suffix,
             self._include_schema_name,
@@ -95,11 +95,11 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         )
 
     @property
-    def data_assets(self) -> Dict[str, Asset]:
-        return self._introspected_data_assets_cache
+    def assets(self) -> Dict[str, Asset]:
+        return self._introspected_assets_cache
 
     def _refresh_data_references_cache(self):
-        self._refresh_introspected_data_assets_cache(
+        self._refresh_introspected_assets_cache(
             self._data_asset_name_prefix,
             self._data_asset_name_suffix,
             self._include_schema_name,
@@ -114,7 +114,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
         super()._refresh_data_references_cache()
 
-    def _refresh_introspected_data_assets_cache(
+    def _refresh_introspected_assets_cache(
         self,
         data_asset_name_prefix: str = None,
         data_asset_name_suffix: str = None,
@@ -180,7 +180,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             except OperationalError as e:
                 # If it doesn't work, then...
                 if skip_inapplicable_tables:
-                    # No harm done. Just don't include this table in the list of data_assets.
+                    # No harm done. Just don't include this table in the list of assets.
                     continue
 
                 else:
@@ -190,7 +190,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     ) from e
 
             # Store an asset config for each introspected data asset.
-            self._introspected_data_assets_cache[data_asset_name] = data_asset_config
+            self._introspected_assets_cache[data_asset_name] = data_asset_config
 
     def _introspect_db(
         self,

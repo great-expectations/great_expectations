@@ -37,8 +37,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
     id: checkpoint_command_line
     title: LegacyCheckpoint - Command Line
     icon:
-    short_description: Run a configured checkpoint from a command line.
-    description: Run a configured checkpoint from a command line in a Terminal shell.
+    short_description: Run a configured Checkpoint from a command line.
+    description: Run a configured Checkpoint from a command line in a Terminal shell.
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
     maturity_details:
@@ -106,7 +106,7 @@ def checkpoint_new(ctx, name, jupyter):
 
 def _checkpoint_new(ctx, checkpoint_name, jupyter):
 
-    context = ctx.obj.data_context
+    context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -138,7 +138,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -151,13 +151,13 @@ def _verify_checkpoint_does_not_exist(
     try:
         if checkpoint_name in context.list_checkpoints():
             toolkit.exit_with_failure_message_and_stats(
-                context,
-                usage_event,
-                f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
+                data_context=context,
+                usage_event=usage_event,
+                message=f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
             )
     except InvalidTopLevelConfigKeyError as e:
         toolkit.exit_with_failure_message_and_stats(
-            context, usage_event, f"<red>{e}</red>"
+            data_context=context, usage_event=usage_event, message=f"<red>{e}</red>"
         )
 
 
@@ -172,7 +172,7 @@ def _get_notebook_path(context, notebook_name):
 @checkpoint.command(name="list")
 @click.pass_context
 def checkpoint_list(ctx):
-    """List configured Checkpoints."""
+    """List configured checkpoints."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
@@ -211,7 +211,7 @@ def checkpoint_delete(ctx, checkpoint):
         toolkit.send_usage_message(context, event=usage_event_end, success=True)
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -237,7 +237,7 @@ def checkpoint_run(ctx, checkpoint):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -310,9 +310,9 @@ def checkpoint_script(ctx, checkpoint):
 
     if os.path.isfile(script_path):
         toolkit.exit_with_failure_message_and_stats(
-            context,
-            usage_event_end,
-            f"""<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
+            data_context=context,
+            usage_event=usage_event_end,
+            message=f"""<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
   - Existing file path: {script_path}""",
         )
 

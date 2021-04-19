@@ -12,38 +12,80 @@ This guide will explain how to host and share Data Docs on a filesystem.
 Steps
 -----
 
-1. **Filesystem-hosted Data Docs are configured by default for Great Expectations deployments created using great_expectations init.**
+.. content-tabs::
 
-  To create additional Data Docs sites, you may re-use the default Data Docs configuration below. You may replace ``local_site`` with your own site name, or leave the default.
+    .. tab-container:: tab0
+        :title: Show Docs for V2 (Batch Kwargs) API
 
-  .. code-block:: yaml
+        1. **Filesystem-hosted Data Docs are configured by default for Great Expectations deployments created using great_expectations init.**
 
-    data_docs_sites:
-      local_site:  # this is a user-selected name - you may select your own
-        class_name: SiteBuilder
-        store_backend:
-          class_name: TupleFilesystemStoreBackend
-          base_directory: uncommitted/data_docs/local_site/ # this is the default path but can be changed as required
-        site_index_builder:
-          class_name: DefaultSiteIndexBuilder
+          To create additional Data Docs sites, you may re-use the default Data Docs configuration below. You may replace ``local_site`` with your own site name, or leave the default.
 
-2. **Test that your configuration is correct by building the site.**
+          .. code-block:: yaml
 
-  Use the following CLI command: ``great_expectations docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
+            data_docs_sites:
+              local_site:  # this is a user-selected name - you may select your own
+                class_name: SiteBuilder
+                store_backend:
+                  class_name: TupleFilesystemStoreBackend
+                  base_directory: uncommitted/data_docs/local_site/ # this is the default path but can be changed as required
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
 
-  .. code-block:: bash
+        2. **Test that your configuration is correct by building the site.**
 
-    > great_expectations docs build --site-name local_site
+            Use the following CLI command: ``great_expectations docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
 
-    The following Data Docs sites will be built:
+            .. code-block:: bash
 
-     - local_site: file:///great_expectations/uncommitted/data_docs/local_site/index.html
+                > great_expectations docs build --site-name local_site
 
-    Would you like to proceed? [Y/n]: Y
+                The following Data Docs sites will be built:
 
-    Building Data Docs...
+                 - local_site: file:///great_expectations/uncommitted/data_docs/local_site/index.html
 
-    Done building Data Docs
+                Would you like to proceed? [Y/n]: Y
+
+                Building Data Docs...
+
+                Done building Data Docs
+
+
+    .. tab-container:: tab1
+        :title: Show Docs for V3 (Batch Request) API
+
+        1. **Filesystem-hosted Data Docs are configured by default for Great Expectations deployments created using great_expectations init.**
+
+          To create additional Data Docs sites, you may re-use the default Data Docs configuration below. You may replace ``local_site`` with your own site name, or leave the default.
+
+          .. code-block:: yaml
+
+            data_docs_sites:
+              local_site:  # this is a user-selected name - you may select your own
+                class_name: SiteBuilder
+                store_backend:
+                  class_name: TupleFilesystemStoreBackend
+                  base_directory: uncommitted/data_docs/local_site/ # this is the default path but can be changed as required
+                site_index_builder:
+                  class_name: DefaultSiteIndexBuilder
+
+        2. **Test that your configuration is correct by building the site.**
+
+            Use the following CLI command: ``great_expectations --v3-api docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
+
+            .. code-block:: bash
+
+                > great_expectations --v3-api docs build --site-name local_site
+
+                The following Data Docs sites will be built:
+
+                 - local_site: file:///great_expectations/uncommitted/data_docs/local_site/index.html
+
+                Would you like to proceed? [Y/n]: Y
+
+                Building Data Docs...
+
+                Done building Data Docs
 
 Additional notes
 ----------------
