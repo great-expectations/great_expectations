@@ -251,13 +251,13 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
         The aim of the Great Expectations Profiler is to describe your existing data automatically by scanning it (or a subset of it) to create an Expectation Suite. The resulting Expectation Suite should describe your existing data well enough that new data (that is well behaved) should still pass when validated against that Expectation Suite. Of course the generated Expectation Suite can be manually modified using the existing Great Expectations Suite Edit functionality or re-generated via a modified Profiler if the data changes.
 
-        To accomplish that aim, it is highly configurable. To describe it's functionality and configuration, we will walk through some of the core concepts followed by examples of increasing complexity. For now, we will use table-based data in this document for simplicity of explanation.
+        To accomplish that aim, it is highly configurable. To describe its functionality and configuration, we will walk through some of the core concepts followed by examples of increasing complexity. For now, we will use table-based data in this document for simplicity of explanation.
 
         A Profiler is defined by a set of ProfilerRules that create Expectations for configurable Domains. These ProfilerRules and Expectations can be built using Parameters calculated at runtime, or hard-coded. These Parameters can be local to a domain or global to all domains (QUESTION: should the ``variables`` key be renamed to something more descriptive like ``global_profiler_parameters``?).
 
         Here is a pseudocode hirearchy to show some of the various core concepts and their relationships (more complex concepts are covered later). Everything prefaced with a ``my_`` is user configurable.
 
-        (QUESTION: Can there be a hirearchy of domains or at least multiple domains for a given rule or should the rule-domain pair be one-one? Maybe domains / parameters can be defined at the same level as rules and then referenced (rather than having to be defined within a rule). Currently it looks like the idea is that more complex domain configurations are meant to be captured in specific domain builder classes e.g. ``SimpleSemanticTypeColumnDomainBuilder`` and that there is a single domain per rule.)
+        (QUESTION: Can there be a hirearchy of domains or at least multiple domains for a given rule or should the rule-domain pair be one-to-one? Maybe domains / parameters can be defined at the same level as rules and then referenced (rather than having to be defined within a rule). Currently it looks like the idea is that more complex domain configurations are meant to be captured in specific domain builder classes e.g. ``SimpleSemanticTypeColumnDomainBuilder`` and that there is a single domain per rule.)
 
 
         .. code-block:: yaml
