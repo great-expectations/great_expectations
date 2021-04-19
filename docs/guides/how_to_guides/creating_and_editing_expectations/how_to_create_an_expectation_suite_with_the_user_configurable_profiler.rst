@@ -242,9 +242,224 @@ This guide will help you create a new Expectation Suite by profiling your data w
     .. tab-container:: tab1
         :title: Show Docs for V3 (Batch Request) API
 
-        .. admonition:: The UserConfigurableProfiler is not currently configured to work with the 0.13 Experimental API.
+        .. admonition:: The UserConfigurableProfiler is Experimental
 
-            We expect to update this in the near future.
+            - The UserConfigurableProfiler is Experimental and this document is aspirational and purely meant to capture our collective understanding as we design and build this feature. It will need significant edits to transition this into a how-to guide. We expect to update this in the near future. Some notes on items to edit / investigate are below.
+            - Profiler is the proposed name for the new profiler, and it will likely assimilate the UserConfigurableProfiler functionality.
+            - Table-based data is assumed for now in this doc for simplicity. This should be extended when appropriate.
+
+
+        The aim of the Great Expectations Profiler is to describe your existing data automatically by scanning it (or a subset of it) to create an Expectation Suite. The resulting Expectation Suite should describe your existing data well enough that new data (that is well behaved) should still pass when validated against that Expectation Suite. Of course the generated Expectation Suite can be manually modified using the existing Great Expectations Suite Edit functionality or re-generated via a modified Profiler if the data changes.
+
+        To accomplish that aim, it is highly configurable. To describe it's functionality and configuration, we will walk through some of the core concepts followed by examples of increasing complexity. For now, we will use table-based data in this document for simplicity of explanation.
+
+        A Profiler is defined by a set of ProfilerRules that create Expectations for configurable Domains. These ProfilerRules and Expectations can be built using Parameters calculated at runtime, or hard-coded. These Parameters can be local to a domain or global to all domains (QUESTION: should the ``variables`` key be renamed to something more descriptive like ``global_profiler_parameters``?).
+
+        Here is a pseudocode hirearchy to show some of the various core concepts and their relationships (more complex concepts are covered later). Everything prefaced with a ``my_`` is user configurable.
+
+        (QUESTION: Can there be a hirearchy of domains or at least multiple domains for a given rule or should the rule-domain pair be one-one? Maybe domains / parameters can be defined at the same level as rules and then referenced (rather than having to be defined within a rule). Currently it looks like the idea is that more complex domain configurations are meant to be captured in specific domain builder classes e.g. ``SimpleSemanticTypeColumnDomainBuilder`` and that there is a single domain per rule.)
+
+
+        .. code-block:: yaml
+
+          global_domain_builders:
+            - global_domain_builder_1:
+            - global_domain_builder_2:
+            ...
+          global_parameter_builders:
+            - global_param_builder_1:
+            - global_param_builder_2:
+            ...
+          rules:
+            - rule_1
+              rule_specific_domain_builders:
+                - rule_1_domain_builder_1:
+                - rule_1_domain_builder_2:
+                ...
+              rule_specific_parameter_builders:
+                - rule_1_parameter_builder_1:
+                # e.g. reference columns from rule_1_domain_builder_1 to calculate metric on each of them (e.g. ``column.min`` metric)
+                - rule_2_parameter_builder_2:
+                ...
+              expectation_configuration_builders:
+                - expectation_1_builder:
+                # e.g. expect_column_values_to_be_between where domain is set via columns from one of the domains defined above and min/max set via parameters defined above. Can also contain if/then logic.
+
+
+        Here is a slightly more concrete example:
+
+        .. code-block:: yaml
+
+          global_profiler_parameters:
+            - global_param_1
+          rules:
+            my_rule_for_ids: # semantic type
+              domains:
+                - my_id_domain_1: # QUESTION: Should we allow for multiple domains in a rule? QUESTION: Can / should domains be defined outside of the scope of a specific rule?
+                  # columns of type ``integer`` with name ``id``
+                - my_id_domain_2:
+                  # columns of type ``integer`` with name suffix of ``_id``
+              parameter_builders:
+                - my_id_parameter_1_min:
+                  # min value of column, using domains above
+                - my_id_parameter_2_max:
+                  # max value of column, using domains above
+                - my_id_parameter_3_min_5_batches_ago:
+                  # min value of column from 5 batches ago, using domains above and using a ``batch_request`` modifier to index to ``-5`` batches.
+              expectation_configuration_builders:
+                - expectation: expect_column_values_to_be_between # Expectation name as string
+                  column: $domain.my_id_domain_1.column # All columns in referenced domain (QUESTION: Why ``domain_kwargs`` in examples e.g. ``$domain.domain_kwargs.column``?)
+                  min_value: $my_id_parameter_1_min.parameter.min # Reference to parameter defined above
+                  max_value: $my_id_parameter_2_max.parameter.min
+                - expectation: expect_column_values_to_be_between
+                  column: $domain.my_id_domain_2.column
+                  min_value: $my_id_parameter_3_min_5_batches_ago.parameter.min
+                  max_value: $global_param_1
+                - expectation: expect_column_values_to_not_be_null
+                  column: $domains.column # columns for all domains
+
+            my_rule_for_datetimes: # semantic type
+              domains:
+                - my_datetime_domain_1: # QUESTION: Should we allow for multiple domains in a rule? QUESTION: Can / should domains be defined outside of the scope of a specific rule?
+                  # columns of type ``datetime`` (using the ``type_filters`` field)
+                - my_datetime_domain_2
+                  # columns with the suffix ``_dt``
+              parameters:
+                - $my_dateformat_parameter_1:
+                  # string format
+              expectation_configuration_builders:
+                - expectation: expect_column_values_to_match_strftime_format
+                column: $domains.column # columns for all domains
+                date_fmt: $my_dateformat_parameter_1.parameter.date_string
+
+
+        TODO: insert more examples with actual code.
+
+        .. code-block:: yaml
+
+          name: BasicSuiteBuilderProfiler
+          variables:
+            false_positive_threshold: 0.01
+          rules:
+            datetime:  # "just-a-name"
+              # JPC: what is happening here -- we're asking, "Which columns in this data are datetimes?"
+              domain_builder:
+                class_name: SimpleSemanticTypeColumnDomainBuilder
+                type: datetime
+              parameter_builders:
+                - id: my_dateformat  # name?
+                  # JPC: what is happening here -- we're asking, "What date format matches the data in this column?"
+                  class_name: SimpleDateFormatStringParameterBuilder
+                  domain_kwargs: $domain.domain_kwargs
+              configuration_builders:
+                - branch:
+                    if: $my_dateformat.parameter.match_pct >= 0.8  # if evaluates to true in python, i.e. "" is FALSE, "%Y" is TRUE
+                    then:
+                      - expectation: expect_column_values_to_match_strftime_format
+                        column: $domain.domain_kwargs.column  # is this obvious/inferrable?
+                        date_fmt: $my_dateformat.parameter.date_string
+                - branch:
+                    if: $domain.column_type in my_dateformat.DATETIME_TYPES_CONST  # Note that domain returned "column_type" in addition to "domain_kwargs"
+                    then:
+                      - expectation: expect_column_values_to_be_in_type_list
+                        column: $domain.domain_kwargs.column  # is this obvious/inferrable?
+                        type_list: my_dateformat.DATETIME_TYPES_CONST
+            numeric:  # "just-a-name"
+              # Which columns in this data are numeric?
+              class_name: SemanticTypeColumnDomainBuilder
+              type: numeric
+              parameter_builders:
+                - id: mean
+                  class_name: MetricParameterBuilder
+                  metric_name: column.mean
+                  metric_domain_kwargs: $domain.domain_kwargs
+                - id: min
+                  class_name: MetricParameterBuilder
+                  metric_name: column.min
+                  metric_domain_kwargs: $domain.domain_kwargs
+                - id: false_positive_threshold_min
+                  class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
+                  batch_request:  # this should be unioned with the rest of the batch request from the call to profile
+                    partition_request:
+                      partition_index: "-10:"
+                  metric_configuration:
+                    metric_name: column.min
+                    metric_domain_kwargs: $domain.domain_kwargs
+                  p_values:
+                    min_value: $variables.false_positive_threshold
+                    max_value: 1.0
+                - id: quantile_ranges
+                  class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
+                  batch_request:
+                    partition_request:
+                      partition_index: "-10:"
+                  metric_configuration:
+                    metric_name: column.quantile_values
+                    metric_domain_kwargs: $domain.domain_kwargs
+                    metric_value_kwargs:
+                      quantiles:
+                        - 0.05
+                        - 0.25
+                        - 0.50
+                        - 0.75
+                        - 0.95
+                  p_values:
+                    min_value: ($false_positive_threshold / 2)
+                    max_value: 1 - ($false_positive_threshold / 2)
+                - id: max
+                  class_name: MetricParameterBuilder
+                  metric_name: column.max
+                  metric_domain_kwargs: $domain.domain_kwargs
+                - id: quantiles
+                  class_name: MetricParameterBuilder
+                  metric_name: column.quantile_values
+                  metric_domain_kwargs: $domain.domain_kwargs
+                  metric_value_kwargs:
+                    quantiles:
+                      - 0.05
+                      - 0.25
+                      - 0.50
+                      - 0.75
+                      - 0.95
+              configuration_builders:
+                - expectation: expect_column_min_to_be_between
+                  min_value: $false_positive_threshold_min.min_value
+                  max_value: $false_positive_threshold_min.max_value
+                - expectation: expect_column_quantile_values_to_be_between
+                  quantiles:
+                    - 0.05
+                    - 0.25
+                    - 0.50
+                    - 0.75
+                    - 0.95
+                  value_ranges: $quantile_ranges
+                - expectation: expect_column_max_to_be_between
+                  min_value: 0.9 * $max
+                  max_value: 1.1 * $max
+                - expectation: expect_column_median_to_be_between
+                  min_value:  # in this example, the resulting configuration is not a value, but an evaluation parameter refering to a metric that must be calculated for each validation to validation of the configuration (QUESTION: can this be performed by a parameter definition relative to the current batch?)
+                    "$PARAMETER": 0.9 *
+                       metric_name: column.median
+                       metric_batch_kwargs:
+                         batch_request:
+                           partition_request:
+                             partition_index: -1
+                         column: $domain.domain_kwargs.column
+                  max_value:  # in this example, the resulting configuration is not a value, but an evaluation parameter refering to a metric that must be calculated for each validation to validation of the configuration
+                    "$PARAMETER": 1.1 *
+                       metric_name: column.median
+                       metric_batch_kwargs:
+                         batch_request:
+                           partition_request:
+                             partition_index: -1
+                         column: $domain.domain_kwargs.column
+
+
+
+        Here are a few definitions of concepts that may not yet be familiar:
+
+          - Semantic Type - you can use these to describe information that the data represents. For example an ``user_id`` column may have an ``integer`` type but you may also associate it with an ``id`` semantic type which conveys additional meaning e.g. must be unique, increasing, non-null, no gaps. In our Profiler concepts, this can be described using a ProfilerRule using a Domain that captures the columns of interest and ExpectationConfigurationBuilders that describe the semantic type (e.g. unique, non-null, etc).
+
 
 
 .. discourse::

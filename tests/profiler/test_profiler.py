@@ -225,7 +225,7 @@ rules:
     domain_builder:
       class_name: SimpleSemanticTypeColumnDomainBuilder
       module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
-      type_filters: datetime
+      type_filters: numeric
     parameter_builders:
       - parameter_id: min
         class_name: MetricParameterBuilder
