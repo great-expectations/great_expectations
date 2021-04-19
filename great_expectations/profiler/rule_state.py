@@ -63,6 +63,7 @@ class RuleState:
             for level in lookup:
                 curr = curr[level]
         except KeyError:
+            # TODO: <Alex>ALEX -- The next line needs to be fixed.</Alex>
             raise ProfilerExecutionError(
                 f"Unable to find value '{value}': key '{level}' was missing."
             )

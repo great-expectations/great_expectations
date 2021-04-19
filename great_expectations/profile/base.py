@@ -206,14 +206,14 @@ profiler_semantic_types = {
 
 class Profiler(metaclass=abc.ABCMeta):
     """
-    Profilers creates suites from various sources of truth.
+    Profiler creates suites from various sources of truth.
 
     These sources of truth can be data or non-data sources such as DDLs.
 
     When implementing a Profiler ensure that you:
     - Implement a . _profile() method
     - Optionally implement .validate() method that verifies you are running on the right
-     kind of object. You should raise an appropriate Exception if the object is not valid.
+      kind of object. You should raise an appropriate Exception if the object is not valid.
     """
 
     def __init__(self, configuration: dict = None):
