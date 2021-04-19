@@ -8,7 +8,9 @@ from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import BatchRequest
 from great_expectations.profiler.profiler import Profiler
+from great_expectations.validator.validation_graph import MetricConfiguration
 
 yaml = YAML()
 
@@ -88,7 +90,7 @@ data_connectors:
       {asset_name}:
         module_name: great_expectations.datasource.data_connector.asset
         group_names:
-          - batch
+          - batch_num
           - total_batches
         pattern: csv_batch_(\d.+)_of_(\d.+)\.csv
         reader_options:
@@ -112,7 +114,7 @@ data_connectors:
                             "base_directory": data_relative_path,
                             "class_name": "Asset",
                             "glob_directive": "*.csv",
-                            "group_names": ["batch", "total_batches"],
+                            "group_names": ["batch_num", "total_batches"],
                             "module_name": "great_expectations.datasource.data_connector.asset",
                             "pattern": "csv_batch_(\\d.+)_of_(\\d.+)\\.csv",
                         }
@@ -164,6 +166,61 @@ def test_batches_are_accessible(
         )
         == file_list
     )
+
+    batch_request_1 = BatchRequest(
+        datasource_name="generic_csv_generator",
+        data_connector_name="daily_data_connector",
+        data_asset_name="daily_data_asset",
+        data_connector_query={
+            "index": -1,
+        },
+    )
+    # Should give most recent batch
+    validator_1 = context.get_validator(
+        batch_request=batch_request_1,
+        create_expectation_suite_with_name="my_expectation_suite_name_1",
+    )
+    metric_max = validator_1.get_metric(
+        MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
+    )
+    assert metric_max == 20
+
+    batch_request_2 = BatchRequest(
+        datasource_name="generic_csv_generator",
+        data_connector_name="daily_data_connector",
+        data_asset_name="daily_data_asset",
+        data_connector_query={
+            "index": -2,
+        },
+    )
+    validator_2 = context.get_validator(
+        batch_request=batch_request_2,
+        create_expectation_suite_with_name="my_expectation_suite_name_2",
+    )
+    metric_max = validator_2.get_metric(
+        MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
+    )
+    assert metric_max == 19
+
+    for batch_num in range(1, 20 + 1):
+        batch_request = BatchRequest(
+            datasource_name="generic_csv_generator",
+            data_connector_name="daily_data_connector",
+            data_asset_name="daily_data_asset",
+            data_connector_query={
+                "index": -batch_num,
+            },
+        )
+        validator = context.get_validator(
+            batch_request=batch_request,
+            create_expectation_suite_with_name=f"my_expectation_suite_name__{batch_num}",
+        )
+        metric_max = validator.get_metric(
+            MetricConfiguration(
+                "column.max", metric_domain_kwargs={"column": "batch_num"}
+            )
+        )
+        assert metric_max == 21 - batch_num
 
 
 @pytest.fixture(scope="module")
@@ -255,7 +312,7 @@ def test_profiler_init_manual_very_simple_multibatch_profiler_configuration_yaml
     multibatch_generic_csv_generator,
 ):
 
-    # TODO: 20210416 AJB - THIS IS A HACK - use/create a ProfilerConfig & ProfilerConfigSchema with validation etc
+    # TODO: 20210416 AJB - THIS IS A HACK - use/create a ProfilerConfig & ProfilerConfigSchema with validation etc. This also strips out "variables" key.
     full_profiler_config_dict = yaml.load(
         very_simple_multibatch_profiler_configuration_yaml
     )
