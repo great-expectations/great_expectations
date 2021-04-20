@@ -4,6 +4,7 @@ from ..exceptions import ProfilerConfigurationError
 from .domain_builder import DomainBuilder
 
 
+# TODO: <Alex>ALEX -- How come this class overwrites get_domains() but not _get_domains() -- was this intentional?</Alex>
 class ColumnDomainBuilder(DomainBuilder):
     def get_domains(
         self,
