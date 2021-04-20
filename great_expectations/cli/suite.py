@@ -182,6 +182,8 @@ def _process_suite_new_flags_and_prompt(
         )
         sys.exit(1)
 
+    # TODO: AJB 20210420 add better warning if user passes --no-interactive but either --profile or --batch-request (for this and suite_edit...)
+
     # If user has provided a flag determining their configuration, skip prompt.
     if (interactive is not None) or (profile is True) or (batch_request is not None):
         # Assume batch needed if user passes --profile
@@ -208,8 +210,14 @@ How would you like to create your Expectation Suite?
 """,
             type=click.Choice(["1", "2", "3"]),
             show_choices=False,
+            default="1",
+            show_default=False,
         )
-        if suite_create_method == "1":
+        # Default option
+        if suite_create_method == "":
+            interactive = False
+            profile = False
+        elif suite_create_method == "1":
             interactive = False
             profile = False
         elif suite_create_method == "2":
@@ -392,74 +400,6 @@ def suite_edit(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
-
-    #     error_message: Optional[str] = None
-    #
-    #     # Convert interactive / no-interactive flags to interactive
-    #     interactive: Optional[bool] = None
-    #     if interactive_flag is True and no_interactive_flag is True:
-    #         error_message = """Please choose either --interactive or --no-interactive, you may not choose both."""
-    #     elif interactive_flag is False and no_interactive_flag is False:
-    #         interactive = None
-    #     elif interactive_flag is True and no_interactive_flag is False:
-    #         interactive = True
-    #     elif interactive_flag is False and no_interactive_flag is True:
-    #         interactive = False
-    #
-    #     if (datasource_name is not None) and (batch_request is not None):
-    #         error_message = """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
-    # options can be used.
-    # """
-    #
-    #     if error_message is not None:
-    #         cli_message(string=f"<red>{error_message}</red>")
-    #         toolkit.send_usage_message(
-    #             data_context=context, event=usage_event_end, success=False
-    #         )
-    #         sys.exit(1)
-    #
-    #     # If user has provided a flag determining their configuration, skip prompt.
-    #     if (
-    #         (interactive is not None)
-    #         or (datasource_name is not None)
-    #         or (batch_request is not None)
-    #     ):
-    #         # Assume batch needed if user passes profile
-    #         if (datasource_name is not None) and (
-    #             interactive is False or interactive is None
-    #         ):
-    #             cli_message(
-    #                 "<green>Entering interactive mode since you passed the --datasource-name flag</green>"
-    #             )
-    #             interactive = True
-    #         elif (batch_request is not None) and (
-    #             interactive is False or interactive is None
-    #         ):
-    #             cli_message(
-    #                 "<green>Entering interactive mode since you passed the --batch-request flag</green>"
-    #             )
-    #             interactive = True
-    #     else:
-    #         suite_edit_method = click.prompt(
-    #             """\
-    # How would you like to edit your Expectation Suite?
-    #     1. Manually, without interacting with a sample batch of data (default)
-    #     2. Interactively, with a sample batch of data
-    # """,
-    #             type=click.Choice(["1", "2"]),
-    #             show_choices=False,
-    #         )
-    #         # set flags for various choices, some of these are set in defaults and can be omitted (only here for clarity)
-    #         # Choice 1
-    #         if suite_edit_method == "1":
-    #             interactive = False
-    #             datasource_name = None
-    #             batch_request = None
-    #         # Choice 2
-    #         elif suite_edit_method == "2":
-    #             interactive = True
-    #             datasource_name = None
-    #             batch_request = None
 
     interactive = _process_suite_edit_flags_and_prompt(
         context=context,
