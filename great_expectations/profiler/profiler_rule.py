@@ -56,7 +56,7 @@ class ProfilerRule:
             rule_state.active_domain = domain
             domain_id = rule_state.get_active_domain_id()
             for parameter_builder in self._parameter_builders:
-                id = parameter_builder.id
+                id = parameter_builder.parameter_id
                 parameter_result = parameter_builder.build_parameters(
                     rule_state=rule_state, validator=validator, batch_ids=batch_ids
                 )
