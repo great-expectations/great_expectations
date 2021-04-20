@@ -28,7 +28,7 @@ class ColumnDomainBuilder(DomainBuilder):
             validator=validator, batch_ids=batch_ids, domain_type=domain_type, **kwargs
         )
 
-    # TODO: <Alex>ALEX -- this method is define, but not used anywhere in the codebase.</Alex>
+    # TODO: <Alex>ALEX -- this method is defined, but not used anywhere in the codebase.</Alex>
     def get_column_domains(self, *, validator=None, batch_ids=None, **kwargs):
         """
         Pops column domain out of a dict of certain domain kwargs and requests this domain
