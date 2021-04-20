@@ -63,10 +63,19 @@ def suite(ctx):
 @click.option(
     "--interactive",
     "-i",
+    "interactive_flag",
     is_flag=True,
     default=False,
-    help="""Indicates that a batch of data is used to create expectations against.  Required with --profile flag and
-with --batch-request option.
+    help="""Use a batch of data to create expectations against (interactive mode).
+""",
+)
+@click.option(
+    "--no-interactive",
+    "-ni",
+    "no_interactive_flag",
+    is_flag=True,
+    default=False,
+    help="""Do not use a batch of data to create expectations against.
 """,
 )
 @click.option(
@@ -94,7 +103,15 @@ Requires --interactive flag.
     help="By default launch jupyter notebooks, unless you specify --no-jupyter flag.",
 )
 @click.pass_context
-def suite_new(ctx, expectation_suite, interactive, profile, batch_request, no_jupyter):
+def suite_new(
+    ctx,
+    expectation_suite,
+    interactive_flag,
+    no_interactive_flag,
+    profile,
+    batch_request,
+    no_jupyter,
+):
     """
     Create a new empty Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
@@ -104,10 +121,16 @@ def suite_new(ctx, expectation_suite, interactive, profile, batch_request, no_ju
 
     error_message: Optional[str] = None
 
-    if not interactive and (profile or (batch_request is not None)):
-        error_message = """Using --profile flag and/or --batch-request <path to JSON file> option requires \
---interactive flag.
-"""
+    # Convert interactive / no-interactive flags to interactive
+    interactive: Optional[bool]
+    if interactive_flag is True and no_interactive_flag is True:
+        error_message = """Please choose either --interactive or --no-interactive, you may not choose both."""
+    elif interactive_flag is False and no_interactive_flag is False:
+        interactive = None
+    elif interactive_flag is True and no_interactive_flag is False:
+        interactive = True
+    elif interactive_flag is False and no_interactive_flag is True:
+        interactive = False
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
@@ -115,6 +138,40 @@ def suite_new(ctx, expectation_suite, interactive, profile, batch_request, no_ju
             data_context=context, event=usage_event_end, success=False
         )
         sys.exit(1)
+
+    # If user has provided a flag determining their configuration, skip prompt.
+    if (interactive is not None) or (profile is True) or (batch_request is not None):
+        # Assume batch needed if user passes profile
+        if profile is True and interactive is False:
+            cli_message("Entering interactive mode since you passed the --profile flag")
+            interactive = True
+    else:
+        suite_create_method = click.prompt(
+            """\
+How would you like to create your Expectation Suite?
+    1. Manually, without interacting with a sample batch of data (default)
+    2. Interactively, with a sample batch of data
+    3. Automatically, using a profiler
+    """,
+            type=click.Choice(["1", "2", "3"]),
+            show_choices=False,
+        )
+        # set flags for various choices, some of these are set in defaults and can be omitted (only here for clarity)
+        # Choice 1
+        if suite_create_method == "1":
+            interactive = False
+            profile = False
+            batch_request = None
+        # Choice 2
+        elif suite_create_method == "2":
+            interactive = True
+            profile = False
+            batch_request = None
+        # Choice 3
+        elif suite_create_method == "3":
+            interactive = True
+            profile = True
+            batch_request = None
 
     _suite_new_workflow(
         context=context,
@@ -354,7 +411,7 @@ def _suite_edit_workflow(
     )
 
     try:
-        if interactive:
+        if interactive or profile:
             batch_request_from_citation_is_up_to_date: bool = True
 
             batch_request_from_citation: Optional[
@@ -404,20 +461,6 @@ def _suite_edit_workflow(
         notebook_path: str = _get_notebook_path(context, notebook_name)
 
         if profile:
-            if not (
-                batch_request
-                and isinstance(batch_request, dict)
-                and BatchRequest(**batch_request)
-            ):
-                cli_message(
-                    string="<red>Creating expectations with --profile flag requires a valid batch of data.</red>"
-                )
-                if not suppress_usage_message:
-                    toolkit.send_usage_message(
-                        data_context=context, event=usage_event, success=False
-                    )
-                sys.exit(1)
-
             if not assume_yes:
                 toolkit.prompt_profile_to_create_a_suite(
                     data_context=context, expectation_suite_name=expectation_suite_name
