@@ -20,6 +20,7 @@ Develop
 * [ENHANCEMENT] Made stylistic improvements to the `checkpoint new` notebook
 * [BUGFIX] Rename assets in SqlDataConnectors to be consistent with other DataConnectors #2665
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
+* [BUGFIX] V2 API CLI now allows files to be read that require extra `reader_options` passed.  For instance `.csv.gz` files from S3.
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
 * [DOCS] Update Configuring Data Docs documentation for V3 API CLI
