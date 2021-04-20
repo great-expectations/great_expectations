@@ -158,7 +158,10 @@ def test_batches_are_accessible(
 
     data_connector = datasource.data_connectors[data_connector_name]
 
-    file_list = multibatch_generic_csv_generator(data_path=data_path)
+    total_batches: int = 20
+    file_list = multibatch_generic_csv_generator(
+        data_path=data_path, num_event_batches=total_batches
+    )
 
     assert (
         data_connector._get_data_reference_list_from_cache_by_data_asset_name(
@@ -183,7 +186,7 @@ def test_batches_are_accessible(
     metric_max = validator_1.get_metric(
         MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
     )
-    assert metric_max == 20
+    assert metric_max == total_batches
 
     batch_request_2 = BatchRequest(
         datasource_name="generic_csv_generator",
@@ -200,9 +203,9 @@ def test_batches_are_accessible(
     metric_max = validator_2.get_metric(
         MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
     )
-    assert metric_max == 19
+    assert metric_max == total_batches - 1
 
-    for batch_num in range(1, 20 + 1):
+    for batch_num in range(1, total_batches + 1):
         batch_request = BatchRequest(
             datasource_name="generic_csv_generator",
             data_connector_name="daily_data_connector",
@@ -220,7 +223,7 @@ def test_batches_are_accessible(
                 "column.max", metric_domain_kwargs={"column": "batch_num"}
             )
         )
-        assert metric_max == 21 - batch_num
+        assert metric_max == (total_batches + 1) - batch_num
 
 
 @pytest.fixture(scope="module")
