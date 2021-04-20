@@ -43,6 +43,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         self._domain_kwargs = domain_kwargs
 
+    # TODO: <Alex>ALEX -- This looks like a single-Batch case.</Alex>
+    # TODO: <Alex>ALEX -- This method returns a dictionary, one of whose keys is "parameters" and the other is "details"; however, this was different from the return type of the same method in MetricParameterBuilder (no "details" key); we should standardize the return type in ParameterBuilder (base class).</Alex>
     def _build_parameters(self, *, rule_state, validator, batch_ids, **kwargs):
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
@@ -89,4 +91,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best = fmt_string
                 best_ratio = ratio
 
-        return {"parameters": best, "details": {"success_ratio": best_ratio}}
+        return {
+            "parameters": best,
+            "details": {"success_ratio": best_ratio},
+        }

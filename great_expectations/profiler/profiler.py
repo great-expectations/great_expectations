@@ -28,7 +28,7 @@ class Profiler:
         Create a new Profiler using configured rules.
         For a rule or an item in a rule configuration, instantiates the following if
         available: a domain builder, a parameter builder, and a configuration builder.
-        Theses will be used to define profiler computation patterns.
+        These will be used to define profiler computation patterns.
 
         Args:
             rules: A rule or set of rules of format {"rule_name": ProfilerRule object}
@@ -36,6 +36,7 @@ class Profiler:
             data_context: An organizational DataContext object that defines a full runtime environment (data access, etc.)
         """
         self._data_context = data_context
+        # TODO: <Alex>ALEX -- We should combine rules and rule_configs into one Union typed variable; then this check will become unnecessary.</Alex>
         assert (
             sum([bool(x) for x in (rules, rule_configs)]) == 1
         ), "Exactly one of rules or rule_configs must be provided"

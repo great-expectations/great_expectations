@@ -3,8 +3,9 @@ from ..rule_state import RuleState
 from .parameter_builder import ParameterBuilder
 
 
+# TODO: <Alex>ALEX -- this class is not used anywhere in the codebase.</Alex>
 class MetricParameterBuilder(ParameterBuilder):
-    """Class utilized for obtaining a resolved metric (which is labeled a 'parameter') using domain kwargs, value
+    """Class utilized for obtaining a resolved (evaluated) metric (which is labeled a 'parameter') using domain kwargs, value
     kwargs, and a metric name"""
 
     def __init__(
@@ -54,5 +55,6 @@ class MetricParameterBuilder(ParameterBuilder):
                 MetricConfiguration(
                     self._metric_name, metric_domain_kwargs, metric_value_kwargs
                 )
-            )
+            ),
+            "details": None,
         }
