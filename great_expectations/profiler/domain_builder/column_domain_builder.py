@@ -22,6 +22,7 @@ class ColumnDomainBuilder(DomainBuilder):
                 f"{self.__class__.__name__} requires a COLUMN domain."
             )
 
+        # TODO: <Alex>ALEX -- perhaps an opportunity to clean this up?</Alex>
         # Todo: This is calling an unimplemented parent implementation, not currently functional <Gil>
         return super().get_domains(
             validator=validator, batch_ids=batch_ids, domain_type=domain_type, **kwargs
