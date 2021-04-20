@@ -404,6 +404,11 @@ stages:
               pip install  .
             displayName: 'Install dependencies'
 
+          # 202104 - Not all user-submitted expectations are compatible with SqlAlchemy 1.4. Remove once dependencies have been resolved.
+          - script: |
+              pip install sqlalchemy<1.4
+            displayName: 'Temporarily Pin SqlAlchemy < 1.4'
+
           - bash: python ./build_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
