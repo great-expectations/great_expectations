@@ -119,10 +119,53 @@ def suite_new(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
+    processed_flags = _process_suite_new_flags_and_prompt(
+        context=context,
+        usage_event_end=usage_event_end,
+        interactive_flag=interactive_flag,
+        no_interactive_flag=no_interactive_flag,
+        profile=profile,
+        batch_request=batch_request,
+    )
+
+    _suite_new_workflow(
+        context=context,
+        expectation_suite_name=expectation_suite,
+        interactive=processed_flags["interactive"],
+        profile=processed_flags["profile"],
+        no_jupyter=no_jupyter,
+        usage_event=usage_event_end,
+        batch_request=batch_request,
+    )
+
+
+def _process_suite_new_flags_and_prompt(
+    context: DataContext,
+    usage_event_end: str,
+    interactive_flag: bool,
+    no_interactive_flag: bool,
+    profile: bool,
+    batch_request: Optional[str] = None,
+) -> Dict[str, Optional[bool]]:
+    """
+    Process various optional suite new flags and prompt if there is not enough information from the flags.
+    Args:
+        context: Data Context for use in sending error messages if any
+        usage_event_end: event name for ending usage stats message
+        interactive_flag: --interactive from the `suite new` CLI command
+        no_interactive_flag: --no-interactive from the `suite new` CLI command
+        profile: --profile from the `suite new` CLI command
+        batch_request: --batch-request from the `suite new` CLI command
+
+    Returns:
+        Dictionary with keys of processed parameters and boolean values e.g.
+        {"interactive": True, "profile": False}
+    """
+
     error_message: Optional[str] = None
 
     # Convert interactive / no-interactive flags to interactive
-    interactive: Optional[bool]
+    interactive: Optional[bool] = None
     if interactive_flag is True and no_interactive_flag is True:
         error_message = """Please choose either --interactive or --no-interactive, you may not choose both."""
     elif interactive_flag is False and no_interactive_flag is False:
@@ -166,32 +209,17 @@ How would you like to create your Expectation Suite?
             type=click.Choice(["1", "2", "3"]),
             show_choices=False,
         )
-        # set flags for various choices, some of these are set in defaults and can be omitted (only here for clarity)
-        # Choice 1
         if suite_create_method == "1":
             interactive = False
             profile = False
-            batch_request = None
-        # Choice 2
         elif suite_create_method == "2":
             interactive = True
             profile = False
-            batch_request = None
-        # Choice 3
         elif suite_create_method == "3":
             interactive = True
             profile = True
-            batch_request = None
 
-    _suite_new_workflow(
-        context=context,
-        expectation_suite_name=expectation_suite,
-        interactive=interactive,
-        profile=profile,
-        no_jupyter=no_jupyter,
-        usage_event=usage_event_end,
-        batch_request=batch_request,
-    )
+    return {"interactive": interactive, "profile": profile}
 
 
 def _suite_new_workflow(
@@ -365,6 +393,125 @@ def suite_edit(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
+    #     error_message: Optional[str] = None
+    #
+    #     # Convert interactive / no-interactive flags to interactive
+    #     interactive: Optional[bool] = None
+    #     if interactive_flag is True and no_interactive_flag is True:
+    #         error_message = """Please choose either --interactive or --no-interactive, you may not choose both."""
+    #     elif interactive_flag is False and no_interactive_flag is False:
+    #         interactive = None
+    #     elif interactive_flag is True and no_interactive_flag is False:
+    #         interactive = True
+    #     elif interactive_flag is False and no_interactive_flag is True:
+    #         interactive = False
+    #
+    #     if (datasource_name is not None) and (batch_request is not None):
+    #         error_message = """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
+    # options can be used.
+    # """
+    #
+    #     if error_message is not None:
+    #         cli_message(string=f"<red>{error_message}</red>")
+    #         toolkit.send_usage_message(
+    #             data_context=context, event=usage_event_end, success=False
+    #         )
+    #         sys.exit(1)
+    #
+    #     # If user has provided a flag determining their configuration, skip prompt.
+    #     if (
+    #         (interactive is not None)
+    #         or (datasource_name is not None)
+    #         or (batch_request is not None)
+    #     ):
+    #         # Assume batch needed if user passes profile
+    #         if (datasource_name is not None) and (
+    #             interactive is False or interactive is None
+    #         ):
+    #             cli_message(
+    #                 "<green>Entering interactive mode since you passed the --datasource-name flag</green>"
+    #             )
+    #             interactive = True
+    #         elif (batch_request is not None) and (
+    #             interactive is False or interactive is None
+    #         ):
+    #             cli_message(
+    #                 "<green>Entering interactive mode since you passed the --batch-request flag</green>"
+    #             )
+    #             interactive = True
+    #     else:
+    #         suite_edit_method = click.prompt(
+    #             """\
+    # How would you like to edit your Expectation Suite?
+    #     1. Manually, without interacting with a sample batch of data (default)
+    #     2. Interactively, with a sample batch of data
+    # """,
+    #             type=click.Choice(["1", "2"]),
+    #             show_choices=False,
+    #         )
+    #         # set flags for various choices, some of these are set in defaults and can be omitted (only here for clarity)
+    #         # Choice 1
+    #         if suite_edit_method == "1":
+    #             interactive = False
+    #             datasource_name = None
+    #             batch_request = None
+    #         # Choice 2
+    #         elif suite_edit_method == "2":
+    #             interactive = True
+    #             datasource_name = None
+    #             batch_request = None
+
+    interactive = _process_suite_edit_flags_and_prompt(
+        context=context,
+        usage_event_end=usage_event_end,
+        interactive_flag=interactive_flag,
+        no_interactive_flag=no_interactive_flag,
+        datasource_name=datasource_name,
+        batch_request=batch_request,
+    )
+
+    additional_batch_request_args: Optional[
+        Dict[str, Union[str, int, Dict[str, Any]]]
+    ] = {"limit": 1000}
+
+    _suite_edit_workflow(
+        context=context,
+        expectation_suite_name=expectation_suite,
+        profile=False,
+        usage_event=usage_event_end,
+        interactive=interactive,
+        no_jupyter=no_jupyter,
+        create_if_not_exist=False,
+        datasource_name=datasource_name,
+        batch_request=batch_request,
+        additional_batch_request_args=additional_batch_request_args,
+        suppress_usage_message=False,
+        assume_yes=False,
+    )
+
+
+def _process_suite_edit_flags_and_prompt(
+    context: DataContext,
+    usage_event_end: str,
+    interactive_flag: bool,
+    no_interactive_flag: bool,
+    datasource_name: Optional[str] = None,
+    batch_request: Optional[str] = None,
+) -> bool:
+    """
+    Process various optional suite edit flags and prompt if there is not enough information from the flags.
+    Args:
+        context: Data Context for use in sending error messages if any
+        usage_event_end: event name for ending usage stats message
+        interactive_flag: --interactive from the `suite new` CLI command
+        no_interactive_flag: --no-interactive from the `suite new` CLI command
+        datasource_name: --datasource-name from the `suite new` CLI command
+        batch_request: --batch-request from the `suite new` CLI command
+
+    Returns:
+        boolean of whether to enter interactive mode
+    """
+
     error_message: Optional[str] = None
 
     # Convert interactive / no-interactive flags to interactive
@@ -396,7 +543,6 @@ options can be used.
         or (datasource_name is not None)
         or (batch_request is not None)
     ):
-        # Assume batch needed if user passes profile
         if (datasource_name is not None) and (
             interactive is False or interactive is None
         ):
@@ -421,36 +567,12 @@ How would you like to edit your Expectation Suite?
             type=click.Choice(["1", "2"]),
             show_choices=False,
         )
-        # set flags for various choices, some of these are set in defaults and can be omitted (only here for clarity)
-        # Choice 1
         if suite_edit_method == "1":
             interactive = False
-            datasource_name = None
-            batch_request = None
-        # Choice 2
         elif suite_edit_method == "2":
             interactive = True
-            datasource_name = None
-            batch_request = None
 
-    additional_batch_request_args: Optional[
-        Dict[str, Union[str, int, Dict[str, Any]]]
-    ] = {"limit": 1000}
-
-    _suite_edit_workflow(
-        context=context,
-        expectation_suite_name=expectation_suite,
-        profile=False,
-        usage_event=usage_event_end,
-        interactive=interactive,
-        no_jupyter=no_jupyter,
-        create_if_not_exist=False,
-        datasource_name=datasource_name,
-        batch_request=batch_request,
-        additional_batch_request_args=additional_batch_request_args,
-        suppress_usage_message=False,
-        assume_yes=False,
-    )
+    return interactive
 
 
 def _suite_edit_workflow(
