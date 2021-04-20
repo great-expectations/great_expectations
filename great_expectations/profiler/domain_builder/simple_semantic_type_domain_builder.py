@@ -38,7 +38,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         config = kwargs
         # TODO: AJB 20210416 If the type keyword for the DomainBuilder can contain multiple semantic types, should it be renamed types and take a list instead? Not that we can’t guess from what a user adds but something to make it clear that multiple semantic types can be used to construct a domain?
         # TODO: <Alex>ALEX -- In general, to avoid confusion, we should avoid the use of "type" because it is a function in Python.</Alex>
-        type_filters = config.get("_type_filters")
+        type_filters = config.get("type_filters")
         if type_filters is None:
             # TODO: AJB 20210416 Add a test for the below comment - None = return all types
             # None indicates no selection; all types should be returned
@@ -56,7 +56,9 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             if column_type in type_filters:
                 domains.append(
                     {
-                        "domain_kwargs": {"column": column.name},
+                        # TODO: AJB 20210419 why is column just the column name string - will this be different based on execution engine versions?
+                        # "domain_kwargs": {"column": column.name},
+                        "domain_kwargs": {"column": column},
                         "domain_type": str(column_type),
                     }
                 )
@@ -65,4 +67,4 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
     # TODe: <Alex>ALEX -- This method seems to always return the same value ("integer")...</Alex>
     def _get_column_semantic_type(self, validator, column):
         # FIXME: DO CHECKS
-        return self.SemanticDomainTypes["INTEGER"]
+        return self.SemanticDomainTypes["INTEGER"].value

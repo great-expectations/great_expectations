@@ -39,7 +39,10 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_domain_kwargs = self._metric_domain_kwargs
 
         # Obtaining any necessary value kwargs from rule state, otherwise using instance var
-        if self._metric_value_kwargs.startswith("$"):
+        if (
+            self._metric_value_kwargs is not None
+            and self._metric_value_kwargs.startswith("$")
+        ):
             metric_value_kwargs = rule_state.get_value(self._metric_value_kwargs)
         else:
             metric_value_kwargs = self._metric_value_kwargs

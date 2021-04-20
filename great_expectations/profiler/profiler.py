@@ -16,6 +16,7 @@ from .profiler_rule import ProfilerRule
 class Profiler:
     """Profiler object serves to profile, or automatically evaluate a set of rules, upon a given
     batch / multiple batches of data"""
+
     def __init__(
         self,
         *,
