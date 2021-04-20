@@ -54,7 +54,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         columns = validator.get_metric(MetricConfiguration("table.columns", dict()))
         domains = []
         for column in columns:
-            column_type = self._get_column_semantic_type(validator, column)
+            column_type = self._get_column_semantic_type(validator=validator, column=column)
             if column_type in type_filters:
                 domains.append(
                     {
