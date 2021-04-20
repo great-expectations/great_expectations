@@ -1,10 +1,10 @@
 from enum import Enum
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Dict, Union, Any
 
+from great_expectations.profiler.domain_builder.column_domain_builder import ColumnDomainBuilder
 from great_expectations.validator.validator import Validator
-
-from ...validator.validation_graph import MetricConfiguration
-from .column_domain_builder import ColumnDomainBuilder
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.validator.validator import MetricConfiguration
 
 
 class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
@@ -27,7 +27,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         # domain_type: Optional[MetricDomainTypes] = None,
         type_filters: Optional[List[str]] = None,
         **kwargs
-    ):
+    ) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
         """Find the semantic column type for each column and return all domains matching the specified type or types.
 
         Returns a list:
@@ -40,10 +40,10 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         ]
         """
         # TODO: <Alex>ALEX -- How does this work?  What information is provided in **kwargs?  Can this be made explicit?  Where is "_type_filters" defined?</Alex>
-        config = kwargs
+        config: dict = kwargs
         # TODO: AJB 20210416 If the type keyword for the DomainBuilder can contain multiple semantic types, should it be renamed types and take a list instead? Not that we can’t guess from what a user adds but something to make it clear that multiple semantic types can be used to construct a domain?
         # TODO: <Alex>ALEX -- In general, to avoid confusion, we should avoid the use of "type" because it is a function in Python.</Alex>
-        type_filters = config.get("type_filters")
+        type_filters: Union[str, Iterable, List[str]] = config.get("type_filters")
         if type_filters is None:
             # TODO: AJB 20210416 Add a test for the below comment - None = return all types
             # None indicates no selection; all types should be returned
@@ -55,13 +55,15 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         else:
             # TODO: <Alex>ALEX -- We should make this error message more informative.</Alex>
             raise ValueError("unrecognized")
-        columns = validator.get_metric(MetricConfiguration("table.columns", dict()))
-        domains = []
+        domains: List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]] = []
+        columns: List[str] = validator.get_metric(MetricConfiguration("table.columns", {}))
+        column: str
         for column in columns:
             # TODO: <Alex>ALEX -- Is this "column_type"?  Or is this more of a "domain type" (or "the name of the domain type")?</Alex>
-            column_type = self._get_column_semantic_type(
+            column_type: str = self._get_column_semantic_type_name(
                 validator=validator, column=column
             )
+            # TODO: <Alex>ALEX -- We need to turn "type_filters" into a more sophisticated filtering object, or change the name to indicate that this is just the list of types.</Alex>
             if column_type in type_filters:
                 domains.append(
                     {
@@ -74,6 +76,6 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         return domains
 
     # TODO: <Alex>ALEX -- This method seems to always return the same value ("integer")...</Alex>
-    def _get_column_semantic_type(self, validator, column):
+    def _get_column_semantic_type_name(self, validator, column) -> str:
         # FIXME: DO CHECKS
         return self.SemanticDomainTypes["INTEGER"].value

@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Dict, Union, Any, Optional
 
-from great_expectations.core.batch import Batch
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.validator.validator import Validator
 
@@ -13,6 +12,7 @@ class DomainBuilder(ABC):
     """
 
     # TODO: <Alex>ALEX -- We should be careful with **kwargs -- if there is no immediate use case for them, then we should only keep explicit arguments.</Alex>
+    # TODO: <Alex>ALEX -- What is the return type?</Alex>
     def get_domains(
         self,
         *,
@@ -21,7 +21,7 @@ class DomainBuilder(ABC):
         include_batch_id: Optional[bool] = False,
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs
-    ):
+    ) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
         """get_domains may be overridden by children who wish to check parameters prior to passing
         work to the implementation of _get_domains in the particular domain_builder.
         """
@@ -34,6 +34,7 @@ class DomainBuilder(ABC):
         )
 
     @abstractmethod
+    # TODO: <Alex>ALEX -- What is the return type?</Alex>
     def _get_domains(
         self,
         *,
@@ -46,6 +47,6 @@ class DomainBuilder(ABC):
         # TODO: <Alex>ALEX -- the following inconsistent signature was found in a subclass.</Alex>
         # type_filters: Optional[List[str]] = None,
         **kwargs
-    ):
+    ) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
         """_get_domains is the primary workhorse for the DomainBuilder"""
         pass

@@ -1,11 +1,14 @@
+from typing import Any, List, Dict
+
 from great_expectations.core import IDDict
-from great_expectations.profiler.exceptions import ProfilerExecutionError
+import great_expectations.exceptions as ge_exceptions
 
 
 class RuleState:
     """Manages state for ProfilerRule objects. Keeps track of rule domain, rule parameters,
     and any other necessary variables for validating the rule"""
 
+    # TODO: <Alex>ALEX -- Add type hints; what are the types?</Alex>
     def __init__(
         self, active_domain=None, domains=None, parameters=None, variables=None
     ):
@@ -19,6 +22,14 @@ class RuleState:
         if variables is None:
             variables = {}
         self._variables = variables
+
+    @property
+    def domains(self) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
+        return self._domains
+
+    @domains.setter
+    def domains(self, domains: List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]):
+        self._domains = domains
 
     @property
     def variables(self):
@@ -35,7 +46,7 @@ class RuleState:
         """
         return IDDict(self.active_domain).to_id()
 
-    def get_value(self, value: str):
+    def get_value(self, value: str) -> Any:
         """
         Get a value from the current rule state. Values must be dot-delimited, and may start either with
         the key 'domain' or the id of a parameter.
@@ -44,28 +55,25 @@ class RuleState:
         :return: requested value
         """
         if not value.startswith("$"):
-            raise ProfilerExecutionError(
-                f"Unable to get value '{value}' - values must start with $"
-            )
+            raise ge_exceptions.ProfilerExecutionError(message=f'Unable to get value "{value}" - values must start with $')
 
         if value == "$domain.domain_kwargs":
             return self.active_domain["domain_kwargs"]
 
-        variables_key = "$variables."
+        variables_key: str = "$variables."
+        lookup: List[str]
         if value.startswith(variables_key):
-            lookup = value[len(variables_key) :].split(".")
+            lookup = value[len(variables_key):].split(".")
             curr = self.variables
         else:
             lookup = value[1:].split(".")
-            curr = self.parameters.get(self.get_active_domain_id(), dict())
+            curr = self.parameters.get(self.get_active_domain_id(), {})
 
         try:
             for level in lookup:
                 curr = curr[level]
         except KeyError:
             # TODO: <Alex>ALEX -- The next line needs to be fixed.</Alex>
-            raise ProfilerExecutionError(
-                f"Unable to find value '{value}': key '{level}' was missing."
-            )
+            raise ge_exceptions.ProfilerExecutionError(message=f'Unable to find value "{value}": key "{level}" was missing.')
 
         return curr

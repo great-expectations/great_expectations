@@ -1,6 +1,10 @@
-from ...validator.validation_graph import MetricConfiguration
-from ..rule_state import RuleState
-from .parameter_builder import ParameterBuilder
+from typing import Optional
+
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.profiler.parameter_builder.parameter_builder import ParameterBuilder
+from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.validator.validator import Validator
 
 
 # TODO: <Alex>ALEX -- this class is not used anywhere in the codebase.</Alex>
@@ -23,8 +27,8 @@ class MetricParameterBuilder(ParameterBuilder):
         self._metric_value_kwargs = metric_value_kwargs
 
     def _build_parameters(
-        self, *, rule_state: RuleState = None, validator=None, batch_ids=None, **kwargs
-    ):
+        self, *, rule_state: Optional[RuleState] = None, validator: Optional[Validator] = None, batch_ids: Optional[List[str]] = None, **kwargs
+    ) -> Parameter:
         """
         Builds a dictionary of format {'parameters': A given resolved metric}
             Args:
@@ -48,13 +52,14 @@ class MetricParameterBuilder(ParameterBuilder):
         else:
             metric_value_kwargs = self._metric_value_kwargs
 
-        # Building a parameter dictionary with single entry {"parameters": Metric},
-        # feeding in a MetricConfiguration with obtained domain and value kwargs
-        return {
-            "parameters": validator.get_metric(
-                MetricConfiguration(
-                    self._metric_name, metric_domain_kwargs, metric_value_kwargs
+        return Parameter(
+            parameters=validator.get_metric(
+                metric=MetricConfiguration(
+                    metric_name=self._metric_name,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=metric_value_kwargs,
+                    metric_dependencies=None,
                 )
             ),
-            "details": None,
-        }
+            details=None,
+        )

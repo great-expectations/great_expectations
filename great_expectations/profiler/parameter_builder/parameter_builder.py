@@ -1,5 +1,12 @@
 from abc import ABC, abstractmethod
 
+from typing import Optional, List
+
+from great_expectations.data_context import DataContext
+from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.validator.validator import Validator
+from great_expectations.profiler.parameter_builder.parameter import Parameter
+
 
 class ParameterBuilder(ABC):
     """
@@ -20,22 +27,24 @@ class ParameterBuilder(ABC):
         ```
     """
 
-    def __init__(self, *, parameter_id: str, data_context=None):
+    def __init__(self, *, parameter_id: str, data_context: Optional[DataContext] = None):
         self._parameter_id = parameter_id
         self._data_context = data_context
 
     @property
-    def parameter_id(self):
+    def parameter_id(self) -> str:
         return self._parameter_id
 
     def build_parameters(
-        self, *, rule_state=None, validator=None, batch_ids=None, **kwargs
-    ):
+        self, *, rule_state: Optional[RuleState] = None, validator: Optional[Validator] = None, batch_ids: Optional[List[str]] = None, **kwargs
+    ) -> Parameter:
         """Build the parameters for the specified domain_kwargs."""
         return self._build_parameters(
             rule_state=rule_state, validator=validator, batch_ids=batch_ids, **kwargs
         )
 
     @abstractmethod
-    def _build_parameters(self, *, rule_state, validator, batch_ids, **kwargs):
+    def _build_parameters(
+        self, *, rule_state: Optional[RuleState] = None, validator: Optional[Validator] = None, batch_ids: Optional[List[str]] = None, **kwargs
+    ) -> Parameter:
         pass

@@ -1,9 +1,13 @@
 import logging
-from typing import Iterable, Optional
+from typing import Iterable, Optional, List
 
-from ...validator.validation_graph import MetricConfiguration
-from ..exceptions import ProfilerExecutionError
-from .parameter_builder import ParameterBuilder
+from great_expectations import DataContext
+from great_expectations.profiler.parameter_builder.parameter_builder import ParameterBuilder
+from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.validator.validator import Validator
+import great_expectations.exceptions as ge_exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +20,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         *,
-        parameter_id,
-        data_context,
+        parameter_id : str,
+        data_context: DataContext,
         threshold: float = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
@@ -45,7 +49,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
     # TODO: <Alex>ALEX -- This looks like a single-Batch case.</Alex>
     # TODO: <Alex>ALEX -- This method returns a dictionary, one of whose keys is "parameters" and the other is "details"; however, this was different from the return type of the same method in MetricParameterBuilder (no "details" key); we should standardize the return type in ParameterBuilder (base class).</Alex>
-    def _build_parameters(self, *, rule_state, validator, batch_ids, **kwargs):
+    def _build_parameters(
+        self, *, rule_state: Optional[RuleState] = None, validator: Optional[Validator] = None, batch_ids: Optional[List[str]] = None, **kwargs
+    ) -> Parameter:
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
         if batch_ids is None:
@@ -57,32 +63,32 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 f"Rule {self.parameter_id} received {len(batch_ids)} batches but can only process one."
             )
             if batch_ids[0] not in validator.execution_engine.loaded_batch_data_ids:
-                raise ProfilerExecutionError(
+                raise ge_exceptions.ProfilerExecutionError(
                     f"Parameter Builder {self.parameter_id} cannot build parameters because batch {batch_ids[0]} is not "
                     f"currently loaded in the validator."
                 )
 
-        domain = rule_state.active_domain["domain_kwargs"]
-        domain.update({"batch_id": batch_ids[0]})
+        metric_domain_kwargs: dict = rule_state.active_domain["domain_kwargs"]
+        metric_domain_kwargs.update({"batch_id": batch_ids[0]})
 
-        count = validator.get_metric(
-            MetricConfiguration(
-                "column_values.not_null.count",
-                domain,
+        count: int = validator.get_metric(
+            metric=MetricConfiguration(
+                metric_name="column_values.not_null.count",
+                metric_domain_kwargs=metric_domain_kwargs,
+                metric_value_kwargs=None,
+                metric_dependencies=None,
             )
         )
         format_string_success_ratios = dict()
         for fmt_string in self._candidate_strings:
-            format_string_success_ratios[fmt_string] = (
-                validator.get_metric(
-                    MetricConfiguration(
-                        "column_values.match_strftime_format.unexpected_count",
-                        domain,
-                        {"strftime_format": fmt_string},
-                    )
+            format_string_success_ratios[fmt_string] = validator.get_metric(
+                metric=MetricConfiguration(
+                    metric_name="column_values.match_strftime_format.unexpected_count",
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs={"strftime_format": fmt_string},
+                    metric_dependencies=None,
                 )
-                / count
-            )
+            ) / count
 
         best = None
         best_ratio = 0
@@ -91,7 +97,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best = fmt_string
                 best_ratio = ratio
 
-        return {
-            "parameters": best,
-            "details": {"success_ratio": best_ratio},
-        }
+        return Parameter(
+            parameters={"data_format_string": best},
+            details={"success_ratio": best_ratio}
+        )

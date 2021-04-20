@@ -1,16 +1,20 @@
-"""
-Defines the MultiBatchBootstrappedMetricDistributionParameterBuilder.
-"""
 from copy import copy
 
-from ...validator.validation_graph import MetricConfiguration
-from .multi_batch_parameter_builder import MultiBatchParameterBuilder
+from typing import Optional
+
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder import MultiBatchParameterBuilder
+from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.validator.validator import Validator
+from great_expectations.profiler.parameter_builder.parameter import Parameter
 
 
 class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     MultiBatchParameterBuilder
 ):
     """
+    Defines the MultiBatchBootstrappedMetricDistributionParameterBuilder.
+
     Builds parameters from the p_values of the distribution of a metric observed from a set of batches identified in the
     batch_ids.
     """
@@ -47,7 +51,9 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         self._p_values = p_values
 
     # TODO: <Alex>ALEX -- There is nothing about "p_values" in this implementation; moreover, "p_values" would apply only to certain values of the "metric_name" -- this needs to be elaborated.</Alex>
-    def _build_parameters(self, *, rule_state, validator, batch_ids, **kwargs):
+    def _build_parameters(
+        self, *, rule_state: Optional[RuleState] = None, validator: Optional[Validator] = None, batch_ids: Optional[List[str]] = None, **kwargs
+    ) -> Parameter:
         samples = []
         for batch_id in batch_ids:
             metric_domain_kwargs = copy(rule_state.active_domain.domain_kwargs)
@@ -66,4 +72,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
                 )
             )
 
-        return {"parameters": samples[0]}
+        return Parameter(
+            parameters=samples[0],
+            details=None,
+        )
