@@ -148,7 +148,9 @@ def build_gallery(
                 diagnostics = impl().run_diagnostics()
                 gallery_info[expectation] = diagnostics
             except Exception as e:
-                logger.error(f"Was not able to run diagnostics for Expectation: {expectation}")
+                logger.error(
+                    f"Was not able to run diagnostics for Expectation: {expectation}"
+                )
                 gallery_info[expectation] = {"error": str(e)}
             built_expectations.add(expectation)
     else:
