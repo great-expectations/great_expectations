@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Iterable, List, Optional
 
+from great_expectations.validator.validator import Validator
+
 from ...validator.validation_graph import MetricConfiguration
 from .column_domain_builder import ColumnDomainBuilder
 
@@ -18,9 +20,11 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
     def _get_domains(
         self,
         *,
-        validator,
-        batch_ids,
-        include_batch_id,
+        validator: Optional[Validator] = None,
+        batch_ids: Optional[List[str]] = None,
+        include_batch_id: Optional[bool] = False,
+        # TODO: <Alex>ALEX -- The signature of this method is inconsistent with that in the base class.</Alex>
+        # domain_type: Optional[MetricDomainTypes] = None,
         type_filters: Optional[List[str]] = None,
         **kwargs
     ):
