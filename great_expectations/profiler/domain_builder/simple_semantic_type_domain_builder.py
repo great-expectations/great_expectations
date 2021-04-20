@@ -58,6 +58,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         columns = validator.get_metric(MetricConfiguration("table.columns", dict()))
         domains = []
         for column in columns:
+            # TODO: <Alex>ALEX -- Is this "column_type"?  Or is this more of a "domain type" (or "the name of the domain type")?</Alex>
             column_type = self._get_column_semantic_type(
                 validator=validator, column=column
             )
@@ -66,7 +67,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                     {
                         # TODO: AJB 20210419 why is column just the column name string - will this be different based on execution engine versions?
                         # "domain_kwargs": {"column": column.name},
-                        "domain_kwargs": {"column": column.name},
+                        "domain_kwargs": {"column": column},
                         "domain_type": column_type,
                     }
                 )
