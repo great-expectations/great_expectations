@@ -1,10 +1,10 @@
 from typing import Union
 
+from ..core import ExpectationConfiguration
 from .configuration_builder.configuration_builder import ConfigurationBuilder
 from .domain_builder.domain_builder import DomainBuilder
 from .parameter_builder.parameter_builder import ParameterBuilder
 from .rule_state import RuleState
-from ..core import ExpectationConfiguration
 
 
 class ProfilerRule:
