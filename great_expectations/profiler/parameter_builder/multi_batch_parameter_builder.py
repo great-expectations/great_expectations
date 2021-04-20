@@ -9,6 +9,7 @@ from ..exceptions import ProfilerExecutionError
 from .parameter_builder import ParameterBuilder
 
 
+# TODO: <Alex>ALEX -- If ParameterBuilder already extends ABC, why does this class need to do the same?</Alex>
 class MultiBatchParameterBuilder(ParameterBuilder, ABC):
     """
     MultiBatchParameterBuilder checks that there are multiple batch ids passed to build_parameters,
@@ -23,6 +24,7 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
         super().__init__(parameter_id=parameter_id, data_context=data_context)
         self._batch_request = batch_request
 
+    # TODO: <Alex>ALEX -- Add type hints (and possibly standardize method arguments usage).</Alex>
     def _get_batch_ids(self, batch_request) -> List[str]:
         datasource_name = batch_request.datasource_name
         batch_definitions = self._data_context.get_datasource(

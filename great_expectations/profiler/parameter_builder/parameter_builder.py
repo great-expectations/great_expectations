@@ -3,15 +3,13 @@ from abc import ABC, abstractmethod
 
 class ParameterBuilder(ABC):
     """
-    A ParameterBuilder implementation provides support for building Expectation
-    Configuration Parameters suitable for use in
-    other ParameterBuilders or in ConfigurationBuilders as part of profiling.
+    A ParameterBuilder implementation provides support for building Expectation Configuration Parameters suitable for
+    use in other ParameterBuilders or in ConfigurationBuilders as part of profiling.
 
-    A ParameterBuilder is configured as part of a ProfilerRule. Its primary interface is the
-    `build_parameters` method.
+    A ParameterBuilder is configured as part of a ProfilerRule. Its primary interface is the `build_parameters` method.
 
-    As part of a ProfilerRule, the following configuration will create a new parameter
-    for each domain returned by the domain_builder, with an associated id.
+    As part of a ProfilerRule, the following configuration will create a new parameter for each domain returned by the
+    domain_builder, with an associated id.
 
         ```
         parameter_builders:
