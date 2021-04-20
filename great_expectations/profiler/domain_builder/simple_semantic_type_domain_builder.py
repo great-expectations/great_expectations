@@ -59,7 +59,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                 domains.append(
                     {
                         "domain_kwargs": {"column": column.name},
-                        "domain_type": str(column_type),
+                        "domain_type": column_type,
                     }
                 )
         return domains
@@ -67,4 +67,4 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
     # TODO: <Alex>ALEX -- This method seems to always return the same value ("integer")...</Alex>
     def _get_column_semantic_type(self, validator, column):
         # FIXME: DO CHECKS
-        return self.SemanticDomainTypes["INTEGER"]
+        return self.SemanticDomainTypes["INTEGER"].value
