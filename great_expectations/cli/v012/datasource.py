@@ -1206,10 +1206,12 @@ We could not determine the format of the file. What is it?
         else:
             try:
                 batch_kwargs["reader_method"] = reader_method
-                batch_kwargs["reader_options"] = {
+                reader_options = {
                     **batch_kwargs.get("reader_options", {}),
                     **reader_options,
                 }
+                if reader_options:
+                    batch_kwargs["reader_options"] = reader_options
                 if isinstance(datasource, SparkDFDatasource) and reader_method == "csv":
                     header_row = click.confirm(
                         "\nDoes this file contain a header row?", default=True
