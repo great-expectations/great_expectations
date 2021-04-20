@@ -141,9 +141,19 @@ def suite_new(
 
     # If user has provided a flag determining their configuration, skip prompt.
     if (interactive is not None) or (profile is True) or (batch_request is not None):
-        # Assume batch needed if user passes profile
-        if profile is True and interactive is False:
-            cli_message("Entering interactive mode since you passed the --profile flag")
+        # Assume batch needed if user passes --profile
+        if profile is True and (interactive is False or interactive is None):
+            cli_message(
+                "<green>Entering interactive mode since you passed the --profile flag</green>"
+            )
+            interactive = True
+        # Assume batch needed if user passes --batch-request
+        elif (batch_request is not None) and (
+            interactive is False or interactive is None
+        ):
+            cli_message(
+                "<green>Entering interactive mode since you passed the --batch-request flag</green>"
+            )
             interactive = True
     else:
         suite_create_method = click.prompt(
@@ -152,7 +162,7 @@ How would you like to create your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
     2. Interactively, with a sample batch of data
     3. Automatically, using a profiler
-    """,
+""",
             type=click.Choice(["1", "2", "3"]),
             show_choices=False,
         )
@@ -292,11 +302,21 @@ def _suite_new_workflow(
 @click.option(
     "--interactive",
     "-i",
+    "interactive_flag",
     is_flag=True,
     default=False,
     help="""Allows to specify explicitly whether or not a batch of data is available to reason about using the language
 of expectations; otherwise, best effort is made to determine this automatically (falling back to False).  Required with
 --datasource-name option and with --batch-request option.
+""",
+)
+@click.option(
+    "--no-interactive",
+    "-ni",
+    "no_interactive_flag",
+    is_flag=True,
+    default=False,
+    help="""Do not use a batch of data to create expectations against.
 """,
 )
 @click.option(
@@ -323,7 +343,13 @@ Requires --interactive flag.  Incompatible with --datasource-name option.
 )
 @click.pass_context
 def suite_edit(
-    ctx, expectation_suite, interactive, datasource_name, batch_request, no_jupyter
+    ctx,
+    expectation_suite,
+    interactive_flag,
+    no_interactive_flag,
+    datasource_name,
+    batch_request,
+    no_jupyter,
 ):
     """
     Generate a Jupyter notebook for editing an existing Expectation Suite.
@@ -341,14 +367,18 @@ def suite_edit(
 
     error_message: Optional[str] = None
 
-    if not interactive and (
-        (datasource_name is not None) or (batch_request is not None)
-    ):
-        error_message = """Using --datasource-name DATASOURCE_NAME option or --batch-request <path to JSON file> \
-option requires --interactive flag.
-"""
+    # Convert interactive / no-interactive flags to interactive
+    interactive: Optional[bool] = None
+    if interactive_flag is True and no_interactive_flag is True:
+        error_message = """Please choose either --interactive or --no-interactive, you may not choose both."""
+    elif interactive_flag is False and no_interactive_flag is False:
+        interactive = None
+    elif interactive_flag is True and no_interactive_flag is False:
+        interactive = True
+    elif interactive_flag is False and no_interactive_flag is True:
+        interactive = False
 
-    if interactive and (datasource_name is not None) and (batch_request is not None):
+    if (datasource_name is not None) and (batch_request is not None):
         error_message = """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
 options can be used.
 """
@@ -359,6 +389,49 @@ options can be used.
             data_context=context, event=usage_event_end, success=False
         )
         sys.exit(1)
+
+    # If user has provided a flag determining their configuration, skip prompt.
+    if (
+        (interactive is not None)
+        or (datasource_name is not None)
+        or (batch_request is not None)
+    ):
+        # Assume batch needed if user passes profile
+        if (datasource_name is not None) and (
+            interactive is False or interactive is None
+        ):
+            cli_message(
+                "<green>Entering interactive mode since you passed the --datasource-name flag</green>"
+            )
+            interactive = True
+        elif (batch_request is not None) and (
+            interactive is False or interactive is None
+        ):
+            cli_message(
+                "<green>Entering interactive mode since you passed the --batch-request flag</green>"
+            )
+            interactive = True
+    else:
+        suite_edit_method = click.prompt(
+            """\
+How would you like to edit your Expectation Suite?
+    1. Manually, without interacting with a sample batch of data (default)
+    2. Interactively, with a sample batch of data
+""",
+            type=click.Choice(["1", "2"]),
+            show_choices=False,
+        )
+        # set flags for various choices, some of these are set in defaults and can be omitted (only here for clarity)
+        # Choice 1
+        if suite_edit_method == "1":
+            interactive = False
+            datasource_name = None
+            batch_request = None
+        # Choice 2
+        elif suite_edit_method == "2":
+            interactive = True
+            datasource_name = None
+            batch_request = None
 
     additional_batch_request_args: Optional[
         Dict[str, Union[str, int, Dict[str, Any]]]
