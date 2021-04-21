@@ -68,6 +68,7 @@ The :ref:`CLI <command_line>` has some conventions of its own.
 * Clickable links (usually to documentation) are blue.
 * Copyable bash commands are green.
 * All top-level bash commands must be nouns: "docs build", not "build docs"
+* Options should be presented as boolean only when there are exactly two values. For example, `--interactive`, `--manual`, and `--profile`; `--non-interactive` would be invalid because there are three options.
 
 
 .rst files
