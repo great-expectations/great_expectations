@@ -76,38 +76,40 @@ class RuleState:
         """
         return IDDict(self.active_domain).to_id()
 
-    def get_value(self, value: str) -> Any:
+    def get_parameter_value(self, parameter_name: str) -> Any:
         """
         Get a value from the current rule state. Values must be dot-delimited, and may start either with
         the key 'domain' or the id of a parameter.
         Args
-            :param value: str - A string key starting with $ and corresponding to internal state arguments, eg: domain kwargs
+            :param parameter_name: str - A string key starting with $ and corresponding to internal state arguments,
+            eg: domain kwargs
         :return: requested value
         """
-        if not value.startswith("$"):
+        if not parameter_name.startswith("$"):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Unable to get value "{value}" - values must start with $'
+                message=f'Unable to get value for parameter name "{parameter_name}" - values must start with $.'
             )
 
-        if value == "$domain.domain_kwargs":
+        if parameter_name == "$domain.domain_kwargs":
             return self.active_domain["domain_kwargs"]
 
         variables_key: str = "$variables."
         lookup: List[str]
-        if value.startswith(variables_key):
-            lookup = value[len(variables_key) :].split(".")
-            curr = self.variables
+        current_parameter: Parameter
+        if parameter_name.startswith(variables_key):
+            lookup = parameter_name[len(variables_key) :].split(".")
+            current_parameter = self.variables
         else:
-            lookup = value[1:].split(".")
-            curr = self.parameters.get(self.get_active_domain_id(), {})
+            lookup = parameter_name[1:].split(".")
+            current_parameter = self.parameters.get(self.get_active_domain_id(), {})
 
+        level: Optional[str] = None
         try:
             for level in lookup:
-                curr = curr[level]
+                current_parameter = current_parameter.parameters[level]
         except KeyError:
-            # TODO: <Alex>ALEX -- The next line needs to be fixed.</Alex>
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Unable to find value "{value}": key "{level}" was missing.'
+                message=f'Unable to find value for parameter name "{parameter_name}": key "{level}" was missing.'
             )
 
-        return curr
+        return current_parameter

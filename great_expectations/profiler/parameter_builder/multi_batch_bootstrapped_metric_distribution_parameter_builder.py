@@ -66,7 +66,9 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
             metric_domain_kwargs.update({"batch_id": batch_id})
 
             if self._metric_value_kwargs.startswith("$"):
-                metric_value_kwargs = rule_state.get_value(self._metric_value_kwargs)
+                metric_value_kwargs = rule_state.get_parameter_value(
+                    parameter_name=self._metric_value_kwargs
+                )
             else:
                 metric_value_kwargs = self._metric_value_kwargs
 

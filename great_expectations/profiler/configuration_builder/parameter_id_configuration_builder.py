@@ -28,7 +28,9 @@ class ParameterIdConfigurationBuilder(ConfigurationBuilder):
         """
         kwargs = {}
         for parameter_name, parameter_id in self._config.items():
-            kwargs[parameter_name] = rule_state.get_value(parameter_id)
+            kwargs[parameter_name] = rule_state.get_parameter_value(
+                parameter_name=parameter_id
+            )
 
         return ExpectationConfiguration(
             expectation_type=self._expectation_type, kwargs=kwargs
