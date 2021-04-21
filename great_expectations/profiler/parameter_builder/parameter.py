@@ -6,6 +6,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 
 
+# TODO: <Alex>ALEX -- The inheritance of DictDot is temporary.  It will be replaced by a DataClass in "develop", and then SerializableDictDot will be a DataClass with the to_jsono_dict() interface.  The present class will be updated, once these changes to "develop" are have been made.</Alex>
 @dataclass
 class Parameter(IDDict, SerializableDictDot):
     parameters: Dict[str, Any]
