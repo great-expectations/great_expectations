@@ -212,7 +212,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "sqlite",
             "oracle",
             "mssql",
-            "oracle",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
@@ -799,7 +798,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .limit(batch_spec["sampling_kwargs"]["n"])
                 )
             else:
-
+                
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
                     sa.select("*")
