@@ -372,9 +372,10 @@ stages:
             displayName: 'pytest'
 
   - stage: deploy_gallery
+    condition: and(succeeded(), or(eq(variables.isMain, true), eq(variables.isDevelop, true)))
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [lint]
+    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: build_gallery
