@@ -10,7 +10,62 @@
 
 # pr: none
 
+resources:
+  containers:
+  - container: postgres
+    image: postgres:11
+    ports:
+    - 5432:5432
+    env:
+      POSTGRES_DB: "test_ci"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+  - container: mysql
+    image: mysql:8.0.20
+    ports:
+      - 3306:3306
+    env:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: test_ci
+  - container: mssql
+    image: microsoft/mssql-server-linux
+    env:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+      MSSQL_DB: test_ci
+      MSSQL_PID: Developer
+    ports:
+      - 1433:1433
+
+variables:
+  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+
 stages:
+  - stage: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: changes
+        steps:
+          - task: ChangedFiles@1
+            name: CheckChanges
+            inputs:
+              verbose: true
+              rules: |
+                [ContribChanged]
+                contrib/**
+
+                [ExperimentalChanged]
+                contrib/experimental/**
+
+                [DocsChanged]
+                docs/**
+
+                [GEChanged]
+                great_expectations/**
+                tests/**
+                /*.txt
+                /*.yml
+
   - stage: os_integration
     variables:
       python.version: '3.x'
@@ -71,11 +126,9 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint]
-
     jobs:
       - job: mysql
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
 
         services:
           mysql: mysql
@@ -120,7 +173,7 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
 
         services:
           mssql: mssql
@@ -154,7 +207,7 @@ stages:
             displayName: 'pytest'
 
       - job: postgres
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
 
         services:
           postgres: postgres
