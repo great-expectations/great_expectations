@@ -480,7 +480,7 @@ def test_profiler_all_expectation_types(
     """
     context = titanic_data_context
     df = ge.read_csv(
-        file_relative_path(__file__, "../test_sets/yellow_tripdata_sample_2019-01.csv")
+        file_relative_path(__file__, "../test_sets/yellow_trip_data_sample_2019-01.csv")
     )
     batch_df = ge.dataset.PandasDataset(df)
 

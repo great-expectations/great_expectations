@@ -1,0 +1,31 @@
+from great_expectations.core.batch import BatchRequest
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.data_context.data_context import DataContext
+
+context = DataContext()
+suite = context.get_expectation_suite("yellow_trip_data_validations")
+
+batch_request_march = BatchRequest(
+  datasource_name="taxi_pandas",
+  data_connector_name="monthly",
+  data_asset_name="my_reports",
+  data_connector_query={
+    "index": -1
+  }
+)
+
+validator_march = context.get_validator(batch_request=batch_request_march, expectation_suite=suite)
+march_table_row_count = validator_march.get_metric(MetricConfiguration("table.row_count", metric_domain_kwargs={}))
+
+batch_request_february = BatchRequest(
+  datasource_name="taxi_pandas",
+  data_connector_name="monthly",
+  data_asset_name="my_reports",
+  data_connector_query={
+    "index": -2
+  }
+)
+
+validator_february = context.get_validator(batch_request=batch_request_february, expectation_suite=suite)
+
+print(validator_february.expect_table_row_count_to_equal(value=march_table_row_count))

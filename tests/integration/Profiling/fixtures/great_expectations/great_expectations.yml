@@ -1,4 +1,3 @@
-
 # Welcome to Great Expectations! Always know what to expect from your data.
 #
 # Here you can define datasources, batch kwargs generators, integrations and
@@ -9,12 +8,34 @@
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
 # It is auto-generated and usually does not need to be changed.
-config_version: 3
+config_version: 3.0
 
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
-datasources: {}
+datasources:
+  taxi_pandas:
+    data_connectors:
+      monthly:
+        base_directory: ../../../../test_sets/
+        glob_directive: '*.csv'
+        class_name: ConfiguredAssetFilesystemDataConnector
+        assets:
+          my_reports:
+            base_directory: taxi_yellow_tripdata_samples
+            group_names:
+              - name
+              - year
+              - month
+            module_name: great_expectations.datasource.data_connector.asset
+            class_name: Asset
+            pattern: (.+)_(\d.*)-(\d.*)\.csv
+        module_name: great_expectations.datasource.data_connector
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: PandasExecutionEngine
+    module_name: great_expectations.datasource
+    class_name: Datasource
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
@@ -87,10 +108,12 @@ data_docs_sites:
     # set to false to hide how-to buttons in Data Docs
     show_how_to_buttons: true
     store_backend:
-        class_name: TupleFilesystemStoreBackend
-        base_directory: uncommitted/data_docs/local_site/
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
-        class_name: DefaultSiteIndexBuilder
+      class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
-  enabled: True
+  enabled: false
+  data_context_id: b6743b23-ed35-4b09-814d-88ba86566295
+notebooks:
