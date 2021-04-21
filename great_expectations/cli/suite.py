@@ -70,12 +70,12 @@ def suite(ctx):
 """,
 )
 @click.option(
-    "--non-interactive",
-    "-ni",
-    "no_interactive_flag",
+    "--manual",
+    "-m",
+    "manual_flag",
     is_flag=True,
     default=False,
-    help="""Do not use a batch of data to create expectations against (non-interactive mode).
+    help="""Do not use a batch of data to create expectations against (manual mode).
 """,
 )
 @click.option(
@@ -107,7 +107,7 @@ def suite_new(
     ctx,
     expectation_suite,
     interactive_flag,
-    no_interactive_flag,
+    manual_flag,
     profile,
     batch_request,
     no_jupyter,
@@ -123,7 +123,7 @@ def suite_new(
         context=context,
         usage_event_end=usage_event_end,
         interactive_flag=interactive_flag,
-        no_interactive_flag=no_interactive_flag,
+        manual_flag=manual_flag,
         profile=profile,
         batch_request=batch_request,
     )
@@ -143,7 +143,7 @@ def _process_suite_new_flags_and_prompt(
     context: DataContext,
     usage_event_end: str,
     interactive_flag: bool,
-    no_interactive_flag: bool,
+    manual_flag: bool,
     profile: bool,
     batch_request: Optional[str] = None,
 ) -> Dict[str, Optional[bool]]:
@@ -153,7 +153,7 @@ def _process_suite_new_flags_and_prompt(
         context: Data Context for use in sending error messages if any
         usage_event_end: event name for ending usage stats message
         interactive_flag: --interactive from the `suite new` CLI command
-        no_interactive_flag: --non-interactive from the `suite new` CLI command
+        manual_flag: --manual from the `suite new` CLI command
         profile: --profile from the `suite new` CLI command
         batch_request: --batch-request from the `suite new` CLI command
 
@@ -166,13 +166,13 @@ def _process_suite_new_flags_and_prompt(
 
     # Convert interactive / no-interactive flags to interactive
     interactive: Optional[bool] = None
-    if interactive_flag is True and no_interactive_flag is True:
-        error_message = """Please choose either --interactive or --non-interactive, you may not choose both."""
-    elif interactive_flag is False and no_interactive_flag is False:
+    if interactive_flag is True and manual_flag is True:
+        error_message = """Please choose either --interactive or --manual, you may not choose both."""
+    elif interactive_flag is False and manual_flag is False:
         interactive = None
-    elif interactive_flag is True and no_interactive_flag is False:
+    elif interactive_flag is True and manual_flag is False:
         interactive = True
-    elif interactive_flag is False and no_interactive_flag is True:
+    elif interactive_flag is False and manual_flag is True:
         interactive = False
 
     if error_message is not None:
@@ -197,7 +197,7 @@ def _process_suite_new_flags_and_prompt(
             interactive = True
         elif profile and interactive is False:
             cli_message(
-                "<yellow>Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --profile flag</yellow>"
+                "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
             )
             interactive = True
         # Assume batch needed if user passes --batch-request
@@ -208,7 +208,7 @@ def _process_suite_new_flags_and_prompt(
             interactive = True
         elif (batch_request is not None) and (interactive is False):
             cli_message(
-                "<yellow>Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --batch-request flag</yellow>"
+                "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
             )
             interactive = True
     else:
@@ -358,12 +358,12 @@ of expectations; otherwise, best effort is made to determine this automatically 
 """,
 )
 @click.option(
-    "--non-interactive",
-    "-ni",
-    "no_interactive_flag",
+    "--manual",
+    "-m",
+    "manual_flag",
     is_flag=True,
     default=False,
-    help="""Do not use a batch of data to create expectations against(non-interactive mode).
+    help="""Do not use a batch of data to create expectations against(manual mode).
 """,
 )
 @click.option(
@@ -393,7 +393,7 @@ def suite_edit(
     ctx,
     expectation_suite,
     interactive_flag,
-    no_interactive_flag,
+    manual_flag,
     datasource_name,
     batch_request,
     no_jupyter,
@@ -416,7 +416,7 @@ def suite_edit(
         context=context,
         usage_event_end=usage_event_end,
         interactive_flag=interactive_flag,
-        no_interactive_flag=no_interactive_flag,
+        manual_flag=manual_flag,
         datasource_name=datasource_name,
         batch_request=batch_request,
     )
@@ -445,7 +445,7 @@ def _process_suite_edit_flags_and_prompt(
     context: DataContext,
     usage_event_end: str,
     interactive_flag: bool,
-    no_interactive_flag: bool,
+    manual_flag: bool,
     datasource_name: Optional[str] = None,
     batch_request: Optional[str] = None,
 ) -> bool:
@@ -455,7 +455,7 @@ def _process_suite_edit_flags_and_prompt(
         context: Data Context for use in sending error messages if any
         usage_event_end: event name for ending usage stats message
         interactive_flag: --interactive from the `suite new` CLI command
-        no_interactive_flag: --non-interactive from the `suite new` CLI command
+        manual_flag: --manual from the `suite new` CLI command
         datasource_name: --datasource-name from the `suite new` CLI command
         batch_request: --batch-request from the `suite new` CLI command
 
@@ -467,13 +467,13 @@ def _process_suite_edit_flags_and_prompt(
 
     # Convert interactive / no-interactive flags to interactive
     interactive: Optional[bool] = None
-    if interactive_flag is True and no_interactive_flag is True:
-        error_message = """Please choose either --interactive or --non-interactive, you may not choose both."""
-    elif interactive_flag is False and no_interactive_flag is False:
+    if interactive_flag is True and manual_flag is True:
+        error_message = """Please choose either --interactive or --manual, you may not choose both."""
+    elif interactive_flag is False and manual_flag is False:
         interactive = None
-    elif interactive_flag is True and no_interactive_flag is False:
+    elif interactive_flag is True and manual_flag is False:
         interactive = True
-    elif interactive_flag is False and no_interactive_flag is True:
+    elif interactive_flag is False and manual_flag is True:
         interactive = False
 
     if (datasource_name is not None) and (batch_request is not None):
@@ -506,7 +506,7 @@ options can be used.
                 )
             elif interactive is False:
                 cli_message(
-                    "<yellow>Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --datasource-name flag</yellow>"
+                    "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --datasource-name flag</yellow>"
                 )
             interactive = True
         elif batch_request is not None:
@@ -516,7 +516,7 @@ options can be used.
                 )
             elif interactive is False:
                 cli_message(
-                    "<yellow>Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --batch-request flag</yellow>"
+                    "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
                 )
             interactive = True
     else:

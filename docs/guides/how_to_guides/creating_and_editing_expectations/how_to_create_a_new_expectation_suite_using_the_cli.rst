@@ -45,10 +45,10 @@ How to create a new Expectation Suite using the CLI
 
         1. The ``--interactive`` mode denotes the fact that you are interacting with your data.  In
         other words, you have access to a data source and can specify a Batch of data to be used to create Expectations
-        against.  ``--non-interactive`` mode still allows you to create expectations (e.g., if you already know enough
+        against.  ``--manual`` mode still allows you to create expectations (e.g., if you already know enough
         about your data, such as the various columns in a database table), but you will not be able to run validations,
         until you specify a Batch of data, which can be done at a later point; in fact, you can switch back and forth
-        between the interactive and non-interactive modes, and all your expectations will be intact.
+        between the interactive and manual modes, and all your expectations will be intact.
 
         Run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
@@ -75,11 +75,11 @@ How to create a new Expectation Suite using the CLI
 
             great_expectations --v3-api suite new --interactive --no-jupyter
 
-        or in the non-interactive mode:
+        or in the manual mode:
 
         .. code-block:: bash
 
-            great_expectations --v3-api suite new --non-interactive --no-jupyter
+            great_expectations --v3-api suite new --manual --no-jupyter
 
 
         3. One of the easiest ways to get starting in the interactive mode is to take advantage of the `--profile` flag:
