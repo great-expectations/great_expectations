@@ -1,3 +1,5 @@
+from typing import Any
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.profiler.configuration_builder.configuration_builder import (
     ConfigurationBuilder,
@@ -18,20 +20,23 @@ class ParameterIdConfigurationBuilder(ConfigurationBuilder):
     ) -> ExpectationConfiguration:
         """
         Utilizes RuleState object to obtain parameter names out of the parameter ids initialized in the constructor,
-        returning an Expectation configuration initialized with the classes' Expectation type and a dict of all necessary
-        parameters (as kwargs).
+        returning an Expectation configuration initialized with the classes' Expectation type and a dict of all
+        necessary parameters (as kwargs).
 
-        :param rule_state: An object keeping track of the state information necessary for rule validation, such as domain,
-                metric parameters, and necessary variables
+        :param rule_state: An object keeping track of the state information necessary for rule validation, such as
+            domain, metric parameters, and necessary variables
         :return: Expectation config initialized with Expectation type and parameters that have been specified by
-        the classes' config and obtained in the Rule State.
+            the class' config and obtained from the Rule State.
         """
-        kwargs = {}
-        for parameter_name, parameter_id in self._config.items():
-            kwargs[parameter_name] = rule_state.get_parameter_value(
-                parameter_name=parameter_id
+        rule_expectation_kwargs: dict = {}
+        attribute_name: str
+        attribute_value: Any
+        for attribute_name, attribute_value in self._config.items():
+            rule_expectation_kwargs[attribute_name] = rule_state.get_parameter_value(
+                parameter_name=attribute_value
             )
 
+        kwargs.update(rule_expectation_kwargs)
         return ExpectationConfiguration(
-            expectation_type=self._expectation_type, kwargs=kwargs
+            expectation_type=self._expectation_type, **kwargs
         )
