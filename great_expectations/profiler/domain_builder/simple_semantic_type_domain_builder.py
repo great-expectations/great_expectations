@@ -1,10 +1,11 @@
 from enum import Enum
-from typing import Iterable, List, Optional, Dict, Union, Any
+from typing import Any, Dict, Iterable, List, Optional, Union
 
-from great_expectations.profiler.domain_builder.column_domain_builder import ColumnDomainBuilder
-from great_expectations.validator.validator import Validator
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.validator.validator import MetricConfiguration
+from great_expectations.profiler.domain_builder.column_domain_builder import (
+    ColumnDomainBuilder,
+)
+from great_expectations.validator.validator import MetricConfiguration, Validator
 
 
 class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
@@ -56,7 +57,9 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             # TODO: <Alex>ALEX -- We should make this error message more informative.</Alex>
             raise ValueError("unrecognized")
         domains: List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]] = []
-        columns: List[str] = validator.get_metric(MetricConfiguration("table.columns", {}))
+        columns: List[str] = validator.get_metric(
+            MetricConfiguration("table.columns", {})
+        )
         column: str
         for column in columns:
             # TODO: <Alex>ALEX -- Is this "column_type"?  Or is this more of a "domain type" (or "the name of the domain type")?</Alex>

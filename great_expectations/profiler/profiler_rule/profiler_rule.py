@@ -1,13 +1,17 @@
-from typing import Optional, List, Union, Dict, Any
+from typing import Any, Dict, List, Optional, Union
 
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.profiler.configuration_builder.configuration_builder import (
+    ConfigurationBuilder,
+)
+from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
+from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.profiler.parameter_builder.parameter_builder import (
+    ParameterBuilder,
+)
 from great_expectations.profiler.profiler_rule.rule_state import RuleState
 from great_expectations.validator.validator import Validator
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.profiler.configuration_builder.configuration_builder import ConfigurationBuilder
-from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
-from great_expectations.profiler.parameter_builder.parameter_builder import ParameterBuilder
-from great_expectations.profiler.parameter_builder.parameter import Parameter
 
 
 class ProfilerRule:
@@ -39,7 +43,9 @@ class ProfilerRule:
             variables = {}
         self._variables = variables
 
-    def evaluate(self, validator: Validator, batch_ids: Optional[List[str]]) -> List[ExpectationConfiguration]:
+    def evaluate(
+        self, validator: Validator, batch_ids: Optional[List[str]]
+    ) -> List[ExpectationConfiguration]:
         """
         Builds a RuleState object for configured information (domain_builder, parameter_builder,
         and configuration_builder which are defined at __init__) and proceeds to use this
@@ -53,7 +59,6 @@ class ProfilerRule:
         rule_state: RuleState = RuleState(variables=self._variables)
         configurations: List[ExpectationConfiguration] = []
 
-        # TODO: <Alex>ALEX -- what is the type?</Alex>
         rule_state.domains = self._domain_builder.get_domains(
             validator=validator, batch_ids=batch_ids
         )
@@ -66,10 +71,11 @@ class ProfilerRule:
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
                 parameter_id: str = parameter_builder.parameter_id
-                parameter_result: Parameter = parameter_builder.build_parameters(
+                parameter: Parameter = parameter_builder.build_parameters(
                     rule_state=rule_state, validator=validator, batch_ids=batch_ids
                 )
-                rule_state.parameters[domain_id][parameter_id] = parameter_result["parameters"]
+                # TODO: <Alex>ALEX -- how does this work?  What are the relevant types?</Alex>
+                rule_state.parameters[domain_id][parameter_id] = parameter.parameters
             for configuration_builder in self._configuration_builders:
                 configurations.append(
                     configuration_builder.build_configuration(rule_state=rule_state)

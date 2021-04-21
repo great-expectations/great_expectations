@@ -1,9 +1,11 @@
 from typing import Optional
 
-from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.profiler.profiler_rule.rule_state import RuleState
-from great_expectations.profiler.parameter_builder.parameter_builder import ParameterBuilder
 from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.profiler.parameter_builder.parameter_builder import (
+    ParameterBuilder,
+)
+from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 
@@ -27,7 +29,12 @@ class MetricParameterBuilder(ParameterBuilder):
         self._metric_value_kwargs = metric_value_kwargs
 
     def _build_parameters(
-        self, *, rule_state: Optional[RuleState] = None, validator: Optional[Validator] = None, batch_ids: Optional[List[str]] = None, **kwargs
+        self,
+        *,
+        rule_state: Optional[RuleState] = None,
+        validator: Optional[Validator] = None,
+        batch_ids: Optional[List[str]] = None,
+        **kwargs
     ) -> Parameter:
         """
         Builds a dictionary of format {'parameters': A given resolved metric}

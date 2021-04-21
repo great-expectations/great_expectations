@@ -124,11 +124,13 @@ class ProfilerError(GreatExpectationsError):
 
 class ProfilerConfigurationError(ProfilerError):
     """A configuration error for a profiler."""
+
     pass
 
 
 class ProfilerExecutionError(ProfilerError):
     """A runtime error for a profiler."""
+
     pass
 
 

@@ -1,12 +1,13 @@
 from copy import copy
-
 from typing import Optional
 
-from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder import MultiBatchParameterBuilder
-from great_expectations.profiler.profiler_rule.rule_state import RuleState
-from great_expectations.validator.validator import Validator
+from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder import (
+    MultiBatchParameterBuilder,
+)
 from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 
 class MultiBatchBootstrappedMetricDistributionParameterBuilder(
@@ -52,7 +53,12 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
 
     # TODO: <Alex>ALEX -- There is nothing about "p_values" in this implementation; moreover, "p_values" would apply only to certain values of the "metric_name" -- this needs to be elaborated.</Alex>
     def _build_parameters(
-        self, *, rule_state: Optional[RuleState] = None, validator: Optional[Validator] = None, batch_ids: Optional[List[str]] = None, **kwargs
+        self,
+        *,
+        rule_state: Optional[RuleState] = None,
+        validator: Optional[Validator] = None,
+        batch_ids: Optional[List[str]] = None,
+        **kwargs
     ) -> Parameter:
         samples = []
         for batch_id in batch_ids:

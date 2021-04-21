@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Union, Any, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.validator.validator import Validator
