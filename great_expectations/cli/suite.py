@@ -70,7 +70,7 @@ def suite(ctx):
 """,
 )
 @click.option(
-    "--no-interactive",
+    "--non-interactive",
     "-ni",
     "no_interactive_flag",
     is_flag=True,
@@ -153,7 +153,7 @@ def _process_suite_new_flags_and_prompt(
         context: Data Context for use in sending error messages if any
         usage_event_end: event name for ending usage stats message
         interactive_flag: --interactive from the `suite new` CLI command
-        no_interactive_flag: --no-interactive from the `suite new` CLI command
+        no_interactive_flag: --non-interactive from the `suite new` CLI command
         profile: --profile from the `suite new` CLI command
         batch_request: --batch-request from the `suite new` CLI command
 
@@ -167,7 +167,7 @@ def _process_suite_new_flags_and_prompt(
     # Convert interactive / no-interactive flags to interactive
     interactive: Optional[bool] = None
     if interactive_flag is True and no_interactive_flag is True:
-        error_message = """Please choose either --interactive or --no-interactive, you may not choose both."""
+        error_message = """Please choose either --interactive or --non-interactive, you may not choose both."""
     elif interactive_flag is False and no_interactive_flag is False:
         interactive = None
     elif interactive_flag is True and no_interactive_flag is False:
@@ -182,7 +182,7 @@ def _process_suite_new_flags_and_prompt(
         )
         sys.exit(1)
 
-    # TODO: AJB 20210420 add better warning if user passes --no-interactive but either --profile or --batch-request (for this and suite_edit...)
+    # TODO: AJB 20210420 add better warning if user passes --non-interactive but either --profile or --batch-request (for this and suite_edit...)
 
     # If user has provided a flag determining their configuration, skip prompt.
     if (interactive is not None) or (profile is True) or (batch_request is not None):
@@ -347,7 +347,7 @@ of expectations; otherwise, best effort is made to determine this automatically 
 """,
 )
 @click.option(
-    "--no-interactive",
+    "--non-interactive",
     "-ni",
     "no_interactive_flag",
     is_flag=True,
@@ -444,7 +444,7 @@ def _process_suite_edit_flags_and_prompt(
         context: Data Context for use in sending error messages if any
         usage_event_end: event name for ending usage stats message
         interactive_flag: --interactive from the `suite new` CLI command
-        no_interactive_flag: --no-interactive from the `suite new` CLI command
+        no_interactive_flag: --non-interactive from the `suite new` CLI command
         datasource_name: --datasource-name from the `suite new` CLI command
         batch_request: --batch-request from the `suite new` CLI command
 
@@ -457,7 +457,7 @@ def _process_suite_edit_flags_and_prompt(
     # Convert interactive / no-interactive flags to interactive
     interactive: Optional[bool] = None
     if interactive_flag is True and no_interactive_flag is True:
-        error_message = """Please choose either --interactive or --no-interactive, you may not choose both."""
+        error_message = """Please choose either --interactive or --non-interactive, you may not choose both."""
     elif interactive_flag is False and no_interactive_flag is False:
         interactive = None
     elif interactive_flag is True and no_interactive_flag is False:

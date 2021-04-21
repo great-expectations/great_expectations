@@ -3101,7 +3101,7 @@ How would you like to create your Expectation Suite?
     2. Interactively, with a sample batch of data
     3. Automatically, using a profiler
 """,
-        "error_both_interactive_flags": "Please choose either --interactive or --no-interactive, you may not choose both.",
+        "error_both_interactive_flags": "Please choose either --interactive or --non-interactive, you may not choose both.",
     }
 
 
@@ -3135,7 +3135,7 @@ How would you like to create your Expectation Suite?
             False,
             "no_msg",
             "no_msg",
-            id="--no-interactive",
+            id="--non-interactive",
         ),
         # return_interactive = True, return_profile = True
         pytest.param(
@@ -3274,7 +3274,7 @@ How would you like to create your Expectation Suite?
             False,
             "happy_path_batch_request",
             "no_msg",
-            id="warning: --no-interactive --batch-request",
+            id="warning: --non-interactive --batch-request",
         ),
         pytest.param(
             False,
@@ -3287,7 +3287,7 @@ How would you like to create your Expectation Suite?
             True,
             "happy_path_profile",
             "no_msg",
-            id="warning: --no-interactive --profile --batch-request",
+            id="warning: --non-interactive --profile --batch-request",
         ),
         # no-interactive flag with profile and without batch request flag
         pytest.param(
@@ -3301,7 +3301,7 @@ How would you like to create your Expectation Suite?
             True,
             "happy_path_profile",
             "no_msg",
-            id="warning: --no-interactive --profile",
+            id="warning: --non-interactive --profile",
         ),
         # Yes error expected
         # both interactive flags, profile=False, with/without batch_request
@@ -3316,7 +3316,7 @@ How would you like to create your Expectation Suite?
             None,
             "error_both_interactive_flags",
             "no_msg",
-            id="error: --interactive --no-interactive",
+            id="error: --interactive --non-interactive",
         ),
         pytest.param(
             True,
@@ -3329,7 +3329,7 @@ How would you like to create your Expectation Suite?
             None,
             "error_both_interactive_flags",
             "no_msg",
-            id="error: --interactive --no-interactive --batch-request",
+            id="error: --interactive --non-interactive --batch-request",
         ),
         # both interactive flags, profile=True, with/without batch_request
         pytest.param(
@@ -3343,7 +3343,7 @@ How would you like to create your Expectation Suite?
             None,
             "error_both_interactive_flags",
             "no_msg",
-            id="error: --interactive --no-interactive --profile",
+            id="error: --interactive --non-interactive --profile",
         ),
         pytest.param(
             True,
@@ -3356,7 +3356,7 @@ How would you like to create your Expectation Suite?
             None,
             "error_both_interactive_flags",
             "no_msg",
-            id="error: --interactive --no-interactive --profile --batch-request",
+            id="error: --interactive --non-interactive --profile --batch-request",
         ),
     ],
 )
@@ -3468,7 +3468,7 @@ How would you like to edit your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
     2. Interactively, with a sample batch of data
 """,
-        "error_both_interactive_flags": "Please choose either --interactive or --no-interactive, you may not choose both.",
+        "error_both_interactive_flags": "Please choose either --interactive or --non-interactive, you may not choose both.",
         "error_both_datasource_name_and_batch_request_flags": """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
 options can be used.
 """,
@@ -3503,7 +3503,7 @@ options can be used.
             False,
             "no_msg",
             "no_msg",
-            id="--no-interactive",
+            id="--non-interactive",
         ),
         # return_interactive = True, --datasource-name
         pytest.param(
@@ -3607,7 +3607,7 @@ options can be used.
             True,
             "happy_path_batch_request",
             "no_msg",
-            id="warning: --no-interactive --batch-request",
+            id="warning: --non-interactive --batch-request",
         ),
         # no-interactive flag with datasource_name
         pytest.param(
@@ -3620,7 +3620,7 @@ options can be used.
             True,
             "happy_path_datasource_name",
             "no_msg",
-            id="warning: --no-interactive --datasource-name",
+            id="warning: --non-interactive --datasource-name",
         ),
         # Yes error expected
         # both interactive flags, datasource_name=None, with/without batch_request
@@ -3634,7 +3634,7 @@ options can be used.
             None,
             "error_both_interactive_flags",
             "no_msg",
-            id="error: --interactive --no-interactive",
+            id="error: --interactive --non-interactive",
         ),
         pytest.param(
             True,
@@ -3646,7 +3646,7 @@ options can be used.
             None,
             "error_both_interactive_flags",
             "no_msg",
-            id="error: --interactive --no-interactive --batch-request",
+            id="error: --interactive --non-interactive --batch-request",
         ),
         # both interactive flags, datasource_name=something, with/without batch_request
         pytest.param(
@@ -3659,7 +3659,7 @@ options can be used.
             None,
             "error_both_interactive_flags",
             "no_msg",
-            id="error: --interactive --no-interactive --datasource-name",
+            id="error: --interactive --non-interactive --datasource-name",
         ),
         pytest.param(
             True,
@@ -3671,7 +3671,7 @@ options can be used.
             None,
             "error_both_datasource_name_and_batch_request_flags",
             "no_msg",
-            id="error: --interactive --no-interactive --datasource-name --batch-request",
+            id="error: --interactive --non-interactive --datasource-name --batch-request",
         ),
         # both --datasource-name and --batch-request
         pytest.param(
@@ -3708,7 +3708,7 @@ options can be used.
             True,
             "error_both_datasource_name_and_batch_request_flags",
             "no_msg",
-            id="--no-interactive --datasource-name --batch-request",
+            id="--non-interactive --datasource-name --batch-request",
         ),
     ],
 )
