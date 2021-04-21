@@ -9,8 +9,8 @@ from great_expectations.profiler.profiler_rule.rule_state import RuleState
 
 class DomainIdParameterNameConfigurationBuilder(ConfigurationBuilder):
     """
-    Class which creates ExpectationConfiguration out of a given Expectation type and domain_id-parameter_name name-value
-    pairs as attribute directives (supplied in kwargs).
+    Class which creates ExpectationConfiguration out of a given Expectation type and domain_id-parameter_name pairs as
+    attribute directives (supplied in kwargs).
     """
 
     def __init__(self, expectation_type: str = None, **kwargs):
