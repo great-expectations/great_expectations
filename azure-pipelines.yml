@@ -375,7 +375,7 @@ stages:
     condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [required, lint]
+    dependsOn: [lint]
 
     jobs:
       - job: build_gallery
