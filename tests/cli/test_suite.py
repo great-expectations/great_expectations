@@ -228,7 +228,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite new",
-        input=f"{expectation_suite_name}\n",
+        input=f"1\n{expectation_suite_name}\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
