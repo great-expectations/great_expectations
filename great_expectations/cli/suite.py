@@ -506,7 +506,12 @@ How would you like to edit your Expectation Suite?
 """,
             type=click.Choice(["1", "2"]),
             show_choices=False,
+            default="1",
+            show_default=False,
         )
+        # Default option
+        if suite_edit_method == "":
+            interactive = False
         if suite_edit_method == "1":
             interactive = False
         elif suite_edit_method == "2":
