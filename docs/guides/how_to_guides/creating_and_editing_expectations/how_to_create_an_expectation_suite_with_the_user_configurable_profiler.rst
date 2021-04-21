@@ -247,44 +247,76 @@ This guide will help you create a new Expectation Suite by profiling your data w
             - The UserConfigurableProfiler is Experimental and this document is aspirational and purely meant to capture our collective understanding as we design and build this feature. It will need significant edits to transition this into a how-to guide. We expect to update this in the near future. Some notes on items to edit / investigate are below.
             - Profiler is the proposed name for the new profiler, and it will likely assimilate the UserConfigurableProfiler functionality.
             - Table-based data is assumed for now in this doc for simplicity. This should be extended when appropriate.
+            - GEN1 refers to our current plan, GEN2 refers to ideas that may or may not be addressed in future versions.
 
 
         The aim of the Great Expectations Profiler is to describe your existing data automatically by scanning it (or a subset of it) to create an Expectation Suite. The resulting Expectation Suite should describe your existing data well enough that new data (that is well behaved) should still pass when validated against that Expectation Suite. Of course the generated Expectation Suite can be manually modified using the existing Great Expectations Suite Edit functionality or re-generated via a modified Profiler if the data changes.
 
         To accomplish that aim, it is highly configurable. To describe its functionality and configuration, we will walk through some of the core concepts followed by examples of increasing complexity. For now, we will use table-based data in this document for simplicity of explanation.
 
-        A Profiler is defined by a set of ProfilerRules that create Expectations for configurable Domains. These ProfilerRules and Expectations can be built using Parameters calculated at runtime, or hard-coded. These Parameters can be local to a domain or global to all domains (QUESTION: should the ``variables`` key be renamed to something more descriptive like ``global_profiler_parameters``?).
+        A Profiler is defined by a set of ProfilerRules that create Expectations for configurable Domains. These ProfilerRules and Expectations can be built using Parameters calculated at runtime, or hard-coded. GEN1: These Parameters are local to a domain. GEN2: These Parameters can be local to a domain or global to all domains (QUESTION: should the ``variables`` key be renamed to something more descriptive like ``global_profiler_parameters``? ANSWER: TBD).
 
-        Here is a pseudocode hirearchy to show some of the various core concepts and their relationships (more complex concepts are covered later). Everything prefaced with a ``my_`` is user configurable.
+        Here is a pseudocode hirearchy to show some of the various core concepts and their relationships (more complex concepts are covered later). Everything prefaced with a ``my_`` is user configurable. Note that items ending with a colon ``:`` or lists ending with ellipses ``...`` in this pseudocode likely require more configuration or support additional items that are not shown.
 
-        (QUESTION: Can there be a hirearchy of domains or at least multiple domains for a given rule or should the rule-domain pair be one-to-one? Maybe domains / parameters can be defined at the same level as rules and then referenced (rather than having to be defined within a rule). Currently it looks like the idea is that more complex domain configurations are meant to be captured in specific domain builder classes e.g. ``SimpleSemanticTypeColumnDomainBuilder`` and that there is a single domain per rule.)
+        (QUESTION: Can there be a hirearchy of domains or at least multiple domains for a given rule or should the rule-domain pair be one-to-one? Maybe domains / parameters can be defined at the same level as rules and then referenced (rather than having to be defined within a rule). Currently it looks like the idea is that more complex domain configurations are meant to be captured in specific domain builder classes e.g. ``SimpleSemanticTypeColumnDomainBuilder`` and that there is a single domain per rule. ANSWER: Group consensus seems to be push complexity into code rather than config i.e. single Domain per ProfilerRule that is defined by a subclass of DomainBuilder)
 
+        GEN1:
+
+        .. code-block:: yaml
+          variables:
+          rules:
+            - my_rule_1
+              domain_builder:
+                - my_domain_builder_for_my_rule_1 # (Note: single domain builder per rule):
+              parameter_builders:
+                - my_rule_1_parameter_builder_1:
+                # e.g. reference columns from my_domain_builder_for_my_rule_1 to calculate metric on each of them (e.g. ``column.min`` metric)
+                - my_rule_2_parameter_builder_2:
+                ...
+              expectation_configuration_builders:
+                - expectation_configuration_1_builder:
+                # e.g. expect_column_values_to_be_between where domain is set via columns from the domain defined above and min/max set via parameters defined above. Can also contain if/then logic.
+
+        GEN2:
 
         .. code-block:: yaml
 
           global_domain_builders:
-            - global_domain_builder_1:
-            - global_domain_builder_2:
+            # To be referenced in rules (supports multiple rules using the same domain)
+            - my_global_domain_builder_1:
+            - my_global_domain_builder_2:
             ...
           global_parameter_builders:
-            - global_param_builder_1:
-            - global_param_builder_2:
+            # To be referenced in rules (supports multiple rules using the same parameter)
+            - my_global_param_builder_1:
+            - my_global_param_builder_2:
             ...
           rules:
-            - rule_1
-              rule_specific_domain_builders:
-                - rule_1_domain_builder_1:
-                - rule_1_domain_builder_2:
-                ...
+            - my_rule_1
+              rule_specific_domain_builder:
+                - my_rule_1_domain_builder:
               rule_specific_parameter_builders:
-                - rule_1_parameter_builder_1:
-                # e.g. reference columns from rule_1_domain_builder_1 to calculate metric on each of them (e.g. ``column.min`` metric)
-                - rule_2_parameter_builder_2:
+                - my_rule_1_parameter_builder_1:
+                # e.g. reference columns from my_rule_1_domain_builder to calculate metric on each of them (e.g. ``column.min`` metric)
+                - my_rule_2_parameter_builder_2:
+                - my_global_param_builder_1 # Reference global parameter builder
                 ...
               expectation_configuration_builders:
                 - expectation_1_builder:
                 # e.g. expect_column_values_to_be_between where domain is set via columns from one of the domains defined above and min/max set via parameters defined above. Can also contain if/then logic.
+            - my_rule_2
+              rule_specific_domain_builder:
+                - my_global_domain_builder_1 # Reference global domain builder
+              rule_specific_parameter_builders:
+                - my_global_param_builder_1 # Reference global parameter builder (note used more than once)
+              ...
+            - my_rule_3
+              rule_specific_domain_builder:
+                - my_global_domain_builder_1 # Reference global domain builder (note used more than once)
+              ...
 
+
+        TODO: The below is not yet modified per our conversations.
 
         Here is a slightly more concrete example:
 
@@ -293,7 +325,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
           global_profiler_parameters:
             - global_param_1
           rules:
-            my_rule_for_ids: # semantic type
+            my_rule_for_ids: # Could be a semantic type
               domains:
                 - my_id_domain_1: # QUESTION: Should we allow for multiple domains in a rule? QUESTION: Can / should domains be defined outside of the scope of a specific rule?
                   # columns of type ``integer`` with name ``id``
