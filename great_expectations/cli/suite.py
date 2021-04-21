@@ -119,7 +119,7 @@ def suite_new(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    processed_flags = _process_suite_new_flags_and_prompt(
+    processed_flags: Dict[str, Optional[bool]] = _process_suite_new_flags_and_prompt(
         context=context,
         usage_event_end=usage_event_end,
         interactive_flag=interactive_flag,
@@ -212,7 +212,7 @@ def _process_suite_new_flags_and_prompt(
             )
             interactive = True
     else:
-        suite_create_method = click.prompt(
+        suite_create_method: str = click.prompt(
             """\
 How would you like to create your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
@@ -412,7 +412,7 @@ def suite_edit(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    interactive = _process_suite_edit_flags_and_prompt(
+    interactive: bool = _process_suite_edit_flags_and_prompt(
         context=context,
         usage_event_end=usage_event_end,
         interactive_flag=interactive_flag,
@@ -520,7 +520,7 @@ options can be used.
                 )
             interactive = True
     else:
-        suite_edit_method = click.prompt(
+        suite_edit_method: str = click.prompt(
             """\
 How would you like to edit your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)

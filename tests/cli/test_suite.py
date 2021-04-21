@@ -5,6 +5,7 @@ from unittest import mock
 
 import click
 import pytest
+from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
 
 from great_expectations import DataContext
@@ -3413,7 +3414,7 @@ def test__process_suite_new_flags_and_prompt(
         assert mock_emit.call_args_list == []
 
         # Check output
-        captured = capsys.readouterr()
+        captured: CaptureResult = capsys.readouterr()
         assert suite_new_messages[stdout_fixture] in captured.out
         assert suite_new_messages[stderr_fixture] in captured.err
 
@@ -3440,7 +3441,7 @@ def test__process_suite_new_flags_and_prompt(
             )
 
         # Check output
-        captured = capsys.readouterr()
+        captured: CaptureResult = capsys.readouterr()
         assert suite_new_messages[stdout_fixture] in captured.out
         assert suite_new_messages[stderr_fixture] in captured.err
         assert mock_prompt.call_count == 0
@@ -3748,7 +3749,7 @@ def test__process_suite_edit_flags_and_prompt(
     if not error_expected:
         if prompt_input is not None:
             mock_prompt.side_effect = [prompt_input]
-        interactive = _process_suite_edit_flags_and_prompt(
+        interactive: bool = _process_suite_edit_flags_and_prompt(
             context=context,
             usage_event_end=usage_event_end,
             interactive_flag=interactive_flag,
@@ -3763,7 +3764,7 @@ def test__process_suite_edit_flags_and_prompt(
         assert mock_emit.call_args_list == []
 
         # Check output
-        captured = capsys.readouterr()
+        captured: CaptureResult = capsys.readouterr()
         assert suite_edit_messages[stdout_fixture] in captured.out
         assert suite_edit_messages[stderr_fixture] in captured.err
 
@@ -3790,7 +3791,7 @@ def test__process_suite_edit_flags_and_prompt(
             )
 
         # Check output
-        captured = capsys.readouterr()
+        captured: CaptureResult = capsys.readouterr()
         assert suite_edit_messages[stdout_fixture] in captured.out
         assert suite_edit_messages[stderr_fixture] in captured.err
         assert mock_prompt.call_count == 0
