@@ -1,3 +1,24 @@
+scatch_config = f"""
+      name: mydatasource
+      class_name: Datasource
+      execution_engine:
+        class_name: PandasExecutionEngine
+      data_connectors:
+        my_data_connector:
+          module_name: great_expectations.datasource.data_connector
+          class_name: ConfiguredAssetFilesystemDataConnector
+          base_directory: ../../../../test_sets/
+          glob_directive: "*.csv"
+          assets:
+            my_reports:
+               base_directory: taxi_yellow_tripdata_samples
+               pattern: (.+)_(\\d.*)-(\\d.*)\\.csv
+               group_names:
+                 - name
+                 - year
+                 - month
+    """
+
 import locale
 import logging
 import os
