@@ -3,6 +3,7 @@ import os
 from typing import Dict, List
 from unittest import mock
 
+import click
 import pytest
 from click.testing import CliRunner, Result
 
@@ -3088,24 +3089,65 @@ suite = profiler.build_suite()"""
 @pytest.fixture
 def suite_new_messages():
     return {
-        "happy_path_profile": "Entering interactive mode since you passed the --profile flag"
+        "no_msg": "",
+        "happy_path_profile": "Entering interactive mode since you passed the --profile flag",
+        "happy_path_batch_request": "Entering interactive mode since you passed the --batch-request flag",
+        "happy_path_prompt_call": """\
+How would you like to create your Expectation Suite?
+    1. Manually, without interacting with a sample batch of data (default)
+    2. Interactively, with a sample batch of data
+    3. Automatically, using a profiler
+""",
+        "error_both_interactive_flags": "Please choose either --interactive or --no-interactive, you may not choose both.",
     }
 
 
 @pytest.mark.parametrize(
-    "interactive_flag,no_interactive_flag,profile,batch_request,error_expected,prompt_input,return_interactive,return_profile",
+    "interactive_flag,no_interactive_flag,profile,batch_request,error_expected,prompt_input,return_interactive,return_profile,stdout_fixture,stderr_fixture",
     [
         # No error expected
         # return_interactive = True, return_profile = False
         pytest.param(
-            True, False, False, None, False, None, True, False, id="--interactive"
+            True,
+            False,
+            False,
+            None,
+            False,
+            None,
+            True,
+            False,
+            "no_msg",
+            "no_msg",
+            id="--interactive",
         ),
         # return_interactive = False, return_profile = False
         pytest.param(
-            False, True, False, None, False, None, False, False, id="--no-interactive"
+            False,
+            True,
+            False,
+            None,
+            False,
+            None,
+            False,
+            False,
+            "no_msg",
+            "no_msg",
+            id="--no-interactive",
         ),
         # return_interactive = True, return_profile = True
-        pytest.param(False, False, True, None, False, None, True, True, id="--profile"),
+        pytest.param(
+            False,
+            False,
+            True,
+            None,
+            False,
+            None,
+            True,
+            True,
+            "no_msg",
+            "no_msg",
+            id="--profile",
+        ),
         pytest.param(
             True,
             False,
@@ -3115,6 +3157,8 @@ def suite_new_messages():
             None,
             True,
             True,
+            "no_msg",
+            "no_msg",
             id="--interactive --profile",
         ),
         # batch_request not empty
@@ -3127,6 +3171,8 @@ def suite_new_messages():
             None,
             True,
             False,
+            "no_msg",
+            "no_msg",
             id="--interactive --batch-request",
         ),
         pytest.param(
@@ -3138,6 +3184,8 @@ def suite_new_messages():
             None,
             True,
             True,
+            "happy_path_profile",
+            "no_msg",
             id="--profile --batch-request",
         ),
         pytest.param(
@@ -3149,6 +3197,8 @@ def suite_new_messages():
             None,
             True,
             True,
+            "no_msg",
+            "no_msg",
             id="--interactive --profile --batch-request",
         ),
         # Prompts
@@ -3162,6 +3212,8 @@ def suite_new_messages():
             "",
             False,
             False,
+            "no_msg",
+            "no_msg",
             id="prompt: Default Choice 1 - Manual suite creation (default)",
         ),
         # Choice 1 - Manual suite creation (default)
@@ -3174,6 +3226,8 @@ def suite_new_messages():
             "1",
             False,
             False,
+            "no_msg",
+            "no_msg",
             id="prompt: Choice 1 - Manual suite creation (default)",
         ),
         # Choice 2 - Interactive suite creation
@@ -3186,6 +3240,8 @@ def suite_new_messages():
             "2",
             True,
             False,
+            "no_msg",
+            "no_msg",
             id="prompt: Choice 2 - Interactive suite creation",
         ),
         # Choice 3 - Automatic suite creation (profiler)
@@ -3198,6 +3254,8 @@ def suite_new_messages():
             "3",
             True,
             True,
+            "no_msg",
+            "no_msg",
             id="prompt: Choice 3 - Automatic suite creation (profiler)",
         ),
         # No error but warning expected
@@ -3211,7 +3269,9 @@ def suite_new_messages():
             None,
             True,
             False,
-            id="error: --no-interactive --batch-request",
+            "happy_path_batch_request",
+            "no_msg",
+            id="warning: --no-interactive --batch-request",
         ),
         pytest.param(
             False,
@@ -3222,7 +3282,9 @@ def suite_new_messages():
             None,
             True,
             True,
-            id="error: --no-interactive --profile --batch-request",
+            "happy_path_profile",
+            "no_msg",
+            id="warning: --no-interactive --profile --batch-request",
         ),
         # no-interactive flag with profile and without batch request flag
         pytest.param(
@@ -3234,7 +3296,9 @@ def suite_new_messages():
             None,
             True,
             True,
-            id="error: --no-interactive --profile",
+            "happy_path_profile",
+            "no_msg",
+            id="warning: --no-interactive --profile",
         ),
         # Yes error expected
         # both interactive flags, profile=False, with/without batch_request
@@ -3247,6 +3311,8 @@ def suite_new_messages():
             None,
             None,
             None,
+            "error_both_interactive_flags",
+            "no_msg",
             id="error: --interactive --no-interactive",
         ),
         pytest.param(
@@ -3258,6 +3324,8 @@ def suite_new_messages():
             None,
             None,
             None,
+            "error_both_interactive_flags",
+            "no_msg",
             id="error: --interactive --no-interactive --batch-request",
         ),
         # both interactive flags, profile=True, with/without batch_request
@@ -3270,6 +3338,8 @@ def suite_new_messages():
             None,
             None,
             None,
+            "error_both_interactive_flags",
+            "no_msg",
             id="error: --interactive --no-interactive --profile",
         ),
         pytest.param(
@@ -3281,6 +3351,8 @@ def suite_new_messages():
             None,
             None,
             None,
+            "error_both_interactive_flags",
+            "no_msg",
             id="error: --interactive --no-interactive --profile --batch-request",
         ),
     ],
@@ -3300,6 +3372,8 @@ def test__process_suite_new_flags_and_prompt(
     prompt_input,
     return_interactive,
     return_profile,
+    stdout_fixture,
+    stderr_fixture,
     empty_data_context_stats_enabled,
     capsys,
     suite_new_messages,
@@ -3311,8 +3385,6 @@ def test__process_suite_new_flags_and_prompt(
 
     usage_event_end: str = "cli.suite.new.end"
     context: DataContext = empty_data_context_stats_enabled
-
-    # TODO: Test capsys (standard out with happy path and error path)
 
     # test happy paths
     if not error_expected:
@@ -3334,9 +3406,21 @@ def test__process_suite_new_flags_and_prompt(
         #  CLI suite new flow of creating a notebook etc.
         assert mock_emit.call_count == 0
         assert mock_emit.call_args_list == []
+
+        # Check output
         captured = capsys.readouterr()
-        assert suite_new_messages["happy_path_profile"] in captured.out
-        assert captured.err == ""
+        assert suite_new_messages[stdout_fixture] in captured.out
+        assert suite_new_messages[stderr_fixture] in captured.err
+
+        # Check prompt text and called only when appropriate
+        if prompt_input is not None:
+            assert mock_prompt.call_count == 1
+            assert (
+                mock_prompt.call_args_list[0][0][0]
+                == suite_new_messages["happy_path_prompt_call"]
+            )
+        else:
+            assert mock_prompt.call_count == 0
 
     # test error cases
     elif error_expected:
@@ -3349,6 +3433,12 @@ def test__process_suite_new_flags_and_prompt(
                 profile=profile,
                 batch_request=batch_request,
             )
+
+        # Check output
+        captured = capsys.readouterr()
+        assert suite_new_messages[stdout_fixture] in captured.out
+        assert suite_new_messages[stderr_fixture] in captured.err
+        assert mock_prompt.call_count == 0
 
         # Note - in this method only a single usage stats message is sent. Other messages are sent during the full
         #  CLI suite new flow of creating a notebook etc.
