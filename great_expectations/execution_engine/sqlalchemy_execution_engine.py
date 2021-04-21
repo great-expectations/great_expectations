@@ -212,7 +212,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             "sqlite",
             "oracle",
             "mssql",
-            "oracle",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
@@ -773,7 +772,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selectable_from_batch_spec(self, batch_spec) -> Select:
+    def _build_selectable_from_batch_spec(self, batch_spec) -> Union[Select, str]:
         table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
@@ -790,16 +789,36 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if batch_spec["sampling_method"] == "_sample_using_limit":
                 # SQLalchemy's semantics for LIMIT are different than normal WHERE clauses,
                 # so the business logic for building the query needs to be different.
-                return (
-                    sa.select("*")
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
+                if self.engine.dialect.name.lower() == "oracle":
+                    # limit doesn't compile properly for oracle so we will append rownum to query string later
+                    raw_query = (
+                        sa.select("*")
+                        .select_from(
+                            sa.table(
+                                table_name, schema=batch_spec.get("schema_name", None)
+                            )
+                        )
+                        .where(split_clause)
                     )
-                    .where(split_clause)
-                    .limit(batch_spec["sampling_kwargs"]["n"])
-                )
+                    query = str(
+                        raw_query.compile(
+                            self.engine, compile_kwargs={"literal_binds": True}
+                        )
+                    )
+                    query += "\nAND ROWNUM <= %d" % batch_spec["sampling_kwargs"]["n"]
+                    return query
+                else:
+                    return (
+                        sa.select("*")
+                        .select_from(
+                            sa.table(
+                                table_name, schema=batch_spec.get("schema_name", None)
+                            )
+                        )
+                        .where(split_clause)
+                        .limit(batch_spec["sampling_kwargs"]["n"])
+                    )
             else:
-
                 sampler_fn = getattr(self, batch_spec["sampling_method"])
                 return (
                     sa.select("*")
@@ -867,9 +886,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            selectable: Select = self._build_selectable_from_batch_spec(
-                batch_spec=batch_spec
-            )
+            if self.engine.dialect.name.lower() == "oracle":
+                selectable: str = self._build_selectable_from_batch_spec(
+                    batch_spec=batch_spec
+                )
+            else:
+                selectable: Select = self._build_selectable_from_batch_spec(
+                    batch_spec=batch_spec
+                )
 
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
