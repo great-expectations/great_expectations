@@ -3094,7 +3094,9 @@ def suite_new_messages():
     return {
         "no_msg": "",
         "happy_path_profile": "Entering interactive mode since you passed the --profile flag",
+        "warning_profile": "Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --profile flag",
         "happy_path_batch_request": "Entering interactive mode since you passed the --batch-request flag",
+        "warning_batch_request": "Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --batch-request flag",
         "happy_path_prompt_call": """\
 How would you like to create your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
@@ -3272,7 +3274,7 @@ How would you like to create your Expectation Suite?
             None,
             True,
             False,
-            "happy_path_batch_request",
+            "warning_batch_request",
             "no_msg",
             id="warning: --non-interactive --batch-request",
         ),
@@ -3285,7 +3287,7 @@ How would you like to create your Expectation Suite?
             None,
             True,
             True,
-            "happy_path_profile",
+            "warning_profile",
             "no_msg",
             id="warning: --non-interactive --profile --batch-request",
         ),
@@ -3299,7 +3301,7 @@ How would you like to create your Expectation Suite?
             None,
             True,
             True,
-            "happy_path_profile",
+            "warning_profile",
             "no_msg",
             id="warning: --non-interactive --profile",
         ),
@@ -3462,7 +3464,9 @@ def suite_edit_messages():
     return {
         "no_msg": "",
         "happy_path_datasource_name": "Entering interactive mode since you passed the --datasource-name flag",
+        "warning_datasource_name": "Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --datasource-name flag",
         "happy_path_batch_request": "Entering interactive mode since you passed the --batch-request flag",
+        "warning_batch_request": "Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --batch-request flag",
         "happy_path_prompt_call": """\
 How would you like to edit your Expectation Suite?
     1. Manually, without interacting with a sample batch of data (default)
@@ -3605,7 +3609,7 @@ options can be used.
             False,
             None,
             True,
-            "happy_path_batch_request",
+            "warning_batch_request",
             "no_msg",
             id="warning: --non-interactive --batch-request",
         ),
@@ -3618,7 +3622,7 @@ options can be used.
             False,
             None,
             True,
-            "happy_path_datasource_name",
+            "warning_datasource_name",
             "no_msg",
             id="warning: --non-interactive --datasource-name",
         ),

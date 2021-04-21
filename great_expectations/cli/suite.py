@@ -182,22 +182,33 @@ def _process_suite_new_flags_and_prompt(
         )
         sys.exit(1)
 
-    # TODO: AJB 20210420 add better warning if user passes --non-interactive but either --profile or --batch-request (for this and suite_edit...)
+    user_provided_any_flag_skip_prompt: bool = any(
+        ((interactive is not None), (profile is True), (batch_request is not None))
+    )
 
-    # If user has provided a flag determining their configuration, skip prompt.
-    if (interactive is not None) or (profile is True) or (batch_request is not None):
+    # Note - explicit check for boolean or None for `interactive: Optional[bool]` is necessary because None indicates
+    #  that a user did not supply either flag.
+    if user_provided_any_flag_skip_prompt:
         # Assume batch needed if user passes --profile
-        if profile is True and (interactive is False or interactive is None):
+        if profile and interactive is None:
             cli_message(
                 "<green>Entering interactive mode since you passed the --profile flag</green>"
             )
             interactive = True
+        elif profile and interactive is False:
+            cli_message(
+                "<yellow>Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --profile flag</yellow>"
+            )
+            interactive = True
         # Assume batch needed if user passes --batch-request
-        elif (batch_request is not None) and (
-            interactive is False or interactive is None
-        ):
+        elif (batch_request is not None) and (interactive is None):
             cli_message(
                 "<green>Entering interactive mode since you passed the --batch-request flag</green>"
+            )
+            interactive = True
+        elif (batch_request is not None) and (interactive is False):
+            cli_message(
+                "<yellow>Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --batch-request flag</yellow>"
             )
             interactive = True
     else:
@@ -477,25 +488,36 @@ options can be used.
         )
         sys.exit(1)
 
-    # If user has provided a flag determining their configuration, skip prompt.
-    if (
-        (interactive is not None)
-        or (datasource_name is not None)
-        or (batch_request is not None)
-    ):
-        if (datasource_name is not None) and (
-            interactive is False or interactive is None
-        ):
-            cli_message(
-                "<green>Entering interactive mode since you passed the --datasource-name flag</green>"
-            )
+    user_provided_any_flag_skip_prompt: bool = any(
+        (
+            (interactive is not None),
+            (datasource_name is not None),
+            (batch_request is not None),
+        )
+    )
+
+    # Note - explicit check for boolean or None for `interactive: Optional[bool]` is necessary because None indicates
+    #  that a user did not supply either flag.
+    if user_provided_any_flag_skip_prompt:
+        if datasource_name is not None:
+            if interactive is None:
+                cli_message(
+                    "<green>Entering interactive mode since you passed the --datasource-name flag</green>"
+                )
+            elif interactive is False:
+                cli_message(
+                    "<yellow>Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --datasource-name flag</yellow>"
+                )
             interactive = True
-        elif (batch_request is not None) and (
-            interactive is False or interactive is None
-        ):
-            cli_message(
-                "<green>Entering interactive mode since you passed the --batch-request flag</green>"
-            )
+        elif batch_request is not None:
+            if interactive is None:
+                cli_message(
+                    "<green>Entering interactive mode since you passed the --batch-request flag</green>"
+                )
+            elif interactive is False:
+                cli_message(
+                    "<yellow>Warning: Ignoring the --non-interactive flag and entering interactive mode since you passed the --batch-request flag</yellow>"
+                )
             interactive = True
     else:
         suite_edit_method = click.prompt(
