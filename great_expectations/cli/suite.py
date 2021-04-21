@@ -75,7 +75,7 @@ def suite(ctx):
     "no_interactive_flag",
     is_flag=True,
     default=False,
-    help="""Do not use a batch of data to create expectations against.
+    help="""Do not use a batch of data to create expectations against (non-interactive mode).
 """,
 )
 @click.option(
@@ -83,7 +83,7 @@ def suite(ctx):
     "-p",
     is_flag=True,
     default=False,
-    help="""Generate a starting expectation suite automatically so you can refine it further. Requires --interactive
+    help="""Generate a starting expectation suite automatically so you can refine it further. Assumes --interactive
 flag.
 """,
 )
@@ -91,7 +91,7 @@ flag.
     "--batch-request",
     "-br",
     help="""Arguments to be provided to get_batch when loading the data asset.  Must be a path to a valid JSON file.
-Requires --interactive flag.
+Assumes --interactive flag.
 """,
     default=None,
 )
@@ -342,7 +342,7 @@ def _suite_new_workflow(
     is_flag=True,
     default=False,
     help="""Allows to specify explicitly whether or not a batch of data is available to reason about using the language
-of expectations; otherwise, best effort is made to determine this automatically (falling back to False).  Required with
+of expectations; otherwise, best effort is made to determine this automatically (falling back to False).  Assumed with
 --datasource-name option and with --batch-request option.
 """,
 )
@@ -352,21 +352,21 @@ of expectations; otherwise, best effort is made to determine this automatically 
     "no_interactive_flag",
     is_flag=True,
     default=False,
-    help="""Do not use a batch of data to create expectations against.
+    help="""Do not use a batch of data to create expectations against(non-interactive mode).
 """,
 )
 @click.option(
     "--datasource-name",
     "-ds",
     default=None,
-    help="""The name of the datasource. Requires --interactive flag.  Incompatible with --batch-request option.
+    help="""The name of the datasource. Assumes --interactive flag.  Incompatible with --batch-request option.
 """,
 )
 @click.option(
     "--batch-request",
     "-br",
     help="""Arguments to be provided to get_batch when loading the data asset.  Must be a path to a valid JSON file.
-Requires --interactive flag.  Incompatible with --datasource-name option.
+Assumes --interactive flag.  Incompatible with --datasource-name option.
 """,
     default=None,
 )
