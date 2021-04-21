@@ -426,7 +426,7 @@ stages:
               GALLERY_BUILD_HOOK: $(gallerywebhook)
 
   - stage: deploy
-    condition: and(succeeded(), eq(variables.isMain, true))
+    condition: succeeded()
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
