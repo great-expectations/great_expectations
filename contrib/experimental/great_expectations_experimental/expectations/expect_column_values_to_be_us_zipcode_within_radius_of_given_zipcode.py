@@ -348,8 +348,8 @@ if __name__ == "__main__":
     from packaging.version import parse as parse_version
 
     # Note 202104 uszipcode is not compatible with sqlalchemy 1.4 and higher
-    # Please remove this check once issue has been resolved, which can be tracked at the following link :
-    # https://github.com/MacHu-GWU/uszipcode-project/issues/48
+    # Please remove this check once issue has been resolved
+    # Issue can be tracked here : https://github.com/MacHu-GWU/uszipcode-project/issues/48
     try:
         import sqlalchemy as sa
 

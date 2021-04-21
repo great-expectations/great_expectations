@@ -2,6 +2,7 @@ import datetime
 import logging
 import uuid
 import warnings
+from typing import Optional
 
 from great_expectations.types import ClassConfig
 
