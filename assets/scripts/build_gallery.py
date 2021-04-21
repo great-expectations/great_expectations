@@ -144,8 +144,14 @@ def build_gallery(
             impl = great_expectations.expectations.registry.get_expectation_impl(
                 expectation
             )
-            diagnostics = impl().run_diagnostics()
-            gallery_info[expectation] = diagnostics
+            try:
+                diagnostics = impl().run_diagnostics()
+                gallery_info[expectation] = diagnostics
+            except Exception as e:
+                logger.error(
+                    f"Was not able to run diagnostics for Expectation: {expectation}"
+                )
+                gallery_info[expectation] = {"error": str(e)}
             built_expectations.add(expectation)
     else:
         built_expectations = set(core_expectations)
