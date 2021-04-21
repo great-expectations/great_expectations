@@ -772,7 +772,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             == hash_value
         )
 
-    def _build_selectable_from_batch_spec(self, batch_spec) -> Select:
+    def _build_selectable_from_batch_spec(self, batch_spec) -> Union[Select, str]:
         table_name: str = batch_spec["table_name"]
         if "splitter_method" in batch_spec:
             splitter_fn = getattr(self, batch_spec["splitter_method"])
@@ -886,9 +886,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            selectable: Select = self._build_selectable_from_batch_spec(
-                batch_spec=batch_spec
-            )
+            if engine.dialect.name.lower() == "oracle":
+                selectable: str = self._build_selectable_from_batch_spec(
+                    batch_spec=batch_spec
+                )
+            else:
+                selectable: Select = self._build_selectable_from_batch_spec(
+                    batch_spec=batch_spec
+                )
 
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
