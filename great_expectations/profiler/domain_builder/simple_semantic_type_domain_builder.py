@@ -61,19 +61,21 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             MetricConfiguration("table.columns", {})
         )
         column: str
+        # A semantic type is distinguished from the column storage type;
+        # An example of storage type would be "integer".  The semantic type would be "id".
+        semantic_column_type: str
         for column in columns:
-            # TODO: <Alex>ALEX -- Is this "column_type"?  Or is this more of a "domain type" (or "the name of the domain type")?</Alex>
-            column_type: str = self._get_column_semantic_type_name(
+            semantic_column_type: str = self._get_column_semantic_type_name(
                 validator=validator, column=column
             )
             # TODO: <Alex>ALEX -- We need to turn "type_filters" into a more sophisticated filtering object, or change the name to indicate that this is just the list of types.</Alex>
-            if column_type in type_filters:
+            if semantic_column_type in type_filters:
                 domains.append(
                     {
                         # TODO: AJB 20210419 why is column just the column name string - will this be different based on execution engine versions?
                         # "domain_kwargs": {"column": column.name},
                         "domain_kwargs": {"column": column},
-                        "domain_type": column_type,
+                        "domain_type": semantic_column_type,
                     }
                 )
         return domains

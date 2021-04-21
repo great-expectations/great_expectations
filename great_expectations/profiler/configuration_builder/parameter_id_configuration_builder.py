@@ -7,36 +7,37 @@ from great_expectations.profiler.configuration_builder.configuration_builder imp
 from great_expectations.profiler.profiler_rule.rule_state import RuleState
 
 
-class ParameterIdConfigurationBuilder(ConfigurationBuilder):
-    """Class which creates Expectation configuration out of a given
-    Expectation type and a parameter-name config"""
+class DomainIdParameterNameConfigurationBuilder(ConfigurationBuilder):
+    """
+    Class which creates ExpectationConfiguration out of a given Expectation type and domain_id-parameter_name name-value
+    pairs as attribute directives (supplied in kwargs).
+    """
 
-    def __init__(self, expectation: str = None, **kwargs):
-        self._expectation_type = expectation
-        self._config = kwargs
+    def __init__(self, expectation_type: str = None, **kwargs):
+        self._expectation_type = expectation_type
+        self._domain_id_parameter_name_dict = kwargs
 
     def _build_configuration(
         self, rule_state: RuleState, **kwargs
     ) -> ExpectationConfiguration:
         """
-        Utilizes RuleState object to obtain parameter names out of the parameter ids initialized in the constructor,
-        returning an Expectation configuration initialized with the classes' Expectation type and a dict of all
-        necessary parameters (as kwargs).
+        Utilizes RuleState object to obtain parameter names out of the parameter names initialized in the constructor,
+        returning an ExpectationConfiguration, initialized with the classes' Expectation type ass well as the dictionary
+        of all the additional flexible attributes (passed as kwargs to this method).
 
         :param rule_state: An object keeping track of the state information necessary for rule validation, such as
-            domain, metric parameters, and necessary variables
-        :return: Expectation config initialized with Expectation type and parameters that have been specified by
-            the class' config and obtained from the Rule State.
+            domain, metric parameters, and necessary variables.
+        :return: ExpectationConfiguration
         """
         rule_expectation_kwargs: dict = {}
-        attribute_name: str
-        attribute_value: Any
-        for attribute_name, attribute_value in self._config.items():
-            rule_expectation_kwargs[attribute_name] = rule_state.get_parameter_value(
-                parameter_name=attribute_value
+        domain_id: str
+        parameter_name: Any
+        for domain_id, parameter_name in self._domain_id_parameter_name_dict.items():
+            rule_expectation_kwargs[domain_id] = rule_state.get_parameter_value(
+                parameter_name=parameter_name
             )
 
-        kwargs.update(rule_expectation_kwargs)
+        rule_expectation_kwargs.update(kwargs)
         return ExpectationConfiguration(
             expectation_type=self._expectation_type, **kwargs
         )

@@ -8,7 +8,6 @@ from great_expectations.validator.validator import Validator
 
 # TODO: <Alex>ALEX -- The fact that this class overwrites get_domains() instead of _get_domains() is problematic and should be changed to the standarized approach (the latter).</Alex>
 class ColumnDomainBuilder(DomainBuilder):
-    # TODO: <Alex>ALEX -- What is the return type?</Alex>
     def get_domains(
         self,
         *,
@@ -33,7 +32,6 @@ class ColumnDomainBuilder(DomainBuilder):
         )
 
     # TODO: <Alex>ALEX -- this method is defined, but not used anywhere in the codebase.</Alex>
-    # TODO: <Alex>ALEX -- What is the return type?</Alex>
     def get_column_domains(
         self, *, validator=None, batch_ids=None, **kwargs
     ) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:

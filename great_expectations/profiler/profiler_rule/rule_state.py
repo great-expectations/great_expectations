@@ -66,6 +66,14 @@ class RuleState:
     ):
         self._active_domain = active_domain
 
+    @property
+    def active_domain_id(self) -> str:
+        """
+        Getter for the id of the rule domain
+        :return: the id of the rule domain
+        """
+        return IDDict(self.active_domain).to_id()
+
     # TODO: <Alex>ALEX -- what is the return type?</Alex>
     @property
     def variables(self) -> Parameter:
@@ -74,14 +82,6 @@ class RuleState:
         :return: variables necessary for validating rule
         """
         return self._variables
-
-    @property
-    def active_domain_id(self) -> str:
-        """
-        Getter for the id of the rule domain
-        :return: the id of the rule domain
-        """
-        return IDDict(self.active_domain).to_id()
 
     def get_parameter_value(self, parameter_name: str) -> Any:
         """
