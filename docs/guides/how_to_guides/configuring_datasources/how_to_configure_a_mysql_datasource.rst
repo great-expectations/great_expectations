@@ -158,32 +158,30 @@ Steps
         #. You will be presented with a Jupyter Notebook which will guide you through the steps of creating a Datasource.
 
 
-Additional notes
-----------------
+        **MySql SimpleSqlalchemyDatasource Example.**
 
         Within this notebook, you will have the opportunity to create your own yaml Datasource configuration. The following text walks through an example.
 
-        #.  **MySql SimpleSqlalchemyDatasource Example.**
 
-                Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.
+            Parameters can be set as strings, or passed in as environment variables. In the following example, a yaml config is configured for a ``SimpleSqlalchemyDatasource`` with associated credentials passed in as strings.
 
-                .. code-block:: python
+            .. code-block:: python
 
-                    datasource_name = "my_mysql_datasource"
-                    config = f"""
-                        name: {datasource_name}
-                        class_name: SimpleSqlalchemyDatasource
-                        credentials:
-                          drivername: mysql+pymysql
-                          host: YOUR_MYSQL_HOST
-                          port: YOUR_MYSQL_PORT
-                          username: YOUR_MYSQL_USERNAME
-                          password: YOUR_MYSQL_PASSWORD
-                          database: YOUR_MYSQL_DB_NAME
-                        introspection:
-                          whole_table:
-                            data_asset_name_suffix: __whole_table
-                        """
+                datasource_name = "my_mysql_datasource"
+                config = f"""
+                    name: {datasource_name}
+                    class_name: SimpleSqlalchemyDatasource
+                    credentials:
+                      drivername: mysql+pymysql
+                      host: YOUR_MYSQL_HOST
+                      port: YOUR_MYSQL_PORT
+                      username: YOUR_MYSQL_USERNAME
+                      password: YOUR_MYSQL_PASSWORD
+                      database: YOUR_MYSQL_DB_NAME
+                    introspection:
+                      whole_table:
+                        data_asset_name_suffix: __whole_table
+                    """
 
             **Note**: Additional examples of yaml configurations for various filesystems and databases can be found in the following document: :ref:`How to configure Data Context components using test_yaml_config <how_to_guides_how_to_configure_datacontext_components_using_test_yaml_config>`
 
