@@ -76,7 +76,7 @@ Steps
 
         1. Generate a notebook.
 
-            To edit a suite called movieratings.ratings you could run the CLI command:
+            To edit a suite called ``movieratings.ratings`` you could run the CLI command:
 
             .. code-block:: bash
 
@@ -126,7 +126,7 @@ Steps
 
         1. Generate a notebook.
 
-            To edit a suite called movieratings.ratings you could run the CLI command:
+            To edit a suite called ``movieratings.ratings`` you could run the CLI command:
 
             .. code-block:: bash
 
