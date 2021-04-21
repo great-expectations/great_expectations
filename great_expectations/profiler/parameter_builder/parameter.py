@@ -11,6 +11,7 @@ class Parameter(IDDict, SerializableDictDot):
     parameters: Dict[str, Any]
     details: Optional[Dict[str, Union[str, dict]]] = None
 
+    @property
     def id(self) -> str:
         return self.to_id()
 
