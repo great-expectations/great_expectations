@@ -886,7 +886,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            if engine.dialect.name.lower() == "oracle":
+            if self.engine.dialect.name.lower() == "oracle":
                 selectable: str = self._build_selectable_from_batch_spec(
                     batch_spec=batch_spec
                 )
