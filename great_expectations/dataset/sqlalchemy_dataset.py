@@ -271,17 +271,37 @@ class MetaSqlAlchemyDataset(Dataset):
             count_results["null_count"] = int(count_results["null_count"])
             count_results["unexpected_count"] = int(count_results["unexpected_count"])
 
-            # Retrieve unexpected values
-            unexpected_query_results = self.engine.execute(
-                sa.select([sa.column(column)])
-                .select_from(self._table)
-                .where(
-                    sa.and_(
-                        sa.not_(expected_condition), sa.not_(ignore_values_condition)
+            # limit doesn't compile properly for oracle so we will append rownum to query string later
+            if self.engine.dialect.name.lower() == "oracle":
+                raw_query = (
+                    sa.select([sa.column(column)])
+                    .select_from(self._table)
+                    .where(
+                        sa.and_(
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
+                        )
                     )
                 )
-                .limit(unexpected_count_limit)
-            )
+                query = str(
+                    raw_query.compile(
+                        self.engine, compile_kwargs={"literal_binds": True}
+                    )
+                )
+                query += "\nAND ROWNUM <= %d" % unexpected_count_limit
+            else:
+                query = (
+                    sa.select([sa.column(column)])
+                    .select_from(self._table)
+                    .where(
+                        sa.and_(
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
+                        )
+                    )
+                    .limit(unexpected_count_limit)
+                )
+            unexpected_query_results = self.engine.execute(query)
 
             nonnull_count: int = (
                 count_results["element_count"] - count_results["null_count"]
