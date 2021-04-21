@@ -22,11 +22,11 @@ Steps
 
         1. Generate a notebook.
 
-            To edit a suite called movieratings.ratings you could run the CLI command:
+            To edit a suite called movieratings.warning you could run the CLI command:
 
             .. code-block:: bash
 
-                great_expectations suite edit movieratings.ratings
+                great_expectations suite edit movieratings.warning
 
             For convenience, the :ref:`Data Docs <reference__core_concepts__datasources>` page for each Expectation Suite has the CLI command syntax for you. Simply press the “How to Edit This Suite” button, and copy/paste the CLI command into your terminal.
 
@@ -66,7 +66,7 @@ Steps
 
             .. code-block:: bash
 
-                rm great_expectations/uncommitted/edit_movieratings.ratings.ipynb
+                rm great_expectations/uncommitted/edit_movieratings.warning.ipynb
 
 
     .. tab-container:: tab1
@@ -76,11 +76,11 @@ Steps
 
         1. Generate a notebook.
 
-            To edit a suite called ``movieratings.ratings`` you could run the CLI command:
+            To edit a suite called ``movieratings.warning`` you could run the CLI command:
 
             .. code-block:: bash
 
-                great_expectations --v3-api suite edit movieratings.ratings
+                great_expectations --v3-api suite edit movieratings.warning
 
             For convenience, the :ref:`Data Docs <reference__core_concepts__datasources>` page for each Expectation Suite has the CLI command syntax for you.
 
@@ -117,7 +117,7 @@ Steps
 
             .. code-block:: bash
 
-                rm great_expectations/uncommitted/edit_movieratings.ratings.ipynb
+                rm great_expectations/uncommitted/edit_movieratings.warning.ipynb
 
     .. tab-container:: tab2
         :title: Show Docs for V3 (Batch Request) API With a Batch of data
@@ -126,11 +126,11 @@ Steps
 
         1. Generate a notebook.
 
-            To edit a suite called ``movieratings.ratings`` you could run the CLI command:
+            To edit a suite called ``movieratings.warning`` you could run the CLI command:
 
             .. code-block:: bash
 
-                great_expectations --v3-api suite edit movieratings.ratings --interactive
+                great_expectations --v3-api suite edit movieratings.warning --interactive
 
             For convenience, the :ref:`Data Docs <reference__core_concepts__datasources>` page for each Expectation Suite has the CLI command syntax for you. Simply press the “How to Edit This Suite” button, and copy/paste the CLI command into your terminal.
 
@@ -169,7 +169,7 @@ Steps
 
             .. code-block:: bash
 
-                rm great_expectations/uncommitted/edit_movieratings.ratings.ipynb
+                rm great_expectations/uncommitted/edit_movieratings.warning.ipynb
 
 
 
