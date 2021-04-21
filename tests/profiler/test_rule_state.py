@@ -26,7 +26,9 @@ def semantic_rule_state():
                 parameters={"mean": 5.0}, details=None
             )
         },
-        variables={"false_positive_threshold": 0.01},
+        variables=Parameter(
+            parameters={"false_positive_threshold": 0.01}, details=None
+        ),
     )
 
 
@@ -41,7 +43,7 @@ def test_get_parameter_value(semantic_rule_state):
     assert semantic_rule_state.get_parameter_value(parameter_name="$mean") == 5.0
 
 
-def test_get_variable_value(semantic_rule_state):
+def test_get_parameter_value(semantic_rule_state):
     assert (
         semantic_rule_state.get_parameter_value(
             parameter_name="$variables.false_positive_threshold"

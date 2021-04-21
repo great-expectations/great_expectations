@@ -21,7 +21,7 @@ class RuleState:
         ] = None,
         # TODO: <Alex>ALEX -- what is the structure of this "parameters" argument?</Alex>
         parameters: Optional[Dict[str, Parameter]] = None,
-        variables=None,
+        variables: Optional[Parameter] = None,
     ):
         self._active_domain = active_domain
         if domains is None:
@@ -32,7 +32,7 @@ class RuleState:
         self._parameters = parameters
         # TODO: <Alex>ALEX -- what is the type -- what kind of a dictionary is "variables"?</Alex>
         if variables is None:
-            variables = {}
+            variables = Parameter(parameters={}, details=None)
         self._variables = variables
 
     @property
@@ -61,7 +61,7 @@ class RuleState:
 
     # TODO: <Alex>ALEX -- what is the return type?</Alex>
     @property
-    def variables(self):
+    def variables(self) -> Parameter:
         """
         Getter for rule_state variables
         :return: variables necessary for validating rule
