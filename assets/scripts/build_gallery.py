@@ -144,14 +144,8 @@ def build_gallery(
             impl = great_expectations.expectations.registry.get_expectation_impl(
                 expectation
             )
-            try:
-                diagnostics = impl().run_diagnostics()
-                gallery_info[expectation] = diagnostics
-            except Exception as e:
-                logger.error(
-                    f"Was not able to run diagnostics for Expectation: {expectation}"
-                )
-                gallery_info[expectation] = {"error": str(e)}
+            diagnostics = impl().run_diagnostics()
+            gallery_info[expectation] = diagnostics
             built_expectations.add(expectation)
     else:
         built_expectations = set(core_expectations)
@@ -207,15 +201,10 @@ def build_gallery(
                     expectation
                 )
 
-                try:
-                    diagnostics = impl().run_diagnostics()
-                    gallery_info[expectation] = diagnostics
-                except Exception as e:
-                    logger.error(
-                        f"Was not able to run diagnostics for Expectation: {expectation}"
-                    )
-                    gallery_info[expectation] = {"error": str(e)}
+                diagnostics = impl().run_diagnostics()
+                gallery_info[expectation] = diagnostics
                 built_expectations.add(expectation)
+
             logger.info(f"Unloading just-installed for module {expectation_module}")
             for req in just_installed:
                 logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")

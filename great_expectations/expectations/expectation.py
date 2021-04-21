@@ -764,7 +764,7 @@ class Expectation(metaclass=MetaExpectation):
                     expectation_config=expectation_config,
                 )
                 validation_result = validation_results[0]
-            except GreatExpectationsError as e:
+            except Exception as e:
                 report_obj = self._add_error_to_diagnostics_report(
                     report_obj, e, traceback.format_exc()
                 )
