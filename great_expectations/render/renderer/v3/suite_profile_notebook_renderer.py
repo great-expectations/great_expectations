@@ -123,7 +123,9 @@ This can be done by running `great_expectations suite edit {self.expectation_sui
         self._notebook = nbformat.v4.new_notebook()
         self.add_header()
         self.add_markdown_cell(
-            markdown="""# Select the columns on which you would like to set expectations and those which you would like to ignore.
+            markdown="""# Select columns
+
+Select the columns on which you would like to set expectations and those which you would like to ignore.
 
 Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
 
@@ -133,7 +135,7 @@ use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
         )
         self._add_available_columns_list()
         self.add_markdown_cell(
-            markdown="""# Run the data profiler.
+            markdown="""# Run the data profiler
 
 The suites generated here are **not meant to be production suites** -- they are **a starting point to build upon**.
 
