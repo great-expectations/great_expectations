@@ -5,10 +5,17 @@ from great_expectations.core import IDDict
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.profiler.parameter_builder.parameter import Parameter
 
+DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
+DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
+    f"$domain.{DOMAIN_KWARGS_PARAMETER_NAME}"
+)
+VARIABLES_KEY: str = "$variables."
 
+
+# TODO: <Alex>ALEX -- We should consider changing the names "parameters" and "Parameter.parameters" to be more semantically meaningful.</Alex>
 class RuleState:
     """Manages state for ProfilerRule objects. Keeps track of rule domain, rule parameters,
-    and any other necessary variables for validating the rule"""
+    and any other necessary variables for validating the rule."""
 
     # TODO: <Alex>ALEX -- Add type hints; what are the types?</Alex>
     def __init__(
@@ -30,7 +37,7 @@ class RuleState:
         if parameters is None:
             parameters = {}
         self._parameters = parameters
-        # TODO: <Alex>ALEX -- what is the type -- what kind of a dictionary is "variables"?</Alex>
+        # TODO: <Alex>ALEX -- what is the type -- what kind of a dictionary is "variables"?  Is is "Parameter"?</Alex>
         if variables is None:
             variables = Parameter(parameters={}, details=None)
         self._variables = variables
@@ -85,31 +92,43 @@ class RuleState:
             eg: domain kwargs
         :return: requested value
         """
-        if not parameter_name.startswith("$"):
+        fully_qualified_parameter_name: str = parameter_name
+        if not fully_qualified_parameter_name.startswith("$"):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Unable to get value for parameter name "{parameter_name}" - values must start with $.'
+                message=f'Unable to get value for parameter name "{fully_qualified_parameter_name}" -- values must start with $.'
             )
 
-        if parameter_name == "$domain.domain_kwargs":
-            return self.active_domain["domain_kwargs"]
+        if (
+            fully_qualified_parameter_name
+            == DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
+        ):
+            return self.active_domain[DOMAIN_KWARGS_PARAMETER_NAME]
 
-        variables_key: str = "$variables."
-        lookup: List[str]
-        current_parameter: Parameter
-        if parameter_name.startswith(variables_key):
-            lookup = parameter_name[len(variables_key) :].split(".")
-            current_parameter = self.variables
+        fully_qualified_parameter_name_references_variable: bool = False
+        if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
+            fully_qualified_parameter_name = fully_qualified_parameter_name[
+                len(VARIABLES_KEY) :
+            ]
+            fully_qualified_parameter_name_references_variable = True
         else:
-            lookup = parameter_name[1:].split(".")
-            current_parameter = self.parameters.get(self.active_domain_id, {})
+            fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
-        level: Optional[str] = None
+        parameter: Parameter
+        if fully_qualified_parameter_name_references_variable:
+            parameter = self.variables
+        else:
+            parameter = self.parameters.get(self.active_domain_id, {})
+
+        parameter_name_hierarchy_list: List[str] = fully_qualified_parameter_name.split(
+            "."
+        )
+        parameter_name_at_level_in_hierarchy: Optional[str] = None
         try:
-            for level in lookup:
-                current_parameter = current_parameter.parameters[level]
+            for parameter_name_at_level_in_hierarchy in parameter_name_hierarchy_list:
+                parameter = parameter.parameters[parameter_name_at_level_in_hierarchy]
         except KeyError:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Unable to find value for parameter name "{parameter_name}": key "{level}" was missing.'
+                message=f'Unable to find value for parameter name "{parameter_name}": key "{parameter_name_at_level_in_hierarchy}" was missing.'
             )
 
-        return current_parameter
+        return parameter
