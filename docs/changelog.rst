@@ -18,6 +18,7 @@ Develop
 * [ENHANCEMENT} Update the datasource new notebook for improved data asset inference
 * [ENHANCEMENT] Update the `datasource new` notebook for improved data asset inference
 * [ENHANCEMENT] Made stylistic improvements to the `checkpoint new` notebook
+* [ENHANCEMENT] Add mode prompt to suite new and suite edit #2706
 * [BUGFIX] Rename assets in SqlDataConnectors to be consistent with other DataConnectors #2665
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
