@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from great_expectations.profiler.parameter_builder.parameter import Parameter
 from great_expectations.profiler.parameter_builder.parameter_builder import (
@@ -17,13 +17,13 @@ class MetricParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         *,
-        parameter_id,
+        parameter_name,
         data_context=None,
         metric_name,
         metric_domain_kwargs="$domain.domain_kwargs",
         metric_value_kwargs=None
     ):
-        super().__init__(parameter_id=parameter_id, data_context=data_context)
+        super().__init__(parameter_name=parameter_name, data_context=data_context)
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
@@ -47,7 +47,7 @@ class MetricParameterBuilder(ParameterBuilder):
         # Obtaining any necessary domain kwargs from rule state, otherwise using instance var
         if self._metric_domain_kwargs.startswith("$"):
             metric_domain_kwargs = rule_state.get_parameter_value(
-                parameter_name=self._metric_domain_kwargs
+                fully_qualified_parameter_name=self._metric_domain_kwargs
             )
         else:
             metric_domain_kwargs = self._metric_domain_kwargs
@@ -58,7 +58,7 @@ class MetricParameterBuilder(ParameterBuilder):
             and self._metric_value_kwargs.startswith("$")
         ):
             metric_value_kwargs = rule_state.get_parameter_value(
-                parameter_name=self._metric_value_kwargs
+                fully_qualified_parameter_name=self._metric_value_kwargs
             )
         else:
             metric_value_kwargs = self._metric_value_kwargs

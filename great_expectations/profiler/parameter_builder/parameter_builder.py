@@ -19,7 +19,7 @@ class ParameterBuilder(ABC):
 
         ```
         parameter_builders:
-          - id: mean
+          - parameter_name: mean
             class_name: MetricParameterBuilder
             metric_name: column.mean
             metric_domain_kwargs: $domain.domain_kwargs
@@ -27,14 +27,14 @@ class ParameterBuilder(ABC):
     """
 
     def __init__(
-        self, *, parameter_id: str, data_context: Optional[DataContext] = None
+        self, *, parameter_name: str, data_context: Optional[DataContext] = None
     ):
-        self._parameter_id = parameter_id
+        self._parameter_name = parameter_name
         self._data_context = data_context
 
     @property
-    def parameter_id(self) -> str:
-        return self._parameter_id
+    def parameter_name(self) -> str:
+        return self._parameter_name
 
     def build_parameters(
         self,

@@ -22,7 +22,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         *,
-        parameter_id: str,
+        parameter_name: str,
         data_context: DataContext,
         threshold: float = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
@@ -37,7 +37,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             candidate_strings: a list of candidate date format strings that will REPLACE the default
             additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
         """
-        super().__init__(parameter_id=parameter_id, data_context=data_context)
+        super().__init__(parameter_name=parameter_name, data_context=data_context)
         self._threshold = threshold
         if candidate_strings is not None:
             self._candidate_strings = candidate_strings
@@ -67,11 +67,11 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         if len(batch_ids) > 1:
             # By default, the validator will use active batch id (the most recently loaded batch)
             logger.warning(
-                f"Rule {self.parameter_id} received {len(batch_ids)} batches but can only process one."
+                f"Rule {self.parameter_name} received {len(batch_ids)} batches but can only process one."
             )
             if batch_ids[0] not in validator.execution_engine.loaded_batch_data_ids:
                 raise ge_exceptions.ProfilerExecutionError(
-                    f"Parameter Builder {self.parameter_id} cannot build parameters because batch {batch_ids[0]} is not "
+                    f"Parameter Builder {self.parameter_name} cannot build parameters because batch {batch_ids[0]} is not "
                     f"currently loaded in the validator."
                 )
 

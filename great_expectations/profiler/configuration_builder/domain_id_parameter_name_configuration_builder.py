@@ -7,37 +7,41 @@ from great_expectations.profiler.configuration_builder.configuration_builder imp
 from great_expectations.profiler.profiler_rule.rule_state import RuleState
 
 
-class DomainIdParameterNameConfigurationBuilder(ConfigurationBuilder):
+class ParameterConfigurationBuilder(ConfigurationBuilder):
     """
-    Class which creates ExpectationConfiguration out of a given Expectation type and domain_id-parameter_name pairs as
-    attribute directives (supplied in kwargs).
+    Class which creates ExpectationConfiguration out of a given Expectation type and
+    parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied as kwargs dictionary).
     """
 
     def __init__(self, expectation_type: str = None, **kwargs):
         self._expectation_type = expectation_type
-        self._domain_id_parameter_name_dict = kwargs
+        self._parameter_name_to_fully_qualified_parameter_name_dict = kwargs
 
     def _build_configuration(
         self, rule_state: RuleState, **kwargs
     ) -> ExpectationConfiguration:
         """
-        Utilizes RuleState object to obtain parameter names out of the parameter names initialized in the constructor,
-        returning an ExpectationConfiguration, initialized with the classes' Expectation type ass well as the dictionary
-        of all the additional flexible attributes (passed as kwargs to this method).
+        Utilizes RuleState object to obtain parameter values out of the fully qualified parameter names initialized in
+        the constructor, returning an ExpectationConfiguration, instantiated with the classes' Expectation type as well
+        as the dictionary of all the additional flexible attributes (passed as kwargs to this method).
 
         :param rule_state: An object keeping track of the state information necessary for rule validation, such as
             domain, metric parameters, and necessary variables.
         :return: ExpectationConfiguration
         """
-        rule_expectation_kwargs: dict = {}
-        domain_id: str
-        parameter_name: Any
-        for domain_id, parameter_name in self._domain_id_parameter_name_dict.items():
-            rule_expectation_kwargs[domain_id] = rule_state.get_parameter_value(
-                parameter_name=parameter_name
+        expectation_kwargs: dict = {}
+        parameter_name: str
+        fully_qualified_parameter_name: str
+        for (
+            parameter_name,
+            fully_qualified_parameter_name,
+        ) in self._parameter_name_to_fully_qualified_parameter_name_dict.items():
+            expectation_kwargs[parameter_name] = rule_state.get_parameter_value(
+                fully_qualified_parameter_name=fully_qualified_parameter_name
             )
 
-        rule_expectation_kwargs.update(kwargs)
+        expectation_kwargs.update(kwargs)
+
         return ExpectationConfiguration(
-            expectation_type=self._expectation_type, **kwargs
+            expectation_type=self._expectation_type, **expectation_kwargs
         )

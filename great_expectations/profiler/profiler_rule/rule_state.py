@@ -83,16 +83,16 @@ class RuleState:
         """
         return self._variables
 
-    def get_parameter_value(self, parameter_name: str) -> Any:
+    def get_parameter_value(self, fully_qualified_parameter_name: str) -> Any:
         """
-        Get a value from the current rule state. Values must be dot-delimited, and may start either with
-        the key 'domain' or the id of a parameter.
+        Get the parameter value from the current rule state using the fully-qualified parameter name.
+        A fully-qualified parameter name must be dot-delimited, and may start either with the key "domain" or the name
+        of a parameter.
         Args
-            :param parameter_name: str - A string key starting with $ and corresponding to internal state arguments,
-            eg: domain kwargs
+            :param fully_qualified_parameter_name: str -- A string key starting with $ and corresponding to internal
+            state arguments (e.g.: domain kwargs)
         :return: requested value
         """
-        fully_qualified_parameter_name: str = parameter_name
         if not fully_qualified_parameter_name.startswith("$"):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f'Unable to get value for parameter name "{fully_qualified_parameter_name}" -- values must start with $.'
@@ -128,7 +128,7 @@ class RuleState:
                 parameter = parameter.parameters[parameter_name_at_level_in_hierarchy]
         except KeyError:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Unable to find value for parameter name "{parameter_name}": key "{parameter_name_at_level_in_hierarchy}" was missing.'
+                message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": key "{parameter_name_at_level_in_hierarchy}" was missing.'
             )
 
         return parameter

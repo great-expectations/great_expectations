@@ -38,10 +38,13 @@ def test_active_domain_id_property(simple_rule_state, semantic_rule_state):
 
 
 def test_get_parameter_value(semantic_rule_state):
-    assert semantic_rule_state.get_parameter_value(parameter_name="$mean") == 5.0
+    assert (
+        semantic_rule_state.get_parameter_value(fully_qualified_parameter_name="$mean")
+        == 5.0
+    )
     assert (
         semantic_rule_state.get_parameter_value(
-            parameter_name="$variables.false_positive_threshold"
+            fully_qualified_parameter_name="$variables.false_positive_threshold"
         )
         == 0.01
     )
@@ -49,5 +52,7 @@ def test_get_parameter_value(semantic_rule_state):
 
 def test_invalid_parameter_name(semantic_rule_state):
     with pytest.raises(ProfilerExecutionError) as exc:
-        _ = semantic_rule_state.get_parameter_value(parameter_name="mean")
+        _ = semantic_rule_state.get_parameter_value(
+            fully_qualified_parameter_name="mean"
+        )
     assert "start with $" in exc.value.message
