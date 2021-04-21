@@ -32,11 +32,9 @@ def semantic_rule_state():
     )
 
 
-def test_get_active_domain_id(simple_rule_state, semantic_rule_state):
-    assert simple_rule_state.get_active_domain_id() == "domain_kwargs={'column': 'Age'}"
-    assert (
-        semantic_rule_state.get_active_domain_id() == "f45a40fda1738351c5e67a0aa89c2c7c"
-    )
+def test_active_domain_id_property(simple_rule_state, semantic_rule_state):
+    assert simple_rule_state.active_domain_id == "domain_kwargs={'column': 'Age'}"
+    assert semantic_rule_state.active_domain_id == "f45a40fda1738351c5e67a0aa89c2c7c"
 
 
 def test_get_parameter_value(semantic_rule_state):

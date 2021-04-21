@@ -68,8 +68,8 @@ class RuleState:
         """
         return self._variables
 
-    # TODO: <Alex>ALEX -- Change some of these methods into properties.</Alex>
-    def get_active_domain_id(self) -> str:
+    @property
+    def active_domain_id(self) -> str:
         """
         Getter for the id of the rule domain
         :return: the id of the rule domain
@@ -101,7 +101,7 @@ class RuleState:
             current_parameter = self.variables
         else:
             lookup = parameter_name[1:].split(".")
-            current_parameter = self.parameters.get(self.get_active_domain_id(), {})
+            current_parameter = self.parameters.get(self.active_domain_id, {})
 
         level: Optional[str] = None
         try:
