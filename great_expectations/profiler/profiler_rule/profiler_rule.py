@@ -67,7 +67,7 @@ class ProfilerRule:
 
         for domain in rule_state.domains:
             rule_state.active_domain = domain
-            domain_id: str = rule_state.active_domain_id()
+            domain_id: str = rule_state.active_domain_id
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
                 parameter_id: str = parameter_builder.parameter_id
