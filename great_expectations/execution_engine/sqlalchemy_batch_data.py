@@ -145,11 +145,15 @@ class SqlAlchemyBatchData(BatchData):
                         "batch_spec_passthrough or a specify a default dataset in engine url"
                     )
             if selectable is not None:
-                # compile selectable to sql statement
-                query = selectable.compile(
-                    dialect=self.sql_engine_dialect,
-                    compile_kwargs={"literal_binds": True},
-                )
+                if engine.dialect.name.lower() == "oracle":
+                    # oracle query was already passed as a string
+                    query = selectable
+                else:
+                    # compile selectable to sql statement
+                    query = selectable.compile(
+                        dialect=self.sql_engine_dialect,
+                        compile_kwargs={"literal_binds": True},
+                    )
             self._create_temporary_table(
                 generated_table_name,
                 query,
