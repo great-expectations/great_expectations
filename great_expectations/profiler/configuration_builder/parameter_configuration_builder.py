@@ -1,5 +1,3 @@
-from typing import Any
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.profiler.configuration_builder.configuration_builder import (
     ConfigurationBuilder,
