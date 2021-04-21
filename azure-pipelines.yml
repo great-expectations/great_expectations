@@ -372,7 +372,6 @@ stages:
             displayName: 'pytest'
 
   - stage: deploy_gallery
-    condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: [lint]
