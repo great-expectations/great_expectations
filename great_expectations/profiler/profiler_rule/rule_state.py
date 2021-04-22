@@ -117,7 +117,9 @@ class RuleState:
         if fully_qualified_parameter_name_references_variable:
             parameter = self.variables
         else:
-            parameter = self.parameters.get(self.active_domain_id, {})
+            parameter = self.parameters.get(
+                self.active_domain_id, Parameter(parameters={}, details=None)
+            )
 
         parameter_name_hierarchy_list: List[str] = fully_qualified_parameter_name.split(
             "."
