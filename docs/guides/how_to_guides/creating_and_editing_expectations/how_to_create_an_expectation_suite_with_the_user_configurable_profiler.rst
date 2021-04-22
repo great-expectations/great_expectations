@@ -320,6 +320,58 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
         Here is a slightly more concrete example:
 
+        GEN1:
+
+          global_profiler_parameters:
+            - global_param_1
+          rules:
+            my_rule_for_ids: # Could be a semantic type
+              domain:
+                my_id_domain:
+                  # columns of type ``integer`` with name ``id`` or suffix ``_id``
+              parameter_builders:
+                - my_id_parameter_1_min:
+                  # min value of column, using domain above
+                - my_id_parameter_2_max:
+                  # max value of column, using domain above
+                - my_id_parameter_3_min_5_batches_ago:
+                  # min value of column from 5 batches ago, using domain above and using a ``batch_request`` modifier to index to ``-5`` batches.
+                - my_id_parameter_4_mean_of_last_10_batches:
+                  # mean of last 10 batches, using domain above and using a ``batch_request`` modifier to index via slice the last ``-10:`` batches.
+              expectation_configuration_builders:
+                - expectation: expect_column_values_to_be_between # Expectation name as string
+                  column: $my_id_domain_1.domain_kwargs.column # Reference to all columns in referenced domain (expectation built with each one in turn) (QUESTION: Can we omit / guess that ``domain_kwargs`` is part of this column definition so it can be shortened to ``$my_id_domain_1.column``?)
+                  min_value: $my_id_parameter_1_min.parameter.min # Reference to parameter defined above
+                    (QUESTION: Can we omit / guess that ``parameter`` is part of this parameter definition so it can be shortened to ``$my_id_parameter_2_max.max``?)
+                  max_value: $my_id_parameter_2_max.parameter.max
+                - expectation: expect_column_values_to_be_between
+                  column: $my_id_domain_2.column
+                  min_value: $my_id_parameter_3_min_5_batches_ago.parameter.min
+                  max_value: $global_param_1
+                - expectation: expect_column_values_to_be_between
+                  column: $my_id_domain_2.column
+                  min_value: $my_id_parameter_4_mean_of_last_10_batches.parameter.mean
+                  max_value: $global_param_1
+                  mostly: 0.5
+                - expectation: expect_column_values_to_not_be_null
+                  column: $domains.column # columns for all domains
+
+            my_rule_for_datetimes: # semantic type
+              domains:
+                - my_datetime_domain_1: # QUESTION: Should we allow for multiple domains in a rule? QUESTION: Can / should domains be defined outside of the scope of a specific rule?
+                  # columns of type ``datetime`` (using the ``type_filters`` field)
+                - my_datetime_domain_2
+                  # columns with the suffix ``_dt``
+              parameters:
+                - $my_dateformat_parameter_1:
+                  # string format
+              expectation_configuration_builders:
+                - expectation: expect_column_values_to_match_strftime_format
+                column: $domains.column # columns for all domains
+                date_fmt: $my_dateformat_parameter_1.parameter.date_string
+
+        GEN2:
+
         .. code-block:: yaml
 
           global_profiler_parameters:
@@ -367,9 +419,11 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
         TODO: insert more examples with actual code.
 
+        TODO: This is an example from James' spec document copied over verbatim, and should be edited.
+
         .. code-block:: yaml
 
-          name: BasicSuiteBuilderProfiler
+          class_name: BasicSuiteBuilderProfiler
           variables:
             false_positive_threshold: 0.01
           rules:
