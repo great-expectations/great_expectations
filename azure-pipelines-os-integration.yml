@@ -4,8 +4,8 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
 # Deactivate os-integration to preserve scarce build resources
-# trigger:
-#   - main
+trigger:
+  - main
 #   - develop
 
 # pr: none
