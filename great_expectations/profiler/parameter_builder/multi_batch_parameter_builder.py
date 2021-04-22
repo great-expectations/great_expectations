@@ -21,7 +21,13 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
     and uses a configured batch_request parameter to obtain them if they are not.
     """
 
-    def __init__(self, *, parameter_name: str, batch_request: BatchRequest, data_context: Optional[DataContext] = None):
+    def __init__(
+        self,
+        *,
+        parameter_name: str,
+        batch_request: BatchRequest,
+        data_context: Optional[DataContext] = None,
+    ):
         if data_context is None:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"MultiBatchParameterBuilder requires a data_context, but none was provided."

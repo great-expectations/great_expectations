@@ -17,7 +17,12 @@ logger = logging.getLogger(__name__)
 class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     """Returns the best matching strftime format string for a provided domain."""
 
-    CANDIDATE_DATE_FORMAT_STRINGS = {"YYYY-MM-DD", "MM-DD-YYYY", "YY-MM-DD", "YYYY-mm-DDTHH:MM:SSS"}
+    CANDIDATE_DATE_FORMAT_STRINGS = {
+        "YYYY-MM-DD",
+        "MM-DD-YYYY",
+        "YY-MM-DD",
+        "YYYY-mm-DDTHH:MM:SSS",
+    }
 
     def __init__(
         self,

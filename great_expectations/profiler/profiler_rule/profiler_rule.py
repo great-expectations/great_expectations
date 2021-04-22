@@ -21,8 +21,7 @@ class ProfilerRule:
         domain_builder: DomainBuilder,
         parameter_builders: List[ParameterBuilder],
         configuration_builders: List[ConfigurationBuilder],
-        # TODO: <Alex>ALEX -- what should the type of "variables" be?</Alex>
-        variables=None,
+        variables: Optional[Parameter] = None,
     ):
         """
         Sets Profiler rule name, domain builders, parameters builders, configuration builders,
@@ -39,8 +38,6 @@ class ProfilerRule:
         self._domain_builder = domain_builder
         self._parameter_builders = parameter_builders
         self._configuration_builders = configuration_builders
-        if variables is None:
-            variables = {}
         self._variables = variables
 
     def evaluate(
