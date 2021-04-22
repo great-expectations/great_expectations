@@ -12,9 +12,10 @@ class Parameter(IDDict, SerializableDictDot):
     parameters: Dict[str, Any]
     details: Optional[Dict[str, Union[str, dict]]] = None
 
-    @property
-    def id(self) -> str:
-        return self.to_id()
+    # TODO: <Alex>ALEX -- parameter_id does not seem to be useful (commenting out for now, marking for deletion).</Alex>
+    # @property
+    # def id(self) -> str:
+    #     return self.to_id()
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=asdict(self))
