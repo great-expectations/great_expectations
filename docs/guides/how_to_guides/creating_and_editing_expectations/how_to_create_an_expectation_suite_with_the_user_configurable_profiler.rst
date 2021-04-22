@@ -254,56 +254,58 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
         To accomplish that aim, it is highly configurable. To describe its functionality and configuration, we will walk through some of the core concepts followed by examples of increasing complexity. For now, we will use table-based data in this document for simplicity of explanation.
 
-        A Profiler is defined by a set of ProfilerRules that create Expectations for configurable Domains. These ProfilerRules and Expectations can be built using Parameters calculated at runtime, or hard-coded. GEN1: These Parameters are local to a domain. GEN2: These Parameters can be local to a domain or global to all domains (QUESTION: should the ``variables`` key be renamed to something more descriptive like ``global_profiler_parameters``? ANSWER: TBD).
+        A Profiler is defined by a set of ProfilerRules that create Expectations for configurable Domains. These ProfilerRules and Expectations can be built using Parameters calculated at runtime, or hard-coded. GEN1: These Parameters are local to a domain. GEN2: These Parameters can be local to a domain or global to all domains (QUESTION: should the ``variables`` key be renamed to something more descriptive like ``global_profiler_parameters``? ANSWER: TBD, keep as variables for now).
 
         Here is a pseudocode hirearchy to show some of the various core concepts and their relationships (more complex concepts are covered later). Everything prefaced with a ``my_`` is user configurable. Note that items ending with a colon ``:`` or lists ending with ellipses ``...`` in this pseudocode likely require more configuration or support additional items that are not shown.
 
         (QUESTION: Can there be a hirearchy of domains or at least multiple domains for a given rule or should the rule-domain pair be one-to-one? Maybe domains / parameters can be defined at the same level as rules and then referenced (rather than having to be defined within a rule). Currently it looks like the idea is that more complex domain configurations are meant to be captured in specific domain builder classes e.g. ``SimpleSemanticTypeColumnDomainBuilder`` and that there is a single domain per rule. ANSWER: Group consensus seems to be push complexity into code rather than config i.e. single Domain per ProfilerRule that is defined by a subclass of DomainBuilder)
 
-        GEN1:
+        GEN1 (Pseudocode):
 
         .. code-block:: yaml
-          variables:
+          variables: # global variables accessed in any domain_builder, parameter_builder or expectation_configuration_builder via $ substitution e.g. $variable_name, config not shown
           rules:
             - my_rule_1
               domain_builder:
-                - my_domain_builder_for_my_rule_1 # (Note: single domain builder per rule):
+                - my_domain_builder_for_my_rule_1 # (Note: single domain builder per rule): # config not shown
               parameter_builders:
-                - my_rule_1_parameter_builder_1:
+                - my_rule_1_parameter_builder_1: # config not shown
                 # e.g. reference columns from my_domain_builder_for_my_rule_1 to calculate metric on each of them (e.g. ``column.min`` metric)
-                - my_rule_2_parameter_builder_2:
+                - my_rule_2_parameter_builder_2: # config not shown
                 ...
               expectation_configuration_builders:
-                - expectation_configuration_1_builder:
+                - expectation_configuration_1_builder: # config not shown
                 # e.g. expect_column_values_to_be_between where domain is set via columns from the domain defined above and min/max set via parameters defined above. Can also contain if/then logic.
+                ...
 
-        GEN2:
+        GEN2 (Pseudocode):
 
         .. code-block:: yaml
 
+          variables: # global variables accessed in any domain_builder, parameter_builder or expectation_configuration_builder via $ substitution e.g. $variable_name, config not shown
           global_domain_builders:
             # To be referenced in rules (supports multiple rules using the same domain)
-            - my_global_domain_builder_1:
-            - my_global_domain_builder_2:
+            - my_global_domain_builder_1: # config not shown
+            - my_global_domain_builder_2: # config not shown
             ...
           global_parameter_builders:
             # To be referenced in rules (supports multiple rules using the same parameter)
-            - my_global_param_builder_1:
-            - my_global_param_builder_2:
+            - my_global_param_builder_1: # config not shown
+            - my_global_param_builder_2: # config not shown
             ...
           rules:
             - my_rule_1
               rule_specific_domain_builder:
-                - my_rule_1_domain_builder:
+                - my_rule_1_domain_builder: # single domain builder as in GEN1, but may be re-used if globally defined. config not shown
               rule_specific_parameter_builders:
-                - my_rule_1_parameter_builder_1:
+                - my_rule_1_parameter_builder_1: # config not shown
                 # e.g. reference columns from my_rule_1_domain_builder to calculate metric on each of them (e.g. ``column.min`` metric)
-                - my_rule_2_parameter_builder_2:
+                - my_rule_2_parameter_builder_2: # config not shown
                 - my_global_param_builder_1 # Reference global parameter builder
                 ...
               expectation_configuration_builders:
                 - expectation_1_builder:
-                # e.g. expect_column_values_to_be_between where domain is set via columns from one of the domains defined above and min/max set via parameters defined above. Can also contain if/then logic.
+                # e.g. expect_column_values_to_be_between where domain is set via columns from the domain defined above and min/max set via parameters defined above. Can also contain if/then logic.
             - my_rule_2
               rule_specific_domain_builder:
                 - my_global_domain_builder_1 # Reference global domain builder
@@ -316,42 +318,40 @@ This guide will help you create a new Expectation Suite by profiling your data w
               ...
 
 
-        TODO: The below is not yet modified per our conversations.
-
         Here is a slightly more concrete example:
 
         GEN1:
 
-          global_profiler_parameters:
-            - global_param_1
+          variables: # global variables accessed in any domain_builder, parameter_builder or expectation_configuration_builder via $ substitution e.g. $variable_name, config not shown
+            - global_var_1:
           rules:
             my_rule_for_ids: # Could be a semantic type
               domain:
                 my_id_domain:
-                  # columns of type ``integer`` with name ``id`` or suffix ``_id``
+                  # config not shown: columns of type ``integer`` with name ``id`` or suffix ``_id`` (QUESTION: Is the domain just a series of columns or does it also define a specific batch or batches?)
               parameter_builders:
                 - my_id_parameter_1_min:
-                  # min value of column, using domain above
+                  # config not shown: min value of column, using domain above
                 - my_id_parameter_2_max:
-                  # max value of column, using domain above
+                  # config not shown: max value of column, using domain above
                 - my_id_parameter_3_min_5_batches_ago:
-                  # min value of column from 5 batches ago, using domain above and using a ``batch_request`` modifier to index to ``-5`` batches.
+                  # config not shown: min value of column from 5 batches ago, using domain above and using a ``batch_request`` modifier to index to ``-5`` batches.
                 - my_id_parameter_4_mean_of_last_10_batches:
-                  # mean of last 10 batches, using domain above and using a ``batch_request`` modifier to index via slice the last ``-10:`` batches.
+                  # config not shown: mean of last 10 batches, using domain above and using a ``batch_request`` modifier to index via slice the last ``-10:`` batches.
               expectation_configuration_builders:
                 - expectation: expect_column_values_to_be_between # Expectation name as string
                   column: $my_id_domain_1.domain_kwargs.column # Reference to all columns in referenced domain (expectation built with each one in turn) (QUESTION: Can we omit / guess that ``domain_kwargs`` is part of this column definition so it can be shortened to ``$my_id_domain_1.column``?)
                   min_value: $my_id_parameter_1_min.parameter.min # Reference to parameter defined above
-                    (QUESTION: Can we omit / guess that ``parameter`` is part of this parameter definition so it can be shortened to ``$my_id_parameter_2_max.max``?)
+                    (QUESTION: 1. How do we define a relative parameter e.g. like a window function of sorts - e.g. the parameter is "mean of column from 5 batches before the batch that this expectation is built from" not 5 batches back from the domain definition (I may be thinking about this wrong). 2. Can we omit / guess that ``parameter`` is part of this parameter definition so it can be shortened to ``$my_id_parameter_2_max.max``?)
                   max_value: $my_id_parameter_2_max.parameter.max
                 - expectation: expect_column_values_to_be_between
-                  column: $my_id_domain_2.column
+                  column: $my_id_domain_2.column # Note "domain_kwargs" assumed
                   min_value: $my_id_parameter_3_min_5_batches_ago.parameter.min
-                  max_value: $global_param_1
+                  max_value: $global_var_1 # Note use of global variable
                 - expectation: expect_column_values_to_be_between
                   column: $my_id_domain_2.column
                   min_value: $my_id_parameter_4_mean_of_last_10_batches.parameter.mean
-                  max_value: $global_param_1
+                  max_value: $global_var_1
                   mostly: 0.5
                 - expectation: expect_column_values_to_not_be_null
                   column: $domains.column # columns for all domains
@@ -370,12 +370,17 @@ This guide will help you create a new Expectation Suite by profiling your data w
                 column: $domains.column # columns for all domains
                 date_fmt: $my_dateformat_parameter_1.parameter.date_string
 
+
+        .. admonition:: The below examples are not yet modified per our conversations.
+
+            - TODO: The below examples are not yet modified per our conversations.
+
         GEN2:
 
         .. code-block:: yaml
 
           global_profiler_parameters:
-            - global_param_1
+            - global_var_1
           rules:
             my_rule_for_ids: # Could be a semantic type
               domains:
@@ -398,7 +403,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
                 - expectation: expect_column_values_to_be_between
                   column: $domain.my_id_domain_2.column
                   min_value: $my_id_parameter_3_min_5_batches_ago.parameter.min
-                  max_value: $global_param_1
+                  max_value: $global_var_1
                 - expectation: expect_column_values_to_not_be_null
                   column: $domains.column # columns for all domains
 
