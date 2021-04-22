@@ -7,40 +7,22 @@ Validate your data using a Checkpoint
 
 In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Checkpoints bundle :ref:`Batches` of data with corresponding :ref:`Expectation Suites` for validation.
 
-Let’s set up our first Checkpoint to validate the February data! In order to do this, we need to do two things:
+Let’s set up our first Checkpoint to validate the February data! Run the following in your terminal:
 
-1. Define the ``batch_kwargs`` for the February data
-2. Configure a Checkpoint to validate that data with our ``taxi.demo`` Expectation Suite.
+.. code-block:: bash
 
-.. warning::
+    great_expectations --v3-api checkpoint new my_checkpoint
 
-   As of Great Expectations version 0.13.8 and above, we introduced new style (class-based) Checkpoints. These are **not yet supported by the CLI**, so you will need to configure new Checkpoints in code. We're working on releasing CLI support for Checkpoints very soon!
+This will open **a Jupyter notebook** (you guessed it) that will allow you to complete the configuration of your Checkpoint.
 
-**Go back to your Jupyter notebook** and add a new cell with the following code:
 
-.. code-block:: python
+The ``checkpoint new`` notebook
+--------------------------------
 
-    # This defines the batch for your February data set
-    batch_kwargs_2 = {
-        "path": "<path to my code>/ge_tutorials/data/yellow_tripdata_sample_2019-02.csv",
-        "datasource": "data__dir",
-        "data_asset_name": "yellow_tripdata_sample_2019-02",
-    }
+The Jupyter notebook contains some boilerplate code that allows you to configure a new Checkpoint.
 
-    # This is where we configure a Checkpoint to validate the batch with the "taxi.demo" suite
-    my_checkpoint = LegacyCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        batches=[
-            {
-              "batch_kwargs": batch_kwargs_2,
-              "expectation_suite_names": ["taxi.demo"]
-            }
-        ]
-    )
+TODO: MORE HERE.
 
-    # And here we just run validation!
-    results = my_checkpoint.run()
 
 **What just happened?**
 
@@ -49,26 +31,7 @@ Let’s set up our first Checkpoint to validate the February data! In order to d
 - You configured the Checkpoint to validate the ``yellow_tripdata_sample_2019-02.csv`` file.
 - The ``results`` variable now contains the validation results (duh!)
 
-How to save and load a Checkpoint
------------------------------------
 
-We're currently working on a more user-friendly version of interacting with the new, class-based Checkpoints. In the meantime, here's how you can save your Checkpoint to the Data Context:
-
-.. code-block:: python
-
-    # Save the Checkpoint to your Data Context
-    my_checkpoint_json = my_checkpoint.config.to_json_dict()
-    context.add_checkpoint(**my_checkpoint_json)
-
-Once you've configured and saved a Checkpoint, you can load and run it every time you want to validate your data. In this example, we're using a named CSV file which you might not want to validate repeatedly. But if you point your Checkpoint at a database table, this will save you a lot of time when running validation on the same table periodically.
-
-.. code-block:: python
-
-    # And here's how you can load it from your Data Context again
-    my_loaded_checkpoint = context.get_checkpoint("my_checkpoint")
-
-    # And then run validation again if you'd like
-    my_loaded_checkpoint.run()
 
 
 How to inspect your validation results
