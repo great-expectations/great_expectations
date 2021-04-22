@@ -55,11 +55,8 @@ datasources:
 # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_contexts/how_to_use_a_yaml_file_or_environment_variables_to_populate_credentials.html
 
 
-config_variables_file_path: uncommitted/config_variables.yml
-
 # The plugins_directory will be added to your python path for custom modules
 # used to override and extend Great Expectations.
-plugins_directory: plugins/
 
 stores:
 # Stores are configurable places to store things like Expectations, Validations
@@ -79,7 +76,8 @@ stores:
     class_name: ValidationsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: uncommitted/validations/
+      suppress_store_backend_id: true
+      base_directory: ./
 
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:
@@ -91,7 +89,7 @@ stores:
     store_backend:
       class_name: TupleFilesystemStoreBackend
       suppress_store_backend_id: true
-      base_directory: checkpoints/
+      base_directory: ./
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store
