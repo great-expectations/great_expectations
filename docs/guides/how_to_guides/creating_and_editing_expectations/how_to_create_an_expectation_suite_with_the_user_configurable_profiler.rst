@@ -263,6 +263,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
         GEN1 (Pseudocode):
 
         .. code-block:: yaml
+
           variables: # global variables accessed in any domain_builder, parameter_builder or expectation_configuration_builder via $ substitution e.g. $variable_name, config not shown
           rules:
             - my_rule_1
@@ -321,6 +322,8 @@ This guide will help you create a new Expectation Suite by profiling your data w
         Here is a slightly more concrete example:
 
         GEN1:
+
+        .. code-block:: yaml
 
           variables: # global variables accessed in any domain_builder, parameter_builder or expectation_configuration_builder via $ substitution e.g. $variable_name, config not shown
             - global_var_1:
