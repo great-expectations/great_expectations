@@ -17,17 +17,17 @@ logger = logging.getLogger(__name__)
 class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     """Returns the best matching strftime format string for a provided domain."""
 
-    CANDIDATE_STRINGS = {"YYYY-MM-DD", "MM-DD-YYYY", "YY-MM-DD", "YYYY-mm-DDTHH:MM:SSS"}
+    CANDIDATE_DATE_FORMAT_STRINGS = {"YYYY-MM-DD", "MM-DD-YYYY", "YY-MM-DD", "YYYY-mm-DDTHH:MM:SSS"}
 
     def __init__(
         self,
         *,
         parameter_name: str,
-        data_context: DataContext,
-        threshold: float = 1.0,
+        domain_kwargs: str,
+        threshold: Optional[float] = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
-        domain_kwargs=None,
+        data_context: Optional[DataContext] = None,
     ):
         """
         Configure this SimpleDateFormatStringParameterBuilder
@@ -38,11 +38,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
         """
         super().__init__(parameter_name=parameter_name, data_context=data_context)
+
         self._threshold = threshold
         if candidate_strings is not None:
             self._candidate_strings = candidate_strings
         else:
-            self._candidate_strings = self.CANDIDATE_STRINGS
+            self._candidate_strings = self.CANDIDATE_DATE_FORMAT_STRINGS
 
         if additional_candidate_strings is not None:
             self._candidate_strings += additional_candidate_strings
@@ -108,6 +109,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best_ratio = ratio
 
         return Parameter(
-            parameters={"data_format_string": best},
+            parameters={"date_format_string": best},
             details={"success_ratio": best_ratio},
         )

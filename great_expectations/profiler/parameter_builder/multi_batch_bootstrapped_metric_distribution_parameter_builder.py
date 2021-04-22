@@ -1,6 +1,8 @@
 from copy import copy
-from typing import List, Optional
+from typing import List, Optional, Union
 
+from great_expectations import DataContext
+from great_expectations.core.batch import BatchRequest
 from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder import (
     MultiBatchParameterBuilder,
 )
@@ -23,12 +25,12 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     def __init__(
         self,
         *,
-        parameter_name,
-        batch_request,
-        metric_name,
-        metric_value_kwargs,
-        p_values,
-        data_context
+        parameter_name: str,
+        batch_request: BatchRequest,
+        metric_name: str,
+        metric_value_kwargs: Union[str, dict],
+        p_values: List[float],
+        data_context: Optional[DataContext] = None
     ):
         """
         Create a MultiBatchBootstrappedMetricDistributionParameterBuilder.
@@ -44,9 +46,10 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         """
         super().__init__(
             parameter_name=parameter_name,
-            data_context=data_context,
             batch_request=batch_request,
+            data_context=data_context,
         )
+
         self._metric_name = metric_name
         self._metric_value_kwargs = metric_value_kwargs
         self._p_values = p_values

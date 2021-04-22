@@ -70,12 +70,11 @@ class ProfilerRule:
             domain_id: str = rule_state.active_domain_id
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
-                parameter_id: str = parameter_builder.parameter_id
+                parameter_name: str = parameter_builder.parameter_name
                 parameter: Parameter = parameter_builder.build_parameters(
                     rule_state=rule_state, validator=validator, batch_ids=batch_ids
                 )
-                # TODO: <Alex>ALEX -- how does this work?  What are the relevant types?</Alex>
-                rule_state.parameters[domain_id][parameter_id] = parameter.parameters
+                rule_state.parameters[domain_id][parameter_name] = parameter.parameters
             for configuration_builder in self._configuration_builders:
                 configurations.append(
                     configuration_builder.build_configuration(rule_state=rule_state)

@@ -1,5 +1,6 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
+from great_expectations import DataContext
 from great_expectations.profiler.parameter_builder.parameter import Parameter
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
@@ -17,13 +18,14 @@ class MetricParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         *,
-        parameter_name,
-        data_context=None,
-        metric_name,
-        metric_domain_kwargs="$domain.domain_kwargs",
-        metric_value_kwargs=None
+        parameter_name: str,
+        metric_name: str,
+        metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
+        metric_value_kwargs: Optional[Union[str, dict]] = None,
+        data_context: Optional[DataContext] = None,
     ):
         super().__init__(parameter_name=parameter_name, data_context=data_context)
+
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
@@ -34,7 +36,7 @@ class MetricParameterBuilder(ParameterBuilder):
         rule_state: Optional[RuleState] = None,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        **kwargs
+        **kwargs,
     ) -> Parameter:
         """
         Builds a dictionary of format {'parameters': A given resolved metric}
@@ -45,7 +47,9 @@ class MetricParameterBuilder(ParameterBuilder):
         :return: a dictionary of format {'parameters': A given resolved metric}
         """
         # Obtaining any necessary domain kwargs from rule state, otherwise using instance var
-        if self._metric_domain_kwargs.startswith("$"):
+        if isinstance(
+            self._metric_domain_kwargs, str
+        ) and self._metric_domain_kwargs.startswith("$"):
             metric_domain_kwargs = rule_state.get_parameter_value(
                 fully_qualified_parameter_name=self._metric_domain_kwargs
             )
@@ -55,6 +59,7 @@ class MetricParameterBuilder(ParameterBuilder):
         # Obtaining any necessary value kwargs from rule state, otherwise using instance var
         if (
             self._metric_value_kwargs is not None
+            and isinstance(self._metric_value_kwargs, str)
             and self._metric_value_kwargs.startswith("$")
         ):
             metric_value_kwargs = rule_state.get_parameter_value(
