@@ -6,7 +6,9 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder import (
     MultiBatchParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_tree_container_node import ParameterTreeContainerNode
+from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
+    ParameterTreeContainerNode,
+)
 from great_expectations.profiler.profiler_rule.rule_state import RuleState
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -87,5 +89,5 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
             # TODO: Using the first sample for now, but this should be extended for handling multiple batches
             parameters=samples[0],
             details=None,
-            descendants=None
+            descendants=None,
         )

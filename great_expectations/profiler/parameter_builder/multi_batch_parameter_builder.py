@@ -3,10 +3,12 @@ from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest, BatchDefinition
-from great_expectations.profiler.parameter_builder.parameter_tree_container_node import ParameterTreeContainerNode
+from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
+)
+from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
+    ParameterTreeContainerNode,
 )
 from great_expectations.profiler.profiler_rule.rule_state import RuleState
 from great_expectations.validator.validator import Validator

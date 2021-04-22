@@ -6,9 +6,11 @@ from great_expectations.profiler.configuration_builder.configuration_builder imp
     ConfigurationBuilder,
 )
 from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
-from great_expectations.profiler.parameter_builder.parameter_tree_container_node import ParameterTreeContainerNode
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
+)
+from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
+    ParameterTreeContainerNode,
 )
 from great_expectations.profiler.profiler_rule.rule_state import RuleState
 from great_expectations.validator.validator import Validator
@@ -68,10 +70,14 @@ class ProfilerRule:
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
                 parameter_name: str = parameter_builder.parameter_name
-                parameter_tree_container_node: ParameterTreeContainerNode = parameter_builder.build_parameters(
-                    rule_state=rule_state, validator=validator, batch_ids=batch_ids
+                parameter_tree_container_node: ParameterTreeContainerNode = (
+                    parameter_builder.build_parameters(
+                        rule_state=rule_state, validator=validator, batch_ids=batch_ids
+                    )
                 )
-                rule_state.parameters[domain_id][parameter_name] = parameter_tree_container_node.parameters
+                rule_state.parameters[domain_id][
+                    parameter_name
+                ] = parameter_tree_container_node.parameters
             for configuration_builder in self._configuration_builders:
                 configurations.append(
                     configuration_builder.build_configuration(rule_state=rule_state)

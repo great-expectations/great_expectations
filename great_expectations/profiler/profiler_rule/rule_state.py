@@ -3,7 +3,9 @@ from typing import Any, Dict, List, Optional, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.profiler.parameter_builder.rule_evaluation_parameter_tree_container_node import RuleEvaluationParameterTreeContainerNode
+from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
+    ParameterTreeContainerNode,
+)
 
 DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
 DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
@@ -26,8 +28,8 @@ class RuleState:
             List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]
         ] = None,
         # TODO: <Alex>ALEX -- what is the structure of this "parameters" argument?</Alex>
-        parameters: Optional[Dict[str, RuleEvaluationParameterTreeContainerNode]] = None,
-        variables: Optional[RuleEvaluationParameterTreeContainerNode] = None,
+        parameters: Optional[Dict[str, ParameterTreeContainerNode]] = None,
+        variables: Optional[ParameterTreeContainerNode] = None,
     ):
         self._active_domain = active_domain
         if domains is None:
@@ -37,11 +39,11 @@ class RuleState:
             parameters = {}
         self._parameters = parameters
         if variables is None:
-            variables = RuleEvaluationParameterTreeContainerNode(parameters={}, details=None)
+            variables = ParameterTreeContainerNode(parameters={}, details=None)
         self._variables = variables
 
     @property
-    def parameters(self) -> Dict[str, RuleEvaluationParameterTreeContainerNode]:
+    def parameters(self) -> Dict[str, ParameterTreeContainerNode]:
         return self._parameters
 
     @property
@@ -74,7 +76,7 @@ class RuleState:
 
     # TODO: <Alex>ALEX -- what is the return type?</Alex>
     @property
-    def variables(self) -> RuleEvaluationParameterTreeContainerNode:
+    def variables(self) -> ParameterTreeContainerNode:
         """
         Getter for rule_state variables
         :return: variables necessary for validating rule
@@ -115,12 +117,13 @@ class RuleState:
             "."
         )
 
-        node: RuleEvaluationParameterTreeContainerNode
+        node: ParameterTreeContainerNode
         if fully_qualified_parameter_name_references_variable:
             node = self.variables
         else:
             node = self.parameters.get(
-                self.active_domain_id, RuleEvaluationParameterTreeContainerNode(parameters={}, details=None)
+                self.active_domain_id,
+                ParameterTreeContainerNode(parameters={}, details=None),
             )
 
         parameter_name_at_level_in_hierarchy: Optional[str] = None
@@ -128,7 +131,9 @@ class RuleState:
         try:
             for parameter_name_at_level_in_hierarchy in parameter_name_hierarchy_list:
                 if node.descendants is None:
-                    parameter_value = node.parameters[parameter_name_at_level_in_hierarchy]
+                    parameter_value = node.parameters[
+                        parameter_name_at_level_in_hierarchy
+                    ]
                 else:
                     node = node.descendants[parameter_name_at_level_in_hierarchy]
         except KeyError:
