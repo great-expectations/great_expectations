@@ -1,7 +1,7 @@
 .. _tutorials__getting_started:
 
 #############################################
-Getting started with Great Expectations
+Getting started with Great Expectations -- v2 (Batch Kwargs) API
 #############################################
 
 Welcome to Great Expectations! This tutorial will help you set up your first local deployment of Great Expectations that contains a small Expectation Suite to validate some sample data. We'll also introduce important concepts, with links to detailed material you can dig into later.

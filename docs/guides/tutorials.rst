@@ -23,4 +23,5 @@ These tutorials will teach you the basics of what you need to know to get up and
    /guides/tutorials/quick_start
    /guides/tutorials/explore_expectations_in_a_notebook
    /guides/tutorials/getting_started
+   /guides/tutorials/getting_started_v3_api
    /guides/tutorials/how_to_create_expectations
