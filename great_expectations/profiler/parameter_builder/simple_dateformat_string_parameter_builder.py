@@ -3,7 +3,7 @@ from typing import Iterable, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.profiler.parameter_builder.parameter_tree_container_node import ParameterTreeContainerNode
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
@@ -56,7 +56,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         self._domain_kwargs = domain_kwargs
 
     # TODO: <Alex>ALEX -- This looks like a single-Batch case.</Alex>
-    # TODO: <Alex>ALEX -- This method returns a dictionary, one of whose keys is "parameters" and the other is "details"; however, this was different from the return type of the same method in MetricParameterBuilder (no "details" key); we should standardize the return type in ParameterBuilder (base class).</Alex>
     def _build_parameters(
         self,
         *,
@@ -64,7 +63,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         **kwargs,
-    ) -> Parameter:
+    ) -> ParameterTreeContainerNode:
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
         if batch_ids is None:
@@ -113,7 +112,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best = fmt_string
                 best_ratio = ratio
 
-        return Parameter(
+        return ParameterTreeContainerNode(
             parameters={"date_format_string": best},
             details={"success_ratio": best_ratio},
+            descendants=None
         )

@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.profiler.parameter_builder.rule_evaluation_parameter_tree_container_node import RuleEvaluationParameterTreeContainerNode
 
 DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
 DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
@@ -12,7 +12,6 @@ DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
 VARIABLES_KEY: str = "$variables."
 
 
-# TODO: <Alex>ALEX -- We should consider changing the names "parameters" and "Parameter.parameters" to be more semantically meaningful.</Alex>
 class RuleState:
     """Manages state for ProfilerRule objects. Keeps track of rule domain, rule parameters,
     and any other necessary variables for validating the rule."""
@@ -27,8 +26,8 @@ class RuleState:
             List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]
         ] = None,
         # TODO: <Alex>ALEX -- what is the structure of this "parameters" argument?</Alex>
-        parameters: Optional[Dict[str, Parameter]] = None,
-        variables: Optional[Parameter] = None,
+        parameters: Optional[Dict[str, RuleEvaluationParameterTreeContainerNode]] = None,
+        variables: Optional[RuleEvaluationParameterTreeContainerNode] = None,
     ):
         self._active_domain = active_domain
         if domains is None:
@@ -37,13 +36,12 @@ class RuleState:
         if parameters is None:
             parameters = {}
         self._parameters = parameters
-        # TODO: <Alex>ALEX -- what is the type -- what kind of a dictionary is "variables"?  Is is "Parameter"?</Alex>
         if variables is None:
-            variables = Parameter(parameters={}, details=None)
+            variables = RuleEvaluationParameterTreeContainerNode(parameters={}, details=None)
         self._variables = variables
 
     @property
-    def parameters(self) -> Dict[str, Parameter]:
+    def parameters(self) -> Dict[str, RuleEvaluationParameterTreeContainerNode]:
         return self._parameters
 
     @property
@@ -76,7 +74,7 @@ class RuleState:
 
     # TODO: <Alex>ALEX -- what is the return type?</Alex>
     @property
-    def variables(self) -> Parameter:
+    def variables(self) -> RuleEvaluationParameterTreeContainerNode:
         """
         Getter for rule_state variables
         :return: variables necessary for validating rule
@@ -113,24 +111,29 @@ class RuleState:
         else:
             fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
-        parameter: Parameter
-        if fully_qualified_parameter_name_references_variable:
-            parameter = self.variables
-        else:
-            parameter = self.parameters.get(
-                self.active_domain_id, Parameter(parameters={}, details=None)
-            )
-
         parameter_name_hierarchy_list: List[str] = fully_qualified_parameter_name.split(
             "."
         )
+
+        node: RuleEvaluationParameterTreeContainerNode
+        if fully_qualified_parameter_name_references_variable:
+            node = self.variables
+        else:
+            node = self.parameters.get(
+                self.active_domain_id, RuleEvaluationParameterTreeContainerNode(parameters={}, details=None)
+            )
+
         parameter_name_at_level_in_hierarchy: Optional[str] = None
+        parameter_value: Optional[Any] = None
         try:
             for parameter_name_at_level_in_hierarchy in parameter_name_hierarchy_list:
-                parameter = parameter.parameters[parameter_name_at_level_in_hierarchy]
+                if node.descendants is None:
+                    parameter_value = node.parameters[parameter_name_at_level_in_hierarchy]
+                else:
+                    node = node.descendants[parameter_name_at_level_in_hierarchy]
         except KeyError:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": key "{parameter_name_at_level_in_hierarchy}" was missing.'
             )
 
-        return parameter
+        return parameter_value

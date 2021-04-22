@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 
 from great_expectations.data_context import DataContext
-from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.profiler.parameter_builder.parameter_tree_container_node import ParameterTreeContainerNode
 from great_expectations.profiler.profiler_rule.rule_state import RuleState
 from great_expectations.validator.validator import Validator
 
@@ -43,7 +43,7 @@ class ParameterBuilder(ABC):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         **kwargs
-    ) -> Parameter:
+    ) -> ParameterTreeContainerNode:
         """Build the parameters for the specified domain_kwargs."""
         return self._build_parameters(
             rule_state=rule_state, validator=validator, batch_ids=batch_ids, **kwargs
@@ -57,5 +57,5 @@ class ParameterBuilder(ABC):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         **kwargs
-    ) -> Parameter:
+    ) -> ParameterTreeContainerNode:
         pass

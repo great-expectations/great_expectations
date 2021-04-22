@@ -6,9 +6,10 @@ from great_expectations.types import SerializableDictDot
 
 
 @dataclass
-class Parameter(SerializableDictDot):
-    parameters: Dict[str, Any]
+class ParameterTreeContainerNode(SerializableDictDot):
+    parameters: Dict[str, Any] = None
     details: Optional[Dict[str, Union[str, dict]]] = None
+    descendants: Optional[Dict[str, "ParameterTreeContainerNode"]] = None
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=asdict(self))
