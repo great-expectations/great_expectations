@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
-from great_expectations.profiler.rule_state import RuleState
-from great_expectations.validator.validator import Validator
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.profiler.profiler_rule.rule_state import RuleState
 
 
 class ConfigurationBuilder(ABC):
-    def build_configuration(self, rule_state: RuleState, **kwargs):
+    def build_configuration(
+        self, rule_state: RuleState, **kwargs
+    ) -> ExpectationConfiguration:
         """
         Calls the implemented build_configuration method of a concrete subclass
         args
@@ -14,8 +15,10 @@ class ConfigurationBuilder(ABC):
                 metric parameters, and necessary variables
         :return: Built Configuration
         """
-        return self._build_configuration(rule_state, **kwargs)
+        return self._build_configuration(rule_state=rule_state, **kwargs)
 
     @abstractmethod
-    def _build_configuration(self, rule_state: RuleState, **kwargs):
+    def _build_configuration(
+        self, rule_state: RuleState, **kwargs
+    ) -> ExpectationConfiguration:
         pass

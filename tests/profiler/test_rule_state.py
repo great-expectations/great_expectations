@@ -1,7 +1,8 @@
 import pytest
 
-from great_expectations.profiler.exceptions import ProfilerExecutionError
-from great_expectations.profiler.rule_state import RuleState
+from great_expectations.exceptions import ProfilerExecutionError
+from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.profiler.profiler_rule.rule_state import RuleState
 
 
 @pytest.fixture
@@ -20,27 +21,38 @@ def semantic_rule_state():
     return RuleState(
         active_domain={"domain_kwargs": {"column": "Age"}, "semantic_type": "numeric"},
         domains=[{"domain_kwargs": {"column": "Age"}, "semantic_type": "numeric"}],
-        parameters={"f45a40fda1738351c5e67a0aa89c2c7c": {"mean": 5.0}},
-        variables={"false_positive_threshold": 0.01},
+        parameters={
+            "f45a40fda1738351c5e67a0aa89c2c7c": Parameter(
+                parameters={"mean": 5.0}, details=None
+            )
+        },
+        variables=Parameter(
+            parameters={"false_positive_threshold": 0.01}, details=None
+        ),
     )
 
 
-def test_get_active_domain_id(simple_rule_state, semantic_rule_state):
-    assert simple_rule_state.get_active_domain_id() == "domain_kwargs={'column': 'Age'}"
-    assert (
-        semantic_rule_state.get_active_domain_id() == "f45a40fda1738351c5e67a0aa89c2c7c"
-    )
+def test_active_domain_id_property(simple_rule_state, semantic_rule_state):
+    assert simple_rule_state.active_domain_id == "domain_kwargs={'column': 'Age'}"
+    assert semantic_rule_state.active_domain_id == "f45a40fda1738351c5e67a0aa89c2c7c"
 
 
 def test_get_parameter_value(semantic_rule_state):
-    assert semantic_rule_state.get_value("$mean") == 5.0
-
-
-def test_get_variable_value(semantic_rule_state):
-    assert semantic_rule_state.get_value("$variables.false_positive_threshold") == 0.01
+    assert (
+        semantic_rule_state.get_parameter_value(fully_qualified_parameter_name="$mean")
+        == 5.0
+    )
+    assert (
+        semantic_rule_state.get_parameter_value(
+            fully_qualified_parameter_name="$variables.false_positive_threshold"
+        )
+        == 0.01
+    )
 
 
 def test_invalid_parameter_name(semantic_rule_state):
     with pytest.raises(ProfilerExecutionError) as exc:
-        _ = semantic_rule_state.get_value("mean")
+        _ = semantic_rule_state.get_parameter_value(
+            fully_qualified_parameter_name="mean"
+        )
     assert "start with $" in exc.value.message
