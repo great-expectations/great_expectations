@@ -11,8 +11,8 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     MultiBatchParameterBuilder
 ):
     """
-    Builds parameters from the p_values of the distribution of a metric observed from a
-    set of batches identified in the batch_ids.
+    Builds parameters from the p_values of the distribution of a metric observed from a set of batches identified in the
+    batch_ids.
     """
 
     def __init__(
@@ -46,6 +46,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         self._metric_value_kwargs = metric_value_kwargs
         self._p_values = p_values
 
+    # TODO: <Alex>ALEX -- There is nothing about "p_values" in this implementation; moreover, "p_values" would apply only to certain values of the "metric_name" -- this needs to be elaborated.</Alex>
     def _build_parameters(self, *, rule_state, validator, batch_ids, **kwargs):
         samples = []
         for batch_id in batch_ids:

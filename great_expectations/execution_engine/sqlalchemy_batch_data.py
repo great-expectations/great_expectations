@@ -145,11 +145,15 @@ class SqlAlchemyBatchData(BatchData):
                         "batch_spec_passthrough or a specify a default dataset in engine url"
                     )
             if selectable is not None:
-                # compile selectable to sql statement
-                query = selectable.compile(
-                    dialect=self.sql_engine_dialect,
-                    compile_kwargs={"literal_binds": True},
-                )
+                if engine.dialect.name.lower() == "oracle":
+                    # oracle query was already passed as a string
+                    query = selectable
+                else:
+                    # compile selectable to sql statement
+                    query = selectable.compile(
+                        dialect=self.sql_engine_dialect,
+                        compile_kwargs={"literal_binds": True},
+                    )
             self._create_temporary_table(
                 generated_table_name,
                 query,
@@ -229,6 +233,10 @@ class SqlAlchemyBatchData(BatchData):
             querymod = query.split(strsep, maxsplit=1)
             stmt = (querymod[0] + "into {temp_table_name} from" + querymod[1]).format(
                 temp_table_name=temp_table_name
+            )
+        elif self.sql_engine_dialect.name.lower() == "awsathena":
+            stmt = "CREATE TABLE {temp_table_name} AS {query}".format(
+                temp_table_name=temp_table_name, query=query
             )
         elif self.sql_engine_dialect.name.lower() == "oracle":
             stmt = "CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}".format(

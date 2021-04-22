@@ -14,6 +14,9 @@ from .profiler_rule import ProfilerRule
 
 
 class Profiler:
+    """Profiler object serves to profile, or automatically evaluate a set of rules, upon a given
+    batch / multiple batches of data"""
+
     def __init__(
         self,
         *,
@@ -23,11 +26,17 @@ class Profiler:
     ):
         """
         Create a new Profiler using configured rules.
+        For a rule or an item in a rule configuration, instantiates the following if
+        available: a domain builder, a parameter builder, and a configuration builder.
+        These will be used to define profiler computation patterns.
 
         Args:
-            rules:
+            rules: A rule or set of rules of format {"rule_name": ProfilerRule object}
+            rule_configs: An alternative to rules, providing a rule configuration as a dictionary instead of a ProfilerRule
+            data_context: An organizational DataContext object that defines a full runtime environment (data access, etc.)
         """
         self._data_context = data_context
+        # TODO: <Alex>ALEX -- We should combine rules and rule_configs into one Union typed variable; then this check will become unnecessary.</Alex>
         assert (
             sum([bool(x) for x in (rules, rule_configs)]) == 1
         ), "Exactly one of rules or rule_configs must be provided"
@@ -94,6 +103,21 @@ class Profiler:
         data_context=None,
         expectation_suite_name=None,
     ):
+        """
+        Utilizing one of validator, batch, batches, or batch_request (only one may be provided),
+        evaluates Profiler object to evaluate rule set on the given data and returns results of rule
+        evaluations as an Expectation Suite
+
+        Args:
+            :param validator: A Validator object to profile on
+            :param batch: A Batch object to profile on
+            :param batches: A list of Batch objects
+            :param batch_request: A Batch request utilized to obtain a Validator Object
+            :param batch_ids: A batch id used to identify data. If not provided, validator active batch id is used.
+            :param data_context: A DataContext object used to define a great_expectations project environment
+            :param expectation_suite_name: A name for returned Expectation suite.
+        :return: Set of rule evaluation results in the form of an Expectation suite
+        """
         if sum([bool(x) for x in (validator, batch, batches, batch_request)]) != 1:
             raise ProfilerError(
                 "Exactly one of validator, batch, batches, or batch_request must be provided."
