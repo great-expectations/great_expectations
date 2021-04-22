@@ -58,8 +58,14 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             raise ValueError("unrecognized")
         domains: List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]] = []
         columns: List[str] = validator.get_metric(
-            MetricConfiguration("table.columns", {})
+            metric=MetricConfiguration(
+                metric_name="table.columns",
+                metric_domain_kwargs={},
+                metric_value_kwargs=None,
+                metric_dependencies=None,
+            )
         )
+        # TODO: <Alex>ALEX -- How can/should we use "batch_id" and "include_batch_id"?</Alex>
         column: str
         # A semantic type is distinguished from the column storage type;
         # An example of storage type would be "integer".  The semantic type would be "id".

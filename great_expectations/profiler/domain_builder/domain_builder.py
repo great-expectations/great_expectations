@@ -12,7 +12,6 @@ class DomainBuilder(ABC):
     """
 
     # TODO: <Alex>ALEX -- We should be careful with **kwargs -- if there is no immediate use case for them, then we should only keep explicit arguments.</Alex>
-    # TODO: <Alex>ALEX -- What is the return type?</Alex>
     def get_domains(
         self,
         *,
@@ -22,8 +21,9 @@ class DomainBuilder(ABC):
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs
     ) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
-        """get_domains may be overridden by children who wish to check parameters prior to passing
-        work to the implementation of _get_domains in the particular domain_builder.
+        """
+        Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
+        then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """
         return self._get_domains(
             validator=validator,
@@ -34,7 +34,6 @@ class DomainBuilder(ABC):
         )
 
     @abstractmethod
-    # TODO: <Alex>ALEX -- What is the return type?</Alex>
     def _get_domains(
         self,
         *,
