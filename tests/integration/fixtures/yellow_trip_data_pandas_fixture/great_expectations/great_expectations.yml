@@ -17,12 +17,12 @@ datasources:
   taxi_pandas:
     data_connectors:
       monthly:
-        base_directory: ../../../../test_sets/
+        base_directory: ../test_data/
         glob_directive: '*.csv'
         class_name: ConfiguredAssetFilesystemDataConnector
         assets:
           my_reports:
-            base_directory: taxi_yellow_tripdata_samples
+            base_directory: ./
             group_names:
               - name
               - year
