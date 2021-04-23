@@ -247,8 +247,10 @@ This guide will help you create a new Expectation Suite by profiling your data w
             - The UserConfigurableProfiler is Experimental and this document is aspirational and purely meant to capture our collective understanding as we design and build this feature. It will need significant edits to transition this into a how-to guide. We expect to update this in the near future. Some notes on items to edit / investigate are below.
             - Profiler is the proposed name for the new profiler, and it will likely assimilate the UserConfigurableProfiler functionality.
             - Table-based data is assumed for now in this doc for simplicity. This should be extended when appropriate.
-            - GEN1 refers to our current plan, GEN2 refers to ideas that may or may not be addressed in future versions.
+            - GEN1 refers to our current plan, GEN2 refers to ideas that may or may not be addressed in future versions. Currently the only difference is that GEN2 allows for globally defined parameters and domains that can be used in multiple rules. It does not support multiple domains in a single rule.
 
+
+        TODO: This text is just for internal communication so far and must be cross referenced with existing docs especially the Core Concepts docs before being released.
 
         The aim of the Great Expectations Profiler is to describe your existing data automatically by scanning it (or a subset of it) to create an Expectation Suite. The resulting Expectation Suite should describe your existing data well enough that new data (that is well behaved) should still pass when validated against that Expectation Suite. Of course the generated Expectation Suite can be manually modified using the existing Great Expectations Suite Edit functionality or re-generated via a modified Profiler if the data changes.
 
@@ -329,7 +331,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
             - global_var_1:
           rules:
             my_rule_for_ids: # Could be a semantic type
-              domain:
+              domain_builder:
                 my_id_domain:
                   # config not shown: columns of type ``integer`` with name ``id`` or suffix ``_id`` (QUESTION: Is the domain just a series of columns or does it also define a specific batch or batches?)
               parameter_builders:
@@ -382,22 +384,33 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
         .. code-block:: yaml
 
-          global_profiler_parameters:
-            - global_var_1
+          variables: # global variables accessed in any domain_builder, parameter_builder or expectation_configuration_builder via $ substitution e.g. $variable_name, config not shown
+          global_domain_builders:
+            # To be referenced in rules (supports multiple rules using the same domain)
+            - my_global_domain_builder_1: # config not shown
+            - my_global_domain_builder_2: # config not shown
+            ...
+          global_parameter_builders:
+            # To be referenced in rules (supports multiple rules using the same parameter)
+            - my_global_param_builder_1: # config not shown
+            - my_global_param_builder_2: # config not shown
+            ...
           rules:
             my_rule_for_ids: # Could be a semantic type
-              domains:
-                - my_id_domain_1: # QUESTION: Should we allow for multiple domains in a rule? QUESTION: Can / should domains be defined outside of the scope of a specific rule?
-                  # columns of type ``integer`` with name ``id``
-                - my_id_domain_2:
-                  # columns of type ``integer`` with name suffix of ``_id``
+              domain_builder:
+                my_id_domain:
+                  # config not shown: columns of type ``integer`` with name ``id`` or suffix ``_id`` (QUESTION: Is the domain just a series of columns or does it also define a specific batch or batches?)
               parameter_builders:
                 - my_id_parameter_1_min:
-                  # min value of column, using domains above
+                  # config not shown: min value of column, using domain above
                 - my_id_parameter_2_max:
-                  # max value of column, using domains above
+                  # config not shown: max value of column, using domain above
                 - my_id_parameter_3_min_5_batches_ago:
-                  # min value of column from 5 batches ago, using domains above and using a ``batch_request`` modifier to index to ``-5`` batches.
+                  # config not shown: min value of column from 5 batches ago, using domain above and using a ``batch_request`` modifier to index to ``-5`` batches.
+                - my_id_parameter_4_mean_of_last_10_batches:
+                  # config not shown: mean of last 10 batches, using domain above and using a ``batch_request`` modifier to index via slice the last ``-10:`` batches.
+
+BOOKMARK
               expectation_configuration_builders:
                 - expectation: expect_column_values_to_be_between # Expectation name as string
                   column: $domain.my_id_domain_1.column # All columns in referenced domain (QUESTION: Why ``domain_kwargs`` in examples e.g. ``$domain.domain_kwargs.column``?)
