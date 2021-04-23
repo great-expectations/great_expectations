@@ -4,8 +4,9 @@
 Changelog
 #########
 
-Develop
+0.13.19
 -----------------
+* [BUGFIX] Fix packaging error breaking V3 CLI suite commands (#2719)
 
 0.13.18
 -----------------
