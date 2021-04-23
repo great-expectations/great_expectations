@@ -5,9 +5,7 @@ from great_expectations.profiler.expectation_configuration_builder.expectation_c
 from great_expectations.profiler.rule.rule_state import RuleState
 
 
-class ParameterIdentificationExpectationConfigurationBuilder(
-    ExpectationConfigurationBuilder
-):
+class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     """
     Class which creates ExpectationConfiguration out of a given Expectation type and
     parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied as kwargs dictionary).
