@@ -446,6 +446,9 @@ BOOKMARK
 
         # QUESTION - what is the $something.something syntax?
         # PROPOSED ANSWER: $instance_name(parameter_name,domain_name - maybe `domain` is ok and assume the rule domain).attribute(instance or class).sub_attribute.sub_sub_attribute...
+        # TODO: DomainBuilders are 1:1, not Domains
+
+        my_domain_builder_name.
 
         .. code-block:: yaml
 
@@ -455,30 +458,39 @@ BOOKMARK
             my_rule_for_datetimes:  # "just-a-name"
               # JPC: what is happening here -- we're asking, "Which columns in this data are datetimes?"
               domain_builder:
+                name: my_domain_builder_name # QUESTION: This is added - is that OK?
                 class_name: SimpleSemanticTypeColumnDomainBuilder
                 semantic_types:  # AJB: semantic_types are defined in the Domain Builder and referenced here by name
                                  #      domains are checked against these types for inclusion in the rule domain.
                                  #      All domains corresponding to any of the semantic_types are included.
+                                 # semantic_type key is determined by the domain builder not global e.g. SimpleSuffixColumnDomainBuilder where suffix is the keyword.
                   - datetime
+                list_of_domain_names: # TBD - this is maybe batch_id,domain_id together - probably Typed Object DomainId
               parameter_builders:
-                - parameter_name: my_dateformat  # name?
+# WIP
+                - name: my_dateformat  # This is shorthand for `parameter_builder_name`
                   # JPC: what is happening here -- we're asking, "What date format matches the data in this column?"
                   class_name: SimpleDateFormatStringParameterBuilder
-                  domain_kwargs: $domain.domain_kwargs # QUESTION: if there is only one domain, can this just be assumed?
-              configuration_builders:
+                  module_name: # OPTIONAL
+                  domain_builder_kwargs: my_domain_builder_name.domain_kwargs # QUESTION: if there is only one domain_builder, can this just be assumed?
+              expectation_configuration_builders:
                 - branch: # branch is optional if/then syntax. You can also just put the expectation
                     if: $my_dateformat.success_ratio >= 0.8  # if evaluates to true in python, i.e. "" is FALSE, "%Y" is TRUE
                                                                    # This success_ratio is provided via `details` of a parameter
                                                                    # It is matched with the correct domain
                                                                    # QUESTION: I removed the `parameter` in between the
                                                                    # parameter_name and success_ratio - perhaps we can
-                                                                   # simplify these lookups
+                                                                   # simplify these lookups - ANSWER - Cool, not sure exaclty how to implement but let's try it.
                     then:
-                      - expectation_type: expect_column_values_to_match_strftime_format # QUESTION: Should we change this from expectation to expectation_type?
-                        column: $domain.domain_kwargs.column  # is this obvious/inferrable?
+                      # ExpectationConfigurationBuilder configuration goes here
+                      - name: my_expectation_configuration_builder_1
+                        class_name: DefaultExpectationConfigurationBuilder # Optional, will use Default if not supplied, otherwise will use supplied
+                        module_name: tbd # Optional, for all other
+                        expectation_type: expect_column_values_to_match_strftime_format # QUESTION: Should we change this from expectation to expectation_type?
+                        column: $my_domain_builder.domain_kwargs.column  # is this obvious/inferrable?
                                                               # AJB - I think some may wish to be more explicit but yes
                                                               # this should be inferrable when there is a 1-1 between
-                                                              # ProfilerRule and Domain. So make this line optional.
+                                                              # ProfilerRule and Domain Builder. So make this line optional.
                         strftime_format: $my_dateformat.date_format_string # This is an expectation kwarg
                                                                                      # (Parameters in our docs)
                                                                                      # QUESTION: removed `parameter`
