@@ -244,9 +244,9 @@ rules:
         module_name: great_expectations.profiler.parameter_builder.simple_dateformat_string_parameter_builder
         domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
-        - expectation: expect_column_values_to_match_strftime_format
+        - expectation_type: expect_column_values_to_match_strftime_format
           column: $domain.domain_kwargs.column
-          date_fmt: $parameter.my_dateformat.strftime_format
+          strftime_format: $parameter.custom_date_formats.my_dateformat
   numeric:
     class_name: SemanticTypeColumnDomainBuilder
     type: numeric
@@ -287,12 +287,12 @@ rules:
       module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
       semantic_type_filters: integer
     parameter_builders:
-      - parameter_name: min
+      - parameter_name: my_min
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
-      - parameter_name: max
+      - parameter_name: my_max
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.max
