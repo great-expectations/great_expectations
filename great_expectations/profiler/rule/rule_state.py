@@ -18,7 +18,6 @@ class RuleState:
     """Manages state for ProfilerRule objects. Keeps track of rule domain, rule parameters,
     and any other necessary variables for validating the rule."""
 
-    # TODO: <Alex>ALEX -- Add type hints; what are the types?</Alex>
     def __init__(
         self,
         active_domain: Optional[
@@ -27,7 +26,6 @@ class RuleState:
         domains: Optional[
             List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]
         ] = None,
-        # TODO: <Alex>ALEX -- what is the structure of this "parameters" argument?</Alex>
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         variables: Optional[ParameterContainer] = None,
     ):
@@ -74,7 +72,6 @@ class RuleState:
         """
         return IDDict(self.active_domain).to_id()
 
-    # TODO: <Alex>ALEX -- what is the return type?</Alex>
     @property
     def variables(self) -> ParameterContainer:
         """

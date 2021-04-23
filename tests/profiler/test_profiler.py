@@ -237,21 +237,21 @@ rules:
     domain_builder:
       class_name: SimpleSemanticTypeColumnDomainBuilder
       module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
-      type_filters: datetime
+      semantic_type_filters: datetime
     parameter_builders:
-      - parameter_id: my_dateformat
+      - parameter_name: my_dateformat
         class_name: SimpleDateFormatStringParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.simple_dateformat_string_parameter_builder
         domain_kwargs: $domain.domain_kwargs
-    configuration_builders:
+    expectation_configuration_builders:
         - expectation: expect_column_values_to_match_strftime_format
           column: $domain.domain_kwargs.column
-          date_fmt: $my_dateformat.parameter.date_string
+          date_fmt: $parameter.my_dateformat.strftime_format
   numeric:
     class_name: SemanticTypeColumnDomainBuilder
     type: numeric
     parameter_builders:
-      - id: quantile_ranges
+      - parameter_name: quantile_ranges
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
         batch_request:
           partition_request:
@@ -269,8 +269,8 @@ rules:
         p_values:
           min_value: ($alert_threshold / 2)
           max_value: 1 - ($alert_threshold / 2)
-    configuration_builders:
-      - expectation: expect_column_quantile_values_to_be_between
+    expectation_configuration_builders:
+      - expectation_type: expect_column_quantile_values_to_be_between
         value_ranges: $quantile_ranges
 """
     return config
@@ -285,21 +285,21 @@ rules:
     domain_builder:
       class_name: SimpleSemanticTypeColumnDomainBuilder
       module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
-      type_filters: integer
+      semantic_type_filters: integer
     parameter_builders:
-      - parameter_id: min
+      - parameter_name: min
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
-      - parameter_id: max
+      - parameter_name: max
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
-    configuration_builders:
-      - expectation: expect_column_values_to_be_between
-        module_name: great_expectations.profiler.configuration_builder.parameter_id_configuration_builder
+    expectation_configuration_builders:
+      - expectation_type: expect_column_values_to_be_between
+        module_name: great_expectations.profiler.expectation_configuration_builder.parameter_identification_configuration_builder
         min_value: $min
         max_value: $max
 """
