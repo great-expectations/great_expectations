@@ -17,6 +17,8 @@ class ParameterContainer(SerializableDictDot):
 
     $parameter.date_strings.yyyy_mm_dd_date_format
     $parameter.date_strings.mm_yyyy_dd_date_format
+    $parameter.date_strings.tolerances.max_abs_error_time_milliseconds
+    $parameter.date_strings.tolerances.max_num_conversion_attempts
     $parameter.tolerances.mostly
 
     Typically, only the leaf nodes (characterized by having no descendants) contain attributes and details.
