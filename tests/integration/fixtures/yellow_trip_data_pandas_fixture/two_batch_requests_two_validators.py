@@ -7,24 +7,26 @@ suite = context.get_expectation_suite("yellow_trip_data_validations")
 
 # February BatchRequest and Validator
 batch_request_february = BatchRequest(
-  datasource_name="taxi_pandas",
-  data_connector_name="monthly",
-  data_asset_name="my_reports",
-  data_connector_query={
-    "index": -2
-  }
+    datasource_name="taxi_pandas",
+    data_connector_name="monthly",
+    data_asset_name="my_reports",
+    data_connector_query={"index": -2},
 )
-validator_february = context.get_validator(batch_request=batch_request_february, expectation_suite=suite)
-february_table_row_count = validator_february.get_metric(MetricConfiguration("table.row_count", metric_domain_kwargs={}))
+validator_february = context.get_validator(
+    batch_request=batch_request_february, expectation_suite=suite
+)
+february_table_row_count = validator_february.get_metric(
+    MetricConfiguration("table.row_count", metric_domain_kwargs={})
+)
 
 # March BatchRequest and Validator
 batch_request_march = BatchRequest(
-  datasource_name="taxi_pandas",
-  data_connector_name="monthly",
-  data_asset_name="my_reports",
-  data_connector_query={
-    "index": -1
-  }
+    datasource_name="taxi_pandas",
+    data_connector_name="monthly",
+    data_asset_name="my_reports",
+    data_connector_query={"index": -1},
 )
-validator_march = context.get_validator(batch_request=batch_request_march, expectation_suite=suite)
-print(validator_february.expect_table_row_count_to_equal(value=february_table_row_count))
+validator_march = context.get_validator(
+    batch_request=batch_request_march, expectation_suite=suite
+)
+print(validator_march.expect_table_row_count_to_equal(value=february_table_row_count))
