@@ -13,9 +13,10 @@ integration_test_matrix = [
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py"
+        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
     },
 ]
+
 
 def idfn(test_configuration):
     return test_configuration.get("name")
@@ -39,8 +40,7 @@ def test_docs(test_configuration, tmp_path):
 
         # DataContext
         context_source_dir = os.path.join(
-            base_dir,
-            test_configuration.get("data_context_dir")
+            base_dir, test_configuration.get("data_context_dir")
         )
         test_context_dir = os.path.join(tmp_path, "great_expectations")
         shutil.copytree(
@@ -49,10 +49,7 @@ def test_docs(test_configuration, tmp_path):
         )
 
         # Test Data
-        source_data_dir = os.path.join(
-            base_dir,
-            test_configuration.get("data_dir")
-        )
+        source_data_dir = os.path.join(base_dir, test_configuration.get("data_dir"))
         test_data_dir = os.path.join(tmp_path, "test_data")
         shutil.copytree(
             source_data_dir,
@@ -62,20 +59,14 @@ def test_docs(test_configuration, tmp_path):
         # UAT Script
         script_source = os.path.join(
             test_configuration.get("base_dir"),
-            test_configuration.get("user_flow_script")
+            test_configuration.get("user_flow_script"),
         )
         script_path = os.path.join(tmp_path, "test_script.py")
         shutil.copyfile(script_source, script_path)
         # Check initial state
 
         # Execute test
-        res = subprocess.run(
-            [
-                "python",
-                script_path
-            ],
-            capture_output=True
-        )
+        res = subprocess.run(["python", script_path], capture_output=True)
         # Check final state
         outs = res.stdout.decode("utf-8")
         errs = res.stderr.decode("utf-8")

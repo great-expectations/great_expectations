@@ -193,7 +193,9 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
     """
 
     df = ge.read_csv(
-        file_relative_path(__file__, "../test_sets/yellow_trip_data_sample_2019-01.csv"),
+        file_relative_path(
+            __file__, "../test_sets/yellow_trip_data_sample_2019-01.csv"
+        ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
 
@@ -207,7 +209,9 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     Ensures that all available expectation types work as expected
     """
     df = ge.read_csv(
-        file_relative_path(__file__, "../test_sets/yellow_trip_data_sample_2019-01.csv"),
+        file_relative_path(
+            __file__, "../test_sets/yellow_trip_data_sample_2019-01.csv"
+        ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
     return get_spark_runtime_validator(titanic_data_context_modular_api, df)
@@ -220,7 +224,9 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     Ensures that all available expectation types work as expected
     """
     df = ge.read_csv(
-        file_relative_path(__file__, "../test_sets/yellow_trip_data_sample_2019-01.csv"),
+        file_relative_path(
+            __file__, "../test_sets/yellow_trip_data_sample_2019-01.csv"
+        ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
     return get_sqlalchemy_runtime_validator_postgresql(df)
