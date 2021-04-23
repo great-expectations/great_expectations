@@ -37,7 +37,9 @@ class RuleState:
             parameters = {}
         self._parameters = parameters
         if variables is None:
-            variables = ParameterContainer(parameters={}, details=None)
+            variables = ParameterContainer(
+                parameters={}, details=None, descendants=None
+            )
         self._variables = variables
 
     @property
@@ -120,7 +122,7 @@ class RuleState:
         else:
             parameter_container = self.parameters.get(
                 self.active_domain_id,
-                ParameterContainer(parameters={}, details=None),
+                ParameterContainer(parameters={}, details=None, descendants=None),
             )
 
         parameter_name_part: Optional[str] = None

@@ -78,11 +78,13 @@ class Rule:
                 rule_state.parameters[domain_id][
                     parameter_name
                 ] = parameter_container.parameters
+
+            expectation_configuration_builder: ExpectationConfigurationBuilder
             for (
                 expectation_configuration_builder
             ) in self._expectation_configuration_builders:
                 configurations.append(
-                    expectation_configuration_builder.build_configuration(
+                    expectation_configuration_builder.build_expectation_configuration(
                         rule_state=rule_state
                     )
                 )
