@@ -1,6 +1,13 @@
-from ...validator.validation_graph import MetricConfiguration
-from ..rule_state import RuleState
-from .parameter_builder import ParameterBuilder
+from typing import List, Optional, Union
+
+from great_expectations import DataContext
+from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.profiler.parameter_builder.parameter_builder import (
+    ParameterBuilder,
+)
+from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 
 # TODO: <Alex>ALEX -- this class is not used anywhere in the codebase.</Alex>
@@ -11,20 +18,26 @@ class MetricParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         *,
-        parameter_id,
-        data_context=None,
-        metric_name,
-        metric_domain_kwargs="$domain.domain_kwargs",
-        metric_value_kwargs=None
+        parameter_name: str,
+        metric_name: str,
+        metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
+        metric_value_kwargs: Optional[Union[str, dict]] = None,
+        data_context: Optional[DataContext] = None,
     ):
-        super().__init__(parameter_id=parameter_id, data_context=data_context)
+        super().__init__(parameter_name=parameter_name, data_context=data_context)
+
         self._metric_name = metric_name
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
 
     def _build_parameters(
-        self, *, rule_state: RuleState = None, validator=None, batch_ids=None, **kwargs
-    ):
+        self,
+        *,
+        rule_state: Optional[RuleState] = None,
+        validator: Optional[Validator] = None,
+        batch_ids: Optional[List[str]] = None,
+        **kwargs,
+    ) -> Parameter:
         """
         Builds a dictionary of format {'parameters': A given resolved metric}
             Args:
@@ -34,27 +47,35 @@ class MetricParameterBuilder(ParameterBuilder):
         :return: a dictionary of format {'parameters': A given resolved metric}
         """
         # Obtaining any necessary domain kwargs from rule state, otherwise using instance var
-        if self._metric_domain_kwargs.startswith("$"):
-            metric_domain_kwargs = rule_state.get_value(self._metric_domain_kwargs)
+        if isinstance(
+            self._metric_domain_kwargs, str
+        ) and self._metric_domain_kwargs.startswith("$"):
+            metric_domain_kwargs = rule_state.get_parameter_value(
+                fully_qualified_parameter_name=self._metric_domain_kwargs
+            )
         else:
             metric_domain_kwargs = self._metric_domain_kwargs
 
         # Obtaining any necessary value kwargs from rule state, otherwise using instance var
         if (
             self._metric_value_kwargs is not None
+            and isinstance(self._metric_value_kwargs, str)
             and self._metric_value_kwargs.startswith("$")
         ):
-            metric_value_kwargs = rule_state.get_value(self._metric_value_kwargs)
+            metric_value_kwargs = rule_state.get_parameter_value(
+                fully_qualified_parameter_name=self._metric_value_kwargs
+            )
         else:
             metric_value_kwargs = self._metric_value_kwargs
 
-        # Building a parameter dictionary with single entry {"parameters": Metric},
-        # feeding in a MetricConfiguration with obtained domain and value kwargs
-        return {
-            "parameters": validator.get_metric(
-                MetricConfiguration(
-                    self._metric_name, metric_domain_kwargs, metric_value_kwargs
+        return Parameter(
+            parameters=validator.get_metric(
+                metric=MetricConfiguration(
+                    metric_name=self._metric_name,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=metric_value_kwargs,
+                    metric_dependencies=None,
                 )
             ),
-            "details": None,
-        }
+            details=None,
+        )

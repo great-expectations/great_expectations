@@ -1,16 +1,12 @@
 from typing import Dict, Optional
 
+import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.exceptions import ProfilerExecutionError
+from great_expectations.profiler.profiler_rule.profiler_rule import ProfilerRule
 from great_expectations.validator.validator import Validator
-
-from .. import DataContext
-from ..core import ExpectationSuite
-from .exceptions import (
-    ProfilerConfigurationError,
-    ProfilerError,
-    ProfilerExecutionError,
-)
-from .profiler_rule import ProfilerRule
 
 
 class Profiler:
@@ -46,8 +42,8 @@ class Profiler:
             for rule_name, rule_config in rule_configs.items():
                 domain_builder_config = rule_config.get("domain_builder")
                 if domain_builder_config is None:
-                    raise ProfilerConfigurationError(
-                        f"Invalid rule {rule_name}: no domain_builder found"
+                    raise ge_exceptions.ProfilerConfigurationError(
+                        message=f'Invalid rule "{rule_name}": no domain_builder found.'
                     )
                 domain_builder = instantiate_class_from_config(
                     domain_builder_config,
@@ -144,7 +140,7 @@ class Profiler:
             elif batch_request:
                 if not self.data_context:
                     raise ProfilerExecutionError(
-                        "Unable to profile using a batch_request if no data_context is provided."
+                        message="Unable to profile using a batch_request if no data_context is provided."
                     )
                 validator = self.data_context.get_validator(batch_request)
 
@@ -158,8 +154,8 @@ class Profiler:
                 unloaded_batch_ids.append(batch_id)
 
         if len(unloaded_batch_ids) > 0:
-            raise ProfilerExecutionError(
-                f"batch_ids {unloaded_batch_ids} were requested but are not available."
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"batch_ids {unloaded_batch_ids} were requested but are not available."
             )
 
         if expectation_suite_name is None:
