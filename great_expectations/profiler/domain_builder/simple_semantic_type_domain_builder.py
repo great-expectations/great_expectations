@@ -9,10 +9,10 @@ from great_expectations.validator.validator import MetricConfiguration, Validato
 
 
 class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
-    def __init__(self, semantic_type_filters: Optional[List[str]] = None):
-        if semantic_type_filters is None:
-            semantic_type_filters = []
-        self._semantic_type_filters = semantic_type_filters
+    def __init__(self, semantic_types: Optional[List[str]] = None):
+        if semantic_types is None:
+            semantic_types = []
+        self._semantic_types = semantic_types
 
     class SemanticDomainTypes(Enum):
         INTEGER = "integer"
@@ -39,21 +39,16 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         ]
         """
         config: dict = kwargs
-        semantic_type_filters: Union[str, Iterable, List[str]] = config.get(
-            "semantic_type_filters"
-        )
-        if semantic_type_filters is None:
-            semantic_type_filters = self._semantic_type_filters
-        elif isinstance(semantic_type_filters, str):
-            semantic_type_filters = [self.SemanticDomainTypes[semantic_type_filters]]
-        elif isinstance(semantic_type_filters, Iterable):
-            semantic_type_filters = [
-                self.SemanticDomainTypes[x] for x in semantic_type_filters
-            ]
+        semantic_types: Union[str, Iterable, List[str]] = config.get("semantic_types")
+        if semantic_types is None:
+            semantic_types = self._semantic_types
+        elif isinstance(semantic_types, str):
+            semantic_types = [self.SemanticDomainTypes[semantic_types]]
+        elif isinstance(semantic_types, Iterable):
+            semantic_types = [self.SemanticDomainTypes[x] for x in semantic_types]
         else:
-            # TODO: <Alex>ALEX -- We should make semantic_type_filters into a more robust data structure (i.e., a more sophisticated filtering object), or change the variable name to indicate that this is just the list of types (or a single string).</Alex>
             raise ValueError(
-                "Unrecognized type of semantic domain filters directive -- must be a list or a string."
+                "Unrecognized semantic_types directive -- must be a list or a string."
             )
 
         domains: List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]] = []
@@ -74,7 +69,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             semantic_column_type: str = self._get_column_semantic_type_name(
                 validator=validator, column=column
             )
-            if semantic_column_type in semantic_type_filters:
+            if semantic_column_type in semantic_types:
                 domains.append(
                     {
                         "domain_kwargs": {"column": column},
