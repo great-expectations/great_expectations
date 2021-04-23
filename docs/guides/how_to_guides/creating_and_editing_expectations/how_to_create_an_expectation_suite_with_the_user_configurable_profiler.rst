@@ -262,6 +262,8 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
         (QUESTION: Can there be a hirearchy of domains or at least multiple domains for a given rule or should the rule-domain pair be one-to-one? Maybe domains / parameters can be defined at the same level as rules and then referenced (rather than having to be defined within a rule). Currently it looks like the idea is that more complex domain configurations are meant to be captured in specific domain builder classes e.g. ``SimpleSemanticTypeColumnDomainBuilder`` and that there is a single domain per rule. ANSWER: Group consensus seems to be push complexity into code rather than config i.e. single Domain per ProfilerRule that is defined by a subclass of DomainBuilder)
 
+        NOTE: Please see the last example, it was edited as of 20210423, these have not yet been updated.
+
         GEN1 (Pseudocode):
 
         .. code-block:: yaml
@@ -364,7 +366,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
             my_rule_for_datetimes: # semantic type
               domains:
                 - my_datetime_domain_1: # QUESTION: Should we allow for multiple domains in a rule? QUESTION: Can / should domains be defined outside of the scope of a specific rule?
-                  # columns of type ``datetime`` (using the ``type_filters`` field)
+                  # columns of type ``datetime`` (using the ``semantic_types`` field)
                 - my_datetime_domain_2
                   # columns with the suffix ``_dt``
               parameters:
@@ -373,7 +375,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
               expectation_configuration_builders:
                 - expectation: expect_column_values_to_match_strftime_format
                 column: $domains.column # columns for all domains
-                date_fmt: $my_dateformat_parameter_1.parameter.date_string
+                strftime_format: $my_dateformat_parameter_1.parameter.date_string
 
 
         .. admonition:: The below examples are not yet modified per our conversations.
@@ -426,7 +428,7 @@ BOOKMARK
             my_rule_for_datetimes: # semantic type
               domains:
                 - my_datetime_domain_1: # QUESTION: Should we allow for multiple domains in a rule? QUESTION: Can / should domains be defined outside of the scope of a specific rule?
-                  # columns of type ``datetime`` (using the ``type_filters`` field)
+                  # columns of type ``datetime`` (using the ``semantic_types`` field)
                 - my_datetime_domain_2
                   # columns with the suffix ``_dt``
               parameters:
@@ -435,74 +437,91 @@ BOOKMARK
               expectation_configuration_builders:
                 - expectation: expect_column_values_to_match_strftime_format
                 column: $domains.column # columns for all domains
-                date_fmt: $my_dateformat_parameter_1.parameter.date_string
+                strftime_format: $my_dateformat_parameter_1.parameter.date_string
 
 
         TODO: insert more examples with actual code.
 
-        TODO: This is an example from James' spec document copied over verbatim, and should be edited.
+        TODO: This is an example from James' spec document copied over verbatim, and should be edited. It has been edited as of 20210423
+
+        # QUESTION - what is the $something.something syntax?
+        # PROPOSED ANSWER: $instance_name(parameter_name,domain_name - maybe `domain` is ok and assume the rule domain).attribute(instance or class).sub_attribute.sub_sub_attribute...
 
         .. code-block:: yaml
 
-          class_name: BasicSuiteBuilderProfiler
           variables:
             false_positive_threshold: 0.01
           rules:
-            datetime:  # "just-a-name"
+            my_rule_for_datetimes:  # "just-a-name"
               # JPC: what is happening here -- we're asking, "Which columns in this data are datetimes?"
               domain_builder:
                 class_name: SimpleSemanticTypeColumnDomainBuilder
-                type: datetime
+                semantic_types:  # AJB: semantic_types are defined in the Domain Builder and referenced here by name
+                                 #      domains are checked against these types for inclusion in the rule domain.
+                                 #      All domains corresponding to any of the semantic_types are included.
+                  - datetime
               parameter_builders:
-                - id: my_dateformat  # name?
+                - parameter_name: my_dateformat  # name?
                   # JPC: what is happening here -- we're asking, "What date format matches the data in this column?"
                   class_name: SimpleDateFormatStringParameterBuilder
-                  domain_kwargs: $domain.domain_kwargs
+                  domain_kwargs: $domain.domain_kwargs # QUESTION: if there is only one domain, can this just be assumed?
               configuration_builders:
-                - branch:
-                    if: $my_dateformat.parameter.match_pct >= 0.8  # if evaluates to true in python, i.e. "" is FALSE, "%Y" is TRUE
+                - branch: # branch is optional if/then syntax. You can also just put the expectation
+                    if: $my_dateformat.success_ratio >= 0.8  # if evaluates to true in python, i.e. "" is FALSE, "%Y" is TRUE
+                                                                   # This success_ratio is provided via `details` of a parameter
+                                                                   # It is matched with the correct domain
+                                                                   # QUESTION: I removed the `parameter` in between the
+                                                                   # parameter_name and success_ratio - perhaps we can
+                                                                   # simplify these lookups
                     then:
-                      - expectation: expect_column_values_to_match_strftime_format
+                      - expectation_type: expect_column_values_to_match_strftime_format # QUESTION: Should we change this from expectation to expectation_type?
                         column: $domain.domain_kwargs.column  # is this obvious/inferrable?
-                        date_fmt: $my_dateformat.parameter.date_string
+                                                              # AJB - I think some may wish to be more explicit but yes
+                                                              # this should be inferrable when there is a 1-1 between
+                                                              # ProfilerRule and Domain. So make this line optional.
+                        strftime_format: $my_dateformat.date_format_string # This is an expectation kwarg
+                                                                                     # (Parameters in our docs)
+                                                                                     # QUESTION: removed `parameter`
                 - branch:
-                    if: $domain.column_type in my_dateformat.DATETIME_TYPES_CONST  # Note that domain returned "column_type" in addition to "domain_kwargs"
+                    if: $domain.column_type in my_dateformat.DATETIME_TYPES_CONST  # Note that domain returned "column_type" in addition to "domain_kwargs" - Note also that DATEITME_TYPES_CONST doesn't yet exist but would be a class variable of the SimpleDateFormatStringParameterBuilder
+                                                                                   # QUESTION: Is this a "subdomain"? It kind of feels against the 1 domain per ProfilerRule, but makes sense. Suppose I want to reference this elsewhere, I guess for now we copy paste.
                     then:
                       - expectation: expect_column_values_to_be_in_type_list
-                        column: $domain.domain_kwargs.column  # is this obvious/inferrable?
-                        type_list: my_dateformat.DATETIME_TYPES_CONST
-            numeric:  # "just-a-name"
+                        column: $domain.domain_kwargs.column  # is this obvious/inferrable? # YES optional, see above
+                        type_list: my_dateformat.DATETIME_TYPES_CONST # See above note
+            my_rule_for_numerics:  # "just-a-name"
               # Which columns in this data are numeric?
               class_name: SemanticTypeColumnDomainBuilder
-              type: numeric
+              semantic_types:
+                - numeric
               parameter_builders:
-                - id: mean
+                - parameter_name: my_parameter_mean
                   class_name: MetricParameterBuilder
                   metric_name: column.mean
-                  metric_domain_kwargs: $domain.domain_kwargs
-                - id: min
+                  metric_domain_kwargs: $domain.domain_kwargs # QUESTION: Should this be optional and inferred?
+                - parameter_name: my_parameter_min
                   class_name: MetricParameterBuilder
                   metric_name: column.min
-                  metric_domain_kwargs: $domain.domain_kwargs
-                - id: false_positive_threshold_min
+                  metric_domain_kwargs: $domain.domain_kwargs # QUESTION: Should this be optional and inferred?
+                - parameter_name: my_parameter_false_positive_threshold_min
                   class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
                   batch_request:  # this should be unioned with the rest of the batch request from the call to profile
                     partition_request:
                       partition_index: "-10:"
                   metric_configuration:
                     metric_name: column.min
-                    metric_domain_kwargs: $domain.domain_kwargs
-                  p_values:
+                    metric_domain_kwargs: $domain.domain_kwargs # QUESTION: Should this be optional and inferred?
+                  p_values: # TBD Not yet implemented
                     min_value: $variables.false_positive_threshold
                     max_value: 1.0
-                - id: quantile_ranges
+                - parameter_name: my_parameter_quantile_ranges
                   class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
                   batch_request:
                     partition_request:
                       partition_index: "-10:"
                   metric_configuration:
                     metric_name: column.quantile_values
-                    metric_domain_kwargs: $domain.domain_kwargs
+                    metric_domain_kwargs: $domain.domain_kwargs # QUESTION: Should this be optional and inferred?
                     metric_value_kwargs:
                       quantiles:
                         - 0.05
@@ -513,14 +532,14 @@ BOOKMARK
                   p_values:
                     min_value: ($false_positive_threshold / 2)
                     max_value: 1 - ($false_positive_threshold / 2)
-                - id: max
+                - parameter_name: my_parameter_max
                   class_name: MetricParameterBuilder
                   metric_name: column.max
-                  metric_domain_kwargs: $domain.domain_kwargs
-                - id: quantiles
+                  metric_domain_kwargs: $domain.domain_kwargs # QUESTION: Should this be optional and inferred?
+                - id: my_parameter_quantiles
                   class_name: MetricParameterBuilder
                   metric_name: column.quantile_values
-                  metric_domain_kwargs: $domain.domain_kwargs
+                  metric_domain_kwargs: $domain.domain_kwargs # QUESTION: Should this be optional and inferred?
                   metric_value_kwargs:
                     quantiles:
                       - 0.05
@@ -530,8 +549,8 @@ BOOKMARK
                       - 0.95
               configuration_builders:
                 - expectation: expect_column_min_to_be_between
-                  min_value: $false_positive_threshold_min.min_value
-                  max_value: $false_positive_threshold_min.max_value
+                  min_value: $my_parameter_false_positive_threshold_min.min_value
+                  max_value: $my_parameter_false_positive_threshold_min.max_value
                 - expectation: expect_column_quantile_values_to_be_between
                   quantiles:
                     - 0.05
@@ -539,19 +558,19 @@ BOOKMARK
                     - 0.50
                     - 0.75
                     - 0.95
-                  value_ranges: $quantile_ranges
+                  value_ranges: $my_parameter_quantile_ranges
                 - expectation: expect_column_max_to_be_between
-                  min_value: 0.9 * $max
-                  max_value: 1.1 * $max
+                  min_value: 0.9 * $my_parameter_max
+                  max_value: 1.1 * $my_parameter_max
                 - expectation: expect_column_median_to_be_between
-                  min_value:  # in this example, the resulting configuration is not a value, but an evaluation parameter refering to a metric that must be calculated for each validation to validation of the configuration (QUESTION: can this be performed by a parameter definition relative to the current batch?)
+                  min_value:  # in this example, the resulting configuration is not a value, but an evaluation parameter referring to a metric that must be calculated for each validation to validation of the configuration (QUESTION: can this be performed by a parameter definition relative to the current batch instead of Evaluation Parameter?)
                     "$PARAMETER": 0.9 *
                        metric_name: column.median
                        metric_batch_kwargs:
                          batch_request:
                            partition_request:
                              partition_index: -1
-                         column: $domain.domain_kwargs.column
+                         column: $domain.domain_kwargs.column # QUESTION: Should this be optional and inferred?
                   max_value:  # in this example, the resulting configuration is not a value, but an evaluation parameter refering to a metric that must be calculated for each validation to validation of the configuration
                     "$PARAMETER": 1.1 *
                        metric_name: column.median
@@ -559,7 +578,7 @@ BOOKMARK
                          batch_request:
                            partition_request:
                              partition_index: -1
-                         column: $domain.domain_kwargs.column
+                         column: $domain.domain_kwargs.column # QUESTION: Should this be optional and inferred?
 
 
 
