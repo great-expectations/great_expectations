@@ -200,9 +200,11 @@ def build_gallery(
                 impl = great_expectations.expectations.registry.get_expectation_impl(
                     expectation
                 )
+
                 diagnostics = impl().run_diagnostics()
                 gallery_info[expectation] = diagnostics
                 built_expectations.add(expectation)
+
             logger.info(f"Unloading just-installed for module {expectation_module}")
             for req in just_installed:
                 logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
