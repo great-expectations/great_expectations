@@ -5,7 +5,7 @@ from great_expectations.profiler.expectation_configuration_builder.expectation_c
 from great_expectations.profiler.rule.rule_state import RuleState
 
 
-class ParameterNameValueExpectationConfigurationBuilder(
+class ParameterIdentificationExpectationConfigurationBuilder(
     ExpectationConfigurationBuilder
 ):
     """

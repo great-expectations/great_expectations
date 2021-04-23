@@ -5,7 +5,7 @@ from great_expectations.profiler.rule.rule_state import RuleState
 
 
 class ExpectationConfigurationBuilder(ABC):
-    def build_configuration(
+    def build_expectation_configuration(
         self, rule_state: RuleState, **kwargs
     ) -> ExpectationConfiguration:
         """
