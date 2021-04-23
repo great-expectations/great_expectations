@@ -2,10 +2,10 @@ from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.profiler.configuration_builder.configuration_builder import (
-    ConfigurationBuilder,
-)
 from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
+from great_expectations.profiler.expectation_configuration_builder.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
+)
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
@@ -22,7 +22,7 @@ class Rule:
         name: str,
         domain_builder: DomainBuilder,
         parameter_builders: List[ParameterBuilder],
-        configuration_builders: List[ConfigurationBuilder],
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder],
         variables: Optional[ParameterTreeContainerNode] = None,
     ):
         """
@@ -32,14 +32,14 @@ class Rule:
         :param domain_builder: A Domain Builder object used to build rule data domain
         :param parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters for
         every configuration
-        :param configuration_builders: A list of Configuration Builders initializing state configurations (utilizes the info in
+        :param expectation_configuration_builders: A list of Expectation Configuration Builders initializing state configurations (utilizes the info in
         a RuleState object)
         :param variables: Any instance data required to verify a rule
         """
         self._name = name
         self._domain_builder = domain_builder
         self._parameter_builders = parameter_builders
-        self._configuration_builders = configuration_builders
+        self._expectation_configuration_builders = expectation_configuration_builders
         self._variables = variables
 
     def evaluate(
@@ -78,9 +78,13 @@ class Rule:
                 rule_state.parameters[domain_id][
                     parameter_name
                 ] = parameter_tree_container_node.parameters
-            for configuration_builder in self._configuration_builders:
+            for (
+                expectation_configuration_builder
+            ) in self._expectation_configuration_builders:
                 configurations.append(
-                    configuration_builder.build_configuration(rule_state=rule_state)
+                    expectation_configuration_builder.build_configuration(
+                        rule_state=rule_state
+                    )
                 )
 
         return configurations

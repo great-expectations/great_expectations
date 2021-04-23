@@ -4,7 +4,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.profiler.rule.rule_state import RuleState
 
 
-class ConfigurationBuilder(ABC):
+class ExpectationConfigurationBuilder(ABC):
     def build_configuration(
         self, rule_state: RuleState, **kwargs
     ) -> ExpectationConfiguration:
@@ -15,10 +15,10 @@ class ConfigurationBuilder(ABC):
                 metric parameters, and necessary variables
         :return: Built Configuration
         """
-        return self._build_configuration(rule_state=rule_state, **kwargs)
+        return self._build_expectation_configuration(rule_state=rule_state, **kwargs)
 
     @abstractmethod
-    def _build_configuration(
+    def _build_expectation_configuration(
         self, rule_state: RuleState, **kwargs
     ) -> ExpectationConfiguration:
         pass

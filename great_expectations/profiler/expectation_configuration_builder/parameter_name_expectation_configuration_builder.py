@@ -1,11 +1,11 @@
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.profiler.configuration_builder.configuration_builder import (
-    ConfigurationBuilder,
+from great_expectations.profiler.expectation_configuration_builder.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 
 
-class ParameterConfigurationBuilder(ConfigurationBuilder):
+class ParameterNameExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     """
     Class which creates ExpectationConfiguration out of a given Expectation type and
     parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied as kwargs dictionary).
@@ -15,7 +15,7 @@ class ParameterConfigurationBuilder(ConfigurationBuilder):
         self._expectation_type = expectation_type
         self._parameter_name_to_fully_qualified_parameter_name_dict = kwargs
 
-    def _build_configuration(
+    def _build_expectation_configuration(
         self, rule_state: RuleState, **kwargs
     ) -> ExpectationConfiguration:
         """
