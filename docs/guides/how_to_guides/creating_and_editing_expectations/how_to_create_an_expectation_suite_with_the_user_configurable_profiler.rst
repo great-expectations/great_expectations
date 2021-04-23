@@ -250,6 +250,9 @@ This guide will help you create a new Expectation Suite by profiling your data w
             - GEN1 refers to our current plan, GEN2 refers to ideas that may or may not be addressed in future versions. Currently the only difference is that GEN2 allows for globally defined parameters and domains that can be used in multiple rules. It does not support multiple domains in a single rule.
 
 
+        NOTE: ONLY A SECTION OF THIS DOCUMENT HAS BEEN UPDATED - PLEASE SEE NOTES
+
+
         TODO: This text is just for internal communication so far and must be cross referenced with existing docs especially the Core Concepts docs before being released.
 
         The aim of the Great Expectations Profiler is to describe your existing data automatically by scanning it (or a subset of it) to create an Expectation Suite. The resulting Expectation Suite should describe your existing data well enough that new data (that is well behaved) should still pass when validated against that Expectation Suite. Of course the generated Expectation Suite can be manually modified using the existing Great Expectations Suite Edit functionality or re-generated via a modified Profiler if the data changes.
@@ -448,7 +451,8 @@ BOOKMARK
         # PROPOSED ANSWER: $instance_name(parameter_name,domain_name - maybe `domain` is ok and assume the rule domain).attribute(instance or class).sub_attribute.sub_sub_attribute...
         # TODO: DomainBuilders are 1:1, not Domains
 
-        my_domain_builder_name.
+
+        # NOTE: PLEASE SEE BELOW FOR UPDATED CODE AS OF 20210423 ------------------------------------------------------
 
         .. code-block:: yaml
 
@@ -465,15 +469,18 @@ BOOKMARK
                                  #      All domains corresponding to any of the semantic_types are included.
                                  # semantic_type key is determined by the domain builder not global e.g. SimpleSuffixColumnDomainBuilder where suffix is the keyword.
                   - datetime
-                list_of_domain_names: # TBD - this is maybe batch_id,domain_id together - probably Typed Object DomainId
+                user_input_list_of_domain_names: # TBD - this is maybe batch_id,domain_id together - probably Typed Object DomainId - can add human readable IDs. Probably too much complexity for first version.
               parameter_builders:
-# WIP
                 - name: my_dateformat  # This is shorthand for `parameter_builder_name`
                   # JPC: what is happening here -- we're asking, "What date format matches the data in this column?"
                   class_name: SimpleDateFormatStringParameterBuilder
                   module_name: # OPTIONAL
                   domain_builder_kwargs: my_domain_builder_name.domain_kwargs # QUESTION: if there is only one domain_builder, can this just be assumed?
               expectation_configuration_builders:
+                # TODO: BranchingExpectationConfigurationBuilder - with parameters that take key value for gt lt gte lte
+                # Keep this if-then complexity in the Expectation rather than in the config
+                # Propose delaying until later versions, but this is directional design
+
                 - branch: # branch is optional if/then syntax. You can also just put the expectation
                     if: $my_dateformat.success_ratio >= 0.8  # if evaluates to true in python, i.e. "" is FALSE, "%Y" is TRUE
                                                                    # This success_ratio is provided via `details` of a parameter
@@ -499,7 +506,7 @@ BOOKMARK
                                                                                    # QUESTION: Is this a "subdomain"? It kind of feels against the 1 domain per ProfilerRule, but makes sense. Suppose I want to reference this elsewhere, I guess for now we copy paste.
                     then:
                       - expectation: expect_column_values_to_be_in_type_list
-                        column: $domain.domain_kwargs.column  # is this obvious/inferrable? # YES optional, see above
+                        column: $domain_builder.domain_kwargs.column  # is this obvious/inferrable? # YES optional, see above
                         type_list: my_dateformat.DATETIME_TYPES_CONST # See above note
             my_rule_for_numerics:  # "just-a-name"
               # Which columns in this data are numeric?
@@ -592,7 +599,7 @@ BOOKMARK
                              partition_index: -1
                          column: $domain.domain_kwargs.column # QUESTION: Should this be optional and inferred?
 
-
+# NOTE: PLEASE SEE ABOVE FOR UPDATED CODE AS OF 20210423 ------------------------------------------------------
 
         Here are a few definitions of concepts that may not yet be familiar:
 
