@@ -359,6 +359,7 @@ stages:
               pip install wheel
               python setup.py sdist
               python setup.py bdist_wheel
+              rm -rf great_expectations
            displayName: 'Build distribution'
 
           - script: |
