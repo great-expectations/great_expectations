@@ -6,8 +6,8 @@ from great_expectations import DataContext
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
-    ParameterTreeContainerNode,
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -65,7 +65,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         **kwargs,
-    ) -> ParameterTreeContainerNode:
+    ) -> ParameterContainer:
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
         if batch_ids is None:
@@ -114,7 +114,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best = fmt_string
                 best_ratio = ratio
 
-        return ParameterTreeContainerNode(
+        return ParameterContainer(
             parameters={"date_format_string": best},
             details={"success_ratio": best_ratio},
             descendants=None,

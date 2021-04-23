@@ -4,8 +4,8 @@ from great_expectations import DataContext
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
-    ParameterTreeContainerNode,
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -39,7 +39,7 @@ class MetricParameterBuilder(ParameterBuilder):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         **kwargs,
-    ) -> ParameterTreeContainerNode:
+    ) -> ParameterContainer:
         """
         Builds a dictionary of format {'parameters': A given resolved metric}
             Args:
@@ -70,7 +70,7 @@ class MetricParameterBuilder(ParameterBuilder):
         else:
             metric_value_kwargs = self._metric_value_kwargs
 
-        return ParameterTreeContainerNode(
+        return ParameterContainer(
             parameters=validator.get_metric(
                 metric=MetricConfiguration(
                     metric_name=self._metric_name,

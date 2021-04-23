@@ -9,8 +9,8 @@ from great_expectations.profiler.expectation_configuration_builder.expectation_c
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
-    ParameterTreeContainerNode,
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validator import Validator
@@ -23,7 +23,7 @@ class Rule:
         domain_builder: DomainBuilder,
         parameter_builders: List[ParameterBuilder],
         expectation_configuration_builders: List[ExpectationConfigurationBuilder],
-        variables: Optional[ParameterTreeContainerNode] = None,
+        variables: Optional[ParameterContainer] = None,
     ):
         """
         Sets Profiler rule name, domain builders, parameters builders, configuration builders,
@@ -70,14 +70,14 @@ class Rule:
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
                 parameter_name: str = parameter_builder.parameter_name
-                parameter_tree_container_node: ParameterTreeContainerNode = (
+                parameter_container: ParameterContainer = (
                     parameter_builder.build_parameters(
                         rule_state=rule_state, validator=validator, batch_ids=batch_ids
                     )
                 )
                 rule_state.parameters[domain_id][
                     parameter_name
-                ] = parameter_tree_container_node.parameters
+                ] = parameter_container.parameters
             for (
                 expectation_configuration_builder
             ) in self._expectation_configuration_builders:

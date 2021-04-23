@@ -7,8 +7,8 @@ from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
-    ParameterTreeContainerNode,
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validator import Validator
@@ -46,7 +46,7 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         **kwargs,
-    ) -> ParameterTreeContainerNode:
+    ) -> ParameterContainer:
         """Build the parameters for the specified domain_kwargs."""
         if batch_ids is None:
             batch_ids = self._get_batch_ids(self._batch_request)

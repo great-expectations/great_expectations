@@ -6,8 +6,8 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder import (
     MultiBatchParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
-    ParameterTreeContainerNode,
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -64,7 +64,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         **kwargs
-    ) -> ParameterTreeContainerNode:
+    ) -> ParameterContainer:
         samples = []
         for batch_id in batch_ids:
             metric_domain_kwargs = copy(rule_state.active_domain["domain_kwargs"])
@@ -85,7 +85,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
                 )
             )
 
-        return ParameterTreeContainerNode(
+        return ParameterContainer(
             # TODO: Using the first sample for now, but this should be extended for handling multiple batches
             parameters=samples[0],
             details=None,

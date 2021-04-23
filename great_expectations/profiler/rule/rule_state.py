@@ -3,8 +3,8 @@ from typing import Any, Dict, List, Optional, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
-    ParameterTreeContainerNode,
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
 )
 
 DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
@@ -28,8 +28,8 @@ class RuleState:
             List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]
         ] = None,
         # TODO: <Alex>ALEX -- what is the structure of this "parameters" argument?</Alex>
-        parameters: Optional[Dict[str, ParameterTreeContainerNode]] = None,
-        variables: Optional[ParameterTreeContainerNode] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        variables: Optional[ParameterContainer] = None,
     ):
         self._active_domain = active_domain
         if domains is None:
@@ -39,11 +39,11 @@ class RuleState:
             parameters = {}
         self._parameters = parameters
         if variables is None:
-            variables = ParameterTreeContainerNode(parameters={}, details=None)
+            variables = ParameterContainer(parameters={}, details=None)
         self._variables = variables
 
     @property
-    def parameters(self) -> Dict[str, ParameterTreeContainerNode]:
+    def parameters(self) -> Dict[str, ParameterContainer]:
         return self._parameters
 
     @property
@@ -76,7 +76,7 @@ class RuleState:
 
     # TODO: <Alex>ALEX -- what is the return type?</Alex>
     @property
-    def variables(self) -> ParameterTreeContainerNode:
+    def variables(self) -> ParameterContainer:
         """
         Getter for rule_state variables
         :return: variables necessary for validating rule
@@ -113,32 +113,34 @@ class RuleState:
         else:
             fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
-        parameter_name_hierarchy_list: List[str] = fully_qualified_parameter_name.split(
-            "."
-        )
+        fully_qualified_parameter_as_list: List[
+            str
+        ] = fully_qualified_parameter_name.split(".")
 
-        node: ParameterTreeContainerNode
+        parameter_container: ParameterContainer
         if fully_qualified_parameter_name_references_variable:
-            node = self.variables
+            parameter_container = self.variables
         else:
-            node = self.parameters.get(
+            parameter_container = self.parameters.get(
                 self.active_domain_id,
-                ParameterTreeContainerNode(parameters={}, details=None),
+                ParameterContainer(parameters={}, details=None),
             )
 
-        parameter_name_at_level_in_hierarchy: Optional[str] = None
+        parameter_name_part: Optional[str] = None
         parameter_value: Optional[Any] = None
         try:
-            for parameter_name_at_level_in_hierarchy in parameter_name_hierarchy_list:
-                if node.descendants is None:
-                    parameter_value = node.parameters[
-                        parameter_name_at_level_in_hierarchy
+            for parameter_name_part in fully_qualified_parameter_as_list:
+                if parameter_container.descendants is None:
+                    parameter_value = parameter_container.parameters[
+                        parameter_name_part
                     ]
                 else:
-                    node = node.descendants[parameter_name_at_level_in_hierarchy]
+                    parameter_container = parameter_container.descendants[
+                        parameter_name_part
+                    ]
         except KeyError:
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": key "{parameter_name_at_level_in_hierarchy}" was missing.'
+                message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": key "{parameter_name_part}" was missing.'
             )
 
         return parameter_value
