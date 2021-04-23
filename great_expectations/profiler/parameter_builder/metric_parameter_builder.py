@@ -7,7 +7,7 @@ from great_expectations.profiler.parameter_builder.parameter_builder import (
 from great_expectations.profiler.parameter_builder.parameter_tree_container_node import (
     ParameterTreeContainerNode,
 )
-from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 

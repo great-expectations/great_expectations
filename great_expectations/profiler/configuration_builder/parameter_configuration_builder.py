@@ -2,7 +2,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.profiler.configuration_builder.configuration_builder import (
     ConfigurationBuilder,
 )
-from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.profiler.rule.rule_state import RuleState
 
 
 class ParameterConfigurationBuilder(ConfigurationBuilder):

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.profiler.rule.rule_state import RuleState
 
 
 class ConfigurationBuilder(ABC):

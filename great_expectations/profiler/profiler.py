@@ -5,7 +5,7 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ProfilerExecutionError
-from great_expectations.profiler.profiler_rule.profiler_rule import ProfilerRule
+from great_expectations.profiler.rule.rule import Rule
 from great_expectations.validator.validator import Validator
 
 
@@ -16,7 +16,7 @@ class Profiler:
     def __init__(
         self,
         *,
-        rules: Optional[Dict[str, ProfilerRule]] = None,
+        rules: Optional[Dict[str, Rule]] = None,
         rule_configs: Optional[Dict[str, Dict]] = None,
         data_context: Optional[DataContext] = None,
     ):
@@ -27,8 +27,8 @@ class Profiler:
         These will be used to define profiler computation patterns.
 
         Args:
-            rules: A rule or set of rules of format {"rule_name": ProfilerRule object}
-            rule_configs: An alternative to rules, providing a rule configuration as a dictionary instead of a ProfilerRule
+            rules: A rule or set of rules of format {"rule_name": Rule object}
+            rule_configs: An alternative to rules, providing a rule configuration as a dictionary instead of a Rule
             data_context: An organizational DataContext object that defines a full runtime environment (data access, etc.)
         """
         self._data_context = data_context
@@ -75,8 +75,9 @@ class Profiler:
                         )
                     )
 
+                # TODO: <Alex>ALEXs -- use name-value pairs in arguments; add type hints throughout.</Alex>
                 self._rules.append(
-                    ProfilerRule(
+                    Rule(
                         rule_name,
                         domain_builder,
                         parameter_builders,
