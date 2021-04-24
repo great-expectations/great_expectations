@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import IDDict
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
@@ -20,22 +21,21 @@ class RuleState:
 
     def __init__(
         self,
-        active_domain: Optional[
-            Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]
-        ] = None,
-        domains: Optional[
-            List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]
-        ] = None,
+        active_domain: Optional[Domain],
+        domains: Optional[List[Domain]] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         variables: Optional[ParameterContainer] = None,
     ):
         self._active_domain = active_domain
+
         if domains is None:
-            domains = {}
+            domains = Domain(domain_kwargs=None, domain_type=None)
         self._domains = domains
+
         if parameters is None:
             parameters = {}
         self._parameters = parameters
+
         if variables is None:
             variables = ParameterContainer(
                 parameters={}, details=None, descendants=None
@@ -47,32 +47,20 @@ class RuleState:
         return self._parameters
 
     @property
-    def domains(self) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
+    def domains(self) -> List[Domain]:
         return self._domains
 
     @domains.setter
-    def domains(
-        self, domains: List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]
-    ):
+    def domains(self, domains: List[Domain]):
         self._domains = domains
 
     @property
-    def active_domain(self) -> Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]:
+    def active_domain(self) -> Domain:
         return self._active_domain
 
     @active_domain.setter
-    def active_domain(
-        self, active_domain: Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]
-    ):
+    def active_domain(self, active_domain: Domain):
         self._active_domain = active_domain
-
-    @property
-    def active_domain_id(self) -> str:
-        """
-        Getter for the id of the rule domain
-        :return: the id of the rule domain
-        """
-        return IDDict(self.active_domain).to_id()
 
     @property
     def variables(self) -> ParameterContainer:
@@ -121,7 +109,7 @@ class RuleState:
             parameter_container = self.variables
         else:
             parameter_container = self.parameters.get(
-                self.active_domain_id,
+                self.active_domain.id,
                 ParameterContainer(parameters={}, details=None, descendants=None),
             )
 

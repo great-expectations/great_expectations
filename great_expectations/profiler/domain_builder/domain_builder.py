@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.validator.validator import Validator
 
 
@@ -20,7 +21,7 @@ class DomainBuilder(ABC):
         include_batch_id: Optional[bool] = False,
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs
-    ) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
+    ) -> List[Domain]:
         """
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
@@ -42,6 +43,6 @@ class DomainBuilder(ABC):
         include_batch_id: Optional[bool] = False,
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs
-    ) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
+    ) -> List[Domain]:
         """_get_domains is the primary workhorse for the DomainBuilder"""
         pass
