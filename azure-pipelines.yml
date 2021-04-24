@@ -325,7 +325,7 @@ stages:
               pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
-  - stage: cli_integration
+  - stage: packaging_and_cli_integration
     dependsOn: [scope_check, lint, usage_stats_integration, required, db_integration]
     pool:
       vmImage: 'ubuntu-latest'
@@ -355,10 +355,20 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
+              pip install twine
+              pip install wheel
+              python setup.py sdist
+              python setup.py bdist_wheel
+           displayName: 'Build distribution'
+
+          - script: |
+              pip install dist/great_expectations*.tar.gz
+           displayName: 'Install built distributable'
+
+          - script: |
               # not including "--requirement requirements-dev-spark.txt", because it specifies "pyspark>=2.3.2,<3.0.0" versions, which do not support Python 3.8 (see script step below)
               pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
               pip install --requirement requirements.txt
-              pip install .
             displayName: 'Install dependencies'
 
           - script: |

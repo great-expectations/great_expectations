@@ -6,6 +6,7 @@ Changelog
 
 Develop
 -----------------
+* [MAINTENANCE] CLI CI integration tests now execute against a built package
 
 0.13.19
 -----------------
