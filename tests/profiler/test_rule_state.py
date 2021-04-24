@@ -52,7 +52,8 @@ def semantic_rule_state():
         ),
     )
 
-# TODO: build test to ensure that id property and access works for a list of domains of various types
+
+# TODO: <Alex>ALEX -- build test to ensure that id property and access works for a list of domains of various types.</Alex>
 def test_id_property_of_active_domain(simple_rule_state, semantic_rule_state):
     assert simple_rule_state.active_domain.id == "20afbf5aa7826d5d5c378a62ccef8ded"
     assert semantic_rule_state.active_domain.id == "221524dcea2a0c06128e96256a3cad1d"
