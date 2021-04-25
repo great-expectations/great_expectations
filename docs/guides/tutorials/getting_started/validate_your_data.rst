@@ -5,7 +5,7 @@ Validate your data using a Checkpoint
 
 :ref:`validation` is the core operation of Great Expectations: “Validate data X against Expectation Y.”
 
-In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Checkpoints bundle :ref:`Batches` of data with corresponding :ref:`Expectation Suites` for validation.
+In normal usage, the best way to validate data is with a :ref:`Checkpoints <checkpoints_and_actions>`. Checkpoints bundle :ref:`Batches <how_to_guides__creating_batches>` of data with corresponding :ref:`Expectation Suites <how_to_guides__creating_and_editing_expectations>` for validation.
 
 Let’s set up our first Checkpoint to validate the February data! In order to do this, we need to do two things:
 

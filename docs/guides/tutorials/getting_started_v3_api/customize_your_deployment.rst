@@ -3,7 +3,8 @@
 Optional: Customize your deployment
 ===================================
 
-At this point, you have your first, working local deployment of Great Expectations. You've also been introduced to the foundational concepts in the library: :ref:`data_context`, :ref:`Datasources <reference__core_concepts__datasources>`, :ref:`Expectations`, :ref:`Profilers`, :ref:`Data Docs <reference__core_concepts__data_docs>`, :ref:`Validation`, and :ref:`Checkpoints <reference__core_concepts__validation__checkpoints>`.
+At this point, you have your first, working local deployment of Great Expectations using the V3 (Batch Request) API.
+You've also been introduced to the foundational concepts in the library: :ref:`data_context`, :ref:`Datasources <reference__core_concepts__datasources>`, :ref:`Expectations`, :ref:`Profilers`, :ref:`Data Docs <reference__core_concepts__data_docs>`, :ref:`Validation`, and :ref:`Checkpoints <reference__core_concepts__validation__checkpoints>`.
 
 Congratulations! You're off to a very good start.
 
@@ -114,22 +115,6 @@ By default, Data Docs are stored locally, in an uncommitted directory. This is g
 * :ref:`how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_azure_blob_storage`
 * :ref:`how_to_guides__configuring_data_docs__how_to_host_and_share_data_docs_on_gcs`
 
-
-.. _tutorials__getting_started__customize_your_deployment__additional_validation_operators_and_actions:
-
-Additional Validation Operators and Actions
------------------------------------------------
-
-Most teams will want to configure various :ref:`Validation Actions <validation_actions>` as part of their deployment.
-
-* :ref:`how_to_guides__validation__how_to_update_data_docs_as_a_validation_action`
-* :ref:`how_to_guides__validation__how_to_store_validation_results_as_a_validation_action`
-* :ref:`how_to_guides__validation__how_to_trigger_slack_notifications_as_a_validation_action`
-* :ref:`how_to_guides__validation__how_to_trigger_email_as_a_validation_action`
-
-If you also want to modify your :ref:reference__core_concepts__validation__validation_operator, you can learn how here:
-
-* :ref:`how_to_guides__validation__how_to_add_a_validation_operator`
 
 .. Creating and editing Expectations
 .. ---------------------------------

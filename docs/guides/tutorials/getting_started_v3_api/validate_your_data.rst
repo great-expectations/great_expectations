@@ -5,7 +5,7 @@ Validate your data using a Checkpoint
 
 :ref:`validation` is the core operation of Great Expectations: “Validate data X against Expectation Y.”
 
-In normal usage, the best way to validate data is with a :ref:`Checkpoint`. Checkpoints bundle :ref:`Batches` of data with corresponding :ref:`Expectation Suites` for validation.
+In normal usage, the best way to validate data is with a :ref:`Checkpoints <checkpoints_and_actions>`. Checkpoints bundle :ref:`Batches <how_to_guides__creating_batches>` of data with corresponding :ref:`Expectation Suites <how_to_guides__creating_and_editing_expectations>` for validation.
 
 Let’s set up our first Checkpoint to validate the February data! Run the following in your terminal:
 
@@ -13,51 +13,65 @@ Let’s set up our first Checkpoint to validate the February data! Run the follo
 
     great_expectations --v3-api checkpoint new my_checkpoint
 
-This will open **a Jupyter notebook** (you guessed it) that will allow you to complete the configuration of your Checkpoint.
+This will open **a Jupyter notebook** that will allow you to complete the configuration of your Checkpoint.
 
 
 The ``checkpoint new`` notebook
 --------------------------------
 
-The Jupyter notebook contains some boilerplate code that allows you to configure a new Checkpoint.
+The Jupyter notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell
+is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit it as follows
+to configure a Checkpoint to validate the February data:
 
-TODO: MORE HERE.
+.. code-block:: bash
 
+    my_checkpoint_config = f"""
+    name: {my_checkpoint_name}
+    config_version: 1.0
+    class_name: SimpleCheckpoint
+    run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+    validations:
+      - batch_request:
+          datasource_name: taxi_data
+          data_connector_name: taxi_data_example_data_connector
+          data_asset_name: yellow_tripdata_sample_2019-02.csv
+          data_connector_query:
+            index: -1
+        expectation_suite_name: taxi.demo
+    """
+
+You can then execute all cells in the notebook in order to store the Checkpoint to your Data Context.
 
 **What just happened?**
 
 - ``my_checkpoint`` is the name of your new Checkpoint.
 - The Checkpoint uses ``taxi.demo`` as its primary :ref:`Expectation Suite`.
-- You configured the Checkpoint to validate the ``yellow_tripdata_sample_2019-02.csv`` file.
-- The ``results`` variable now contains the validation results (duh!)
+- You configured the Checkpoint to validate the ``yellow_tripdata_sample_2019-02.csv`` (i.e. our February data) file.
 
 
 
+How to run validation and inspect your validation results
+---------------------------------------------------------
 
-How to inspect your validation results
----------------------------------------
+This is basically just a recap of the previous section on Data Docs! In order to build Data Docs and get your results
+in a nice, human-readable format, you can simply uncomment and run the last cell in the notebook. This will open Data
+Docs, where you can click on the latest validation run to see the validation results page for this Checkpoint run.
 
-This is basically just a recap of the previous section on Data Docs! In order to build Data Docs and get your results in a nice, human-readable format, you can do the following:
+.. figure:: /images/data_docs_taxi_failed_validation01.png
 
-.. code-block:: python
-
-    validation_result_identifier = results.list_validation_result_identifiers()[0]
-    context.build_data_docs()
-    context.open_data_docs(validation_result_identifier)
-
-Check out the data validation results page that just opened. You'll see that the test suite **failed** when you ran it against the February data. Awesome!
+You'll see that the test suite **failed** when you ran it against the February data. Awesome!
 
 **What just happened? Why did it fail?? Help!?**
 
-We ran the Checkpoint and it successfully failed! **Wait - what?** Yes, that's correct, and that's we wanted. We know that in this example, the February data has data quality issues, which means we *expect* the validation to fail.
+We ran the Checkpoint and it successfully failed! **Wait - what?** Yes, that's correct, and that's we wanted.
+We know that in this example, the February data has data quality issues, which means we *expect* the validation to fail.
 
-.. figure:: /images/validation_results_failed_detail.png
+On the validation results page, you will see that the validation of the staging data *failed* because the set
+of *Observed Values* in the ``passenger_count`` column contained the value 0.0! This violates our Expectation,
+which makes the validation fail.
 
-On the validation results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the ``passenger_count`` column contained the value 0.0! This violates our Expectation, which makes the validation fail.
 
-If you navigate to the Data Docs *Home* page and refresh, you will also see a *failed* validation run at the top of the page:
-
-.. figure:: /images/validation_results_failed.png
+.. figure:: /images/data_docs_taxi_failed_validation02.png
 
 
 **And this is it!**
