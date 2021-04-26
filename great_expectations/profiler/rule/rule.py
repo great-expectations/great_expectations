@@ -1,7 +1,7 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
 from great_expectations.profiler.expectation_configuration_builder.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -62,11 +62,11 @@ class Rule:
             validator=validator, batch_ids=batch_ids
         )
 
-        domain: Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]
+        domain: Domain
 
         for domain in rule_state.domains:
             rule_state.active_domain = domain
-            domain_id: str = rule_state.active_domain_id
+            domain_id: str = rule_state.active_domain.id
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
                 parameter_name: str = parameter_builder.parameter_name
@@ -75,6 +75,7 @@ class Rule:
                         rule_state=rule_state, validator=validator, batch_ids=batch_ids
                     )
                 )
+                # TODO: <Alex>ALEX -- this mechanism needs to be discussed.</Alex>
                 rule_state.parameters[domain_id][
                     parameter_name
                 ] = parameter_container.parameters

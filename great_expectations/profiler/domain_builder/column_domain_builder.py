@@ -1,7 +1,8 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.profiler.domain_builder.domain import Domain, StorageDomainTypes
 from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -16,7 +17,7 @@ class ColumnDomainBuilder(DomainBuilder):
         include_batch_id: Optional[bool] = False,
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs,
-    ) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
+    ) -> List[Domain]:
         """
         Obtains and returns a given column
         """
@@ -24,7 +25,7 @@ class ColumnDomainBuilder(DomainBuilder):
             raise ge_exceptions.ProfilerConfigurationError(
                 message=f"{self.__class__.__name__} requires a COLUMN domain."
             )
-        domains: List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]] = []
+        domains: List[Domain] = []
         columns: List[str] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
@@ -38,9 +39,10 @@ class ColumnDomainBuilder(DomainBuilder):
         column: str
         for column in columns:
             domains.append(
-                {
-                    "domain_kwargs": {"column": column},
-                }
+                Domain(
+                    domain_kwargs={"column": column},
+                    domain_type=StorageDomainTypes.COLUMN,
+                )
             )
         return domains
 
@@ -52,7 +54,7 @@ class ColumnDomainBuilder(DomainBuilder):
         batch_ids: Optional[List[str]] = None,
         include_batch_id: Optional[bool] = False,
         **kwargs,
-    ) -> List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]]:
+    ) -> List[Domain]:
         """
         Pops column domain out of a dict of certain domain kwargs and requests this domain
         """

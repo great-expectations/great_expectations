@@ -1,6 +1,11 @@
 import pytest
 
 from great_expectations.exceptions import ProfilerExecutionError
+from great_expectations.profiler.domain_builder.domain import (
+    Domain,
+    SemanticDomainTypes,
+    StorageDomainTypes,
+)
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
@@ -11,9 +16,15 @@ from great_expectations.profiler.rule.rule_state import RuleState
 def simple_rule_state():
     """Simple rule_state with one domain, currently set to active"""
     return RuleState(
-        active_domain={"domain_kwargs": {"column": "Age"}},
-        domains=[{"domain_kwargs": {"column": "Age"}}],
-        parameters=dict(),
+        active_domain=Domain(
+            domain_kwargs={"column": "Age"}, domain_type=StorageDomainTypes.COLUMN
+        ),
+        domains=[
+            Domain(
+                domain_kwargs={"column": "Age"}, domain_type=StorageDomainTypes.COLUMN
+            )
+        ],
+        parameters={},
     )
 
 
@@ -21,10 +32,16 @@ def simple_rule_state():
 def semantic_rule_state():
     """Simple rule_state with one domain, currently set to active"""
     return RuleState(
-        active_domain={"domain_kwargs": {"column": "Age"}, "semantic_type": "numeric"},
-        domains=[{"domain_kwargs": {"column": "Age"}, "semantic_type": "numeric"}],
+        active_domain=Domain(
+            domain_kwargs={"column": "Age"}, domain_type=SemanticDomainTypes.NUMERIC
+        ),
+        domains=[
+            Domain(
+                domain_kwargs={"column": "Age"}, domain_type=SemanticDomainTypes.NUMERIC
+            )
+        ],
         parameters={
-            "f45a40fda1738351c5e67a0aa89c2c7c": ParameterContainer(
+            "221524dcea2a0c06128e96256a3cad1d": ParameterContainer(
                 parameters={"mean": 5.0}, details=None, descendants=None
             )
         },
@@ -36,9 +53,10 @@ def semantic_rule_state():
     )
 
 
-def test_active_domain_id_property(simple_rule_state, semantic_rule_state):
-    assert simple_rule_state.active_domain_id == "domain_kwargs={'column': 'Age'}"
-    assert semantic_rule_state.active_domain_id == "f45a40fda1738351c5e67a0aa89c2c7c"
+# TODO: <Alex>ALEX -- build test to ensure that id property and access works for a list of domains of various types.</Alex>
+def test_id_property_of_active_domain(simple_rule_state, semantic_rule_state):
+    assert simple_rule_state.active_domain.id == "20afbf5aa7826d5d5c378a62ccef8ded"
+    assert semantic_rule_state.active_domain.id == "221524dcea2a0c06128e96256a3cad1d"
 
 
 def test_get_parameter_value(semantic_rule_state):

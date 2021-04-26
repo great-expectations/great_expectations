@@ -6,6 +6,7 @@ import os
 import sys
 from collections import OrderedDict
 from collections.abc import Mapping
+from enum import Enum
 from typing import Any, Dict, Iterable, List, Optional, Union
 from urllib.parse import urlparse
 
@@ -215,6 +216,9 @@ def convert_to_json_serializable(data):
 
     elif isinstance(data, RunIdentifier):
         return data.to_json_dict()
+
+    elif isinstance(data, Enum):
+        return data.value
 
     else:
         raise TypeError(
