@@ -33,8 +33,6 @@ def execute_shell_command(command: str) -> int:
     env: dict = dict(os.environ, PATH=path_env_var)
 
     status_code: int = 0
-    print(f"ABCDEF PYTHON VERSION IS {sys.version}")
-    print(f"ABCDEF PYTHON VERSION INFO IS {sys.version_info}")
     try:
         res: CompletedProcess = run(
             args=["bash", "-c", command],

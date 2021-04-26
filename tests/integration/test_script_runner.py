@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+import sys
 
 import pytest
 
@@ -25,6 +26,7 @@ def idfn(test_configuration):
 @pytest.mark.docs
 @pytest.mark.integration
 @pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(test_configuration, tmp_path):
     workdir = os.getcwd()
     try:
