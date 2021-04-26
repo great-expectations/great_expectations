@@ -165,8 +165,8 @@ class Profiler:
             )
         suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
         for rule in self._rules:
-            result = rule.evaluate(validator, batch_ids)
-            for config in result:
-                suite.add_expectation(config)
+            expectation_configurations = rule.evaluate(validator, batch_ids)
+            for expectation_configuration in expectation_configurations:
+                suite.add_expectation(expectation_configuration)
 
         return suite
