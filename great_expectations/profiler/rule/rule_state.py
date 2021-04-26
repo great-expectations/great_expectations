@@ -80,7 +80,9 @@ class RuleState:
         """
         if not fully_qualified_parameter_name.startswith("$"):
             raise ge_exceptions.ProfilerExecutionError(
-                message=f'Unable to get value for parameter name "{fully_qualified_parameter_name}" -- values must start with $.'
+                message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
+names must start with $ (e.g., "${fully_qualified_parameter_name}").
+"""
             )
 
         if (
@@ -115,14 +117,15 @@ class RuleState:
         parameter_value: Optional[Any] = None
         try:
             for parameter_name_part in fully_qualified_parameter_as_list:
-                if parameter_container.descendants is None:
-                    parameter_value = parameter_container.parameters[
-                        parameter_name_part
-                    ]
-                else:
-                    parameter_container = parameter_container.descendants[
-                        parameter_name_part
-                    ]
+                if (
+                    parameter_container.parameters
+                    and parameter_name_part in parameter_container.parameters
+                ):
+                    return parameter_container.parameters[parameter_name_part]
+
+                parameter_container = parameter_container.descendants[
+                    parameter_name_part
+                ]
         except KeyError:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": key "{parameter_name_part}" was missing.'

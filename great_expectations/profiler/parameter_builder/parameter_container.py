@@ -15,7 +15,9 @@ class ParameterContainer(SerializableDictDot):
     Each node can optionally contain a bag of attribute name-value pairs ("parameter") and "details", with helpful
     information regarding how the parameters were obtained (tolerances, explanations, etc.).
 
+    $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format
     $parameter.date_strings.yyyy_mm_dd_date_format
+    $parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format
     $parameter.date_strings.mm_yyyy_dd_date_format
     $parameter.date_strings.tolerances.max_abs_error_time_milliseconds
     $parameter.date_strings.tolerances.max_num_conversion_attempts
@@ -26,7 +28,7 @@ class ParameterContainer(SerializableDictDot):
     """
 
     parameters: Optional[Dict[str, Any]] = None
-    details: Optional[Dict[str, Union[str, dict]]] = None
+    details: Optional[Dict[str, Any]] = None
     descendants: Optional[Dict[str, "ParameterContainer"]] = None
 
     def to_json_dict(self) -> dict:
