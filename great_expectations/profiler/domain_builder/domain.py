@@ -9,6 +9,12 @@ from great_expectations.types import SerializableDictDot
 
 
 class DomainTypes(Enum):
+    """
+    This is a base class for the different specific DomainTypes classes, each of which enumerates the particular variety
+    of domain types (e.g., "StorageDomainTypes", "SemanticDomainTypes", etc.).  Since the base "DomainTypes" extends
+    "Enum", the JSON serialization, supported for the general "Enum" class, applies for all "DomainTypes" classes, too.
+    """
+
     pass
 
 
