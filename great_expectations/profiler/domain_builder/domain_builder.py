@@ -18,7 +18,7 @@ class DomainBuilder(ABC):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        include_batch_id: Optional[bool] = False,
+        include_batch_id: Optional[bool] = True,
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs
     ) -> List[Domain]:

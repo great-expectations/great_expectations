@@ -14,7 +14,7 @@ class ColumnDomainBuilder(DomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        include_batch_id: Optional[bool] = False,
+        include_batch_id: Optional[bool] = True,
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs,
     ) -> List[Domain]:
@@ -35,15 +35,26 @@ class ColumnDomainBuilder(DomainBuilder):
             )
         )
 
-        # TODO: <Alex>ALEX -- How can/should we use "batch_id" and "include_batch_id"?</Alex>
         column: str
         for column in columns:
-            domains.append(
-                Domain(
-                    domain_kwargs={"column": column},
-                    domain_type=StorageDomainTypes.COLUMN,
+            if include_batch_id:
+                # TODO: <Alex>ALEX -- Should we use the "active_batch_id" or is there a reason to use one of the passed "batch_ids"?  Further, should we, in fact, include both, the "active_batch_id" as well as all "batch_ids" -- for multibatch case?</Alex>
+                domains.append(
+                    Domain(
+                        domain_kwargs={
+                            "column": column,
+                            "batch_id": validator.active_batch_id,
+                        },
+                        domain_type=StorageDomainTypes.COLUMN,
+                    )
                 )
-            )
+            else:
+                domains.append(
+                    Domain(
+                        domain_kwargs={"column": column},
+                        domain_type=StorageDomainTypes.COLUMN,
+                    )
+                )
         return domains
 
     # TODO: <Alex>ALEX -- this public method is a utility method; it is defined, but not used anywhere in the codebase.  If it is useful, then it should be moved to a utility module and declared as a static method.</Alex>
@@ -52,7 +63,7 @@ class ColumnDomainBuilder(DomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        include_batch_id: Optional[bool] = False,
+        include_batch_id: Optional[bool] = True,
         **kwargs,
     ) -> List[Domain]:
         """

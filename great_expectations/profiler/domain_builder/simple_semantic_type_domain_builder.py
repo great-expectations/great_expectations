@@ -22,7 +22,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        include_batch_id: Optional[bool] = False,
+        include_batch_id: Optional[bool] = True,
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs
     ) -> List[Domain]:
@@ -61,12 +61,24 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                 self._get_column_semantic_type_name(validator=validator, column=column)
             )
             if semantic_column_type in semantic_types:
-                domains.append(
-                    Domain(
-                        domain_kwargs={"column": column},
-                        domain_type=semantic_column_type,
+                if include_batch_id:
+                    # TODO: <Alex>ALEX -- Should we use the "active_batch_id" or is there a reason to use one of the passed "batch_ids"?  Further, should we, in fact, include both, the "active_batch_id" as well as all "batch_ids" -- for multibatch case?</Alex>
+                    domains.append(
+                        Domain(
+                            domain_kwargs={
+                                "column": column,
+                                "batch_id": validator.active_batch_id,
+                            },
+                            domain_type=semantic_column_type,
+                        )
                     )
-                )
+                else:
+                    domains.append(
+                        Domain(
+                            domain_kwargs={"column": column},
+                            domain_type=semantic_column_type,
+                        )
+                    )
 
         return domains
 
