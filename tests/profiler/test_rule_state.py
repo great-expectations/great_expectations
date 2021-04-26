@@ -15,7 +15,6 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 
-# TODO: <Alex>ALEX -- Is it possible to express these different fixtures more concisely?</Alex>
 
 # noinspection PyPep8Naming
 @pytest.fixture
