@@ -2,26 +2,28 @@ from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.profiler.configuration_builder.configuration_builder import (
-    ConfigurationBuilder,
-)
 from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
-from great_expectations.profiler.parameter_builder.parameter import Parameter
+from great_expectations.profiler.expectation_configuration_builder.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
+)
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
+)
+from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validator import Validator
 
 
-class ProfilerRule:
+class Rule:
     def __init__(
         self,
         name: str,
         domain_builder: DomainBuilder,
         parameter_builders: List[ParameterBuilder],
-        configuration_builders: List[ConfigurationBuilder],
-        variables: Optional[Parameter] = None,
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder],
+        variables: Optional[ParameterContainer] = None,
     ):
         """
         Sets Profiler rule name, domain builders, parameters builders, configuration builders,
@@ -30,14 +32,14 @@ class ProfilerRule:
         :param domain_builder: A Domain Builder object used to build rule data domain
         :param parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters for
         every configuration
-        :param configuration_builders: A list of Configuration Builders initializing state configurations (utilizes the info in
+        :param expectation_configuration_builders: A list of Expectation Configuration Builders initializing state configurations (utilizes the info in
         a RuleState object)
         :param variables: Any instance data required to verify a rule
         """
         self._name = name
         self._domain_builder = domain_builder
         self._parameter_builders = parameter_builders
-        self._configuration_builders = configuration_builders
+        self._expectation_configuration_builders = expectation_configuration_builders
         self._variables = variables
 
     def evaluate(
@@ -68,13 +70,23 @@ class ProfilerRule:
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
                 parameter_name: str = parameter_builder.parameter_name
-                parameter: Parameter = parameter_builder.build_parameters(
-                    rule_state=rule_state, validator=validator, batch_ids=batch_ids
+                parameter_container: ParameterContainer = (
+                    parameter_builder.build_parameters(
+                        rule_state=rule_state, validator=validator, batch_ids=batch_ids
+                    )
                 )
-                rule_state.parameters[domain_id][parameter_name] = parameter.parameters
-            for configuration_builder in self._configuration_builders:
+                rule_state.parameters[domain_id][
+                    parameter_name
+                ] = parameter_container.parameters
+
+            expectation_configuration_builder: ExpectationConfigurationBuilder
+            for (
+                expectation_configuration_builder
+            ) in self._expectation_configuration_builders:
                 configurations.append(
-                    configuration_builder.build_configuration(rule_state=rule_state)
+                    expectation_configuration_builder.build_expectation_configuration(
+                        rule_state=rule_state
+                    )
                 )
 
         return configurations

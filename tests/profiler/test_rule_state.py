@@ -1,8 +1,10 @@
 import pytest
 
 from great_expectations.exceptions import ProfilerExecutionError
-from great_expectations.profiler.parameter_builder.parameter import Parameter
-from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
+)
+from great_expectations.profiler.rule.rule_state import RuleState
 
 
 @pytest.fixture
@@ -22,12 +24,14 @@ def semantic_rule_state():
         active_domain={"domain_kwargs": {"column": "Age"}, "semantic_type": "numeric"},
         domains=[{"domain_kwargs": {"column": "Age"}, "semantic_type": "numeric"}],
         parameters={
-            "f45a40fda1738351c5e67a0aa89c2c7c": Parameter(
-                parameters={"mean": 5.0}, details=None
+            "f45a40fda1738351c5e67a0aa89c2c7c": ParameterContainer(
+                parameters={"mean": 5.0}, details=None, descendants=None
             )
         },
-        variables=Parameter(
-            parameters={"false_positive_threshold": 0.01}, details=None
+        variables=ParameterContainer(
+            parameters={"false_positive_threshold": 0.01},
+            details=None,
+            descendants=None,
         ),
     )
 

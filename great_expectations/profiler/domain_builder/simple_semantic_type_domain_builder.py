@@ -24,6 +24,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         include_batch_id: Optional[bool] = False,
+        domain_type: Optional[MetricDomainTypes] = None,
         # TODO: <Alex>ALEX -- The signature of this method is inconsistent with that in the base class.</Alex>
         # domain_type: Optional[MetricDomainTypes] = None,
         semantic_types: Optional[List[str]] = None,
@@ -40,22 +41,19 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             ...
         ]
         """
-        # TODO: <Alex>ALEX -- How does this work?  What information is provided in **kwargs?  Can this be made explicit?  Where is "_semantic_types" defined?</Alex>
         config: dict = kwargs
-        # TODO: AJB 20210416 If the type keyword for the DomainBuilder can contain multiple semantic types, should it be renamed types and take a list instead? Not that we can’t guess from what a user adds but something to make it clear that multiple semantic types can be used to construct a domain?
-        # TODO: <Alex>ALEX -- In general, to avoid confusion, we should avoid the use of "type" because it is a function in Python.</Alex>
         semantic_types: Union[str, Iterable, List[str]] = config.get("semantic_types")
         if semantic_types is None:
-            # TODO: AJB 20210416 Add a test for the below comment - None = return all types
-            # None indicates no selection; all types should be returned
             semantic_types = self._semantic_types
         elif isinstance(semantic_types, str):
             semantic_types = [self.SemanticDomainTypes[semantic_types]]
         elif isinstance(semantic_types, Iterable):
             semantic_types = [self.SemanticDomainTypes[x] for x in semantic_types]
         else:
-            # TODO: <Alex>ALEX -- We should make this error message more informative.</Alex>
-            raise ValueError("unrecognized")
+            raise ValueError(
+                "Unrecognized semantic_types directive -- must be a list or a string."
+            )
+
         domains: List[Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]] = []
         columns: List[str] = validator.get_metric(
             metric=MetricConfiguration(
@@ -77,8 +75,6 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             if semantic_column_type in semantic_types:
                 domains.append(
                     {
-                        # TODO: AJB 20210419 why is column just the column name string - will this be different based on execution engine versions?
-                        # "domain_kwargs": {"column": column.name},
                         "domain_kwargs": {"column": column},
                         "domain_type": semantic_column_type,
                     }

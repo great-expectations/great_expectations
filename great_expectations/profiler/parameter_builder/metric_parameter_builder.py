@@ -1,11 +1,13 @@
 from typing import List, Optional, Union
 
 from great_expectations import DataContext
-from great_expectations.profiler.parameter_builder.parameter import Parameter
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.profiler.profiler_rule.rule_state import RuleState
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
+)
+from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -37,7 +39,7 @@ class MetricParameterBuilder(ParameterBuilder):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         **kwargs,
-    ) -> Parameter:
+    ) -> ParameterContainer:
         """
         Builds a dictionary of format {'parameters': A given resolved metric}
             Args:
@@ -68,7 +70,7 @@ class MetricParameterBuilder(ParameterBuilder):
         else:
             metric_value_kwargs = self._metric_value_kwargs
 
-        return Parameter(
+        return ParameterContainer(
             parameters=validator.get_metric(
                 metric=MetricConfiguration(
                     metric_name=self._metric_name,
@@ -78,4 +80,5 @@ class MetricParameterBuilder(ParameterBuilder):
                 )
             ),
             details=None,
+            descendants=None,
         )
