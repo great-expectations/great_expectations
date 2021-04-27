@@ -374,7 +374,8 @@ def parse_string_to_datetime(
     if not isinstance(datetime_string, str):
         raise ge_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
-            """)
+            """
+        )
 
     if not datetime_format_string:
         return dateutil.parser.parse(timestr=datetime_string)
@@ -383,7 +384,8 @@ def parse_string_to_datetime(
         raise ge_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").
-            """)
+            """
+        )
 
     return datetime.datetime.strptime(datetime_string, datetime_format_string)
 
@@ -562,7 +564,7 @@ def get_or_create_spark_session(
 
 
 def spark_restart_required(
-    current_spark_config: List[tuple], desired_spark_config: dict, force_reuse_spark_context: bool
+    current_spark_config: List[tuple], desired_spark_config: dict
 ) -> bool:
 
     # we can't change spark context config values within databricks runtimes
@@ -575,7 +577,7 @@ def spark_restart_required(
     ):
         return True
 
-    if not set([(k, v) for k, v in desired_spark_config.items()]).issubset(
+    if not {(k, v) for k, v in desired_spark_config.items()}.issubset(
         current_spark_config
     ):
         return True

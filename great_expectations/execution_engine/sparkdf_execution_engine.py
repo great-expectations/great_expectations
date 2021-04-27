@@ -142,8 +142,14 @@ class SparkDFExecutionEngine(ExecutionEngine):
         "reader_options",
     }
 
-    def __init__(self, *args, persist=True, spark_config=None,
-                 force_reuse_spark_context=False, **kwargs):
+    def __init__(
+        self,
+        *args,
+        persist=True,
+        spark_config=None,
+        force_reuse_spark_context=False,
+        **kwargs,
+    ):
         # Creation of the Spark DataFrame is done outside this class
         self._persist = persist
 
@@ -151,7 +157,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
             spark_config = {}
 
         spark: SparkSession = get_or_create_spark_application(
-            spark_config=spark_config, force_reuse_spark_context=force_reuse_spark_context)
+            spark_config=spark_config,
+            force_reuse_spark_context=force_reuse_spark_context,
+        )
 
         spark_config = dict(spark_config)
         spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
@@ -208,7 +216,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
             if isinstance(batch_data, str):
                 raise ge_exceptions.ExecutionEngineError(
                     f"""SparkDFExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.
-Please check your config.""")
+Please check your config."""
+                )
             batch_spec.batch_data = "SparkDataFrame"
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method: str = batch_spec.reader_method
@@ -643,13 +652,16 @@ Please check your config.""")
         try:
             getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError) as e:
-            raise (ge_exceptions.ExecutionEngineError(
-                f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""))
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
 
         def _encrypt_value(to_encode):
             hash_func = getattr(hashlib, hash_function_name)
-            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits:]
+            hashed_value = hash_func(to_encode.encode()).hexdigest()[-1 * hash_digits :]
             return hashed_value
 
         encrypt_udf = F.udf(_encrypt_value, StringType())
@@ -706,15 +718,18 @@ Please check your config.""")
         try:
             getattr(hashlib, str(hash_function_name))
         except (TypeError, AttributeError) as e:
-            raise (ge_exceptions.ExecutionEngineError(
-                f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
-                    Reference to {hash_function_name} cannot be found."""))
+            raise (
+                ge_exceptions.ExecutionEngineError(
+                    f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
+                    Reference to {hash_function_name} cannot be found."""
+                )
+            )
 
         def _encrypt_value(to_encode):
             to_encode_str = str(to_encode)
             hash_func = getattr(hashlib, hash_function_name)
             hashed_value = hash_func(to_encode_str.encode()).hexdigest()[
-                -1 * hash_digits:
+                -1 * hash_digits :
             ]
             return hashed_value
 
