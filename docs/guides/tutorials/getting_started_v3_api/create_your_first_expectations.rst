@@ -12,7 +12,7 @@ Each Expectation is a declarative, machine-verifiable assertion about the expect
     "Take nothing on its looks; take everything on evidence. There's no better rule."
 
 The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations.
-In order to create a new suite, we will use the built-in profiler to automatically create an Expectation Suite called ``taxi.demo`` with the help of a built-in profiler. Type the following into your terminal:
+In order to create a new suite, we will use the built-in profiler to automatically create an Expectation Suite called ``taxi.demo``. Type the following into your terminal:
 
 .. code-block:: bash
 
