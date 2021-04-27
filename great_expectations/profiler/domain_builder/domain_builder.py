@@ -21,6 +21,16 @@ class DomainBuilder(ABC):
         **kwargs
     ) -> List[Domain]:
         """
+        :param validator
+        :param batch_ids: A list of batch_ids to use when profiling (e.g. can be a subset of batches provided via
+        Validator, batch, batches, batch_request).  If not provided, all batches are used.  If a Validator is provided,
+        Validator active batch id is used.
+
+        Note: In this class, we do not verify that all of these batch_ids are accessible; this should be done elsewhere
+        (with an error raised in the appropriate situations).
+
+        :param domain_type
+
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """

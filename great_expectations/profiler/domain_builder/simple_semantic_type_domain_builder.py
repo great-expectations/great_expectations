@@ -1,14 +1,18 @@
 from typing import Iterable, List, Optional, Union
 
-from great_expectations.core.domain_types import MetricDomainTypes
+import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
 from great_expectations.profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
-from great_expectations.profiler.domain_builder.domain import (
-    Domain,
-    SemanticDomainTypes,
-)
+from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.validator.validator import MetricConfiguration, Validator
+
+
+# TODO: <Alex>ALEX -- This method seems to always return the same value ("IDENTITY")...</Alex>
+def _get_column_semantic_type_name(validator, column) -> SemanticDomainTypes:
+    # FIXME: DO CHECKS
+    return SemanticDomainTypes.IDENTITY
 
 
 class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
@@ -22,13 +26,17 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        include_batch_id: Optional[bool] = True,
         domain_type: Optional[MetricDomainTypes] = None,
-        **kwargs
+        **kwargs,
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
         """
+        if validator is None:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"{self.__class__.__name__} requires a reference to an instance of the Validator class."
+            )
+
         config: dict = kwargs
         semantic_types: Union[str, Iterable, List[str]] = config.get("semantic_types")
         if semantic_types is None:
@@ -51,38 +59,23 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                 metric_dependencies=None,
             )
         )
-        # TODO: <Alex>ALEX -- How can/should we use "batch_id" and "include_batch_id"?</Alex>
         column: str
         # A semantic type is distinguished from the column storage type;
         # An example of storage type would be "integer".  The semantic type would be "id".
         semantic_column_type: str
         for column in columns:
-            semantic_column_type: SemanticDomainTypes = (
-                self._get_column_semantic_type_name(validator=validator, column=column)
+            semantic_column_type: SemanticDomainTypes = _get_column_semantic_type_name(
+                validator=validator, column=column
             )
             if semantic_column_type in semantic_types:
-                if include_batch_id:
-                    # TODO: <Alex>ALEX -- Should we use the "active_batch_id" or is there a reason to use one of the passed "batch_ids"?  Further, should we, in fact, include both, the "active_batch_id" as well as all "batch_ids" -- for multibatch case?</Alex>
-                    domains.append(
-                        Domain(
-                            domain_kwargs={
-                                "column": column,
-                                "batch_id": validator.active_batch_id,
-                            },
-                            domain_type=semantic_column_type,
-                        )
+                domains.append(
+                    Domain(
+                        domain_kwargs={
+                            "column": column,
+                            "batch_id": validator.active_batch_id,
+                        },
+                        domain_type=semantic_column_type,
                     )
-                else:
-                    domains.append(
-                        Domain(
-                            domain_kwargs={"column": column},
-                            domain_type=semantic_column_type,
-                        )
-                    )
+                )
 
         return domains
-
-    # TODO: <Alex>ALEX -- This method seems to always return the same value ("integer")...</Alex>
-    def _get_column_semantic_type_name(self, validator, column) -> SemanticDomainTypes:
-        # FIXME: DO CHECKS
-        return SemanticDomainTypes["INTEGER"]
