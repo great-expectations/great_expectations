@@ -374,8 +374,7 @@ def parse_string_to_datetime(
     if not isinstance(datetime_string, str):
         raise ge_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
-            """
-        )
+            """)
 
     if not datetime_format_string:
         return dateutil.parser.parse(timestr=datetime_string)
@@ -384,8 +383,7 @@ def parse_string_to_datetime(
         raise ge_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").
-            """
-        )
+            """)
 
     return datetime.datetime.strptime(datetime_string, datetime_format_string)
 

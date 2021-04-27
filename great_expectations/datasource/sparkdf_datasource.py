@@ -98,8 +98,8 @@ class SparkDFDatasource(LegacyDatasource):
 
         configuration = kwargs
         configuration.update(
-            {"data_asset_type": data_asset_type, "spark_config": spark_config, "force_reuse_spark_context": force_reuse_spark_context}
-        )
+            {"data_asset_type": data_asset_type, "spark_config": spark_config,
+             "force_reuse_spark_context": force_reuse_spark_context})
         if batch_kwargs_generators:
             configuration["batch_kwargs_generators"] = batch_kwargs_generators
 
@@ -142,7 +142,8 @@ class SparkDFDatasource(LegacyDatasource):
 
         if spark_config is None:
             spark_config = {}
-        spark = get_or_create_spark_application(spark_config=spark_config, force_reuse_spark_context=force_reuse_spark_context)
+        spark = get_or_create_spark_application(
+            spark_config=spark_config, force_reuse_spark_context=force_reuse_spark_context)
         self.spark = spark
 
         self._build_generators()
@@ -188,9 +189,7 @@ class SparkDFDatasource(LegacyDatasource):
             if "s3" in batch_kwargs:
                 warnings.warn(
                     "Direct GE Support for the s3 BatchKwarg will be removed in a future release. Please use a path "
-                    "including the s3a:// protocol instead.",
-                    DeprecationWarning,
-                )
+                    "including the s3a:// protocol instead.", DeprecationWarning,)
 
             # If both are present, let s3 override
             path = batch_kwargs.get("path")
