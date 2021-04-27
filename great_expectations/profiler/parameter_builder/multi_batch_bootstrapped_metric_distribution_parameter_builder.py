@@ -71,7 +71,11 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
             metric_domain_kwargs = copy(rule_state.active_domain["domain_kwargs"])
             metric_domain_kwargs.update({"batch_id": batch_id})
 
-            if self._metric_value_kwargs.startswith("$"):
+            if (
+                self._metric_value_kwargs
+                and isinstance(self._metric_value_kwargs, str)
+                and self._metric_value_kwargs.startswith("$")
+            ):
                 metric_value_kwargs = rule_state.get_parameter_value(
                     fully_qualified_parameter_name=self._metric_value_kwargs
                 )
@@ -81,7 +85,10 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
             samples.append(
                 validator.get_metric(
                     MetricConfiguration(
-                        self._metric_name, metric_domain_kwargs, metric_value_kwargs
+                        metric_name=self._metric_name,
+                        metric_domain_kwargs=metric_domain_kwargs,
+                        metric_value_kwargs=metric_value_kwargs,
+                        metric_dependencies=None,
                     )
                 )
             )
