@@ -143,7 +143,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
     }
 
     def __init__(self, *args, persist=True, spark_config=None,
-                 force_reuse_spark_context=force_reuse_spark_context, **kwargs):
+                 force_reuse_spark_context=False, **kwargs):
         # Creation of the Spark DataFrame is done outside this class
         self._persist = persist
 
