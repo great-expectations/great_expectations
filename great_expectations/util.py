@@ -9,7 +9,6 @@ import pstats
 import time
 from collections import OrderedDict
 from datetime import datetime
-from enum import Enum
 from functools import wraps
 from gc import get_referrers
 from inspect import (
@@ -25,7 +24,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast
+from typing import Any, Callable, Optional
 
 from dateutil.parser import parse
 from pkg_resources import Distribution
@@ -179,47 +178,6 @@ def get_currently_executing_function_call_arguments(
     call_args_dict.update(**kwargs)
 
     return call_args_dict
-
-
-def extend_enum(inherited_enum: Union[Enum, Tuple[Enum]]) -> Callable:
-    """
-    This decorator accepts one Enum or a tuple of Enum types as arguments and extends the Enum being decorated with the
-    content attributes of these argument Enum type(s).
-    :param inherited_enum: One ore more sources (passed in as an individual Enum class or as a tuple of Enum classes)
-    :return: The destination Enum object will inherit the fields of the source Enum object(s)
-    """
-
-    def wrapper(receiver_enum: Enum) -> Enum:
-        if not isinstance(receiver_enum, Enum):
-            raise TypeError(
-                f'Incorrect type "{str(type(receiver_enum))}" for the receiver_enum was encountered.'
-            )
-
-        source_enums: Tuple[Enum]
-        if isinstance(inherited_enum, Enum):
-            source_enums = (inherited_enum,)
-        elif isinstance(inherited_enum, tuple):
-            source_enums = inherited_enum
-        else:
-            raise TypeError(
-                f'Incorrect type "{str(type(inherited_enum))}" for the inherited_enum was encountered.'
-            )
-
-        item: Enum
-
-        receiver_enum_iterable: Iterable[Enum] = cast(Iterable[Enum], receiver_enum)
-        destination_enum_dict: Dict[str, Any] = {
-            item.name: item.value for item in receiver_enum_iterable
-        }
-
-        specific_inherited_enum: Iterable[Enum]
-        for specific_inherited_enum in source_enums:
-            for item in specific_inherited_enum:
-                destination_enum_dict[item.name] = item.value
-
-        return Enum(receiver_enum.__name__, destination_enum_dict)
-
-    return wrapper
 
 
 def verify_dynamic_loading_support(module_name: str, package_name: str = None) -> None:
