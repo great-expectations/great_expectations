@@ -73,7 +73,9 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 **Let's take a look through the notebook and see what's happening in each cell:**
 
-#. The first cell does several things: It imports all the relevant libraries, loads a Data Context, and creates what we call a Batch of your data and Expectation Suite.
+.. figure:: /images/suite_edit_notebook.png
+
+#. The first cell does several things: It imports all the relevant libraries, loads a Data Context, and creates a ``Validator``, which combines a Batch Request to define your batch of data, and an Expectation Suite.
 
 #. The second cell allows you to specify which columns you want to **ignore** when creating Expectations. Remember how we want to add some tests on the ``passenger_count`` column to ensure that its values range between 1 and 6? **Let's uncomment just this one line to include it:**
 

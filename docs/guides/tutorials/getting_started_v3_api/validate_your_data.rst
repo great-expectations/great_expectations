@@ -23,7 +23,7 @@ The Jupyter notebook contains some boilerplate code that allows you to configure
 is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit it as follows
 to configure a Checkpoint to validate the February data:
 
-.. code-block:: bash
+.. code-block:: python
 
     my_checkpoint_config = f"""
     name: {my_checkpoint_name}

@@ -29,7 +29,7 @@ For now, your static site is built and stored locally. In the last step of the t
 How did we get those Expectations?
 --------------------------------------
 
-You can create and edit Expectations using several different workflows. The CLI ``scaffold`` command just used one of the quickest and simplest: scaffolding Expectations using an automated :ref:`Profiler <Profilers>`.
+You can create and edit Expectations using several different workflows. The CLI ``scaffold`` command just used one of the quickest and simplest: scaffolding Expectations using an automated :ref:`Profiler <profilers>`.
 
 This Profiler connected to your data (using the Datasource you configured in the previous step), took a quick look at the contents of the data, and produced an initial set of Expectations. The Profiler considers the following properties, amongst others:
 
