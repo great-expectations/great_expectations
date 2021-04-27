@@ -7,11 +7,11 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
     MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )

@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.profiler.domain_builder.domain import Domain, StorageDomainTypes
 from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
 from great_expectations.validator.validation_graph import MetricConfiguration

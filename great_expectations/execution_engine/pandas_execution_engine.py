@@ -18,10 +18,10 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
+from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.core.util import S3Url, sniff_s3_compression
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
-
-from .execution_engine import ExecutionEngine, MetricDomainTypes
 
 try:
     import boto3
@@ -277,7 +277,7 @@ Please check your config."""
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
@@ -286,7 +286,7 @@ Please check your config."""
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or "MetricDomainTypes") - an Enum value indicating which metric domain the user would
+            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
             like to be using, or a corresponding string value representing it. String types include "identity", "column",
             "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
             MetricDomainTypes.

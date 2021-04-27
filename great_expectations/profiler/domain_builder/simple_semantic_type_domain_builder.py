@@ -1,6 +1,6 @@
 from typing import Iterable, List, Optional, Union
 
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
