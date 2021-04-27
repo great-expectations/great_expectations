@@ -4,7 +4,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import ProfilerExecutionError
 from great_expectations.profiler.rule.rule import Rule
 from great_expectations.validator.validator import Validator
 
@@ -60,12 +59,12 @@ class Profiler:
                         )
                     )
 
-                configuration_builders = []
+                expectation_configuration_builders = []
                 configuration_builder_configs = rule_config.get(
-                    "configuration_builders"
+                    "expectation_configuration_builders"
                 )
                 for configuration_builder_config in configuration_builder_configs:
-                    configuration_builders.append(
+                    expectation_configuration_builders.append(
                         instantiate_class_from_config(
                             configuration_builder_config,
                             runtime_environment={"data_context": data_context},
@@ -78,10 +77,11 @@ class Profiler:
                 # TODO: <Alex>ALEXs -- use name-value pairs in arguments; add type hints throughout.</Alex>
                 self._rules.append(
                     Rule(
-                        rule_name,
-                        domain_builder,
-                        parameter_builders,
-                        configuration_builders,
+                        name=rule_name,
+                        domain_builder=domain_builder,
+                        parameter_builders=parameter_builders,
+                        expectation_configuration_builders=expectation_configuration_builders,
+                        variables=None,
                     )
                 )
 
@@ -110,13 +110,13 @@ class Profiler:
             :param batch: A Batch object to profile on
             :param batches: A list of Batch objects
             :param batch_request: A Batch request utilized to obtain a Validator Object
-            :param batch_ids: A batch id used to identify data. If not provided, validator active batch id is used.
+            :param batch_ids: A list of batch_ids to use when profiling (e.g. can be a subset of batches provided via validator, batch, batches, batch_request). If not provided, all batches are used. If a Validator is provided, validator active batch id is used. Note, we also verify that all of these batch_ids are accessible and throw an error if not.
             :param data_context: A DataContext object used to define a great_expectations project environment
             :param expectation_suite_name: A name for returned Expectation suite.
         :return: Set of rule evaluation results in the form of an Expectation suite
         """
         if sum([bool(x) for x in (validator, batch, batches, batch_request)]) != 1:
-            raise ProfilerError(
+            raise ge_exceptions.ProfilerError(
                 "Exactly one of validator, batch, batches, or batch_request must be provided."
             )
 
@@ -132,7 +132,7 @@ class Profiler:
                 execution_engine = batches[0].data.execution_engine
                 for batch in batches:
                     if batch.data.execution_engine != execution_engine:
-                        raise ProfilerExecutionError(
+                        raise ge_exceptions.ProfilerExecutionError(
                             f"batch {batch.id} does not share an execution engine with all other batches in the same batches list."
                         )
                 validator = Validator(
@@ -140,7 +140,7 @@ class Profiler:
                 )
             elif batch_request:
                 if not self.data_context:
-                    raise ProfilerExecutionError(
+                    raise ge_exceptions.ProfilerExecutionError(
                         message="Unable to profile using a batch_request if no data_context is provided."
                     )
                 validator = self.data_context.get_validator(batch_request)
@@ -165,8 +165,8 @@ class Profiler:
             )
         suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
         for rule in self._rules:
-            result = rule.evaluate(validator, batch_ids)
-            for config in result:
-                suite.add_expectation(config)
+            expectation_configurations = rule.evaluate(validator, batch_ids)
+            for expectation_configuration in expectation_configurations:
+                suite.add_expectation(expectation_configuration)
 
         return suite

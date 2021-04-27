@@ -66,6 +66,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         **kwargs
     ) -> ParameterContainer:
         samples = []
+        # TODO: 20210426 AJB I think we need to handle not passing batch_ids here and everywhere else by processing all batches if `batch_ids is None`
         for batch_id in batch_ids:
             metric_domain_kwargs = copy(rule_state.active_domain["domain_kwargs"])
             metric_domain_kwargs.update({"batch_id": batch_id})
