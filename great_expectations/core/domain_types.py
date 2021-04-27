@@ -77,6 +77,7 @@ class StorageDomainTypes(DomainTypes):
 
 class SemanticDomainTypes(DomainTypes):
     NUMERIC = "numeric"
+    VALUE_SET = "value_set"
     DATETIME = "datetime"
 
 
