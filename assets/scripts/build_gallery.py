@@ -38,8 +38,8 @@ def execute_shell_command(command: str) -> int:
             args=["bash", "-c", command],
             stdin=None,
             input=None,
-            stdout=None,
-            stderr=None,
+            # stdout=None, # commenting out to prevent issues with `subprocess.run` in python <3.7.4
+            # stderr=None, # commenting out to prevent issues with `subprocess.run` in python <3.7.4
             capture_output=True,
             shell=False,
             cwd=cwd,
