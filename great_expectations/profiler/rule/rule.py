@@ -56,7 +56,7 @@ class Rule:
         :return: List of Corresponding Expectation Configurations representing every configured rule
         """
         rule_state: RuleState = RuleState(variables=self._variables)
-        configurations: List[ExpectationConfiguration] = []
+        expectation_configurations: List[ExpectationConfiguration] = []
 
         rule_state.domains = self._domain_builder.get_domains(
             validator=validator, batch_ids=batch_ids
@@ -84,10 +84,10 @@ class Rule:
             for (
                 expectation_configuration_builder
             ) in self._expectation_configuration_builders:
-                configurations.append(
+                expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
                         rule_state=rule_state
                     )
                 )
 
-        return configurations
+        return expectation_configurations

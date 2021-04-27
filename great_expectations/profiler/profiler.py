@@ -110,7 +110,7 @@ class Profiler:
             :param batch: A Batch object to profile on
             :param batches: A list of Batch objects
             :param batch_request: A Batch request utilized to obtain a Validator Object
-            :param batch_ids: A batch id used to identify data. If not provided, validator active batch id is used.
+            :param batch_ids: A list of batch_ids to use when profiling (e.g. can be a subset of batches provided via validator, batch, batches, batch_request). If not provided, all batches are used. If a Validator is provided, validator active batch id is used. Note, we also verify that all of these batch_ids are accessible and throw an error if not.
             :param data_context: A DataContext object used to define a great_expectations project environment
             :param expectation_suite_name: A name for returned Expectation suite.
         :return: Set of rule evaluation results in the form of an Expectation suite
@@ -165,8 +165,8 @@ class Profiler:
             )
         suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
         for rule in self._rules:
-            result = rule.evaluate(validator, batch_ids)
-            for config in result:
-                suite.add_expectation(config)
+            expectation_configurations = rule.evaluate(validator, batch_ids)
+            for expectation_configuration in expectation_configurations:
+                suite.add_expectation(expectation_configuration)
 
         return suite
