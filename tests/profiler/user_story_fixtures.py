@@ -2,6 +2,7 @@ import pytest
 
 from great_expectations.core import ExpectationSuite
 
+# TODO: Move these fixtures to integration tests
 
 @pytest.fixture(scope="module")
 def alice_columnar_table_single_batch():
