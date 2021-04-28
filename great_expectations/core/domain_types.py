@@ -27,15 +27,21 @@ class StorageDomainTypes(DomainTypes):
     SCHEMA = "schema"
     TABLE = "table"
     COLUMN = "column"
-    COLUMN_PAIR = "column_pair"
-    MULTICOLUMN = "multicolumn"
 
 
 class SemanticDomainTypes(DomainTypes):
     IDENTITY = "identity"
     NUMERIC = "numeric"
-    VALUE_SET = "value_set"
     DATETIME = "datetime"
+    TEXT = "text"
+    LOGIC = "logic"
+    CURRENCY = "currency"
+    IMAGE = "image"
+    COLUMN_PAIR = "column_pair"
+    MULTICOLUMN = "multicolumn"
+    VALUE_SET = "value_set"
+    MISCELLANEOUS = "miscellaneous"
+    UNKNOWN = "unknown"
 
 
 class MetricDomainTypes(

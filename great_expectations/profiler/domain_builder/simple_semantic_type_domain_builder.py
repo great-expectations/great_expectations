@@ -10,6 +10,10 @@ from great_expectations.validator.validator import MetricConfiguration, Validato
 
 
 class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
+    """
+    This DomainBuilder utilizes a "best-effort" semantic interpretation of ("storage") columns of a table.
+    """
+
     def __init__(self, semantic_types: Optional[List[str]] = None):
         if semantic_types is None:
             semantic_types = []
@@ -110,10 +114,71 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
                 message="A unique column could not be found while obtaining semantic type information."
             )
 
-        column_type: str = cast(str, column_types_dict_list[0][column_name])
+        column_type: str = cast(str, column_types_dict_list[0][column_name]).upper()
 
-        if SemanticDomainTypes.has_member_key(key=column_type):
-            return SemanticDomainTypes[column_name]
+        semantic_column_type: SemanticDomainTypes
+        if column_type in [
+            "UNIQUEIDENTIFIER",
+        ]:
+            semantic_column_type = SemanticDomainTypes.IDENTITY
+        elif column_type in [
+            "NUMERIC",
+            "BINARY",
+            "VARBINARY",
+            "INT",
+            "INT64",
+            "INTEGER",
+            "TINYINT",
+            "SMALLINT",
+            "BIGINT",
+            "DECIMAL",
+            "DOUBLE",
+            "DOUBLE_PRECISION",
+            "FLOAT",
+            "FLOAT64",
+            "REAL",
+        ]:
+            semantic_column_type = SemanticDomainTypes.NUMERIC
+        elif column_type in [
+            "TIME",
+            "TIMESTAMP",
+            "DATE",
+            "DATETIME",
+            "DATETIME2",
+            "DATETIME64",
+            "DATETIMEOFFSET",
+            "SMALLDATETIME",
+        ]:
+            semantic_column_type = SemanticDomainTypes.DATETIME
+        elif column_type in [
+            "CHAR",
+            "NCHAR",
+            "NVARCHAR",
+            "VARCHAR",
+            "STRING",
+            "TEXT",
+            "NTEXT",
+        ]:
+            semantic_column_type = SemanticDomainTypes.TEXT
+        elif column_type in [
+            "BOOLEAN",
+            "BIT",
+        ]:
+            semantic_column_type = SemanticDomainTypes.LOGIC
+        elif column_type in [
+            "MONEY",
+            "SMALLMONEY",
+        ]:
+            semantic_column_type = SemanticDomainTypes.CURRENCY
+        elif column_type in [
+            "IMAGE",
+        ]:
+            semantic_column_type = SemanticDomainTypes.IMAGE
+        elif column_type in [
+            "SQL_VARIANT",
+        ]:
+            semantic_column_type = SemanticDomainTypes.MISCELLANEOUS
+        else:
+            semantic_column_type = SemanticDomainTypes.UNKNOWN
 
-        # The default semantic domain type is "identity" (by convention).
-        return SemanticDomainTypes.IDENTITY
+        return semantic_column_type
