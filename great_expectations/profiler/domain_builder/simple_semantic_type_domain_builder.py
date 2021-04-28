@@ -24,6 +24,9 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         batch_ids: Optional[List[str]] = None,
         include_batch_id: Optional[bool] = False,
         domain_type: Optional[MetricDomainTypes] = None,
+        # TODO: <Alex>ALEX -- The signature of this method is inconsistent with that in the base class.</Alex>
+        # domain_type: Optional[MetricDomainTypes] = None,
+        semantic_types: Optional[List[str]] = None,
         **kwargs
     ) -> List[Domain]:
         """
