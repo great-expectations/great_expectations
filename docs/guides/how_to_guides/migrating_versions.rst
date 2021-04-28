@@ -40,11 +40,9 @@ How to use the project ``check-config`` command
             your original yaml file will be archived automatically for you. Even so, it's
             in your source control system already, right? ;-)
 
-            .. _v3_vs_v2_api:
+            .. _v3_vs_v2_api_v2:
 
-            ***************************************************
-            V3 (Batch Request) API vs The V2 (Batch Kwargs) API
-            ***************************************************
+            **V3 (Batch Request) API vs The V2 (Batch Kwargs) API**
 
             The 0.13 major release of Great Expectations introduced a group of new features based on “new style” Datasources and Modular Expectations that we call the V3 (Batch Request) API. The V2 (Batch Kwargs) API will be deprecated in the future.
 
@@ -573,11 +571,9 @@ How to use the project ``check-config`` command
             your original yaml file will be archived automatically for you. Even so, it's
             in your source control system already, right? ;-)
 
-            .. _v3_vs_v2_api:
+            .. _v3_vs_v2_api_v3:
 
-            ***************************************************
-            V3 (Batch Request) API vs The V2 (Batch Kwargs) API
-            ***************************************************
+            **V3 (Batch Request) API vs The V2 (Batch Kwargs) API**
 
             The 0.13 major release of Great Expectations introduced a group of new features based on “new style” Datasources and Modular Expectations that we call the V3 (Batch Request) API. The V2 (Batch Kwargs) API will be deprecated in the future.
 
