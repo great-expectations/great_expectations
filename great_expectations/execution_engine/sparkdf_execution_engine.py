@@ -11,7 +11,7 @@ from great_expectations.core.batch_spec import (
     PathBatchSpec,
     RuntimeDataBatchSpec,
 )
-from great_expectations.core.domain_types import MetricDomainTypes
+from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.exceptions import exceptions as ge_exceptions
@@ -318,11 +318,11 @@ Please check your config."""
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
             domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity", "column",
-            "column_pair", "table" and "other". Enum types include capitalized versions of these from the class
-            MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when describing
-            the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            like to be using, or a corresponding string value representing it. String types include "identity",
+            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            class MetricDomainTypes.
+            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
+            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -535,7 +535,7 @@ Please check your config."""
         for aggregate in aggregates.values():
             compute_domain_kwargs = aggregate["domain_kwargs"]
             df, _, _ = self.get_compute_domain(
-                compute_domain_kwargs, domain_type="identity"
+                compute_domain_kwargs, domain_type=SemanticDomainTypes.IDENTITY.value
             )
             assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
             condition_ids = []
