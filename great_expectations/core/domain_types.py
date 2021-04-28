@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any, Callable, Optional
 
 from great_expectations.core.util import MetaClsEnumJoin
 
@@ -11,7 +12,15 @@ class DomainTypes(Enum):
     "DomainTypes" classes, too.
     """
 
-    pass
+    @classmethod
+    def has_member_key(cls, key: Any) -> bool:
+        key_exists: bool = key in cls.__members__
+        if key_exists:
+            hash_op: Optional[Callable] = getattr(key, "__hash__", None)
+            if callable(hash_op):
+                return True
+            return False
+        return False
 
 
 class StorageDomainTypes(DomainTypes):

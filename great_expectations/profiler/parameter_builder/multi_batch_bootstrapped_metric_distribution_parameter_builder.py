@@ -1,8 +1,9 @@
 from copy import copy
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder import (
     MultiBatchParameterBuilder,
 )
@@ -67,10 +68,14 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     ) -> ParameterContainer:
         samples = []
         # TODO: 20210426 AJB I think we need to handle not passing batch_ids here and everywhere else by processing all batches if `batch_ids is None`
+        # TODO: <Alex>ALEX -- batch_id is not used -- it needs to be replaced with "active_domain" (TBD).</Alex>
         for batch_id in batch_ids:
-            metric_domain_kwargs = copy(rule_state.active_domain["domain_kwargs"])
-            metric_domain_kwargs.update({"batch_id": batch_id})
+            # TODO: <Alex>ALEX -- type overloading is generally a poor practice; the caller should decide on the type of "metric_domain_kwargs" and call this method accordingly.</Alex>
+            metric_domain_kwargs: Union[
+                str, Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]
+            ] = copy(rule_state.active_domain["domain_kwargs"])
 
+            # TODO: <Alex>ALEX -- Potential future issue to resolve is the return type of rule_state.get_parameter_value(); the usage pattern of "metric_domain_kwargs" below requires a dictionary; however, the method currently returns "Any"</Alex>
             if (
                 self._metric_value_kwargs
                 and isinstance(self._metric_value_kwargs, str)
@@ -84,7 +89,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
 
             samples.append(
                 validator.get_metric(
-                    MetricConfiguration(
+                    metric=MetricConfiguration(
                         metric_name=self._metric_name,
                         metric_domain_kwargs=metric_domain_kwargs,
                         metric_value_kwargs=metric_value_kwargs,
