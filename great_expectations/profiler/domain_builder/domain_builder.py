@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional
 
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.validator.validator import Validator
 
@@ -9,29 +9,33 @@ from great_expectations.validator.validator import Validator
 class DomainBuilder(ABC):
     """A DomainBuilder provides methods to get domains based on one or more batches of data.
 
-    It may additionally accept other configuration.
+    There is no default constructor for this class, and it may accept configuration as needed for the particular domain.
     """
 
-    # TODO: <Alex>ALEX -- We should be careful with **kwargs -- if there is no immediate use case for them, then we should only keep explicit arguments.</Alex>
     def get_domains(
         self,
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        include_batch_id: Optional[bool] = False,
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs
     ) -> List[Domain]:
         """
+        :param validator
+        :param batch_ids: A list of batch_ids to use when profiling (e.g. can be a subset of batches provided via
+        Validator, batch, batches, batch_request).  If not provided, all batches are used.  If a Validator is provided,
+        Validator active batch id is used.
+
+        Note: In this class, we do not verify that all of these batch_ids are accessible; this should be done elsewhere
+        (with an error raised in the appropriate situations).
+
+        :param domain_type
+
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """
         return self._get_domains(
-            validator=validator,
-            batch_ids=batch_ids,
-            include_batch_id=include_batch_id,
-            domain_type=domain_type,
-            **kwargs
+            validator=validator, batch_ids=batch_ids, domain_type=domain_type, **kwargs
         )
 
     @abstractmethod
@@ -40,7 +44,6 @@ class DomainBuilder(ABC):
         *,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        include_batch_id: Optional[bool] = False,
         domain_type: Optional[MetricDomainTypes] = None,
         **kwargs
     ) -> List[Domain]:
