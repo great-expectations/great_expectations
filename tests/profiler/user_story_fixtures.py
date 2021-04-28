@@ -1,9 +1,11 @@
 import pytest
 
+from great_expectations.core import ExpectationSuite
+
 
 @pytest.fixture(scope="module")
 def alice_columnar_table_single_batch():
-    config = """
+    profiler_config = """
 variables:
   max_user_id: 999999999999
   min_timestamp: 2004-10-19 10:23:54
@@ -60,4 +62,10 @@ rules:
             content:
               - ### This expectation confirms that the event_ts contains the latest timestamp of all domains
 """
-    return config
+
+    # TODO: Add the resulting expectation suite and a description or generator of data
+    expected_expectation_suite = ExpectationSuite()
+    return {
+        "profiler_config": profiler_config,
+        "expected_expectation_suite": expected_expectation_suite,
+    }
