@@ -186,6 +186,7 @@ def verify_dynamic_loading_support(module_name: str, package_name: str = None) -
     :param package_name: the name of a package, to which the given module belongs
     """
     try:
+        # noinspection PyUnresolvedReferences
         module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(
             module_name, package=package_name
         )

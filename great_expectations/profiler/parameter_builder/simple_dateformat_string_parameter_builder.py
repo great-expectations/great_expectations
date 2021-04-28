@@ -1,5 +1,5 @@
 import logging
-from typing import Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -93,29 +93,39 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 metric_dependencies=None,
             )
         )
-        format_string_success_ratios = dict()
-        for fmt_string in self._candidate_strings:
-            format_string_success_ratios[fmt_string] = (
+
+        format_string: str
+        format_string_success_ratios: Dict[str, str] = {
+            format_string: float(
                 validator.get_metric(
                     metric=MetricConfiguration(
                         metric_name="column_values.match_strftime_format.unexpected_count",
                         metric_domain_kwargs=metric_domain_kwargs,
-                        metric_value_kwargs={"strftime_format": fmt_string},
+                        metric_value_kwargs={"strftime_format": format_string},
                         metric_dependencies=None,
                     )
                 )
-                / count
             )
+            / count
+            for format_string in self._candidate_strings
+        }
 
-        best = None
-        best_ratio = 0
-        for fmt_string, ratio in format_string_success_ratios.items():
-            if ratio > best_ratio and ratio >= self._threshold:
-                best = fmt_string
-                best_ratio = ratio
+        best_fit_date_format_estimate: Optional[str] = None
+        best_success_ratio: float = 0.0
+        current_success_ratio: float
+        for (
+            format_string,
+            current_success_ratio,
+        ) in format_string_success_ratios.items():
+            if (
+                current_success_ratio > best_success_ratio
+                and current_success_ratio >= self._threshold
+            ):
+                best_fit_date_format_estimate = format_string
+                best_success_ratio = current_success_ratio
 
         return ParameterContainer(
-            parameters={"date_format_string": best},
-            details={"success_ratio": best_ratio},
+            parameters={"date_format_string": best_fit_date_format_estimate},
+            details={"success_ratio": best_success_ratio},
             descendants=None,
         )

@@ -4,12 +4,11 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 
+# TODO: <Alex>ALEX -- We need to add tests involving "SemanticDomainTypes" (not only "StorageDomainTypes").</Alex>
+from great_expectations.core.domain_types import SemanticDomainTypes, StorageDomainTypes
+
 # TODO: <Alex>ALEX -- build test to ensure that id property and access works for a list of domains of various types.</Alex>
-from great_expectations.profiler.domain_builder.domain import (
-    Domain,
-    SemanticDomainTypes,
-    StorageDomainTypes,
-)
+from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
