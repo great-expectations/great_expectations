@@ -33,7 +33,7 @@ def column_Date_storage_type_domain():
 
 
 @pytest.fixture
-def single_part_parameter_container():
+def single_part_name_parameter_container():
     return ParameterContainer(
         parameter_nodes={
             "mean": ParameterNode(
@@ -48,7 +48,7 @@ def single_part_parameter_container():
 
 
 @pytest.fixture
-def multi_part_parameter_container():
+def multi_part_name_parameter_container():
     """
     $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format
     $parameter.date_strings.yyyy_mm_dd_date_format
@@ -106,7 +106,7 @@ def multi_part_parameter_container():
             "tolerances": date_strings_tolerances_parameter_node,
         },
     )
-    parameter_multi_part_parameter_node: ParameterNode = ParameterNode(
+    parameter_multi_part_name_parameter_node: ParameterNode = ParameterNode(
         attributes=None,
         descendants={
             "date_strings": date_strings_parameter_node,
@@ -116,7 +116,7 @@ def multi_part_parameter_container():
     root_parameter_node: ParameterNode = ParameterNode(
         attributes=None,
         descendants={
-            "parameter": parameter_multi_part_parameter_node,
+            "parameter": parameter_multi_part_name_parameter_node,
         },
     )
     return ParameterContainer(
@@ -181,8 +181,8 @@ def rule_state_with_no_parameters(
 def rule_state_with_parameters(
     column_Age_storage_type_domain,
     column_Date_storage_type_domain,
-    single_part_parameter_container,
-    multi_part_parameter_container,
+    single_part_name_parameter_container,
+    multi_part_name_parameter_container,
 ):
     """Simple rule_state with one domain, currently set to active"""
     return RuleState(
@@ -192,8 +192,8 @@ def rule_state_with_parameters(
             column_Date_storage_type_domain,
         ],
         parameters={
-            column_Age_storage_type_domain.id: single_part_parameter_container,
-            column_Date_storage_type_domain.id: multi_part_parameter_container,
+            column_Age_storage_type_domain.id: single_part_name_parameter_container,
+            column_Date_storage_type_domain.id: multi_part_name_parameter_container,
         },
         variables=ParameterContainer(
             parameter_nodes={
