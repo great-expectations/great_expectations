@@ -8,6 +8,7 @@ import pandas as pd
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.exceptions import ExecutionEngineError, GreatExpectationsError
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
@@ -289,7 +290,7 @@ class ExecutionEngine(ABC):
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, "MetricDomainTypes"],
+        domain_type: Union[str, MetricDomainTypes],
     ) -> Tuple[Any, dict, dict]:
         """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
         and specific engine semantics.
@@ -376,11 +377,3 @@ class MetricFunctionTypes(Enum):
     MAP_VALUES = "value"  # "map_values"
     WINDOW_VALUES = "value"  # "window_values"
     AGGREGATE_VALUE = "value"  # "aggregate_value"
-
-
-class MetricDomainTypes(Enum):
-    IDENTITY = "identity"
-    COLUMN = "column"
-    COLUMN_PAIR = "column_pair"
-    TABLE = "table"
-    MULTICOLUMN = "multicolumn"
