@@ -78,7 +78,7 @@ class Rule:
                 # TODO: <Alex>ALEX -- this mechanism needs to be discussed.</Alex>
                 rule_state.parameters[domain_id][
                     parameter_name
-                ] = parameter_container.parameters
+                ] = parameter_container.attributes
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
             for (

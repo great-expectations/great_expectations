@@ -125,7 +125,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best_success_ratio = current_success_ratio
 
         return ParameterContainer(
-            parameters={"date_format_string": best_fit_date_format_estimate},
+            attributes={"date_format_string": best_fit_date_format_estimate},
             details={"success_ratio": best_success_ratio},
             descendants=None,
         )

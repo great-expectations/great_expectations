@@ -1,16 +1,15 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.parameter_builder.parameter_container import (
+    DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+    DOMAIN_KWARGS_PARAMETER_NAME,
+    VARIABLES_KEY,
     ParameterContainer,
+    ParameterNode,
+    validate_fully_qualified_parameter_name,
 )
-
-DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
-DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = (
-    f"$domain.{DOMAIN_KWARGS_PARAMETER_NAME}"
-)
-VARIABLES_KEY: str = "$variables."
 
 
 class RuleState:
@@ -35,9 +34,7 @@ class RuleState:
         self._parameters = parameters
 
         if variables is None:
-            variables = ParameterContainer(
-                parameters={}, details=None, descendants=None
-            )
+            variables = ParameterContainer(parameter_nodes=None)
         self._variables = variables
 
     @property
@@ -68,7 +65,7 @@ class RuleState:
         """
         return self._variables
 
-    def get_parameter_value(self, fully_qualified_parameter_name: str) -> Any:
+    def get_parameter_value(self, fully_qualified_parameter_name: str) -> Optional[Any]:
         """
         Get the parameter value from the current rule state using the fully-qualified parameter name.
         A fully-qualified parameter name must be dot-delimited, and may start either with the key "domain" or the name
@@ -78,12 +75,9 @@ class RuleState:
             state arguments (e.g.: domain kwargs)
         :return: requested value
         """
-        if not fully_qualified_parameter_name.startswith("$"):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
-names must start with $ (e.g., "${fully_qualified_parameter_name}").
-"""
-            )
+        validate_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name
+        )
 
         if (
             fully_qualified_parameter_name
@@ -104,31 +98,34 @@ names must start with $ (e.g., "${fully_qualified_parameter_name}").
             str
         ] = fully_qualified_parameter_name.split(".")
 
+        if len(fully_qualified_parameter_as_list) == 0:
+            return None
+
         parameter_container: ParameterContainer
         if fully_qualified_parameter_name_references_variable:
             parameter_container = self.variables
         else:
             parameter_container = self.parameters.get(
-                self.active_domain.id,
-                ParameterContainer(parameters={}, details=None, descendants=None),
+                self.active_domain.id, ParameterContainer(parameter_nodes=None)
             )
 
+        parameter_node: Optional[
+            ParameterNode
+        ] = parameter_container.get_parameter_node(
+            parameter_name_root=fully_qualified_parameter_as_list[0]
+        )
+
         parameter_name_part: Optional[str] = None
-        parameter_value: Optional[Any] = None
         try:
             for parameter_name_part in fully_qualified_parameter_as_list:
                 if (
-                    parameter_container.parameters
-                    and parameter_name_part in parameter_container.parameters
+                    parameter_node.attributes
+                    and parameter_name_part in parameter_node.attributes
                 ):
-                    return parameter_container.parameters[parameter_name_part]
+                    return parameter_node.attributes[parameter_name_part]
 
-                parameter_container = parameter_container.descendants[
-                    parameter_name_part
-                ]
+                parameter_node = parameter_node.descendants[parameter_name_part]
         except KeyError:
             raise ge_exceptions.ProfilerExecutionError(
                 message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": key "{parameter_name_part}" was missing.'
             )
-
-        return parameter_value

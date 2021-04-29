@@ -100,7 +100,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
 
         return ParameterContainer(
             # TODO: Using the first sample for now, but this should be extended for handling multiple batches
-            parameters=samples[0],
+            attributes=samples[0],
             details=None,
             descendants=None,
         )

@@ -41,12 +41,12 @@ class MetricParameterBuilder(ParameterBuilder):
         **kwargs,
     ) -> ParameterContainer:
         """
-        Builds a dictionary of format {'parameters': A given resolved metric}
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
             Args:
             :param rule_state: An object keeping track of the state information necessary for rule validation, such as domain,
                     metric parameters, and necessary variables
             :param validator: A Validator object used to obtain metrics
-        :return: a dictionary of format {'parameters': A given resolved metric}
+        :return: a ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
         """
         # Obtaining any necessary domain kwargs from rule state, otherwise using instance var
         if isinstance(
@@ -71,7 +71,7 @@ class MetricParameterBuilder(ParameterBuilder):
             metric_value_kwargs = self._metric_value_kwargs
 
         return ParameterContainer(
-            parameters=validator.get_metric(
+            attributes=validator.get_metric(
                 metric=MetricConfiguration(
                     metric_name=self._metric_name,
                     metric_domain_kwargs=metric_domain_kwargs,
