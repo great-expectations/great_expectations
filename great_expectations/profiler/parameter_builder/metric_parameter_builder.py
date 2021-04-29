@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations import DataContext
 from great_expectations.profiler.parameter_builder.parameter_builder import (
@@ -6,6 +6,7 @@ from great_expectations.profiler.parameter_builder.parameter_builder import (
 )
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
+    build_parameter_container,
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -70,15 +71,17 @@ class MetricParameterBuilder(ParameterBuilder):
         else:
             metric_value_kwargs = self._metric_value_kwargs
 
-        return ParameterContainer(
-            attributes=validator.get_metric(
-                metric=MetricConfiguration(
-                    metric_name=self._metric_name,
-                    metric_domain_kwargs=metric_domain_kwargs,
-                    metric_value_kwargs=metric_value_kwargs,
-                    metric_dependencies=None,
-                )
-            ),
-            details=None,
-            descendants=None,
-        )
+        parameter_values: Dict[str, Dict[str, Any]] = {
+            f"$parameter.{self._metric_name}": {
+                "value": validator.get_metric(
+                    metric=MetricConfiguration(
+                        metric_name=self._metric_name,
+                        metric_domain_kwargs=metric_domain_kwargs,
+                        metric_value_kwargs=metric_value_kwargs,
+                        metric_dependencies=None,
+                    )
+                ),
+                "details": None,
+            },
+        }
+        return build_parameter_container(parameter_values=parameter_values)

@@ -9,6 +9,7 @@ from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder
 )
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
+    build_parameter_container,
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -33,7 +34,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         metric_name: str,
         metric_value_kwargs: Union[str, dict],
         p_values: List[float],
-        data_context: Optional[DataContext] = None
+        data_context: Optional[DataContext] = None,
     ):
         """
         Create a MultiBatchBootstrappedMetricDistributionParameterBuilder.
@@ -64,7 +65,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         rule_state: Optional[RuleState] = None,
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
-        **kwargs
+        **kwargs,
     ) -> ParameterContainer:
         samples = []
         # TODO: 20210426 AJB I think we need to handle not passing batch_ids here and everywhere else by processing all batches if `batch_ids is None`
@@ -98,9 +99,11 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
                 )
             )
 
-        return ParameterContainer(
-            # TODO: Using the first sample for now, but this should be extended for handling multiple batches
-            attributes=samples[0],
-            details=None,
-            descendants=None,
-        )
+        parameter_values: Dict[str, Dict[str, Any]] = {
+            f"$parameter.{self._metric_name}": {
+                # TODO: Using the first sample for now, but this should be extended for handling multiple batches
+                "value": samples[0],
+                "details": None,
+            },
+        }
+        return build_parameter_container(parameter_values=parameter_values)
