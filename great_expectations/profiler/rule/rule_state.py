@@ -68,8 +68,7 @@ class RuleState:
     def get_parameter_value(self, fully_qualified_parameter_name: str) -> Optional[Any]:
         """
         Get the parameter value from the current rule state using the fully-qualified parameter name.
-        A fully-qualified parameter name must be dot-delimited, and may start either with the key "domain" or the name
-        of a parameter.
+        A fully-qualified parameter name must be a dot-delimited string, or the name of a parameter (without the dots).
         Args
             :param fully_qualified_parameter_name: str -- A string key starting with $ and corresponding to internal
             state arguments (e.g.: domain kwargs)

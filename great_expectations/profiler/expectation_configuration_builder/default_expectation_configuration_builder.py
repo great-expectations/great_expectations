@@ -19,7 +19,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self, rule_state: RuleState, **kwargs
     ) -> ExpectationConfiguration:
         """
-        Utilizes RuleState object to obtain parameter values out of the fully qualified parameter names initialized in
+        Utilizes RuleState object to obtain parameter values out of the fully-qualified parameter names initialized in
         the constructor, returning an ExpectationConfiguration, instantiated with the classes' Expectation type as well
         as the dictionary of all the additional flexible attributes (passed as kwargs to this method).
 

@@ -39,7 +39,18 @@ class ParameterNode(SerializableDictDot):
 @dataclass
 class ParameterContainer(SerializableDictDot):
     """
-    ParameterContainer holds root nodes of tree structures, corresponding to fully qualified parameter names.
+    ParameterContainer holds root nodes of tree structures, corresponding to fully-qualified parameter names.
+
+    While all parameter names begin with the dollar sign character ("$"), a fully-qualified parameter name is a string,
+    whose parts are delimited by the period character (".").
+
+    As an example, suppose that the value of the attribute "max_num_conversion_attempts" is needed for certain
+    processing operations.  However, there could be several attributes with this name, albeit in different contexts:
+    $parameter.date_strings.tolerances.max_num_conversion_attempts
+    $parameter.character.encodings.tolerances.max_num_conversion_attempts
+    The fully-qualified parameter names disambiguate the same "leaf" attribute names occurring in multiple contexts.
+    In the present example, the use of fully-qualified parameter names makes it clear that in one context,
+    "max_num_conversion_attempts" refers to the operations on date/time, while in the other -- it applies to characters.
 
     $variables.false_positive_threshold
     $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format
@@ -50,6 +61,14 @@ class ParameterContainer(SerializableDictDot):
     $parameter.date_strings.tolerances.max_num_conversion_attempts
     $parameter.tolerances.mostly
     $mean
+
+    The reason that ParameterContainer is needed is that each ParameterNode can point only to one tree structure,
+    characterized by having a specific root-level ParameterNode object.  A root-level ParameterNode object corresponds
+    to a set of fully-qualified parameter names that have the same first part (e.g., "parameter").  However, a Domain
+    may utilize fully-qualified parameter names that have multiple first parts (i.e., from different "name spaces").
+    The ParameterContainer maintains a dictionary that holds references to root-level ParameterNode objects for all
+    parameter "name spaces" applicable to the given Domain (where the first part of all fully-qualified parameter names
+    within the same "name space" serves as the dictionary key, and the root-level ParameterNode objects are the values).
     """
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = None
@@ -97,6 +116,11 @@ def build_parameter_container(
         ...
     }
     :return parameter_container holds the dictionary of ParameterNode objects corresponding to roots of parameter names
+
+    This function loops through the supplied pairs of fully-qualified parameter names and their corresponding values
+    (and any "details" metadata) and builds the tree under a single root-level ParameterNode object for a "name space".
+    In particular, if any ParameterNode object in the tree (starting with the root-level ParameterNode object) already
+    exists, it is reused; in other words, ParameterNode objects are unique per part of fully-qualified parameter names.
     """
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     parameter_node: Optional[ParameterNode]
@@ -145,8 +169,18 @@ def _build_parameter_node_tree_for_one_parameter(
     parameter_value: Any,
     details: Optional[Any] = None,
 ) -> None:
+    """
+    Recursively builds a tree of ParameterNode objects, creating new ParameterNode objects parsimoniously (i.e., only if
+    ParameterNode object, corresponding to a part of fully-qualified parameter names in a "name space" does not exist).
+    :param parameter_node: root-level ParameterNode for the sub-tree, characterized by the first parameter name in list
+    :param parameter_name_as_list: list of parts of a fully-qualified parameter name of sub-tree (or sub "name space")
+    :param parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leave node")
+    :param details: metadata/details pertaining to the last part of the fully-qualified parameter name ("leave node")
+    """
     parameter_name_part: str = parameter_name_as_list[0]
 
+    # If the fully-qualified parameter name (or "name space") is still compound (i.e., not at "leaf node" / last part),
+    # then build the sub-tree, creating the descendant ParameterNode (to hold the sub-tree), if no descendants exist.
     if len(parameter_name_as_list) > 1:
         if parameter_node.descendants is None:
             parameter_node.descendants = {}
@@ -161,7 +195,9 @@ def _build_parameter_node_tree_for_one_parameter(
             details=details,
         )
     else:
-        _assign_parameter_node_attribute_name_value_pairs(
+        # If the fully-qualified parameter name (or "name space") is trivial (i.e., at "leaf node" / last part),
+        # then store the supplied attribute name-value pairs as well as the metadata/details in the node's dictionaries.
+        _set_parameter_node_attribute_name_value_pairs(
             parameter_node=parameter_node,
             attribute_name=parameter_name_part,
             attribute_value=parameter_value,
@@ -169,7 +205,7 @@ def _build_parameter_node_tree_for_one_parameter(
         )
 
 
-def _assign_parameter_node_attribute_name_value_pairs(
+def _set_parameter_node_attribute_name_value_pairs(
     parameter_node: ParameterNode,
     attribute_name: str,
     attribute_value: Any,
