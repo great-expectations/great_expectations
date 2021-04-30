@@ -2,8 +2,11 @@ from typing import Any, Dict
 
 import pytest
 
-# TODO: <Alex>ALEX -- We need to add tests involving "SemanticDomainTypes" (not only "StorageDomainTypes").</Alex>
-from great_expectations.core.domain_types import SemanticDomainTypes, StorageDomainTypes
+# TODO: <Alex>ALEX -- We need to add tests involving "SemanticDomainTypes" (not only "StructuredDomainTypes").</Alex>
+from great_expectations.core.domain_types import (
+    SemanticDomainTypes,
+    StructuredDomainTypes,
+)
 
 # TODO: <Alex>ALEX -- build test to ensure that id property and access works for a list of domains of various types.</Alex>
 from great_expectations.profiler.domain_builder.domain import Domain
@@ -16,19 +19,19 @@ from great_expectations.profiler.rule.rule_state import RuleState
 
 # noinspection PyPep8Naming
 @pytest.fixture
-def column_Age_storage_type_domain():
+def column_Age_structured_type_domain():
     return Domain(
         domain_kwargs={"column": "Age", "batch_id": "1234567890"},
-        domain_type=StorageDomainTypes.COLUMN,
+        domain_type=StructuredDomainTypes.COLUMN,
     )
 
 
 # noinspection PyPep8Naming
 @pytest.fixture
-def column_Date_storage_type_domain():
+def column_Date_structured_type_domain():
     return Domain(
         domain_kwargs={"column": "Date", "batch_id": "1234567890"},
-        domain_type=StorageDomainTypes.COLUMN,
+        domain_type=StructuredDomainTypes.COLUMN,
     )
 
 
@@ -182,14 +185,14 @@ def parameter_values_nine_parameters_multiple_depths():
 # noinspection PyPep8Naming
 @pytest.fixture
 def rule_state_with_no_parameters(
-    column_Age_storage_type_domain, column_Date_storage_type_domain
+    column_Age_structured_type_domain, column_Date_structured_type_domain
 ):
     """Simple rule_state with one domain, currently set to active"""
     return RuleState(
-        active_domain=column_Age_storage_type_domain,
+        active_domain=column_Age_structured_type_domain,
         domains=[
-            column_Age_storage_type_domain,
-            column_Date_storage_type_domain,
+            column_Age_structured_type_domain,
+            column_Date_structured_type_domain,
         ],
         parameters={},
     )
@@ -198,21 +201,21 @@ def rule_state_with_no_parameters(
 # noinspection PyPep8Naming
 @pytest.fixture
 def rule_state_with_parameters(
-    column_Age_storage_type_domain,
-    column_Date_storage_type_domain,
+    column_Age_structured_type_domain,
+    column_Date_structured_type_domain,
     single_part_name_parameter_container,
     multi_part_name_parameter_container,
 ):
     """Simple rule_state with one domain, currently set to active"""
     return RuleState(
-        active_domain=column_Age_storage_type_domain,
+        active_domain=column_Age_structured_type_domain,
         domains=[
-            column_Age_storage_type_domain,
-            column_Date_storage_type_domain,
+            column_Age_structured_type_domain,
+            column_Date_structured_type_domain,
         ],
         parameters={
-            column_Age_storage_type_domain.id: single_part_name_parameter_container,
-            column_Date_storage_type_domain.id: multi_part_name_parameter_container,
+            column_Age_structured_type_domain.id: single_part_name_parameter_container,
+            column_Date_structured_type_domain.id: multi_part_name_parameter_container,
         },
         variables=ParameterContainer(
             parameter_nodes={
