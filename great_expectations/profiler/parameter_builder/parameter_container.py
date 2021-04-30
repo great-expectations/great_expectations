@@ -175,8 +175,8 @@ def _build_parameter_node_tree_for_one_parameter(
     ParameterNode object, corresponding to a part of fully-qualified parameter names in a "name space" does not exist).
     :param parameter_node: root-level ParameterNode for the sub-tree, characterized by the first parameter name in list
     :param parameter_name_as_list: list of parts of a fully-qualified parameter name of sub-tree (or sub "name space")
-    :param parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leave node")
-    :param details: metadata/details pertaining to the last part of the fully-qualified parameter name ("leave node")
+    :param parameter_value: value pertaining to the last part of the fully-qualified parameter name ("leaf node")
+    :param details: metadata/details pertaining to the last part of the fully-qualified parameter name ("leaf node")
     """
     parameter_name_part: str = parameter_name_as_list[0]
 
