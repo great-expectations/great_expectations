@@ -66,6 +66,12 @@ def test_get_parameter_value_valid_parameter_name(
     )
     assert (
         rule_state_with_parameters.get_parameter_value(
+            fully_qualified_parameter_name="$variables.false_positive_threshold"
+        )
+        == 1.0e-2
+    )
+    assert (
+        rule_state_with_parameters.get_parameter_value(
             fully_qualified_parameter_name="$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format"
         )
         == "%Y-%m-%d %H:%M:%S %Z"
