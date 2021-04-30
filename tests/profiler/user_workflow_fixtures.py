@@ -6,6 +6,7 @@ from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 
 # TODO: Move these fixtures to integration tests
 
+
 @pytest.fixture(scope="module")
 def alice_columnar_table_single_batch():
 
@@ -146,8 +147,8 @@ rules:
                 "expectation_type": "expect_column_values_to_be_between",
                 "kwargs": {
                     "column": "user_id",
-                    "min_value": "19", # From the data
-                    "max_value": "999999999999"
+                    "min_value": "19",  # From the data
+                    "max_value": "999999999999",
                 },
                 "meta": {},
             }
@@ -155,26 +156,27 @@ rules:
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_not_be_null",
-                "kwargs": {
-                    "column": "user_id",
-                },
+                "kwargs": {"column": "user_id",},
                 "meta": {},
             }
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_be_of_type",
-                "kwargs": {
-                    "column": "user_id",
-                    "type_": "INTEGER",
-                },
+                "kwargs": {"column": "user_id", "type_": "INTEGER",},
                 "meta": {},
             }
         ),
     ]
 
-    my_rule_for_timestamps_expectation_configurations: List[ExpectationConfiguration] = []
-    my_rule_for_timestamps_column_names: List[str] = ["event_ts", "server_ts", "device_ts"]
+    my_rule_for_timestamps_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = []
+    my_rule_for_timestamps_column_names: List[str] = [
+        "event_ts",
+        "server_ts",
+        "device_ts",
+    ]
     for my_rule_for_timestamps_column_name in my_rule_for_timestamps_column_names:
         my_rule_for_timestamps_expectation_configurations.extend(
             [
@@ -191,18 +193,14 @@ rules:
                 ExpectationConfiguration(
                     **{
                         "expectation_type": "expect_column_values_to_be_increasing",
-                        "kwargs": {
-                            "column": my_rule_for_timestamps_column_name,
-                        },
+                        "kwargs": {"column": my_rule_for_timestamps_column_name,},
                         "meta": {},
                     }
                 ),
                 ExpectationConfiguration(
                     **{
                         "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                        "kwargs": {
-                            "column": my_rule_for_timestamps_column_name,
-                        },
+                        "kwargs": {"column": my_rule_for_timestamps_column_name,},
                         "meta": {},
                     }
                 ),
@@ -218,7 +216,7 @@ rules:
                             "format": "markdown",
                             "content": [
                                 "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
-                            ]
+                            ],
                         },
                     }
                 ),
@@ -234,18 +232,22 @@ rules:
                             "format": "markdown",
                             "content": [
                                 "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
-                            ]
+                            ],
                         },
                     }
                 ),
             ]
         )
 
-    expectation_configurations: List[ExpectationConfiguration] = my_rule_for_user_ids_expectation_configurations + my_rule_for_timestamps_expectation_configurations
+    expectation_configurations: List[
+        ExpectationConfiguration
+    ] = my_rule_for_user_ids_expectation_configurations + my_rule_for_timestamps_expectation_configurations
     assert len(expectation_configurations) == 18
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
-    expected_expectation_suite = ExpectationSuite(expectation_suite_name=expectation_suite_name)
+    expected_expectation_suite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name
+    )
     for expectation_configuration in expectation_configurations:
         expected_expectation_suite.add_expectation(expectation_configuration)
 
@@ -261,11 +263,23 @@ rules:
         "sample_data_relative_path": sample_data_relative_path,
     }
 
+
 def test_fixture_generation(alice_columnar_table_single_batch):
-    assert alice_columnar_table_single_batch["sample_data_relative_path"] == "alice_columnar_table_single_batch_data.csv"
+    assert (
+        alice_columnar_table_single_batch["sample_data_relative_path"]
+        == "alice_columnar_table_single_batch_data.csv"
+    )
     assert len(alice_columnar_table_single_batch["profiler_configs"]) > 0
     for profiler_config in alice_columnar_table_single_batch["profiler_configs"]:
         assert len(profiler_config) > 0
         assert isinstance(profiler_config, str)
-    assert isinstance(alice_columnar_table_single_batch["expected_expectation_suite"], ExpectationSuite)
-    assert len(alice_columnar_table_single_batch["expected_expectation_suite"].expectations) == 18
+    assert isinstance(
+        alice_columnar_table_single_batch["expected_expectation_suite"],
+        ExpectationSuite,
+    )
+    assert (
+        len(
+            alice_columnar_table_single_batch["expected_expectation_suite"].expectations
+        )
+        == 18
+    )
