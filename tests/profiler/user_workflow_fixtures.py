@@ -28,7 +28,7 @@ rules:
         max_value: $max_user_id
       - expectation: expect_column_values_to_not_be_null
       - expectation: expect_column_values_to_be_of_type
-        type: INTEGER
+        type_: INTEGER
   my_rule_for_timestamps:
     domain_builder:
       class_name: SimpleColumnSuffixDomainBuilder
@@ -45,7 +45,7 @@ rules:
         metric_domain_kwargs: $event_ts.domain_kwargs
     expectation_configuration_builders:
       - expectation: expect_column_values_to_be_of_type
-        type: TIMESTAMP
+        type_: TIMESTAMP
       - expectation: expect_column_values_to_be_increasing
       - expectation: expect_column_values_to_be_dateutil_parseable
       - expectation: expect_column_min_to_be_between
@@ -92,7 +92,7 @@ rules:
                 "expectation_type": "expect_column_values_to_be_of_type",
                 "kwargs": {
                     "column": "user_id",
-                    "type": "INTEGER",
+                    "type_": "INTEGER",
                 },
                 "meta": {},
             }
@@ -109,7 +109,7 @@ rules:
                         "expectation_type": "expect_column_values_to_be_of_type",
                         "kwargs": {
                             "column": my_rule_for_timestamps_column_name,
-                            "type": "TIMESTAMP",
+                            "type_": "TIMESTAMP",
                         },
                         "meta": {},
                     }
