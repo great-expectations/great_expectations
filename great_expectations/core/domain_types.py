@@ -7,7 +7,7 @@ from great_expectations.core.util import MetaClsEnumJoin
 class DomainTypes(Enum):
     """
     This is a base class for the different specific DomainTypes classes, each of which enumerates the particular variety
-    of domain types (e.g., "StorageDomainTypes", "SemanticDomainTypes", "MetricDomainTypes", etc.).  Since the base
+    of domain types (e.g., "StructuredDomainTypes", "SemanticDomainTypes", "MetricDomainTypes", etc.).  Since the base
     "DomainTypes" extends "Enum", the JSON serialization, supported for the general "Enum" class, applies for all
     "DomainTypes" classes, too.
     """
@@ -23,10 +23,12 @@ class DomainTypes(Enum):
         return False
 
 
-class StorageDomainTypes(DomainTypes):
+class StructuredDomainTypes(DomainTypes):
     SCHEMA = "schema"
     TABLE = "table"
     COLUMN = "column"
+    COLUMN_PAIR = "column_pair"
+    MULTICOLUMN = "multicolumn"
 
 
 class SemanticDomainTypes(DomainTypes):
@@ -37,14 +39,12 @@ class SemanticDomainTypes(DomainTypes):
     LOGIC = "logic"
     CURRENCY = "currency"
     IMAGE = "image"
-    COLUMN_PAIR = "column_pair"
-    MULTICOLUMN = "multicolumn"
     VALUE_SET = "value_set"
     MISCELLANEOUS = "miscellaneous"
     UNKNOWN = "unknown"
 
 
 class MetricDomainTypes(
-    Enum, metaclass=MetaClsEnumJoin, enums=(StorageDomainTypes, SemanticDomainTypes)
+    Enum, metaclass=MetaClsEnumJoin, enums=(StructuredDomainTypes, SemanticDomainTypes)
 ):
     pass

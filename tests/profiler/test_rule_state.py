@@ -10,22 +10,23 @@ import great_expectations.exceptions as ge_exceptions
 def test_id_property_of_active_domain(
     rule_state_with_no_parameters,
     rule_state_with_parameters,
-    column_Age_storage_type_domain,
-    column_Date_storage_type_domain,
+    column_Age_structured_type_domain,
+    column_Date_structured_type_domain,
 ):
     assert (
         rule_state_with_no_parameters.active_domain.id
-        == column_Age_storage_type_domain.id
+        == column_Age_structured_type_domain.id
     )
 
-    assert (
-        rule_state_with_parameters.active_domain.id == column_Age_storage_type_domain.id
-    )
-
-    rule_state_with_parameters.active_domain = column_Date_storage_type_domain
     assert (
         rule_state_with_parameters.active_domain.id
-        == column_Date_storage_type_domain.id
+        == column_Age_structured_type_domain.id
+    )
+
+    rule_state_with_parameters.active_domain = column_Date_structured_type_domain
+    assert (
+        rule_state_with_parameters.active_domain.id
+        == column_Date_structured_type_domain.id
     )
 
 
@@ -41,7 +42,7 @@ def test_get_parameter_value_invalid_parameter_name(rule_state_with_parameters):
 
 # noinspection PyPep8Naming
 def test_get_parameter_value_valid_parameter_name(
-    rule_state_with_parameters, column_Date_storage_type_domain
+    rule_state_with_parameters, column_Date_structured_type_domain
 ):
     assert (
         rule_state_with_parameters.get_parameter_value(
@@ -56,7 +57,7 @@ def test_get_parameter_value_valid_parameter_name(
         == 5.0
     )
 
-    rule_state_with_parameters.active_domain = column_Date_storage_type_domain
+    rule_state_with_parameters.active_domain = column_Date_structured_type_domain
     assert (
         rule_state_with_parameters.get_parameter_value(
             fully_qualified_parameter_name="$variables.false_positive_threshold"
