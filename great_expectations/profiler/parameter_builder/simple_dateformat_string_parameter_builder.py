@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -8,6 +8,7 @@ from great_expectations.profiler.parameter_builder.parameter_builder import (
 )
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
+    build_parameter_container,
 )
 from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     """Returns the best matching strftime format string for a provided domain."""
 
-    CANDIDATE_DATE_FORMAT_STRINGS = {
+    CANDIDATE_DATE_FORMAT_STRINGS: str = {
         "YYYY-MM-DD",
         "MM-DD-YYYY",
         "YY-MM-DD",
@@ -124,8 +125,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best_fit_date_format_estimate = format_string
                 best_success_ratio = current_success_ratio
 
-        return ParameterContainer(
-            parameters={"date_format_string": best_fit_date_format_estimate},
-            details={"success_ratio": best_success_ratio},
-            descendants=None,
-        )
+        parameter_values: Dict[str, Dict[str, Any]] = {
+            "$parameter.date_format_string": {
+                "value": best_fit_date_format_estimate,
+                "details": {"success_ratio": best_success_ratio},
+            },
+        }
+        return build_parameter_container(parameter_values=parameter_values)
