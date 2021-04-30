@@ -1,7 +1,10 @@
 from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.domain_types import MetricDomainTypes, StorageDomainTypes
+from great_expectations.core.domain_types import (
+    MetricDomainTypes,
+    StructuredDomainTypes,
+)
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -48,7 +51,7 @@ class ColumnDomainBuilder(DomainBuilder):
                         "column": column,
                         "batch_id": validator.active_batch_id,
                     },
-                    domain_type=StorageDomainTypes.COLUMN,
+                    domain_type=StructuredDomainTypes.COLUMN,
                 )
             )
         return domains
