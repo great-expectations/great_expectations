@@ -61,6 +61,7 @@ class ParameterContainer(SerializableDictDot):
     $parameter.date_strings.tolerances.max_num_conversion_attempts
     $parameter.tolerances.mostly
     $mean
+    $custom.lang.character_encodings
 
     The reason that ParameterContainer is needed is that each ParameterNode can point only to one tree structure,
     characterized by having a specific root-level ParameterNode object.  A root-level ParameterNode object corresponds
