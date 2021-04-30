@@ -35,14 +35,20 @@ How to create a new Expectation Suite using the CLI
 
         While you could hand-author an Expectation Suite by writing a JSON file, just like with other features it is easier to let the :ref:`CLI <command_line>` save you time and typos.
 
-        We will walk through several available options for how to do this.
+        Simply run this command and follow the prompts:
 
-        1. The `--interactive` mode (`False` by default) denotes the fact that you are interacting with your data.  In
-        other words, you have access to a data source and can specify a Batch of data to be used to create expectations
-        against.  Not specifying this flag still allows you to create expectations (e.g., if you already know enough
+        .. code-block:: bash
+
+            great_expectations --v3-api suite new
+
+        Alternatively, if you wish to skip some steps by providing flags please follow the rest of this document. We will walk through several available options for how to do this.
+
+        1. The ``--interactive`` mode denotes the fact that you are interacting with your data.  In
+        other words, you have access to a data source and can specify a Batch of data to be used to create Expectations
+        against.  ``--manual`` mode still allows you to create expectations (e.g., if you already know enough
         about your data, such as the various columns in a database table), but you will not be able to run validations,
         until you specify a Batch of data, which can be done at a later point; in fact, you can switch back and forth
-        between the interactive and non-interactive modes, and all your expectations will be intact.
+        between the interactive and manual modes, and all your expectations will be intact.
 
         Run this command in the root directory of your project (where the init command created the ``great_expectations`` subdirectory:
 
@@ -55,7 +61,7 @@ How to create a new Expectation Suite using the CLI
         your datasource configuration), then Great Expectations will automatically select it for you (to speed up the process).
 
         Finally, unless you specify the name of the Expectation Suite on the command line (using the
-        `--expectation-suite` option), the command will ask you to name your new Expectation Suite and offer you a
+        ``--expectation-suite`` option), the command will ask you to name your new Expectation Suite and offer you a
         default name to simply accept, or provide your own.
 
         Then an empty suite is created and added to your project.
@@ -63,17 +69,17 @@ How to create a new Expectation Suite using the CLI
         Then Great Expectations creates a jupyter notebook for you to start creating your new suite.  The command
         concludes by opening the newly generated jupyter notebook.
 
-        2. If you wish to skip the automated opening of jupyter notebook, add the `--no-jupyter` flag:
+        2. If you wish to skip the automated opening of jupyter notebook, add the ``--no-jupyter`` flag:
 
         .. code-block:: bash
 
             great_expectations --v3-api suite new --interactive --no-jupyter
 
-        or in the non-interactive mode:
+        or in the manual mode:
 
         .. code-block:: bash
 
-            great_expectations --v3-api suite new --no-jupyter
+            great_expectations --v3-api suite new --manual --no-jupyter
 
 
         3. One of the easiest ways to get starting in the interactive mode is to take advantage of the `--profile` flag:
@@ -83,7 +89,7 @@ How to create a new Expectation Suite using the CLI
             great_expectations --v3-api suite new --interactive --profile
 
         This instructs Great Expectations to inspect your Batch of data and suggest the initial set of Expectations.
-        When the notebook opens (or when you open it later if the above command is used with the `--no-jupyter` flag),
+        When the notebook opens (or when you open it later if the above command is used with the ``--no-jupyter`` flag),
         you can edit these expectations.  For example, you might tighten some tolerances, compared to the initial values,
         based on your knowledge of your dataset.  After that, you can review and save your Expectation Suite and run validations using it.
 
