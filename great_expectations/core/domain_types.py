@@ -32,13 +32,13 @@ class StructuredDomainTypes(DomainTypes):
 
 
 class SemanticDomainTypes(DomainTypes):
-    IDENTITY = "identity"
     NUMERIC = "numeric"
-    DATETIME = "datetime"
     TEXT = "text"
     LOGIC = "logic"
+    DATETIME = "datetime"
+    BINARY = "binary"
     CURRENCY = "currency"
-    IMAGE = "image"
+    IDENTITY = "identity"
     VALUE_SET = "value_set"
     MISCELLANEOUS = "miscellaneous"
     UNKNOWN = "unknown"
