@@ -47,9 +47,8 @@ def test_get_parameter_value_valid_parameter_name(
         rule_state_with_parameters.get_parameter_value(
             fully_qualified_parameter_name="$variables.false_positive_threshold"
         )
-        == 0.01
+        == 1.0e-2
     )
-
     assert (
         rule_state_with_parameters.get_parameter_value(
             fully_qualified_parameter_name="$mean"
@@ -58,6 +57,12 @@ def test_get_parameter_value_valid_parameter_name(
     )
 
     rule_state_with_parameters.active_domain = column_Date_storage_type_domain
+    assert (
+        rule_state_with_parameters.get_parameter_value(
+            fully_qualified_parameter_name="$variables.false_positive_threshold"
+        )
+        == 1.0e-2
+    )
     assert (
         rule_state_with_parameters.get_parameter_value(
             fully_qualified_parameter_name="$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format"

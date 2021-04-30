@@ -41,6 +41,7 @@ class ParameterContainer(SerializableDictDot):
     """
     ParameterContainer holds root nodes of tree structures, corresponding to fully qualified parameter names.
 
+    $variables.false_positive_threshold
     $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format
     $parameter.date_strings.yyyy_mm_dd_date_format
     $parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format

@@ -50,6 +50,7 @@ def single_part_name_parameter_container():
 @pytest.fixture
 def multi_part_name_parameter_container():
     """
+    $variables.false_positive_threshold
     $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format
     $parameter.date_strings.yyyy_mm_dd_date_format
     $parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format
@@ -59,6 +60,13 @@ def multi_part_name_parameter_container():
     $parameter.tolerances.mostly
     $mean
     """
+    variables_multi_part_name_parameter_node: ParameterNode = ParameterNode(
+        attributes={
+            "false_positive_threshold": 1.0e-2,
+        },
+        details=None,
+        descendants=None,
+    )
     root_mean_node: ParameterNode = ParameterNode(
         attributes={
             "mean": 6.5e-1,
@@ -113,6 +121,12 @@ def multi_part_name_parameter_container():
             "tolerances": tolerances_parameter_node,
         },
     )
+    root_variables_node: ParameterNode = ParameterNode(
+        attributes=None,
+        descendants={
+            "variables": variables_multi_part_name_parameter_node,
+        },
+    )
     root_parameter_node: ParameterNode = ParameterNode(
         attributes=None,
         descendants={
@@ -121,6 +135,7 @@ def multi_part_name_parameter_container():
     )
     return ParameterContainer(
         parameter_nodes={
+            "variables": root_variables_node,
             "parameter": root_parameter_node,
             "mean": root_mean_node,
         }
@@ -128,8 +143,12 @@ def multi_part_name_parameter_container():
 
 
 @pytest.fixture
-def parameter_values_eight_parameters_multiple_depths():
+def parameter_values_nine_parameters_multiple_depths():
     parameter_values: Dict[str, Dict[str, Any]] = {
+        "$variables.false_positive_threshold": {
+            "value": 1.0e-2,
+            "details": None,
+        },
         "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format": {
             "value": "%Y-%m-%d %H:%M:%S %Z",
             "details": {"confidence": 7.8e-1},
@@ -199,7 +218,7 @@ def rule_state_with_parameters(
             parameter_nodes={
                 "false_positive_threshold": ParameterNode(
                     attributes={
-                        "false_positive_threshold": 0.01,
+                        "false_positive_threshold": 1.0e-2,
                     },
                     details=None,
                     descendants=None,
