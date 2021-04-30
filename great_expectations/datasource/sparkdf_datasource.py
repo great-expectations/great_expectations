@@ -67,6 +67,7 @@ class SparkDFDatasource(LegacyDatasource):
         data_asset_type=None,
         batch_kwargs_generators=None,
         spark_config=None,
+        force_reuse_spark_context=False,
         **kwargs
     ):
         """
@@ -96,8 +97,13 @@ class SparkDFDatasource(LegacyDatasource):
 
         configuration = kwargs
         configuration.update(
-            {"data_asset_type": data_asset_type, "spark_config": spark_config}
+            {
+                "data_asset_type": data_asset_type,
+                "spark_config": spark_config,
+                "force_reuse_spark_context": force_reuse_spark_context,
+            }
         )
+
         if batch_kwargs_generators:
             configuration["batch_kwargs_generators"] = batch_kwargs_generators
 
@@ -110,6 +116,7 @@ class SparkDFDatasource(LegacyDatasource):
         data_asset_type=None,
         batch_kwargs_generators=None,
         spark_config=None,
+        force_reuse_spark_context=False,
         **kwargs
     ):
         """Build a new SparkDFDatasource instance.
@@ -123,7 +130,11 @@ class SparkDFDatasource(LegacyDatasource):
             **kwargs: Additional
         """
         configuration_with_defaults = SparkDFDatasource.build_configuration(
-            data_asset_type, batch_kwargs_generators, spark_config, **kwargs
+            data_asset_type,
+            batch_kwargs_generators,
+            spark_config,
+            force_reuse_spark_context,
+            **kwargs
         )
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
         batch_kwargs_generators = configuration_with_defaults.pop(
@@ -139,7 +150,10 @@ class SparkDFDatasource(LegacyDatasource):
 
         if spark_config is None:
             spark_config = {}
-        spark = get_or_create_spark_application(spark_config=spark_config)
+        spark = get_or_create_spark_application(
+            spark_config=spark_config,
+            force_reuse_spark_context=force_reuse_spark_context,
+        )
         self.spark = spark
 
         self._build_generators()
