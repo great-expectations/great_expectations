@@ -161,7 +161,7 @@ def _build_parameter_node_tree_for_one_parameter(
             details=details,
         )
     else:
-        _assign_parameter_node_atrribute_name_value_pairs(
+        _assign_parameter_node_attribute_name_value_pairs(
             parameter_node=parameter_node,
             attribute_name=parameter_name_part,
             attribute_value=parameter_value,
@@ -169,7 +169,7 @@ def _build_parameter_node_tree_for_one_parameter(
         )
 
 
-def _assign_parameter_node_atrribute_name_value_pairs(
+def _assign_parameter_node_attribute_name_value_pairs(
     parameter_node: ParameterNode,
     attribute_name: str,
     attribute_value: Any,
