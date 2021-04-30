@@ -142,14 +142,24 @@ class SparkDFExecutionEngine(ExecutionEngine):
         "reader_options",
     }
 
-    def __init__(self, *args, persist=True, spark_config=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        persist=True,
+        spark_config=None,
+        force_reuse_spark_context=False,
+        **kwargs,
+    ):
         # Creation of the Spark DataFrame is done outside this class
         self._persist = persist
 
         if spark_config is None:
             spark_config = {}
 
-        spark: SparkSession = get_or_create_spark_application(spark_config=spark_config)
+        spark: SparkSession = get_or_create_spark_application(
+            spark_config=spark_config,
+            force_reuse_spark_context=force_reuse_spark_context,
+        )
 
         spark_config = dict(spark_config)
         spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
