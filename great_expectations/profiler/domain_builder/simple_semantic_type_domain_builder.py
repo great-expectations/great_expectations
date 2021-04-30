@@ -1,15 +1,14 @@
 from typing import Iterable, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.domain_types import (
-    MetricDomainTypes,
-    SemanticDomainTypes,
-    translate_column_type_to_semantic_domain_type,
-)
+from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
 from great_expectations.profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
 from great_expectations.profiler.domain_builder.domain import Domain
+from great_expectations.profiler.domain_builder.util import (
+    translate_table_column_type_to_semantic_domain_type,
+)
 from great_expectations.validator.validator import MetricConfiguration, Validator
 
 
@@ -76,7 +75,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         semantic_column_type: str
         for column_name in column_names:
             semantic_column_type: SemanticDomainTypes = (
-                translate_column_type_to_semantic_domain_type(
+                translate_table_column_type_to_semantic_domain_type(
                     validator=validator, column_name=column_name
                 )
             )
