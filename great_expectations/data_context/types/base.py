@@ -921,6 +921,9 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    ge_cloud = fields.Dict(
+        keys=fields.Str(), allow_none=True, required=False
+    )
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal
@@ -1487,6 +1490,7 @@ class DataContextConfig(BaseYamlConfig):
         anonymous_usage_statistics=None,
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
+        ge_cloud: Optional[Dict] = None
     ):
         # Set defaults
         if config_version is None:
@@ -1533,6 +1537,8 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
+        if ge_cloud is not None:
+            self.ge_cloud = ge_cloud
 
         super().__init__(commented_map=commented_map)
 
@@ -1586,6 +1592,7 @@ class CheckpointConfigSchema(Schema):
         "notify_with",
     ]
 
+    ge_cloud_id = fields.UUID(required=False, allow_none=True)
     name = fields.String(required=False, allow_none=True)
     config_version = fields.Number(
         validate=lambda x: (0 < x < 100) or x is None,
