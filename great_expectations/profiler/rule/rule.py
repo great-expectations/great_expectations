@@ -69,6 +69,7 @@ class Rule:
             domain_id: str = rule_state.active_domain.id
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
+                # TODO: <Alex>ALEX -- this mechanism needs to be discussed.</Alex>
                 parameter_name: str = parameter_builder.parameter_name
                 parameter_container: ParameterContainer = (
                     parameter_builder.build_parameters(
@@ -76,9 +77,7 @@ class Rule:
                     )
                 )
                 # TODO: <Alex>ALEX -- this mechanism needs to be discussed.</Alex>
-                rule_state.parameters[domain_id][
-                    parameter_name
-                ] = parameter_container.attributes
+                rule_state.parameters[domain_id][parameter_name] = parameter_container
 
             expectation_configuration_builder: ExpectationConfigurationBuilder
             for (
