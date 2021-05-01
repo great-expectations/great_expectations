@@ -85,7 +85,8 @@ class Rule:
 
     @property
     def variables(self) -> ParameterContainer:
-        return self._variables
+        # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
+        return copy.deepcopy(self._variables)
 
     @property
     def domain_parameters(self) -> Dict[str, ParameterContainer]:
