@@ -40,6 +40,19 @@ def test_parse_evaluation_parameter():
         == 9
     )
 
+    # bare decimal is accepted
+    assert (
+        parse_evaluation_parameter(
+            "urn:great_expectations:validations:source_patient_data.default"
+            ":expect_table_row_count_to_equal.result.observed_value * .9",
+            {
+                "urn:great_expectations:validations:source_patient_data.default"
+                ":expect_table_row_count_to_equal.result.observed_value": 10
+            },
+        )
+        == 9
+    )
+
     # We have basic operations (trunc)
     assert (
         parse_evaluation_parameter(
