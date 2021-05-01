@@ -4,15 +4,12 @@ from typing import Dict, List, Optional
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.domain_builder.domain_builder import DomainBuilder
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.profiler.expectation_configuration_builder.expectation_configuration_builder import (
-#     ExpectationConfigurationBuilder,
-# )
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.profiler.parameter_builder.parameter_builder import (
-#     ParameterBuilder,
-# )
+from great_expectations.profiler.expectation_configuration_builder.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
+)
+from great_expectations.profiler.parameter_builder.parameter_builder import (
+    ParameterBuilder,
+)
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
@@ -24,14 +21,10 @@ class Rule:
         self,
         name: str,
         domain_builder: Optional[DomainBuilder] = None,
-        # TODO: <Alex>ALEX</Alex>
-        # parameter_builders: Optional[List[ParameterBuilder]] = None,
-        parameter_builders=None,
-        # TODO: <Alex>ALEX</Alex>
-        # expectation_configuration_builders: Optional[
-        #     List[ExpectationConfigurationBuilder]
-        # ] = None,
-        expectation_configuration_builders=None,
+        parameter_builders: Optional[List[ParameterBuilder]] = None,
+        expectation_configuration_builders: Optional[
+            List[ExpectationConfigurationBuilder]
+        ] = None,
         variables: Optional[ParameterContainer] = None,
     ):
         """
@@ -71,15 +64,14 @@ class Rule:
 
         domain: Domain
         for domain in domains:
-            # TODO: <Alex>ALEX</Alex>
-            # parameter_builder: ParameterBuilder
+            parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
                 parameter_container: ParameterContainer = (
                     parameter_builder.build_parameters(batch_ids=batch_ids)
                 )
                 self._domain_parameters[domain.id] = parameter_container
 
-            # expectation_configuration_builder: ExpectationConfigurationBuilder
+            expectation_configuration_builder: ExpectationConfigurationBuilder
             for (
                 expectation_configuration_builder
             ) in self._expectation_configuration_builders:
@@ -97,8 +89,5 @@ class Rule:
 
     @property
     def domain_parameters(self) -> Dict[str, ParameterContainer]:
+        # Returning a copy of the "self._domain_parameters" state variable in order to prevent write-before-read hazard.
         return copy.deepcopy(self._domain_parameters)
-
-    @domain_parameters.setter
-    def domain_parameters(self, domain_parameters: Dict[str, ParameterContainer]):
-        self._domain_parameters = domain_parameters
