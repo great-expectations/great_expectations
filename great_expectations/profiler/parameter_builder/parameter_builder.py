@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from great_expectations.data_context import DataContext
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
-from great_expectations.profiler.rule.rule import Rule
 from great_expectations.validator.validator import Validator
 
 
@@ -32,15 +31,17 @@ class ParameterBuilder(ABC):
     def __init__(
         self,
         parameter_name: str,
-        rule: Rule,
-        domain: Domain,
         validator: Validator,
+        domain: Domain,
+        rule_variables: Optional[ParameterContainer] = None,
+        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         self._parameter_name = parameter_name
-        self._rule = rule
-        self._domain = domain
         self._validator = validator
+        self._domain = domain
+        self._rule_variables = rule_variables
+        self._rule_domain_parameters = rule_domain_parameters
         self._data_context = data_context
 
     def build_parameters(
@@ -64,16 +65,20 @@ class ParameterBuilder(ABC):
         return self._parameter_name
 
     @property
-    def rule(self) -> Rule:
-        return self._rule
+    def validator(self) -> Validator:
+        return self._validator
 
     @property
     def domain(self) -> Domain:
         return self._domain
 
     @property
-    def validator(self) -> Validator:
-        return self._validator
+    def rule_variables(self) -> Optional[ParameterContainer]:
+        return self._rule_variables
+
+    @property
+    def rule_domain_parameters(self) -> Optional[Dict[str, ParameterContainer]]:
+        return self._rule_domain_parameters
 
     @property
     def data_context(self) -> DataContext:

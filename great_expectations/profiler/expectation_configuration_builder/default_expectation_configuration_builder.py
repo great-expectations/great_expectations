@@ -1,10 +1,14 @@
+from typing import Dict, Optional
+
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.domain_builder.util import get_parameter_value
 from great_expectations.profiler.expectation_configuration_builder.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
-from great_expectations.profiler.rule.rule import Rule
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
+)
 
 
 class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
@@ -18,7 +22,11 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self._parameter_name_to_fully_qualified_parameter_name_dict = kwargs
 
     def _build_expectation_configuration(
-        self, rule: Rule, domain: Domain, **kwargs
+        self,
+        domain: Domain,
+        rule_variables: Optional[ParameterContainer] = None,
+        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
+        **kwargs
     ) -> ExpectationConfiguration:
         expectation_kwargs: dict = {}
         parameter_name: str
@@ -30,8 +38,8 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             expectation_kwargs[parameter_name] = get_parameter_value(
                 fully_qualified_parameter_name=fully_qualified_parameter_name,
                 domain=domain,
-                rule_variables=rule.variables,
-                rule_domain_parameters=rule.domain_parameters,
+                rule_variables=rule_variables,
+                rule_domain_parameters=rule_domain_parameters,
             )
 
         expectation_kwargs.update(kwargs)

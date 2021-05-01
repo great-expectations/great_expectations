@@ -14,7 +14,6 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
 )
-from great_expectations.profiler.rule.rule import Rule
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -34,13 +33,14 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         parameter_name: str,
-        rule: Rule,
-        domain: Domain,
         validator: Validator,
+        domain: Domain,
         domain_kwargs: str,
         threshold: Optional[float] = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
+        rule_variables: Optional[ParameterContainer] = None,
+        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -51,11 +51,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             candidate_strings: a list of candidate date format strings that will REPLACE the default
             additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
         """
+
         super().__init__(
             parameter_name=parameter_name,
-            rule=rule,
-            domain=domain,
             validator=validator,
+            domain=domain,
+            rule_variables=rule_variables,
+            rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
         )
 

@@ -14,7 +14,6 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
 )
-from great_expectations.profiler.rule.rule import Rule
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -32,13 +31,14 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     def __init__(
         self,
         parameter_name: str,
-        rule: Rule,
-        domain: Domain,
         validator: Validator,
+        domain: Domain,
         batch_request: BatchRequest,
         metric_name: str,
         metric_value_kwargs: Union[str, dict],
         p_values: List[float],
+        rule_variables: Optional[ParameterContainer] = None,
+        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         """
@@ -55,10 +55,11 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         """
         super().__init__(
             parameter_name=parameter_name,
-            rule=rule,
-            domain=domain,
             validator=validator,
+            domain=domain,
             batch_request=batch_request,
+            rule_variables=rule_variables,
+            rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
         )
 
@@ -91,8 +92,8 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
                 metric_value_kwargs = get_parameter_value(
                     fully_qualified_parameter_name=self._metric_value_kwargs,
                     domain=self.domain,
-                    rule_variables=self.rule.variables,
-                    rule_domain_parameters=self.rule.domain_parameters,
+                    rule_variables=self.rule_variables,
+                    rule_domain_parameters=self.rule_domain_parameters,
                 )
             else:
                 metric_value_kwargs = self._metric_value_kwargs
