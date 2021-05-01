@@ -4,30 +4,29 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 
-
-# TODO: <Alex>ALEX -- build test to ensure that id property and access works for a list of domains of various types.</Alex>
-# noinspection PyPep8Naming
-def test_id_property_of_active_domain(
-    rule_state_with_no_parameters,
-    rule_state_with_parameters,
-    column_Age_structured_type_domain,
-    column_Date_structured_type_domain,
-):
-    assert (
-        rule_state_with_no_parameters.active_domain.id
-        == column_Age_structured_type_domain.id
-    )
-
-    assert (
-        rule_state_with_parameters.active_domain.id
-        == column_Age_structured_type_domain.id
-    )
-
-    rule_state_with_parameters.active_domain = column_Date_structured_type_domain
-    assert (
-        rule_state_with_parameters.active_domain.id
-        == column_Date_structured_type_domain.id
-    )
+#
+# # noinspection PyPep8Naming
+# def test_id_property_of_active_domain(
+#     rule_state_with_no_parameters,
+#     rule_state_with_parameters,
+#     column_Age_structured_type_domain,
+#     column_Date_structured_type_domain,
+# ):
+#     assert (
+#         rule_state_with_no_parameters.active_domain.id
+#         == column_Age_structured_type_domain.id
+#     )
+#
+#     assert (
+#         rule_state_with_parameters.active_domain.id
+#         == column_Age_structured_type_domain.id
+#     )
+#
+#     rule_state_with_parameters.active_domain = column_Date_structured_type_domain
+#     assert (
+#         rule_state_with_parameters.active_domain.id
+#         == column_Date_structured_type_domain.id
+#     )
 
 
 def test_get_parameter_value_invalid_parameter_name(rule_state_with_parameters):
