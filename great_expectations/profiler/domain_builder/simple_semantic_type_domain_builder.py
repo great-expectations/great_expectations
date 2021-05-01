@@ -6,7 +6,7 @@ from great_expectations.profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
 from great_expectations.profiler.domain_builder.domain import Domain
-from great_expectations.profiler.domain_builder.util import (
+from great_expectations.profiler.util import (
     translate_table_column_type_to_semantic_domain_type,
 )
 from great_expectations.validator.validator import MetricConfiguration, Validator

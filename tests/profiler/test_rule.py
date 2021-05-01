@@ -3,10 +3,11 @@ from typing import Any
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.profiler.domain_builder.util import get_parameter_value
-
 
 # noinspection PyPep8Naming
+from great_expectations.profiler.util import get_parameter_value
+
+
 def test_get_parameter_value_invalid_parameter_name(
     rule_with_variables_with_parameters, column_Age_structured_type_domain
 ):

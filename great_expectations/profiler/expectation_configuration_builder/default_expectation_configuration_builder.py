@@ -2,13 +2,13 @@ from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.profiler.domain_builder.domain import Domain
-from great_expectations.profiler.domain_builder.util import get_parameter_value
 from great_expectations.profiler.expectation_configuration_builder.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
+from great_expectations.profiler.util import get_parameter_value
 
 
 class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):

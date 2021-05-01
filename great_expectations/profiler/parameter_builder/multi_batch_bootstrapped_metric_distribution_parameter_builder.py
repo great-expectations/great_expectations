@@ -5,7 +5,6 @@ from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain_types import MetricDomainTypes
 from great_expectations.profiler.domain_builder.domain import Domain
-from great_expectations.profiler.domain_builder.util import get_parameter_value
 from great_expectations.profiler.parameter_builder.multi_batch_parameter_builder import (
     MultiBatchParameterBuilder,
 )
@@ -14,6 +13,7 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     build_parameter_container,
 )
+from great_expectations.profiler.util import get_parameter_value
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
