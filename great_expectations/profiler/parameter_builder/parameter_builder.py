@@ -31,14 +31,14 @@ class ParameterBuilder(ABC):
     def __init__(
         self,
         parameter_name: str,
-        validator: Validator,
-        domain: Domain,
+        # validator: Validator,
+        domain: Domain = None,
         rule_variables: Optional[ParameterContainer] = None,
         rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         self._parameter_name = parameter_name
-        self._validator = validator
+        # self._validator = validator
         self._domain = domain
         self._rule_variables = rule_variables
         self._rule_domain_parameters = rule_domain_parameters
@@ -64,9 +64,9 @@ class ParameterBuilder(ABC):
     def parameter_name(self) -> str:
         return self._parameter_name
 
-    @property
-    def validator(self) -> Validator:
-        return self._validator
+    # @property
+    # def validator(self) -> Validator:
+    #     return self._validator
 
     @property
     def domain(self) -> Domain:

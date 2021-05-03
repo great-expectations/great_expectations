@@ -143,7 +143,8 @@ def build_parameter_container(
         ].split(".")
         parameter_name_root = fully_qualified_parameter_name_as_list[0]
         parameter_value = parameter_value_details_dict["value"]
-        parameter_details = parameter_value_details_dict["details"]
+        # details key is not required for globally defined "variables"
+        parameter_details = parameter_value_details_dict.get("details")
         parameter_node = parameter_container.get_parameter_node(
             parameter_name_root=parameter_name_root
         )
@@ -229,3 +230,26 @@ def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str)
 names must start with $ (e.g., "${fully_qualified_parameter_name}").
 """
         )
+
+
+def build_parameter_container_for_variables(
+    variable_configs: Dict[str, Any]
+) -> ParameterContainer:
+    """
+    Build a ParameterContainer for all of the profiler config variables passed as key value pairs
+    Args:
+        variable_configs: Variable key:value pairs e.g. {"variable_name": variable_value, ...}
+
+    Returns:
+        ParameterContainer containing all variables
+    """
+    variable_values_with_fully_qualified_names: Dict[str, Dict[str, Any]] = {}
+    for variable_config_key, variable_config_value in variable_configs.items():
+        variable_config_key = f"{VARIABLES_KEY}{variable_config_key}"
+        variable_values_with_fully_qualified_names[variable_config_key] = {
+            "value": variable_config_value
+        }
+
+    return build_parameter_container(
+        parameter_values=variable_values_with_fully_qualified_names
+    )

@@ -22,9 +22,9 @@ class MetricParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         parameter_name: str,
-        validator: Validator,
-        domain: Domain,
+        # validator: Validator,
         metric_name: str,
+        domain: Domain = None,
         rule_variables: Optional[ParameterContainer] = None,
         rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = "$domain.domain_kwargs",
@@ -33,7 +33,7 @@ class MetricParameterBuilder(ParameterBuilder):
     ):
         super().__init__(
             parameter_name=parameter_name,
-            validator=validator,
+            # validator=validator,
             domain=domain,
             rule_variables=rule_variables,
             rule_domain_parameters=rule_domain_parameters,
