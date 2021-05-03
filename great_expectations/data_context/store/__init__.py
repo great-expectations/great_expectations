@@ -5,6 +5,7 @@ from .store_backend import (  # isort:skip
     StoreBackend,
     InMemoryStoreBackend,
 )
+from .ge_cloud_store_backend import GeCloudStoreBackend  # isort:skip
 from .tuple_store_backend import (  # isort:skip
     TupleFilesystemStoreBackend,
     TupleGCSStoreBackend,
@@ -23,7 +24,6 @@ from .expectations_store import ExpectationsStore  # isort:skip
 from .validations_store import ValidationsStore  # isort:skip
 from .query_store import SqlAlchemyQueryStore  # isort:skip
 from .html_site_store import HtmlSiteStore  # isort:skip
-from .ge_cloud_store_backend import GeCloudStoreBackend  # isort:skip
 
 
 for module_name, package_name in [
