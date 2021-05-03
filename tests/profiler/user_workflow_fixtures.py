@@ -10,12 +10,17 @@ from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 @pytest.fixture(scope="module")
 def alice_columnar_table_single_batch():
 
+    # TODO: this config specifies a class_name and module_name for the Rule class which is currently not configurable
+    #  please decide whether Rule class is configurable before considering this a finalized configuration.
+
     verbose_profiler_config = """
 variables:
   max_user_id: 999999999999
   min_timestamp: 2004-10-19 10:23:54
 rules:
   my_rule_for_user_ids:
+    class_name: Rule
+    module_name: great_expectations.profiler.rule.rule
     domain_builder:
       class_name: MyCustomSemanticTypeColumnDomainBuilder
       module_name: plugins.profiler.domain_builder.my_custom_semantic_type_column_domain_builder
@@ -44,6 +49,8 @@ rules:
         column: $domain.domain_kwargs.column
         type_: INTEGER
   my_rule_for_timestamps:
+    class_name: Rule
+    module_name: great_expectations.profiler.rule.rule
     domain_builder:
       class_name: SimpleColumnSuffixDomainBuilder
       module_name: great_expectations.profiler.domain_builder.simple_column_suffix_domain_builder
@@ -97,6 +104,8 @@ rules:
               - ### This expectation confirms that the event_ts contains the latest timestamp of all domains
 """
 
+# TODO: This "simplified" configuration has outstanding questions and proposed configurations that should be
+#  answered before it is considered to be a standard configuration.
     simplified_profiler_config = """
 variables:
   max_user_id: 999999999999
