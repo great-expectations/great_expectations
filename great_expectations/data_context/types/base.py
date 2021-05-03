@@ -1691,6 +1691,7 @@ class CheckpointConfig(BaseYamlConfig):
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None
     ):
         self._name = name
         self._config_version = config_version
@@ -1715,6 +1716,7 @@ class CheckpointConfig(BaseYamlConfig):
             self._slack_webhook = slack_webhook
             self._notify_on = notify_on
             self._notify_with = notify_with
+            self._ge_cloud_id = ge_cloud_id
 
         self._module_name = module_name or "great_expectations.checkpoint"
         self._class_name = class_name
@@ -1827,6 +1829,10 @@ class CheckpointConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls):
         return CheckpointConfigSchema
+
+    @property
+    def ge_cloud_id(self):
+        return self._ge_cloud_id
 
     @property
     def name(self):
