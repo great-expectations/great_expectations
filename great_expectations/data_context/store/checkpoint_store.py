@@ -17,6 +17,14 @@ class CheckpointStore(ConfigurationStore):
 
     _configuration_class = CheckpointConfig
 
+    def ge_cloud_response_to_object(self, response):
+        ge_cloud_checkpoint_id = response["data"]["id"]
+        checkpoint_config_json = response["data"]["attributes"]["checkpoint_config"]
+        checkpoint_config_json["ge_cloud_id"] = ge_cloud_checkpoint_id
+        checkpoint_config = self._configuration_class(**self._configuration_class.get_schema_class()().load(
+            checkpoint_config_json))
+        return checkpoint_config
+
     def serialization_self_check(self, pretty_print: bool):
         test_checkpoint_name: str = "test-name-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
