@@ -104,8 +104,8 @@ rules:
               - ### This expectation confirms that the event_ts contains the latest timestamp of all domains
 """
 
-# TODO: This "simplified" configuration has outstanding questions and proposed configurations that should be
-#  answered before it is considered to be a standard configuration.
+    # TODO: This "simplified" configuration has outstanding questions and proposed configurations that should be
+    #  answered before it is considered to be a standard configuration.
     simplified_profiler_config = """
 variables:
   max_user_id: 999999999999
@@ -184,14 +184,19 @@ rules:
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_not_be_null",
-                "kwargs": {"column": "user_id",},
+                "kwargs": {
+                    "column": "user_id",
+                },
                 "meta": {},
             }
         ),
         ExpectationConfiguration(
             **{
                 "expectation_type": "expect_column_values_to_be_of_type",
-                "kwargs": {"column": "user_id", "type_": "INTEGER",},
+                "kwargs": {
+                    "column": "user_id",
+                    "type_": "INTEGER",
+                },
                 "meta": {},
             }
         ),
@@ -221,14 +226,18 @@ rules:
                 ExpectationConfiguration(
                     **{
                         "expectation_type": "expect_column_values_to_be_increasing",
-                        "kwargs": {"column": my_rule_for_timestamps_column_name,},
+                        "kwargs": {
+                            "column": my_rule_for_timestamps_column_name,
+                        },
                         "meta": {},
                     }
                 ),
                 ExpectationConfiguration(
                     **{
                         "expectation_type": "expect_column_values_to_be_dateutil_parseable",
-                        "kwargs": {"column": my_rule_for_timestamps_column_name,},
+                        "kwargs": {
+                            "column": my_rule_for_timestamps_column_name,
+                        },
                         "meta": {},
                     }
                 ),
@@ -267,9 +276,10 @@ rules:
             ]
         )
 
-    expectation_configurations: List[
-        ExpectationConfiguration
-    ] = my_rule_for_user_ids_expectation_configurations + my_rule_for_timestamps_expectation_configurations
+    expectation_configurations: List[ExpectationConfiguration] = (
+        my_rule_for_user_ids_expectation_configurations
+        + my_rule_for_timestamps_expectation_configurations
+    )
     assert len(expectation_configurations) == 18
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
