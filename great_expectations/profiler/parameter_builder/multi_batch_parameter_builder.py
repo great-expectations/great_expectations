@@ -3,14 +3,12 @@ from typing import List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchDefinition, BatchRequest
+from great_expectations.core.batch import BatchRequest
+from great_expectations.profiler.domain_builder.domain import Domain
+from great_expectations.profiler.domain_builder.util import get_batch_ids
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.profiler.parameter_builder.parameter_container import (
-    ParameterContainer,
-)
-from great_expectations.profiler.rule.rule_state import RuleState
 from great_expectations.validator.validator import Validator
 
 
@@ -25,9 +23,12 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
 
     def __init__(
         self,
-        *,
         parameter_name: str,
+        validator: Validator,
+        domain: Domain,
         batch_request: BatchRequest,
+        rule_variables: Optional[ParameterContainer] = None,
+        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         if data_context is None:
@@ -35,29 +36,20 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
                 message=f"MultiBatchParameterBuilder requires a data_context, but none was provided."
             )
 
-        super().__init__(parameter_name=parameter_name, data_context=data_context)
-
-        self._batch_request = batch_request
-
-    def build_parameters(
-        self,
-        *,
-        rule_state: Optional[RuleState] = None,
-        validator: Optional[Validator] = None,
-        batch_ids: Optional[List[str]] = None,
-        **kwargs,
-    ) -> ParameterContainer:
-        """Build the parameters for the specified domain_kwargs."""
-        if batch_ids is None:
-            batch_ids = self._get_batch_ids(self._batch_request)
-
-        return self._build_parameters(
-            rule_state=rule_state, validator=validator, batch_ids=batch_ids, **kwargs
+        super().__init__(
+            parameter_name=parameter_name,
+            validator=validator,
+            domain=domain,
+            rule_variables=rule_variables,
+            rule_domain_parameters=rule_domain_parameters,
+            data_context=data_context,
         )
 
-    def _get_batch_ids(self, batch_request: BatchRequest) -> List[str]:
-        datasource_name: str = batch_request.datasource_name
-        batch_definitions: List[BatchDefinition] = self._data_context.get_datasource(
-            datasource_name=datasource_name
-        ).get_batch_definition_list_from_batch_request(batch_request=batch_request)
-        return [batch_definition.id for batch_definition in batch_definitions]
+        self._batch_request = batch_request
+        self._batch_ids = get_batch_ids(
+            data_context=self.data_context, batch_request=self._batch_request
+        )
+
+    @property
+    def batch_ids(self) -> List[str]:
+        return self._batch_ids

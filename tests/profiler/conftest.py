@@ -7,14 +7,12 @@ from great_expectations.core.domain_types import (
     SemanticDomainTypes,
     StructuredDomainTypes,
 )
-
-# TODO: <Alex>ALEX -- build test to ensure that id property and access works for a list of domains of various types.</Alex>
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.parameter_builder.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
-from great_expectations.profiler.rule.rule_state import RuleState
+from great_expectations.profiler.rule.rule import Rule
 
 
 # noinspection PyPep8Naming
@@ -184,39 +182,30 @@ def parameter_values_nine_parameters_multiple_depths():
 
 # noinspection PyPep8Naming
 @pytest.fixture
-def rule_state_with_no_parameters(
-    column_Age_structured_type_domain, column_Date_structured_type_domain
-):
-    """Simple rule_state with one domain, currently set to active"""
-    return RuleState(
-        active_domain=column_Age_structured_type_domain,
-        domains=[
-            column_Age_structured_type_domain,
-            column_Date_structured_type_domain,
-        ],
-        parameters={},
+def rule_without_variables_without_parameters():
+    rule: Rule = Rule(
+        name="rule_with_no_variables_no_parameters",
+        domain_builder=None,
+        parameter_builders=None,
+        expectation_configuration_builders=None,
+        variables=None,
     )
+    return rule
 
 
 # noinspection PyPep8Naming
 @pytest.fixture
-def rule_state_with_parameters(
+def rule_with_variables_with_parameters(
     column_Age_structured_type_domain,
     column_Date_structured_type_domain,
     single_part_name_parameter_container,
     multi_part_name_parameter_container,
 ):
-    """Simple rule_state with one domain, currently set to active"""
-    return RuleState(
-        active_domain=column_Age_structured_type_domain,
-        domains=[
-            column_Age_structured_type_domain,
-            column_Date_structured_type_domain,
-        ],
-        parameters={
-            column_Age_structured_type_domain.id: single_part_name_parameter_container,
-            column_Date_structured_type_domain.id: multi_part_name_parameter_container,
-        },
+    rule: Rule = Rule(
+        name="rule_with_variables_with_parameters",
+        domain_builder=None,
+        parameter_builders=None,
+        expectation_configuration_builders=None,
         variables=ParameterContainer(
             parameter_nodes={
                 "false_positive_threshold": ParameterNode(
@@ -229,3 +218,8 @@ def rule_state_with_parameters(
             }
         ),
     )
+    rule._domain_parameters = {
+        column_Age_structured_type_domain.id: single_part_name_parameter_container,
+        column_Date_structured_type_domain.id: multi_part_name_parameter_container,
+    }
+    return rule

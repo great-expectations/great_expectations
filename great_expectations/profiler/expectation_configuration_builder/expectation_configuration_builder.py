@@ -1,24 +1,34 @@
 from abc import ABC, abstractmethod
+from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.profiler.rule.rule_state import RuleState
+from great_expectations.profiler.domain_builder.domain import Domain
+from great_expectations.profiler.parameter_builder.parameter_container import (
+    ParameterContainer,
+)
 
 
 class ExpectationConfigurationBuilder(ABC):
     def build_expectation_configuration(
-        self, rule_state: RuleState, **kwargs
+        self,
+        domain: Domain,
+        rule_variables: Optional[ParameterContainer] = None,
+        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
+        **kwargs
     ) -> ExpectationConfiguration:
-        """
-        Calls the implemented build_configuration method of a concrete subclass
-        args
-            :param rule_state: An object keeping track of the state information necessary for rule validation, such as domain,
-                metric parameters, and necessary variables
-        :return: Built Configuration
-        """
-        return self._build_expectation_configuration(rule_state=rule_state, **kwargs)
+        return self._build_expectation_configuration(
+            domain=domain,
+            rule_variables=rule_variables,
+            rule_domain_parameters=rule_domain_parameters,
+            **kwargs
+        )
 
     @abstractmethod
     def _build_expectation_configuration(
-        self, rule_state: RuleState, **kwargs
+        self,
+        domain: Domain,
+        rule_variables: Optional[ParameterContainer] = None,
+        rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
+        **kwargs
     ) -> ExpectationConfiguration:
         pass
