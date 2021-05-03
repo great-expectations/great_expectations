@@ -116,6 +116,16 @@ class Store:
     def get(self, key):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
+        elif self.store_backend.__class__.__name__ == "GeCloudStoreBackend":
+            self._validate_key(key)
+            value = self._store_backend.get(self.key_to_tuple(key))
+            if value:
+                if getattr(self, "ge_cloud_response_to_object"):
+                    return self.ge_cloud_response_to_object(response=value)
+                else:
+                    return value
+            else:
+                return None
         else:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
@@ -127,6 +137,16 @@ class Store:
     def set(self, key, value):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.set(key, value)
+        elif self.store_backend.__class__.__name__ == "GeCloudStoreBackend":
+            # skip serialization
+            self._validate_key(key)
+            response = self._store_backend.set(
+                self.key_to_tuple(key), value
+            )
+            if getattr(self, "ge_cloud_response_to_object"):
+                return self.ge_cloud_response_to_object(response=response)
+            else:
+                return response
         else:
             self._validate_key(key)
             return self._store_backend.set(
