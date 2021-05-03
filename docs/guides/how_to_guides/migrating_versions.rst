@@ -26,9 +26,9 @@ The 0.13 major release of Great Expectations introduced a group of new features 
 
 0.13.x releases are compatible with both versions of the API. V3 API is currently marked as experimental.
 
-We are actively working on incorporating user feedback, documenting the new V3 API, and making the CLI work with it.
+We are actively working on incorporating user feedback, documenting the new V3 API, and making the CLI work with it. **You will notice tabs for V2 (Batch Kwargs) and V3 (Batch Request) API throughout the documentation** that will show the differences for each API.
 
-Here are our current recommendations for choosing between V2 and V3 APIs:
+**Here are our current recommendations for choosing between V2 and V3 APIs:**
 
 * Always install the latest 0.13.x release in order to keep up to date with various enhancements and bug fixes.
 
@@ -51,7 +51,7 @@ project directory, run:
 
     great_expectations project check-config
 
-If using the v3 (Batch Request) Great Expectations API, use the ``--v3-api`` flag:
+If using the V3 (Batch Request) Great Expectations API, use the ``--v3-api`` flag to run the CLI command:
 
 .. code-block:: bash
 
@@ -71,7 +71,10 @@ in your source control system already, right? ;-)
 Upgrading to 0.13.x
 *************************
 
-The 0.13.8 release introduces a formal `CheckpointStore`, which is a type of a `ConfigurationStore` that allows any of the supported `StoreBackend` alternatives to be specified for the various configurable components of Great Expectations.  With `CheckpointStore`, developers can save their `Checkpoint` configuration on the local filesystem or in various cloud storage services.
+The 0.13.8 release introduces a formal ``CheckpointStore``, which is a type of a ``ConfigurationStore`` that allows any
+of the supported ``StoreBackend`` alternatives to be specified for the various configurable components of Great
+Expectations.  With ``CheckpointStore``, developers can save their ``Checkpoint`` configuration on the local filesystem
+or in various cloud storage services.
 
 The migration of Great Expectations from 0.12.x to 0.13.8 is seamless.  Simply execute:
 
@@ -80,7 +83,8 @@ The migration of Great Expectations from 0.12.x to 0.13.8 is seamless.  Simply e
     great_expectations project upgrade
 
 If you created any Checkpoints in the previous versions, they will become managed under the
-auspices of the `CheckpointStore` with its `StoreBackend` pointing to the same `checkpoints` directory in your Great Expectations installation directory as was configured prior to the upgrade.
+auspices of the ``CheckpointStore`` with its ``StoreBackend`` pointing to the same ``checkpoints`` directory in your
+Great Expectations project directory as was configured prior to the upgrade.
 
 
 .. _upgrading_to_0.12:
@@ -95,14 +99,25 @@ For example, using the old API:
 
 .. code-block:: python
 
-    remove_expectation(expectation_type="expect_column_values_to_be_in_set", column="city", expectation_kwargs={"value_set": ["New York","London","Tokyo"]})
+    remove_expectation(
+        expectation_type="expect_column_values_to_be_in_set",
+        column="city",
+        expectation_kwargs={"value_set": ["New York","London","Tokyo"]}
+    )
 
 
 Using the new API:
 
 .. code-block:: python
 
-    remove_expectation(ExpectationConfiguration(expectation_type="expect_column_values_to_be_in_set", column="city", expectation_kwargs={"column": "city", "value_set": ["New York","London","Tokyo"]}), match_type="success")
+    remove_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            column="city",
+            expectation_kwargs={"column": "city", "value_set": ["New York","London","Tokyo"]}
+        ),
+        match_type="success"
+    )
 
 
 .. _upgrading_to_0.11:
