@@ -3,7 +3,7 @@ title: My data is in a database
 ---
 
 Great! GE supports the following Databases:
-- Postgres
+- [Postgres](#my-data-is-in-postgres)
 - Sqlite
 - Snowflake
 - MsSQL
@@ -11,7 +11,7 @@ Great! GE supports the following Databases:
 - Oracle
 
 
-## My Data is in .. Postgres
+## My Data is in postgres
 
 ### First make sure you have the necessary pre-requisites
 
@@ -20,17 +20,22 @@ You will need
 2. required packages
 
 There are two ways to add credentials :
-- [connection_string](some_document)\
-- [credentials](some_document)
+- connection_string (link tbd)
+- credentials (link tbd)
 
 Make sure you have pre-reqs:
-```python
-pip install sqlalchemy
+```console
+pip install sqlalchemy psycopg2
 ```
 
 ### Here is your configuration
 
 Great here is an example of your configuration:
 
-```python file=../../../../integration/code/query_postgres_runtime_data_connector.py#L11-L25
+```python file=../../../../integration/code/query_postgres_runtime_data_connector.py#L17-L31
+```
+
+Here is an example of loading a batch from a query.
+
+```python file=../../../../integration/code/query_postgres_runtime_data_connector.py#L36-L43
 ```
