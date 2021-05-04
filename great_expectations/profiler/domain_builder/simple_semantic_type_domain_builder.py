@@ -1,4 +1,4 @@
-from typing import Iterable, List, Optional, Union
+from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.domain_types import MetricDomainTypes, SemanticDomainTypes
@@ -6,8 +6,12 @@ from great_expectations.profiler.domain_builder.column_domain_builder import (
     ColumnDomainBuilder,
 )
 from great_expectations.profiler.domain_builder.domain import Domain
+from great_expectations.profiler.domain_builder.inferred_semantic_domain_type import (
+    InferredSemanticDomainType,
+)
 from great_expectations.profiler.util import (
-    infer_table_column_type_to_semantic_domain_type,
+    infer_semantic_domain_type_from_table_column_type,
+    parse_semantic_domain_type_argument,
 )
 from great_expectations.validator.validator import MetricConfiguration, Validator
 
@@ -17,7 +21,12 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder utilizes a "best-effort" semantic interpretation of ("storage") columns of a table.
     """
 
-    def __init__(self, semantic_types: Optional[List[str]] = None):
+    def __init__(
+        self,
+        semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        ] = None,
+    ):
         if semantic_types is None:
             semantic_types = []
         self._semantic_types = semantic_types
@@ -39,28 +48,17 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
             )
 
         config: dict = kwargs
-        semantic_types: Union[str, Iterable, List[str]] = config.get("semantic_types")
-        semantic_type: str
+        semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        ] = config.get("semantic_types")
         if semantic_types is None:
             semantic_types = self._semantic_types
-        elif isinstance(semantic_types, str):
-            semantic_types = [
-                SemanticDomainTypes[semantic_type]
-                for semantic_type in [semantic_types]
-                if SemanticDomainTypes.has_member_key(key=semantic_type)
-            ]
-        elif isinstance(semantic_types, (Iterable, List)):
-            semantic_types = [
-                SemanticDomainTypes[semantic_type]
-                for semantic_type in semantic_types
-                if SemanticDomainTypes.has_member_key(key=semantic_type)
-            ]
         else:
-            raise ValueError(
-                "Unrecognized semantic_types directive -- must be a list or a string."
+            semantic_types = parse_semantic_domain_type_argument(
+                semantic_types=semantic_types
             )
 
-        column_names: List[str] = validator.get_metric(
+        table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
                 metric_domain_kwargs={},
@@ -70,23 +68,26 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         )
         domains: List[Domain] = []
         column_name: str
-        # A semantic type is distinguished from the column storage type;
-        # An example of storage type would be "integer".  The semantic type would be "id".
-        semantic_column_type: str
-        for column_name in column_names:
-            semantic_column_type: SemanticDomainTypes = (
-                infer_table_column_type_to_semantic_domain_type(
+        # A semantic type is distinguished from the structured column type;
+        # An example structured column type would be "integer".  The inferred semantic type would be "id".
+        inferred_semantic_domain_type: InferredSemanticDomainType
+        semantic_domain_type: SemanticDomainTypes
+        for column_name in table_column_names:
+            inferred_semantic_domain_type = (
+                infer_semantic_domain_type_from_table_column_type(
                     validator=validator, column_name=column_name
                 )
             )
-            if semantic_column_type in semantic_types:
+            semantic_domain_type = inferred_semantic_domain_type.semantic_domain_type
+            # InferredSemanticDomainType also contains the "details" property capturing metadata about the inference.
+            if semantic_domain_type in semantic_types:
                 domains.append(
                     Domain(
                         domain_kwargs={
                             "column": column_name,
                             "batch_id": validator.active_batch_id,
                         },
-                        domain_type=semantic_column_type,
+                        domain_type=semantic_domain_type,
                     )
                 )
 

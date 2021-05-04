@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -6,6 +6,9 @@ from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.domain_types import SemanticDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
 from great_expectations.profiler.domain_builder.domain import Domain
+from great_expectations.profiler.domain_builder.inferred_semantic_domain_type import (
+    InferredSemanticDomainType,
+)
 from great_expectations.profiler.parameter_builder.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     DOMAIN_KWARGS_PARAMETER_NAME,
@@ -18,9 +21,9 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 
-def infer_table_column_type_to_semantic_domain_type(
+def infer_semantic_domain_type_from_table_column_type(
     validator: Validator, column_name: str
-) -> SemanticDomainTypes:
+) -> InferredSemanticDomainType:
     # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
     column_types_dict_list: List[Dict[str, Any]] = list(
         filter(
@@ -91,7 +94,57 @@ information.  Please ensure that the specified column name refers to exactly one
     else:
         semantic_column_type = SemanticDomainTypes.UNKNOWN
 
-    return semantic_column_type
+    inferred_semantic_column_type: InferredSemanticDomainType = (
+        InferredSemanticDomainType(
+            semantic_domain_type=semantic_column_type,
+            details={
+                "algorithm_type": "deterministic",
+                "mechanism": "lookup_table",
+                "source": "great_expectations.profile.base.ProfilerTypeMapping",
+            },
+        )
+    )
+
+    return inferred_semantic_column_type
+
+
+def parse_semantic_domain_type_argument(
+    semantic_types: Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ] = None
+) -> List[SemanticDomainTypes]:
+    if semantic_types is None:
+        return []
+
+    semantic_type: Union[str, SemanticDomainTypes]
+    if isinstance(semantic_types, str):
+        return [
+            SemanticDomainTypes[semantic_type]
+            for semantic_type in [semantic_types]
+            if SemanticDomainTypes.has_member_key(key=semantic_type)
+        ]
+    if isinstance(semantic_types, SemanticDomainTypes):
+        return [semantic_type for semantic_type in [semantic_types]]
+    elif isinstance(semantic_types, List):
+        if all([isinstance(semantic_type, str) for semantic_type in semantic_types]):
+            return [
+                SemanticDomainTypes[semantic_type]
+                for semantic_type in semantic_types
+                if SemanticDomainTypes.has_member_key(key=semantic_type)
+            ]
+        elif all(
+            [
+                isinstance(semantic_type, SemanticDomainTypes)
+                for semantic_type in semantic_types
+            ]
+        ):
+            return [semantic_type for semantic_type in semantic_types]
+        else:
+            raise ValueError(
+                "All elements in semantic_types list must be either of str or SemanticDomainTypes type."
+            )
+    else:
+        raise ValueError("Unrecognized semantic_types directive.")
 
 
 def get_parameter_value(
