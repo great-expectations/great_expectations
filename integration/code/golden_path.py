@@ -8,11 +8,8 @@ batch = context.get_batch(
         data_connector_name="monthly",
         data_asset_name="yellow",
         data_connector_query={
-            "batch_filter_parameters": {
-                "year": "2019",
-                "month": "02"
-            }
-        }
+            "batch_filter_parameters": {"year": "2019", "month": "02"}
+        },
     )
 )
 
