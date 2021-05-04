@@ -23,6 +23,13 @@ integration_test_matrix = [
         "data_dir": "integration/fixtures/test_data",
         "user_flow_script": "integration/code/path_filesystem_runtime_data_connector.py",
     },
+    {
+        "name": "postgres_runtime_golden_path",
+        "base_dir": file_relative_path(__file__, "../../"),
+        "data_context_dir": "integration/fixtures/runtime_data_taxi_monthly/great_expectations",
+        #"data_dir": "integration/fixtures/test_data",
+        "user_flow_script": "integration/code/query_postgres_runtime_data_connector.py",
+    },
 ]
 
 
@@ -57,13 +64,14 @@ def test_docs(test_configuration, tmp_path):
             test_context_dir,
         )
 
-        # Test Data
-        source_data_dir = os.path.join(base_dir, test_configuration.get("data_dir"))
-        test_data_dir = os.path.join(tmp_path, "test_data")
-        shutil.copytree(
-            source_data_dir,
-            test_data_dir,
-        )
+        if test_configuration.get("data_dir") is not None:
+            # Test Data
+            source_data_dir = os.path.join(base_dir, test_configuration.get("data_dir"))
+            test_data_dir = os.path.join(tmp_path, "test_data")
+            shutil.copytree(
+                source_data_dir,
+                test_data_dir,
+            )
 
         # UAT Script
         script_source = os.path.join(

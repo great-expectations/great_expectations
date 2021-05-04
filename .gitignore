@@ -79,6 +79,7 @@ instance/
 # Scrapy stuff:
 .scrapy
 
+#<WILL> IS THIS SOMETHING?
 # Sphinx documentation
 docs/_build/
 
