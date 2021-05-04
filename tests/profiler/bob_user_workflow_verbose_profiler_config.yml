@@ -1,3 +1,5 @@
+# Note the call to Profiler.profile() takes multiple batches
+# Unless filtered / specified this list of batches will be used for all metrics/parameters
 variables:
   # TODO: Do we plan to support lists or mappings in variables?
 #  vendor_ids:
@@ -6,12 +8,9 @@ variables:
 #    - 4
   max_vendor_id: 4
   max_amount: 99999
-# Note the call to Profiler.profile() takes multiple batches
-# Unless filtered / specified this list of batches will be used for all metrics/parameters
+  false_positive_threshold: 0.01
 rules:
   my_rule_for_ids:
-    # TODO: this config specifies a class_name and module_name for the Rule class which is currently not configurable
-    #  please decide whether Rule class is configurable before considering this a finalized configuration.
     class_name: Rule
     module_name: great_expectations.profiler.rule.rule
     domain_builder:
@@ -36,8 +35,8 @@ rules:
         # TODO: How exactly to reference the value_set?
         value_set: $my_value_set_for_ids.counts
 
-    # expect_column_values_to_be_between for each of the _amount columns
   my_rule_for_amounts:
+    # expect_column_values_to_be_between for each of the _amount columns
     class_name: Rule
     module_name: great_expectations.profiler.rule.rule
     domain_builder:
@@ -54,103 +53,130 @@ rules:
         min_value: 0
         max_value: $variables.max_user_id
         column: $domain.domain_kwargs.column
-
   my_rule_for_numeric_data:
     class_name: Rule
     module_name: great_expectations.profiler.rule.rule
     domain_builder:
-      # TODO: Change this to semantic type numeric
-      class_name: SimpleColumnSuffixDomainBuilder
-      module_name: great_expectations.profiler.domain_builder.simple_column_suffix_domain_builder
-      column_name_suffixes:
-        - _amount
-    # These parameter_builders are from https://github.com/superconductive/design/blob/main/docs/20201203_profiling.md
-#    parameter_builders:
-#      - parameter_name: mean
-#        class_name: MetricParameterBuilder
-#        metric_name: column.mean
-#        metric_domain_kwargs: $domain.domain_kwargs
-#      - parameter_name: min
-#        class_name: MetricParameterBuilder
-#        metric_name: column.min
-#        metric_domain_kwargs: $domain.domain_kwargs
-#      - parameter_name: false_positive_threshold_min
-#        class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
-#        batch_request: # this should be unioned with the rest of the batch request from the call to profile
-#          partition_request:
-#            # NOTE: interpreted like python slices e.g. most recent 10 batches
-#            partition_index: "-10:"
-#        metric_configuration:
-#          metric_name: column.min
-#          metric_domain_kwargs: $domain.domain_kwargs
-#        p_values:
-#          min_value: $variables.false_positive_threshold
-#          max_value: 1.0
-#      - parameter_name: quantile_ranges
-#        class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
-#        batch_request:
-#          partition_request:
-#            partition_index: "-10:"
-#        metric_configuration:
-#          metric_name: column.quantile_values
-#          metric_domain_kwargs: $domain.domain_kwargs
-#          metric_value_kwargs:
-#            quantiles:
-#              - 0.05
-#              - 0.25
-#              - 0.50
-#              - 0.75
-#              - 0.95
-#        p_values:
-#          min_value: ($false_positive_threshold / 2)
-#          max_value: 1 - ($false_positive_threshold / 2)
-#      - parameter_name: max
-#        class_name: MetricParameterBuilder
-#        metric_name: column.max
-#        metric_domain_kwargs: $domain.domain_kwargs
-#      - parameter_name: quantiles
-#        class_name: MetricParameterBuilder
-#        metric_name: column.quantile_values
-#        metric_domain_kwargs: $domain.domain_kwargs
-#        metric_value_kwargs:
-#          quantiles:
-#            - 0.05
-#            - 0.25
-#            - 0.50
-#            - 0.75
-#            - 0.95
-#      expectation_configuration_builders:
-#        - expectation: expect_column_min_to_be_between
-#          min_value: $false_positive_threshold_min.min_value
-#          max_value: $false_positive_threshold_min.max_value
-#        - expectation: expect_column_quantile_values_to_be_between
-#          quantiles:
-#            - 0.05
-#            - 0.25
-#            - 0.50
-#            - 0.75
-#            - 0.95
-#          value_ranges: $quantile_ranges
-#        - expectation: expect_column_max_to_be_between
-#          min_value: 0.9 * $max
-#          max_value: 1.1 * $max
-#        - expectation: expect_column_median_to_be_between
-#          min_value: # in this example, the resulting configuration is not a value, but an evaluation parameter refering to a metric that must be calculated for each validation to validation of the configuration
-#            "$PARAMETER": 0.9 *
-#              metric_name: column.median
-#              metric_batch_kwargs:
-#                batch_request:
-#                  partition_request:
-#                    partition_index: -1
-#                column: $domain.domain_kwargs.column
-#          max_value: # in this example, the resulting configuration is not a value, but an evaluation parameter refering to a metric that must be calculated for each validation to validation of the configuration
-#            "$PARAMETER": 1.1 *
-#              metric_name: column.median
-#              metric_batch_kwargs:
-#                batch_request:
-#                  partition_request:
-#                    partition_index: -1
-#                column: $domain.domain_kwargs.column
+      class_name: SimpleSemanticTypeColumnDomainBuilder
+      module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
+      semantic_types:
+        - numeric
+    parameter_builders:
+      # NOTE: These parameter_builders are from https://github.com/superconductive/design/blob/main/docs/20201203_profiling.md
+      # NOTE: my_column_mean and my_column_min are added as parameters but unused in expectation_configuration_builders - this is OK
+      # TODO: Should we warn users if there are unused ParameterBuilders in a Profiler configuration?
+      - parameter_name: my_column_mean
+        class_name: MetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        metric_name: column.mean
+        metric_domain_kwargs: $domain.domain_kwargs
+      - parameter_name: my_column_min
+        class_name: MetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        metric_name: column.min
+        metric_domain_kwargs: $domain.domain_kwargs
+      - parameter_name: my_column_max
+        class_name: MetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        metric_name: column.max
+        metric_domain_kwargs: $domain.domain_kwargs
+
+        # TODO: I don't totally understand the following parameters, and there is likely work to be done to make MultiBatchBootstrappedMetricDistributionParameterBuilder work as intended.
+        # for example,
+        # 1. why does false_positive_threshold_min have the metric_configuration
+        # mapping instead of passing metric_name and metric_domain_kwargs (this can be changed easily)
+        # 2. MultiBatchBootstrappedMetricDistributionParameterBuilder does not have a metric_domain_kwargs param
+        # 3. MultiBatchBootstrappedMetricDistributionParameterBuilder takes a list of batch_ids and a batch_request. The way that batch_ids seems to work in other areas is as a filter (e.g. the batch_request returns some batches and we filter to only those contained in the list batch_ids, if batch_ids is None then we use all batches) whereas here it seems meant to add to the batches from the batch_request (maybe just a param name change to clarify e.g. `additional_batch_ids`)
+
+      - parameter_name: false_positive_threshold_min
+        class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
+        # TODO: Not sure I understand the comment here - why would we want to add the batches from the call to profile? Wouldn't we expect that this parameter is calculated just from the explicitly defined batch_request below? (if this is useful, maybe there are two modes)
+        batch_request: # this should be unioned with the rest of the batch request from the call to profile
+          partition_request:
+            # NOTE: interpreted like python slices e.g. most recent 10 batches
+            partition_index: "-10:"
+        metric_configuration:
+          metric_name: column.min
+          metric_domain_kwargs: $domain.domain_kwargs
+        p_values:
+          min_value: $variables.false_positive_threshold
+          max_value: 1.0
+
+      - parameter_name: quantile_ranges
+        class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
+        batch_request:
+          partition_request:
+            partition_index: "-10:"
+        metric_configuration:
+          metric_name: column.quantile_values
+          metric_domain_kwargs: $domain.domain_kwargs
+          metric_value_kwargs:
+            quantiles:
+              - 0.05
+              - 0.25
+              - 0.50
+              - 0.75
+              - 0.95
+        p_values:
+          min_value: ($variables.false_positive_threshold / 2)
+          max_value: 1 - ($variables.false_positive_threshold / 2)
+
+      - parameter_name: quantiles
+        class_name: MetricParameterBuilder
+        module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
+        metric_name: column.quantile_values
+        metric_domain_kwargs: $domain.domain_kwargs
+        metric_value_kwargs:
+          quantiles:
+            - 0.05
+            - 0.25
+            - 0.50
+            - 0.75
+            - 0.95
+    expectation_configuration_builders:
+      - expectation_type: expect_column_min_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        min_value: $false_positive_threshold_min.parameter.min_value
+        max_value: $false_positive_threshold_min.parameter.max_value
+      - expectation_type: expect_column_quantile_values_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        quantiles:
+          - 0.05
+          - 0.25
+          - 0.50
+          - 0.75
+          - 0.95
+        # TODO: Is this the way to refer to the value_ranges? Should it not be $quantile_ranges.parameter.ranges to be consistent with other parameters?
+        value_ranges: $quantile_ranges
+      - expectation_type: expect_column_max_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        min_value: 0.9 * $my_column_max.parameter.max
+        max_value: 1.1 * $my_column_max.parameter.max
+      - expectation_type: expect_column_median_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
+        # TODO: Below failing yaml linter
+#        min_value: # in this example, the resulting configuration is not a value, but an evaluation parameter referring to a metric that must be calculated for each validation to validation of the configuration
+#          "$PARAMETER": 0.9 *
+#            metric_name: column.median
+#            metric_batch_kwargs:
+#              batch_request:
+#                partition_request:
+#                  partition_index: -1
+#              column: $domain.domain_kwargs.column
+#        max_value: # in this example, the resulting configuration is not a value, but an evaluation parameter referring to a metric that must be calculated for each validation to validation of the configuration
+#          "$PARAMETER": 1.1 *
+#            metric_name: column.median
+#            metric_batch_kwargs:
+#              batch_request:
+#                partition_request:
+#                  partition_index: -1
+#              column: $domain.domain_kwargs.column
 
 
 
