@@ -27,7 +27,7 @@ integration_test_matrix = [
         "name": "postgres_runtime_golden_path",
         "base_dir": file_relative_path(__file__, "../../"),
         "data_context_dir": "integration/fixtures/runtime_data_taxi_monthly/great_expectations",
-        #"data_dir": "integration/fixtures/test_data",
+        # "data_dir": "integration/fixtures/test_data",
         "user_flow_script": "integration/code/query_postgres_runtime_data_connector.py",
     },
 ]

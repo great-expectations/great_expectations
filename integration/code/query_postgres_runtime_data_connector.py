@@ -5,7 +5,7 @@ from great_expectations.core.batch import Batch
 YOUR_CREDENTIALS_HERE = """postgresql+psycopg2://postgres:@localhost/test_ci"""
 
 context = ge.get_context()
-#context = ge.DataContext(context_root_dir="../fixtures/runtime_data_taxi_monthly/great_expectations")
+# context = ge.DataContext(context_root_dir="../fixtures/runtime_data_taxi_monthly/great_expectations")
 
 # with a connection_string
 config = """
@@ -32,9 +32,7 @@ batch_request = ge.core.batch.RuntimeBatchRequest(
     datasource_name="my_postgres_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data_asset for you
-    runtime_parameters={
-        "query": "SELECT * FROM taxi_data LIMIT 5;"
-    },
+    runtime_parameters={"query": "SELECT * FROM taxi_data LIMIT 5;"},
     batch_identifiers={"default_identifier_name": "something_something"},
 )
 
@@ -42,4 +40,6 @@ batch_request = ge.core.batch.RuntimeBatchRequest(
 batch = context.get_batch(batch_request=batch_request)
 assert isinstance(batch, Batch)
 batch_data = batch.data
-assert isinstance(batch_data, ge.execution_engine.sqlalchemy_batch_data.SqlAlchemyBatchData)
+assert isinstance(
+    batch_data, ge.execution_engine.sqlalchemy_batch_data.SqlAlchemyBatchData
+)
