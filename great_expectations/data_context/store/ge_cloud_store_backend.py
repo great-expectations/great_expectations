@@ -22,6 +22,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         ge_cloud_base_url,
         ge_cloud_resource_name,
         ge_cloud_resource_type,
+        ge_cloud_credentials,
         suppress_store_backend_id=False,
         manually_initialize_store_backend_id: str = "",
         store_name=None,
@@ -35,6 +36,7 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         self._ge_cloud_base_url = ge_cloud_base_url
         self._ge_cloud_resource_name = ge_cloud_resource_name
         self._ge_cloud_resource_type = ge_cloud_resource_type
+        self._ge_cloud_credentials = ge_cloud_credentials
 
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
@@ -58,7 +60,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _get(self, key):
         ge_cloud_url = self.get_url_for_key(key=key)
         headers = {
-            "Content-Type": "application/vnd.api+json"
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {self.ge_cloud_credentials['access_token']}"
         }
         response = requests.get(ge_cloud_url, headers=headers)
         return response.json()
@@ -78,10 +81,12 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             }
         }
         headers = {
-            "Content-Type": "application/vnd.api+json"
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {self.ge_cloud_credentials['access_token']}"
         }
-        url = urljoin(self.ge_cloud_base_url, self.ge_cloud_resource_name)
-
+        url = urljoin(self.ge_cloud_base_url, f"accounts/"
+                                              f"{self.ge_cloud_credentials['account_id']}/"
+                                              f"{self.ge_cloud_resource_name}")
         try:
             response = requests.post(url, json=data, headers=headers)
             return response.json()
@@ -101,12 +106,16 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def ge_cloud_resource_type(self):
         return self._ge_cloud_resource_type
 
+    @property
+    def ge_cloud_credentials(self):
+        return self._ge_cloud_credentials
+
     def list_keys(self):
         pass
 
     def get_url_for_key(self, key, protocol=None):
         ge_cloud_id = key[0]
-        url = urljoin(self.ge_cloud_base_url, f"{self.ge_cloud_resource_name}/{ge_cloud_id}")
+        url = urljoin(self.ge_cloud_base_url, f"accounts/{self.ge_cloud_credentials['account_id']}/{self.ge_cloud_resource_name}/{ge_cloud_id}")
         return url
 
     def remove_key(self, key):
