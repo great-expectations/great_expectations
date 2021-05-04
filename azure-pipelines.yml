@@ -328,7 +328,7 @@ stages:
             displayName: 'pytest'
 
   - stage: docusaurus-tests
-    dependsOn: [scope_check, lint]
+    # dependsOn: [scope_check, lint]
     pool:
       vmImage: 'ubuntu-latest'
 
