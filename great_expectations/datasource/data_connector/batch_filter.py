@@ -1,8 +1,9 @@
 import itertools
 import logging
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.util import is_int
 
@@ -50,9 +51,9 @@ def build_batch_filter(
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
-    batch_filter_parameters: Optional[dict] = data_connector_query_dict.get(
-        "batch_filter_parameters"
-    )
+    batch_filter_parameters: Optional[
+        Union[dict, IDDict]
+    ] = data_connector_query_dict.get("batch_filter_parameters")
     if batch_filter_parameters:
         if not isinstance(batch_filter_parameters, dict):
             raise ge_exceptions.BatchFilterError(
@@ -64,8 +65,7 @@ def build_batch_filter(
             raise ge_exceptions.BatchFilterError(
                 'All batch_filter_parameters keys must strings (Python "str").'
             )
-    if batch_filter_parameters is not None:
-        batch_filter_parameters: IDDict = IDDict(batch_filter_parameters)
+        batch_filter_parameters = IDDict(batch_filter_parameters)
     index: Optional[
         Union[int, list, tuple, slice, str]
     ] = data_connector_query_dict.get("index")
@@ -167,7 +167,9 @@ class BatchFilter:
         }
         return str(doc_fields_dict)
 
-    def select_from_data_connector_query(self, batch_definition_list=None):
+    def select_from_data_connector_query(
+        self, batch_definition_list: Optional[List[BatchDefinition]] = None
+    ) -> List[BatchDefinition]:
         if batch_definition_list is None:
             return []
         filter_function: Callable
@@ -175,6 +177,7 @@ class BatchFilter:
             filter_function = self.custom_filter_function
         else:
             filter_function = self.best_effort_batch_definition_matcher()
+        selected_batch_definitions: List[BatchDefinition]
         selected_batch_definitions = list(
             filter(
                 lambda batch_definition: filter_function(
