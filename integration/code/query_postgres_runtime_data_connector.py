@@ -4,6 +4,12 @@ from great_expectations.core.batch import Batch
 
 YOUR_CREDENTIALS_HERE = """postgresql+psycopg2://postgres:@localhost/test_ci"""
 
+# import sqlalchemy as sa
+# import pandas as pd
+# eng = sa.create_engine("postgresql+psycopg2://postgres:@localhost/test_ci")
+# df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
+# df.to_sql(name="taxi_data", con=eng, index=False)
+
 context = ge.get_context()
 # context = ge.DataContext(context_root_dir="../fixtures/runtime_data_taxi_monthly/great_expectations")
 
