@@ -1,5 +1,5 @@
 ---
-title: My data is in ... a Filesystem
+title: My data is in a filesystem
 ---
 
 # Introduction
