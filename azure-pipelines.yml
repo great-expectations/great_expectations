@@ -45,6 +45,9 @@ stages:
             inputs:
               verbose: true
               rules: |
+                [CIChanged]
+                azure-pipelines.yml
+
                 [ContribChanged]
                 contrib/**
 
@@ -334,7 +337,8 @@ stages:
 
     jobs:
       - job: test_docs
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
+      # TODO remove CI changed condition
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.CIChanged'], true))
 
         variables:
           python.version: '3.8'
