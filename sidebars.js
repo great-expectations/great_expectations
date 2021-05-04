@@ -93,8 +93,7 @@ module.exports = {
           type: 'category',
           label: '🔌 Connecting to your data',
           items: [
-            { type: 'doc', id: 'guides/setup/installing/local' }
-
+            { type: 'doc', id: 'guides/connecting_to_your_data/1_where_is_your_data/my-data-is-in-a-filesystem' }
           ]
         },
         {
