@@ -356,7 +356,9 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pytest -vvv -m docs --no-spark --no-postgresql --no-sqlalchemy
+              pip install pytest pytest-azurepipelines
+              pytest -v -m docs --no-spark --no-postgresql --no-sqlalchemy
+              cat test-output.xml
             displayName: 'pytest'
 
 #  - stage: cli_integration
