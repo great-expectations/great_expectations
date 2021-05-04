@@ -2944,9 +2944,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self.checkpoint_store.set(key=key, value=checkpoint_config)
         return new_checkpoint
 
-    def get_checkpoint(self, name: str) -> Union[Checkpoint, LegacyCheckpoint]:
+    def get_checkpoint(self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None) -> Union[Checkpoint,
+                                                                                                     LegacyCheckpoint]:
         key: ConfigurationIdentifier = ConfigurationIdentifier(
-            configuration_key=name,
+            configuration_key=name or ge_cloud_id,
         )
         try:
             checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
@@ -2985,7 +2986,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
 
         config: dict = checkpoint_config.to_json_dict()
-        config.update({"name": name})
+        if name is not None:
+            config.update({"name": name})
         config = filter_properties_dict(properties=config)
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
             config=config,
