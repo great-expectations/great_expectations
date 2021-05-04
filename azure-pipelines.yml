@@ -327,7 +327,7 @@ stages:
               pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
-  - stage: docusaurus-tests
+  - stage: docusaurus_tests
     # dependsOn: [scope_check, lint]
     pool:
       vmImage: 'ubuntu-latest'
