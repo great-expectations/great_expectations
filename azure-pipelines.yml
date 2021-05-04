@@ -383,7 +383,8 @@ stages:
 
       - job: deploy_docs
       # TODO figure out when to deploy and where
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true))
+      # TODO remove true condition
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), true)
 
         steps:
           - task: NodeTool@0
