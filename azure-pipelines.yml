@@ -362,37 +362,24 @@ stages:
               pytest -v -m docs --no-spark --no-postgresql --no-sqlalchemy
             displayName: 'pytest'
 
-  - stage: docusaurus_build
-    dependsOn: [docusaurus_tests]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: docusaurus_build
+  #   dependsOn: [docusaurus_tests]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
+  #
+  #   jobs:
+  #     - job: build_docs
+  #     # TODO remove true condition
+  #       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), true)
+  #
+  #       steps:
+  #         - task: NodeTool@0
+  #           inputs:
+  #             versionSpec: '14.x'
+  #
+  #         - script: yarn install
+  #         - script: yarn build
 
-    jobs:
-      - job: build_docs
-      # TODO remove true condition
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), true)
-
-        steps:
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '14.x'
-
-          - script: yarn install
-          - script: |
-              yarn build
-
-      - job: deploy_docs
-      # TODO figure out when to deploy and where
-      # TODO remove true condition
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), true)
-
-        steps:
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '14.x'
-
-          - script: |
-              ls build
 
   # - stage: cli_integration
   #   dependsOn: [scope_check, lint, usage_stats_integration, required, db_integration]
