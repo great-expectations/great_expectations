@@ -7,7 +7,7 @@ from great_expectations.profiler.domain_builder.column_domain_builder import (
 )
 from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.util import (
-    translate_table_column_type_to_semantic_domain_type,
+    infer_table_column_type_to_semantic_domain_type,
 )
 from great_expectations.validator.validator import MetricConfiguration, Validator
 
@@ -75,7 +75,7 @@ class SimpleSemanticTypeColumnDomainBuilder(ColumnDomainBuilder):
         semantic_column_type: str
         for column_name in column_names:
             semantic_column_type: SemanticDomainTypes = (
-                translate_table_column_type_to_semantic_domain_type(
+                infer_table_column_type_to_semantic_domain_type(
                     validator=validator, column_name=column_name
                 )
             )

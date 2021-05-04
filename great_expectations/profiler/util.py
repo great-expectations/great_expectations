@@ -18,7 +18,7 @@ from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 
-def translate_table_column_type_to_semantic_domain_type(
+def infer_table_column_type_to_semantic_domain_type(
     validator: Validator, column_name: str
 ) -> SemanticDomainTypes:
     # Note: As of Python 3.8, specifying argument type in Lambda functions is not supported by Lambda syntax.
