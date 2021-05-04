@@ -2,12 +2,6 @@
 title: My data is in a filesystem
 ---
 
-
-
-:::tip
-Welcome! In addition to perusing the documentation, please feel free to ask questions on our Slack channel or discussion forum!
-:::
-
 # Introduction
 
 On the filesystem, GE supports a variety of tabular data, including CSV, and Parquet.
