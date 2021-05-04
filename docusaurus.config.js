@@ -5,8 +5,8 @@ const remarkCodeImport = require('remark-code-import')
 module.exports = {
   title: 'Great Expectations',
   tagline: 'Always know what to expect from your data.',
-  // TODO need docusaurus url
-  url: 'https://docs.greatexpectations.io',
+  // TODO update for proper hosting URL once decisions are made
+  url: 'https://knoxpod.netlify.com', // Url to your site with no trailing slash
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
