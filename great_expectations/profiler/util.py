@@ -48,44 +48,40 @@ information.  Please ensure that the specified column name refers to exactly one
 
     semantic_column_type: SemanticDomainTypes
     if column_type in (
-        set([type_name.upper() for type_name in ProfilerTypeMapping.INT_TYPE_NAMES])
-        | set([type_name.upper() for type_name in ProfilerTypeMapping.FLOAT_TYPE_NAMES])
+        {type_name.upper() for type_name in ProfilerTypeMapping.INT_TYPE_NAMES}
+        | {type_name.upper() for type_name in ProfilerTypeMapping.FLOAT_TYPE_NAMES}
     ):
         semantic_column_type = SemanticDomainTypes.NUMERIC
-    elif column_type in set(
-        [type_name.upper() for type_name in ProfilerTypeMapping.STRING_TYPE_NAMES]
-    ):
+    elif column_type in {
+        type_name.upper() for type_name in ProfilerTypeMapping.STRING_TYPE_NAMES
+    }:
         semantic_column_type = SemanticDomainTypes.TEXT
-    elif column_type in set(
-        [type_name.upper() for type_name in ProfilerTypeMapping.BOOLEAN_TYPE_NAMES]
-    ):
+    elif column_type in {
+        type_name.upper() for type_name in ProfilerTypeMapping.BOOLEAN_TYPE_NAMES
+    }:
         semantic_column_type = SemanticDomainTypes.LOGIC
-    elif column_type in set(
-        [type_name.upper() for type_name in ProfilerTypeMapping.DATETIME_TYPE_NAMES]
-    ):
+    elif column_type in {
+        type_name.upper() for type_name in ProfilerTypeMapping.DATETIME_TYPE_NAMES
+    }:
         semantic_column_type = SemanticDomainTypes.DATETIME
-    elif column_type in set(
-        [type_name.upper() for type_name in ProfilerTypeMapping.BINARY_TYPE_NAMES]
-    ):
+    elif column_type in {
+        type_name.upper() for type_name in ProfilerTypeMapping.BINARY_TYPE_NAMES
+    }:
         semantic_column_type = SemanticDomainTypes.BINARY
-    elif column_type in set(
-        [type_name.upper() for type_name in ProfilerTypeMapping.CURRENCY_TYPE_NAMES]
-    ):
+    elif column_type in {
+        type_name.upper() for type_name in ProfilerTypeMapping.CURRENCY_TYPE_NAMES
+    }:
         semantic_column_type = SemanticDomainTypes.CURRENCY
-    elif column_type in set(
-        [type_name.upper() for type_name in ProfilerTypeMapping.IDENTITY_TYPE_NAMES]
-    ):
+    elif column_type in {
+        type_name.upper() for type_name in ProfilerTypeMapping.IDENTITY_TYPE_NAMES
+    }:
         semantic_column_type = SemanticDomainTypes.IDENTITY
     elif column_type in (
-        set(
-            [
-                type_name.upper()
-                for type_name in ProfilerTypeMapping.MISCELLANEOUS_TYPE_NAMES
-            ]
-        )
-        | set(
-            [type_name.upper() for type_name in ProfilerTypeMapping.RECORD_TYPE_NAMES]
-        )
+        {
+            type_name.upper()
+            for type_name in ProfilerTypeMapping.MISCELLANEOUS_TYPE_NAMES
+        }
+        | {type_name.upper() for type_name in ProfilerTypeMapping.RECORD_TYPE_NAMES}
     ):
         semantic_column_type = SemanticDomainTypes.MISCELLANEOUS
     else:
@@ -114,7 +110,9 @@ def get_parameter_value(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     )
 
-    if fully_qualified_parameter_name == DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME:
+    if fully_qualified_parameter_name.startswith(
+        DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
+    ):
         # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
         # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of
         # the DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).

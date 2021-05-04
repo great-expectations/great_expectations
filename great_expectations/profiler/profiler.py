@@ -76,7 +76,7 @@ class Profiler:
                             configuration_builder_config,
                             runtime_environment={"data_context": data_context},
                             config_defaults={
-                                "class_name": "ParameterIdConfigurationBuilder"
+                                "class_name": "DefaultExpectationConfigurationBuilder"
                             },
                         )
                     )
