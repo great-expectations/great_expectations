@@ -46,7 +46,7 @@ class Rule:
         self._domain_parameters = {}
 
     def evaluate(
-        self, validator: Validator, batch_ids: Optional[List[str]]
+        self, validator: Validator, batch_ids: Optional[List[str]] = None
     ) -> List[ExpectationConfiguration]:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every

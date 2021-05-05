@@ -33,7 +33,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        validator: Validator,
         domain: Domain,
         domain_kwargs: str,
         threshold: Optional[float] = 1.0,
@@ -54,7 +53,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         super().__init__(
             name=name,
-            validator=validator,
             domain=domain,
             rule_variables=rule_variables,
             rule_domain_parameters=rule_domain_parameters,
@@ -76,23 +74,21 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     # TODO: <Alex>ALEX -- This looks like a single-Batch case.</Alex>
     def _build_parameters(
         self,
+        validator: Validator,
         *,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         """Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold."""
         if batch_ids is None:
-            batch_ids = [self.validator.active_batch_id]
+            batch_ids = [validator.active_batch_id]
 
         if len(batch_ids) > 1:
             # By default, the validator will use active batch id (the most recently loaded batch)
             logger.warning(
                 f"Parameter Builder {self.name} received {len(batch_ids)} batches but can only process one."
             )
-            if (
-                batch_ids[0]
-                not in self.validator.execution_engine.loaded_batch_data_ids
-            ):
+            if batch_ids[0] not in validator.execution_engine.loaded_batch_data_ids:
                 raise ge_exceptions.ProfilerExecutionError(
                     f"Parameter Builder {self.name} cannot build parameters because batch {batch_ids[0]} is not "
                     f"currently loaded in the validator."
@@ -107,7 +103,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         ] = copy.deepcopy(self.domain[DOMAIN_KWARGS_PARAMETER_NAME])
         metric_domain_kwargs.update({"batch_id": batch_ids[0]})
 
-        count: int = self.validator.get_metric(
+        count: int = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="column_values.not_null.count",
                 metric_domain_kwargs=metric_domain_kwargs,
@@ -119,7 +115,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         format_string: str
         format_string_success_ratios: Dict[str, str] = {
             format_string: float(
-                self.validator.get_metric(
+                validator.get_metric(
                     metric=MetricConfiguration(
                         metric_name="column_values.match_strftime_format.unexpected_count",
                         metric_domain_kwargs=metric_domain_kwargs,

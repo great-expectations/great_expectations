@@ -31,7 +31,6 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     def __init__(
         self,
         name: str,
-        validator: Validator,
         domain: Domain,
         batch_request: BatchRequest,
         metric_name: str,
@@ -55,7 +54,6 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         """
         super().__init__(
             name=name,
-            validator=validator,
             domain=domain,
             batch_request=batch_request,
             rule_variables=rule_variables,
@@ -70,6 +68,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     # TODO: <Alex>ALEX -- There is nothing about "p_values" in this implementation; moreover, "p_values" would apply only to certain values of the "metric_name" -- this needs to be elaborated.</Alex>
     def _build_parameters(
         self,
+        validator: Validator,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
         samples = []
@@ -99,7 +98,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
                 metric_value_kwargs = self._metric_value_kwargs
 
             samples.append(
-                self.validator.get_metric(
+                validator.get_metric(
                     metric=MetricConfiguration(
                         metric_name=self._metric_name,
                         metric_domain_kwargs=metric_domain_kwargs,
