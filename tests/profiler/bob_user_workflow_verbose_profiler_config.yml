@@ -53,6 +53,7 @@ rules:
         min_value: 0
         max_value: $variables.max_user_id
         column: $domain.domain_kwargs.column
+
   my_rule_for_numeric_data:
     class_name: Rule
     module_name: great_expectations.profiler.rule.rule
@@ -102,6 +103,7 @@ rules:
         p_values:
           min_value: $variables.false_positive_threshold
           max_value: 1.0
+      # TODO: Question: does this metric produce a distribution of the column min based on the most recent 10 batches where the p_values sets the resulting min and max acceptable values for the column min? For example if the p_values are not set, then the min is the lowest min of any batch and the max is the highest min of any batch.
 
       - parameter_name: quantile_ranges
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
@@ -160,23 +162,6 @@ rules:
       - expectation_type: expect_column_median_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-        # TODO: Below failing yaml linter
-#        min_value: # in this example, the resulting configuration is not a value, but an evaluation parameter referring to a metric that must be calculated for each validation to validation of the configuration
-#          "$PARAMETER": 0.9 *
-#            metric_name: column.median
-#            metric_batch_kwargs:
-#              batch_request:
-#                partition_request:
-#                  partition_index: -1
-#              column: $domain.domain_kwargs.column
-#        max_value: # in this example, the resulting configuration is not a value, but an evaluation parameter referring to a metric that must be calculated for each validation to validation of the configuration
-#          "$PARAMETER": 1.1 *
-#            metric_name: column.median
-#            metric_batch_kwargs:
-#              batch_request:
-#                partition_request:
-#                  partition_index: -1
-#              column: $domain.domain_kwargs.column
 
 
 
