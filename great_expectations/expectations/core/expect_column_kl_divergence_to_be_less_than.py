@@ -298,7 +298,7 @@ class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
             below_partition = MetricConfiguration(
                 "column_values.between.count",
                 metric_domain_kwargs=domain_kwargs,
-                metric_value_kwargs={"max_value": bins[0]},
+                metric_value_kwargs={"max_value": bins[0], "strict_max": True},
             )
             above_partition = MetricConfiguration(
                 "column_values.between.count",
