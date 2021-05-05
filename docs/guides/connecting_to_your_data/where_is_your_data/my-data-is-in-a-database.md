@@ -32,10 +32,10 @@ pip install sqlalchemy psycopg2
 
 Great here is an example of your configuration:
 
-```python file=../../../../integration/code/query_postgres_runtime_data_connector.py#L17-L31
+```python file=../../../../integration/code/query_postgres_runtime_data_connector.py#L19-L33
 ```
 
 Here is an example of loading a batch from a query.
 
-```python file=../../../../integration/code/query_postgres_runtime_data_connector.py#L36-L43
+```python file=../../../../integration/code/query_postgres_runtime_data_connector.py#L38-L44
 ```

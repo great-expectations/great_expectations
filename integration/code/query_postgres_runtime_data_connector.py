@@ -5,7 +5,9 @@ from integration.code.utils import load_data_into_database
 
 CONNECTION_STRING = """postgresql+psycopg2://postgres:@localhost/test_ci"""
 load_data_into_database(
-    "taxi_data", "../fixtures/test_data/reports/yellow_tripdata_sample_2019-01.csv"
+    "taxi_data",
+    "../fixtures/test_data/reports/yellow_tripdata_sample_2019-01.csv",
+    CONNECTION_STRING,
 )
 
 # context = ge.get_context()
