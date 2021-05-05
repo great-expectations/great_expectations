@@ -80,28 +80,43 @@ def get_parameter_value(
     """
     parameter_container: ParameterContainer
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
+        parameter_container = variables
         fully_qualified_parameter_name = fully_qualified_parameter_name[
             len(VARIABLES_KEY) :
         ]
-        parameter_container = variables
     else:
-        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
         parameter_container = parameters[domain.id]
+        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
-    fully_qualified_parameter_as_list: List[str] = fully_qualified_parameter_name.split(
-        "."
-    )
+    fully_qualified_parameter_name_as_list: List[
+        str
+    ] = fully_qualified_parameter_name.split(".")
 
-    if len(fully_qualified_parameter_as_list) == 0:
+    if len(fully_qualified_parameter_name_as_list) == 0:
         return None
 
-    parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
-        parameter_name_root=fully_qualified_parameter_as_list[0]
+    try:
+        return _get_parameter_value_one_domain_scope(
+            fully_qualified_parameter_name_as_list=fully_qualified_parameter_name_as_list,
+            parameters=parameter_container,
+        )
+    except KeyError as e:
+        raise ge_exceptions.ProfilerExecutionError(
+            message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": Error "{e}" occurred.'
+        )
+
+
+def _get_parameter_value_one_domain_scope(
+    fully_qualified_parameter_name_as_list: List[str],
+    parameters: ParameterContainer,
+) -> Optional[Any]:
+    parameter_node: Optional[ParameterNode] = parameters.get_parameter_node(
+        parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )
 
     parameter_name_part: Optional[str] = None
     try:
-        for parameter_name_part in fully_qualified_parameter_as_list:
+        for parameter_name_part in fully_qualified_parameter_name_as_list:
             if (
                 parameter_node.attributes
                 and parameter_name_part in parameter_node.attributes
@@ -110,8 +125,8 @@ def get_parameter_value(
 
             parameter_node = parameter_node.descendants[parameter_name_part]
     except KeyError:
-        raise ge_exceptions.ProfilerExecutionError(
-            message=f'Unable to find value for parameter name "{fully_qualified_parameter_name}": key "{parameter_name_part}" was missing.'
+        raise KeyError(
+            f'Part "{parameter_name_part}" does not exist in fully-qualified parameter name.'
         )
 
 
