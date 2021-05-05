@@ -34,11 +34,19 @@ def get_parameter_value(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     )
 
-    if fully_qualified_parameter_name == DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME:
+    if fully_qualified_parameter_name.startswith(
+        DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
+    ):
         # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
         # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of
         # the DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
-        return domain[DOMAIN_KWARGS_PARAMETER_NAME]
+        if domain and domain[DOMAIN_KWARGS_PARAMETER_NAME]:
+            return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
+                fully_qualified_parameter_name[
+                    (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1) :
+                ]
+            )
+        return None
 
     fully_qualified_parameter_name_references_variable: bool = False
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
