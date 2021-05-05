@@ -27,7 +27,7 @@ rules:
   #     semantic_types:
   #       - user_id
   #   parameter_builders:
-  #     - parameter_name: my_min_user_id
+  #     - name: my_min_user_id
   #       class_name: MetricParameterBuilder
   #       module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
   #       metric_name: column.min
@@ -61,7 +61,7 @@ rules:
       #   - server_ts
       #   - device_ts
     parameter_builders:
-      - parameter_name: my_max_event_ts
+      - name: my_max_event_ts
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.max
@@ -118,7 +118,7 @@ rules:
   #     semantic_types:
   #       - user_id
   #   parameter_builders:
-  #     - parameter_name: my_min_user_id
+  #     - name: my_min_user_id
   #       class_name: MetricParameterBuilder
   #       metric_name: column.min
   #   expectation_configuration_builders:
@@ -138,7 +138,7 @@ rules:
         - server_ts
         - device_ts
     parameter_builders:
-      - parameter_name: my_max_event_ts
+      - name: my_max_event_ts
         class_name: MetricParameterBuilder
         metric_name: column.max
         metric_domain_kwargs: $domain.event_ts.domain_kwargs
