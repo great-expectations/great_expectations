@@ -2,47 +2,78 @@
 title: My data is in a filesystem
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Introduction
 
 On the filesystem, GE supports a variety of tabular data, including CSV, and Parquet.
 
-You will first be asked to answer a few questions like :
-
 ## Where would you like computation to happen?
 
-This question is for determining the Execution Engine, which is what GE uses to handle. The IN the case.
+This determines which `Execution Engine` Great Expectations will use to perform computation on your data.
+There are two choices:
 
-We have PandasExecutionEngine, and SparkExecutionEngine to choose from.
+- [pandas](#i-want-my-computation-to-occur-in-pandas) uses the `PandasExecutionEngine`
+- [spark](#i-want-my-computation-to-occur-in-spark) uses the `SparkExecutionEngine`
 
+### I want my computation to occur in Pandas
 
-### I want my computation to occur in `Pandas`
+Here is an example of your configuration:
 
-Great here is an example of your configuration:
-
-```python file=../../../../integration/code/path_filesystem_runtime_data_connector.py#L5-L17
+```python file=../../../../integration/code/pandas/filesystem/csv_runtime_data_connector.py#L10-L22
 ```
+
+:::info
+Do we want this kind of learning-oriented material in this doc?
+I don't have a strong opinion.
+:::
+
 ***What does it contain?***
 1. It has a PandasExecutionEngine
-2. It also has a default RuntimeDataConnector
-  - name: default_runtime_data_connector_name (can be discussed)
+2. It also has a default `RuntimeDataConnector` named: `default_runtime_data_connector_name` (**TODO** discuss)
+3. It also has a default batch_identifier : `default_identifier_name` (can be discussed)
+4. A `RuntimeDataconnector` is usually enough to test whether your connection works, or if you are interactively validating a few Batches of Data.
+5. There is also something called an ActiveDataConnector (Configured or Inferred) that can be used to automate the retrieval and validation of Batches while also enabling more sophisticated filtering and sorting.
+Please look at (**TODO** insert link) for more information.
 
-3. It also has a default batch_identifier : default_identifier_name (can be discussed)
+Now add the datasource by running:
 
-4. A RuntimeDataconnector is usually enough to test whether your connection works, or if you are interactively validating a few Batches of Data.
+:::info
+Do we tell users how to actually add the datasource? Do we point them at the CLI?
+:::
 
-5. There is also something called an ActiveDataConnector (Configured or Inferred) that can be used to automate the retrieval and validation of Batches while also enabling more sophisticated filtering and sorting. Please look at (insert link) for more information.
-
-
-```python file=../../../../integration/code/path_filesystem_runtime_data_connector.py#L20
+```python file=../../../../integration/code/pandas/filesystem/csv_runtime_data_connector.py#L24
 ```
 
-#### Test your configuration in
+
+<Tabs
+  defaultValue="csv_filesystem"
+  values={[
+    {label: 'CSV on a filesystem', value: 'csv_filesystem'},
+    {label: 'TBD', value: 'tbd'},
+  ]}>
+  <TabItem value="csv_filesystem">
+
+Here is an example of how to retrieve a batch of data using csvs on local filesystem.
+
+```python file=../../../../integration/code/pandas/filesystem/csv_runtime_data_connector.py#L26-L34
+```
+
+  </TabItem>
+  <TabItem value="tbd">Other things can go here!</TabItem>
+</Tabs>
 
 
+#### Test your configuration by ...
+
+:::danger
+This article is a stub.
+:::
 
 
-### I want my computation to occur in `Spark`
+### I want my computation to occur in Spark
 
-:::tip
+:::danger
 This article is a stub.
 :::

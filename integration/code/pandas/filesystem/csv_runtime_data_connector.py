@@ -1,9 +1,11 @@
-import great_expectations as ge
-from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource
-from great_expectations.core.batch import RuntimeBatchRequest
+from ruamel import yaml
 
-context = ge.DataContext(context_root_dir="../../../fixtures/runtime_data_taxi_monthly/great_expectations/", )
-# context = ge.get_context()
+import great_expectations as ge
+from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.data_context.util import file_relative_path
+
+# context = ge.DataContext(context_root_dir=file_relative_path(__file__, "../../../fixtures/runtime_data_taxi_monthly/great_expectations/"), )
+context = ge.get_context()
 
 datasource_yaml = f"""
 name: taxi_datasource_with_runtime_data_connector
@@ -19,7 +21,7 @@ data_connectors:
             - default_identifier_name
 """
 
-sanitize_yaml_and_save_datasource(context, datasource_yaml, overwrite_existing=True)
+context.add_datasource(**yaml.load(datasource_yaml))
 
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource_with_runtime_data_connector",
@@ -31,7 +33,7 @@ batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "something_something"},
 )
 
-batch_request.runtime_parameters["path"] = "../../../fixtures/data/reports/yellow_tripdata_sample_2019-01.csv"
+# batch_request.runtime_parameters["path"] = file_relative_path(__file__, "../../../fixtures/data/reports/yellow_tripdata_sample_2019-01.csv")
 
 batch = context.get_batch(batch_request=batch_request)
 
