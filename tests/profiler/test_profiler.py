@@ -239,7 +239,7 @@ rules:
       module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
       semantic_type_filters: datetime
     parameter_builders:
-      - parameter_name: my_dateformat
+      - name: my_dateformat
         class_name: SimpleDateFormatStringParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.simple_dateformat_string_parameter_builder
         domain_kwargs: $domain.domain_kwargs
@@ -251,7 +251,7 @@ rules:
     class_name: SemanticTypeColumnDomainBuilder
     type: numeric
     parameter_builders:
-      - parameter_name: quantile_ranges
+      - name: quantile_ranges
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
         batch_request:
           partition_request:
@@ -287,12 +287,12 @@ rules:
       module_name: great_expectations.profiler.domain_builder.simple_semantic_type_domain_builder
       semantic_type_filters: integer
     parameter_builders:
-      - parameter_name: my_min
+      - name: my_min
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
-      - parameter_name: my_max
+      - name: my_max
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.max
