@@ -20,7 +20,7 @@ rules:
         - _id
         - _type
     parameter_builders:
-      - parameter_name: my_value_set_for_ids
+      - name: my_value_set_for_ids
         # NOTE: This parameter is meant to be the union of all observed batch value_sets
         class_name: MultiBatchParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_parameter_builder
@@ -66,17 +66,17 @@ rules:
       # NOTE: These parameter_builders are from https://github.com/superconductive/design/blob/main/docs/20201203_profiling.md
       # NOTE: my_column_mean and my_column_min are added as parameters but unused in expectation_configuration_builders - this is OK
       # TODO: Should we warn users if there are unused ParameterBuilders in a Profiler configuration?
-      - parameter_name: my_column_mean
+      - name: my_column_mean
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.mean
         metric_domain_kwargs: $domain.domain_kwargs
-      - parameter_name: my_column_min
+      - name: my_column_min
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
-      - parameter_name: my_column_max
+      - name: my_column_max
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.max
@@ -89,7 +89,7 @@ rules:
         # 2. MultiBatchBootstrappedMetricDistributionParameterBuilder does not have a metric_domain_kwargs param
         # 3. MultiBatchBootstrappedMetricDistributionParameterBuilder takes a list of batch_ids and a batch_request. The way that batch_ids seems to work in other areas is as a filter (e.g. the batch_request returns some batches and we filter to only those contained in the list batch_ids, if batch_ids is None then we use all batches) whereas here it seems meant to add to the batches from the batch_request (maybe just a param name change to clarify e.g. `additional_batch_ids`)
 
-      - parameter_name: false_positive_threshold_min
+      - name: false_positive_threshold_min
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
         # TODO: Not sure I understand the comment here - why would we want to add the batches from the call to profile? Wouldn't we expect that this parameter is calculated just from the explicitly defined batch_request below? (if this is useful, maybe there are two modes)
@@ -105,7 +105,7 @@ rules:
           max_value: 1.0
       # TODO: Question: does this metric produce a distribution of the column min based on the most recent 10 batches where the p_values sets the resulting min and max acceptable values for the column min? For example if the p_values are not set, then the min is the lowest min of any batch and the max is the highest min of any batch.
 
-      - parameter_name: quantile_ranges
+      - name: quantile_ranges
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.multi_batch_bootstrapped_metric_distribution_parameter_builder
         batch_request:
@@ -125,7 +125,7 @@ rules:
           min_value: ($variables.false_positive_threshold / 2)
           max_value: 1 - ($variables.false_positive_threshold / 2)
 
-      - parameter_name: quantiles
+      - name: quantiles
         class_name: MetricParameterBuilder
         module_name: great_expectations.profiler.parameter_builder.metric_parameter_builder
         metric_name: column.quantile_values
