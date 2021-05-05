@@ -21,7 +21,7 @@ class MetricParameterBuilder(ParameterBuilder):
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         validator: Validator,
         domain: Domain,
         metric_name: str,
@@ -32,7 +32,7 @@ class MetricParameterBuilder(ParameterBuilder):
         data_context: Optional[DataContext] = None,
     ):
         super().__init__(
-            parameter_name=parameter_name,
+            name=name,
             validator=validator,
             domain=domain,
             rule_variables=rule_variables,

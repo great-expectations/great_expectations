@@ -30,7 +30,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         validator: Validator,
         domain: Domain,
         batch_request: BatchRequest,
@@ -47,14 +47,14 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         The ParameterBuilder will build parameters for the active domain from the rule.
 
         Args:
-            parameter_name: the name of the parameter handled by this ParameterBuilder
+            name: the name of this ParameterBuilder (from configuration)
             batch_request: BatchRequest elements that should be used to obtain additional batch_ids
             metric_name: metric from which to build the parameters
             metric_value_kwargs: value kwargs for the metric to be built
             p_values: the p_values for which to return metric value estimates
         """
         super().__init__(
-            parameter_name=parameter_name,
+            name=name,
             validator=validator,
             domain=domain,
             batch_request=batch_request,

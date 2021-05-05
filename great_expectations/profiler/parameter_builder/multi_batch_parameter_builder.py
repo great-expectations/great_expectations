@@ -23,7 +23,7 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         validator: Validator,
         domain: Domain,
         batch_request: BatchRequest,
@@ -37,7 +37,7 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
             )
 
         super().__init__(
-            parameter_name=parameter_name,
+            name=name,
             validator=validator,
             domain=domain,
             rule_variables=rule_variables,
