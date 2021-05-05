@@ -99,11 +99,12 @@ rules:
             partition_index: "-10:"
         metric_configuration:
           metric_name: column.min
+          # TODO: Are these metric_domain_kwargs referencing the current domain being processed when evaluating the rule (and then will be processed on that domain for each of the last 10 batches)?
           metric_domain_kwargs: $domain.domain_kwargs
         p_values:
           min_value: $variables.false_positive_threshold
           max_value: 1.0
-      # TODO: Question: does this metric produce a distribution of the column min based on the most recent 10 batches where the p_values sets the resulting min and max acceptable values for the column min? For example if the p_values are not set, then the min is the lowest min of any batch and the max is the highest min of any batch.
+        # TODO: Question: does this false_positive_threshold_min parameter produce a distribution of the column min based on the most recent 10 batches where the p_values sets the resulting min and max acceptable values for the column min? For example if the p_values are not set, then the min is the lowest min of any batch and the max is the highest min of any batch.
 
       - name: quantile_ranges
         class_name: MultiBatchBootstrappedMetricDistributionParameterBuilder
@@ -124,6 +125,7 @@ rules:
         p_values:
           min_value: ($variables.false_positive_threshold / 2)
           max_value: 1 - ($variables.false_positive_threshold / 2)
+        # TODO: Question: does this parameter produce a distribution of the column quantile values for each of the quantiles listed based on the most recent 10 batches where the p_values sets the resulting min and max acceptable values for each of the quantiles? For example if the p_values are not set, then the quantile range is between the smallest observed value for that quantile in any of the latest 10 batches and the largest observed value for that quantile in any of the latest 10 batches?
 
       - name: quantiles
         class_name: MetricParameterBuilder
@@ -137,6 +139,8 @@ rules:
             - 0.50
             - 0.75
             - 0.95
+        # TODO: Question: does this parameter_builder produce an actual value for each of the quantiles for the domain that is currently being processed (for the batch that is currently being processed)?
+
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
@@ -159,14 +163,8 @@ rules:
         module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
         min_value: 0.9 * $my_column_max.parameter.max
         max_value: 1.1 * $my_column_max.parameter.max
-      - expectation_type: expect_column_median_to_be_between
-        class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.profiler.expectation_configuration_builder.default_expectation_configuration_builder
-
 
 
   # TODO: Reference specific batch (index or name) / filter batches
-  # TODO: rule based on data from specific batch
-  # TODO: rule based on data from relative batch
-  # TODO: rule based on data from relative batch with relative expectation (Evaluation Parameter)
+  # TODO: rule or expectation_configuration based on data from relative batch with relative expectation (Evaluation Parameter)
   # TODO: Are all permutations of the above TODOs possible?
