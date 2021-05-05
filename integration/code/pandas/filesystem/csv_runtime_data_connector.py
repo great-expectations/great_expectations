@@ -27,9 +27,7 @@ batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource_with_runtime_data_connector",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data_asset for you
-    runtime_parameters={
-        "path": "./data/reports/yellow_tripdata_sample_2019-01.csv"
-    },
+    runtime_parameters={"path": "./data/reports/yellow_tripdata_sample_2019-01.csv"},
     batch_identifiers={"default_identifier_name": "something_something"},
 )
 
