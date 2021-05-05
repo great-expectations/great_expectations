@@ -336,6 +336,10 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
+
+      - services:
+          postgres: postgres
+
       - job: test_docs
       # TODO remove CI changed condition
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true), eq(variables.isMain, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.CIChanged'], true))
