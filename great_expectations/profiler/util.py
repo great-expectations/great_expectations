@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Optional
+from functools import wraps
+from typing import Any, Callable, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -14,6 +15,53 @@ from great_expectations.profiler.parameter_builder.parameter_container import (
 )
 
 
+def parameter_name_parser(func: Callable = None) -> Callable:
+    @wraps(func)
+    def get_parameter_value_for_fully_qualified_parameter_name(
+        fully_qualified_parameter_name: str,
+        domain: Domain,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> Optional[Any]:
+        validate_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name
+        )
+
+        # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
+        # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of the
+        # DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
+        if (
+            fully_qualified_parameter_name
+            == DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
+        ):
+            if domain:
+                # Supports the "$domain.domain_kwargs" style syntax.
+                return domain[DOMAIN_KWARGS_PARAMETER_NAME]
+            return None
+
+        if fully_qualified_parameter_name.startswith(
+            DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
+        ):
+            if domain and domain[DOMAIN_KWARGS_PARAMETER_NAME]:
+                # Supports the "$domain.domain_kwargs.column" style syntax.
+                return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
+                    fully_qualified_parameter_name[
+                        (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1) :
+                    ]
+                )
+            return None
+
+        return func(
+            fully_qualified_parameter_name=fully_qualified_parameter_name,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
+    return get_parameter_value_for_fully_qualified_parameter_name
+
+
+@parameter_name_parser
 def get_parameter_value(
     fully_qualified_parameter_name: str,
     domain: Domain,
@@ -30,40 +78,15 @@ def get_parameter_value(
         :param parameters
     :return: value
     """
-    validate_fully_qualified_parameter_name(
-        fully_qualified_parameter_name=fully_qualified_parameter_name
-    )
-
-    if fully_qualified_parameter_name == DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME:
-        # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
-        # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of
-        # the DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
-        if domain:
-            return domain[DOMAIN_KWARGS_PARAMETER_NAME]
-        return None
-
-    if fully_qualified_parameter_name.startswith(
-        DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME
-    ):
-        # Using "__getitem__" (bracket) notation instead of "__getattr__" (dot) notation in order to insure the
-        # compatibility of field names (e.g., "domain_kwargs") with user-facing syntax (as governed by the value of
-        # the DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
-        if domain and domain[DOMAIN_KWARGS_PARAMETER_NAME]:
-            return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
-                fully_qualified_parameter_name[
-                    (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1) :
-                ]
-            )
-        return None
-
-    fully_qualified_parameter_name_references_variable: bool = False
+    parameter_container: ParameterContainer
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
         fully_qualified_parameter_name = fully_qualified_parameter_name[
             len(VARIABLES_KEY) :
         ]
-        fully_qualified_parameter_name_references_variable = True
+        parameter_container = variables
     else:
         fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
+        parameter_container = parameters[domain.id]
 
     fully_qualified_parameter_as_list: List[str] = fully_qualified_parameter_name.split(
         "."
@@ -71,12 +94,6 @@ def get_parameter_value(
 
     if len(fully_qualified_parameter_as_list) == 0:
         return None
-
-    parameter_container: ParameterContainer
-    if fully_qualified_parameter_name_references_variable:
-        parameter_container = variables
-    else:
-        parameter_container = parameters[domain.id]
 
     parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_as_list[0]
