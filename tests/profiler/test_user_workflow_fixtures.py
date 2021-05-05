@@ -1,7 +1,7 @@
 from great_expectations.core import ExpectationSuite
 
 
-def test_fixture_generation(alice_columnar_table_single_batch):
+def test_alice_fixture_generation(alice_columnar_table_single_batch):
     assert (
         alice_columnar_table_single_batch["sample_data_relative_path"]
         == "alice_columnar_table_single_batch_data.csv"
