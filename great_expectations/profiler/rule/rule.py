@@ -67,7 +67,9 @@ class Rule:
             parameter_builder: ParameterBuilder
             for parameter_builder in self._parameter_builders:
                 parameter_container: ParameterContainer = (
-                    parameter_builder.build_parameters(batch_ids=batch_ids)
+                    parameter_builder.build_parameters(
+                        validator=validator, batch_ids=batch_ids
+                    )
                 )
                 self._domain_parameters[domain.id] = parameter_container
 
