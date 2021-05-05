@@ -31,7 +31,6 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     def __init__(
         self,
         name: str,
-        domain: Domain,
         batch_request: BatchRequest,
         metric_name: str,
         metric_value_kwargs: Union[str, dict],
@@ -54,7 +53,6 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
         """
         super().__init__(
             name=name,
-            domain=domain,
             batch_request=batch_request,
             rule_variables=rule_variables,
             rule_domain_parameters=rule_domain_parameters,
@@ -68,6 +66,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
     # TODO: <Alex>ALEX -- There is nothing about "p_values" in this implementation; moreover, "p_values" would apply only to certain values of the "metric_name" -- this needs to be elaborated.</Alex>
     def _build_parameters(
         self,
+        domain: Domain,
         validator: Validator,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
@@ -81,7 +80,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
             # the DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
             metric_domain_kwargs: Union[
                 str, Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]
-            ] = copy.deepcopy(self.domain[DOMAIN_KWARGS_PARAMETER_NAME])
+            ] = copy.deepcopy(domain[DOMAIN_KWARGS_PARAMETER_NAME])
 
             if (
                 self._metric_value_kwargs
@@ -90,7 +89,7 @@ class MultiBatchBootstrappedMetricDistributionParameterBuilder(
             ):
                 metric_value_kwargs = get_parameter_value(
                     fully_qualified_parameter_name=self._metric_value_kwargs,
-                    domain=self.domain,
+                    domain=domain,
                     rule_variables=self.rule_variables,
                     rule_domain_parameters=self.rule_domain_parameters,
                 )

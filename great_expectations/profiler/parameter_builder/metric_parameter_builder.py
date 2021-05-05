@@ -22,7 +22,6 @@ class MetricParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        domain: Domain,
         metric_name: str,
         rule_variables: Optional[ParameterContainer] = None,
         rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -32,7 +31,6 @@ class MetricParameterBuilder(ParameterBuilder):
     ):
         super().__init__(
             name=name,
-            domain=domain,
             rule_variables=rule_variables,
             rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
@@ -44,6 +42,7 @@ class MetricParameterBuilder(ParameterBuilder):
 
     def _build_parameters(
         self,
+        domain: Domain,
         validator: Validator,
         *,
         batch_ids: Optional[List[str]] = None,
@@ -59,7 +58,7 @@ class MetricParameterBuilder(ParameterBuilder):
         ) and self._metric_domain_kwargs.startswith("$"):
             metric_domain_kwargs = get_parameter_value(
                 fully_qualified_parameter_name=self._metric_domain_kwargs,
-                domain=self.domain,
+                domain=domain,
                 rule_variables=self.rule_variables,
                 rule_domain_parameters=self.rule_domain_parameters,
             )
@@ -74,7 +73,7 @@ class MetricParameterBuilder(ParameterBuilder):
         ):
             metric_value_kwargs = get_parameter_value(
                 fully_qualified_parameter_name=self._metric_value_kwargs,
-                domain=self.domain,
+                domain=domain,
                 rule_variables=self.rule_variables,
                 rule_domain_parameters=self.rule_domain_parameters,
             )

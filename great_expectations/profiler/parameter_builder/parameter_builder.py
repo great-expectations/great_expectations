@@ -31,29 +31,30 @@ class ParameterBuilder(ABC):
     def __init__(
         self,
         name: str,
-        domain: Domain,
         rule_variables: Optional[ParameterContainer] = None,
         rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
         data_context: Optional[DataContext] = None,
     ):
         self._name = name
-        self._domain = domain
         self._rule_variables = rule_variables
         self._rule_domain_parameters = rule_domain_parameters
         self._data_context = data_context
 
     def build_parameters(
         self,
+        domain: Domain,
         validator: Validator,
         *,
         batch_ids: Optional[List[str]] = None,
     ) -> ParameterContainer:
-        """Build the parameters for the specified domain_kwargs."""
-        return self._build_parameters(validator=validator, batch_ids=batch_ids)
+        return self._build_parameters(
+            domain=domain, validator=validator, batch_ids=batch_ids
+        )
 
     @abstractmethod
     def _build_parameters(
         self,
+        domain: Domain,
         validator: Validator,
         *,
         batch_ids: Optional[List[str]] = None,
@@ -63,10 +64,6 @@ class ParameterBuilder(ABC):
     @property
     def name(self) -> str:
         return self._name
-
-    @property
-    def domain(self) -> Domain:
-        return self._domain
 
     @property
     def rule_variables(self) -> Optional[ParameterContainer]:

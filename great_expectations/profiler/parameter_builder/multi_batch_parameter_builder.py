@@ -4,7 +4,6 @@ from typing import Dict, List, Optional
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
-from great_expectations.profiler.domain_builder.domain import Domain
 from great_expectations.profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
@@ -26,7 +25,6 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
     def __init__(
         self,
         name: str,
-        domain: Domain,
         batch_request: BatchRequest,
         rule_variables: Optional[ParameterContainer] = None,
         rule_domain_parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -39,7 +37,6 @@ class MultiBatchParameterBuilder(ParameterBuilder, ABC):
 
         super().__init__(
             name=name,
-            domain=domain,
             rule_variables=rule_variables,
             rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,

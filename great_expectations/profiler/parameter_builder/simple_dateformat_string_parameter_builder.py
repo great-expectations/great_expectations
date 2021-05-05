@@ -33,7 +33,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        domain: Domain,
         domain_kwargs: str,
         threshold: Optional[float] = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
@@ -53,7 +52,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         super().__init__(
             name=name,
-            domain=domain,
             rule_variables=rule_variables,
             rule_domain_parameters=rule_domain_parameters,
             data_context=data_context,
@@ -74,6 +72,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     # TODO: <Alex>ALEX -- This looks like a single-Batch case.</Alex>
     def _build_parameters(
         self,
+        domain: Domain,
         validator: Validator,
         *,
         batch_ids: Optional[List[str]] = None,
@@ -100,7 +99,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         # the DOMAIN_KWARGS_PARAMETER_NAME constant, which may change, requiring the same change to the field name).
         metric_domain_kwargs: Union[
             str, Dict[str, Union[str, MetricDomainTypes, Dict[str, Any]]]
-        ] = copy.deepcopy(self.domain[DOMAIN_KWARGS_PARAMETER_NAME])
+        ] = copy.deepcopy(domain[DOMAIN_KWARGS_PARAMETER_NAME])
         metric_domain_kwargs.update({"batch_id": batch_ids[0]})
 
         count: int = validator.get_metric(
